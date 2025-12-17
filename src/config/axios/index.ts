@@ -46,7 +46,6 @@ api.interceptors.response.use(
       }
     }
 
-    // ✅ Keep the GOOD version
     const publicRoute = isPublicRoute(currentPath);
     console.log(publicRoute, currentPath);
 
