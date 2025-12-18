@@ -1,0 +1,76 @@
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+  SelectContent,
+} from "@/components/ui/select";
+
+interface FormSelectProps {
+  label: string;
+  placeholder?: string;
+  options: { label: string; value: string }[];
+  value?: string;
+  onChange?: (v: string) => void;
+}
+
+export function FormSelect({
+  label,
+  placeholder,
+  options,
+  value,
+  onChange,
+}: FormSelectProps) {
+  return (
+    <div className="space-y-1">
+      <Label>{label}</Label>
+
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+
+        <SelectContent>
+          {options.map((op) => (
+            <SelectItem key={op.value} value={op.value}>
+              {op.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+
+
+interface FormInputProps {
+  label: string;
+  placeholder?: string;
+  value?: string;
+  onChange?: (v: string) => void;
+  type?: string;
+}
+
+export function FormInput({
+  label,
+  placeholder,
+  value,
+  onChange,
+  type = "text",
+}: FormInputProps) {
+  return (
+    <div className="space-y-1">
+      <Label>{label}</Label>
+      <Input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+      />
+    </div>
+  );
+}
