@@ -27,12 +27,12 @@ export const LeftStepper = ({
   };
 
   return (
-    <div className="w-full lg:w-100 flex flex-col justify-between bg-gray-900 text-white p-6 rounded-xl">
+    <div className="w-full h-full lg:w-100 flex flex-col justify-between bg-gray-900 text-white p-6 rounded-xl">
       <h2 className="text-xl font-bold mb-8">
         Create New General & Traffic Offence Record
       </h2>
 
-      <div className="space-y-1">
+      <div className="space-y-1 relative -top-36">
         {steps.map((step, index) => {
           const status = getStatus(step.id);
 
@@ -45,7 +45,7 @@ export const LeftStepper = ({
                 }`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-md font-semibold ${
                     status === "completed"
                       ? "bg-green-500"
                       : status === "active"
@@ -53,10 +53,10 @@ export const LeftStepper = ({
                       : "bg-gray-600"
                   }`}
                 >
-                  {status === "completed" ? <Check size={18} /> : step.icon}
+                  {status === "completed" ? <Check size={24} /> : step.icon}
                 </div>
 
-                <span className="text-sm whitespace-pre-line text-gray-300">
+                <span className="text-lg whitespace-pre-line text-gray-300">
                   {step.label}
                 </span>
               </button>

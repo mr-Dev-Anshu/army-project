@@ -12,7 +12,7 @@ export default function Step1Particulars({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full ">
       {/* SUB STEP 1 - YES / NO */}
       <VehiclePrimaryQuestion
         vehicleStatus={value}

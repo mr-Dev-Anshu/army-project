@@ -7,11 +7,12 @@ import Step2Statement from "./steps/Step2Statement";
 import Step3Offence from "./steps/Step3Offence";
 import Step4Remarks from "./steps/Step4Remarks";
 import Step1Particulars from "./steps/Step1Particulars";
+import { FormDataState } from "@/common/types/form.types";
 
 interface Props {
   step: number;
-  formData: any;
-  setFormData: (d: any) => void;
+  formData: FormDataState;
+  setFormData: (d: Partial<FormDataState>) => void;
   onNext: () => void;
 }
 
@@ -56,7 +57,7 @@ export const RightPanel = ({ step, formData, setFormData, onNext }: Props) => {
   };
 
   return (
-    <div className="flex-1 p-8 flex flex-col min-h-0">
+    <div className="flex-1 h-full p-8 flex flex-col">
       {/* ---------- HEADER ---------- */}
       <div className="flex justify-between mb-6">
         <h3 className="text-2xl font-bold">{titles[step]}</h3>
@@ -71,7 +72,7 @@ export const RightPanel = ({ step, formData, setFormData, onNext }: Props) => {
         </div>
       </div>
 
-      <div className="border rounded-lg p-6 max-h-[500px] overflow-y-auto">
+      <div className="border rounded-lg p-6 mb-6  overflow-y-auto">
         {renderStep()}
       </div>
 

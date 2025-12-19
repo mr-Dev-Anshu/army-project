@@ -25,7 +25,7 @@ export function FormSelect({
   onChange,
 }: FormSelectProps) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 w-full">
       <Label>{label}</Label>
 
       <Select value={value} onValueChange={onChange}>
