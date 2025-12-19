@@ -1,0 +1,34 @@
+import { Offender } from "../models/Offenders";
+
+export class OffenderRepository {
+  async getAll() {
+    return await Offender.find().sort({ createdAt: -1 }).lean();
+  }
+
+  async getById(id) {
+    return await Offender.findById(id).lean();
+  }
+
+  async getByOffenceId(offenceId) {
+    return await Offender.find({ offenceId }).sort({ createdAt: -1 }).lean();
+  }
+
+  async create(data) {
+    const offender = new Offender(data);
+    await offender.save();
+    return offender.toObject();
+  }
+
+  async update(id, data) {
+    return await Offender.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    }).lean();
+  }
+
+  async delete(id) {
+    return await Offender.findByIdAndDelete(id).lean();
+  }
+}
+
+export const offenderRepo = new OffenderRepository();
