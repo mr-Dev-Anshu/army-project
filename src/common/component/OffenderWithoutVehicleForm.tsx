@@ -1,4 +1,3 @@
-
 "use client";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -65,7 +64,10 @@ export default function OffenderWithoutVehicleForm() {
         <OffenderDynamicForm
           title={offenderConfig[offenderType].title}
           helperText={offenderConfig[offenderType].helperText}
-          fields={offenderConfig[offenderType].fields}
+          fields={
+            offenderConfig[offenderType].fields.slice(1) 
+          }
+          showCoDriver={false}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import ActionCard from "../dashboard-components/ActionCard";
+import ActionCard from "./ActionCard";
 import { FileText, Gauge, ClipboardList } from "lucide-react";
 
 export default function CreateNewRecordPanel() {

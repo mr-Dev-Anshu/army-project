@@ -1,11 +1,8 @@
 
-import Dashboard from "@/common/features/Dashboard"
-import { FilePlus } from "lucide-react"
-
+import Dashboard from "@/common/features/dashboard/Dashboard"
 const page = () => {
   return (
     <div>
-    
     <Dashboard/>
     </div>
   )

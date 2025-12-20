@@ -3,6 +3,7 @@
   import './globals.css';
   import DynamicBreadcrumbs from '@/common/component/DynamicBreadCrumb';
   import { FormProvider } from '@/context/FormContext';
+import Wrapper from '@/common/hoc/Wrapper';
 
   const inter = Inter({ subsets: ['latin'] });
 
@@ -27,11 +28,13 @@
           </div> */}
 
           {/* Main Content */}
-        <FormProvider>
+        <Wrapper>
+          <FormProvider>
           <main className="min-h-screen bg-gray-50">
             {children}
           </main>
         </FormProvider>
+        </Wrapper>
         </body>
       </html>
     );

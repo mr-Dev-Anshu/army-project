@@ -21,6 +21,23 @@ export interface OffenderWithoutVehicleState {
 }
 
 
+export interface Witness {
+  dateOfDuty: string;
+  startTime: string;
+  endTime: string;
+  dutyLocation: string;
+  dutyType: string;
+
+  reportingMPName: string;
+  rank: string;
+  unit: string;
+  armyNo: string;
+
+  timeOfOffence: string;
+  incidentLocation: string;
+  description: string;
+}
+
 export interface FormDataState {
   vehicleInvolved: string;
 
@@ -29,7 +46,10 @@ export interface FormDataState {
   offenderWithoutVehicle: OffenderWithoutVehicleState;
 
   remarks?: string;
+  
 }
+
+
 
 // ---------- ROOT STATE ----------
 export interface GlobalFormState {

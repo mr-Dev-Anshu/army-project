@@ -11,13 +11,13 @@ import {
   Shield,
 } from "lucide-react";
 
-import Sidebar from "../component/dashboard-components/Sidebar";
-import ActionCard from "../component/dashboard-components/ActionCard";
-import DynamicStatsCard from "../component/dashboard-components/DynamicStatsCard";
-import CreateNewRecordPanel from "../component/dashboard-components/CreateNewRecordPanel";
+import Sidebar from "./components/dashboard-components/Sidebar";
+import ActionCard from "./components/dashboard-components/ActionCard";
+import DynamicStatsCard from "./components/dashboard-components/DynamicStatsCard";
+import CreateNewRecordPanel from "./components/dashboard-components/CreateNewRecordPanel";
 
 import { useState } from "react";
-import MultiStepForm from "../component/multi-step-form/MulitstepForm";
+import MultiStepForm from "../../component/multi-step-form/MulitstepForm";
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
