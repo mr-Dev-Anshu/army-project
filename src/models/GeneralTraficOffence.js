@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const onDutyDetailsSchema = new mongoose.Schema({
+export const onDutyDetailsSchema = new mongoose.Schema({
   dateOfDuty: {
     type: Date,
   },
@@ -18,7 +18,7 @@ const onDutyDetailsSchema = new mongoose.Schema({
   },
 });
 
-const onDutyDetailsMPReporting = new mongoose.Schema({
+export const onDutyDetailsMPReporting = new mongoose.Schema({
   nameReportingMP: {
     type: String,
   },
@@ -33,7 +33,7 @@ const onDutyDetailsMPReporting = new mongoose.Schema({
   },
 });
 
-const offenceOccurenceDetails = new mongoose.Schema({
+export const offenceOccurenceDetails = new mongoose.Schema({
   timeOfOffence: {
     type: Date,
   },
@@ -45,7 +45,7 @@ const offenceOccurenceDetails = new mongoose.Schema({
   },
 });
 
-const generalTrafficOffenceSchema = new mongoose.Schema(
+ const generalTrafficOffenceSchema = new mongoose.Schema(
   {
     isVehicleInvolved: {
       type: Boolean,
