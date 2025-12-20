@@ -1,132 +1,187 @@
 "use client";
-
-import { useReducer } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSection } from "../../FormSection";
-import { FormSelect } from "../../FormInput";
-
-/* -------- REUSABLE: FIELD ---------- */
-function Field({
-  label,
-  placeholder,
-  type = "text",
-}: {
-  label: string;
-  placeholder: string;
-  type?: string;
-}) {
-  return (
-    <div className="space-y-1">
-      <Label className="mb-3">{label}</Label>
-      <Input type={type} placeholder={placeholder} />
-    </div>
-  );
-}
-
-/* ---------------- REDUCER ---------------- */
-const initialState = {
-  witnesses: [1],
-};
-
-function reducer(state: any, action: any) {
-  switch (action.type) {
-    case "ADD_WITNESS":
-      return {
-        ...state,
-        witnesses: [...state.witnesses, state.witnesses.length + 1],
-      };
-
-    default:
-      return state;
-  }
-}
+import { useForm } from "@/context/FormContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FormDataState } from "@/common/types/form.types";
 
 export default function Step2Statement() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const { state, dispatch } = useForm();
+
+  const d = state.formData;
+
+  type FormKeys =
+    | "onDutyDetails"
+    | "onDutyDetailsMPReporting"
+    | "offenceOccurenceDetails";
+
+  const update = <K extends FormKeys>(
+    key: K,
+    value: Partial<FormDataState[K]>
+  ) => {
+    dispatch({
+      type: "SET_FORM_DATA",
+      payload: {
+        ...state.formData,
+        [key]: {
+          ...state.formData[key],
+          ...value,
+        },
+      },
+    });
+  };
 
   return (
-    <div className="space-y-8">
-      {/* ---------------- 1️ ON DUTY DETAILS ---------------- */}
+    <div className="space-y-10">
+      {/* ---------------- 1️⃣ ON DUTY DETAILS ---------------- */}
       <FormSection title="On-Duty Details">
-        <p className="text-sm text-gray-500">
-          Enter when and where the witness was on duty while reporting the
-          offence.
-        </p>
-
         <div className="grid grid-cols-3 gap-4">
-          <Field label="Date of Duty" placeholder="Pick a date" type="date" />
-          <Field label="Start Time" placeholder="00:00" type="time" />
-          <Field label="End Time" placeholder="00:00" type="time" />
+          <Input
+            type="date"
+            value={d.onDutyDetails.dateOfDuty}
+            onChange={(e) =>
+              update("onDutyDetails", { dateOfDuty: e.target.value })
+            }
+          />
+
+          <Input
+            type="time"
+            value={d.onDutyDetails.startTime}
+            onChange={(e) =>
+              update("onDutyDetails", { startTime: e.target.value })
+            }
+          />
+
+          <Input
+            type="time"
+            value={d.onDutyDetails.endTime}
+            onChange={(e) =>
+              update("onDutyDetails", { endTime: e.target.value })
+            }
+          />
         </div>
 
-        <Field label="Duty Location" placeholder="Location" />
-        <Field label="Duty Type" placeholder="e.g Mobile Duty" />
+        <Input
+          placeholder="Duty Location"
+          value={d.onDutyDetails.dutyLocation}
+          onChange={(e) =>
+            update("onDutyDetails", { dutyLocation: e.target.value })
+          }
+        />
+
+        <Input
+          placeholder="Duty Type"
+          value={d.onDutyDetails.dutyType}
+          onChange={(e) =>
+            update("onDutyDetails", { dutyType: e.target.value })
+          }
+        />
       </FormSection>
 
       {/* ---------------- 2️ REPORTING MP ---------------- */}
       <FormSection title="On-Duty Details of MP Reporting">
-        <p className="text-sm text-gray-500">Enter Details</p>
-
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Name of Reporting MP" placeholder="e.g Sanjay Kumar" />
-
-          {/* ⭐️ RANK DROPDOWN ADDED HERE */}
-          <FormSelect
-            label="Rank"
-            placeholder="Select rank"
-            options={[
-              { label: "Lieutenant", value: "lt" },
-              { label: "Captain", value: "captain" },
-              { label: "Major", value: "major" },
-              { label: "Colonel", value: "colonel" },
-            ]}
+          <Input
+            placeholder="Reporting MP Name"
+            value={d.onDutyDetailsMPReporting.nameReportingMP}
+            onChange={(e) =>
+              update("onDutyDetailsMPReporting", {
+                nameReportingMP: e.target.value,
+              })
+            }
           />
+
+          {/*  RANK FIXED */}
+          <Select
+            value={d.onDutyDetailsMPReporting.rank}
+            onValueChange={(v) =>
+              update("onDutyDetailsMPReporting", { rank: v })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select Rank" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="Lieutenant">Lieutenant</SelectItem>
+              <SelectItem value="Captain">Captain</SelectItem>
+              <SelectItem value="Major">Major</SelectItem>
+              <SelectItem value="Colonel">Colonel</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormSelect
-              label="Unit"
-              placeholder="Select unit"
-              options={[
-                { label: "Unit 1", value: "u1" },
-                { label: "Unit 2", value: "u2" },
-                { label: "Unit 3", value: "u3" },
-              ]}
-            />
-          </div>
+          {/*  UNIT FIXED */}
+          <Select
+            value={d.onDutyDetailsMPReporting.unit}
+            onValueChange={(v) =>
+              update("onDutyDetailsMPReporting", { unit: v })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select Unit" />
+            </SelectTrigger>
 
-          <Field label="Army No." placeholder="Enter" />
+            <SelectContent>
+              <SelectItem value="MP Unit 12">MP Unit 12</SelectItem>
+              <SelectItem value="Unit 2">Unit 2</SelectItem>
+              <SelectItem value="Unit 3">Unit 3</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Input
+            placeholder="Army No."
+            value={d.onDutyDetailsMPReporting.armyNumber}
+            onChange={(e) =>
+              update("onDutyDetailsMPReporting", {
+                armyNumber: e.target.value,
+              })
+            }
+          />
         </div>
       </FormSection>
 
-      {/* ADD MORE (Reducer Based) */}
-      <Button
-        variant="link"
-        className="text-blue-600"
-        onClick={() => dispatch({ type: "ADD_WITNESS" })}
-      >
-        + Add More Witnesses ({state.witnesses.length})
-      </Button>
-
       {/* ---------------- 3️ OFFENCE OCCURRENCE ---------------- */}
       <FormSection title="Offence Occurrence Details">
-        <p className="text-sm text-gray-500">
-          Enter the exact date and time when the incident occurred.
-        </p>
-
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Time of Offence" placeholder="00:00" type="time" />
-          <Field label="Incident Location" placeholder="Location" />
+          <Input
+            type="time"
+            value={d.offenceOccurenceDetails.timeOfOffence}
+            onChange={(e) =>
+              update("offenceOccurenceDetails", {
+                timeOfOffence: e.target.value,
+              })
+            }
+          />
+
+          <Input
+            placeholder="Incident Location"
+            value={d.offenceOccurenceDetails.incidentLocation}
+            onChange={(e) =>
+              update("offenceOccurenceDetails", {
+                incidentLocation: e.target.value,
+              })
+            }
+          />
         </div>
 
-        <div>
-          <Label className="mb-4">Full Description of Offence</Label>
-          <Textarea placeholder="Provide detailed description including what happened & how it occurred" />
-        </div>
+        <Textarea
+          placeholder="Description"
+          value={d.offenceOccurenceDetails.description}
+          onChange={(e) =>
+            update("offenceOccurenceDetails", {
+              description: e.target.value,
+            })
+          }
+        />
       </FormSection>
     </div>
   );

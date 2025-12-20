@@ -1,12 +1,16 @@
-// ---------- STEP STATE ----------
+import { OffenderType } from "@/apis/offender/types";
+
+
+// ---------- VEHICLE ----------
 export interface VehicleDetailsState {
   category: string;
   vehicleType: string;
   driverType: string;
 }
 
+// ---------- OFFENDER ----------
 export interface OffenderWithoutVehicleState {
-  offenderType: string;
+  offenderType: OffenderType;
 
   military: {
     armyNumber: string;
@@ -20,38 +24,68 @@ export interface OffenderWithoutVehicleState {
   };
 }
 
-
-export interface Witness {
+// ---------- STEP-2 ----------
+export interface OnDutyDetails {
   dateOfDuty: string;
   startTime: string;
   endTime: string;
   dutyLocation: string;
   dutyType: string;
+}
 
-  reportingMPName: string;
+export interface OnDutyDetailsMPReporting {
+  nameReportingMP: string;
   rank: string;
   unit: string;
-  armyNo: string;
+  armyNumber: string;
+}
 
+export interface OffenceOccurenceDetails {
   timeOfOffence: string;
   incidentLocation: string;
   description: string;
 }
 
+// ---------- WITNESS ----------
+export interface Witness {
+  dutyBlock?: OnDutyDetails;
+  reportingBlock?: OnDutyDetailsMPReporting;
+  offenceBlock?: OffenceOccurenceDetails;
+}
+
+// ---------- DEPENDENTS ----------
+export type DependentType =
+  | "Military Personnel"
+  | "Servant / Maid"
+  | "Shopkeeper & Worker"
+  | "Temporary Hired Worker";
+
+export interface OffenderPerson {
+  relation: string;
+  whoIsIt: DependentType;
+}
+
+// ---------- FORM ROOT ----------
 export interface FormDataState {
   vehicleInvolved: string;
-
   vehicleDetails: VehicleDetailsState;
-
   offenderWithoutVehicle: OffenderWithoutVehicleState;
 
   remarks?: string;
-  
+
+  onDutyDetails: OnDutyDetails;
+  onDutyDetailsMPReporting: OnDutyDetailsMPReporting;
+  offenceOccurenceDetails: OffenceOccurenceDetails;
+
+  offenceTypes: string[];
+  offenceCode: string[];
+
+  witnesses: Witness[];         
+  offendeDetails:Record<string,string>;
+  offenderPeople: OffenderPerson[];
 }
 
-
-
-// ---------- ROOT STATE ----------
+// ---------- GLOBAL ----------
 export interface GlobalFormState {
   currentStep: number;
   completedSteps: number[];
@@ -68,4 +102,6 @@ export type Action =
   | {
       type: "SET_OFFENDER_WITHOUT_VEHICLE_DETAILS";
       payload: Partial<OffenderWithoutVehicleState>;
-    };
+    }
+  | { type: "SET_OFFENDER_PEOPLE"; payload: OffenderPerson[] }
+  | { type: "SET_WITNESSES"; payload: Witness[] };   // ← ADDED

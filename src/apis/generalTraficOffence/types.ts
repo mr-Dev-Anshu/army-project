@@ -1,3 +1,5 @@
+import { OffenderPerson, OffenderWithoutVehicleState, VehicleDetailsState, Witness } from "@/common/types/form.types";
+
 export interface GeneralTrafficOffence {
   _id?: string;
   offenceType?: string;
@@ -8,10 +10,13 @@ export interface GeneralTrafficOffence {
 }
 
 export interface CreateTrafficOffenceData {
-  offenceType: string;
-  description?: string;
-  fineAmount?: number;
-  points?: number;
+  isVehicleInvolved: boolean;
+  vehicleDetails?: VehicleDetailsState;
+  offenderWithoutVehicle?: OffenderWithoutVehicleState;
+  witnesses: Witness[];
+  offenderPeople: OffenderPerson[];
+  remarks?: string;
 }
+
 
 export interface UpdateTrafficOffenceData extends Partial<CreateTrafficOffenceData> {}

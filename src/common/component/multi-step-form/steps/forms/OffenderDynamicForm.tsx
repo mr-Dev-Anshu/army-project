@@ -13,7 +13,7 @@ export default function OffenderDynamicForm({
   helperText,
   fields
 }: any) {
-  const { state } = useForm();
+  const { state, dispatch } = useForm();
 
   const activeOffenderType =
     state?.formData?.vehicleInvolved === "yes"
@@ -21,10 +21,14 @@ export default function OffenderDynamicForm({
       : state.formData.offenderWithoutVehicle.offenderType;
 
   const [isDependent, setIsDependent] = useState(false);
+  const [dependents, setDependents] = useState([{ relation: "", whoIsIt: "" }]);
 
-  const [dependents, setDependents] = useState([
-    { relation: "", whoIsIt: "" }
-  ]);
+  const saveField = (label: string, value: string) => {
+    dispatch({
+      type: "SET_OFFENDER_DETAILS",
+      payload: { [label]: value }
+    });
+  };
 
   return (
     <div className="space-y-6 mt-4 border border-gray-200 rounded-xl bg-white p-6 shadow-sm">
@@ -36,19 +40,25 @@ export default function OffenderDynamicForm({
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f: any, i: number) =>
           f.type === "input" ? (
-            <FormInput key={i} label={f.label} placeholder={f.placeholder} />
+            <FormInput
+              key={i}
+              label={f.label}
+              placeholder={f.placeholder}
+              onChange={(value: any) => saveField(f.label, value)}
+            />
           ) : (
             <FormSelect
               key={i}
               label={f.label}
               placeholder={f.placeholder}
               options={f.options || []}
+              onChange={(value: any) => saveField(f.label, value)}
             />
           )
         )}
       </div>
 
-      {/* CIVILIAN SPECIAL SECTION */}
+      {/* CIVILIAN SECTION */}
       {activeOffenderType?.toLowerCase() === "civilian" && (
         <div className="rounded-xl border border-gray-300 bg-gray-50 p-6 space-y-5 mt-6">
           <label className="flex gap-2 items-start text-sm">
@@ -67,13 +77,16 @@ export default function OffenderDynamicForm({
                 key={index}
                 className="border rounded-lg p-4 bg-white space-y-4"
               >
-                {/* RELATION INPUT */}
                 <FormInput
                   label="Relation"
                   placeholder="e.g. Brother-in-law"
+                  onChange={(value: any) => {
+                    const d = [...dependents];
+                    d[index].relation = value;
+                    setDependents(d);
+                  }}
                 />
 
-                {/* WHO IS IT */}
                 <p className="font-semibold mb-2">Who is it?</p>
 
                 <RadioGroup
@@ -101,7 +114,6 @@ export default function OffenderDynamicForm({
                   ))}
                 </RadioGroup>
 
-                {/* ⬇️ SHOW THEIR DETAILS FORM */}
                 {item.whoIsIt &&
                   offenderFormsConfig[item.whoIsIt] && (
                     <div className="mt-4 border rounded-lg p-4 bg-gray-50">
@@ -117,6 +129,9 @@ export default function OffenderDynamicForm({
                                 key={i}
                                 label={f.label}
                                 placeholder={f.placeholder}
+                                onChange={(value: any) =>
+                                  saveField(f.label, value)
+                                }
                               />
                             ) : (
                               <FormSelect
@@ -124,6 +139,9 @@ export default function OffenderDynamicForm({
                                 label={f.label}
                                 placeholder={f.placeholder}
                                 options={f.options || []}
+                                onChange={(value: any) =>
+                                  saveField(f.label, value)
+                                }
                               />
                             )
                         )}
@@ -133,7 +151,6 @@ export default function OffenderDynamicForm({
               </div>
             ))}
 
-          {/* Add More Button */}
           {isDependent && (
             <button
               onClick={() =>

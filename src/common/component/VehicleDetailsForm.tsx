@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -5,21 +7,36 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
 import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
-
 import { useForm } from "@/context/FormContext";
 
 export default function VehicleDetailsForm() {
   const { state, dispatch } = useForm();
 
-  // RIGHT PATH — yahi use karo
-  const { category, vehicleType, driverType } =
-    state.formData.vehicleDetails;
+  const { category, vehicleType, driverType } = state.formData.vehicleDetails;
 
   return (
-    <div className="border h-full   rounded-lg p-6 space-y-8">
+    <div
+      className="
+    border rounded-lg bg-white 
+    
+ 
+    p-4 sm:p-2 md:px-3 
+    space-y-6 sm:space-y-7 md:space-y-8
+  
+    w-full
+    max-w-[900px]
+    mx-auto
+    
+    /* Height Safe */
+    max-h-[75vh]
+    overflow-y-auto
+  "
+    >
       {/* VEHICLE CATEGORY */}
       <div>
-        <p className="font-semibold mb-2">Select Vehicle Category</p>
+        <p className="font-semibold mb-2 text-base sm:text-lg">
+          Select Vehicle Category
+        </p>
 
         <RadioGroup
           value={category}
@@ -29,7 +46,12 @@ export default function VehicleDetailsForm() {
               payload: { category: v },
             })
           }
-          className="grid grid-cols-2 gap-4"
+          className="
+            grid 
+            grid-cols-1 
+            sm:grid-cols-2
+            gap-3 sm:gap-4
+          "
         >
           <label className="border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer">
             <RadioGroupItem value="2w" />
@@ -45,7 +67,7 @@ export default function VehicleDetailsForm() {
 
       {/* VEHICLE TYPE */}
       <div>
-        <p className="font-semibold mb-2">
+        <p className="font-semibold mb-2 text-base sm:text-lg">
           Which Type Of Vehicle Was Involved?
         </p>
 
@@ -57,7 +79,12 @@ export default function VehicleDetailsForm() {
               payload: { vehicleType: v },
             })
           }
-          className="grid grid-cols-2 gap-4"
+          className="
+            grid 
+            grid-cols-1 
+            sm:grid-cols-2 
+            gap-3 sm:gap-4
+          "
         >
           <label className="border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer">
             <RadioGroupItem value="civilian" />
@@ -74,15 +101,20 @@ export default function VehicleDetailsForm() {
       {/* CIVILIAN VEHICLE */}
       {vehicleType === "civilian" && (
         <div>
-          <p className="font-semibold mb-2">
+          <p className="font-semibold mb-2 text-base sm:text-lg">
             Fill Vehicle Identification Fields:
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div
+            className="
+              grid 
+              grid-cols-1 
+              sm:grid-cols-2 
+              gap-3 sm:gap-4
+            "
+          >
             <div>
-              <Label className="mb-3">
-                Civil Vehicle Registration Number
-              </Label>
+              <Label className="mb-3">Civil Vehicle Registration Number</Label>
               <Input placeholder="e.g. MP04 AB 1234" />
             </div>
 
@@ -100,11 +132,18 @@ export default function VehicleDetailsForm() {
       {/* DD VEHICLE */}
       {vehicleType === "dd" && (
         <div>
-          <p className="font-semibold mb-2">
+          <p className="font-semibold mb-2 text-base sm:text-lg">
             Fill Vehicle Identification Fields:
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div
+            className="
+              grid 
+              grid-cols-1 
+              sm:grid-cols-2 
+              gap-3 sm:gap-4
+            "
+          >
             <div>
               <Label className="mb-3">DD Vehicle BA Number</Label>
               <Input placeholder="e.g. 12A 345678Z" />
@@ -123,7 +162,7 @@ export default function VehicleDetailsForm() {
 
       {/* DRIVER TYPE */}
       <div>
-        <p className="font-semibold mb-2">
+        <p className="font-semibold mb-2 text-base sm:text-lg">
           Select Who was the Driver/Rider?
         </p>
 
@@ -135,7 +174,12 @@ export default function VehicleDetailsForm() {
               payload: { driverType: v },
             })
           }
-          className="grid grid-cols-2 gap-3"
+          className="
+            grid 
+            grid-cols-1
+            sm:grid-cols-2 
+            gap-3 sm:gap-4
+          "
         >
           {[
             "Military Personnel",

@@ -21,7 +21,7 @@ import MultiStepForm from "../../component/multi-step-form/MulitstepForm";
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
-  //page controller
+
   const [page, setPage] = useState<"dashboard" | "createRecord" | "multiForm">(
     "dashboard"
   );
@@ -70,6 +70,7 @@ export default function Dashboard() {
 
   return (
     <div className="w-full h-screen flex bg-[#f5f5f7]">
+
       {/* SIDEBAR */}
       <Sidebar
         collapsed={collapsed}
@@ -78,11 +79,13 @@ export default function Dashboard() {
       />
 
       {/* RIGHT CONTENT */}
-      <div className="flex-1 p-6 space-y-8 overflow-y-auto">
+      <div className="flex-1 p-4 sm:p-5 md:p-6 space-y-8 overflow-y-auto">
+
         {/* ================== DASHBOARD PAGE ================== */}
         {page === "dashboard" && (
           <>
-            <div className="flex justify-between items-center">
+            {/* HEADER WRAP RESPONSIVE */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <h1 className="text-2xl font-semibold text-gray-800">
                 Dashboard
               </h1>
@@ -90,20 +93,22 @@ export default function Dashboard() {
               <input
                 type="text"
                 placeholder="Type to search..."
-                className="w-[400px] px-4 py-2 border rounded-lg outline-none"
+                className="w-full sm:w-[300px] md:w-[400px] px-4 py-2 border rounded-lg outline-none"
               />
             </div>
 
-            <div className="grid grid-cols-4">
+            {/* STATS GRID RESPONSIVE */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 gap-4">
               {statsData.map((card, i) => (
                 <DynamicStatsCard key={i} {...card} />
               ))}
             </div>
 
+            {/* QUICK ACTIONS */}
             <div className="space-y-3">
               <h2 className="text-xl font-semibold">Quick Actions</h2>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {quickActions.map((action, i) => (
                   <ActionCard
                     key={i}
@@ -118,7 +123,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border shadow-sm">
+            {/* TABLE / LIST SECTION */}
+            <div className="bg-white rounded-xl p-4 sm:p-5 md:p-6 border shadow-sm">
               <h2 className="text-lg font-semibold mb-4">
                 All Registered Reports
               </h2>
@@ -129,6 +135,8 @@ export default function Dashboard() {
 
         {/* ================== CREATE NEW RECORD PAGE ================== */}
         {page === "createRecord" && <CreateNewRecordPanel />}
+
+        {/* ================== MULTI STEP FORM ================== */}
         {page === "multiForm" && <MultiStepForm />}
       </div>
     </div>
