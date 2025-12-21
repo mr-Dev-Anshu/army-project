@@ -182,10 +182,10 @@ export default function VehicleDetailsForm() {
           "
         >
           {[
-            "Military Personnel",
+            "Military Person",
             "Civilian",
             "Employee",
-            "Servant / Maid",
+            "Servant/Maid",
             "Shop Keeper",
             "Temporary Hired Worker",
           ].map((item) => (

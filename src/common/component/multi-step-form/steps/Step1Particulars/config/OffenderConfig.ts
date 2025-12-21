@@ -1,5 +1,5 @@
  export const offenderFormsConfig: any = {
-    "Military Personnel": {
+    "Military Person": {
       title: "Fill Offender Particulars",
       helperText: "Select who the offender is and fill their details.",
       fields: [
@@ -50,7 +50,7 @@
       ],
     },
 
-    "Servant / Maid": {
+    "Servant/Maid": {
       title: "Fill Offender Particulars",
       helperText: "Select who the offender is and fill their details.",
       fields: [

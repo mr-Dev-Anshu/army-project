@@ -1,9 +1,9 @@
   import type { Metadata } from 'next';
   import { Inter } from 'next/font/google';
   import './globals.css';
-  import DynamicBreadcrumbs from '@/common/component/DynamicBreadCrumb';
   import { FormProvider } from '@/context/FormContext';
 import Wrapper from '@/common/hoc/Wrapper';
+import { ToastContainer } from 'react-toastify';
 
   const inter = Inter({ subsets: ['latin'] });
 
@@ -32,6 +32,7 @@ import Wrapper from '@/common/hoc/Wrapper';
           <FormProvider>
           <main className="min-h-screen bg-gray-50">
             {children}
+            <ToastContainer position="top-right" autoClose={3000} />
           </main>
         </FormProvider>
         </Wrapper>

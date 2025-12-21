@@ -149,6 +149,141 @@ export default function Step2Statement() {
         </div>
       </FormSection>
 
+      {/* ---------------- 3️⃣ WITNESSING MP ---------------- */}
+      <FormSection title="On-Duty Details of Witnessing MP">
+        {d.witnesses.map((witness, index) => (
+          <div key={index} className="border p-4 rounded-lg space-y-4 mb-6">
+            <h3 className="font-semibold">Witness {index + 1}</h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                placeholder="Witness MP Name"
+                value={witness.reportingBlock.nameReportingMP}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_WITNESSES",
+                    payload: d.witnesses.map((w, i) =>
+                      i === index
+                        ? {
+                            ...w,
+                            reportingBlock: {
+                              ...w.reportingBlock,
+                              nameReportingMP: e.target.value,
+                            },
+                          }
+                        : w
+                    ),
+                  })
+                }
+              />
+
+              <Select
+                value={witness.reportingBlock.rank}
+                onValueChange={(v) =>
+                  dispatch({
+                    type: "SET_WITNESSES",
+                    payload: d.witnesses.map((w, i) =>
+                      i === index
+                        ? {
+                            ...w,
+                            reportingBlock: { ...w.reportingBlock, rank: v },
+                          }
+                        : w
+                    ),
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Rank" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="Lieutenant">Lieutenant</SelectItem>
+                  <SelectItem value="Captain">Captain</SelectItem>
+                  <SelectItem value="Major">Major</SelectItem>
+                  <SelectItem value="Colonel">Colonel</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                value={witness.reportingBlock.unit}
+                onValueChange={(v) =>
+                  dispatch({
+                    type: "SET_WITNESSES",
+                    payload: d.witnesses.map((w, i) =>
+                      i === index
+                        ? {
+                            ...w,
+                            reportingBlock: { ...w.reportingBlock, unit: v },
+                          }
+                        : w
+                    ),
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Unit" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="MP Unit 12">MP Unit 12</SelectItem>
+                  <SelectItem value="Unit 2">Unit 2</SelectItem>
+                  <SelectItem value="Unit 3">Unit 3</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Input
+                placeholder="Army No."
+                value={witness.reportingBlock.armyNumber}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_WITNESSES",
+                    payload: d.witnesses.map((w, i) =>
+                      i === index
+                        ? {
+                            ...w,
+                            reportingBlock: {
+                              ...w.reportingBlock,
+                              armyNumber: e.target.value,
+                            },
+                          }
+                        : w
+                    ),
+                  })
+                }
+              />
+            </div>
+          </div>
+        ))}
+
+        {/* ➕ Add Witness */}
+        <button
+          className="px-4 py-2 bg-primary text-white rounded"
+          onClick={() =>
+            dispatch({
+              type: "SET_WITNESSES",
+              payload: [
+                ...d.witnesses,
+                {
+                  dutyBlock: d.onDutyDetails,
+                  reportingBlock: {
+                    nameReportingMP: "",
+                    rank: "",
+                    unit: "",
+                    armyNumber: "",
+                  },
+                  offenceBlock: d.offenceOccurenceDetails,
+                },
+              ],
+            })
+          }
+        >
+          + Add More Witness
+        </button>
+      </FormSection>
+
       {/* ---------------- 3️ OFFENCE OCCURRENCE ---------------- */}
       <FormSection title="Offence Occurrence Details">
         <div className="grid grid-cols-2 gap-4">
