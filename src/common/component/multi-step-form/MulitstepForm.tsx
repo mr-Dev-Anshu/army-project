@@ -111,8 +111,8 @@ export default function MultiStepForm() {
   };
 
   return (
-    <div className="h-[calc(100vh-40px)] bg-gray-100 p-6">
-      <div className="max-w-full mx-auto bg-white rounded-lg overflow-hidden h-full">
+    <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
+      <div className=" w-full bg-white rounded-lg overflow-hidden h-full">
         <div className="flex h-full">
           <LeftStepper
             steps={steps}

@@ -89,8 +89,9 @@ export const RightPanel = ({
         
         flex 
         flex-col 
-        
+        w-full
         overflow-hidden
+       
       "
     >
       {/* ---------- HEADER ---------- */}

@@ -32,8 +32,6 @@ export default function Step4Remarks() {
         space-y-6 
         px-4
         w-full
-        max-w-[900px]
-        mx-auto
         overflow-y-auto
       "
     >

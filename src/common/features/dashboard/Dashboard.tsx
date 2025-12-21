@@ -115,7 +115,7 @@ export default function Dashboard() {
                     {...action}
                     onClick={() => {
                       if (action.title === "Create New Record") {
-                        setPage("multiForm");
+                        setPage("createRecord");
                       }
                     }}
                   />
@@ -134,7 +134,7 @@ export default function Dashboard() {
         )}
 
         {/* ================== CREATE NEW RECORD PAGE ================== */}
-        {page === "createRecord" && <CreateNewRecordPanel />}
+        {page === "createRecord" && <CreateNewRecordPanel setCollapsed={setCollapsed} />}
 
         {/* ================== MULTI STEP FORM ================== */}
         {page === "multiForm" && <MultiStepForm />}

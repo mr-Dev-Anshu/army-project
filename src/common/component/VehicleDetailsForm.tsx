@@ -17,17 +17,12 @@ export default function VehicleDetailsForm() {
   return (
     <div
       className="
-    border rounded-lg bg-white 
-    
- 
+    border rounded-lg bg-white
     p-4 sm:p-2 md:px-3 
     space-y-6 sm:space-y-7 md:space-y-8
   
     w-full
-    max-w-[900px]
-    mx-auto
-    
-    /* Height Safe */
+
     max-h-[75vh]
     overflow-y-auto
   "
