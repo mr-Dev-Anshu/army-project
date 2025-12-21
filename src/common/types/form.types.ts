@@ -7,6 +7,7 @@ export interface VehicleDetailsState {
   category: string;
   vehicleType: string;
   driverType: string;
+
 }
 
 // ---------- OFFENDER ----------
@@ -45,6 +46,9 @@ export interface OffenceOccurenceDetails {
   timeOfOffence: string;
   incidentLocation: string;
   description: string;
+  authSpeed?: string;
+  actualSpeed?: string;
+  overSpeed?: string;
 }
 
 // ---------- WITNESS ----------

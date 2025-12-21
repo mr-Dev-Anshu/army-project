@@ -1,4 +1,3 @@
-
 // "use client";
 // import { createContext, useContext, useReducer, ReactNode } from "react";
 // import { Action, GlobalFormState } from "@/common/types/form.types";
@@ -30,7 +29,7 @@
 //       },
 //     },
 
-//     //  NEW — STORE OFFENDER FORM DATA HERE 
+//     //  NEW — STORE OFFENDER FORM DATA HERE
 //     offenderDetails: {},
 
 //     //  PHASE-1
@@ -129,7 +128,7 @@
 //         },
 //       };
 
-//     //  NEW — SAVE DYNAMIC OFFENDER FIELDS 
+//     //  NEW — SAVE DYNAMIC OFFENDER FIELDS
 //     case "SET_OFFENDER_DETAILS":
 //       return {
 //         ...state,
@@ -166,8 +165,6 @@
 //   if (!ctx) throw new Error("useForm must be used inside FormProvider");
 //   return ctx;
 // }
-
-
 
 "use client";
 import { createContext, useContext, useReducer, ReactNode } from "react";
@@ -222,34 +219,37 @@ const initialState: GlobalFormState = {
       timeOfOffence: "",
       incidentLocation: "",
       description: "",
+      authSpeed: "30", // default
+      actualSpeed: "",
+      overSpeed: "",
     },
 
     offenceTypes: [],
     offenceCode: [],
 
     // STEP-3 / PHASE-2
-  witnesses: [
-  {
-    dutyBlock: {
-      dateOfDuty: "",
-      startTime: "",
-      endTime: "",
-      dutyLocation: "",
-      dutyType: "",
-    },
-    reportingBlock: {
-      nameReportingMP: "",
-      rank: "",
-      unit: "",
-      armyNumber: "",
-    },
-    offenceBlock: {
-      timeOfOffence: "",
-      incidentLocation: "",
-      description: "",
-    },
-  },
-],
+    witnesses: [
+      {
+        dutyBlock: {
+          dateOfDuty: "",
+          startTime: "",
+          endTime: "",
+          dutyLocation: "",
+          dutyType: "",
+        },
+        reportingBlock: {
+          nameReportingMP: "",
+          rank: "",
+          unit: "",
+          armyNumber: "",
+        },
+        offenceBlock: {
+          timeOfOffence: "",
+          incidentLocation: "",
+          description: "",
+        },
+      },
+    ],
 
     offenderPeople: [],
   },
@@ -366,4 +366,3 @@ export function useForm() {
   if (!ctx) throw new Error("useForm must be used inside FormProvider");
   return ctx;
 }
-

@@ -1,95 +1,3 @@
-// "use client";
-// import { Check, AlertCircle } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { useForm } from "@/context/FormContext";
-// import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
-
-// interface Step {
-//   id: number;
-//   label: string;
-//   icon: string;
-// }
-
-// interface Props {
-//   steps: Step[];
-//   currentStep: number;
-//   completedSteps: number[];
-//   onStepClick: (id: number) => void;
-// }
-
-// export const LeftStepper = ({
-//   steps,
-//   currentStep,
-//   completedSteps,
-//   onStepClick,
-// }: Props) => {
-//   const getStatus = (id: number) => {
-//     if (id === currentStep) return "active";
-//     if (Array.isArray(completedSteps) && completedSteps.includes(id))
-//       return "completed";
-//     return "pending";
-//   };
-
-//   const { state } = useForm();
-  
-
-//   return (
-//     <div className="w-full h-full lg:w-100 flex flex-col justify-between bg-gray-900 text-white p-6 rounded-xl">
-//       <h2 className="text-xl font-bold mb-8">
-//         Create New General & Traffic Offence Record
-//       </h2>
-
-//       <div className="space-y-1 relative -top-36">
-//         {steps.map((step, index) => {
-//           const status = getStatus(step.id);
-
-//           return (
-//             <div key={step.id}>
-//               <button
-//                 onClick={() => onStepClick(step.id)}
-//                 className={`w-full flex items-start gap-3 p-3 rounded-lg text-left ${
-//                   status === "active" ? "bg-gray-800" : "hover:bg-gray-800"
-//                 }`}
-//               >
-//                 <div
-//                   className={`w-12 h-12 rounded-full flex items-center justify-center text-md font-semibold ${
-//                     status === "completed"
-//                       ? "bg-green-500"
-//                       : status === "active"
-//                       ? "bg-blue-500"
-//                       : "bg-gray-600"
-//                   }`}
-//                 >
-//                   {status === "completed" ? <Check size={24} /> : step.icon}
-//                 </div>
-
-//                 <span className="text-lg whitespace-pre-line text-gray-300">
-//                   {step.label}
-//                 </span>
-//               </button>
-
-//               {index < steps.length - 1 && (
-//                 <div className="ml-4 pl-4 h-8 border-l-2 border-dashed border-gray-600" />
-//               )}
-//             </div>
-//           );
-//         })}
-//       </div>
-
-//       <div className="mt-8 w-fit flex gap-2">
-//         <Button className="w-fit border-1 border-gray-50 bg-transparent">
-//           Cancel
-//         </Button>
-//         <Button  className="w-full bg-blue-600">
-//           Preview & Save Report
-//         </Button>
-//       </div>
-//     </div>
-//   );
-// };
-
-
-
 "use client";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -98,7 +6,7 @@ import { useForm } from "@/context/FormContext";
 interface Step {
   id: number;
   label: string;
-  icon: string;
+  icon: string | React.ReactNode;
 }
 
 interface Props {
@@ -106,12 +14,16 @@ interface Props {
   currentStep: number;
   completedSteps: number[];
   onStepClick: (id: number) => void;
+  title?: string;
+  reportNo?: string;
 }
 
 export const LeftStepper = ({
   steps,
   currentStep,
   completedSteps,
+   title,
+  reportNo,
   onStepClick,
 }: Props) => {
   const getStatus = (id: number) => {
@@ -151,8 +63,12 @@ export const LeftStepper = ({
           sm:text-xl
         "
       >
-        Create New General & Traffic Offence Record
+        {title || " Create New General & Traffic Offence Record"}
       </h2>
+
+      {reportNo && (
+        <p className="text-xs text-gray-400 mb-6">REPORT NO. {reportNo}</p>
+      )}
 
       {/* Steps List */}
       <div
@@ -184,11 +100,7 @@ export const LeftStepper = ({
                   text-left
                   transition
 
-                  ${
-                    status === "active"
-                      ? "bg-gray-800"
-                      : "hover:bg-gray-800"
-                  }
+                  ${status === "active" ? "bg-gray-800" : "hover:bg-gray-800"}
                 `}
               >
                 {/* Step Icon */}

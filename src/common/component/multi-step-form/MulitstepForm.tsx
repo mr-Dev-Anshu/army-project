@@ -5,6 +5,10 @@ import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { createOffender } from "@/apis/offender/create";
 import { createMpWitenessing } from "@/apis/MpWitenessing/create";
 import { toast } from "react-toastify";
+import Step1Particulars from "./steps/Step1Particulars";
+import Step2Statement from "./steps/Step2Statement";
+import Step3Offence from "./steps/Step3Offence";
+import Step4Remarks from "./steps/Step4Remarks";
 
 export default function MultiStepForm() {
   const { state, dispatch } = useForm();
@@ -110,6 +114,60 @@ export default function MultiStepForm() {
     }
   };
 
+
+    const stepsConfig = {
+    1: {
+      title: "1. PARTICULARS:",
+      component: (
+        <Step1Particulars
+          value={state.formData.vehicleInvolved}
+          onChange={(v: string) =>
+            dispatch({
+              type: "SET_FORM_DATA",
+              payload: { vehicleInvolved: v },
+            })
+          }
+        />
+      ),
+    },
+
+    2: {
+      title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
+      component: (
+        <Step2Statement
+          formData={state.formData}
+          setFormData={(d) =>
+            dispatch({ type: "SET_FORM_DATA", payload: d })
+          }
+        />
+      ),
+    },
+
+    3: {
+      title: "3. OFFENCE COMMITTED / ORDERS CONTRAVENED:",
+      component: (
+        <Step3Offence
+          formData={state.formData}
+          setFormData={(d) =>
+            dispatch({ type: "SET_FORM_DATA", payload: d })
+          }
+        />
+      ),
+    },
+
+    4: {
+      title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
+      component: (
+        <Step4Remarks
+          formData={state.formData}
+          setFormData={(d) =>
+            dispatch({ type: "SET_FORM_DATA", payload: d })
+          }
+        />
+      ),
+    },
+  };
+
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
       <div className=" w-full bg-white rounded-lg overflow-hidden h-full">
@@ -118,6 +176,8 @@ export default function MultiStepForm() {
             steps={steps}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
+            title="Create New General & Traffic Offence Record"
+            reportNo="PRO/21 CPU/00042/106/25"
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
@@ -129,6 +189,7 @@ export default function MultiStepForm() {
             }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onSubmitFinal={onSubmitFinal}
+            stepsConfig={stepsConfig}
           />
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import ActionCard from "./ActionCard";
 import { FileText, Gauge, ClipboardList } from "lucide-react";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
+import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 
 export default function CreateNewRecordPanel({ setCollapsed }: any) {
   const [selectedRecord, setSelectedRecord] = useState<string | null>(null);
@@ -70,20 +71,8 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
 
       {/* ---------- SPEED FORM ---------- */}
       {selectedRecord === "speed" && (
-        <div className="w-full max-w-5xl p-6 border rounded-xl mx-auto">
-          <h2 className="font-semibold text-lg">
-            Static Speed Check Record Form
-          </h2>
-
-          <button
-            className="mt-6 px-6 py-2 rounded-lg bg-gray-900 text-white"
-            onClick={() => {
-              setSelectedRecord(null);
-              setCollapsed(false);
-            }}
-          >
-            Back
-          </button>
+        <div className="w-full  p-6 border rounded-xl">
+          <StaticSpeedForm/>
         </div>
       )}
 
