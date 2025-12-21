@@ -206,7 +206,9 @@ export default function VehicleDetailsForm() {
           title={offenderFormsConfig[driverType].title}
           helperText={offenderFormsConfig[driverType].helperText}
           fields={offenderFormsConfig[driverType].fields}
+          showCoDriver={true}
         />
+        
       )}
     </div>
   );

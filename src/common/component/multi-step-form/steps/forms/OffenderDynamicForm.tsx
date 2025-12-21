@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -11,7 +10,8 @@ import { useForm } from "@/context/FormContext";
 export default function OffenderDynamicForm({
   title,
   helperText,
-  fields
+  fields,
+  showCoDriver = false,
 }: any) {
   const { state, dispatch } = useForm();
 
@@ -26,7 +26,7 @@ export default function OffenderDynamicForm({
   const saveField = (label: string, value: string) => {
     dispatch({
       type: "SET_OFFENDER_DETAILS",
-      payload: { [label]: value }
+      payload: { [label]: value },
     });
   };
 
@@ -36,7 +36,7 @@ export default function OffenderDynamicForm({
 
       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
-      {/* MAIN FORM */}
+      {/* ---------- MAIN FORM ---------- */}
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f: any, i: number) =>
           f.type === "input" ? (
@@ -58,106 +58,185 @@ export default function OffenderDynamicForm({
         )}
       </div>
 
-      {/* CIVILIAN SECTION */}
+      {/* ---------- ONLY FOR MILITARY PERSON ---------- */}
+      {showCoDriver && activeOffenderType === "Military Person" && (
+        <>
+          <div className="mt-6 flex items-start gap-2">
+            <Checkbox
+              checked={Boolean(state.formData.coDriverOrPillion)}
+              onCheckedChange={(v) =>
+                dispatch({
+                  type: "SET_FORM_DATA",
+                  payload: { coDriverOrPillion: Boolean(v) },
+                })
+              }
+            />
+
+            <p className="text-sm">
+              Was there a <b>Co-Driver / Pillion Rider</b> ?
+            </p>
+          </div>
+
+          {/* ⭐ If checked → Show SAME Military Form Again */}
+          {state.formData.coDriverOrPillion && (
+            <div className="mt-6 border border-gray-300 rounded-xl bg-gray-50 p-6">
+              <p className="font-semibold mb-3">
+                Co-Driver / Pillion — Military Person Details
+              </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                {offenderFormsConfig["Military Person"].fields.map(
+                  (f: any, i: number) =>
+                    f.type === "input" ? (
+                      <FormInput
+                        key={i}
+                        label={`CoDriver_${f.label}`}
+                        placeholder={f.placeholder}
+                        onChange={(value: any) =>
+                          saveField(`CoDriver_${f.label}`, value)
+                        }
+                      />
+                    ) : (
+                      <FormSelect
+                        key={i}
+                        label={`CoDriver_${f.label}`}
+                        placeholder={f.placeholder}
+                        options={f.options || []}
+                        onChange={(value: any) =>
+                          saveField(`CoDriver_${f.label}`, value)
+                        }
+                      />
+                    )
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ---------- CIVILIAN LOGIC SAME ---------- */}
       {activeOffenderType?.toLowerCase() === "civilian" && (
-        <div className="rounded-xl border border-gray-300 bg-gray-50 p-6 space-y-5 mt-6">
+        <div className="rounded-xl border border-gray-300 bg-gray-50 p-6 space-y-6 mt-6">
+          {/* DEPENDENT CHECKBOX */}
           <label className="flex gap-2 items-start text-sm">
             <Checkbox
               checked={isDependent}
               onCheckedChange={(v) => setIsDependent(Boolean(v))}
             />
             <span>
-              Is this person <b>Dependent / Relative</b> of Military Personnel?
+              Is this person <b>Dependent / Relative</b> of Military Personnel
+              or Other Registered?
             </span>
           </label>
 
+          {/* IF YES */}
           {isDependent &&
             dependents.map((item, index) => (
               <div
                 key={index}
-                className="border rounded-lg p-4 bg-white space-y-4"
+                className="border rounded-lg p-5 bg-white space-y-6"
               >
-                <FormInput
-                  label="Relation"
-                  placeholder="e.g. Brother-in-law"
-                  onChange={(value: any) => {
-                    const d = [...dependents];
-                    d[index].relation = value;
-                    setDependents(d);
-                  }}
-                />
+                {/* RELATION INPUT */}
+                <div>
+                  <p className="font-semibold text-sm mb-1">
+                    Name the relation
+                  </p>
+                  <FormInput
+                    label=""
+                    placeholder="e.g. Brother-in-law"
+                    onChange={(value: any) => {
+                      const d = [...dependents];
+                      d[index].relation = value;
+                      setDependents(d);
+                    }}
+                  />
+                </div>
 
-                <p className="font-semibold mb-2">Who is it?</p>
+                {/* WHO IS IT */}
+                <div>
+                  <p className="font-semibold mb-2">Who is it?</p>
 
-                <RadioGroup
-                  className="grid grid-cols-2 gap-3"
-                  value={item.whoIsIt}
-                  onValueChange={(v) => {
-                    const copy = [...dependents];
-                    copy[index].whoIsIt = v;
-                    setDependents(copy);
-                  }}
-                >
-                  {[
-                    "Military Personnel",
-                    "Servant / Maid",
-                    "Shopkeeper & Worker",
-                    "Temporary Hired Worker"
-                  ].map((x) => (
-                    <label
-                      key={x}
-                      className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer bg-white"
-                    >
-                      <RadioGroupItem value={x} />
-                      {x}
-                    </label>
-                  ))}
-                </RadioGroup>
+                  <RadioGroup
+                    className="grid grid-cols-2 gap-3"
+                    value={item.whoIsIt}
+                    onValueChange={(v) => {
+                      const copy = [...dependents];
+                      copy[index].whoIsIt = v;
+                      setDependents(copy);
+                    }}
+                  >
+                    {[
+                      "Military Person",
+                      "Servant/Maid",
+                      "Shop Keeper",
+                      "Temporary Hired Worker",
+                    ].map((x) => (
+                      <label
+                        key={x}
+                        className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer bg-white"
+                      >
+                        <RadioGroupItem value={x} />
+                        {x}
+                      </label>
+                    ))}
+                  </RadioGroup>
+                </div>
 
-                {item.whoIsIt &&
-                  offenderFormsConfig[item.whoIsIt] && (
-                    <div className="mt-4 border rounded-lg p-4 bg-gray-50">
-                      <p className="font-semibold mb-2">
-                        {offenderFormsConfig[item.whoIsIt].title}
-                      </p>
+                {item.whoIsIt && offenderFormsConfig[item.whoIsIt] && (
+                  <div className="mt-4 border rounded-lg p-5 bg-gray-50">
+                    <p className="font-semibold mb-2">Fill Details</p>
+                    <p className="text-xs text-gray-500 mb-4">
+                      Select who the offender is and fill their details. The
+                      form will update based on your selection.
+                    </p>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        {offenderFormsConfig[item.whoIsIt].fields.map(
-                          (f: any, i: number) =>
-                            f.type === "input" ? (
-                              <FormInput
-                                key={i}
-                                label={f.label}
-                                placeholder={f.placeholder}
-                                onChange={(value: any) =>
-                                  saveField(f.label, value)
-                                }
-                              />
-                            ) : (
-                              <FormSelect
-                                key={i}
-                                label={f.label}
-                                placeholder={f.placeholder}
-                                options={f.options || []}
-                                onChange={(value: any) =>
-                                  saveField(f.label, value)
-                                }
-                              />
-                            )
-                        )}
-                      </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        ...offenderFormsConfig[item.whoIsIt].fields,
+
+                        ...(item.whoIsIt === "Military Person"
+                          ? [
+                              {
+                                type: "input",
+                                label: "Relative Name",
+                                placeholder: "Enter Relative Name",
+                              },
+                              {
+                                type: "input",
+                                label: "Relative Address",
+                                placeholder: "Enter Relative Address",
+                              },
+                            ]
+                          : []),
+                      ].map((f: any, i: number) =>
+                        f.type === "input" ? (
+                          <FormInput
+                            key={i}
+                            label={f.label}
+                            placeholder={f.placeholder}
+                            onChange={(value: any) => saveField(f.label, value)}
+                          />
+                        ) : (
+                          <FormSelect
+                            key={i}
+                            label={f.label}
+                            placeholder={f.placeholder}
+                            options={f.options || []}
+                            onChange={(value: any) => saveField(f.label, value)}
+                          />
+                        )
+                      )}
                     </div>
-                  )}
+                  </div>
+                )}
               </div>
             ))}
 
+          {/* ADD MORE BUTTON */}
           {isDependent && (
             <button
               onClick={() =>
-                setDependents([
-                  ...dependents,
-                  { relation: "", whoIsIt: "" }
-                ])
+                setDependents([...dependents, { relation: "", whoIsIt: "" }])
               }
               className="text-blue-600 text-sm"
             >
