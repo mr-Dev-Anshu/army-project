@@ -7,7 +7,7 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
   }),
   vehicleCategory: Joi.string().trim().optional(),
   vehicleNumber: Joi.string().trim().optional(), 
-
+  vehicleName:Joi.string().trim().optional(),
   onDutyDetails: Joi.object({
     dateOfDuty: Joi.date().optional(),
     startTime: Joi.date().optional(),

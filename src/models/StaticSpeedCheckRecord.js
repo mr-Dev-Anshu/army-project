@@ -37,6 +37,9 @@ const staticSpeedCheckRecordSchema = mongoose.Schema({
   vehicleNumber: {
     type: String,
   },
+  vehicleName:{
+     type:String,
+  },
   onDutyDetails: onDutyDetailsSchema,
   onDutyDetailsMPReporting: onDutyDetailsMPReporting,
   offenceOccurenceDetails: offenceOccurrenceSchema,
