@@ -1,0 +1,126 @@
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
+
+export const reportDetailsSchema = new Schema({
+  reportNumber: { type: String },
+  command: { type: String },
+  firNumber: { type: String },
+  firFileUrl: { type: String },
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
+export const investigationHeadSchema = new Schema({
+  armyNumber: { type: String },
+  rank: { type: String },
+  name: { type: String },
+  unit: { type: String },
+  fmn: { type: String },
+  command: { type: String },
+  address: { type: String },
+  iCardNumber: { type: String },
+
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
+export const occurrenceDetailsSchema = new Schema({
+  offenceType: { type: String },
+  placeOfOccurrence: { type: String },
+  dateOfOccurrence: { type: Date },
+  timeOfOccurrence: { type: Date },
+  description: { type: String },
+
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
+export const individualSchema = new Schema({
+  isVehicleInvolved: { type: Boolean, default: false },
+  vehicleCategory: { type: String },
+  typeOfVehicle: { type: String },
+  vehicleNumber: { type: String },
+  vehicleName: { type: String },
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
+export const witnessSchema = new Schema({
+  isVehicleInvolved: { type: Boolean, default: false },
+  vehicleCategory: { type: String },
+  typeOfVehicle: { type: String },
+  vehicleNumber: { type: String },
+  vehicleName: { type: String },
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
+export const documentSchema = new Schema({
+  statement: { type: String },
+  url: { type: String },
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
+export const evidenceSchema = new Schema({
+  type: { type: String },
+  url: { type: String },
+  description: { type: String },
+  uploadedAt: { type: Date, default: Date.now },
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
+
+const mpReportSchema = new Schema(
+  {
+    reportDetails: { type: reportDetailsSchema },
+    investigationHead: { type: investigationHeadSchema },
+    occurrenceDetails: { type: occurrenceDetailsSchema },
+    documents: [documentSchema],
+    detailedOccurrenceReport: { type: String },
+    pointsFindOutDuringInvestigation: { type: String },
+    opinion: { type: String },
+    remarks: {
+      analysis: { type: String },
+      recommendation: { type: String },
+      customFields: {
+        type: Schema.Types.Mixed,
+        default: {},
+      },
+    },
+    evidences:[evidenceSchema],
+    customFields: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+  },
+  {
+    timestamps: true,
+    strict: false,
+  }
+);
+
+mpReportSchema.index({ "reportDetails.reportNumber": 1 }, { unique: true });
+mpReportSchema.index({ "investigationHead.armyNumber": 1 });
+mpReportSchema.index({ "occurrenceDetails.offenceType": 1 });
+mpReportSchema.index({ "occurrenceDetails.placeOfOccurrence": 1 });
+mpReportSchema.index({ "occurrenceDetails.dateOfOccurrence": -1 });
+
+export const MPReport =
+  mongoose.models.MPReport || mongoose.model("MPReport", mpReportSchema);

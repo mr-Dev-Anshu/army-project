@@ -18,16 +18,10 @@ export const createOffenderSchema = Joi.object({
       "Temporary Hired Worker"
     )
     .required(),
+  category: Joi.string().optional(),
+  offenderDetails: Joi.object().unknown(true).default({}).optional(),
 
-  offenderDetails: Joi.object()
-    .unknown(true)
-    .default({})
-    .optional(),
-
-  customFields: Joi.object()
-    .unknown(true)
-    .default({})
-    .optional(),
+  customFields: Joi.object().unknown(true).default({}).optional(),
 });
 
 export const updateOffenderSchema = createOffenderSchema.fork(

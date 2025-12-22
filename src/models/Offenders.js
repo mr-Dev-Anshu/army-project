@@ -4,7 +4,7 @@ const offenderSchema = new mongoose.Schema(
   {
     offenceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "GeneralTrafficOffence", 
+      ref: "GeneralTrafficOffence",
       required: true,
     },
     offenderType: {
@@ -24,7 +24,10 @@ const offenderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
-
+    category: {
+      type: String,
+      default: "Offender",
+    },
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
