@@ -1,51 +1,42 @@
 import mongoose from "mongoose";
 
 export const onDutyDetailsSchema = new mongoose.Schema({
-  dateOfDuty: {
-    type: Date,
-  },
-  startTime: {
-    type: Date,
-  },
-  endTime: {
-    type: Date,
-  },
-  dutyLocation: {
-    type: String,
-  },
-  dutyType: {
-    type: String,
+  dateOfDuty: { type: Date },
+  startTime: { type: Date },
+  endTime: { type: Date },
+  dutyLocation: { type: String },
+  dutyType: { type: String },
+
+  customFields: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
   },
 });
 
 export const onDutyDetailsMPReporting = new mongoose.Schema({
-  nameReportingMP: {
-    type: String,
-  },
-  rank: {
-    type: String,
-  },
-  unit: {
-    type: String,
-  },
-  armyNumber: {
-    type: String,
+  nameReportingMP: { type: String },
+  rank: { type: String },
+  unit: { type: String },
+  armyNumber: { type: String },
+
+  customFields: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
   },
 });
 
 export const offenceOccurenceDetails = new mongoose.Schema({
-  timeOfOffence: {
-    type: Date,
-  },
-  incidentLocation: {
-    type: String,
-  },
-  description: {
-    type: String,
+  timeOfOffence: { type: Date },
+  incidentLocation: { type: String },
+  description: { type: String },
+
+  customFields: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
   },
 });
 
- const generalTrafficOffenceSchema = new mongoose.Schema(
+const generalTrafficOffenceSchema = new mongoose.Schema(
   {
     isVehicleInvolved: {
       type: Boolean,
@@ -59,26 +50,29 @@ export const offenceOccurenceDetails = new mongoose.Schema({
       type: String,
       enum: ["Civilian Vehicle", "DD Vehicle"],
     },
-    vehicleNumber: {
-      type: String,
+    vehicleNumber: { type: String },
+    vehicleName:{ 
+         type:String
     },
     onDutyDetails: onDutyDetailsSchema,
     onDutyDetailsMPReporting: onDutyDetailsMPReporting,
     offenceOccurenceDetails: offenceOccurenceDetails,
-    offenceTypes: [
-      {
-        type: String,
-      },
-    ],
-    offenceTypeReference: [
-      {
-        type: String,
-      },
-    ],
-  },
+    
+    offenceTypes: [{ type: String }],
+    offenceTypeReference: [{ type: String }],
 
-  { timestamps: true }
+    customFields: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+  },
+  { timestamps: true ,
+    strict:false
+     
+  }
 );
+
+
 
 export const GeneralTrafficOffence =
   mongoose.models.GeneralTrafficOffence ||
