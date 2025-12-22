@@ -5,9 +5,9 @@ export const createOffenderSchema = Joi.object({
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
-      "string.pattern.base": "Invalid ObjectId",
+      "string.pattern.base": "Invalid ObjectId format for offenceId",
     }),
-    
+
   offenderType: Joi.string()
     .valid(
       "Military Person",
@@ -19,10 +19,18 @@ export const createOffenderSchema = Joi.object({
     )
     .required(),
 
-  offenderDetails: Joi.object().unknown(true).optional(),
+  offenderDetails: Joi.object()
+    .unknown(true)
+    .default({})
+    .optional(),
+
+  customFields: Joi.object()
+    .unknown(true)
+    .default({})
+    .optional(),
 });
 
 export const updateOffenderSchema = createOffenderSchema.fork(
-  Object.keys(createOffenderSchema.describe().keys), 
+  ["offenceId", "offenderType", "offenderDetails", "customFields"],
   (schema) => schema.optional()
 );

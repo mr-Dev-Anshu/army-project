@@ -76,6 +76,7 @@ export class GeneralTrafficOffenceRepository {
 }
 
   async create(data) {
+     console.log(data)
     const offence = new GeneralTrafficOffence(data);
     await offence.save();
     return offence.toObject();

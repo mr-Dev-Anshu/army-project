@@ -26,24 +26,39 @@ const offenceOccurrenceSchema = mongoose.Schema({
     type: String,
   },
 });
-const staticSpeedCheckRecordSchema = mongoose.Schema({
-  vehicleType: {
-    type: String,
-    required: true,
+const staticSpeedCheckRecordSchema = new mongoose.Schema(
+  {
+    vehicleType: {
+      type: String,
+      required: true,
+    },
+    vehicleCategory: {
+      type: String,
+    },
+    vehicleNumber: {
+      type: String,
+    },
+    vehicleName: {
+      type: String,
+    },
+    onDutyDetails: onDutyDetailsSchema,
+    onDutyDetailsMPReporting: onDutyDetailsMPReporting,
+    offenceOccurenceDetails: offenceOccurrenceSchema,
+    remark: {
+      type: String,
+    },
+    customFields: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
-  vehicleCategory: {
-    type: String,
-  },
-  vehicleNumber: {
-    type: String,
-  },
-  onDutyDetails: onDutyDetailsSchema,
-  onDutyDetailsMPReporting: onDutyDetailsMPReporting,
-  offenceOccurenceDetails: offenceOccurrenceSchema,
-  remark: {
-    type: String,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
+
+staticSpeedCheckRecordSchema.index({ vehicleNumber: 1 });
+staticSpeedCheckRecordSchema.index({ "offenceOccurenceDetails.time": -1 });
 
 export const StaticSpeedCheckRecord =
   mongoose.models.StaticSpeedCheckRecord ||

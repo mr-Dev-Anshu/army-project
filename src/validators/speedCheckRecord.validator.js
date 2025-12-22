@@ -7,13 +7,15 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
   }),
   vehicleCategory: Joi.string().trim().optional(),
   vehicleNumber: Joi.string().trim().optional(), 
-
+  vehicleName:Joi.string().trim().optional(),
   onDutyDetails: Joi.object({
     dateOfDuty: Joi.date().optional(),
     startTime: Joi.date().optional(),
     endTime: Joi.date().optional(),
     dutyLocation: Joi.string().trim().optional(),
     dutyType: Joi.string().trim().optional(),
+        customFields: Joi.object().unknown(true).optional(),
+    
   }).optional(),
 
   onDutyDetailsMPReporting: Joi.object({
@@ -21,6 +23,8 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     rank: Joi.string().trim().optional(),
     unit: Joi.string().trim().optional(),
     armyNumber: Joi.string().trim().optional(),
+        customFields: Joi.object().unknown(true).optional(),
+    
   }).optional(),
 
   offenceOccurenceDetails: Joi.object({
@@ -32,9 +36,13 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     authSpeed: Joi.string().trim().optional(),
     overSpeedCalculated: Joi.string().trim().optional(),
     description: Joi.string().trim().optional(),
+        customFields: Joi.object().unknown(true).optional(),
   }).required(),
 
   remark: Joi.string().trim().optional(),
+  customFields: Joi.object()
+      .unknown(true) 
+      .optional(),
 });
 
 export const updateStaticSpeedCheckRecordSchema = createStaticSpeedCheckRecordSchema.fork(
