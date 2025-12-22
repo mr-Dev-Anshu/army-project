@@ -60,7 +60,7 @@ export default function Step1Particulars({
       >
         {value === "yes" && (
           <div className="w-full">
-            <VehicleDetailsForm />
+            <VehicleDetailsForm scope="traffic" />
           </div>
         )}
 

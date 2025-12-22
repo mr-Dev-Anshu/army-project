@@ -76,7 +76,7 @@ export const RightPanel = ({
       {/* ---------- CONTENT ---------- */}
       <div className="
           border rounded-lg 
-          p-4 sm:p-5 lg:px-0 
+          p-4  sm:p-5 lg:px-6
           mb-4 sm:mb-6 
           overflow-y-auto
           max-h-[60vh] sm:max-h-[70vh] lg:max-h-none

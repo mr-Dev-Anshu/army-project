@@ -6,7 +6,7 @@ interface FormSectionProps {
 
 export function FormSection({ title, children, onClear }: FormSectionProps) {
   return (
-    <div className=" rounded-lg p-6 bg-white space-y-6">
+    <div className=" rounded-lg p-6  space-y-6 ">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{title}</h3>
         {onClear && (
