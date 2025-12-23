@@ -9,9 +9,14 @@ import Step1Particulars from "./steps/Step1Particulars";
 import Step2Statement from "./steps/Step2Statement";
 import Step3Offence from "./steps/Step3Offence";
 import Step4Remarks from "./steps/Step4Remarks";
+import { useCreateOffender } from "@/features/offender/Hooks";
+import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 
 export default function MultiStepForm() {
   const { state, dispatch } = useForm();
+
+  const { mutateAsync: createOffenderMutate } = useCreateOffender();
+  const { mutateAsync: createWitnessMutate } = useCreateOnDutyWitnessingMp();
 
   const steps = [
     { id: 1, label: "Particulars", icon: "1" },
@@ -66,18 +71,14 @@ export default function MultiStepForm() {
 
       // ================= OFFENDER ==================
       const offenderPayload = {
-        offenceId: staticRes._id,
-        offenderType: state.formData.staticSpeed.vehicleDetails.driverType, // IMPORTANT
+        offenceId,
+        offenderType: state.formData.staticSpeed.vehicleDetails.driverType,
         offenderDetails: state.formData.staticSpeed.offenderDetails || {},
       };
 
       console.log("👮 OFFENDER PAYLOAD ===>", offenderPayload);
 
-      await createOffender(offenderPayload);
-
-      console.log(" Sending Offender Payload ===>", offenderPayload);
-
-      const offenderRes = await createOffender(offenderPayload);
+      const offenderRes = await createOffenderMutate(offenderPayload);
 
       toast.success("Offender Created Successfully!");
       console.log(" OFFENDER CREATED ===>", offenderRes);
@@ -94,7 +95,7 @@ export default function MultiStepForm() {
 
         console.log(" Final Witness Payload ===>", witnessingPayload);
 
-        await Promise.all(witnessingPayload.map((w) => createMpWitenessing(w)));
+        await Promise.all(witnessingPayload.map((w) => createWitnessMutate(w)));
 
         toast.success("All Witnesses Saved Successfully!");
         console.log("👮‍♂️ All MP Witness Created Successfully");
@@ -112,16 +113,111 @@ export default function MultiStepForm() {
     }
   };
 
+  // const onSubmitFinal = async () => {
+  //   const date = state.formData.onDutyDetails.dateOfDuty;
+
+  //   const toISO = (time: string) => (time ? `${date}T${time}:00.000Z` : "");
+
+  //   const payload = {
+  //     isVehicleInvolved: state.formData.vehicleInvolved === "yes",
+
+  //     onDutyDetails: {
+  //       ...state.formData.onDutyDetails,
+  //       startTime: toISO(state.formData.onDutyDetails.startTime),
+  //       endTime: toISO(state.formData.onDutyDetails.endTime),
+  //     },
+
+  //     onDutyDetailsMPReporting: state.formData.onDutyDetailsMPReporting,
+
+  //     offenceOccurenceDetails: {
+  //       ...state.formData.offenceOccurenceDetails,
+  //       timeOfOffence: toISO(
+  //         state.formData.offenceOccurenceDetails.timeOfOffence
+  //       ),
+  //     },
+
+  //     offenceTypes: state.formData.offenceTypes,
+  //     offenceTypeReference: state.formData.offenceCode,
+  //   };
+
+  //   try {
+  //     console.log("🚀 Creating offence...");
+  //     toast.info("Creating Offence...");
+
+  //     const offence = await mutateAsync(payload);
+
+  //     toast.success("Offence Created Successfully!");
+  //     console.log("✅ OFFENCE CREATED ===>", offence);
+
+  //     const offenceId = offence?._id;
+  //     if (!offenceId) {
+  //       toast.error("Offence ID missing!");
+  //       return;
+  //     }
+
+  //     // ================= OFFENDER ==================
+  //     const offenderPayload = {
+  //       offenceId: staticRes._id,
+  //       offenderType: state.formData.staticSpeed.vehicleDetails.driverType, // IMPORTANT
+  //       offenderDetails: state.formData.staticSpeed.offenderDetails || {},
+  //     };
+
+  //     console.log("👮 OFFENDER PAYLOAD ===>", offenderPayload);
+
+  //     await createOffender(offenderPayload);
+
+  //     console.log(" Sending Offender Payload ===>", offenderPayload);
+
+  //     const offenderRes = await createOffender(offenderPayload);
+
+  //     toast.success("Offender Created Successfully!");
+  //     console.log(" OFFENDER CREATED ===>", offenderRes);
+
+  //     // ================= WITNESS ==================
+  //     if (state.formData.witnesses?.length > 0) {
+  //       const witnessingPayload = state.formData.witnesses.map((w) => ({
+  //         offenceId,
+  //         rank: w.reportingBlock.rank,
+  //         unit: w.reportingBlock.unit,
+  //         ArmyNo: w.reportingBlock.armyNumber,
+  //         name: w.reportingBlock.nameReportingMP,
+  //       }));
+
+  //       console.log(" Final Witness Payload ===>", witnessingPayload);
+
+  //       await Promise.all(witnessingPayload.map((w) => createMpWitenessing(w)));
+
+  //       toast.success("All Witnesses Saved Successfully!");
+  //       console.log("👮‍♂️ All MP Witness Created Successfully");
+  //     }
+
+  //     toast.success("🎉 Final Submit Completed Successfully!");
+  //   } catch (err: any) {
+  //     console.log(" FINAL ERROR ===>", err?.response?.data || err);
+
+  //     toast.error(
+  //       err?.response?.data?.error ||
+  //         err?.response?.data?.message ||
+  //         "Something went wrong!"
+  //     );
+  //   }
+  // };
+
   const stepsConfig = {
     1: {
       title: "1. PARTICULARS:",
       component: (
         <Step1Particulars
-          value={state.formData.vehicleInvolved}
+          value={state.formData.traffic.vehicleInvolved}
           onChange={(v: string) =>
             dispatch({
               type: "SET_FORM_DATA",
-              payload: { vehicleInvolved: v },
+              payload: {
+                traffic: {
+                  ...state.formData.traffic,
+                  vehicleInvolved: v,
+                },
+              },
             })
           }
         />
