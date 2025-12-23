@@ -66,16 +66,14 @@ export default function MultiStepForm() {
 
       // ================= OFFENDER ==================
       const offenderPayload = {
-        offenceId,
-        offenderType: state.formData.vehicleDetails.driverType || "Civilian",
-        offenderDetails: {
-          name: state.formData.offenderDetails?.["Full Name"] || "",
-          fatherNameOrHusbandName:
-            state.formData.offenderDetails?.["Father Name"] || "",
-          address: state.formData.offenderDetails?.["Address"] || "",
-          aadharNumber: state.formData.offenderDetails?.["ID Proof"] || "",
-        },
+        offenceId: staticRes._id,
+        offenderType: state.formData.staticSpeed.vehicleDetails.driverType, // IMPORTANT
+        offenderDetails: state.formData.staticSpeed.offenderDetails || {},
       };
+
+      console.log("👮 OFFENDER PAYLOAD ===>", offenderPayload);
+
+      await createOffender(offenderPayload);
 
       console.log(" Sending Offender Payload ===>", offenderPayload);
 
@@ -114,8 +112,7 @@ export default function MultiStepForm() {
     }
   };
 
-
-    const stepsConfig = {
+  const stepsConfig = {
     1: {
       title: "1. PARTICULARS:",
       component: (
@@ -136,9 +133,7 @@ export default function MultiStepForm() {
       component: (
         <Step2Statement
           formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
+          setFormData={(d) => dispatch({ type: "SET_FORM_DATA", payload: d })}
         />
       ),
     },
@@ -148,9 +143,7 @@ export default function MultiStepForm() {
       component: (
         <Step3Offence
           formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
+          setFormData={(d) => dispatch({ type: "SET_FORM_DATA", payload: d })}
         />
       ),
     },
@@ -160,9 +153,7 @@ export default function MultiStepForm() {
       component: (
         <Step4Remarks
           formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
+          setFormData={(d) => dispatch({ type: "SET_FORM_DATA", payload: d })}
         />
       ),
     },
@@ -188,8 +179,9 @@ export default function MultiStepForm() {
               dispatch({ type: "SET_FORM_DATA", payload: data })
             }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onSubmitFinal={onSubmitFinal}
+            onSubmitFinal={() => {}}
             stepsConfig={stepsConfig}
+            mode="traffic"
           />
         </div>
       </div>

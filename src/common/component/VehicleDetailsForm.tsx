@@ -1,217 +1,5 @@
 
 
-// "use client";
-
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-// import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
-// import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
-// import { useForm } from "@/context/FormContext";
-
-// export default function VehicleDetailsForm() {
-//   const { state, dispatch } = useForm();
-
-//   const { category, vehicleType, driverType } = state.formData.vehicleDetails;
-
-//   return (
-//     <div
-//       className="
-//     border rounded-lg bg-white
-//     p-4 sm:p-2 md:px-3 
-//     space-y-6 sm:space-y-7 md:space-y-8
-  
-//     w-full
-
-//     max-h-[75vh]
-//     overflow-y-auto
-//   "
-//     >
-//       {/* VEHICLE CATEGORY */}
-//       <div>
-//         <p className="font-semibold mb-2 text-base sm:text-lg">
-//           Select Vehicle Category
-//         </p>
-
-//         <RadioGroup
-//           value={category}
-//           onValueChange={(v) =>
-//             dispatch({
-//               type: "SET_VEHICLE_DETAILS",
-//               payload: { category: v },
-//             })
-//           }
-//           className="
-//             grid 
-//             grid-cols-1 
-//             sm:grid-cols-2
-//             gap-3 sm:gap-4
-//           "
-//         >
-//           <label className="border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer">
-//             <RadioGroupItem value="2w" />
-//             2-Wheeler
-//           </label>
-
-//           <label className="border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer">
-//             <RadioGroupItem value="4w" />
-//             4-Wheeler
-//           </label>
-//         </RadioGroup>
-//       </div>
-
-//       {/* VEHICLE TYPE */}
-//       <div>
-//         <p className="font-semibold mb-2 text-base sm:text-lg">
-//           Which Type Of Vehicle Was Involved?
-//         </p>
-
-//         <RadioGroup
-//           value={vehicleType}
-//           onValueChange={(v) =>
-//             dispatch({
-//               type: "SET_VEHICLE_DETAILS",
-//               payload: { vehicleType: v },
-//             })
-//           }
-//           className="
-//             grid 
-//             grid-cols-1 
-//             sm:grid-cols-2 
-//             gap-3 sm:gap-4
-//           "
-//         >
-//           <label className="border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer">
-//             <RadioGroupItem value="civilian" />
-//             Civilian Vehicle
-//           </label>
-
-//           <label className="border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer">
-//             <RadioGroupItem value="dd" />
-//             DD Vehicle
-//           </label>
-//         </RadioGroup>
-//       </div>
-
-//       {/* CIVILIAN VEHICLE */}
-//       {vehicleType === "civilian" && (
-//         <div>
-//           <p className="font-semibold mb-2 text-base sm:text-lg">
-//             Fill Vehicle Identification Fields:
-//           </p>
-
-//           <div
-//             className="
-//               grid 
-//               grid-cols-1 
-//               sm:grid-cols-2 
-//               gap-3 sm:gap-4
-//             "
-//           >
-//             <div>
-//               <Label className="mb-3">Civil Vehicle Registration Number</Label>
-//               <Input placeholder="e.g. MP04 AB 1234" />
-//             </div>
-
-//             <div>
-//               <Label className="mb-3">
-//                 Make & Type{" "}
-//                 <span className="text-gray-500">(Vehicle Name)</span>
-//               </Label>
-//               <Input placeholder="e.g. Honda CB (Hornet)" />
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* DD VEHICLE */}
-//       {vehicleType === "dd" && (
-//         <div>
-//           <p className="font-semibold mb-2 text-base sm:text-lg">
-//             Fill Vehicle Identification Fields:
-//           </p>
-
-//           <div
-//             className="
-//               grid 
-//               grid-cols-1 
-//               sm:grid-cols-2 
-//               gap-3 sm:gap-4
-//             "
-//           >
-//             <div>
-//               <Label className="mb-3">DD Vehicle BA Number</Label>
-//               <Input placeholder="e.g. 12A 345678Z" />
-//             </div>
-
-//             <div>
-//               <Label className="mb-3">
-//                 Make & Type{" "}
-//                 <span className="text-gray-500">(Vehicle Name)</span>
-//               </Label>
-//               <Input placeholder="e.g. ALS W/B" />
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* DRIVER TYPE */}
-//       <div>
-//         <p className="font-semibold mb-2 text-base sm:text-lg">
-//           Select Who was the Driver/Rider?
-//         </p>
-
-//         <RadioGroup
-//           value={driverType}
-//           onValueChange={(v) =>
-//             dispatch({
-//               type: "SET_VEHICLE_DETAILS",
-//               payload: { driverType: v },
-//             })
-//           }
-//           className="
-//             grid 
-//             grid-cols-1
-//             sm:grid-cols-2 
-//             gap-3 sm:gap-4
-//           "
-//         >
-//           {[
-//             "Military Person",
-//             "Civilian",
-//             "Employee",
-//             "Servant/Maid",
-//             "Shop Keeper",
-//             "Temporary Hired Worker",
-//           ].map((item) => (
-//             <label
-//               key={item}
-//               className="border rounded-lg px-4 py-2 flex items-center gap-2 cursor-pointer"
-//             >
-//               <RadioGroupItem value={item} />
-//               {item}
-//             </label>
-//           ))}
-//         </RadioGroup>
-//       </div>
-
-//       {/* DYNAMIC FORM */}
-//       {driverType && offenderFormsConfig[driverType] && (
-//         <OffenderDynamicForm
-//           title={offenderFormsConfig[driverType].title}
-//           helperText={offenderFormsConfig[driverType].helperText}
-//           fields={offenderFormsConfig[driverType].fields}
-//           showCoDriver={true}
-//         />
-        
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -256,7 +44,6 @@ export default function VehicleDetailsForm({
 
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6 max-h-[75vh] overflow-y-auto">
-
       {/* VEHICLE CATEGORY */}
       <div>
         <p className="font-semibold mb-2">Select Vehicle Category</p>
@@ -297,7 +84,6 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* CIVILIAN */}
       {vehicleType === "civilian" && (
         <div>
           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
@@ -305,20 +91,30 @@ export default function VehicleDetailsForm({
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <Label>Civil Vehicle Registration Number</Label>
-              <Input placeholder="e.g. MP04 AB 1234" />
+              <Input
+                placeholder="e.g. MP04 AB 1234"
+                value={state.formData.staticSpeed.vehicleDetails.vehicleNumber}
+                onChange={(e) =>
+                  updateVehicle({ vehicleNumber: e.target.value })
+                }
+              />
             </div>
 
             <div>
               <Label>
-                Make & Type <span className="text-gray-500">(Vehicle Name)</span>
+                Make & Type{" "}
+                <span className="text-gray-500">(Vehicle Name)</span>
               </Label>
-              <Input placeholder="e.g. Honda CB Hornet" />
+              <Input
+                placeholder="e.g. Honda CB Hornet"
+                value={state.formData.staticSpeed.vehicleDetails.vehicleName}
+                onChange={(e) => updateVehicle({ vehicleName: e.target.value })}
+              />
             </div>
           </div>
         </div>
       )}
 
-      {/* DD VEHICLE */}
       {vehicleType === "dd" && (
         <div>
           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
@@ -326,14 +122,25 @@ export default function VehicleDetailsForm({
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <Label>DD Vehicle BA Number</Label>
-              <Input placeholder="e.g. 12A 345678Z" />
+              <Input
+                placeholder="e.g. 12A 345678Z"
+                value={state.formData.staticSpeed.vehicleDetails.vehicleNumber}
+                onChange={(e) =>
+                  updateVehicle({ vehicleNumber: e.target.value })
+                }
+              />
             </div>
 
             <div>
               <Label>
-                Make & Type <span className="text-gray-500">(Vehicle Name)</span>
+                Make & Type{" "}
+                <span className="text-gray-500">(Vehicle Name)</span>
               </Label>
-              <Input placeholder="e.g. ALS W/B" />
+              <Input
+                placeholder="e.g. ALS W/B"
+                value={state.formData.staticSpeed.vehicleDetails.vehicleName}
+                onChange={(e) => updateVehicle({ vehicleName: e.target.value })}
+              />
             </div>
           </div>
         </div>
@@ -341,9 +148,7 @@ export default function VehicleDetailsForm({
 
       {/* DRIVER TYPE */}
       <div>
-        <p className="font-semibold mb-2">
-          Select Who was the Driver/Rider?
-        </p>
+        <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
 
         <RadioGroup
           value={driverType}
@@ -358,7 +163,10 @@ export default function VehicleDetailsForm({
             "Shop Keeper",
             "Temporary Hired Worker",
           ].map((item) => (
-            <label key={item} className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer">
+            <label
+              key={item}
+              className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+            >
               <RadioGroupItem value={item} />
               {item}
             </label>
@@ -369,7 +177,7 @@ export default function VehicleDetailsForm({
       {/* DYNAMIC FORM */}
       {driverType && offenderFormsConfig[driverType] && (
         <OffenderDynamicForm
-        scope={scope}
+          scope={scope}
           title={offenderFormsConfig[driverType].title}
           helperText={offenderFormsConfig[driverType].helperText}
           fields={offenderFormsConfig[driverType].fields}

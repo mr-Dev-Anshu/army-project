@@ -252,6 +252,26 @@ export default function Step2Statement() {
                   })
                 }
               />
+              <Input
+                placeholder="Contact Number"
+                value={witness.reportingBlock?.contactNumber || ""}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_WITNESSES",
+                    payload: d.witnesses.map((w, i) =>
+                      i === index
+                        ? {
+                            ...w,
+                            reportingBlock: {
+                              ...w.reportingBlock,
+                              contactNumber: e.target.value,
+                            },
+                          }
+                        : w
+                    ),
+                  })
+                }
+              />
             </div>
           </div>
         ))}
