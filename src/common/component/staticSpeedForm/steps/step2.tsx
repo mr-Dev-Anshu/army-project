@@ -44,44 +44,71 @@ export default function StaticSpeedStep2() {
         </p>
 
         <div className="grid grid-cols-3 gap-4">
-          <Input placeholder="Pick a date" />
-          <Input type="time" defaultValue={"06:00"} />
-          <Input type="time" defaultValue={"13:30"} />
+          <div>
+            <Label className="mb-1 text-base ">Date of Duty</Label>
+            <Input placeholder="Pick a date" />
+          </div>
+          <div>
+            <Label className="mb-1 text-base ">Start Time</Label>
+            <Input type="time" defaultValue={"06:00"} />
+          </div>
+          <div>
+            <Label className="mb-1 text-base ">End Time</Label>
+            <Input type="time" defaultValue={"13:30"} />
+          </div>
         </div>
 
-        <Input placeholder="Duty Location" className="mt-4" />
-        <Input placeholder="Duty Type" className="mt-2" />
+        <div>
+          <Label className="mb-1 text-base ">Duty Location</Label>
+          <Input placeholder="Duty Location" className="mt-4" />
+        </div>
+
+        <div>
+          <Label className="mb-1 text-base ">Duty Type</Label>
+          <Input placeholder="Duty Type" className="mt-2" />
+        </div>
       </FormSection>
 
       {/* ================== MP REPORTING ================== */}
       <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
-          <Input placeholder="Name of Reporting MP" />
+          <div>
+            <Label className="mb-1 text-base ">Name of Reporting MP</Label>
+            <Input placeholder="Name of Reporting MP" />
+          </div>
           <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select rank" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="L/Nk">L/Nk</SelectItem>
-              <SelectItem value="Nk">Nk</SelectItem>
-              <SelectItem value="Hav">Hav</SelectItem>
-            </SelectContent>
+            <div>
+              <Label className=" mb-1 text-base text-gray-500">Rank</Label>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select rank" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="L/Nk">L/Nk</SelectItem>
+                <SelectItem value="Nk">Nk</SelectItem>
+                <SelectItem value="Hav">Hav</SelectItem>
+              </SelectContent>
+            </div>
           </Select>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select unit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-              <SelectItem value="MP 12">MP 12</SelectItem>
-              <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Input placeholder="Army Number" />
+          <div>
+            <Label className=" text-base ">Unit</Label>
+            <Select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select unit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
+                <SelectItem value="MP 12">MP 12</SelectItem>
+                <SelectItem value="HQ Unit">HQ Unit</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="mb-2">Army Number</Label>
+            <Input placeholder="Army Number" />
+          </div>
         </div>
       </FormSection>
 
@@ -90,26 +117,29 @@ export default function StaticSpeedStep2() {
         {witnesses.map((witness, index) => (
           <div key={index} className="border p-4 rounded-lg space-y-4 mb-6">
             <div className="grid grid-cols-2 gap-4">
-              <Input
-                placeholder="Name of Witnessing MP"
-                value={witness.reportingBlock?.nameReportingMP}
-                onChange={(e) =>
-                  dispatch({
-                    type: "SET_STATIC_WITNESSES",
-                    payload: witnesses.map((w, i) =>
-                      i === index
-                        ? {
-                            ...w,
-                            reportingBlock: {
-                              ...w.reportingBlock,
-                              nameReportingMP: e.target.value,
-                            },
-                          }
-                        : w
-                    ),
-                  })
-                }
-              />
+              <div>
+                <Label className="mb-1 text-base ">Name of Witnessing MP</Label>
+                <Input
+                  placeholder="Name of Witnessing MP"
+                  value={witness.reportingBlock?.nameReportingMP}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "SET_STATIC_WITNESSES",
+                      payload: witnesses.map((w, i) =>
+                        i === index
+                          ? {
+                              ...w,
+                              reportingBlock: {
+                                ...w.reportingBlock,
+                                nameReportingMP: e.target.value,
+                              },
+                            }
+                          : w
+                      ),
+                    })
+                  }
+                />
+              </div>
 
               <Select
                 value={witness.reportingBlock?.rank}
@@ -127,15 +157,18 @@ export default function StaticSpeedStep2() {
                   })
                 }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select rank" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="L/Nk">L/Nk</SelectItem>
-                  <SelectItem value="Nk">Nk</SelectItem>
-                  <SelectItem value="Hav">Hav</SelectItem>
-                  <SelectItem value="Subedar">Subedar</SelectItem>
-                </SelectContent>
+                <div>
+                  <Label className=" mb-1 text-base ">Rank</Label>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select rank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="L/Nk">L/Nk</SelectItem>
+                    <SelectItem value="Nk">Nk</SelectItem>
+                    <SelectItem value="Hav">Hav</SelectItem>
+                    <SelectItem value="Subedar">Subedar</SelectItem>
+                  </SelectContent>
+                </div>
               </Select>
             </div>
 
@@ -156,56 +189,65 @@ export default function StaticSpeedStep2() {
                   })
                 }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Unit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-                  <SelectItem value="MP 12">MP 12</SelectItem>
-                  <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-                </SelectContent>
+                <div>
+                  <Label className="mb-1 text-base ">Unit</Label>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
+                    <SelectItem value="MP 12">MP 12</SelectItem>
+                    <SelectItem value="HQ Unit">HQ Unit</SelectItem>
+                  </SelectContent>
+                </div>
               </Select>
 
-              <Input
-                placeholder="Army No."
-                value={witness.reportingBlock?.armyNumber}
-                onChange={(e) =>
-                  dispatch({
-                    type: "SET_STATIC_WITNESSES",
-                    payload: witnesses.map((w, i) =>
-                      i === index
-                        ? {
-                            ...w,
-                            reportingBlock: {
-                              ...w.reportingBlock,
-                              armyNumber: e.target.value,
-                            },
-                          }
-                        : w
-                    ),
-                  })
-                }
-              />
-              <Input
-                placeholder="Contact Number"
-                value={witness.reportingBlock?.contactNumber || ""}
-                onChange={(e) =>
-                  dispatch({
-                    type: "SET_STATIC_WITNESSES",
-                    payload: witnesses.map((w, i) =>
-                      i === index
-                        ? {
-                            ...w,
-                            reportingBlock: {
-                              ...w.reportingBlock,
-                              contactNumber: e.target.value,
-                            },
-                          }
-                        : w
-                    ),
-                  })
-                }
-              />
+              <div>
+                <Label className="mb-3 ">Army Number</Label>
+                <Input
+                  placeholder="Army No."
+                  value={witness.reportingBlock?.armyNumber}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "SET_STATIC_WITNESSES",
+                      payload: witnesses.map((w, i) =>
+                        i === index
+                          ? {
+                              ...w,
+                              reportingBlock: {
+                                ...w.reportingBlock,
+                                armyNumber: e.target.value,
+                              },
+                            }
+                          : w
+                      ),
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label className="mb-2 ">Contact Number</Label>
+                <Input
+                  placeholder="Contact Number"
+                  value={witness.reportingBlock?.contactNumber || ""}
+                  onChange={(e) =>
+                    dispatch({
+                      type: "SET_STATIC_WITNESSES",
+                      payload: witnesses.map((w, i) =>
+                        i === index
+                          ? {
+                              ...w,
+                              reportingBlock: {
+                                ...w.reportingBlock,
+                                contactNumber: e.target.value,
+                              },
+                            }
+                          : w
+                      ),
+                    })
+                  }
+                />
+              </div>
             </div>
           </div>
         ))}
@@ -225,7 +267,7 @@ export default function StaticSpeedStep2() {
                     rank: "",
                     unit: "",
                     armyNumber: "",
-                    contactNumber:""
+                    contactNumber: "",
                   },
                   offenceBlock: offence,
                 },
@@ -288,23 +330,27 @@ export default function StaticSpeedStep2() {
       {/* ================== OFFENCE DETAILS ================== */}
       <FormSection title="Offence Occurrence Details">
         <div className="grid grid-cols-2 gap-4">
-          <Input
-            type="time"
-            value={offence.timeOfOffence || ""}
-            onChange={(e) => {
-              const selectedTime = e.target.value; // 17:00
-              const today = new Date().toISOString().split("T")[0]; // 2025-01-23
-              const isoDateTime = `${today}T${selectedTime}:00.000Z`;
+          <div>
+            <Label className="mb-3 text-base ">Date of Offence</Label>
 
-              updateOffence({
-                timeOfOffence: selectedTime,
-                time: isoDateTime,
-              });
-            }}
-          />
+            <Input
+              type="time"
+              value={offence.timeOfOffence || ""}
+              onChange={(e) => {
+                const selectedTime = e.target.value; // 17:00
+                const today = new Date().toISOString().split("T")[0]; // 2025-01-23
+                const isoDateTime = `${today}T${selectedTime}:00.000Z`;
+
+                updateOffence({
+                  timeOfOffence: selectedTime,
+                  time: isoDateTime,
+                });
+              }}
+            />
+          </div>
 
           <div>
-            <Label>Incident Location</Label>
+            <Label className="mb-3 text-base">Incident Location</Label>
             <Input
               placeholder="Incident Location"
               value={offence.incidentLocation || ""}
@@ -315,23 +361,36 @@ export default function StaticSpeedStep2() {
           </div>
         </div>
 
-        <Input
-          placeholder="Actual Speed"
-          className="mt-3"
-          value={offence.actualSpeed || ""}
-          onChange={(e) => updateOffence({ actualSpeed: e.target.value })}
-        />
+        <div>
+          <Label className="   text-base ">Actual Speed</Label>
+          <Input
+            placeholder="Actual Speed"
+            className="mt-3"
+            value={offence.actualSpeed || ""}
+            onChange={(e) => updateOffence({ actualSpeed: e.target.value })}
+          />
 
-        <Input
-          placeholder="Over Speed"
-          className="mt-3"
-          value={offence.overSpeed || ""}
-          onChange={(e) => updateOffence({ overSpeed: e.target.value })}
-        />
+          <p className="text-base  mt-2">
+            STN Cdr k adesh anusar is type k vehicle ki speed as per letter No
+            599/25dt 26 Aug 2025 ke anusar Bhopal Militry STN k lie 30 KMPH
+            mukarar kiya gaya h{" "}
+          </p>
+        </div>
 
+        <div>
+          <Label className="   text-base ">Over Speed</Label>
+          <Input
+            placeholder="Over Speed"
+            className="mt-3"
+            value={offence.overSpeed || ""}
+            onChange={(e) => updateOffence({ overSpeed: e.target.value })}
+          />
+        </div>
+
+        <Label className=" text-base ">Full Description of Offence</Label>
         <Textarea
           placeholder="Provide detailed description..."
-          className="mt-3"
+          className="-mt-3 min-h-[140px]"
           value={offence.description || ""}
           onChange={(e) => updateOffence({ description: e.target.value })}
         />

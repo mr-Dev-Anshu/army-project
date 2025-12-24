@@ -153,7 +153,9 @@ export default function Step2Statement() {
         {d.witnesses.map((witness, index) => (
           <div key={index} className="border p-4 rounded-lg space-y-4 mb-6">
             <div className="grid grid-cols-2 gap-4">
-              <Input
+              <div>
+                <Label className="mb-2 text-base">Name of Witnessing MP</Label>
+                <Input
                 placeholder="Name of Witnessing MP"
                 value={witness.reportingBlock.nameReportingMP}
                 onChange={(e) =>
@@ -173,6 +175,7 @@ export default function Step2Statement() {
                   })
                 }
               />
+              </div>
 
               <Select
                 value={witness.reportingBlock.rank}
@@ -190,7 +193,9 @@ export default function Step2Statement() {
                   })
                 }
               >
-                <SelectTrigger className="w-full">
+              <div>
+                <Label className="mb-2 text-base">Rank</Label>
+                  <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Rank" />
                 </SelectTrigger>
 
@@ -200,6 +205,7 @@ export default function Step2Statement() {
                   <SelectItem value="Hav">Hav</SelectItem>
                   <SelectItem value="Subedar">Subedar</SelectItem>
                 </SelectContent>
+              </div>
               </Select>
             </div>
 
@@ -220,7 +226,9 @@ export default function Step2Statement() {
                   })
                 }
               >
-                <SelectTrigger className="w-full">
+                <div>
+                  <Label className="mb-2 text-base">Unit</Label>
+                  <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Unit" />
                 </SelectTrigger>
 
@@ -229,9 +237,12 @@ export default function Step2Statement() {
                   <SelectItem value="MP 12">MP 12</SelectItem>
                   <SelectItem value="HQ Unit">HQ Unit</SelectItem>
                 </SelectContent>
+                </div>
               </Select>
 
-              <Input
+              <div>
+                <Label className="mb-2 text-base">Army No.</Label>
+                <Input
                 placeholder="Army No."
                 value={witness.reportingBlock.armyNumber}
                 onChange={(e) =>
@@ -251,8 +262,11 @@ export default function Step2Statement() {
                   })
                 }
               />
+              </div>
 
-              <Input
+            <div>
+              <Label className="mb-2 text-base">Contact Number</Label>
+                <Input
                 placeholder="Contact Number"
                 value={witness.reportingBlock?.contactNumber || ""}
                 onChange={(e) =>
@@ -272,6 +286,7 @@ export default function Step2Statement() {
                   })
                 }
               />
+            </div>
             </div>
           </div>
         ))}
