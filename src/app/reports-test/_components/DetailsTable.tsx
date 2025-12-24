@@ -4,6 +4,10 @@ import React from "react";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import OffenderDetailsCell from "./OffenderDetailsCell";
+
+// ... existing imports
+
 interface DetailsTableProps {
   offences: any[];
   isVehicleInvolved: boolean;
@@ -61,11 +65,6 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
             const primaryDetails = primaryOffender.offenderDetails || {};
             
             // Co-Driver / Secondary Offender
-            // Provided screenshot shows "Sanjay Khatri" as Co-Driver. 
-            // In a real scenario, we'd check `offenderType` or position in array.
-            // Using logic: if >1 offender, render 2nd one. If not, check if data has explicit 'coDriver' field.
-            // Fallback: render dummy data if testing, or nothing.
-            // Since this is for testing UI and matching the design exactly, I'll try to find a second offender
             const coDriver = offenders[1] || {};
             const coDriverDetails = coDriver.offenderDetails || {};
 
@@ -78,17 +77,6 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
             // Report No 
             const reportNo = "PRO/21 CPU/00042/102/25";
 
-            // Common Offender Cell Renderer
-            const renderOffenderCell = (details: any, mpName: string) => (
-              <div className="space-y-1">
-                  {details.aadharNumber && <div><span className="font-bold">Aadhar No.</span> {details.aadharNumber}</div>}
-                  {details.name && <div><span className="font-bold">Name:</span> {details.name}</div>}
-                  {details.armyNumber && <div><span className="font-bold">Army no.:</span> {details.armyNumber}</div>}
-                  {details.rank && <div><span className="font-bold">Rank:</span> {details.rank}</div>}
-                  <div><span className="font-bold">MP Name:</span> {mpName}</div>
-              </div>
-            );
-            
             return (
               <tr key={offence._id || index} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-4 align-top">{index + 1}</td>
@@ -101,7 +89,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
                 {isVehicleInvolved ? (
                   <>
                     <td className="px-4 py-4 align-top">
-                      {renderOffenderCell(primaryDetails, reportingMP)}
+                      <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />
                     </td>
                     <td className="px-4 py-4 align-top">{primaryDetails.unit || "21 Corps Signal Regt (AREN)"}</td>
                     <td className="px-4 py-4 align-top">HQ 21 CORPs</td>
@@ -119,17 +107,18 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
                        <div className="text-gray-500">{timeStr}</div>
                     </td>
                      <td className="px-4 py-4 align-top">
-                      {/* If no actual co-driver in data, showing same structure as per design req to match visual */}
-                      {/* For demo purposes, if no 2nd offender, showing empty or placeholder if needed? 
-                          Design shows full details. I will replicate structure if data exists, else empty */}
-                      {offenders.length > 1 ? renderOffenderCell(coDriverDetails, reportingMP) : <span className="text-gray-400">-</span>}
+                      {offenders.length > 1 ? (
+                        <OffenderDetailsCell details={coDriverDetails} mpName={reportingMP} />
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
                   </>
                 ) : (
                   /* NO VEHICLE COLUMNS */
                   <>
                     <td className="px-4 py-4 align-top">
-                       {renderOffenderCell(primaryDetails, reportingMP)}
+                       <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />
                     </td>
                     <td className="px-4 py-4 align-top">{primaryDetails.unit || "11 Engr Regt"}</td>
                     <td className="px-4 py-4 align-top">HQ 21 CORPs</td>
