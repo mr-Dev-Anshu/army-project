@@ -1,25 +1,14 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import api from "@/config/axios";
 import { Loader2, Printer } from "lucide-react";
 import FilterBar from "./FilterBar";
 import GroupedList from "./GroupedList";
 import { Button } from "@/components/ui/button";
-
-// Determine if running within the expected response structure
-const fetchOffences = async () => {
-  // The default getAll endpoint already returns grouped data (repo logic)
-  const res = await api.get("/api/generalTraficOffence");
-  return res.data;
-};
+import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 
 export default function ReportsPage() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["generalTrafficOffence", "grouped"],
-    queryFn: fetchOffences,
-  });
+  const { data, isLoading, isError } = useGetAllTrafficOffences();
 
   // State for filters (mocked for now as backend handles some)
   const [filters, setFilters] = useState({
