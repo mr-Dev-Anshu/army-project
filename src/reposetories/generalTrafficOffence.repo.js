@@ -57,7 +57,9 @@ export class GeneralTrafficOffenceRepository {
               witnessingMpsCount: "$witnessingMpsCount",
               customFields: "$customFields",
               onDutyDetails: "$onDutyDetails",
-              onDutyDetailsMPReporting: "$onDutyDetailsMPReporting"
+              onDutyDetailsMPReporting: "$onDutyDetailsMPReporting",
+              actionStatus: "$actionStatus",
+              vehicleName: "$vehicleName"
             }
           }
         }

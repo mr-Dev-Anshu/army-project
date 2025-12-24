@@ -15,9 +15,10 @@ import {
 interface FilterBarProps {
   filters: any;
   setFilters: (f: any) => void;
+  offenceTypeOptions: string[];
 }
 
-export default function FilterBar({ filters, setFilters }: FilterBarProps) {
+export default function FilterBar({ filters, setFilters, offenceTypeOptions }: FilterBarProps) {
   return (
     <div className="flex items-center gap-3 flex-wrap">
       {/* Search */}
@@ -39,8 +40,9 @@ export default function FilterBar({ filters, setFilters }: FilterBarProps) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All</SelectItem>
-          <SelectItem value="intoxication">Intoxication</SelectItem>
-          <SelectItem value="speeding">Over Speeding</SelectItem>
+          {offenceTypeOptions.map((opt) => (
+             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
         </SelectContent>
       </Select>
 

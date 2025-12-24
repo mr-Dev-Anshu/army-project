@@ -103,8 +103,8 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
                       </td>
                     <td className="px-4 py-4 align-top text-gray-600">{reportNo}</td>
                     <td className="px-4 py-4 align-top">
-                       <div className="font-semibold">{dateStr}</div>
-                       <div className="text-gray-500">{timeStr}</div>
+                       <div className="font-semibold" suppressHydrationWarning>{dateStr}</div>
+                       <div className="text-gray-500" suppressHydrationWarning>{timeStr}</div>
                     </td>
                      <td className="px-4 py-4 align-top">
                       {offenders.length > 1 ? (
@@ -124,8 +124,8 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
                     <td className="px-4 py-4 align-top">HQ 21 CORPs</td>
                     <td className="px-4 py-4 align-top text-gray-600">{reportNo}</td>
                     <td className="px-4 py-4 align-top">
-                       <div className="font-semibold">{dateStr}</div>
-                       <div className="text-gray-500">{timeStr}</div>
+                       <div className="font-semibold" suppressHydrationWarning>{dateStr}</div>
+                       <div className="text-gray-500" suppressHydrationWarning>{timeStr}</div>
                     </td>
                     <td className="px-4 py-4 align-top text-gray-700 max-w-md">
                       {offence.offenceOccurenceDetails?.description || "Civilian Mr Rakesh Kumar (brother-in-law of Hav (CLK) Ajay Shankar Jha) found residing in Govt married accn..."}

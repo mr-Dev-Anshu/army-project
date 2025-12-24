@@ -66,6 +66,12 @@ export default function ReportsPage() {
   // Calculate total count
   const distinctReportsCount = data?.reduce((acc: number, group: any) => acc + (group.offenceCount || group.totalOffences || 0), 0) || 0;
 
+  // Calculate options
+  const fetchedOptions = data?.map((g: any) => g.offenceType).filter(Boolean) || [];
+  const offenceTypeOptions = fetchedOptions.length > 0 
+    ? fetchedOptions 
+    : ["Intoxication", "Over Speeding", "Wrong Parking", "No Helmet"];
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
       {/* DEV TOOLS */}
@@ -103,7 +109,11 @@ export default function ReportsPage() {
       </div>
 
       {/* Filters */}
-      <FilterBar filters={filters} setFilters={setFilters} />
+      <FilterBar 
+        filters={filters} 
+        setFilters={setFilters} 
+        offenceTypeOptions={offenceTypeOptions}
+      />
 
       {/* List */}
       <div className="bg-white rounded-lg shadow border border-gray-200 mt-6 overflow-hidden">
