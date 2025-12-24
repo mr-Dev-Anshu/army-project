@@ -25,11 +25,11 @@ export function FormSelect({
   onChange,
 }: FormSelectProps) {
   return (
-    <div className="space-y-1 w-full">
+    <div className="space-y-1  w-full">
       <Label>{label}</Label>
 
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
+      <Select   defaultValue={options?.[0]?.value}  value={value} onValueChange={onChange}>
+        <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 

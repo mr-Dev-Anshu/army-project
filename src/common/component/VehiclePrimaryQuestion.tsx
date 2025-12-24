@@ -1,3 +1,4 @@
+
 "use client";
 
 export default function VehiclePrimaryQuestion({
@@ -12,7 +13,17 @@ export default function VehiclePrimaryQuestion({
       </h3>
 
       <div className="flex gap-6">
-        <label className="flex gap-2">
+        {/* YES OPTION */}
+        <label
+          className={`
+            flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer border transition-all
+            ${
+              vehicleStatus === "yes"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
+            }
+          `}
+        >
           <input
             type="radio"
             checked={vehicleStatus === "yes"}
@@ -24,7 +35,17 @@ export default function VehiclePrimaryQuestion({
           Yes, Vehicle Involved
         </label>
 
-        <label className="flex gap-2">
+        {/* NO OPTION */}
+        <label
+          className={`
+            flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer border transition-all
+            ${
+              vehicleStatus === "no"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
+            }
+          `}
+        >
           <input
             type="radio"
             checked={vehicleStatus === "no"}

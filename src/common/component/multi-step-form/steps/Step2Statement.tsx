@@ -1,8 +1,3 @@
-
-
-
-
-
 "use client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,7 +19,10 @@ export default function Step2Statement() {
   const d = state.formData.traffic;
 
   const update = (
-    key: "onDutyDetails" | "onDutyDetailsMPReporting" | "offenceOccurenceDetails",
+    key:
+      | "onDutyDetails"
+      | "onDutyDetailsMPReporting"
+      | "offenceOccurenceDetails",
     value: any
   ) => {
     dispatch({
@@ -107,7 +105,7 @@ export default function Step2Statement() {
               update("onDutyDetailsMPReporting", { rank: v })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Rank" />
             </SelectTrigger>
 
@@ -127,7 +125,7 @@ export default function Step2Statement() {
               update("onDutyDetailsMPReporting", { unit: v })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Unit" />
             </SelectTrigger>
 
@@ -192,7 +190,7 @@ export default function Step2Statement() {
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Rank" />
                 </SelectTrigger>
 
@@ -222,14 +220,12 @@ export default function Step2Statement() {
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Unit" />
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="11 Engr Regt">
-                    11 Engr Regt
-                  </SelectItem>
+                  <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
                   <SelectItem value="MP 12">MP 12</SelectItem>
                   <SelectItem value="HQ Unit">HQ Unit</SelectItem>
                 </SelectContent>

@@ -140,7 +140,7 @@ export const LeftStepper = ({
               </button>
 
               {index < steps.length - 1 && (
-                <div className="ml-4 pl-4 h-8 border-l-2 border-dashed border-gray-700" />
+                <div className="ml-9 pl-4 h-8 border-l-2 border-dashed border-gray-700" />
               )}
             </div>
           );
