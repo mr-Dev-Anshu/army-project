@@ -1,9 +1,7 @@
-"use client";
 
 import React from "react";
-import { Search, Calendar, Filter, ArrowUpDown, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,81 +9,112 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Search, Calendar, Filter, ArrowUpDown, Plus } from "lucide-react";
 
 interface FilterBarProps {
-  filters: any;
-  setFilters: (f: any) => void;
+  filters: {
+    search: string;
+    offenceType: string;
+    date: string;
+    actionStatus: string;
+  };
+  setFilters: React.Dispatch<React.SetStateAction<{
+    search: string;
+    offenceType: string;
+    date: string;
+    actionStatus: string;
+  }>>;
   offenceTypeOptions: string[];
 }
 
 export default function FilterBar({ filters, setFilters, offenceTypeOptions }: FilterBarProps) {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({ ...prev, search: e.target.value }));
+  };
+
+  const handleOffenceTypeChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, offenceType: value }));
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({ ...prev, date: e.target.value }));
+  };
+
+  const handleActionStatusChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, actionStatus: value }));
+  };
+
   return (
-    <div className="flex items-center gap-3 flex-wrap">
-      {/* Search */}
+    <div className="flex flex-wrap gap-3 items-center mb-6">
       <div className="relative flex-1 min-w-[300px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <Input 
-          placeholder="Search by report no, unit, offence type..." 
-          className="pl-9 h-10 w-full bg-white"
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <Input
+          type="text"
+          placeholder="Search by report no, unit, offence type..."
+          className="pl-9 bg-white"
+          value={filters.search}
+          onChange={handleSearchChange}
         />
       </div>
 
-      {/* Offence Type Select */}
-      <Select defaultValue="all">
-        <SelectTrigger className="w-[180px] h-10 bg-white">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-500 font-normal">Offence Type:</span>
-            <span className="font-medium">All</span>
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          {offenceTypeOptions.map((opt) => (
-             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="w-[200px]">
+        <Select value={filters.offenceType} onValueChange={handleOffenceTypeChange}>
+          <SelectTrigger className="bg-white">
+            <div className="flex items-center truncate">
+               <span className="text-gray-500 mr-1">Offence Type:</span>
+               <SelectValue placeholder="All" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All</SelectItem>
+            {offenceTypeOptions.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      {/* Date */}
-       <div className="relative w-[180px]">
-         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10 flex items-center gap-1 text-sm">
-             <span className="text-gray-500">Date:</span>
+      <div className="w-[180px] relative">
+         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none z-10">
+            Date:
          </div>
-          <Input 
-            type="text"
-            defaultValue="06/12/2025"
-            className="pl-14 h-10 bg-white"
-             // In a real app, use a date picker
-          />
-           <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-       </div>
+         <Input
+          type="text" 
+          value={filters.date}
+          onChange={handleDateChange}
+          className="bg-white pl-12 pr-9 text-sm" 
+        />
+        <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      </div>
 
+      <div className="w-[200px]">
+         <Select value={filters.actionStatus} onValueChange={handleActionStatusChange}>
+          <SelectTrigger className="bg-white">
+            <div className="flex items-center truncate">
+               <span className="text-gray-500 mr-1">Action Status:</span>
+               <SelectValue placeholder="All" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Taken">Taken</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-      {/* Action Status */}
-      <Select defaultValue="all">
-        <SelectTrigger className="w-[180px] h-10 bg-white">
-           <div className="flex items-center gap-2">
-            <span className="text-gray-500 font-normal">Action Status:</span>
-            <span className="font-medium">All</span>
-          </div>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="taken">Taken</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Utilities */}
-      <Button variant="outline" size="icon" className="h-10 w-10 bg-white">
+      <Button variant="outline" size="icon" className="bg-white w-10 h-10 shrink-0">
         <Filter className="w-4 h-4 text-gray-600" />
       </Button>
-      <Button variant="outline" size="icon" className="h-10 w-10 bg-white">
+
+      <Button variant="outline" size="icon" className="bg-white w-10 h-10 shrink-0">
         <ArrowUpDown className="w-4 h-4 text-gray-600" />
       </Button>
 
-      {/* Add New */}
-      <Button className="h-10 bg-blue-500 hover:bg-blue-600 text-white gap-2 px-4 shadow-sm">
+      {/* Add New Button aligned to the right */}
+      <Button className="ml-auto bg-blue-600 hover:bg-blue-700 text-white gap-2 px-4 shadow-sm">
         <Plus className="w-4 h-4" />
         Add New
       </Button>

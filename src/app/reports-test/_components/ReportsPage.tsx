@@ -110,7 +110,7 @@ export default function ReportsPage() {
         <h1 className="text-xl font-bold text-gray-900">{pageTitle}</h1>
         <div className="flex items-center gap-4">
            <span className="text-sm font-semibold">{distinctReportsCount} Reports</span>
-             <Button variant="outline" className="bg-black text-white hover:bg-gray-800 border-none gap-2">
+             <Button variant="outline" className="bg-black text-white hover:bg-gray-800 hover:text-white cursor-pointer border-none gap-2">
             Download & Print Report
             <Printer className="w-4 h-4" />
           </Button>
