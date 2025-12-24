@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/config/axios";
 import { Loader2, Printer } from "lucide-react";
@@ -16,9 +16,6 @@ const fetchOffences = async () => {
 };
 
 export default function ReportsPage() {
-  // TEST OVERRIDE: Allow toggling for testing UI
-  const [forceNoVehicle, setForceNoVehicle] = useState(false);
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ["generalTrafficOffence", "grouped"],
     queryFn: fetchOffences,
@@ -32,6 +29,31 @@ export default function ReportsPage() {
     actionStatus: "All",
   });
 
+  const [isVehicleView, setIsVehicleView] = useState(true);
+
+  // Process data into two sets: Vehicle Involved vs No Vehicle Involved
+  const { vehicleGroups, noVehicleGroups } = useMemo(() => {
+    if (!data) return { vehicleGroups: [], noVehicleGroups: [] };
+
+    const vGroups: any[] = [];
+    const nvGroups: any[] = [];
+
+    data.forEach((group: any) => {
+      const vOffences = group.offences?.filter((o: any) => o.isVehicleInvolved) || [];
+      const nvOffences = group.offences?.filter((o: any) => !o.isVehicleInvolved) || [];
+
+      if (vOffences.length > 0) {
+        vGroups.push({ ...group, offences: vOffences });
+      }
+
+      if (nvOffences.length > 0) {
+        nvGroups.push({ ...group, offences: nvOffences });
+      }
+    });
+
+    return { vehicleGroups: vGroups, noVehicleGroups: nvGroups };
+  }, [data]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -44,27 +66,10 @@ export default function ReportsPage() {
     return <div className="p-8 text-red-500">Failed to load reports.</div>;
   }
 
-  // Determine mode from first available data
-  // Check if any offence in any group has isVehicleInvolved === true
-  let isVehicleInvolved = false;
-  if (data && data.length > 0) {
-    // Check key offences in the first group
-    const firstGroup = data[0];
-    if (firstGroup.offences && firstGroup.offences.length > 0) {
-      isVehicleInvolved = firstGroup.offences[0].isVehicleInvolved;
-    }
-  }
+  const pageTitle = "General & Traffic Offence Reports";
 
-  if (forceNoVehicle) {
-    isVehicleInvolved = false;
-  }
-
-  const pageTitle = isVehicleInvolved
-    ? "General & Traffic Offence Reports - Vehicle Involved"
-    : "General & Traffic Offence Reports- NO Vehicle Involved";
-
-  // Calculate total count
-  const distinctReportsCount = data?.reduce((acc: number, group: any) => acc + (group.offenceCount || group.totalOffences || 0), 0) || 0;
+  // Calculate total count (summing up the original groups or the processed ones)
+  const distinctReportsCount = data?.reduce((acc: number, group: any) => acc + (group.offences?.length || 0), 0) || 0;
 
   // Calculate options
   const fetchedOptions = data?.map((g: any) => g.offenceType).filter(Boolean) || [];
@@ -72,21 +77,25 @@ export default function ReportsPage() {
     ? fetchedOptions 
     : ["Intoxication", "Over Speeding", "Wrong Parking", "No Helmet"];
 
+  const TableSection = ({ title, groups, isVehicleInvolved }: { title: string, groups: any[], isVehicleInvolved: boolean }) => (
+    <div className="bg-white rounded-lg shadow border border-gray-200 mt-6 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+         <h3 className="font-bold text-gray-800">{title}</h3>
+      </div>
+      {/* Main List Header */}
+      <div className="flex items-center bg-white px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="flex-1">Type of Offence</div>
+        <div className="w-64 text-center">Action Status</div>
+        <div className="w-32 text-right">No. of Records</div>
+      </div>
+
+      {/* Content */}
+      <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} />
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
-      {/* DEV TOOLS */}
-      <div className="fixed bottom-4 right-4 bg-yellow-100 p-2 border border-yellow-300 rounded shadow-lg z-50 text-xs">
-          <p className="font-bold mb-1 text-yellow-800">🧪 Testing Controls</p>
-          <div className="flex items-center gap-2">
-             <input 
-               type="checkbox" 
-               id="vehMode" 
-               checked={forceNoVehicle} 
-               onChange={(e) => setForceNoVehicle(e.target.checked)} 
-             />
-             <label htmlFor="vehMode" className="cursor-pointer">Force "No Vehicle"</label>
-          </div>
-      </div>
       {/* Breadcrumb - Mocked */}
       <div className="flex items-center text-sm text-gray-500 mb-6">
         <span>Reports & Analysis</span>
@@ -115,18 +124,58 @@ export default function ReportsPage() {
         offenceTypeOptions={offenceTypeOptions}
       />
 
-      {/* List */}
-      <div className="bg-white rounded-lg shadow border border-gray-200 mt-6 overflow-hidden">
-        {/* Main List Header */}
-        <div className="flex items-center bg-gray-50 px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          <div className="flex-1">Type of Offence ({data?.length || 0} Offences)</div>
-          <div className="w-64 text-center">Action Status</div>
-          <div className="w-32 text-right">No. of Records</div>
+      {/* View Toggle */}
+      <div className="flex justify-center mt-6">
+        <div className="bg-gray-200 p-1 rounded-lg inline-flex">
+          <button
+            onClick={() => setIsVehicleView(true)}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              isVehicleView
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            Vehicle Involved
+          </button>
+          <button
+            onClick={() => setIsVehicleView(false)}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              !isVehicleView
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            No Vehicle Involved
+          </button>
         </div>
-
-        {/* Content */}
-        <GroupedList data={data} isVehicleInvolved={isVehicleInvolved} />
       </div>
+
+      {/* Conditional Table Rendering */}
+      {isVehicleView ? (
+        vehicleGroups.length > 0 ? (
+          <TableSection 
+            title="Vehicle Involved Reports" 
+            groups={vehicleGroups} 
+            isVehicleInvolved={true} 
+          />
+        ) : (
+          <div className="mt-12 text-center text-gray-500">
+            No "Vehicle Involved" offences found.
+          </div>
+        )
+      ) : (
+        noVehicleGroups.length > 0 ? (
+          <TableSection 
+            title="No Vehicle Involved Reports" 
+            groups={noVehicleGroups} 
+            isVehicleInvolved={false} 
+          />
+        ) : (
+           <div className="mt-12 text-center text-gray-500">
+            No "No Vehicle Involved" offences found.
+          </div>
+        )
+      )}
     </div>
   );
 }

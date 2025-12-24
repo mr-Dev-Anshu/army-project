@@ -91,17 +91,17 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
                     <td className="px-4 py-4 align-top">
                       <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />
                     </td>
-                    <td className="px-4 py-4 align-top">{primaryDetails.unit || "21 Corps Signal Regt (AREN)"}</td>
-                    <td className="px-4 py-4 align-top">HQ 21 CORPs</td>
+                    <td className="px-4 py-4 align-top">{primaryDetails.unit || "N/A"}</td>
+                    <td className="px-4 py-4 align-top">{primaryDetails.fmn || "HQ 21 CORPs"}</td>
                     <td className="px-4 py-4 align-top text-gray-700">
-                      <div className="font-medium text-gray-900">Overtaking In NO</div>
-                      <div>Over Taking Zone</div>
+                      <div className="font-medium text-gray-900">{offence.currentOffenceType || "Traffic Offence"}</div>
+                      <div>{offence.offenceOccurenceDetails?.description ? offence.offenceOccurenceDetails.description.substring(0, 30) + "..." : ""}</div>
                     </td>
                      <td className="px-4 py-4 align-top">
-                        <div className="font-semibold text-gray-900">{offence.vehicleNumber || "UP 16 AP 3840"}</div>
-                        <div className="text-gray-500">{offence.vehicleName || "Honda Accord"}</div>
+                        <div className="font-semibold text-gray-900">{offence.vehicleNumber || "N/A"}</div>
+                        <div className="text-gray-500">{offence.vehicleName || "Unknown Vehicle"}</div>
                       </td>
-                    <td className="px-4 py-4 align-top text-gray-600">{reportNo}</td>
+                    <td className="px-4 py-4 align-top text-gray-600">{offence.reportNumber || reportNo}</td>
                     <td className="px-4 py-4 align-top">
                        <div className="font-semibold" suppressHydrationWarning>{dateStr}</div>
                        <div className="text-gray-500" suppressHydrationWarning>{timeStr}</div>
@@ -120,15 +120,15 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
                     <td className="px-4 py-4 align-top">
                        <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />
                     </td>
-                    <td className="px-4 py-4 align-top">{primaryDetails.unit || "11 Engr Regt"}</td>
-                    <td className="px-4 py-4 align-top">HQ 21 CORPs</td>
-                    <td className="px-4 py-4 align-top text-gray-600">{reportNo}</td>
+                    <td className="px-4 py-4 align-top">{primaryDetails.unit || "N/A"}</td>
+                    <td className="px-4 py-4 align-top">{primaryDetails.fmn || "HQ 21 CORPs"}</td>
+                    <td className="px-4 py-4 align-top text-gray-600">{offence.reportNumber || reportNo}</td>
                     <td className="px-4 py-4 align-top">
                        <div className="font-semibold" suppressHydrationWarning>{dateStr}</div>
                        <div className="text-gray-500" suppressHydrationWarning>{timeStr}</div>
                     </td>
                     <td className="px-4 py-4 align-top text-gray-700 max-w-md">
-                      {offence.offenceOccurenceDetails?.description || "Civilian Mr Rakesh Kumar (brother-in-law of Hav (CLK) Ajay Shankar Jha) found residing in Govt married accn..."}
+                      {offence.offenceOccurenceDetails?.description || "No description provided."}
                     </td>
                   </>
                 )}
