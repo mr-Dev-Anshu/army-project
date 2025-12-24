@@ -1,8 +1,3 @@
-
-
-
-
-
 import { useForm } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
@@ -29,96 +24,101 @@ export default function MultiStepForm() {
     { id: 4, label: "Remarks of CO/2IC Provost Unit", icon: "4" },
   ];
 
-
-
   // ===================== FINAL SUBMIT =====================
-const onSubmitFinal = async () => {
-  const traffic = state.formData.traffic;
+  const onSubmitFinal = async () => {
+    const traffic = state.formData.traffic;
 
-  const date = traffic.onDutyDetails.dateOfDuty;
+    const date = traffic.onDutyDetails.dateOfDuty;
 
-  // SAFE DATE → ISO CONVERTER
-  const toISO = (time: string) => {
-    if (!date || !time) return undefined;   // ❗ important
-    return new Date(`${date}T${time}`).toISOString();
-  };
-
-  const payload = {
-    isVehicleInvolved: traffic.vehicleInvolved === "yes",
-
-    onDutyDetails: {
-      ...traffic.onDutyDetails,
-      startTime: toISO(traffic.onDutyDetails.startTime),
-      endTime: toISO(traffic.onDutyDetails.endTime),
-    },
-
-    onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
-
-    offenceOccurenceDetails: {
-      ...traffic.offenceOccurenceDetails,
-      timeOfOffence: toISO(
-        traffic.offenceOccurenceDetails.timeOfOffence
-      ),
-
-      // ❗ empty string backend ko pasand nahi, undefined bhejo
-      incidentLocation:
-        traffic.offenceOccurenceDetails.incidentLocation?.trim() || undefined,
-    },
-
-    offenceTypes: traffic.offenceTypes,
-    offenceTypeReference: traffic.offenceCode,
-  };
-
-  try {
-    toast.info("Creating Offence...");
-
-    const offence = await mutateAsync(payload);
-    toast.success("Offence Created Successfully!");
-
-    const offenceId = offence?._id;
-    if (!offenceId) {
-      toast.error("Offence ID missing!");
-      return;
-    }
-
-    // ================== OFFENDER ==================
-    const offenderPayload = {
-      offenceId,
-      offenderType: traffic.vehicleDetails.driverType,
-      offenderDetails: traffic.offenderDetails || {},
+    // SAFE DATE → ISO CONVERTER
+    const toISO = (time: string) => {
+      if (!date || !time) return undefined; // ❗ important
+      return new Date(`${date}T${time}`).toISOString();
     };
 
-    await createOffenderMutate(offenderPayload);
-    toast.success("Offender Created Successfully!");
+    const payload = {
+      isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
-    // ================== WITNESS ==================
-    if (traffic.witnesses?.length > 0) {
-      await Promise.all(
-        traffic.witnesses.map((w) =>
-          createWitnessMutate({
-            offenceId,
-            rank: w.reportingBlock.rank,
-            unit: w.reportingBlock.unit,
-            ArmyNo: w.reportingBlock.armyNumber,
-            name: w.reportingBlock.nameReportingMP,
-          })
-        )
+      onDutyDetails: {
+        ...traffic.onDutyDetails,
+        startTime: toISO(traffic.onDutyDetails.startTime),
+        endTime: toISO(traffic.onDutyDetails.endTime),
+      },
+
+      onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
+
+      offenceOccurenceDetails: {
+        ...traffic.offenceOccurenceDetails,
+        timeOfOffence: toISO(traffic.offenceOccurenceDetails.timeOfOffence),
+
+        //  empty string backend ko pasand nahi, undefined bhejo
+        incidentLocation:
+          traffic.offenceOccurenceDetails.incidentLocation?.trim() || undefined,
+      },
+
+      offenceTypes: traffic.offenceTypes,
+      offenceTypeReference: traffic.offenceCode,
+    };
+
+    try {
+      toast.info("Creating Offence...");
+
+      const offence = await mutateAsync(payload);
+      toast.success("Offence Created Successfully!");
+
+      const offenceId = offence?._id;
+      if (!offenceId) {
+        toast.error("Offence ID missing!");
+        return;
+      }
+
+      const offenderType =
+        traffic.vehicleInvolved === "yes"
+          ? traffic?.vehicleDetails?.driverType
+          : traffic?.offenderWithoutVehicle?.offenderType;
+
+      const offenderPayload = {
+        offenceId,
+        offenderType,
+        offenderDetails:
+          traffic.offenderPeople && traffic.offenderPeople.length > 0
+            ? traffic.offenderPeople
+            : [],
+      };
+
+      console.log("👮 TRAFFIC OFFENDER PAYLOAD ===>", offenderPayload);
+
+
+      await createOffenderMutate(offenderPayload);
+      toast.success("Offender Created Successfully!");
+
+      // ================== WITNESS ==================
+      if (traffic.witnesses?.length > 0) {
+        await Promise.all(
+          traffic.witnesses.map((w) =>
+            createWitnessMutate({
+              offenceId,
+              rank: w.reportingBlock.rank,
+              unit: w.reportingBlock.unit,
+              ArmyNo: w.reportingBlock.armyNumber,
+              name: w.reportingBlock.nameReportingMP,
+            })
+          )
+        );
+
+        toast.success("All Witnesses Saved Successfully!");
+      }
+
+      toast.success("🎉 Final Submit Completed Successfully!");
+    } catch (err: any) {
+      console.log(" FINAL ERROR ===>", err?.response?.data || err);
+      toast.error(
+        err?.response?.data?.error ||
+          err?.response?.data?.message ||
+          "Something went wrong!"
       );
-
-      toast.success("All Witnesses Saved Successfully!");
     }
-
-    toast.success("🎉 Final Submit Completed Successfully!");
-  } catch (err: any) {
-    console.log(" FINAL ERROR ===>", err?.response?.data || err);
-    toast.error(
-      err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Something went wrong!"
-    );
-  }
-};
-
+  };
 
   // // ===================== FINAL SUBMIT =====================
   // const onSubmitFinal = async () => {
@@ -257,7 +257,7 @@ const onSubmitFinal = async () => {
               dispatch({ type: "SET_FORM_DATA", payload: data })
             }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onSubmitFinal={onSubmitFinal}   // <<=== IMPORTANT!!!
+            onSubmitFinal={onSubmitFinal} // <<=== IMPORTANT!!!
             stepsConfig={stepsConfig}
             mode="traffic"
           />
