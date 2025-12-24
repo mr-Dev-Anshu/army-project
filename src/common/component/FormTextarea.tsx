@@ -17,10 +17,13 @@ export function FormTextarea({
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
+
       {description && (
         <p className="text-sm text-gray-500">{description}</p>
       )}
+
       <Textarea
+        className="min-h-[200px]"   //  Default height increased
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
       />

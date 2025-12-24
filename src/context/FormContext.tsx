@@ -7,59 +7,130 @@
 //   completedSteps: [],
 
 //   formData: {
-//     vehicleInvolved: "",
+//     /* ================= TRAFFIC FORM ================= */
+//     traffic: {
+//       vehicleInvolved: "",
 
-//     vehicleDetails: {
-//       category: "",
-//       vehicleType: "",
-//       driverType: "",
+//       vehicleDetails: {
+//         category: "",
+//         vehicleType: "",
+//         driverType: "",
+//       },
+
+//       offenderWithoutVehicle: {
+//         offenderType: "",
+//         military: {
+//           armyNumber: "",
+//           rank: "",
+//           name: "",
+//           unit: "",
+//           fmn: "",
+//           command: "",
+//           address: "",
+//           iCardNumber: "",
+//         },
+//       },
+
+//       offenderDetails: {},
+
+//       onDutyDetails: {
+//         dateOfDuty: "",
+//         startTime: "",
+//         endTime: "",
+//         dutyLocation: "",
+//         dutyType: "",
+//       },
+
+//       onDutyDetailsMPReporting: {
+//         nameReportingMP: "",
+//         rank: "",
+//         unit: "",
+//         armyNumber: "",
+//       },
+
+//       offenceOccurenceDetails: {
+//         timeOfOffence: "",
+//         incidentLocation: "",
+//         description: "",
+//         time: "",
+//       },
+
+//       offenceTypes: [],
+//       offenceCode: [],
+
+//       witnesses: [
+//         {
+//           dutyBlock: {
+//             dateOfDuty: "",
+//             startTime: "",
+//             endTime: "",
+//             dutyLocation: "",
+//             dutyType: "",
+//           },
+//           reportingBlock: {
+//             nameReportingMP: "",
+//             rank: "",
+//             unit: "",
+//             armyNumber: "",
+//             contactNumber: "",
+//           },
+//           offenceBlock: {
+//             timeOfOffence: "",
+//             incidentLocation: "",
+//             description: "",
+//           },
+//         },
+//       ],
+
+//       offenderPeople: [],
 //     },
 
-//     offenderWithoutVehicle: {
-//       offenderType: "",
-//       military: {
-//         armyNumber: "",
-//         rank: "",
-//         name: "",
-//         unit: "",
-//         fmn: "",
-//         command: "",
-//         address: "",
-//         iCardNumber: "",
+//     /* ================= STATIC SPEED FORM ================= */
+//     staticSpeed: {
+//       vehicleDetails: {
+//         category: "",
+//         vehicleType: "",
+//         driverType: "",
+//         vehicleNumber: "",
+//         vehicleName: "",
+//       },
+
+//       witnesses: [
+//         {
+//           dutyBlock: {
+//             dateOfDuty: "",
+//             startTime: "",
+//             endTime: "",
+//             dutyLocation: "",
+//             dutyType: "",
+//           },
+//           reportingBlock: {
+//             nameReportingMP: "",
+//             rank: "",
+//             unit: "",
+//             armyNumber: "",
+//             contactNumber: "", // <<--- IMPORTANT
+//           },
+//           offenceBlock: {
+//             timeOfOffence: "",
+//             incidentLocation: "",
+//             description: "",
+//           },
+//         },
+//       ],
+
+//       offenderDetails: {},
+//       offenderPeople: [], 
+
+//       offenceOccurenceDetails: {
+//         timeOfOffence: "",
+//         incidentLocation: "",
+//         description: "",
+//         authSpeed: "30",
+//         actualSpeed: "",
+//         overSpeed: "",
 //       },
 //     },
-
-//     //  NEW — STORE OFFENDER FORM DATA HERE
-//     offenderDetails: {},
-
-//     //  PHASE-1
-//     onDutyDetails: {
-//       dateOfDuty: "",
-//       startTime: "",
-//       endTime: "",
-//       dutyLocation: "",
-//       dutyType: "",
-//     },
-
-//     onDutyDetailsMPReporting: {
-//       nameReportingMP: "",
-//       rank: "",
-//       unit: "",
-//       armyNumber: "",
-//     },
-
-//     offenceOccurenceDetails: {
-//       timeOfOffence: "",
-//       incidentLocation: "",
-//       description: "",
-//     },
-
-//     offenceTypes: [],
-//     offenceCode: [],
-
-//     //  PHASE-2
-//     witnesses: [],
-//     offenderPeople: [],
 //   },
 // };
 
@@ -77,20 +148,25 @@
 //     case "SET_STEP":
 //       return { ...state, currentStep: action.payload };
 
+//     /* ========= GENERIC FORM DATA MERGE ========= */
 //     case "SET_FORM_DATA":
 //       return {
 //         ...state,
 //         formData: { ...state.formData, ...action.payload },
 //       };
 
+//     /* ========= TRAFFIC VEHICLE ========= */
 //     case "SET_VEHICLE_DETAILS":
 //       return {
 //         ...state,
 //         formData: {
 //           ...state.formData,
-//           vehicleDetails: {
-//             ...state.formData.vehicleDetails,
-//             ...action.payload,
+//           traffic: {
+//             ...state.formData.traffic,
+//             vehicleDetails: {
+//               ...state.formData.traffic.vehicleDetails,
+//               ...action.payload,
+//             },
 //           },
 //         },
 //       };
@@ -100,9 +176,12 @@
 //         ...state,
 //         formData: {
 //           ...state.formData,
-//           offenderWithoutVehicle: {
-//             ...state.formData.offenderWithoutVehicle,
-//             offenderType: action.payload,
+//           traffic: {
+//             ...state.formData.traffic,
+//             offenderWithoutVehicle: {
+//               ...state.formData.traffic.offenderWithoutVehicle,
+//               offenderType: action.payload,
+//             },
 //           },
 //         },
 //       };
@@ -112,9 +191,12 @@
 //         ...state,
 //         formData: {
 //           ...state.formData,
-//           offenderWithoutVehicle: {
-//             ...state.formData.offenderWithoutVehicle,
-//             ...action.payload,
+//           traffic: {
+//             ...state.formData.traffic,
+//             offenderWithoutVehicle: {
+//               ...state.formData.traffic.offenderWithoutVehicle,
+//               ...action.payload,
+//             },
 //           },
 //         },
 //       };
@@ -124,22 +206,74 @@
 //         ...state,
 //         formData: {
 //           ...state.formData,
-//           offenderPeople: action.payload,
+//           traffic: {
+//             ...state.formData.traffic,
+//             offenderPeople: action.payload,
+//           },
 //         },
 //       };
 
-//     //  NEW — SAVE DYNAMIC OFFENDER FIELDS
-//     case "SET_OFFENDER_DETAILS":
+
+//     /* ========= TRAFFIC WITNESSES ========= */
+//     case "SET_WITNESSES":
 //       return {
 //         ...state,
 //         formData: {
 //           ...state.formData,
-//           offenderDetails: {
-//             ...state.formData.offenderDetails,
-//             ...action.payload,
+//           traffic: {
+//             ...state.formData.traffic,
+//             witnesses: action.payload,
 //           },
 //         },
 //       };
+
+//     /* ========= STATIC SPEED WITNESSES ========= */
+//     case "SET_STATIC_WITNESSES":
+//       return {
+//         ...state,
+//         formData: {
+//           ...state.formData,
+//           staticSpeed: {
+//             ...state.formData.staticSpeed,
+//             witnesses: action.payload,
+//           },
+//         },
+//       };
+
+//    case "SET_STATIC_SPEED_DATA":
+//   return {
+//     ...state,
+//     formData: {
+//       ...state.formData,
+//       staticSpeed: {
+//         ...state.formData.staticSpeed,
+
+//         vehicleDetails: {
+//           ...state.formData.staticSpeed.vehicleDetails,
+//           ...(action.payload.vehicleDetails || {}),
+//         },
+
+//         offenceOccurenceDetails: {
+//           ...state.formData.staticSpeed.offenceOccurenceDetails,
+//           ...(action.payload.offenceOccurenceDetails || {}),
+//         },
+
+//         offenderDetails: {
+//           ...state.formData.staticSpeed.offenderDetails,
+//           ...(action.payload.offenderDetails || {}),
+//         },
+
+//         offenderPeople:
+//           action.payload.offenderPeople ??
+//           state.formData.staticSpeed.offenderPeople,   // ⭐⭐ IMPORTANT ⭐⭐
+
+//         witnesses:
+//           action.payload.witnesses ??
+//           state.formData.staticSpeed.witnesses,
+//       },
+//     },
+//   };
+
 
 //     default:
 //       return state;
@@ -166,6 +300,8 @@
 //   return ctx;
 // }
 
+
+
 "use client";
 import { createContext, useContext, useReducer, ReactNode } from "react";
 import { Action, GlobalFormState } from "@/common/types/form.types";
@@ -175,83 +311,130 @@ const initialState: GlobalFormState = {
   completedSteps: [],
 
   formData: {
-    vehicleInvolved: "",
+    /* ================= TRAFFIC FORM ================= */
+    traffic: {
+      vehicleInvolved: "",
 
-    vehicleDetails: {
-      category: "",
-      vehicleType: "",
-      driverType: "",
-    },
-
-    offenderWithoutVehicle: {
-      offenderType: "",
-      military: {
-        armyNumber: "",
-        rank: "",
-        name: "",
-        unit: "",
-        fmn: "",
-        command: "",
-        address: "",
-        iCardNumber: "",
+      vehicleDetails: {
+        category: "",
+        vehicleType: "",
+        driverType: "",
       },
-    },
 
-    offenderDetails: {},
-
-    // STEP-2
-    onDutyDetails: {
-      dateOfDuty: "",
-      startTime: "",
-      endTime: "",
-      dutyLocation: "",
-      dutyType: "",
-    },
-
-    onDutyDetailsMPReporting: {
-      nameReportingMP: "",
-      rank: "",
-      unit: "",
-      armyNumber: "",
-    },
-
-    offenceOccurenceDetails: {
-      timeOfOffence: "",
-      incidentLocation: "",
-      description: "",
-      authSpeed: "30", // default
-      actualSpeed: "",
-      overSpeed: "",
-    },
-
-    offenceTypes: [],
-    offenceCode: [],
-
-    // STEP-3 / PHASE-2
-    witnesses: [
-      {
-        dutyBlock: {
-          dateOfDuty: "",
-          startTime: "",
-          endTime: "",
-          dutyLocation: "",
-          dutyType: "",
-        },
-        reportingBlock: {
-          nameReportingMP: "",
-          rank: "",
-          unit: "",
+      offenderWithoutVehicle: {
+        offenderType: "",
+        military: {
           armyNumber: "",
-        },
-        offenceBlock: {
-          timeOfOffence: "",
-          incidentLocation: "",
-          description: "",
+          rank: "",
+          name: "",
+          unit: "",
+          fmn: "",
+          command: "",
+          address: "",
+          iCardNumber: "",
         },
       },
-    ],
 
-    offenderPeople: [],
+      offenderDetails: {},
+
+      onDutyDetails: {
+        dateOfDuty: "",
+        startTime: "",
+        endTime: "",
+        dutyLocation: "",
+        dutyType: "",
+      },
+
+      onDutyDetailsMPReporting: {
+        nameReportingMP: "",
+        rank: "",
+        unit: "",
+        armyNumber: "",
+      },
+
+      offenceOccurenceDetails: {
+        timeOfOffence: "",
+        incidentLocation: "",
+        description: "",
+        time: "",
+      },
+
+      offenceTypes: [],
+      offenceCode: [],
+
+      witnesses: [
+        {
+          dutyBlock: {
+            dateOfDuty: "",
+            startTime: "",
+            endTime: "",
+            dutyLocation: "",
+            dutyType: "",
+          },
+          reportingBlock: {
+            nameReportingMP: "",
+            rank: "",
+            unit: "",
+            armyNumber: "",
+            contactNumber: "",
+          },
+          offenceBlock: {
+            timeOfOffence: "",
+            incidentLocation: "",
+            description: "",
+          },
+        },
+      ],
+
+      offenderPeople: [],
+    },
+
+    /* ================= STATIC SPEED FORM ================= */
+    staticSpeed: {
+      vehicleDetails: {
+        category: "",
+        vehicleType: "",
+        driverType: "",
+        vehicleNumber: "",
+        vehicleName: "",
+      },
+
+      witnesses: [
+        {
+          dutyBlock: {
+            dateOfDuty: "",
+            startTime: "",
+            endTime: "",
+            dutyLocation: "",
+            dutyType: "",
+          },
+          reportingBlock: {
+            nameReportingMP: "",
+            rank: "",
+            unit: "",
+            armyNumber: "",
+            contactNumber: "",
+          },
+          offenceBlock: {
+            timeOfOffence: "",
+            incidentLocation: "",
+            description: "",
+          },
+        },
+      ],
+
+      offenderDetails: {},
+      offenderPeople: [],
+
+      offenceOccurenceDetails: {
+        timeOfOffence: "",
+        incidentLocation: "",
+        description: "",
+        authSpeed: "30",
+        actualSpeed: "",
+        overSpeed: "",
+      },
+    },
   },
 };
 
@@ -269,20 +452,25 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
     case "SET_STEP":
       return { ...state, currentStep: action.payload };
 
+    /* ========= GENERIC FORM DATA MERGE ========= */
     case "SET_FORM_DATA":
       return {
         ...state,
         formData: { ...state.formData, ...action.payload },
       };
 
+    /* ========= TRAFFIC VEHICLE ========= */
     case "SET_VEHICLE_DETAILS":
       return {
         ...state,
         formData: {
           ...state.formData,
-          vehicleDetails: {
-            ...state.formData.vehicleDetails,
-            ...action.payload,
+          traffic: {
+            ...state.formData.traffic,
+            vehicleDetails: {
+              ...state.formData.traffic.vehicleDetails,
+              ...action.payload,
+            },
           },
         },
       };
@@ -292,9 +480,12 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
         ...state,
         formData: {
           ...state.formData,
-          offenderWithoutVehicle: {
-            ...state.formData.offenderWithoutVehicle,
-            offenderType: action.payload,
+          traffic: {
+            ...state.formData.traffic,
+            offenderWithoutVehicle: {
+              ...state.formData.traffic.offenderWithoutVehicle,
+              offenderType: action.payload,
+            },
           },
         },
       };
@@ -304,41 +495,117 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
         ...state,
         formData: {
           ...state.formData,
-          offenderWithoutVehicle: {
-            ...state.formData.offenderWithoutVehicle,
-            ...action.payload,
+          traffic: {
+            ...state.formData.traffic,
+            offenderWithoutVehicle: {
+              ...state.formData.traffic.offenderWithoutVehicle,
+              ...action.payload,
+            },
           },
         },
       };
 
+    /* ========= TRAFFIC OFFENDER PEOPLE (FULL REPLACE) ========= */
     case "SET_OFFENDER_PEOPLE":
       return {
         ...state,
         formData: {
           ...state.formData,
-          offenderPeople: action.payload,
-        },
-      };
-
-    case "SET_OFFENDER_DETAILS":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          offenderDetails: {
-            ...state.formData.offenderDetails,
-            ...action.payload,
+          traffic: {
+            ...state.formData.traffic,
+            offenderPeople: action.payload,
           },
         },
       };
 
-    // ⭐ WITNESSES HANDLE HERE
+    /* ========= ADD OFFENDER (SAFE PUSH) ========= */
+    case "ADD_TRAFFIC_OFFENDER":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          traffic: {
+            ...state.formData.traffic,
+            offenderPeople: [
+              ...(state.formData.traffic.offenderPeople || []),
+              action.payload,
+            ],
+          },
+        },
+      };
+
+    /* ========= TRAFFIC WITNESSES ========= */
     case "SET_WITNESSES":
       return {
         ...state,
         formData: {
           ...state.formData,
-          witnesses: action.payload,
+          traffic: {
+            ...state.formData.traffic,
+            witnesses: action.payload,
+          },
+        },
+      };
+
+    /* ========= STATIC ========= */
+    case "SET_STATIC_WITNESSES":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          staticSpeed: {
+            ...state.formData.staticSpeed,
+            witnesses: action.payload,
+          },
+        },
+      };
+
+    case "SET_STATIC_SPEED_DATA":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          staticSpeed: {
+            ...state.formData.staticSpeed,
+
+            vehicleDetails: {
+              ...state.formData.staticSpeed.vehicleDetails,
+              ...(action.payload.vehicleDetails || {}),
+            },
+
+            offenceOccurenceDetails: {
+              ...state.formData.staticSpeed.offenceOccurenceDetails,
+              ...(action.payload.offenceOccurenceDetails || {}),
+            },
+
+            offenderDetails: {
+              ...state.formData.staticSpeed.offenderDetails,
+              ...(action.payload.offenderDetails || {}),
+            },
+
+            offenderPeople:
+              action.payload.offenderPeople ??
+              state.formData.staticSpeed.offenderPeople,
+
+            witnesses:
+              action.payload.witnesses ??
+              state.formData.staticSpeed.witnesses,
+          },
+        },
+      };
+
+    case "ADD_STATIC_OFFENDER":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          staticSpeed: {
+            ...state.formData.staticSpeed,
+            offenderPeople: [
+              ...(state.formData.staticSpeed.offenderPeople || []),
+              action.payload,
+            ],
+          },
         },
       };
 

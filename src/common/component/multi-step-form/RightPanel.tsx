@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -18,9 +15,8 @@ interface Props {
   setFormData: (d: Partial<FormDataState>) => void;
   onNext: () => void;
   onSubmitFinal: () => void;
-
-  // NOTE: Record<string> so string + number keys dono chale
   stepsConfig: Record<string, StepConfig>;
+  mode?: "traffic" | "static";   // <-- OPTIONAL YAHAN
 }
 
 export const RightPanel = ({
@@ -29,18 +25,31 @@ export const RightPanel = ({
   onNext,
   onSubmitFinal,
   stepsConfig,
+  mode,                // <-- YAHAN SIRF mode (❌ ?: nahi)
 }: Props) => {
 
-  // convert step to string safely
   const current = stepsConfig?.[String(step)];
 
   const isNextDisabled = () => {
-    if (step === 1) return !formData.vehicleInvolved;
+    //  STATIC SPEED
+    if (mode === "static" && step === 1) {
+      const vd = formData.staticSpeed?.vehicleDetails;
+      return !(vd?.vehicleType && vd?.category);
+    }
+
+    //  TRAFFIC
+    if (mode === "traffic" && step === 1) {
+      return !formData.traffic?.vehicleInvolved;
+    }
+
     return false;
   };
 
+
+
   return (
-    <div className="
+    <div
+      className="
         flex-1 
         h-full 
         p-4 sm:p-6 lg:p-8 
@@ -50,7 +59,8 @@ export const RightPanel = ({
       "
     >
       {/* ---------- HEADER ---------- */}
-      <div className="
+      <div
+        className="
           flex flex-col 
           sm:flex-row sm:items-center 
           justify-between 
@@ -74,9 +84,10 @@ export const RightPanel = ({
       </div>
 
       {/* ---------- CONTENT ---------- */}
-      <div className="
+      <div
+        className="
           border rounded-lg 
-          p-4 sm:p-5 lg:px-0 
+          p-4  sm:p-5 lg:px-6
           mb-4 sm:mb-6 
           overflow-y-auto
           max-h-[60vh] sm:max-h-[70vh] lg:max-h-none

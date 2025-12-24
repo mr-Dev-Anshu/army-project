@@ -1,3 +1,5 @@
+
+
 import Joi from "joi";
 
 export const createOffenderSchema = Joi.object({
@@ -18,8 +20,19 @@ export const createOffenderSchema = Joi.object({
       "Temporary Hired Worker"
     )
     .required(),
-  category: Joi.string().optional(),
-  offenderDetails: Joi.object().unknown(true).default({}).optional(),
+
+  offenderDetails: Joi.array()
+    .items(
+      Joi.object({
+        type: Joi.string()
+          .valid("Driver", "CoDriver")
+          .required(),
+
+        details: Joi.object().unknown(true).required()
+      })
+    )
+    .min(1)
+    .required(),
 
   customFields: Joi.object().unknown(true).default({}).optional(),
 });

@@ -26,7 +26,7 @@ export default function StaticSpeedStep1Particulars() {
       >
         <div className="w-full">
         <h1 className="text-xl font-bold mb-4"> 1.1 Fill Vehicle Identification Fields:</h1>
-          <VehicleDetailsForm />
+          <VehicleDetailsForm scope="static" />
         </div>
       </div>
     </div>

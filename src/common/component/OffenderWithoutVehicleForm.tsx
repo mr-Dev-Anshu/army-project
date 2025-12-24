@@ -61,7 +61,8 @@ export default function OffenderWithoutVehicleForm() {
       </RadioGroup>
 
       {offenderType && offenderConfig[offenderType] && (
-        <OffenderDynamicForm
+        <OffenderDynamicForm 
+        scope="traffic"
           title={offenderConfig[offenderType].title}
           helperText={offenderConfig[offenderType].helperText}
           fields={
@@ -69,7 +70,7 @@ export default function OffenderWithoutVehicleForm() {
           }
           showCoDriver={false}
         />
-        
+
       )}
     </div>
   );

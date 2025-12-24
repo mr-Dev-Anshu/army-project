@@ -2,16 +2,20 @@ import { useForm } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
 import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
-import { createOffender } from "@/apis/offender/create";
-import { createMpWitenessing } from "@/apis/MpWitenessing/create";
 import { toast } from "react-toastify";
 import Step1Particulars from "./steps/Step1Particulars";
 import Step2Statement from "./steps/Step2Statement";
 import Step3Offence from "./steps/Step3Offence";
 import Step4Remarks from "./steps/Step4Remarks";
+import { useCreateOffender } from "@/features/offender/Hooks";
+import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 
 export default function MultiStepForm() {
   const { state, dispatch } = useForm();
+
+  const { mutateAsync } = useCreateTrafficOffence();
+  const { mutateAsync: createOffenderMutate } = useCreateOffender();
+  const { mutateAsync: createWitnessMutate } = useCreateOnDutyWitnessingMp();
 
   const steps = [
     { id: 1, label: "Particulars", icon: "1" },
@@ -20,43 +24,47 @@ export default function MultiStepForm() {
     { id: 4, label: "Remarks of CO/2IC Provost Unit", icon: "4" },
   ];
 
-  const { mutateAsync, isPending } = useCreateTrafficOffence();
-
+  // ===================== FINAL SUBMIT =====================
   const onSubmitFinal = async () => {
-    const date = state.formData.onDutyDetails.dateOfDuty;
+    const traffic = state.formData.traffic;
 
-    const toISO = (time: string) => (time ? `${date}T${time}:00.000Z` : "");
+    const date = traffic.onDutyDetails.dateOfDuty;
+
+    // SAFE DATE → ISO CONVERTER
+    const toISO = (time: string) => {
+      if (!date || !time) return undefined; // ❗ important
+      return new Date(`${date}T${time}`).toISOString();
+    };
 
     const payload = {
-      isVehicleInvolved: state.formData.vehicleInvolved === "yes",
+      isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
       onDutyDetails: {
-        ...state.formData.onDutyDetails,
-        startTime: toISO(state.formData.onDutyDetails.startTime),
-        endTime: toISO(state.formData.onDutyDetails.endTime),
+        ...traffic.onDutyDetails,
+        startTime: toISO(traffic.onDutyDetails.startTime),
+        endTime: toISO(traffic.onDutyDetails.endTime),
       },
 
-      onDutyDetailsMPReporting: state.formData.onDutyDetailsMPReporting,
+      onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
 
       offenceOccurenceDetails: {
-        ...state.formData.offenceOccurenceDetails,
-        timeOfOffence: toISO(
-          state.formData.offenceOccurenceDetails.timeOfOffence
-        ),
+        ...traffic.offenceOccurenceDetails,
+        timeOfOffence: toISO(traffic.offenceOccurenceDetails.timeOfOffence),
+
+        //  empty string backend ko pasand nahi, undefined bhejo
+        incidentLocation:
+          traffic.offenceOccurenceDetails.incidentLocation?.trim() || undefined,
       },
 
-      offenceTypes: state.formData.offenceTypes,
-      offenceTypeReference: state.formData.offenceCode,
+      offenceTypes: traffic.offenceTypes,
+      offenceTypeReference: traffic.offenceCode,
     };
 
     try {
-      console.log("🚀 Creating offence...");
       toast.info("Creating Offence...");
 
       const offence = await mutateAsync(payload);
-
       toast.success("Offence Created Successfully!");
-      console.log("✅ OFFENCE CREATED ===>", offence);
 
       const offenceId = offence?._id;
       if (!offenceId) {
@@ -64,48 +72,46 @@ export default function MultiStepForm() {
         return;
       }
 
-      // ================= OFFENDER ==================
+      const offenderType =
+        traffic.vehicleInvolved === "yes"
+          ? traffic?.vehicleDetails?.driverType
+          : traffic?.offenderWithoutVehicle?.offenderType;
+
       const offenderPayload = {
         offenceId,
-        offenderType: state.formData.vehicleDetails.driverType || "Civilian",
-        offenderDetails: {
-          name: state.formData.offenderDetails?.["Full Name"] || "",
-          fatherNameOrHusbandName:
-            state.formData.offenderDetails?.["Father Name"] || "",
-          address: state.formData.offenderDetails?.["Address"] || "",
-          aadharNumber: state.formData.offenderDetails?.["ID Proof"] || "",
-        },
+        offenderType,
+        offenderDetails:
+          traffic.offenderPeople && traffic.offenderPeople.length > 0
+            ? traffic.offenderPeople
+            : [],
       };
 
-      console.log(" Sending Offender Payload ===>", offenderPayload);
+      console.log("👮 TRAFFIC OFFENDER PAYLOAD ===>", offenderPayload);
 
-      const offenderRes = await createOffender(offenderPayload);
 
+      await createOffenderMutate(offenderPayload);
       toast.success("Offender Created Successfully!");
-      console.log(" OFFENDER CREATED ===>", offenderRes);
 
-      // ================= WITNESS ==================
-      if (state.formData.witnesses?.length > 0) {
-        const witnessingPayload = state.formData.witnesses.map((w) => ({
-          offenceId,
-          rank: w.reportingBlock.rank,
-          unit: w.reportingBlock.unit,
-          ArmyNo: w.reportingBlock.armyNumber,
-          name: w.reportingBlock.nameReportingMP,
-        }));
-
-        console.log(" Final Witness Payload ===>", witnessingPayload);
-
-        await Promise.all(witnessingPayload.map((w) => createMpWitenessing(w)));
+      // ================== WITNESS ==================
+      if (traffic.witnesses?.length > 0) {
+        await Promise.all(
+          traffic.witnesses.map((w) =>
+            createWitnessMutate({
+              offenceId,
+              rank: w.reportingBlock.rank,
+              unit: w.reportingBlock.unit,
+              ArmyNo: w.reportingBlock.armyNumber,
+              name: w.reportingBlock.nameReportingMP,
+            })
+          )
+        );
 
         toast.success("All Witnesses Saved Successfully!");
-        console.log("👮‍♂️ All MP Witness Created Successfully");
       }
 
       toast.success("🎉 Final Submit Completed Successfully!");
     } catch (err: any) {
       console.log(" FINAL ERROR ===>", err?.response?.data || err);
-
       toast.error(
         err?.response?.data?.error ||
           err?.response?.data?.message ||
@@ -114,17 +120,101 @@ export default function MultiStepForm() {
     }
   };
 
+  // // ===================== FINAL SUBMIT =====================
+  // const onSubmitFinal = async () => {
+  //   const traffic = state.formData.traffic;
 
-    const stepsConfig = {
+  //   const date = traffic.onDutyDetails.dateOfDuty;
+  //   const toISO = (time: string) => (time ? `${date}T${time}:00.000Z` : "");
+
+  //   const payload = {
+  //     isVehicleInvolved: traffic.vehicleInvolved === "yes",
+
+  //     onDutyDetails: {
+  //       ...traffic.onDutyDetails,
+  //       startTime: toISO(traffic.onDutyDetails.startTime),
+  //       endTime: toISO(traffic.onDutyDetails.endTime),
+  //     },
+
+  //     onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
+
+  //     offenceOccurenceDetails: {
+  //       ...traffic.offenceOccurenceDetails,
+  //       timeOfOffence: toISO(
+  //         traffic.offenceOccurenceDetails.timeOfOffence
+  //       ),
+  //     },
+
+  //     offenceTypes: traffic.offenceTypes,
+  //     offenceTypeReference: traffic.offenceCode,
+  //   };
+
+  //   try {
+  //     toast.info("Creating Offence...");
+
+  //     const offence = await mutateAsync(payload);
+  //     toast.success("Offence Created Successfully!");
+
+  //     const offenceId = offence?._id;
+  //     if (!offenceId) {
+  //       toast.error("Offence ID missing!");
+  //       return;
+  //     }
+
+  //     // ================== OFFENDER ==================
+  //     const offenderPayload = {
+  //       offenceId,
+  //       offenderType: traffic.vehicleDetails.driverType,
+  //       offenderDetails: traffic.offenderDetails || {},
+  //     };
+
+  //     await createOffenderMutate(offenderPayload);
+  //     toast.success("Offender Created Successfully!");
+
+  //     // ================== WITNESS ==================
+  //     if (traffic.witnesses?.length > 0) {
+  //       await Promise.all(
+  //         traffic.witnesses.map((w) =>
+  //           createWitnessMutate({
+  //             offenceId,
+  //             rank: w.reportingBlock.rank,
+  //             unit: w.reportingBlock.unit,
+  //             ArmyNo: w.reportingBlock.armyNumber,
+  //             name: w.reportingBlock.nameReportingMP,
+  //           })
+  //         )
+  //       );
+
+  //       toast.success("All Witnesses Saved Successfully!");
+  //     }
+
+  //     toast.success("🎉 Final Submit Completed Successfully!");
+  //   } catch (err: any) {
+  //     console.log(" FINAL ERROR ===>", err?.response?.data || err);
+  //     toast.error(
+  //       err?.response?.data?.error ||
+  //         err?.response?.data?.message ||
+  //         "Something went wrong!"
+  //     );
+  //   }
+  // };
+
+  // ================== STEP CONFIG ==================
+  const stepsConfig = {
     1: {
       title: "1. PARTICULARS:",
       component: (
         <Step1Particulars
-          value={state.formData.vehicleInvolved}
+          value={state.formData.traffic.vehicleInvolved}
           onChange={(v: string) =>
             dispatch({
               type: "SET_FORM_DATA",
-              payload: { vehicleInvolved: v },
+              payload: {
+                traffic: {
+                  ...state.formData.traffic,
+                  vehicleInvolved: v,
+                },
+              },
             })
           }
         />
@@ -133,44 +223,23 @@ export default function MultiStepForm() {
 
     2: {
       title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
-      component: (
-        <Step2Statement
-          formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
-        />
-      ),
+      component: <Step2Statement />,
     },
 
     3: {
       title: "3. OFFENCE COMMITTED / ORDERS CONTRAVENED:",
-      component: (
-        <Step3Offence
-          formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
-        />
-      ),
+      component: <Step3Offence />,
     },
 
     4: {
       title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
-      component: (
-        <Step4Remarks
-          formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
-        />
-      ),
+      component: <Step4Remarks />,
     },
   };
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
-      <div className=" w-full bg-white rounded-lg overflow-hidden h-full">
+      <div className="w-full bg-white rounded-lg overflow-hidden h-full">
         <div className="flex h-full">
           <LeftStepper
             steps={steps}
@@ -188,8 +257,9 @@ export default function MultiStepForm() {
               dispatch({ type: "SET_FORM_DATA", payload: data })
             }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onSubmitFinal={onSubmitFinal}
+            onSubmitFinal={onSubmitFinal} // <<=== IMPORTANT!!!
             stepsConfig={stepsConfig}
+            mode="traffic"
           />
         </div>
       </div>

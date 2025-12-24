@@ -1,3 +1,4 @@
+"use client";
 import { useForm } from "@/context/FormContext";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
 import { RightPanel } from "../multi-step-form/RightPanel";
@@ -6,9 +7,22 @@ import StaticSpeedStep1Particulars from "./steps/Step1";
 import Step2Statement from "./steps/step2";
 import Step3Offence from "./steps/step3";
 
+import { toast } from "react-toastify";
+import { createStaticSpeedRecord } from "@/apis/StaticSpeed/create";
+import { createMpWitenessing } from "@/apis/MpWitenessing/create";
+import { createOffender } from "@/apis/offender/create";
+import { CreateStaticSpeedPayload } from "@/apis/StaticSpeed/type";
+import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+import { useCreateOffender } from "@/features/offender/Hooks";
+import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 
 export default function StaticSpeedForm() {
   const { state, dispatch } = useForm();
+
+  const staticData = state.formData.staticSpeed;
+  const createStaticRecord = useCreateStaticSpeedRecord();
+  const createOffenderMutation = useCreateOffender();
+  const createWitnessMutation = useCreateOnDutyWitnessingMp();
 
   const steps = [
     { id: 1, label: "Particulars", icon: "1" },
@@ -17,25 +31,15 @@ export default function StaticSpeedForm() {
     { id: 4, label: "Remarks of CO/2IC Provost Unit", icon: "4" },
   ];
 
-  // ------------ ⭐ IMPORTANT: Static Speed Steps Config ⭐ ------------
   const stepsConfig = {
-    1: {
-      title: "1. PARTICULARS:",
-      component: (
-        <StaticSpeedStep1Particulars
-        
-        />
-      ),
-    },
+    1: { title: "1. PARTICULARS:", component: <StaticSpeedStep1Particulars /> },
 
     2: {
       title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
       component: (
         <Step2Statement
           formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
+          setFormData={(d) => dispatch({ type: "SET_FORM_DATA", payload: d })}
         />
       ),
     },
@@ -45,9 +49,7 @@ export default function StaticSpeedForm() {
       component: (
         <Step3Offence
           formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
+          setFormData={(d) => dispatch({ type: "SET_FORM_DATA", payload: d })}
         />
       ),
     },
@@ -57,20 +59,95 @@ export default function StaticSpeedForm() {
       component: (
         <Step4Remarks
           formData={state.formData}
-          setFormData={(d) =>
-            dispatch({ type: "SET_FORM_DATA", payload: d })
-          }
+          setFormData={(d) => dispatch({ type: "SET_FORM_DATA", payload: d })}
         />
       ),
     },
+  };
+
+  const handleFinalSubmit = async () => {
+    try {
+      const payload: CreateStaticSpeedPayload = {
+        vehicleType: staticData.vehicleDetails.vehicleType,
+        vehicleCategory: staticData.vehicleDetails.category,
+        vehicleNumber: staticData.vehicleDetails.vehicleNumber,
+        vehicleName: staticData.vehicleDetails.vehicleName,
+
+        offenceOccurenceDetails: {
+          time: staticData.offenceOccurenceDetails.time,
+          incidentLocation: staticData.offenceOccurenceDetails.incidentLocation,
+          description: staticData.offenceOccurenceDetails.description,
+          overSpeed: staticData.offenceOccurenceDetails.overSpeed ?? "",
+          actualSpeed: staticData.offenceOccurenceDetails.actualSpeed ?? "",
+          authSpeed: staticData.offenceOccurenceDetails.authSpeed ?? "",
+        },
+      };
+
+      console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
+
+      // ========= 1️⃣ STATIC SPEED =========
+      const staticRes = await createStaticRecord.mutateAsync(payload);
+
+      toast.success("Static Record Created Successfully!");
+      console.log("📌 STATIC RECORD RESPONSE ===>", staticRes);
+
+      if (!staticRes?._id) {
+        console.error("❌ ERROR: STATIC RESPONSE DOES NOT CONTAIN _id");
+        return;
+      }
+
+      // ========= 2️⃣ OFFENDER =========
+      const offenderPayload = {
+        offenceId: staticRes._id,
+        offenderType: state.formData.staticSpeed.vehicleDetails.driverType,
+
+        // BACKEND EXPECTS ARRAY (JOI)
+        offenderDetails:
+          state.formData.staticSpeed.offenderPeople &&
+          state.formData.staticSpeed.offenderPeople.length > 0
+            ? state.formData.staticSpeed.offenderPeople
+            : [],
+      };
+
+      console.log("👮 STATIC OFFENDER PAYLOAD ===>", offenderPayload);
+
+      await createOffenderMutation.mutateAsync(offenderPayload);
+      toast.success("Offender Saved!");
+
+      // ========= 3️⃣ WITNESSES =========
+      const witnessPayload = staticData.witnesses.map((w) => ({
+        offenceId: staticRes._id,
+        rank: w.reportingBlock.rank,
+        unit: w.reportingBlock.unit,
+        ArmyNo: w.reportingBlock.armyNumber,
+        name: w.reportingBlock.nameReportingMP || "",
+        contactNumber: w.reportingBlock.contactNumber,
+      }));
+
+      console.log("👀 WITNESS PAYLOAD ===>", witnessPayload);
+
+      await Promise.all(
+        witnessPayload.map((w) => createWitnessMutation.mutateAsync(w))
+      );
+
+      toast.success("Witness Added!");
+
+      console.log("🎉 ALL APIS COMPLETED SUCCESSFULLY");
+    } catch (error: any) {
+      console.log("❌ STATIC SPEED SUBMIT ERROR ===>", error?.response?.data);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          "Failed to submit record"
+      );
+    }
   };
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
       <div className="w-full bg-white rounded-lg overflow-hidden h-full">
         <div className="flex h-full">
-
-          {/* LEFT PANEL */}
           <LeftStepper
             steps={steps}
             currentStep={state.currentStep}
@@ -80,7 +157,6 @@ export default function StaticSpeedForm() {
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
-          {/* RIGHT PANEL */}
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
@@ -88,8 +164,9 @@ export default function StaticSpeedForm() {
               dispatch({ type: "SET_FORM_DATA", payload: data })
             }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onSubmitFinal={() => {}}
-            stepsConfig={stepsConfig}   //  ← ⭐ YAHAN PASS KAR DIYA
+            onSubmitFinal={handleFinalSubmit}
+            stepsConfig={stepsConfig}
+            mode="static"
           />
         </div>
       </div>

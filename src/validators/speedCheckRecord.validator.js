@@ -31,11 +31,25 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     time: Joi.date().required().messages({
       "any.required": "time of offence is required",
     }),
+
     incidentLocation: Joi.string().trim().optional(),
+
+    // Accept frontend actualSpeed
+    actualSpeed: Joi.string().trim().optional(),
+
+    // Accept backend key also (safe)
     actualSpeedNoted: Joi.string().trim().optional(),
+
     authSpeed: Joi.string().trim().optional(),
+
+    // Accept frontend overSpeed
+    overSpeed: Joi.string().trim().optional(),
+
+    // Accept backend key also
     overSpeedCalculated: Joi.string().trim().optional(),
+
     description: Joi.string().trim().optional(),
+
     customFields: Joi.object().unknown(true).optional(),
   }).required(),
 
