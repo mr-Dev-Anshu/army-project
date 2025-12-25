@@ -278,6 +278,131 @@
             ]
         },
         {
+            "name": "MP Investigation Reports",
+            "item": [
+                {
+                    "name": "Get All Reports",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Report by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports/{{reportId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports",
+                                "{{reportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Report",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('reportId', response.data._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"reportDetails\": {\n    \"reportNumber\": \"MP/2025/001\",\n    \"command\": \"South Command\",\n    \"firNumber\": \"FIR-12345\",\n    \"firFileUrl\": \"http://example.com/fir.pdf\"\n  },\n  \"investigationHead\": {\n    \"armyNumber\": \"JC-987654K\",\n    \"rank\": \"Subedar\",\n    \"name\": \"Rajesh Kumar\",\n    \"unit\": \"12 MP Unit\",\n    \"fmn\": \"HQ 12 Corps\",\n    \"command\": \"South Command\",\n    \"address\": \"Unit Lines, Pune\",\n    \"iCardNumber\": \"IC-54321\"\n  },\n  \"occurrenceDetails\": {\n    \"offenceType\": \"Theft\",\n    \"placeOfOccurrence\": \"Unit Stores\",\n    \"dateOfOccurrence\": \"2025-06-15\",\n    \"timeOfOccurrence\": \"2025-06-15T14:30:00.000Z\",\n    \"description\": \"Theft of unit property reported.\"\n  },\n  \"customFields\": {\n    \"victim\": {\n        \"vehicleCategory\": \"2-Wheeler\",\n        \"typeOfVehicle\": \"MC\",\n        \"vehicleNumber\": \"MH 12 AB 1234\",\n        \"name\": \"Sepoy Rahul\",\n        \"rank\": \"Sep\",\n        \"type\": \"Suspect\",\n        \"unit\": \"123 Signal Regt\",\n        \"armyNumber\": \"12345678A\"\n    }\n  },\n  \"documents\": [\n    {\n        \"statement\": \"Witness statement of Guard\",\n        \"url\": \"http://example.com/stmt1.pdf\"\n    }\n  ],\n  \"remarks\": {\n    \"analysis\": \"Initial investigation requires more evidence.\",\n    \"recommendation\": \"Escalate to senior officer.\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Report",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"actionStatus\": true,\n  \"remarks\": {\n    \"analysis\": \"Investigation completed. Suspect confessed.\",\n    \"recommendation\": \"Disciplinary action initiated.\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports/{{reportId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports",
+                                "{{reportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Report",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports/{{reportId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports",
+                                "{{reportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Aggregation & Filters",
             "item": [
                 {
