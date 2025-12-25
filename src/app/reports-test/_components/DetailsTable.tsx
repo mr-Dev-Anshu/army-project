@@ -1,12 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import OffenderDetailsCell from "./OffenderDetailsCell";
-
-// ... existing imports
 
 interface DetailsTableProps {
   offences: any[];
@@ -14,145 +12,200 @@ interface DetailsTableProps {
 }
 
 export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTableProps) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-xs text-gray-700 bg-white">
-        <thead className="bg-gray-50 border-b border-gray-200 font-semibold text-gray-900 uppercase">
-          <tr>
-            <th className="px-4 py-3 w-12">Sr no.</th>
-            <th className="px-4 py-3">Place of Offence</th>
-            
-            {/* Dynamic Headers */}
-            {isVehicleInvolved ? (
-              <>
-                <th className="px-4 py-3 min-w-[200px]">Particulars of Driver/Rider</th>
-                <th className="px-4 py-3">Unit</th>
-                <th className="px-4 py-3">FMN</th>
-                <th className="px-4 py-3 max-w-[150px]">Offence Type/ Brief</th>
-                <th className="px-4 py-3">Veh. BA No. / Make & Take</th>
-                <th className="px-4 py-3">Report no.</th>
-                <th className="px-4 py-3">Date & Time</th>
-                <th className="px-4 py-3">Particulars of Co-Driver/Rider</th>
-              </>
-            ) : (
-              <>
-                <th className="px-4 py-3 min-w-[200px]">Particulars of Indls.</th>
-                <th className="px-4 py-3">Unit</th>
-                <th className="px-4 py-3">FMN</th>
-                <th className="px-4 py-3">Report no.</th>
-                <th className="px-4 py-3">Date & Time</th>
-                <th className="px-4 py-3 max-w-xs">Offence Description</th>
-              </>
-            )}
+  
+  const columns = useMemo<Column<any>[]>(() => {
+    const commonColumns: Column<any>[] = [
+      {
+        header: "Sr no.",
+        cell: (offence) => {
+             // We don't have the index here directly if we just pass the item. 
+             // But DynamicTable maps over data. 
+             // Use a wrapper or just render based on index if we can get it.
+             // EDIT: DynamicTable doesn't pass index to cell. 
+             // I should probably map the data to include index or handling it in DynamicTable. 
+             // For now, I'll specificially handle it by mapping data before passing it to DynamicTable?
+             // Or better, I'll update DynamicTable to pass index to cell function.
+             // Wait, I can't easily change DynamicTable repeatedly.
+             // I'll map the data to add 'displayIndex' property.
+             return <span className="text-gray-900">{offence.displayIndex}</span>
+        },
+        className: "w-12 text-center" 
+      },
+      {
+        header: "Place of Offence",
+        cell: (offence) => (
+          <div>
+            <div className="font-medium text-gray-900">
+              {offence.offenceOccurenceDetails?.incidentLocation || "Unknown Location"}
+            </div>
+            <div className="text-gray-500 font-normal mt-1">SI Line Military Station</div>
+          </div>
+        )
+      }
+    ];
 
-            <th className="px-4 py-3">Action status</th>
-            <th className="px-4 py-3"></th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100">
-          {offences.map((offence, index) => {
-            const date = new Date(offence.offenceOccurenceDetails?.timeOfOffence || offence.createdAt);
-            const dateStr = date.toLocaleDateString("en-GB");
-            const timeStr = date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false });
-            
-            // Derive Status
-            const isTaken = offence.actionStatus === true; 
-            const statusLabel = isTaken ? "Taken" : "Pending";
-            
-            // Offenders info
-            const offenders = offence.offenders || [];
-            const primaryOffender = offenders[0] || {};
-            const primaryDetails = primaryOffender.offenderDetails || {};
-            
-            // Co-Driver / Secondary Offender
-            const coDriver = offenders[1] || {};
-            const coDriverDetails = coDriver.offenderDetails || {};
+    const vehicleColumns: Column<any>[] = [
+      {
+        header: "Particulars of Driver/Rider",
+        className: "min-w-[200px]",
+        cell: (offence) => {
+          const primaryDetails = offence.offenders?.[0]?.offenderDetails || {};
+          const reportingMP = offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+          return <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />;
+        }
+      },
+      {
+        header: "Unit",
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
+      },
+      {
+        header: "FMN",
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 CORPs"
+      },
+      {
+        header: "Offence Type/ Brief",
+        className: "max-w-[150px]",
+        cell: (offence) => (
+          <div>
+            <div className="font-medium text-gray-900">{offence.currentOffenceType || "Traffic Offence"}</div>
+            <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+              {offence.offenceOccurenceDetails?.description || ""}
+            </div>
+          </div>
+        )
+      },
+      {
+        header: "Veh. BA No. / Make & Take",
+        cell: (offence) => (
+          <div>
+            <div className="font-semibold text-gray-900">{offence.vehicleNumber || "N/A"}</div>
+            <div className="text-gray-500 text-xs">{offence.vehicleName || "Unknown Vehicle"}</div>
+          </div>
+        )
+      },
+      {
+        header: "Report no.",
+        cell: (offence) => (
+          <span className="text-gray-600 text-xs">{offence.reportNumber || "PRO/21 CPU/00042/102/25"}</span>
+        )
+      },
+      {
+        header: "Date & Time",
+        cell: (offence) => {
+          const date = new Date(offence.offenceOccurenceDetails?.timeOfOffence || offence.createdAt);
+          return (
+            <div>
+              <div className="font-semibold text-gray-900">{date.toLocaleDateString("en-GB")}</div>
+              <div className="text-gray-500 text-xs">{date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false })}</div>
+            </div>
+          );
+        }
+      },
+      {
+        header: "Particulars of Co-Driver/Rider",
+        cell: (offence) => {
+          const coDriver = offence.offenders?.[1];
+          if (!coDriver) return <span className="text-gray-400">-</span>;
+          const details = coDriver.offenderDetails || {};
+          const reportingMP = offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+          return <OffenderDetailsCell details={details} mpName={reportingMP} />;
+        }
+      }
+    ];
 
-            // Reporting MP
-            const reportingMP = offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
-            
-            // Locations
-            const place = offence.offenceOccurenceDetails?.incidentLocation || "Unknown Location";
-            
-            // Report No 
-            const reportNo = "PRO/21 CPU/00042/102/25";
+    const noVehicleColumns: Column<any>[] = [
+      {
+        header: "Particulars of Indls.",
+        className: "min-w-[200px]",
+        cell: (offence) => {
+          // Check if we have specific mock data fields or standardized ones
+          // For No Vehicle Involved, sometimes it's a Civilian or Maid
+          const primaryDetails = offence.offenders?.[0]?.offenderDetails || {};
+          // Mocking some data for visual parity with screenshot if missing
+          // The screenshot had "Civilian Mr Rakesh Kumar" etc.
+          // We'll trust the details object has what we need or OffenderDetailsCell handles it
+          const reportingMP = offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+          return <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />;
+        }
+      },
+      {
+        header: "Unit",
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
+      },
+      {
+        header: "FMN",
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 CORPs"
+      },
+      {
+        header: "Report no.",
+        cell: (offence) => (
+          <span className="text-gray-600 text-xs">{offence.reportNumber || "PRO/21 CPU/00042/102/25"}</span>
+        )
+      },
+      {
+        header: "Date & Time",
+        cell: (offence) => {
+          const date = new Date(offence.offenceOccurenceDetails?.timeOfOffence || offence.createdAt);
+          return (
+            <div>
+              <div className="font-semibold text-gray-900">{date.toLocaleDateString("en-GB")}</div>
+              <div className="text-gray-500 text-xs">{date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false })}</div>
+            </div>
+          );
+        }
+      },
+      {
+        header: "Offence Description",
+        className: "max-w-md",
+        cell: (offence) => (
+           <div className="text-gray-700 text-xs">
+              {offence.offenceOccurenceDetails?.description || "No description provided."}
+           </div>
+        )
+      }
+    ];
 
-            return (
-              <tr key={offence._id || index} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-4 align-top">{index + 1}</td>
-                <td className="px-4 py-4 align-top font-medium text-gray-900">
-                  {place}
-                  <div className="text-gray-500 font-normal mt-1">SI Line Military Station</div>
-                </td>
-                
-                {/* VEHICLE INVOLVED COLUMNS */}
-                {isVehicleInvolved ? (
-                  <>
-                    <td className="px-4 py-4 align-top">
-                      <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />
-                    </td>
-                    <td className="px-4 py-4 align-top">{primaryDetails.unit || "N/A"}</td>
-                    <td className="px-4 py-4 align-top">{primaryDetails.fmn || "HQ 21 CORPs"}</td>
-                    <td className="px-4 py-4 align-top text-gray-700">
-                      <div className="font-medium text-gray-900">{offence.currentOffenceType || "Traffic Offence"}</div>
-                      <div>{offence.offenceOccurenceDetails?.description ? offence.offenceOccurenceDetails.description.substring(0, 30) + "..." : ""}</div>
-                    </td>
-                     <td className="px-4 py-4 align-top">
-                        <div className="font-semibold text-gray-900">{offence.vehicleNumber || "N/A"}</div>
-                        <div className="text-gray-500">{offence.vehicleName || "Unknown Vehicle"}</div>
-                      </td>
-                    <td className="px-4 py-4 align-top text-gray-600">{offence.reportNumber || reportNo}</td>
-                    <td className="px-4 py-4 align-top">
-                       <div className="font-semibold" suppressHydrationWarning>{dateStr}</div>
-                       <div className="text-gray-500" suppressHydrationWarning>{timeStr}</div>
-                    </td>
-                     <td className="px-4 py-4 align-top">
-                      {offenders.length > 1 ? (
-                        <OffenderDetailsCell details={coDriverDetails} mpName={reportingMP} />
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                  </>
-                ) : (
-                  /* NO VEHICLE COLUMNS */
-                  <>
-                    <td className="px-4 py-4 align-top">
-                       <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />
-                    </td>
-                    <td className="px-4 py-4 align-top">{primaryDetails.unit || "N/A"}</td>
-                    <td className="px-4 py-4 align-top">{primaryDetails.fmn || "HQ 21 CORPs"}</td>
-                    <td className="px-4 py-4 align-top text-gray-600">{offence.reportNumber || reportNo}</td>
-                    <td className="px-4 py-4 align-top">
-                       <div className="font-semibold" suppressHydrationWarning>{dateStr}</div>
-                       <div className="text-gray-500" suppressHydrationWarning>{timeStr}</div>
-                    </td>
-                    <td className="px-4 py-4 align-top text-gray-700 max-w-md">
-                      {offence.offenceOccurenceDetails?.description || "No description provided."}
-                    </td>
-                  </>
-                )}
+    const actionColumns: Column<any>[] = [
+      {
+        header: "Action Status",
+        cell: (offence) => {
+          const isTaken = offence.actionStatus === true;
+          return (
+             <div className="flex flex-col items-center gap-1">
+                <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
+                  <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                </div>
+                <span className="text-[10px] text-gray-500 font-medium uppercase">{isTaken ? "Taken" : "Pending"}</span>
+              </div>
+          );
+        },
+        className: "text-center w-24"
+      },
+      {
+        header: "",
+        cell: () => (
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreVertical className="w-4 h-4 text-gray-400" />
+          </Button>
+        ),
+        className: "text-right w-10"
+      }
+    ];
 
-                <td className="px-4 py-4 align-top">
-                  <div className="flex flex-col items-center gap-1">
-                    {/* Design shows Toggle Switch looks specific */}
-                    <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
-                      <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                    </div>
-                    <span className="text-xs text-gray-500 mt-1">{statusLabel}</span>
-                  </div>
-                </td>
+    return [
+      ...commonColumns,
+      ...(isVehicleInvolved ? vehicleColumns : noVehicleColumns),
+      ...actionColumns
+    ];
+  }, [isVehicleInvolved]);
 
-                <td className="px-4 py-4 align-top text-right">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="w-4 h-4 text-gray-400" />
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
+  // Pre-process data to add index
+  const processedData = useMemo(() => {
+    return offences.map((item, index) => ({
+      ...item,
+      displayIndex: index + 1
+    }));
+  }, [offences]);
+
+  return <DynamicTable data={processedData} columns={columns} />;
 }

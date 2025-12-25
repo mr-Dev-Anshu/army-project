@@ -14,6 +14,11 @@
             "key": "offenceId",
             "value": "",
             "type": "string"
+        },
+        {
+            "key": "recordId",
+            "value": "",
+            "type": "string"
         }
     ],
     "item": [
@@ -94,7 +99,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleType\": \"Civilian Vehicle\",\n  \"vehicleNumber\": \"MP01AB1234\",\n  \"vehicleName\": \"Honda City\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T08:00:00.000Z\",\n    \"endTime\": \"2025-12-24T16:00:00.000Z\",\n    \"dutyLocation\": \"Bhopal Cantt\",\n    \"dutyType\": \"Patrol\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Capt. Rajesh Kumar\",\n    \"rank\": \"Captain\",\n    \"unit\": \"Unit 5\",\n    \"armyNumber\": \"IC12345\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T10:30:00.000Z\",\n    \"incidentLocation\": \"Gate No 2, Bhopal Cantt\",\n    \"description\": \"Wrong parking near restricted area\"\n  },\n  \"offenceTypes\": [\"minor\"],\n  \"offenceTypeReference\": [\"Para 48 of SAO 6/S/2001/PM\"],\n  \"actionStatus\": false\n}"
+                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleType\": \"Civilian Vehicle\",\n  \"vehicleNumber\": \"MP01AB1234\",\n  \"vehicleName\": \"Honda City\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T08:00:00.000Z\",\n    \"endTime\": \"2025-12-24T16:00:00.000Z\",\n    \"dutyLocation\": \"Bhopal Cantt\",\n    \"dutyType\": \"Patrol\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Capt. Rajesh Kumar\",\n    \"rank\": \"Captain\",\n    \"unit\": \"Unit 5\",\n    \"armyNumber\": \"IC12345\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T10:30:00.000Z\",\n    \"incidentLocation\": \"Gate No 2, Bhopal Cantt\",\n    \"description\": \"Wrong parking near restricted area\"\n  },\n  \"offenceTypes\": [\"minor\", \"parking\"],\n  \"offenceTypeReference\": [\"Para 48 of SAO 6/S/2001/PM\", \"Traffic Rule 12B\"],\n  \"customFields\": {\n    \"parkingDuration\": \"30 minutes\",\n    \"warningIssued\": \"true\"\n  },\n  \"actionStatus\": false\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/generalTraficOffence",
@@ -135,7 +140,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"2-Wheeler\",\n  \"vehicleType\": \"DD Vehicle\",\n  \"vehicleNumber\": \"DD05MP2023\",\n  \"vehicleName\": \"Royal Enfield Classic 350\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T06:00:00.000Z\",\n    \"endTime\": \"2025-12-24T14:00:00.000Z\",\n    \"dutyLocation\": \"Highway NH-12\",\n    \"dutyType\": \"Speed Check\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Lt. Anil Singh\",\n    \"rank\": \"Lieutenant\",\n    \"unit\": \"Unit 3\",\n    \"armyNumber\": \"IC67890\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T11:15:00.000Z\",\n    \"incidentLocation\": \"NH-12 Checkpoint\",\n    \"description\": \"Over speeding at 120 km/h in 60 km/h zone\"\n  },\n  \"offenceTypes\": [\"major\"],\n  \"offenceTypeReference\": [\"Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM)\"],\n  \"actionStatus\": false\n}"
+                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"2-Wheeler\",\n  \"vehicleType\": \"DD Vehicle\",\n  \"vehicleNumber\": \"DD05MP2023\",\n  \"vehicleName\": \"Royal Enfield Classic 350\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T06:00:00.000Z\",\n    \"endTime\": \"2025-12-24T14:00:00.000Z\",\n    \"dutyLocation\": \"Highway NH-12\",\n    \"dutyType\": \"Speed Check\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Lt. Anil Singh\",\n    \"rank\": \"Lieutenant\",\n    \"unit\": \"Unit 3\",\n    \"armyNumber\": \"IC67890\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T11:15:00.000Z\",\n    \"incidentLocation\": \"NH-12 Checkpoint\",\n    \"description\": \"Over speeding at 120 km/h in 60 km/h zone\"\n  },\n  \"offenceTypes\": [\"major\", \"overspeeding\", \"reckless-driving\"],\n  \"offenceTypeReference\": [\"Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM)\", \"MVA Section 184\", \"Army Rule 45(a)\"],\n  \"customFields\": {\n    \"speedLimit\": \"60\",\n    \"recordedSpeed\": \"120\",\n    \"radarId\": \"RDR-NH12-01\"\n  },\n  \"actionStatus\": false\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/generalTraficOffence",
@@ -176,7 +181,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleType\": \"DD Vehicle\",\n  \"vehicleNumber\": \"DD10MP2024\",\n  \"vehicleName\": \"Mahindra Scorpio\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T09:00:00.000Z\",\n    \"endTime\": \"2025-12-24T17:00:00.000Z\",\n    \"dutyLocation\": \"Delhi Cantt\",\n    \"dutyType\": \"Routine Check\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Major Vikram Sharma\",\n    \"rank\": \"Major\",\n    \"unit\": \"Unit 1\",\n    \"armyNumber\": \"IC11111\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T13:45:00.000Z\",\n    \"incidentLocation\": \"Delhi Cantt Main Gate\",\n    \"description\": \"Drunk driving and rash behavior\"\n  },\n  \"offenceTypes\": [\"disciplinary\"],\n  \"offenceTypeReference\": [\"Army Act Section 45\"],\n  \"actionStatus\": false\n}"
+                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleType\": \"DD Vehicle\",\n  \"vehicleNumber\": \"DD10MP2024\",\n  \"vehicleName\": \"Mahindra Scorpio\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T09:00:00.000Z\",\n    \"endTime\": \"2025-12-24T17:00:00.000Z\",\n    \"dutyLocation\": \"Delhi Cantt\",\n    \"dutyType\": \"Routine Check\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Major Vikram Sharma\",\n    \"rank\": \"Major\",\n    \"unit\": \"Unit 1\",\n    \"armyNumber\": \"IC11111\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T13:45:00.000Z\",\n    \"incidentLocation\": \"Delhi Cantt Main Gate\",\n    \"description\": \"Drunk driving and rash behavior\"\n  },\n  \"offenceTypes\": [\"disciplinary\", \"major\", \"drunk-driving\"],\n  \"offenceTypeReference\": [\"Army Act Section 45\", \"MVA Section 185\", \"Disciplinary Code 23A\"],\n  \"customFields\": {\n    \"alcoholLevel\": \"0.12%\",\n    \"breathalyzerReading\": \"120mg/100ml\",\n    \"witnessPresent\": \"true\"\n  },\n  \"actionStatus\": false\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/generalTraficOffence",
@@ -746,6 +751,152 @@
                             ]
                         },
                         "description": "Filter: 4-wheelers with vehicle involved and pending action"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Static Speed Check Record",
+            "item": [
+                {
+                    "name": "Get All Speed Check Records (Grouped by Offence Type)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord"
+                            ]
+                        },
+                        "description": "Fetches all static speed check records grouped by offence type with aggregated statistics (total offences, offenders, and witnessing MPs per type)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Speed Check Record by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord/{{recordId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord",
+                                "{{recordId}}"
+                            ]
+                        },
+                        "description": "Fetches a specific speed check record by ID with all related offenders and witnessing MPs"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Speed Check Record",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('recordId', response._id);",
+                                    "    console.log('Record ID saved:', response._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleType\": \"Civilian Vehicle\",\n  \"vehicleNumber\": \"MP01CD5678\",\n  \"vehicleName\": \"Maruti Swift\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-25T00:00:00.000Z\",\n    \"startTime\": \"2025-12-25T09:00:00.000Z\",\n    \"endTime\": \"2025-12-25T17:00:00.000Z\",\n    \"dutyLocation\": \"NH-12 Speed Check Point\",\n    \"dutyType\": \"Speed Monitoring\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Lt. Amit Singh\",\n    \"rank\": \"Lieutenant\",\n    \"unit\": \"Traffic Control Unit\",\n    \"armyNumber\": \"IC67890\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-25T11:45:00.000Z\",\n    \"incidentLocation\": \"NH-12, Km 45\",\n    \"description\": \"Vehicle exceeding speed limit of 80 km/h, recorded at 105 km/h\"\n  },\n  \"offenceTypes\": [\"overspeeding\", \"minor\"],\n  \"customFields\": {\n    \"speedLimit\": \"80\",\n    \"recordedSpeed\": \"105\",\n    \"radarDeviceId\": \"RADAR-001\"\n  },\n  \"actionStatus\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord"
+                            ]
+                        },
+                        "description": "Creates a new static speed check record"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Speed Check Record",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"actionStatus\": true,\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-25T11:45:00.000Z\",\n    \"incidentLocation\": \"NH-12, Km 45\",\n    \"description\": \"Vehicle exceeding speed limit - Action taken\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord/{{recordId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord",
+                                "{{recordId}}"
+                            ]
+                        },
+                        "description": "Updates an existing speed check record"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Speed Check Record",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord/{{recordId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord",
+                                "{{recordId}}"
+                            ]
+                        },
+                        "description": "Deletes a speed check record by ID"
                     },
                     "response": []
                 }

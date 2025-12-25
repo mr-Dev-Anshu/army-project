@@ -38,9 +38,6 @@ export class GeneralTrafficOffenceService {
     return { success: true, message: "Offence deleted successfully" };
   }
 
-  async getGroupedByOffenceType(queryParams) {
-    return await generalTrafficOffenceRepo.getGroupedByOffenceType(queryParams);
-  }
 }
 
 export const generalTrafficOffenceService = new GeneralTrafficOffenceService();

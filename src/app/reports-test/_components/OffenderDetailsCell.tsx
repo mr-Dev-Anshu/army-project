@@ -10,30 +10,48 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
     <div className="space-y-1 text-xs">
       {details.aadharNumber && (
         <div className="flex gap-1">
-          <span className="font-bold text-gray-900">Aadhar No.</span>
+          <span className="font-bold text-gray-900 min-w-[70px]">Aadhar No.</span>
           <span className="text-gray-700">{details.aadharNumber}</span>
         </div>
       )}
       {details.name && (
         <div className="flex gap-1">
-          <span className="font-bold text-gray-900">Name:</span>
+          <span className="font-bold text-gray-900 min-w-[70px]">Name:</span>
           <span className="text-gray-700">{details.name}</span>
         </div>
       )}
       {details.armyNumber && (
         <div className="flex gap-1">
-          <span className="font-bold text-gray-900">Army no.:</span>
+          <span className="font-bold text-gray-900 min-w-[70px]">Army no.:</span>
           <span className="text-gray-700">{details.armyNumber}</span>
+        </div>
+      )}
+       {details.passId && (
+        <div className="flex gap-1">
+          <span className="font-bold text-gray-900 min-w-[70px]">Pass ID & No.</span>
+          <span className="text-gray-700">{details.passId}</span>
+        </div>
+      )}
+      {details.moName && (
+        <div className="flex gap-1">
+          <span className="font-bold text-gray-900 min-w-[70px]">M/O Name:</span>
+          <span className="text-gray-700">{details.moName}</span>
         </div>
       )}
       {details.rank && (
         <div className="flex gap-1">
-          <span className="font-bold text-gray-900">Rank:</span>
+          <span className="font-bold text-gray-900 min-w-[70px]">Rank:</span>
           <span className="text-gray-700">{details.rank}</span>
         </div>
       )}
+      {details.coRank && (
+        <div className="flex gap-1">
+          <span className="font-bold text-gray-900 min-w-[70px]">C/O Rank:</span>
+          <span className="text-gray-700">{details.coRank}</span>
+        </div>
+      )}
       <div className="flex gap-1">
-        <span className="font-bold text-gray-900">MP Name:</span>
+        <span className="font-bold text-gray-900 min-w-[70px]">MP Name:</span>
         <span className="text-gray-700">{mpName}</span>
       </div>
     </div>
