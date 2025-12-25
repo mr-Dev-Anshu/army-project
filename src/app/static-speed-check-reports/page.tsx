@@ -1,49 +1,73 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StaticSpeedTable from "./_components/StaticSpeedTable";
-// Reusing FilterBar from reports-test or ideally moving it to common
-// I will just import it for now if path allows, but referencing .. from here is messy if not aliased.
-// Let's assume I create a simplified header or reuse layouts.
-// I'll create a simple page layout here matching the design.
-
-const MOCK_DATA = Array.from({ length: 15 }).map((_, i) => ({
-  id: i,
-  placeOfOffence: i % 2 === 0 ? "SI Line Military Station" : "Bairagarh military station",
-  subLocation: i % 2 === 0 ? "" : "", 
-  date: "06/12/2025",
-  time: "17:50",
-  driverDetails: {
-    aadharNumber: "4444 2222 3333",
-    name: "Mr. Rakesh Kumar",
-    armyNumber: "11223344F",
-    rank: "L/Nk",
-  },
-  mpName: "Sanjay Khatri",
-  unit: i % 2 === 0 ? "21 Corps Signal Regt (AREN)" : "11 Engr Regt",
-  fmn: "HQ 21 CORPs",
-  offenceBrief: "Overtaking In NO Over Taking Zone",
-  vehicleNo: "UP 16 AP 3840",
-  vehicleModel: "Honda Accord",
-  reportNo: "PRO/21 CPU/00042/102/25",
-  authSpeed: "30",
-  actualSpeed: "41",
-  overSpeed: "11",
-  coDriverDetails: i % 3 === 0 ? {
-    aadharNumber: "4444 2222 3333",
-    name: "Mr. Rakesh Kumar",
-    armyNumber: "11223344F",
-    rank: "L/Nk",
-  } : null,
-  actionStatus: i % 3 === 0 ? "Taken" : "Pending"
-}));
+import { useGetStaticSpeedRecords } from "@/features/staticSpeed/hooks";
 
 export default function StaticSpeedCheckReportsPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const distinctReportsCount = MOCK_DATA.length;
+  const { data, isLoading, isError } = useGetStaticSpeedRecords();
+  
+  // State for filters
+  const [filters, setFilters] = useState({
+    search: "",
+    date: "06/12/2025",
+    actionStatus: "All",
+  });
+
+  const processedData = useMemo(() => {
+    if (!data) return [];
+    
+    return data.map((item: any) => {
+      const offenceDetails = item.offenceOccurenceDetails || {};
+      const primaryOffender = item.offenders?.[0]?.offenderDetails || {};
+      const coDriver = item.offenders?.[1]?.offenderDetails || null;
+      const mpName = item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+      
+      const dateObj = new Date(offenceDetails.timeOfOffence || item.createdAt);
+      const dateStr = dateObj.toLocaleDateString("en-GB");
+      const timeStr = dateObj.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false });
+
+      return {
+        id: item._id,
+        placeOfOffence: offenceDetails.incidentLocation || "Unknown",
+        subLocation: "SI Line Military Station", // Hardcoded fallback or from API if available
+        date: dateStr,
+        time: timeStr,
+        driverDetails: {
+          aadharNumber: primaryOffender.aadharNumber,
+          name: primaryOffender.name,
+          armyNumber: primaryOffender.armyNumber,
+          rank: primaryOffender.rank,
+        },
+        mpName: mpName,
+        unit: primaryOffender.unit || "N/A",
+        fmn: primaryOffender.fmn || "HQ 21 CORPs", // Fallback
+        offenceBrief: offenceDetails.description || "Speeding",
+        vehicleNo: item.vehicleNumber || "N/A",
+        vehicleModel: item.vehicleName || "Unknown Vehicle",
+        reportNo: item.reportNumber || "PRO/21 CPU/00042/102/25", // Fallback or real field
+        authSpeed: offenceDetails.authSpeed || "30",
+        actualSpeed: offenceDetails.actualSpeed || "0",
+        overSpeed: offenceDetails.overSpeed || "0",
+        coDriverDetails: coDriver ? {
+             aadharNumber: coDriver.aadharNumber,
+             name: coDriver.name,
+             armyNumber: coDriver.armyNumber,
+             rank: coDriver.rank,
+        } : null,
+        actionStatus: item.actionStatus === true ? "Taken" : "Pending"
+      };
+    });
+  }, [data]);
+
+  const distinctReportsCount = processedData.length;
   const pageTitle = "Static Speed Check Reports";
+
+  if (isError) {
+    return <div className="p-8 text-red-500 text-center">Failed to load reports.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
@@ -68,12 +92,14 @@ export default function StaticSpeedCheckReportsPage() {
         </div>
       </div>
 
-      {/* Filters Placeholder - matching the look */}
+      {/* Filters Placeholder */}
       <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4 flex-wrap border border-gray-200">
          <div className="relative flex-1 min-w-[300px]">
             <input 
               type="text" 
               placeholder="Search by report no, unit, offence type..." 
+              value={filters.search}
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,12 +109,12 @@ export default function StaticSpeedCheckReportsPage() {
          
          <div className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2 bg-white">
            <span className="text-sm text-gray-500">Date:</span>
-           <span className="text-sm font-medium text-gray-900">06/12/2025</span>
+           <span className="text-sm font-medium text-gray-900">{filters.date}</span>
          </div>
 
          <div className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2 bg-white">
             <span className="text-sm text-gray-500">Action Status:</span>
-            <span className="text-sm font-medium text-gray-900">All</span>
+            <span className="text-sm font-medium text-gray-900">{filters.actionStatus}</span>
              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -112,7 +138,7 @@ export default function StaticSpeedCheckReportsPage() {
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       ) : (
-        <StaticSpeedTable data={MOCK_DATA} />
+        <StaticSpeedTable data={processedData} />
       )}
     </div>
   );
