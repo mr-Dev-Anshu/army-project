@@ -47,14 +47,10 @@ export default function Step1Particulars({
       <div
         className="
           w-full
-          
-          /* Responsive min heights so UI looks same but fits screens */
           min-h-[200px]
           sm:min-h-[230px]
           md:min-h-[260px]
           lg:min-h-[300px]
-
-          /* Prevent shrinking weirdness */
           flex
         "
       >

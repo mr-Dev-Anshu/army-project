@@ -1,21 +1,22 @@
 "use client";
 
 import {
-  Home,
-  FileText,
-  Gauge,
+  PieChart,
+  Users,
+  Clock,
   ClipboardList,
   FileCheck,
   ChevronDown,
   ChevronRight,
   BarChart3,
-  Users,
   Car,
   Book,
   FileBarChart,
   Database,
   Shield,
   ChevronLeft,
+  FileText,
+  Settings,
 } from "lucide-react";
 
 import {
@@ -57,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const menuItems: MenuItem[] = [
-    { icon: <Home className="w-5 h-5" />, label: "Dashboard", badge: "1" },
+    { icon: <PieChart className="w-5 h-5" />, label: "Dashboard", badge: "1" },
   ];
 
   const formsAndCertificates: MenuItem = {
@@ -114,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         { label: "Command/Area" },
       ],
     },
-    { icon: <Users className="w-5 h-5" />, label: "User Access Management" },
+    { icon: <Settings className="w-5 h-5" />, label: "User Access Management" },
   ];
 
   const renderMenuItem = (item: MenuItem, isSubmenu = false) => (
@@ -276,7 +277,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               )}
             >
               <span className="text-gray-400 flex-shrink-0">
-                <Gauge className="w-5 h-5" />
+                <Clock className="w-5 h-5" />
               </span>
 
               {!collapsed && (
