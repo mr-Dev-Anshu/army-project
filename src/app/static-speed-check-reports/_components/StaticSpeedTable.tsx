@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 // Importing from the sibling module for now as per previous context
-import OffenderDetailsCell from "@/app/reports-test/_components/OffenderDetailsCell";
+import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
 
 interface StaticSpeedTableProps {
   data: any[];
