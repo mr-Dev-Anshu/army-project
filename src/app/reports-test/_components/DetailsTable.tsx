@@ -18,18 +18,10 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       {
         header: "Sr no.",
         cell: (offence) => {
-             // We don't have the index here directly if we just pass the item. 
-             // But DynamicTable maps over data. 
-             // Use a wrapper or just render based on index if we can get it.
-             // EDIT: DynamicTable doesn't pass index to cell. 
-             // I should probably map the data to include index or handling it in DynamicTable. 
-             // For now, I'll specificially handle it by mapping data before passing it to DynamicTable?
-             // Or better, I'll update DynamicTable to pass index to cell function.
-             // Wait, I can't easily change DynamicTable repeatedly.
-             // I'll map the data to add 'displayIndex' property.
              return <span className="text-gray-900">{offence.displayIndex}</span>
         },
-        className: "w-12 text-center" 
+        className: "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
+        headerClassName: "sticky left-0 z-20 bg-gray-50 border-r border-gray-200 w-12"
       },
       {
         header: "Place of Offence",
@@ -40,7 +32,8 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
             </div>
             <div className="text-gray-500 font-normal mt-1">SI Line Military Station</div>
           </div>
-        )
+        ),
+        className: "min-w-[180px]"
       }
     ];
 
@@ -56,15 +49,17 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "Unit",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A",
+        className: "min-w-[100px]"
       },
       {
         header: "FMN",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 CORPs"
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 CORPs",
+        className: "min-w-[100px]"
       },
       {
         header: "Offence Type/ Brief",
-        className: "max-w-[150px]",
+        className: "min-w-[180px] max-w-[200px]",
         cell: (offence) => (
           <div>
             <div className="font-medium text-gray-900">{offence.currentOffenceType || "Traffic Offence"}</div>
@@ -76,6 +71,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "Veh. BA No. / Make & Take",
+        className: "min-w-[150px]",
         cell: (offence) => (
           <div>
             <div className="font-semibold text-gray-900">{offence.vehicleNumber || "N/A"}</div>
@@ -85,12 +81,14 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "Report no.",
+        className: "min-w-[140px]",
         cell: (offence) => (
           <span className="text-gray-600 text-xs">{offence.reportNumber || "PRO/21 CPU/00042/102/25"}</span>
         )
       },
       {
         header: "Date & Time",
+        className: "min-w-[120px]",
         cell: (offence) => {
           const date = new Date(offence.offenceOccurenceDetails?.timeOfOffence || offence.createdAt);
           return (
@@ -103,6 +101,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "Particulars of Co-Driver/Rider",
+        className: "min-w-[200px]",
         cell: (offence) => {
           const coDriver = offence.offenders?.[1];
           if (!coDriver) return <span className="text-gray-400">-</span>;
@@ -130,20 +129,24 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "Unit",
+        className: "min-w-[100px]",
         cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
       },
       {
         header: "FMN",
+        className: "min-w-[100px]",
         cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 CORPs"
       },
       {
         header: "Report no.",
+        className: "min-w-[140px]",
         cell: (offence) => (
           <span className="text-gray-600 text-xs">{offence.reportNumber || "PRO/21 CPU/00042/102/25"}</span>
         )
       },
       {
         header: "Date & Time",
+        className: "min-w-[120px]",
         cell: (offence) => {
           const date = new Date(offence.offenceOccurenceDetails?.timeOfOffence || offence.createdAt);
           return (
@@ -156,7 +159,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "Offence Description",
-        className: "max-w-md",
+        className: "min-w-[300px] max-w-md",
         cell: (offence) => (
            <div className="text-gray-700 text-xs">
               {offence.offenceOccurenceDetails?.description || "No description provided."}
@@ -179,7 +182,10 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
               </div>
           );
         },
-        className: "text-center w-24"
+        // Stick to right, offset by 48px (w-12 of next col)
+        // Add border-l to this one to separate from scrollable content
+        className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200", 
+        headerClassName: "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200"
       },
       {
         header: "",
@@ -188,7 +194,9 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
             <MoreVertical className="w-4 h-4 text-gray-400" />
           </Button>
         ),
-        className: "text-right w-10"
+        // Stick to absolute right
+        className: "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
+        headerClassName: "w-12 sticky right-0 z-20 bg-gray-50"
       }
     ];
 

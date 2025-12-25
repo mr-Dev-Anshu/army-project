@@ -40,7 +40,7 @@ export function DynamicTable<T>({
         <tbody className="divide-y divide-gray-100">
           {data.length > 0 ? (
             data.map((item, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-gray-50 transition-colors">
+              <tr key={rowIndex} className="hover:bg-gray-50 transition-colors group">
                 {columns.map((col, colIndex) => (
                   <td 
                     key={colIndex} 
