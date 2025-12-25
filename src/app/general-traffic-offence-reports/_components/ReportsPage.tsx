@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Loader2, Printer } from "lucide-react";
-import FilterBar from "./FilterBar";
+import ReportFilterBar from "@/components/common/ReportFilterBar";
 import GroupedList from "./GroupedList";
 import { Button } from "@/components/ui/button";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
@@ -116,10 +116,12 @@ export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehi
       </div>
 
       {/* Filters */}
-      <FilterBar 
-        filters={filters} 
-        setFilters={setFilters} 
+      <ReportFilterBar
+        filters={filters}
+        onFilterChange={(key, value) => setFilters(prev => ({ ...prev, [key]: value }))}
         offenceTypeOptions={offenceTypeOptions}
+        showOffenceType={true}
+        onAddNew={() => console.log("Add New Clicked")}
       />
 
       {/* Conditional Table Rendering */}
