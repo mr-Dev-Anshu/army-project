@@ -183,5 +183,5 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
     }));
   }, [data]);
 
-  return <DynamicTable data={processedData} columns={columns} />;
+  return <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />;
 }

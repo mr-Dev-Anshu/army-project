@@ -69,22 +69,26 @@ export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehi
     ? fetchedOptions 
     : ["Intoxication", "Over Speeding", "Wrong Parking", "No Helmet"];
 
-  const TableSection = ({ title, groups, isVehicleInvolved }: { title: string, groups: any[], isVehicleInvolved: boolean }) => (
-    <div className="bg-white rounded-lg shadow border border-gray-200 mt-6 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-         <h3 className="font-bold text-gray-800">{title}</h3>
+  const TableSection = ({ title, groups, isVehicleInvolved }: { title: string, groups: any[], isVehicleInvolved: boolean }) => {
+    const uniqueOffenceTypesCount = groups.length;
+    
+    return (
+      <div className="bg-white rounded-lg shadow border border-gray-200 mt-6 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+           <h3 className="font-bold text-gray-800">{title}</h3>
+        </div>
+        {/* Main List Header */}
+        <div className="flex items-center bg-white px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <div className="flex-1">Type of Offence ({uniqueOffenceTypesCount} OFFENCES)</div>
+          <div className="w-64 text-center">Action Status</div>
+          <div className="w-32 text-right">No. of Records</div>
+        </div>
+  
+        {/* Content */}
+        <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} />
       </div>
-      {/* Main List Header */}
-      <div className="flex items-center bg-white px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-        <div className="flex-1">Type of Offence</div>
-        <div className="w-64 text-center">Action Status</div>
-        <div className="w-32 text-right">No. of Records</div>
-      </div>
-
-      {/* Content */}
-      <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} />
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">

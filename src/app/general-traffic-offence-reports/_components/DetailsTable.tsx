@@ -259,5 +259,5 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
     }));
   }, [offences]);
 
-  return <DynamicTable data={processedData} columns={columns} />;
+  return <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />;
 }
