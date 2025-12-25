@@ -1,9 +1,23 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { MoreVertical } from "lucide-react";
+import { 
+  MoreVertical, 
+  MousePointerClick, 
+  Eye, 
+  Printer, 
+  Edit, 
+  Copy, 
+  Trash 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import OffenderDetailsCell from "./OffenderDetailsCell";
 
 interface DetailsTableProps {
@@ -190,9 +204,39 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       {
         header: "",
         cell: () => (
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreVertical className="w-4 h-4 text-gray-400" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100">
+                <MoreVertical className="w-4 h-4 text-gray-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuItem className="gap-2 cursor-pointer">
+                <MousePointerClick className="w-4 h-4" />
+                Change Action Status
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2 cursor-pointer">
+                <Eye className="w-4 h-4" />
+                View
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2 cursor-pointer">
+                <Printer className="w-4 h-4" />
+                Print
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2 cursor-pointer">
+                <Edit className="w-4 h-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2 cursor-pointer">
+                <Copy className="w-4 h-4" />
+                Duplicate Report
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                <Trash className="w-4 h-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ),
         // Stick to absolute right
         className: "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
