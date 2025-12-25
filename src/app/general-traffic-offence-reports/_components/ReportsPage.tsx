@@ -1,20 +1,18 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Loader2, Printer } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
+import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
-import { Button } from "@/components/ui/button";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 
-const TableSection = ({ title, groups, isVehicleInvolved }: { title: string, groups: any[], isVehicleInvolved: boolean }) => {
+const TableSection = ({ groups, isVehicleInvolved }: {  groups: any[], isVehicleInvolved: boolean }) => {
   const uniqueOffenceTypesCount = groups.length;
   
   return (
     <div className="bg-white rounded-lg shadow border border-gray-200 mt-6 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-         <h3 className="font-bold text-gray-800">{title}</h3>
-      </div>
+ 
       {/* Main List Header */}
       <div className="flex items-center bg-white px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
         <div className="flex-1">Type of Offence ({uniqueOffenceTypesCount} OFFENCES)</div>
@@ -141,26 +139,11 @@ export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehi
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
-      {/* Breadcrumb - Mocked */}
-      <div className="flex items-center text-sm text-gray-500 mb-6">
-        <span>Reports & Analysis</span>
-        <span className="mx-2">›</span>
-        <span>All Reports</span>
-        <span className="mx-2">›</span>
-        <span className="font-semibold text-gray-900">{pageTitle}</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-900">{pageTitle}</h1>
-        <div className="flex items-center gap-4">
-           <span className="text-sm font-semibold">{distinctReportsCount} Reports</span>
-             <Button variant="outline" className="bg-black text-white hover:bg-gray-800 hover:text-white cursor-pointer border-none gap-2">
-            Download & Print Report
-            <Printer className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+      <ReportPageHeader 
+        title={pageTitle}
+        reportCount={distinctReportsCount}
+        onDownload={() => console.log("Download Clicked")}
+      />
 
       {/* Filters */}
       <ReportFilterBar
@@ -175,7 +158,6 @@ export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehi
       {isVehicleView ? (
         vehicleGroups.length > 0 ? (
           <TableSection 
-            title="Vehicle Involved Reports" 
             groups={vehicleGroups} 
             isVehicleInvolved={true} 
           />

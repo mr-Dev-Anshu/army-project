@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Loader2, Printer } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
 import { useGetAllMPReports } from "@/features/mpReports/hooks";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
+import ReportPageHeader from "@/components/common/ReportPageHeader";
 
 export default function MpOccurrenceReportsPage() {
   const { data, isLoading, isError } = useGetAllMPReports();
@@ -132,31 +132,11 @@ export default function MpOccurrenceReportsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
-      {/* Breadcrumb */}
-      <div className="flex items-center text-sm text-gray-500 mb-6">
-        <span>Reports & Analysis</span>
-        <span className="mx-2">›</span>
-        <span>All Reports</span>
-        <span className="mx-2">›</span>
-        <span className="font-semibold text-gray-900">{pageTitle}</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-900">{pageTitle}</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-semibold">
-            {distinctReportsCount} Reports
-          </span>
-          <Button
-            variant="outline"
-            className="bg-black text-white hover:bg-gray-800 hover:text-white cursor-pointer border-none gap-2"
-          >
-            Download & Print Report
-            <Printer className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+      <ReportPageHeader 
+        title={pageTitle}
+        reportCount={distinctReportsCount}
+        onDownload={() => console.log("Download Clicked")}
+      />
 
       {/* Filters */}
       <ReportFilterBar
