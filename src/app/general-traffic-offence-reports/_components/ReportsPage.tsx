@@ -35,8 +35,9 @@ export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehi
   const [filters, setFilters] = useState({
     search: "",
     offenceType: "All",
-    date: "06/12/2025",
+    date: "",
     actionStatus: "All",
+    sortOrder: "desc" as "asc" | "desc", // Default
   });
 
   // Process data into two sets: Vehicle Involved vs No Vehicle Involved
@@ -47,8 +48,54 @@ export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehi
     const nvGroups: any[] = [];
 
     data.forEach((group: any) => {
-      const vOffences = group.offences?.filter((o: any) => o.isVehicleInvolved) || [];
-      const nvOffences = group.offences?.filter((o: any) => !o.isVehicleInvolved) || [];
+      // Common filtering function
+      const matchesFilter = (o: any) => {
+        // Date Check
+        if (filters.date) {
+            const rawDate = o.offenceOccurenceDetails?.timeOfOffence || o.createdAt;
+            if (rawDate) {
+                const recordDate = new Date(rawDate).toISOString().split('T')[0];
+                if (recordDate !== filters.date) return false;
+            }
+        }
+
+        // Action Status Check
+        if (filters.actionStatus !== "All") {
+            const isTaken = o.actionStatus === true;
+            const filterTaken = filters.actionStatus === "Taken";
+            // e.g. if filter is Taken (true), record must be true.
+            // if filter is Pending (false), record must be false.
+            // Simplified: (isTaken && filterTaken) || (!isTaken && !filterTaken) which is isTaken === filterTaken
+            if (isTaken !== filterTaken) return false;
+        }
+
+        // Search Check (already existing or new?)
+        // The original code passed 'search' to filter but didn't implement it in the snippet I saw.
+        // Assuming search is desired:
+        if (filters.search) {
+             const searchLower = filters.search.toLowerCase();
+             const reportNo = o.reportNumber?.toLowerCase() || "";
+             const offenceType = o.currentOffenceType?.toLowerCase() || "";
+             // Add more fields if needed
+             if (!reportNo.includes(searchLower) && !offenceType.includes(searchLower)) return false;
+        }
+
+        return true;
+      };
+
+      let vOffences = group.offences?.filter((o: any) => o.isVehicleInvolved && matchesFilter(o)) || [];
+      let nvOffences = group.offences?.filter((o: any) => !o.isVehicleInvolved && matchesFilter(o)) || [];
+
+      // Sort
+      if (filters.sortOrder) {
+        const sorter = (a: any, b: any) => {
+             const dateA = new Date(a.offenceOccurenceDetails?.timeOfOffence || a.createdAt).getTime();
+             const dateB = new Date(b.offenceOccurenceDetails?.timeOfOffence || b.createdAt).getTime();
+             return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+        };
+        vOffences.sort(sorter);
+        nvOffences.sort(sorter);
+      }
 
       if (vOffences.length > 0) {
         vGroups.push({ ...group, offences: vOffences });
@@ -60,7 +107,7 @@ export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehi
     });
 
     return { vehicleGroups: vGroups, noVehicleGroups: nvGroups };
-  }, [data]);
+  }, [data, filters]);
 
   if (isLoading) {
     return (

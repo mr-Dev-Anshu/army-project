@@ -13,14 +13,52 @@ export default function StaticSpeedCheckReportsPage() {
   // State for filters
   const [filters, setFilters] = useState({
     search: "",
-    date: "06/12/2025",
+    date: "",
     actionStatus: "All",
+    sortOrder: "desc" as "asc" | "desc", // Default sort
   });
 
   const processedData = useMemo(() => {
     if (!data) return [];
     
-    return data.map((item: any) => {
+    // Filter raw data first
+    const filteredData = data.filter((item: any) => {
+        // Date Check
+        if (filters.date) {
+            const rawDate = item.offenceOccurenceDetails?.timeOfOffence || item.createdAt;
+            if (rawDate) {
+                const recordDate = new Date(rawDate).toISOString().split('T')[0];
+                if (recordDate !== filters.date) return false;
+            }
+        }
+
+        // Action Status Check
+        if (filters.actionStatus !== "All") {
+            const isTaken = item.actionStatus === true;
+            const filterTaken = filters.actionStatus === "Taken";
+            if (isTaken !== filterTaken) return false;
+        }
+
+        // Search Check
+        if (filters.search) {
+             const searchLower = filters.search.toLowerCase();
+             const reportNo = item.reportNumber?.toLowerCase() || "";
+             const vehicleNo = item.vehicleNumber?.toLowerCase() || "";
+             if (!reportNo.includes(searchLower) && !vehicleNo.includes(searchLower)) return false;
+        }
+        return true;
+    });
+
+    // Sorting
+    if (filters.sortOrder) {
+        filteredData.sort((a: any, b: any) => {
+            const dateA = new Date(a.offenceOccurenceDetails?.timeOfOffence || a.createdAt).getTime();
+            const dateB = new Date(b.offenceOccurenceDetails?.timeOfOffence || b.createdAt).getTime();
+            return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+        });
+    }
+
+    return filteredData.map((item: any) => {
       const offenceDetails = item.offenceOccurenceDetails || {};
       const primaryOffender = item.offenders?.[0]?.offenderDetails || {};
       const coDriver = item.offenders?.[1]?.offenderDetails || null;
@@ -61,7 +99,7 @@ export default function StaticSpeedCheckReportsPage() {
         actionStatus: item.actionStatus
       };
     });
-  }, [data]);
+  }, [data, filters]);
 
   const distinctReportsCount = processedData.length;
   const pageTitle = "Static Speed Check Reports";

@@ -15,16 +15,18 @@ export interface FilterState {
   offenceType?: string;
   date?: string;
   actionStatus?: string;
+  sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
 
 interface ReportFilterBarProps {
   filters: FilterState;
-  onFilterChange: (key: keyof FilterState, value: string) => void;
+  onFilterChange: (key: keyof FilterState, value: any) => void;
   offenceTypeOptions?: string[];
   placeholder?: string;
   showDate?: boolean;
   showActionStatus?: boolean;
+  showOffenceType?: boolean;
   onAddNew?: () => void;
 }
 
@@ -35,6 +37,7 @@ export default function ReportFilterBar({
   placeholder = "Search by report no, unit, offence type...",
   showDate = true,
   showActionStatus = true,
+  showOffenceType = true,
   onAddNew,
 }: ReportFilterBarProps) {
   return (
@@ -53,7 +56,7 @@ export default function ReportFilterBar({
         </div>
 
         {/* Offence Type Select */}
-        {offenceTypeOptions.length > 0 && (
+        {showOffenceType && offenceTypeOptions.length > 0 && (
           <div className="w-[200px]">
             <Select
               value={filters.offenceType || "All"}
@@ -79,17 +82,13 @@ export default function ReportFilterBar({
 
         {/* Date Input */}
         {showDate && (
-          <div className="w-[180px] relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none z-10">
-              Date:
-            </div>
+          <div className="w-auto relative">
             <Input
-              type="text"
+              type="date"
               value={filters.date || ""}
               onChange={(e) => onFilterChange("date", e.target.value)}
-              className="bg-white pl-12 pr-9 text-sm border-gray-300"
+              className="bg-white border-gray-300 cursor-pointer"
             />
-            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
         )}
 
@@ -114,20 +113,16 @@ export default function ReportFilterBar({
             </Select>
           </div>
         )}
-
         <Button
           variant="outline"
           size="icon"
           className="bg-white w-10 h-10 shrink-0 border-gray-300"
+          onClick={() => {
+             const newOrder = filters.sortOrder === "asc" ? "desc" : "asc";
+             onFilterChange("sortOrder", newOrder);
+          }}
         >
-          <Filter className="w-4 h-4 text-gray-600" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="bg-white w-10 h-10 shrink-0 border-gray-300"
-        >
-          <ArrowUpDown className="w-4 h-4 text-gray-600" />
+          <ArrowUpDown className={`w-4 h-4 text-gray-600 ${filters.sortOrder === 'asc' ? 'transform rotate-180' : ''}`} />
         </Button>
       </div>
       {/* Add New Button */}

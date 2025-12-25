@@ -14,14 +14,56 @@ export default function MpOccurrenceReportsPage() {
   const [filters, setFilters] = useState({
     search: "",
     offenceType: "All",
-    date: "06/12/2025",
+    date: "",
     actionStatus: "All",
+    sortOrder: "desc" as "asc" | "desc",
   });
 
   const processedData = useMemo(() => {
     if (!data) return [];
 
-    return data.map((item: any) => {
+    // Filter raw data
+    const filteredData = data.filter((item: any) => {
+         // ... existing filter logic ...
+         const occurrence = item.occurrenceDetails || {};
+         
+         // Date Check
+         if (filters.date) {
+            const rawDate = occurrence.dateOfOccurrence || item.createdAt;
+             if (rawDate) {
+                const recordDate = new Date(rawDate).toISOString().split('T')[0];
+                if (recordDate !== filters.date) return false;
+            }
+         }
+
+         // Action Status Check
+         if (filters.actionStatus !== "All") {
+            const isTaken = item.actionStatus === true;
+            const filterTaken = filters.actionStatus === "Taken";
+            if (isTaken !== filterTaken) return false;
+         }
+         
+         // Search
+         if (filters.search) {
+             const searchLower = filters.search.toLowerCase();
+             const reportNo = item.reportDetails?.reportNumber?.toLowerCase() || "";
+             const offenceType = occurrence.offenceType?.toLowerCase() || "";
+             if (!reportNo.includes(searchLower) && !offenceType.includes(searchLower)) return false;
+         }
+
+        return true;
+    });
+
+    // Sorting
+    if (filters.sortOrder) {
+        filteredData.sort((a: any, b: any) => {
+            const dateA = new Date(a.occurrenceDetails?.dateOfOccurrence || a.createdAt).getTime();
+            const dateB = new Date(b.occurrenceDetails?.dateOfOccurrence || b.createdAt).getTime();
+            return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+        });
+    }
+
+    return filteredData.map((item: any) => {
       const occurrence = item.occurrenceDetails || {};
       const invHead = item.investigationHead || {};
 
@@ -75,7 +117,7 @@ export default function MpOccurrenceReportsPage() {
         actionStatus: item.actionStatus,
       };
     });
-  }, [data]);
+  }, [data, filters]);
 
   const distinctReportsCount = processedData.length;
   const pageTitle = "MP Occurrence & Investigation Report";
