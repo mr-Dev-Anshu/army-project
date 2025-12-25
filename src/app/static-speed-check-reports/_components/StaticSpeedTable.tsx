@@ -146,10 +146,6 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
               <DropdownMenuItem className="gap-2 cursor-pointer">
-                <MousePointerClick className="w-4 h-4" />
-                Change Action Status
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
