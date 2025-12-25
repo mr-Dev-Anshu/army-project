@@ -7,7 +7,7 @@ import GroupedList from "./GroupedList";
 import { Button } from "@/components/ui/button";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 
-export default function ReportsPage() {
+export default function ReportsPage({ viewType = "vehicle" }: { viewType?: "vehicle" | "no-vehicle" }) {
   const { data, isLoading, isError } = useGetAllTrafficOffences();
 
   // State for filters (mocked for now as backend handles some)
@@ -17,8 +17,6 @@ export default function ReportsPage() {
     date: "06/12/2025",
     actionStatus: "All",
   });
-
-  const [isVehicleView, setIsVehicleView] = useState(true);
 
   // Process data into two sets: Vehicle Involved vs No Vehicle Involved
   const { vehicleGroups, noVehicleGroups } = useMemo(() => {
@@ -55,13 +53,18 @@ export default function ReportsPage() {
     return <div className="p-8 text-red-500">Failed to load reports.</div>;
   }
 
-  const pageTitle = "General & Traffic Offence Reports";
+  const isVehicleView = viewType === "vehicle";
+  const pageTitle = isVehicleView 
+    ? "General & Traffic Offence Reports- Vehicle Involved" 
+    : "General & Traffic Offence Reports- NO Vehicle Involved";
 
   // Calculate total count (summing up the original groups or the processed ones)
-  const distinctReportsCount = data?.reduce((acc: number, group: any) => acc + (group.offences?.length || 0), 0) || 0;
+  // We should probably filter the count based on view type
+  const activeGroups = isVehicleView ? vehicleGroups : noVehicleGroups;
+  const distinctReportsCount = activeGroups.reduce((acc: number, group: any) => acc + (group.offences?.length || 0), 0);
 
   // Calculate options
-  const fetchedOptions = data?.map((g: any) => g.offenceType).filter(Boolean) || [];
+  const fetchedOptions = activeGroups?.map((g: any) => g.offenceType).filter(Boolean) || [];
   const offenceTypeOptions = fetchedOptions.length > 0 
     ? fetchedOptions 
     : ["Intoxication", "Over Speeding", "Wrong Parking", "No Helmet"];
@@ -112,32 +115,6 @@ export default function ReportsPage() {
         setFilters={setFilters} 
         offenceTypeOptions={offenceTypeOptions}
       />
-
-      {/* View Toggle */}
-      <div className="flex justify-center mt-6">
-        <div className="bg-gray-200 p-1 rounded-lg inline-flex">
-          <button
-            onClick={() => setIsVehicleView(true)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              isVehicleView
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-900"
-            }`}
-          >
-            Vehicle Involved
-          </button>
-          <button
-            onClick={() => setIsVehicleView(false)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              !isVehicleView
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-900"
-            }`}
-          >
-            No Vehicle Involved
-          </button>
-        </div>
-      </div>
 
       {/* Conditional Table Rendering */}
       {isVehicleView ? (
