@@ -8,8 +8,7 @@ import {
   Printer, 
   Edit, 
   Copy, 
-  Trash, 
-  Loader2
+  Trash
 } from "lucide-react";
 import { useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { Button } from "@/components/ui/button";
