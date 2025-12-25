@@ -120,85 +120,6 @@ export default function MultiStepForm() {
     }
   };
 
-  // // ===================== FINAL SUBMIT =====================
-  // const onSubmitFinal = async () => {
-  //   const traffic = state.formData.traffic;
-
-  //   const date = traffic.onDutyDetails.dateOfDuty;
-  //   const toISO = (time: string) => (time ? `${date}T${time}:00.000Z` : "");
-
-  //   const payload = {
-  //     isVehicleInvolved: traffic.vehicleInvolved === "yes",
-
-  //     onDutyDetails: {
-  //       ...traffic.onDutyDetails,
-  //       startTime: toISO(traffic.onDutyDetails.startTime),
-  //       endTime: toISO(traffic.onDutyDetails.endTime),
-  //     },
-
-  //     onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
-
-  //     offenceOccurenceDetails: {
-  //       ...traffic.offenceOccurenceDetails,
-  //       timeOfOffence: toISO(
-  //         traffic.offenceOccurenceDetails.timeOfOffence
-  //       ),
-  //     },
-
-  //     offenceTypes: traffic.offenceTypes,
-  //     offenceTypeReference: traffic.offenceCode,
-  //   };
-
-  //   try {
-  //     toast.info("Creating Offence...");
-
-  //     const offence = await mutateAsync(payload);
-  //     toast.success("Offence Created Successfully!");
-
-  //     const offenceId = offence?._id;
-  //     if (!offenceId) {
-  //       toast.error("Offence ID missing!");
-  //       return;
-  //     }
-
-  //     // ================== OFFENDER ==================
-  //     const offenderPayload = {
-  //       offenceId,
-  //       offenderType: traffic.vehicleDetails.driverType,
-  //       offenderDetails: traffic.offenderDetails || {},
-  //     };
-
-  //     await createOffenderMutate(offenderPayload);
-  //     toast.success("Offender Created Successfully!");
-
-  //     // ================== WITNESS ==================
-  //     if (traffic.witnesses?.length > 0) {
-  //       await Promise.all(
-  //         traffic.witnesses.map((w) =>
-  //           createWitnessMutate({
-  //             offenceId,
-  //             rank: w.reportingBlock.rank,
-  //             unit: w.reportingBlock.unit,
-  //             ArmyNo: w.reportingBlock.armyNumber,
-  //             name: w.reportingBlock.nameReportingMP,
-  //           })
-  //         )
-  //       );
-
-  //       toast.success("All Witnesses Saved Successfully!");
-  //     }
-
-  //     toast.success("🎉 Final Submit Completed Successfully!");
-  //   } catch (err: any) {
-  //     console.log(" FINAL ERROR ===>", err?.response?.data || err);
-  //     toast.error(
-  //       err?.response?.data?.error ||
-  //         err?.response?.data?.message ||
-  //         "Something went wrong!"
-  //     );
-  //   }
-  // };
-
   // ================== STEP CONFIG ==================
   const stepsConfig = {
     1: {
@@ -238,7 +159,7 @@ export default function MultiStepForm() {
   };
 
   return (
-    <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
+    <div className="h-[calc(100vh-40px)] bg-gray-100 w-full px-6">
       <div className="w-full bg-white rounded-lg overflow-hidden h-full">
         <div className="flex h-full">
           <LeftStepper

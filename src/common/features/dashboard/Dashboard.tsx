@@ -9,6 +9,10 @@ import {
   Book,
   FileBarChart,
   Shield,
+  Search,
+  File,
+  SquareSplitVertical,
+  SquareSplitHorizontal,
 } from "lucide-react";
 
 import Sidebar from "./components/dashboard-components/Sidebar";
@@ -80,22 +84,26 @@ export default function Dashboard() {
       />
 
       {/* RIGHT CONTENT */}
-      <div className="flex-1 p-4 sm:p-5 md:p-6 space-y-8 overflow-y-auto">
+      <div className="flex-1 p-4  sm:p-5 md:p-6 space-y-8 overflow-y-auto">
 
         {/* ================== DASHBOARD PAGE ================== */}
         {page === "dashboard" && (
           <>
             {/* HEADER WRAP RESPONSIVE */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <h1 className="text-2xl font-semibold text-gray-800">
-                Dashboard
-              </h1>
-
-              <input
+            
+             
+            
+            <div className="w-full flex items-center gap-2 sm:w-[300px] shadow-md md:w-full px-4 py-2 border-2 rounded-xl outline-none">
+                <SquareSplitHorizontal/>
+           <div className="flex items-center gap-3">
+               <Search/>
+                <input
                 type="text"
                 placeholder="Type to search..."
-                className="w-full sm:w-[300px] md:w-[400px] px-4 py-2 border rounded-lg outline-none"
               />
+           </div>
+            </div>
             </div>
 
             {/* STATS GRID RESPONSIVE */}

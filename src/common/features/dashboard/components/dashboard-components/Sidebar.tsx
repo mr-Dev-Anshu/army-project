@@ -122,15 +122,22 @@ const Sidebar: React.FC<SidebarProps> = ({
       key={item.label}
       onClick={() => item.label === "Dashboard" && onMenuSelect("dashboard")}
       className={cn(
-        "w-full flex items-start gap-3 px-4 py-2.5 text-left text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors",
-        isSubmenu && "pl-12"
+        "w-full relative flex items-center transition-all",
+        collapsed
+          ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
+          : "px-4 py-2.5 gap-3 hover:bg-gray-100 rounded-lg",
+        isSubmenu && !collapsed && "pl-12"
       )}
     >
-      <span className="text-gray-400">{item.icon}</span>
+      {/* ICON */}
+      <span className="text-gray-700 flex-shrink-0">{item.icon}</span>
 
+      {/* TEXT IN EXPANDED */}
       {!collapsed && (
         <>
-          <span className="flex-1 text-base">{item.label}</span>
+          <span className="flex-1 text-base text-gray-700 text-left whitespace-normal break-words leading-snug">
+            {item.label}
+          </span>
 
           {item.badge && (
             <span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded">
@@ -152,12 +159,19 @@ const Sidebar: React.FC<SidebarProps> = ({
         onOpenChange={() => toggleMenu(item.label)}
         className="w-full"
       >
-        <CollapsibleTrigger className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-          <span className="text-gray-400">{item.icon}</span>
+        <CollapsibleTrigger
+          className={cn(
+            "w-full flex items-center transition-all",
+            collapsed
+              ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
+              : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100 rounded-lg"
+          )}
+        >
+          <span className="text-gray-400 flex-shrink-0">{item.icon}</span>
 
           {!collapsed && (
             <>
-              <span className="flex-1 text-lg">{item.label}</span>
+              <span className="flex-1 text-lg text-gray-600">{item.label}</span>
               {openMenus.includes(item.label) ? (
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               ) : (
@@ -207,11 +221,22 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-4 space-y-1 side-scrollbar">
-        {menuItems.map((item) => renderMenuItem(item))}
+      <nav
+        className={cn(
+          "flex-1 overflow-y-auto side-scrollbar",
+          collapsed ? "px-0 pt-4" : "p-4 space-y-1"
+        )}
+      >
+        {/* Dashboard */}
+        <div className={collapsed ? "px-2" : ""}>
+          {menuItems.map((item) => renderMenuItem(item))}
+        </div>
 
-        {/* Create New Record (ALWAYS SHOW ICONS) */}
-        <div className="pt-6">
+        {/* Divider */}
+        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
+
+        {/* Create New Record Section */}
+        <div className={collapsed ? "pt-4 px-2" : "pt-6"}>
           {!collapsed && (
             <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
               Create New Record
@@ -222,14 +247,19 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* 1️⃣ GENERAL & TRAFFIC */}
             <button
               onClick={() => onMenuSelect("multiForm")}
-              className="w-full flex items-start justify-start gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className={cn(
+                "w-full flex items-start transition-all",
+                collapsed
+                  ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
+                  : "gap-3 px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+              )}
             >
-              <span className="text-gray-400">
+              <span className="text-gray-400 flex-shrink-0">
                 <FileText className="w-5 h-5" />
               </span>
 
               {!collapsed && (
-                <span className="text-base text-left whitespace-normal break-words leading-snug flex-1">
+                <span className="text-base text-left text-gray-600 whitespace-normal break-words leading-snug flex-1">
                   General & Traffic Offence Report
                 </span>
               )}
@@ -238,14 +268,19 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* 2️⃣ STATIC SPEED */}
             <button
               onClick={() => onMenuSelect("createRecord")}
-              className="w-full flex items-start gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className={cn(
+                "w-full flex items-start transition-all",
+                collapsed
+                  ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
+                  : "gap-3 px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+              )}
             >
-              <span className="text-gray-400">
+              <span className="text-gray-400 flex-shrink-0">
                 <Gauge className="w-5 h-5" />
               </span>
 
               {!collapsed && (
-                <span className="text-base text-left whitespace-normal break-words leading-snug flex-1">
+                <span className="text-base text-left text-gray-600 whitespace-normal break-words leading-snug flex-1">
                   Static Speed Check Report
                 </span>
               )}
@@ -254,14 +289,19 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* 3️⃣ MP REPORT */}
             <button
               onClick={() => onMenuSelect("createRecord")}
-              className="w-full flex items-start gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className={cn(
+                "w-full flex items-start transition-all",
+                collapsed
+                  ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
+                  : "gap-3 px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+              )}
             >
-              <span className="text-gray-400">
+              <span className="text-gray-400 flex-shrink-0">
                 <ClipboardList className="w-5 h-5" />
               </span>
 
               {!collapsed && (
-                <span className="text-base text-left whitespace-normal break-words leading-snug flex-1">
+                <span className="text-base text-left text-gray-600 whitespace-normal break-words leading-snug flex-1">
                   MP Occurrence & Investigation Report
                 </span>
               )}
@@ -269,18 +309,34 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {renderCollapsibleSection(formsAndCertificates)}
+        {/* Divider */}
+        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
 
-        <div className="pt-6">
+        {/* Forms & Certificates */}
+        <div className={collapsed ? "px-2" : ""}>
+          {renderCollapsibleSection(formsAndCertificates)}
+        </div>
+
+        {/* Divider */}
+        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
+
+        {/* Reports & Analysis Section */}
+        <div className={collapsed ? "pt-4 px-2" : "pt-6"}>
           {!collapsed && (
             <h2 className="px-4 py-2 text-base font-bold text-gray-400 uppercase tracking-wider">
               Reports & Analysis
             </h2>
           )}
-          {reportsAndAnalysis.map((item) => renderMenuItem(item))}
+          <div className="flex flex-col items-start justify-start w-full">
+            {reportsAndAnalysis.map((item) => renderMenuItem(item))}
+          </div>
         </div>
 
-        <div className="pt-6 pb-4">
+        {/* Divider */}
+        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
+
+        {/* System Setup Section */}
+        <div className={collapsed ? "pt-4 px-2 pb-4" : "pt-6 pb-4"}>
           {!collapsed && (
             <h2 className="px-4 py-2 text-base font-bold text-gray-400 uppercase tracking-wider">
               System Setup

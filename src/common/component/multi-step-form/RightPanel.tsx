@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Eye, RotateCcw } from "lucide-react";
+import { ChevronRight, Eye} from "lucide-react";
+import { CiEraser } from "react-icons/ci";
+
 import { FormDataState } from "@/common/types/form.types";
 
 interface StepConfig {
@@ -25,7 +27,7 @@ export const RightPanel = ({
   onNext,
   onSubmitFinal,
   stepsConfig,
-  mode,                // <-- YAHAN SIRF mode (❌ ?: nahi)
+  mode,           
 }: Props) => {
 
   const current = stepsConfig?.[String(step)];
@@ -56,6 +58,7 @@ export const RightPanel = ({
         flex flex-col 
         w-full
         overflow-hidden
+       
       "
     >
       {/* ---------- HEADER ---------- */}
@@ -66,6 +69,7 @@ export const RightPanel = ({
           justify-between 
           mb-4 sm:mb-6 
           gap-3
+        
         "
       >
         <h3 className="font-bold leading-tight text-lg sm:text-xl lg:text-2xl">
@@ -73,11 +77,11 @@ export const RightPanel = ({
         </h3>
 
         <div className="flex gap-2 flex-wrap">
-          <Button variant="ghost" size="sm">
-            <RotateCcw size={16} /> Clear
+          <Button  variant="outline" size="sm">
+            <CiEraser size={16} /> Clear
           </Button>
 
-          <Button variant="ghost" size="sm">
+          <Button className="bg-black text-white" variant="outline" size="sm">
             <Eye size={16} />
           </Button>
         </div>
