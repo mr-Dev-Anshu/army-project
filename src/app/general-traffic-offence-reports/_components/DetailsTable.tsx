@@ -8,8 +8,10 @@ import {
   Printer, 
   Edit, 
   Copy, 
-  Trash 
+  Trash, 
+  Loader2
 } from "lucide-react";
+import { useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import {
@@ -26,6 +28,7 @@ interface DetailsTableProps {
 }
 
 export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTableProps) {
+  const { mutate: updateOffence, isPending: isUpdating } = useUpdateTrafficOffence();
   
   const columns = useMemo<Column<any>[]>(() => {
     const commonColumns: Column<any>[] = [
@@ -188,7 +191,17 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         cell: (offence) => {
           const isTaken = offence.actionStatus === true;
           return (
-             <div className="flex flex-col items-center gap-1">
+             <div 
+               className="flex flex-col items-center gap-1 cursor-pointer"
+               onClick={() => {
+                 if (offence._id) {
+                   updateOffence({ 
+                     id: offence._id, 
+                     data: { actionStatus: !isTaken } 
+                   });
+                 }
+               }}
+             >
                 <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
                   <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
                 </div>
@@ -245,7 +258,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       ...(isVehicleInvolved ? vehicleColumns : noVehicleColumns),
       ...actionColumns
     ];
-  }, [isVehicleInvolved]);
+  }, [isVehicleInvolved, updateOffence]);
 
   // Pre-process data to add index
   const processedData = useMemo(() => {
