@@ -20,12 +20,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 // Importing from the sibling module for now as per previous context
 import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
+import { useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 
 interface StaticSpeedTableProps {
   data: any[];
 }
 
 export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
+  const { mutate: updateRecord } = useUpdateStaticSpeedRecord();
   
   const columns = useMemo<Column<any>[]>(() => {
     return [
@@ -121,10 +123,20 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         header: "Action Status",
         className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200", 
         headerClassName: "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
-        cell: (item) => {
-          const isTaken = item.actionStatus === "Taken";
+         cell: (item) => {
+          const isTaken = item.actionStatus === true;
           return (
-             <div className="flex flex-col items-center gap-1">
+             <div 
+               className="flex flex-col items-center gap-1 cursor-pointer"
+               onClick={() => {
+                 if (item._id) {
+                   updateRecord({
+                     id: item._id,
+                     data: { actionStatus: !isTaken }
+                   });
+                 }
+               }}
+             >
                 <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
                   <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
                 </div>
@@ -170,7 +182,7 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         )
       }
     ];
-  }, []);
+  }, [updateRecord]);
 
   const processedData = useMemo(() => {
     return data.map((item, index) => ({

@@ -61,9 +61,6 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
 });
 
 export const updateStaticSpeedCheckRecordSchema = createStaticSpeedCheckRecordSchema.fork(
-  [
-    "vehicleType",
-    "offenceOccurenceDetails.time",
-  ],
+  Object.keys(createStaticSpeedCheckRecordSchema.describe().keys),
   (schema) => schema.optional()
 );

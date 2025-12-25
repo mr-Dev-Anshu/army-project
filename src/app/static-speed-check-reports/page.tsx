@@ -30,7 +30,7 @@ export default function StaticSpeedCheckReportsPage() {
       const timeStr = dateObj.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false });
 
       return {
-        id: item._id,
+        _id: item._id,
         placeOfOffence: offenceDetails.incidentLocation || "Unknown",
         subLocation: "SI Line Military Station", // Hardcoded fallback or from API if available
         date: dateStr,
@@ -57,7 +57,7 @@ export default function StaticSpeedCheckReportsPage() {
              armyNumber: coDriver.armyNumber,
              rank: coDriver.rank,
         } : null,
-        actionStatus: item.actionStatus === true ? "Taken" : "Pending"
+        actionStatus: item.actionStatus
       };
     });
   }, [data]);
