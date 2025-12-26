@@ -7,8 +7,12 @@ import { useGetAllMPReports } from "@/features/mpReports/hooks";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+
 export default function MpOccurrenceReportsPage() {
   const { data, isLoading, isError } = useGetAllMPReports();
+  const [isCreating, setIsCreating] = useState(false);
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -24,43 +28,43 @@ export default function MpOccurrenceReportsPage() {
 
     // Filter raw data
     const filteredData = data.filter((item: any) => {
-         // ... existing filter logic ...
-         const occurrence = item.occurrenceDetails || {};
-         
-         // Date Check
-         if (filters.date) {
-            const rawDate = occurrence.dateOfOccurrence || item.createdAt;
-             if (rawDate) {
-                const recordDate = new Date(rawDate).toISOString().split('T')[0];
-                if (recordDate !== filters.date) return false;
-            }
-         }
+      // ... existing filter logic ...
+      const occurrence = item.occurrenceDetails || {};
 
-         // Action Status Check
-         if (filters.actionStatus !== "All") {
-            const isTaken = item.actionStatus === true;
-            const filterTaken = filters.actionStatus === "Taken";
-            if (isTaken !== filterTaken) return false;
-         }
-         
-         // Search
-         if (filters.search) {
-             const searchLower = filters.search.toLowerCase();
-             const reportNo = item.reportDetails?.reportNumber?.toLowerCase() || "";
-             const offenceType = occurrence.offenceType?.toLowerCase() || "";
-             if (!reportNo.includes(searchLower) && !offenceType.includes(searchLower)) return false;
-         }
+      // Date Check
+      if (filters.date) {
+        const rawDate = occurrence.dateOfOccurrence || item.createdAt;
+        if (rawDate) {
+          const recordDate = new Date(rawDate).toISOString().split('T')[0];
+          if (recordDate !== filters.date) return false;
+        }
+      }
 
-        return true;
+      // Action Status Check
+      if (filters.actionStatus !== "All") {
+        const isTaken = item.actionStatus === true;
+        const filterTaken = filters.actionStatus === "Taken";
+        if (isTaken !== filterTaken) return false;
+      }
+
+      // Search
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const reportNo = item.reportDetails?.reportNumber?.toLowerCase() || "";
+        const offenceType = occurrence.offenceType?.toLowerCase() || "";
+        if (!reportNo.includes(searchLower) && !offenceType.includes(searchLower)) return false;
+      }
+
+      return true;
     });
 
     // Sorting
     if (filters.sortOrder) {
-        filteredData.sort((a: any, b: any) => {
-            const dateA = new Date(a.occurrenceDetails?.dateOfOccurrence || a.createdAt).getTime();
-            const dateB = new Date(b.occurrenceDetails?.dateOfOccurrence || b.createdAt).getTime();
-            return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-        });
+      filteredData.sort((a: any, b: any) => {
+        const dateA = new Date(a.occurrenceDetails?.dateOfOccurrence || a.createdAt).getTime();
+        const dateB = new Date(b.occurrenceDetails?.dateOfOccurrence || b.createdAt).getTime();
+        return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      });
     }
 
     return filteredData.map((item: any) => {
@@ -80,10 +84,10 @@ export default function MpOccurrenceReportsPage() {
         date: dateObj.toLocaleDateString("en-GB"),
         time: occurrence.timeOfOccurrence
           ? new Date(occurrence.timeOfOccurrence).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })
           : "00:00",
         placeOfOccurrence: occurrence.placeOfOccurrence || "Unknown",
 
@@ -122,6 +126,27 @@ export default function MpOccurrenceReportsPage() {
   const distinctReportsCount = processedData.length;
   const pageTitle = "MP Occurrence & Investigation Report";
 
+  if (isCreating) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
+            <ArrowLeft className="w-4 h-4" /> Back to Reports
+          </Button>
+          <h1 className="text-lg font-semibold text-gray-800">Create New MP Occurrence & Investigation Report</h1>
+        </div>
+        <div className="flex-1 overflow-auto p-6">
+          <div className="w-full max-w-5xl p-6 border rounded-xl mx-auto bg-white">
+            <h2 className="font-semibold text-lg">
+              MP Occurrence & Investigation Form
+            </h2>
+            <p className="text-gray-500 mt-2">Form implementation pending...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (isError) {
     return (
       <div className="p-8 text-red-500 text-center">
@@ -132,7 +157,7 @@ export default function MpOccurrenceReportsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
-      <ReportPageHeader 
+      <ReportPageHeader
         title={pageTitle}
         reportCount={distinctReportsCount}
         onDownload={() => console.log("Download Clicked")}
@@ -145,7 +170,7 @@ export default function MpOccurrenceReportsPage() {
           setFilters((prev) => ({ ...prev, [key]: value }))
         }
         showOffenceType={false}
-        onAddNew={() => console.log("Add New Clicked")}
+        onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({
             search: "",

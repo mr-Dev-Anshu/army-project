@@ -33,11 +33,17 @@ const TableSection = ({
   );
 };
 
+import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+
 export default function ReportsPage({
   viewType = "vehicle",
 }: {
   viewType?: "vehicle" | "no-vehicle";
 }) {
+  const [isCreating, setIsCreating] = useState(false);
+
   // State for filters
   const [filters, setFilters] = useState({
     search: "",
@@ -131,7 +137,21 @@ export default function ReportsPage({
     return { vehicleGroups: vGroups, noVehicleGroups: nvGroups };
   }, [data, filters]);
 
-
+  if (isCreating) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
+            <ArrowLeft className="w-4 h-4" /> Back to Reports
+          </Button>
+          <h1 className="text-lg font-semibold text-gray-800">Create New General & Traffic Offence Report</h1>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <MultiStepForm />
+        </div>
+      </div>
+    )
+  }
 
   const isVehicleView = viewType === "vehicle";
   const pageTitle = isVehicleView
@@ -164,7 +184,7 @@ export default function ReportsPage({
         }
         offenceTypeOptions={offenceTypeOptions}
         showOffenceType={true}
-        onAddNew={() => console.log("Add New Clicked")}
+        onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({
             search: "",
