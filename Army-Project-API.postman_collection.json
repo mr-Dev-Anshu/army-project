@@ -880,6 +880,39 @@
                     "response": []
                 },
                 {
+                    "name": "Filter by Date (Specific Day)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&date=2025-12-06",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "date",
+                                    "value": "2025-12-06"
+                                }
+                            ]
+                        },
+                        "description": "Get offences occurring on a specific date (UTC)"
+                    },
+                    "response": []
+                },
+                {
                     "name": "Full Complex Filter (OffenceType + Status + Vehicle Details)",
                     "request": {
                         "method": "GET",

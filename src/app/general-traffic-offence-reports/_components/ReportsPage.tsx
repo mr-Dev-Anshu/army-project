@@ -59,8 +59,12 @@ export default function ReportsPage({
       params.status = filters.actionStatus; // Backend accepts "Taken" / "Pending"
     }
 
+    if (filters.date) {
+      params.date = filters.date.split('T')[0];
+    }
+
     return params;
-  }, [filters.offenceType, filters.actionStatus]);
+  }, [filters.offenceType, filters.actionStatus, filters.date]);
 
   const { data, isLoading, isError } = useGetAllTrafficOffences(apiParams);
 

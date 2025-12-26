@@ -19,6 +19,7 @@ export async function GET(request) {
         vehicleType: searchParams.get('vehicleType'),
         vehicleCategory: searchParams.get('vehicleCategory'),
         isVehicleInvolved: searchParams.get('isVehicleInvolved'),
+        date: searchParams.get('date'),
       };
 
       // Remove null/undefined values

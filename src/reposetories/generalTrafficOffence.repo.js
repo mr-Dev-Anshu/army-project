@@ -102,6 +102,20 @@ export class GeneralTrafficOffenceRepository {
       matchStage.vehicleCategory = filters.vehicleCategory;
     }
 
+    if (filters.date) {
+      const dateStr = filters.date.split('T')[0]; // Ensure we have YYYY-MM-DD
+      const startDate = new Date(dateStr);
+      startDate.setUTCHours(0, 0, 0, 0);
+
+      const endDate = new Date(dateStr);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      matchStage.$or = [
+        { "offenceOccurenceDetails.timeOfOffence": { $gte: startDate, $lte: endDate } },
+        { "createdAt": { $gte: startDate, $lte: endDate } }
+      ];
+    }
+
     // Filter by offence type (containment check before unwind)
     if (filters.offenceType && filters.offenceType !== 'All') {
       matchStage.offenceTypes = filters.offenceType;
