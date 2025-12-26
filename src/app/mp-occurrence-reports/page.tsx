@@ -146,6 +146,15 @@ export default function MpOccurrenceReportsPage() {
         }
         showOffenceType={false}
         onAddNew={() => console.log("Add New Clicked")}
+        onReset={() =>
+          setFilters({
+            search: "",
+            offenceType: "All",
+            date: "",
+            actionStatus: "All",
+            sortOrder: "desc",
+          })
+        }
       />
 
       {/* Main Table */}

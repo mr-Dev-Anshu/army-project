@@ -173,6 +173,15 @@ export default function ReportsPage({
         offenceTypeOptions={offenceTypeOptions}
         showOffenceType={true}
         onAddNew={() => console.log("Add New Clicked")}
+        onReset={() =>
+          setFilters({
+            search: "",
+            offenceType: "All",
+            date: "",
+            actionStatus: "All",
+            sortOrder: "desc",
+          })
+        }
       />
 
       {/* Content Area: Loader, Error, or Data */}

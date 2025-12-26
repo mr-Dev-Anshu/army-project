@@ -28,6 +28,7 @@ interface ReportFilterBarProps {
   showActionStatus?: boolean;
   showOffenceType?: boolean;
   onAddNew?: () => void;
+  onReset?: () => void;
 }
 
 export default function ReportFilterBar({
@@ -39,6 +40,7 @@ export default function ReportFilterBar({
   showActionStatus = true,
   showOffenceType = true,
   onAddNew,
+  onReset,
 }: ReportFilterBarProps) {
   return (
     <div className="flex flex-wrap gap-3 justify-between items-center mb-6  bg-white ">
@@ -124,7 +126,19 @@ export default function ReportFilterBar({
         >
           <ArrowUpDown className={`w-4 h-4 text-gray-600 ${filters.sortOrder === 'asc' ? 'transform rotate-180' : ''}`} />
         </Button> */}
+
+        {/* Reset Filter Button */}
+        {onReset && (
+          <Button
+            variant="outline"
+            className="bg-white border-gray-300 text-gray-600 hover:bg-gray-100"
+            onClick={onReset}
+          >
+            Reset Filter
+          </Button>
+        )}
       </div>
+
       {/* Add New Button */}
       {onAddNew && (
         <Button

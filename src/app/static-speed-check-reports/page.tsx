@@ -125,6 +125,14 @@ export default function StaticSpeedCheckReportsPage() {
         showOffenceType={false}
         placeholder="Search by report no, unit, or vehicle..."
         onAddNew={() => console.log("Add New Clicked")}
+        onReset={() =>
+          setFilters({
+            search: "",
+            date: "",
+            actionStatus: "All",
+            sortOrder: "desc",
+          })
+        }
       />
 
       {/* Main Table */}
