@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { 
-  MoreVertical, 
-  MousePointerClick, 
-  Eye, 
-  Printer, 
-  Edit, 
-  Copy, 
+import {
+  MoreVertical,
+  Eye,
+  Printer,
+  Edit,
+  Copy,
   Trash
 } from "lucide-react";
 import { useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
+import { toast } from "react-toastify";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,14 +29,43 @@ interface DetailsTableProps {
 }
 
 export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTableProps) {
-  const { mutate: updateOffence, isPending: isUpdating } = useUpdateTrafficOffence();
-  
+  const { mutateAsync: updateOffence, isPending: isUpdating } = useUpdateTrafficOffence();
+  const [modalState, setModalState] = React.useState<{ isOpen: boolean; offenceId: string | null; newStatus: boolean }>({
+    isOpen: false,
+    offenceId: null,
+    newStatus: false,
+  });
+
+  const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
+    setModalState({
+      isOpen: true,
+      offenceId,
+      newStatus: !currentStatus,
+    });
+  };
+
+  const handleConfirm = async () => {
+    if (!modalState.offenceId) return;
+
+    try {
+      await updateOffence({
+        id: modalState.offenceId,
+        data: { actionStatus: modalState.newStatus },
+      });
+      toast.success("Action status updated successfully!");
+      setModalState({ isOpen: false, offenceId: null, newStatus: false });
+    } catch (error) {
+      toast.error("Failed to update action status.");
+      console.error(error);
+    }
+  };
+
   const columns = useMemo<Column<any>[]>(() => {
     const commonColumns: Column<any>[] = [
       {
         header: "Sr no.",
         cell: (offence) => {
-             return <span className="text-gray-900">{offence.displayIndex}</span>
+          return <span className="text-gray-900">{offence.displayIndex}</span>
         },
         className: "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
         headerClassName: "sticky left-0 z-20 bg-gray-50 border-r border-gray-200 w-12"
@@ -133,12 +164,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         header: "Particulars of Indls.",
         className: "min-w-[200px]",
         cell: (offence) => {
-          // Check if we have specific mock data fields or standardized ones
-          // For No Vehicle Involved, sometimes it's a Civilian or Maid
           const primaryDetails = offence.offenders?.[0]?.offenderDetails || {};
-          // Mocking some data for visual parity with screenshot if missing
-          // The screenshot had "Civilian Mr Rakesh Kumar" etc.
-          // We'll trust the details object has what we need or OffenderDetailsCell handles it
           const reportingMP = offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
           return <OffenderDetailsCell details={primaryDetails} mpName={reportingMP} />;
         }
@@ -177,9 +203,9 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         header: "Offence Description",
         className: "min-w-[300px] max-w-md",
         cell: (offence) => (
-           <div className="text-gray-700 text-xs">
-              {offence.offenceOccurenceDetails?.description || "No description provided."}
-           </div>
+          <div className="text-gray-700 text-xs">
+            {offence.offenceOccurenceDetails?.description || "No description provided."}
+          </div>
         )
       }
     ];
@@ -190,27 +216,22 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         cell: (offence) => {
           const isTaken = offence.actionStatus === true;
           return (
-             <div 
-               className="flex flex-col items-center gap-1 cursor-pointer"
-               onClick={() => {
-                 if (offence._id) {
-                   updateOffence({ 
-                     id: offence._id, 
-                     data: { actionStatus: !isTaken } 
-                   });
-                 }
-               }}
-             >
-                <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
-                  <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                </div>
-                <span className="text-[10px] text-gray-500 font-medium uppercase">{isTaken ? "Taken" : "Pending"}</span>
+            <div
+              className="flex flex-col items-center gap-1 cursor-pointer"
+              onClick={() => {
+                if (offence._id) {
+                  handleStatusClick(offence._id, isTaken);
+                }
+              }}
+            >
+              <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
+                <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
               </div>
+              <span className="text-[10px] text-gray-500 font-medium uppercase">{isTaken ? "Taken" : "Pending"}</span>
+            </div>
           );
         },
-        // Stick to right, offset by 48px (w-12 of next col)
-        // Add border-l to this one to separate from scrollable content
-        className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200", 
+        className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
         headerClassName: "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200"
       },
       {
@@ -246,7 +267,6 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
             </DropdownMenuContent>
           </DropdownMenu>
         ),
-        // Stick to absolute right
         className: "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
         headerClassName: "w-12 sticky right-0 z-20 bg-gray-50"
       }
@@ -259,7 +279,6 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
     ];
   }, [isVehicleInvolved, updateOffence]);
 
-  // Pre-process data to add index
   const processedData = useMemo(() => {
     return offences.map((item, index) => ({
       ...item,
@@ -267,5 +286,18 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
     }));
   }, [offences]);
 
-  return <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />;
+  return (
+    <>
+      <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleConfirm}
+        title="Change Action Status"
+        message={`Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`}
+        confirmLabel="Yes, Change"
+        isProcessing={isUpdating}
+      />
+    </>
+  );
 }

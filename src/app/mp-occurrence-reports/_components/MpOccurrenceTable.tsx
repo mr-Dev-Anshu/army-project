@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { 
-  MoreVertical, 
-  Eye, 
-  Printer, 
-  Edit, 
-  Copy, 
-  Trash 
+import {
+  MoreVertical,
+  Eye,
+  Printer,
+  Edit,
+  Copy,
+  Trash
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -19,10 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUpdateMPReport } from "@/features/mpReports/hooks";
 import MpDetailsCell from "./MpDetailsCell";
+import { toast } from "react-toastify";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
-// Reuse existing cell if possible, or define a local one for "Individual/Victim"
-// Since "OffenderDetailsCell" is in another folder, we can import it or duplicate logic.
-// The screenshot shows similar fields. I'll import it.
 import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
 
 interface MpOccurrenceTableProps {
@@ -30,7 +29,36 @@ interface MpOccurrenceTableProps {
 }
 
 export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
-  const { mutate: updateReport } = useUpdateMPReport();
+  const { mutateAsync: updateReport, isPending: isUpdating } = useUpdateMPReport();
+  const [modalState, setModalState] = React.useState<{ isOpen: boolean; reportId: string | null; newStatus: boolean }>({
+    isOpen: false,
+    reportId: null,
+    newStatus: false,
+  });
+
+  const handleStatusClick = (reportId: string, currentStatus: boolean) => {
+    setModalState({
+      isOpen: true,
+      reportId,
+      newStatus: !currentStatus,
+    });
+  };
+
+  const handleConfirm = async () => {
+    if (!modalState.reportId) return;
+
+    try {
+      await updateReport({
+        id: modalState.reportId,
+        data: { actionStatus: modalState.newStatus },
+      });
+      toast.success("Action status updated successfully!");
+      setModalState({ isOpen: false, reportId: null, newStatus: false });
+    } catch (error) {
+      toast.error("Failed to update action status.");
+      console.error(error);
+    }
+  };
 
   const columns = useMemo<Column<any>[]>(() => {
     return [
@@ -66,34 +94,34 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
         header: "Particulars of Individual/Victim",
         className: "min-w-[200px]",
         cell: (item) => (
-            // Using OffenderDetailsCell as a generic Person info cell
-            <OffenderDetailsCell details={item.victimDetails} mpName={item.reportingMPName} />
+          // Using OffenderDetailsCell as a generic Person info cell
+          <OffenderDetailsCell details={item.victimDetails} mpName={item.reportingMPName} />
         )
       },
       {
         header: "Offence Type",
         className: "min-w-[150px]",
         cell: (item) => (
-           <div className="font-medium text-gray-900">{item.offenceType}</div>
+          <div className="font-medium text-gray-900">{item.offenceType}</div>
         )
       },
       {
         header: "Brief of Occurrence",
         className: "min-w-[250px]",
         cell: (item) => (
-           <div className="text-gray-700 text-xs">{item.brief}</div>
+          <div className="text-gray-700 text-xs">{item.brief}</div>
         )
       },
       {
         header: "List of Attached Documents & Statements",
         className: "min-w-[250px]",
         cell: (item) => (
-            <ul className="list-decimal pl-4 text-xs text-gray-600 space-y-1">
-                {item.documents?.map((doc: any, i: number) => (
-                    <li key={i}>{doc.statement || "Document"}</li>
-                ))}
-                {(!item.documents || item.documents.length === 0) && <li>-</li>}
-            </ul>
+          <ul className="list-decimal pl-4 text-xs text-gray-600 space-y-1">
+            {item.documents?.map((doc: any, i: number) => (
+              <li key={i}>{doc.statement || "Document"}</li>
+            ))}
+            {(!item.documents || item.documents.length === 0) && <li>-</li>}
+          </ul>
         )
       },
       {
@@ -105,14 +133,14 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
         header: "Initials of MPCR NCO",
         className: "text-center w-24",
         cell: (item) => (
-            <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
+          <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
         )
       },
       {
         header: "Initials of CO",
         className: "text-center w-24",
         cell: (item) => (
-            <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
+          <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
         )
       },
       {
@@ -122,27 +150,24 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
       },
       {
         header: "Action Status",
-        className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200", 
+        className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
         headerClassName: "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
         cell: (item) => {
           const isTaken = item.actionStatus === true;
           return (
-             <div 
-               className="flex flex-col items-center gap-1 cursor-pointer"
-               onClick={() => {
-                 if (item._id) {
-                   updateReport({ 
-                        id: item._id, 
-                        data: { actionStatus: !isTaken } 
-                   });
-                 }
-               }}
-             >
-                <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
-                  <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                </div>
-                <span className="text-[10px] text-gray-500 font-medium uppercase">{isTaken ? "Taken" : "Pending"}</span>
+            <div
+              className="flex flex-col items-center gap-1 cursor-pointer"
+              onClick={() => {
+                if (item._id) {
+                  handleStatusClick(item._id, isTaken);
+                }
+              }}
+            >
+              <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
+                <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
               </div>
+              <span className="text-[10px] text-gray-500 font-medium uppercase">{isTaken ? "Taken" : "Pending"}</span>
+            </div>
           );
         }
       },
@@ -192,5 +217,18 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
     }));
   }, [data]);
 
-  return <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />;
+  return (
+    <>
+      <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleConfirm}
+        title="Change Action Status"
+        message={`Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`}
+        confirmLabel="Yes, Change"
+        isProcessing={isUpdating}
+      />
+    </>
+  );
 }

@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { 
-  MoreVertical, 
-  MousePointerClick, 
-  Eye, 
-  Printer, 
-  Edit, 
-  Copy, 
-  Trash 
+import {
+  MoreVertical,
+  Eye,
+  Printer,
+  Edit,
+  Copy,
+  Trash
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -18,17 +17,48 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// Importing from the sibling module for now as per previous context
 import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
 import { useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+import { toast } from "react-toastify";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
+
 
 interface StaticSpeedTableProps {
   data: any[];
 }
 
 export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
-  const { mutate: updateRecord } = useUpdateStaticSpeedRecord();
-  
+  const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdateStaticSpeedRecord();
+  const [modalState, setModalState] = React.useState<{ isOpen: boolean; recordId: string | null; newStatus: boolean }>({
+    isOpen: false,
+    recordId: null,
+    newStatus: false,
+  });
+
+  const handleStatusClick = (recordId: string, currentStatus: boolean) => {
+    setModalState({
+      isOpen: true,
+      recordId,
+      newStatus: !currentStatus,
+    });
+  };
+
+  const handleConfirm = async () => {
+    if (!modalState.recordId) return;
+
+    try {
+      await updateRecord({
+        id: modalState.recordId,
+        data: { actionStatus: modalState.newStatus },
+      });
+      toast.success("Action status updated successfully!");
+      setModalState({ isOpen: false, recordId: null, newStatus: false });
+    } catch (error) {
+      toast.error("Failed to update action status.");
+      console.error(error);
+    }
+  };
+
   const columns = useMemo<Column<any>[]>(() => {
     return [
       {
@@ -61,7 +91,7 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         header: "Particulars of Driver/Rider",
         className: "min-w-[200px]",
         cell: (item) => (
-            <OffenderDetailsCell details={item.driverDetails} mpName={item.mpName} />
+          <OffenderDetailsCell details={item.driverDetails} mpName={item.mpName} />
         )
       },
       {
@@ -78,7 +108,7 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         header: "Offence Brief",
         className: "min-w-[180px]",
         cell: (item) => (
-             <div className="text-gray-700 text-xs max-w-xs">{item.offenceBrief}</div>
+          <div className="text-gray-700 text-xs max-w-xs">{item.offenceBrief}</div>
         )
       },
       {
@@ -115,33 +145,30 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         header: "Particulars of Co-Driver/Rider",
         className: "min-w-[200px]",
         cell: (item) => {
-             if (!item.coDriverDetails) return <span className="text-gray-400">-</span>;
-             return <OffenderDetailsCell details={item.coDriverDetails} mpName={item.mpName} />;
+          if (!item.coDriverDetails) return <span className="text-gray-400">-</span>;
+          return <OffenderDetailsCell details={item.coDriverDetails} mpName={item.mpName} />;
         }
       },
       {
         header: "Action Status",
-        className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200", 
+        className: "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
         headerClassName: "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
-         cell: (item) => {
+        cell: (item) => {
           const isTaken = item.actionStatus === true;
           return (
-             <div 
-               className="flex flex-col items-center gap-1 cursor-pointer"
-               onClick={() => {
-                 if (item._id) {
-                   updateRecord({
-                     id: item._id,
-                     data: { actionStatus: !isTaken }
-                   });
-                 }
-               }}
-             >
-                <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
-                  <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                </div>
-                <span className="text-[10px] text-gray-500 font-medium uppercase">{isTaken ? "Taken" : "Pending"}</span>
+            <div
+              className="flex flex-col items-center gap-1 cursor-pointer"
+              onClick={() => {
+                if (item._id) {
+                  handleStatusClick(item._id, isTaken);
+                }
+              }}
+            >
+              <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? 'bg-green-500' : 'bg-red-500'}`}>
+                <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? 'translate-x-5' : 'translate-x-0'}`}></div>
               </div>
+              <span className="text-[10px] text-gray-500 font-medium uppercase">{isTaken ? "Taken" : "Pending"}</span>
+            </div>
           );
         }
       },
@@ -191,5 +218,18 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
     }));
   }, [data]);
 
-  return <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />;
+  return (
+    <>
+      <DynamicTable data={processedData} columns={columns} className="no-scrollbar" />
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleConfirm}
+        title="Change Action Status"
+        message={`Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`}
+        confirmLabel="Yes, Change"
+        isProcessing={isUpdating}
+      />
+    </>
+  );
 }
