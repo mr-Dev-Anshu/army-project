@@ -23,14 +23,14 @@ export function DynamicTable<T>({
   emptyMessage = "No records found." 
 }: DynamicTableProps<T>) {
   return (
-    <div className={cn("overflow-x-auto rounded-lg border border-gray-200 bg-white", className)}>
-      <table className="w-full text-left text-sm text-gray-700">
+    <div className={cn("overflow-x-auto overflow-y-auto max-h-[350px] rounded-lg border border-gray-200 bg-white", className)}>
+      <table className="w-full text-left text-sm text-gray-700 relative">
         <thead className="bg-gray-50 border-b border-gray-200 font-semibold text-gray-900 uppercase text-xs">
           <tr>
             {columns.map((col, index) => (
               <th 
                 key={index} 
-                className={cn("px-4 py-3 whitespace-nowrap", col.headerClassName)}
+                className={cn("sticky top-0 z-10 bg-gray-50 px-4 py-3 whitespace-nowrap shadow-sm", col.headerClassName)}
               >
                 {col.header}
               </th>
