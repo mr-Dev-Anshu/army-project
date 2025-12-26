@@ -37,15 +37,15 @@ export const useUpdateTrafficOffence = () => {
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       api.updateTrafficOffence(id, data),
     onMutate: async ({ id, data }) => {
-      // Cancel outgoing refetches (so they don't overwrite our optimistic update)
+      // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["traffic-offences"] });
       await queryClient.cancelQueries({ queryKey: ["traffic-offence", id] });
 
-      // Snapshot the previous value
-      const previousOffences = queryClient.getQueryData(["traffic-offences"]);
+      // Snapshot the previous value of all queries matching the key
+      const previousOffences = queryClient.getQueriesData({ queryKey: ["traffic-offences"] });
 
-      // Optimistically update to the new value
-      queryClient.setQueryData(["traffic-offences"], (old: any[]) => {
+      // Optimistically update all matching queries
+      queryClient.setQueriesData({ queryKey: ["traffic-offences"] }, (old: any[] | undefined) => {
         if (!old) return [];
         return old.map((group) => ({
           ...group,
@@ -55,11 +55,15 @@ export const useUpdateTrafficOffence = () => {
         }));
       });
 
-      // Return a context object with the snapshotted value
       return { previousOffences };
     },
-    onError: (err, newTodo, context) => {
-      queryClient.setQueryData(["traffic-offences"], context?.previousOffences);
+    onError: (err, variables, context) => {
+      // Rollback to previous value
+      if (context?.previousOffences) {
+        context.previousOffences.forEach(([queryKey, queryData]) => {
+          queryClient.setQueryData(queryKey, queryData);
+        });
+      }
     },
     onSettled: (_, __, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["traffic-offences"] });

@@ -135,17 +135,7 @@ export default function ReportsPage({
     return { vehicleGroups: vGroups, noVehicleGroups: nvGroups };
   }, [data, filters]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
 
-  if (isError) {
-    return <div className="p-8 text-red-500">Failed to load reports.</div>;
-  }
 
   const isVehicleView = viewType === "vehicle";
   const pageTitle = isVehicleView 
@@ -181,25 +171,35 @@ export default function ReportsPage({
         onAddNew={() => console.log("Add New Clicked")}
       />
 
-      {/* Conditional Table Rendering */}
-      {isVehicleView ? (
-        vehicleGroups.length > 0 ? (
-          <TableSection groups={vehicleGroups} isVehicleInvolved={true} />
+      {/* Content Area: Loader, Error, or Data */}
+      {isLoading ? (
+        <div className="flex items-center justify-center p-12 bg-white rounded-lg shadow border border-gray-200 mt-6 min-h-[200px]">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      ) : isError ? (
+        <div className="p-8 text-red-500 bg-white rounded-lg shadow border border-gray-200 mt-6 text-center">
+          Failed to load reports.
+        </div>
+      ) : (
+        /* Conditional Table Rendering */
+        isVehicleView ? (
+          vehicleGroups.length > 0 ? (
+            <TableSection groups={vehicleGroups} isVehicleInvolved={true} />
+          ) : (
+            <div className="mt-12 text-center text-gray-500">
+              No "Vehicle Involved" offences found.
+            </div>
+          )
+        ) : noVehicleGroups.length > 0 ? (
+          <TableSection
+            groups={noVehicleGroups}
+            isVehicleInvolved={false}
+          />
         ) : (
           <div className="mt-12 text-center text-gray-500">
-            No "Vehicle Involved" offences found.
+            No "No Vehicle Involved" offences found.
           </div>
         )
-      ) : noVehicleGroups.length > 0 ? (
-        <TableSection
-          title="No Vehicle Involved Reports"
-          groups={noVehicleGroups}
-          isVehicleInvolved={false}
-        />
-      ) : (
-        <div className="mt-12 text-center text-gray-500">
-          No "No Vehicle Involved" offences found.
-        </div>
       )}
     </div>
   );

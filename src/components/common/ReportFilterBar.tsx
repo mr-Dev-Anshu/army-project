@@ -84,7 +84,7 @@ export default function ReportFilterBar({
         {showDate && (
           <div className="w-auto relative">
             <Input
-              type="date"
+              type="datetime-local"
               value={filters.date || ""}
               onChange={(e) => onFilterChange("date", e.target.value)}
               className="bg-white border-gray-300 cursor-pointer"
