@@ -54,7 +54,7 @@ export default function AllRegisteredReports() {
 
     const reportCards = [
         {
-            title: "General & Traffic Offence Reports - NO Vehicle Involved",
+            title: "General & Traffic Offence Reports - No Vehicle Involved",
             count: counts.trafficNoVehicle,
             icon: <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="48" height="48" rx="24" fill="#1C2E4A" />

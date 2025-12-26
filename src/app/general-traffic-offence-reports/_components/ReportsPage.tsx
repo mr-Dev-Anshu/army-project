@@ -50,11 +50,11 @@ export default function ReportsPage({
   // Prepare params for backend
   const apiParams = useMemo(() => {
     const params: any = { groupBy: "offenceType" };
-    
+
     if (filters.offenceType && filters.offenceType !== "All") {
       params.offenceType = filters.offenceType;
     }
-    
+
     if (filters.actionStatus && filters.actionStatus !== "All") {
       params.status = filters.actionStatus; // Backend accepts "Taken" / "Pending"
     }
@@ -68,13 +68,11 @@ export default function ReportsPage({
 
   const { data, isLoading, isError } = useGetAllTrafficOffences(apiParams);
 
-  // Fetch all options for the dropdown (unfiltered by specific offence type or status)
-  // This ensures the dropdown list doesn't shrink when a selection is made
   const optionsParams = useMemo(() => ({
     groupBy: "offenceType",
     isVehicleInvolved: viewType === "vehicle"
   }), [viewType]);
-  
+
   const { data: optionsData } = useGetAllTrafficOffences(optionsParams);
 
   // Process data into two sets: Vehicle Involved vs No Vehicle Involved
@@ -85,43 +83,37 @@ export default function ReportsPage({
     const nvGroups: any[] = [];
 
     data.forEach((group: any) => {
-      // Common filtering function (still useful for search/date which are client-side)
+
       const matchesFilter = (o: any) => {
         // Date Check
         if (filters.date) {
-            const rawDate = o.offenceOccurenceDetails?.timeOfOffence || o.createdAt;
-            if (rawDate) {
-                const recordDate = new Date(rawDate).toISOString().split('T')[0];
-                if (recordDate !== filters.date) return false;
-            }
+          const rawDate = o.offenceOccurenceDetails?.timeOfOffence || o.createdAt;
+          if (rawDate) {
+            const recordDate = new Date(rawDate).toISOString().split('T')[0];
+            if (recordDate !== filters.date) return false;
+          }
         }
 
         if (filters.search) {
-             const searchLower = filters.search.toLowerCase();
-             const reportNo = o.reportNumber?.toLowerCase() || "";
-             const offenceType = o.currentOffenceType?.toLowerCase() || "";
-             if (!reportNo.includes(searchLower) && !offenceType.includes(searchLower)) return false;
+          const searchLower = filters.search.toLowerCase();
+          const reportNo = o.reportNumber?.toLowerCase() || "";
+          const offenceType = o.currentOffenceType?.toLowerCase() || "";
+          if (!reportNo.includes(searchLower) && !offenceType.includes(searchLower)) return false;
         }
 
         return true;
       };
 
-      // Note: Backend handles isVehicleInvolved via apiParams for the main query if we wanted,
-      // but current logic splits a single response into two. 
-      // Actually, since we now pass filters to backend, 'data' might already be filtered by offenceType.
-      // But we still need to split for the "viewType" logic if the backend query wasn't strictly viewType bounded.
-      // Wait, apiParams *didn't* include isVehicleInvolved in the previous step I wrote?
-      // Let's check apiParams construction below/above.
-      
+
       let vOffences = group.offences?.filter((o: any) => o.isVehicleInvolved && matchesFilter(o)) || [];
       let nvOffences = group.offences?.filter((o: any) => !o.isVehicleInvolved && matchesFilter(o)) || [];
 
       // Sort
       if (filters.sortOrder) {
         const sorter = (a: any, b: any) => {
-             const dateA = new Date(a.offenceOccurenceDetails?.timeOfOffence || a.createdAt).getTime();
-             const dateB = new Date(b.offenceOccurenceDetails?.timeOfOffence || b.createdAt).getTime();
-             return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+          const dateA = new Date(a.offenceOccurenceDetails?.timeOfOffence || a.createdAt).getTime();
+          const dateB = new Date(b.offenceOccurenceDetails?.timeOfOffence || b.createdAt).getTime();
+          return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
         };
         vOffences.sort(sorter);
         nvOffences.sort(sorter);
@@ -142,9 +134,9 @@ export default function ReportsPage({
 
 
   const isVehicleView = viewType === "vehicle";
-  const pageTitle = isVehicleView 
-    ? "General & Traffic Offence Reports- Vehicle Involved" 
-    : "General & Traffic Offence Reports- NO Vehicle Involved";
+  const pageTitle = isVehicleView
+    ? "General & Traffic Offence Reports- Vehicle Involved"
+    : "General & Traffic Offence Reports- No Vehicle Involved";
 
   // Calculate total count
   const activeGroups = isVehicleView ? vehicleGroups : noVehicleGroups;
@@ -152,8 +144,8 @@ export default function ReportsPage({
 
   // Calculate options from the SEPARATE optionsData query
   const fetchedOptions = optionsData?.map((g: any) => g.offenceType).filter(Boolean) || [];
-  const offenceTypeOptions = fetchedOptions.length > 0 
-    ? fetchedOptions 
+  const offenceTypeOptions = fetchedOptions.length > 0
+    ? fetchedOptions
     : ["Intoxication", "Over Speeding", "Wrong Parking", "No Helmet"];
 
   return (
