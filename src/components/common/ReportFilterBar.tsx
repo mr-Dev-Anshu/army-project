@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Calendar, Filter, ArrowUpDown, Plus } from "lucide-react";
+import { Search, Calendar, Plus } from "lucide-react";
 
 export interface FilterState {
   search: string;
@@ -42,7 +42,7 @@ export default function ReportFilterBar({
 }: ReportFilterBarProps) {
   return (
     <div className="flex flex-wrap gap-3 justify-between items-center mb-6  bg-white ">
-      <div className="flex justify-center gap-3 items-center ">
+      <div className="flex flex-wrap justify-center gap-3 items-center">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -57,7 +57,7 @@ export default function ReportFilterBar({
 
         {/* Offence Type Select */}
         {showOffenceType && offenceTypeOptions.length > 0 && (
-          <div className="w-[200px]">
+          <div className="w-[230px] shrink-0">
             <Select
               value={filters.offenceType || "All"}
               onValueChange={(value) => onFilterChange("offenceType", value)}
@@ -113,7 +113,7 @@ export default function ReportFilterBar({
             </Select>
           </div>
         )}
-        <Button
+        {/* <Button
           variant="outline"
           size="icon"
           className="bg-white w-10 h-10 shrink-0 border-gray-300"
@@ -123,7 +123,7 @@ export default function ReportFilterBar({
           }}
         >
           <ArrowUpDown className={`w-4 h-4 text-gray-600 ${filters.sortOrder === 'asc' ? 'transform rotate-180' : ''}`} />
-        </Button>
+        </Button> */}
       </div>
       {/* Add New Button */}
       {onAddNew && (

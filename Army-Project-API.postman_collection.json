@@ -878,6 +878,55 @@
                         "description": "Filter: 4-wheelers with vehicle involved and pending action"
                     },
                     "response": []
+                },
+                {
+                    "name": "Full Complex Filter (OffenceType + Status + Vehicle Details)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&offenceType=major&status=Taken&vehicleType=Civilian Vehicle&vehicleCategory=4-Wheeler&isVehicleInvolved=true",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "offenceType",
+                                    "value": "major"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "Taken"
+                                },
+                                {
+                                    "key": "vehicleType",
+                                    "value": "Civilian Vehicle"
+                                },
+                                {
+                                    "key": "vehicleCategory",
+                                    "value": "4-Wheeler"
+                                },
+                                {
+                                    "key": "isVehicleInvolved",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Tests all filtering capabilities simultaneously: Offence Type, Status (Taken), Vehicle Type, Category, and Involvement."
+                    },
+                    "response": []
                 }
             ]
         },

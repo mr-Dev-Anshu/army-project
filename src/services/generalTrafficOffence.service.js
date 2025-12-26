@@ -4,6 +4,10 @@ export class GeneralTrafficOffenceService {
     return await generalTrafficOffenceRepo.getAll();
   }
 
+  async getGroupedByOffenceType(filters) {
+    return await generalTrafficOffenceRepo.getGroupedByOffenceType(filters);
+  }
+
   async getById(id) {
     const offence = await generalTrafficOffenceRepo.getById(id);
 

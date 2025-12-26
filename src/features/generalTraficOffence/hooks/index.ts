@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "@/apis";
 
-export const useGetAllTrafficOffences = () => {
+export const useGetAllTrafficOffences = (filters?: any) => {
   return useQuery({
-    queryKey: ["traffic-offences"],
-    queryFn: api.getAllTrafficOffences,
+    queryKey: ["traffic-offences", filters],
+    queryFn: () => api.getAllTrafficOffences(filters),
     retry: 1,
   });
 };
@@ -22,7 +22,7 @@ export const useCreateTrafficOffence = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["create-traffic-offence"],
-    mutationFn: (data: api.createTrafficOffence) => api.createTrafficOffence(data),
+    mutationFn: (data: any) => api.createTrafficOffence(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["traffic-offences"] });
     },
