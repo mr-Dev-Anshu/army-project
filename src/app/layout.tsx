@@ -20,12 +20,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className={inter.className}>
-        {/* Breadcrumb Bar */}
-        {/* <div className="border-b border-gray-200 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <DynamicBreadcrumbs />
-            </div>
-          </div> */}
 
         {/* Main Content */}
         <Wrapper>

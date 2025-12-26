@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Eye} from "lucide-react";
+import { ChevronRight, Eye } from "lucide-react";
 import { CiEraser } from "react-icons/ci";
 
 import { FormDataState } from "@/common/types/form.types";
@@ -18,7 +18,7 @@ interface Props {
   onNext: () => void;
   onSubmitFinal: () => void;
   stepsConfig: Record<string, StepConfig>;
-  mode?: "traffic" | "static";   // <-- OPTIONAL YAHAN
+  mode?: "traffic" | "static";
 }
 
 export const RightPanel = ({
@@ -27,27 +27,27 @@ export const RightPanel = ({
   onNext,
   onSubmitFinal,
   stepsConfig,
-  mode,           
+  mode,
 }: Props) => {
-
   const current = stepsConfig?.[String(step)];
 
+  const totalSteps = Object.keys(stepsConfig || {}).length;
+  const isLastStep = step === totalSteps;
+
   const isNextDisabled = () => {
-    //  STATIC SPEED
+    // STATIC SPEED
     if (mode === "static" && step === 1) {
       const vd = formData.staticSpeed?.vehicleDetails;
       return !(vd?.vehicleType && vd?.category);
     }
 
-    //  TRAFFIC
+    // TRAFFIC
     if (mode === "traffic" && step === 1) {
       return !formData.traffic?.vehicleInvolved;
     }
 
     return false;
   };
-
-
 
   return (
     <div
@@ -58,7 +58,6 @@ export const RightPanel = ({
         flex flex-col 
         w-full
         overflow-hidden
-       
       "
     >
       {/* ---------- HEADER ---------- */}
@@ -69,7 +68,6 @@ export const RightPanel = ({
           justify-between 
           mb-4 sm:mb-6 
           gap-3
-        
         "
       >
         <h3 className="font-bold leading-tight text-lg sm:text-xl lg:text-2xl">
@@ -77,7 +75,7 @@ export const RightPanel = ({
         </h3>
 
         <div className="flex gap-2 flex-wrap">
-          <Button  variant="outline" size="sm">
+          <Button variant="outline" size="sm">
             <CiEraser size={16} /> Clear
           </Button>
 
@@ -102,7 +100,8 @@ export const RightPanel = ({
 
       {/* ---------- FOOTER ---------- */}
       <div className="mt-auto flex flex-col sm:flex-row justify-end gap-2">
-        {step !== 4 && (
+
+        {!isLastStep && (
           <Button
             onClick={onNext}
             disabled={isNextDisabled()}
@@ -113,7 +112,7 @@ export const RightPanel = ({
           </Button>
         )}
 
-        {step === 4 && (
+        {isLastStep && (
           <Button
             className="bg-blue-600 w-full sm:w-auto"
             onClick={onSubmitFinal}

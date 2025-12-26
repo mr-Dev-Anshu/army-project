@@ -5,6 +5,7 @@ import ActionCard from "./ActionCard";
 import { FileText, Gauge, ClipboardList } from "lucide-react";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
+import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
 
 export default function CreateNewRecordPanel({ setCollapsed }: any) {
   const [selectedRecord, setSelectedRecord] = useState<string | null>(null);
@@ -40,24 +41,24 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
         <span className="text-black font-medium"> Create New Record</span>
       </div>
 
+      {/* ---------- HEADING + CARDS ---------- */}
       {!selectedRecord && (
-        <h2 className="text-xl text-gray-500 font-semibold mb-6 ml-32">
-          Create New Record
-        </h2>
-      )}
+        <div className="flex justify-center">
+          <div className="w-full max-w-7xl">
+            <h2 className="text-xl text-gray-500 font-semibold mb-6">
+              Create New Record
+            </h2>
 
-      {/* ---------- IF NOTHING SELECTED → SHOW CARDS ---------- */}
-      {!selectedRecord && (
-        <div className="flex flex-1 items-start justify-center">
-          <div className="space-y-4 w-full max-w-7xl">
-            {records.map((item) => (
-              <ActionCard
-                key={item.key}
-                title={item.title}
-                icon={item.icon}
-                onClick={() => handleSelect(item.key)}
-              />
-            ))}
+            <div className="space-y-4">
+              {records.map((item) => (
+                <ActionCard
+                  key={item.key}
+                  title={item.title}
+                  icon={item.icon}
+                  onClick={() => handleSelect(item.key)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -72,17 +73,16 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
       {/* ---------- SPEED FORM ---------- */}
       {selectedRecord === "speed" && (
         <div className="w-full  p-6 border rounded-xl">
-          <StaticSpeedForm/>
+          <StaticSpeedForm />
         </div>
       )}
 
       {/* ---------- MP FORM ---------- */}
       {selectedRecord === "mp" && (
-        <div className="w-full max-w-5xl p-6 border rounded-xl mx-auto">
-          <h2 className="font-semibold text-lg">
-            MP Occurrence & Investigation Form
-          </h2>
-        </div>
+        <div className="w-full  p-6 border rounded-xl ">
+          <MultiFormReport/>
+      </div>
+        
       )}
     </div>
   );

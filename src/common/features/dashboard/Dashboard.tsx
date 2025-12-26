@@ -23,11 +23,12 @@ import CreateNewRecordPanel from "./components/dashboard-components/CreateNewRec
 import { useState } from "react";
 import MultiStepForm from "../../component/multi-step-form/MulitstepForm";
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
+import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
 
-  const [page, setPage] = useState<"dashboard" | "createRecord" | "multiForm" |"staticSpeed">(
+  const [page, setPage] = useState<"dashboard" | "createRecord" | "multiForm" |"staticSpeed" | "investigation">(
     "dashboard"
   );
 
@@ -148,6 +149,7 @@ export default function Dashboard() {
         {/* ================== MULTI STEP FORM ================== */}
         {page === "multiForm" && <MultiStepForm />}
         {page === "staticSpeed" && <StaticSpeedForm/>}
+        {page === "investigation" && <MultiFormReport />}
 
       </div>
     </div>

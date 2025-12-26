@@ -1,4 +1,3 @@
-
 "use client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,15 +17,17 @@ export default function VehicleDetailsForm({
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
 
-  /* ====== IF TRAFFIC + VEHICLE NOT INVOLVED → HIDE THIS FORM ====== */
-  if (scope === "traffic" && traffic.vehicleInvolved !== "yes") {
+  if (
+    scope === "traffic" &&
+    traffic.vehicleInvolved !== "yes" &&
+    state.formData.mpReport.individualDetails?.vehicleInvolved !== "yes" &&
+    state.formData.mpReport.witnessVehicleStatus !== "yes"
+  ) {
     return null;
   }
 
   const vehicleState =
-    scope === "traffic"
-      ? traffic.vehicleDetails
-      : staticSpeed.vehicleDetails;
+    scope === "traffic" ? traffic.vehicleDetails : staticSpeed.vehicleDetails;
 
   const { category, vehicleType, driverType } = vehicleState;
 
@@ -51,7 +52,6 @@ export default function VehicleDetailsForm({
 
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6 max-h-[75vh] overflow-y-auto">
-
       {/* VEHICLE CATEGORY */}
       <div>
         <p className="font-semibold mb-2">Select Vehicle Category</p>
@@ -61,22 +61,29 @@ export default function VehicleDetailsForm({
           onValueChange={(v) => updateVehicle({ category: v })}
           className="grid sm:grid-cols-2 gap-3"
         >
-          <label className={cn(
-            "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-            category === "2w" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-          )}>
+          <label
+            className={cn(
+              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
+              category === "2w"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
+            )}
+          >
             <RadioGroupItem value="2w" /> 2-Wheeler
           </label>
 
-          <label className={cn(
-            "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-            category === "4w" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-          )}>
+          <label
+            className={cn(
+              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
+              category === "4w"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
+            )}
+          >
             <RadioGroupItem value="4w" /> 4-Wheeler
           </label>
         </RadioGroup>
       </div>
-
 
       {/* VEHICLE TYPE */}
       <div>
@@ -89,22 +96,29 @@ export default function VehicleDetailsForm({
           onValueChange={(v) => updateVehicle({ vehicleType: v })}
           className="grid sm:grid-cols-2 gap-3"
         >
-          <label className={cn(
-            "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-            vehicleType === "civilian" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-          )}>
+          <label
+            className={cn(
+              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
+              vehicleType === "civilian"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
+            )}
+          >
             <RadioGroupItem value="civilian" /> Civilian Vehicle
           </label>
 
-          <label className={cn(
-            "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-            vehicleType === "dd" ? "border-blue-500 bg-blue-50" : "border-gray-300"
-          )}>
+          <label
+            className={cn(
+              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
+              vehicleType === "dd"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
+            )}
+          >
             <RadioGroupItem value="dd" /> DD Vehicle
           </label>
         </RadioGroup>
       </div>
-
 
       {/* CIVILIAN VEHICLE DETAILS */}
       {vehicleType === "civilian" && (

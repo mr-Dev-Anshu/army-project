@@ -268,7 +268,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {/* 2️⃣ STATIC SPEED */}
             <button
-              onClick={() => onMenuSelect("createRecord")}
+              onClick={() => onMenuSelect("staticSpeed")}
               className={cn(
                 "w-full flex items-start transition-all",
                 collapsed
@@ -289,7 +289,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {/* 3️⃣ MP REPORT */}
             <button
-              onClick={() => onMenuSelect("createRecord")}
+              onClick={() => onMenuSelect("investigation")}
               className={cn(
                 "w-full flex items-start transition-all",
                 collapsed

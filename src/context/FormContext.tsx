@@ -133,6 +133,60 @@ const initialState: GlobalFormState = {
         overSpeed: "",
       },
     },
+
+    mpReport: {
+      reportDetails: {
+        reportNo: "",
+        command: "",
+        firNo: "",
+        firFile: null,
+      },
+
+      mpParticulars: {
+        armyNo: "",
+        rank: "",
+        name: "",
+        unit: "",
+        fmn: "",
+        command: "",
+        address: "",
+        icard: "",
+      },
+
+      occurrenceDetails: {
+        offenceType: "",
+        place: "",
+        date: "",
+        time: "",
+        description: "",
+      },
+
+      individualDetails: {
+        vehicleInvolved: "",
+        vehicleData: {},
+        driverType: "",
+        offenderList: [],
+      },
+
+      witnesses: [],
+
+      evidence: {
+        attachEvidence: null,
+        eyeSketch: null,
+        photos: [],
+        videos: [],
+      },
+
+      documents: [],
+
+      detailedReport: "",
+      investigationPoints: "",
+      opinion: "",
+      remarks: {
+        analysis: "",
+        recommendation: "",
+      },
+    },
   },
 };
 
@@ -311,6 +365,48 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
             ...state.formData.staticSpeed,
             offenderPeople: [
               ...(state.formData.staticSpeed.offenderPeople || []),
+              action.payload,
+            ],
+          },
+        },
+      };
+
+    case "SET_MP_DATA":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          mpReport: {
+            ...state.formData.mpReport,
+            ...action.payload,
+          },
+        },
+      };
+
+    case "SET_MP_SECTION":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          mpReport: {
+            ...state.formData.mpReport,
+            [action.section]: {
+              ...state.formData.mpReport[action.section],
+              ...action.payload,
+            },
+          },
+        },
+      };
+
+    case "ADD_MP_DOCUMENT":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          mpReport: {
+            ...state.formData.mpReport,
+            documents: [
+              ...(state.formData.mpReport.documents || []),
               action.payload,
             ],
           },

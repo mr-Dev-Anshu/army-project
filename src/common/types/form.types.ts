@@ -61,6 +61,70 @@ export interface Witness {
   offenceBlock: OffenceOccurenceDetails;
 }
 
+
+
+/* ================= MP INVESTIGATION REPORT ================= */
+export interface MpReportState {
+
+  reportDetails: {
+    reportNo: string;
+    command: string;
+    firNo: string;
+    firFile?: File | null;
+  };
+
+  mpParticulars: {
+    armyNo : string;
+    rank: string;
+    name: string;
+    unit: string;
+    fmn: string;
+    command: string;
+    address: string;
+    icard: string;
+  };
+
+  occurrenceDetails: {
+    offenceType: string;
+    placeOfOccurrence: string;
+    date: string;
+    time: string;
+    description: string;
+  };
+
+  /* Step-4 same traffic style handle hoga */
+individualDetails: {
+  vehicleInvolved: "yes" | "no" | "";
+  vehicleData: Partial<VehicleDetailsState>;
+  driverType: string;
+  offenderList: any[];
+};
+
+
+  witnesses: Witness[];
+  evidence: {
+    generalEvidence?: File | null;
+    sketch?: File | null;
+    photos?: File[] | null;
+    videos?: File[] | null;
+  };
+
+  documents: {
+    statement: string;
+    url?: string;
+    attachments: string[];
+  };
+
+  detailedReport: string;
+  findings: string;
+  opinion: string;
+
+  remarks: {
+    analysis: string;
+    recommendation: string;
+  };
+}
+
 // ---------- DEPENDENTS ----------
 export type DependentType =
   | "Military Person"
@@ -93,6 +157,7 @@ export interface FormDataState {
   offendeDetails: Record<string, string>;
   offenderPeople: OffenderPerson[];
   coDriverOrPillion?: boolean;
+  mpReport: MpReportState;
 }
 
 // ---------- GLOBAL ----------
@@ -101,7 +166,6 @@ export interface GlobalFormState {
   completedSteps: number[];
   formData: FormDataState;
 }
-
 // ---------- ACTIONS ----------
 export type Action =
   | { type: "NEXT_STEP" }
@@ -114,4 +178,22 @@ export type Action =
       payload: Partial<OffenderWithoutVehicleState>;
     }
   | { type: "SET_OFFENDER_PEOPLE"; payload: OffenderPerson[] }
-  | { type: "SET_WITNESSES"; payload: Witness[] };
+  | { type: "SET_WITNESSES"; payload: Witness[] }
+
+  /* ========= STATIC SPEED ========= */
+  | { type: "SET_STATIC_WITNESSES"; payload: Witness[] }
+  | { type: "SET_STATIC_SPEED_DATA"; payload: any }
+  | { type: "ADD_STATIC_OFFENDER"; payload: any }
+
+  /* ========= MP REPORT MASTER ========= */
+  | {
+      type: "SET_MP_DATA";
+      payload: Partial<MpReportState>;
+    }
+
+  /* ========= MP SECTION WISE UPDATE ========= */
+  | {
+      type: "SET_MP_SECTION";
+      section: keyof MpReportState;
+      payload: any;
+    };
