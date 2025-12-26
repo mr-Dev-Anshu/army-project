@@ -9,8 +9,9 @@ import {
   Copy,
   Trash
 } from "lucide-react";
-import { useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
+import { useUpdateTrafficOffence, useDeleteTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { Button } from "@/components/ui/button";
+
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import { toast } from "react-toastify";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
@@ -30,9 +31,11 @@ interface DetailsTableProps {
 
 export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTableProps) {
   const { mutateAsync: updateOffence, isPending: isUpdating } = useUpdateTrafficOffence();
-  const [modalState, setModalState] = React.useState<{ isOpen: boolean; offenceId: string | null; newStatus: boolean }>({
+  const { mutateAsync: deleteOffence, isPending: isDeleting } = useDeleteTrafficOffence();
+  const [modalState, setModalState] = React.useState<{ isOpen: boolean; offenceId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
     isOpen: false,
     offenceId: null,
+    type: "status",
     newStatus: false,
   });
 
@@ -40,7 +43,16 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
     setModalState({
       isOpen: true,
       offenceId,
+      type: "status",
       newStatus: !currentStatus,
+    });
+  };
+
+  const handleDeleteClick = (offenceId: string) => {
+    setModalState({
+      isOpen: true,
+      offenceId,
+      type: "delete",
     });
   };
 
@@ -48,14 +60,19 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
     if (!modalState.offenceId) return;
 
     try {
-      await updateOffence({
-        id: modalState.offenceId,
-        data: { actionStatus: modalState.newStatus },
-      });
-      toast.success("Action status updated successfully!");
-      setModalState({ isOpen: false, offenceId: null, newStatus: false });
+      if (modalState.type === "status") {
+        await updateOffence({
+          id: modalState.offenceId,
+          data: { actionStatus: modalState.newStatus },
+        });
+        toast.success("Action status updated successfully!");
+      } else if (modalState.type === "delete") {
+        await deleteOffence(modalState.offenceId);
+        toast.success("Report deleted successfully!");
+      }
+      setModalState({ isOpen: false, offenceId: null, type: "status", newStatus: false });
     } catch (error) {
-      toast.error("Failed to update action status.");
+      toast.error(modalState.type === "status" ? "Failed to update action status." : "Failed to delete report.");
       console.error(error);
     }
   };
@@ -236,7 +253,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "",
-        cell: () => (
+        cell: (offence) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100">
@@ -260,7 +277,14 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
                 <Copy className="w-4 h-4" />
                 Duplicate Report
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                onClick={() => {
+                  if (offence._id) {
+                    handleDeleteClick(offence._id);
+                  }
+                }}
+              >
                 <Trash className="w-4 h-4" />
                 Delete
               </DropdownMenuItem>
@@ -293,10 +317,14 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         isOpen={modalState.isOpen}
         onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
         onConfirm={handleConfirm}
-        title="Change Action Status"
-        message={`Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`}
-        confirmLabel="Yes, Change"
-        isProcessing={isUpdating}
+        title={modalState.type === "status" ? "Change Action Status" : "Delete Report"}
+        message={
+          modalState.type === "status"
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`
+            : "Are you sure you want to delete this report? This action cannot be undone."
+        }
+        confirmLabel={modalState.type === "status" ? "Yes, Change" : "Yes, Delete"}
+        isProcessing={isUpdating || isDeleting}
       />
     </>
   );

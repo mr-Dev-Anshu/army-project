@@ -18,8 +18,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
-import { useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+import { useUpdateStaticSpeedRecord, useDeleteStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { toast } from "react-toastify";
+
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 
@@ -29,9 +30,11 @@ interface StaticSpeedTableProps {
 
 export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
   const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdateStaticSpeedRecord();
-  const [modalState, setModalState] = React.useState<{ isOpen: boolean; recordId: string | null; newStatus: boolean }>({
+  const { mutateAsync: deleteRecord, isPending: isDeleting } = useDeleteStaticSpeedRecord();
+  const [modalState, setModalState] = React.useState<{ isOpen: boolean; recordId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
     isOpen: false,
     recordId: null,
+    type: "status",
     newStatus: false,
   });
 
@@ -39,7 +42,16 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
     setModalState({
       isOpen: true,
       recordId,
+      type: "status",
       newStatus: !currentStatus,
+    });
+  };
+
+  const handleDeleteClick = (recordId: string) => {
+    setModalState({
+      isOpen: true,
+      recordId,
+      type: "delete",
     });
   };
 
@@ -47,14 +59,19 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
     if (!modalState.recordId) return;
 
     try {
-      await updateRecord({
-        id: modalState.recordId,
-        data: { actionStatus: modalState.newStatus },
-      });
-      toast.success("Action status updated successfully!");
-      setModalState({ isOpen: false, recordId: null, newStatus: false });
+      if (modalState.type === "status") {
+        await updateRecord({
+          id: modalState.recordId,
+          data: { actionStatus: modalState.newStatus },
+        });
+        toast.success("Action status updated successfully!");
+      } else if (modalState.type === "delete") {
+        await deleteRecord(modalState.recordId);
+        toast.success("Report deleted successfully!");
+      }
+      setModalState({ isOpen: false, recordId: null, type: "status", newStatus: false });
     } catch (error) {
-      toast.error("Failed to update action status.");
+      toast.error(modalState.type === "status" ? "Failed to update action status." : "Failed to delete report.");
       console.error(error);
     }
   };
@@ -176,7 +193,7 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         header: "",
         className: "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
         headerClassName: "w-12 sticky right-0 z-20 bg-gray-50",
-        cell: () => (
+        cell: (item) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100">
@@ -200,7 +217,14 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
                 <Copy className="w-4 h-4" />
                 Duplicate Report
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                onClick={() => {
+                  if (item._id) {
+                    handleDeleteClick(item._id);
+                  }
+                }}
+              >
                 <Trash className="w-4 h-4" />
                 Delete
               </DropdownMenuItem>
@@ -225,10 +249,14 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         isOpen={modalState.isOpen}
         onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
         onConfirm={handleConfirm}
-        title="Change Action Status"
-        message={`Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`}
-        confirmLabel="Yes, Change"
-        isProcessing={isUpdating}
+        title={modalState.type === "status" ? "Change Action Status" : "Delete Report"}
+        message={
+          modalState.type === "status"
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`
+            : "Are you sure you want to delete this report? This action cannot be undone."
+        }
+        confirmLabel={modalState.type === "status" ? "Yes, Change" : "Yes, Delete"}
+        isProcessing={isUpdating || isDeleting}
       />
     </>
   );

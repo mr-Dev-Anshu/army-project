@@ -17,9 +17,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUpdateMPReport } from "@/features/mpReports/hooks";
+import { useUpdateMPReport, useDeleteMPReport } from "@/features/mpReports/hooks";
 import MpDetailsCell from "./MpDetailsCell";
 import { toast } from "react-toastify";
+
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
@@ -30,9 +31,11 @@ interface MpOccurrenceTableProps {
 
 export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
   const { mutateAsync: updateReport, isPending: isUpdating } = useUpdateMPReport();
-  const [modalState, setModalState] = React.useState<{ isOpen: boolean; reportId: string | null; newStatus: boolean }>({
+  const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteMPReport();
+  const [modalState, setModalState] = React.useState<{ isOpen: boolean; reportId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
     isOpen: false,
     reportId: null,
+    type: "status",
     newStatus: false,
   });
 
@@ -40,7 +43,16 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
     setModalState({
       isOpen: true,
       reportId,
+      type: "status",
       newStatus: !currentStatus,
+    });
+  };
+
+  const handleDeleteClick = (reportId: string) => {
+    setModalState({
+      isOpen: true,
+      reportId,
+      type: "delete",
     });
   };
 
@@ -48,14 +60,19 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
     if (!modalState.reportId) return;
 
     try {
-      await updateReport({
-        id: modalState.reportId,
-        data: { actionStatus: modalState.newStatus },
-      });
-      toast.success("Action status updated successfully!");
-      setModalState({ isOpen: false, reportId: null, newStatus: false });
+      if (modalState.type === "status") {
+        await updateReport({
+          id: modalState.reportId,
+          data: { actionStatus: modalState.newStatus },
+        });
+        toast.success("Action status updated successfully!");
+      } else if (modalState.type === "delete") {
+        await deleteReport(modalState.reportId);
+        toast.success("Report deleted successfully!");
+      }
+      setModalState({ isOpen: false, reportId: null, type: "status", newStatus: false });
     } catch (error) {
-      toast.error("Failed to update action status.");
+      toast.error(modalState.type === "status" ? "Failed to update action status." : "Failed to delete report.");
       console.error(error);
     }
   };
@@ -175,7 +192,7 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
         header: "",
         className: "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
         headerClassName: "w-12 sticky right-0 z-20 bg-gray-50",
-        cell: () => (
+        cell: (item) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100">
@@ -199,7 +216,14 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
                 <Copy className="w-4 h-4" />
                 Duplicate Report
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                onClick={() => {
+                  if (item._id) {
+                    handleDeleteClick(item._id);
+                  }
+                }}
+              >
                 <Trash className="w-4 h-4" />
                 Delete
               </DropdownMenuItem>
@@ -224,10 +248,14 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
         isOpen={modalState.isOpen}
         onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
         onConfirm={handleConfirm}
-        title="Change Action Status"
-        message={`Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`}
-        confirmLabel="Yes, Change"
-        isProcessing={isUpdating}
+        title={modalState.type === "status" ? "Change Action Status" : "Delete Report"}
+        message={
+          modalState.type === "status"
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"}?`
+            : "Are you sure you want to delete this report? This action cannot be undone."
+        }
+        confirmLabel={modalState.type === "status" ? "Yes, Change" : "Yes, Delete"}
+        isProcessing={isUpdating || isDeleting}
       />
     </>
   );
