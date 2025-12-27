@@ -29,10 +29,12 @@ export const createOffenderSchema = Joi.object({
     )
     .min(1)
     .required(),
+
   customFields: Joi.object()
     .unknown(true)
     .default({})
     .optional(),
+
 });
 
 export const updateOffenderSchema = createOffenderSchema.fork(

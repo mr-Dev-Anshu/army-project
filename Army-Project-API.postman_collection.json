@@ -1,0 +1,1113 @@
+{
+    "info": {
+        "name": "Army Project - General Traffic Offence API",
+        "description": "Complete API collection for General Traffic Offence management system with CRUD operations and MongoDB aggregation",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000/api",
+            "type": "string"
+        },
+        {
+            "key": "offenceId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "recordId",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "General Traffic Offence",
+            "item": [
+                {
+                    "name": "Get All Offences",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ]
+                        },
+                        "description": "Fetches all general traffic offences with offender and witnessing MPs details"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Offence by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence/{{offenceId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence",
+                                "{{offenceId}}"
+                            ]
+                        },
+                        "description": "Fetches a specific offence by ID with all related details"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Offence - Minor (Vehicle Involved)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('offenceId', response._id);",
+                                    "    console.log('Offence ID saved:', response._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleType\": \"Civilian Vehicle\",\n  \"vehicleNumber\": \"UP 16 AP 3840\",\n  \"vehicleName\": \"Honda Accord\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-06T00:00:00.000Z\",\n    \"startTime\": \"2025-12-06T08:00:00.000Z\",\n    \"endTime\": \"2025-12-06T18:00:00.000Z\",\n    \"dutyLocation\": \"SI Line Military Station\",\n    \"dutyType\": \"Patrol\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Sanjay Khatri\",\n    \"rank\": \"Nb Sub\",\n    \"unit\": \"21 Corps Signal Regt\",\n    \"armyNumber\": \"JC123456\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-06T17:50:00.000Z\",\n    \"incidentLocation\": \"SI Line Military Station\",\n    \"description\": \"Overtaking In NO Over Taking Zone\"\n  },\n  \"offenceTypes\": [\"minor\", \"Disobeying Traffic rules\"],\n  \"offenceTypeReference\": [\"Traffic Rule 12B\"],\n  \"customFields\": {},\n  \"actionStatus\": false,\n  \"offenderPeople\": [\n    {\n      \"name\": \"Mr. Rakesh Kumar\",\n      \"rank\": \"L/Nk\",\n      \"armyNumber\": \"11223344F\",\n      \"unit\": \"21 Corps Signal Regt (AREN)\",\n      \"aadharNumber\": \"4444 2222 3333\",\n      \"fmn\": \"HQ 21 CORPs\",\n      \"type\": \"Driver\"\n    }\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ]
+                        },
+                        "description": "Create a new minor traffic offence with vehicle involved"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Offence - Major (Over Speeding)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('offenceId', response._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"2-Wheeler\",\n  \"vehicleType\": \"DD Vehicle\",\n  \"vehicleNumber\": \"DD05MP2023\",\n  \"vehicleName\": \"Royal Enfield Classic 350\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T06:00:00.000Z\",\n    \"endTime\": \"2025-12-24T14:00:00.000Z\",\n    \"dutyLocation\": \"Highway NH-12\",\n    \"dutyType\": \"Speed Check\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Lt. Anil Singh\",\n    \"rank\": \"Lieutenant\",\n    \"unit\": \"Unit 3\",\n    \"armyNumber\": \"IC67890\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T11:15:00.000Z\",\n    \"incidentLocation\": \"NH-12 Checkpoint\",\n    \"description\": \"Over speeding at 120 km/h in 60 km/h zone\"\n  },\n  \"offenceTypes\": [\"major\", \"overspeeding\", \"reckless-driving\"],\n  \"offenceTypeReference\": [\"Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM)\", \"MVA Section 184\", \"Army Rule 45(a)\"],\n  \"customFields\": {\n    \"speedLimit\": \"60\",\n    \"recordedSpeed\": \"120\",\n    \"radarId\": \"RDR-NH12-01\"\n  },\n  \"actionStatus\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ]
+                        },
+                        "description": "Create a major traffic offence - over speeding"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Offence - Disciplinary",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('offenceId', response._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"isVehicleInvolved\": true,\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleType\": \"DD Vehicle\",\n  \"vehicleNumber\": \"DD10MP2024\",\n  \"vehicleName\": \"Mahindra Scorpio\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-24T00:00:00.000Z\",\n    \"startTime\": \"2025-12-24T09:00:00.000Z\",\n    \"endTime\": \"2025-12-24T17:00:00.000Z\",\n    \"dutyLocation\": \"Delhi Cantt\",\n    \"dutyType\": \"Routine Check\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Major Vikram Sharma\",\n    \"rank\": \"Major\",\n    \"unit\": \"Unit 1\",\n    \"armyNumber\": \"IC11111\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-24T13:45:00.000Z\",\n    \"incidentLocation\": \"Delhi Cantt Main Gate\",\n    \"description\": \"Drunk driving and rash behavior\"\n  },\n  \"offenceTypes\": [\"disciplinary\", \"major\", \"drunk-driving\"],\n  \"offenceTypeReference\": [\"Army Act Section 45\", \"MVA Section 185\", \"Disciplinary Code 23A\"],\n  \"customFields\": {\n    \"alcoholLevel\": \"0.12%\",\n    \"breathalyzerReading\": \"120mg/100ml\",\n    \"witnessPresent\": \"true\"\n  },\n  \"actionStatus\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ]
+                        },
+                        "description": "Create a disciplinary offence"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Offence - No Vehicle",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"isVehicleInvolved\": false,\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-06T00:00:00.000Z\",\n    \"startTime\": \"2025-12-06T08:00:00.000Z\",\n    \"endTime\": \"2025-12-06T18:00:00.000Z\",\n    \"dutyLocation\": \"SI Line Military Station\",\n    \"dutyType\": \"Patrol\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Sanjay Khatri\",\n    \"rank\": \"Nb Sub\",\n    \"unit\": \"21 Corps Signal Regt\",\n    \"armyNumber\": \"JC123456\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-06T17:50:00.000Z\",\n    \"incidentLocation\": \"SI Line Military Station\",\n    \"description\": \"Civilian Mr Rakesh Kumar (brother-in-law of Hav (CLK) Ajay Shankar Jha) found residing in Govt married accn QTR No. 123/45, Dronachal Base, without permission.\"\n  },\n  \"offenceTypes\": [\"minor\", \"Violation of local orders\"],\n  \"offenceTypeReference\": [\"Local Order 12\"],\n  \"actionStatus\": false,\n  \"offenderPeople\": [\n    {\n      \"name\": \"Mr. Rakesh Kumar\",\n      \"aadharNumber\": \"4444 2222 3333\",\n      \"unit\": \"21 Corps Signal Regt (AREN)\",\n      \"type\": \"Civilian\"\n    }\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ]
+                        },
+                        "description": "Create offence without vehicle involvement"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Offence",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"actionStatus\": true,\n  \"offenceOccurenceDetails\": {\n    \"description\": \"Updated: Action taken - Warning issued and fine collected\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence/{{offenceId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence",
+                                "{{offenceId}}"
+                            ]
+                        },
+                        "description": "Update an existing offence (e.g., change action status)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Offence",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence/{{offenceId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence",
+                                "{{offenceId}}"
+                            ]
+                        },
+                        "description": "Delete an offence by ID"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "MP Investigation Reports",
+            "item": [
+                {
+                    "name": "Get All Reports",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Report by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports/{{reportId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports",
+                                "{{reportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Report",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('reportId', response.data._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"reportDetails\": {\n    \"reportNumber\": \"MP/2025/001\",\n    \"command\": \"South Command\",\n    \"firNumber\": \"FIR-12345\",\n    \"firFileUrl\": \"http://example.com/fir.pdf\"\n  },\n  \"investigationHead\": {\n    \"armyNumber\": \"JC-987654K\",\n    \"rank\": \"Subedar\",\n    \"name\": \"Rajesh Kumar\",\n    \"unit\": \"12 MP Unit\",\n    \"fmn\": \"HQ 12 Corps\",\n    \"command\": \"South Command\",\n    \"address\": \"Unit Lines, Pune\",\n    \"iCardNumber\": \"IC-54321\"\n  },\n  \"occurrenceDetails\": {\n    \"offenceType\": \"Theft\",\n    \"placeOfOccurrence\": \"Unit Stores\",\n    \"dateOfOccurrence\": \"2025-06-15\",\n    \"timeOfOccurrence\": \"2025-06-15T14:30:00.000Z\",\n    \"description\": \"Theft of unit property reported.\"\n  },\n  \"customFields\": {\n    \"victim\": {\n        \"vehicleCategory\": \"2-Wheeler\",\n        \"typeOfVehicle\": \"MC\",\n        \"vehicleNumber\": \"MH 12 AB 1234\",\n        \"name\": \"Sepoy Rahul\",\n        \"rank\": \"Sep\",\n        \"type\": \"Suspect\",\n        \"unit\": \"123 Signal Regt\",\n        \"armyNumber\": \"12345678A\"\n    }\n  },\n  \"documents\": [\n    {\n        \"statement\": \"Witness statement of Guard\",\n        \"url\": \"http://example.com/stmt1.pdf\"\n    }\n  ],\n  \"remarks\": {\n    \"analysis\": \"Initial investigation requires more evidence.\",\n    \"recommendation\": \"Escalate to senior officer.\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Report",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"actionStatus\": true,\n  \"remarks\": {\n    \"analysis\": \"Investigation completed. Suspect confessed.\",\n    \"recommendation\": \"Disciplinary action initiated.\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports/{{reportId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports",
+                                "{{reportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Report",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/mp-reports/{{reportId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "mp-reports",
+                                "{{reportId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Aggregation & Filters",
+            "item": [
+                {
+                    "name": "Get Grouped by Offence Type (All)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                }
+                            ]
+                        },
+                        "description": "Get all offences grouped by offence type with aggregation"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Offence Type (Major)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&offenceType=major",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "offenceType",
+                                    "value": "major"
+                                }
+                            ]
+                        },
+                        "description": "Get only major offences grouped by type"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Offence Type (Minor)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&offenceType=minor",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "offenceType",
+                                    "value": "minor"
+                                }
+                            ]
+                        },
+                        "description": "Get only minor offences grouped by type"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Offence Type (Disciplinary)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&offenceType=disciplinary",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "offenceType",
+                                    "value": "disciplinary"
+                                }
+                            ]
+                        },
+                        "description": "Get only disciplinary offences grouped by type"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Vehicle Type (Civilian)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&vehicleType=Civilian Vehicle",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "vehicleType",
+                                    "value": "Civilian Vehicle"
+                                }
+                            ]
+                        },
+                        "description": "Get offences involving civilian vehicles"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Vehicle Type (DD Vehicle)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&vehicleType=DD Vehicle",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "vehicleType",
+                                    "value": "DD Vehicle"
+                                }
+                            ]
+                        },
+                        "description": "Get offences involving DD vehicles"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Vehicle Category (2-Wheeler)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&vehicleCategory=2-Wheeler",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "vehicleCategory",
+                                    "value": "2-Wheeler"
+                                }
+                            ]
+                        },
+                        "description": "Get offences involving 2-wheelers"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Vehicle Category (4-Wheeler)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&vehicleCategory=4-Wheeler",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "vehicleCategory",
+                                    "value": "4-Wheeler"
+                                }
+                            ]
+                        },
+                        "description": "Get offences involving 4-wheelers"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Action Status (Pending)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&status=false",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "false"
+                                }
+                            ]
+                        },
+                        "description": "Get offences where action is pending (status = false)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Action Status (Completed)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&status=true",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Get offences where action is completed (status = true)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Vehicle Involved (Yes)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&isVehicleInvolved=true",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "isVehicleInvolved",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Get offences where vehicle is involved"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Vehicle Involved (No)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&isVehicleInvolved=false",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "isVehicleInvolved",
+                                    "value": "false"
+                                }
+                            ]
+                        },
+                        "description": "Get offences where no vehicle is involved"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Multiple Filters (Major + DD Vehicle + Pending)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&offenceType=major&vehicleType=DD Vehicle&status=false",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "offenceType",
+                                    "value": "major"
+                                },
+                                {
+                                    "key": "vehicleType",
+                                    "value": "DD Vehicle"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "false"
+                                }
+                            ]
+                        },
+                        "description": "Complex filter: Major offences with DD vehicles and pending action"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Multiple Filters (Vehicle + Category + Status)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&isVehicleInvolved=true&vehicleCategory=4-Wheeler&status=false",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "isVehicleInvolved",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "vehicleCategory",
+                                    "value": "4-Wheeler"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "false"
+                                }
+                            ]
+                        },
+                        "description": "Filter: 4-wheelers with vehicle involved and pending action"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by Date (Specific Day)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&date=2025-12-06",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "date",
+                                    "value": "2025-12-06"
+                                }
+                            ]
+                        },
+                        "description": "Get offences occurring on a specific date (UTC)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Full Complex Filter (OffenceType + Status + Vehicle Details)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/generalTraficOffence?groupBy=offenceType&offenceType=major&status=Taken&vehicleType=Civilian Vehicle&vehicleCategory=4-Wheeler&isVehicleInvolved=true",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "generalTraficOffence"
+                            ],
+                            "query": [
+                                {
+                                    "key": "groupBy",
+                                    "value": "offenceType"
+                                },
+                                {
+                                    "key": "offenceType",
+                                    "value": "major"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "Taken"
+                                },
+                                {
+                                    "key": "vehicleType",
+                                    "value": "Civilian Vehicle"
+                                },
+                                {
+                                    "key": "vehicleCategory",
+                                    "value": "4-Wheeler"
+                                },
+                                {
+                                    "key": "isVehicleInvolved",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Tests all filtering capabilities simultaneously: Offence Type, Status (Taken), Vehicle Type, Category, and Involvement."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Static Speed Check Record",
+            "item": [
+                {
+                    "name": "Get All Speed Check Records (Grouped by Offence Type)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord"
+                            ]
+                        },
+                        "description": "Fetches all static speed check records grouped by offence type with aggregated statistics (total offences, offenders, and witnessing MPs per type)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Speed Check Record by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord/{{recordId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord",
+                                "{{recordId}}"
+                            ]
+                        },
+                        "description": "Fetches a specific speed check record by ID with all related offenders and witnessing MPs"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Speed Check Record",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('recordId', response._id);",
+                                    "    console.log('Record ID saved:', response._id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"vehicleType\": \"Civilian Vehicle\",\n  \"vehicleCategory\": \"4-Wheeler\",\n  \"vehicleNumber\": \"UP 16 AP 3840\",\n  \"vehicleName\": \"Honda Accord\",\n  \"onDutyDetails\": {\n    \"dateOfDuty\": \"2025-12-06T00:00:00.000Z\",\n    \"startTime\": \"2025-12-06T08:00:00.000Z\",\n    \"endTime\": \"2025-12-06T18:00:00.000Z\",\n    \"dutyLocation\": \"SI Line Military Station\",\n    \"dutyType\": \"Speed Check\"\n  },\n  \"onDutyDetailsMPReporting\": {\n    \"nameReportingMP\": \"Sanjay Khatri\",\n    \"rank\": \"Nb Sub\",\n    \"unit\": \"21 Corps Signal Regt\",\n    \"armyNumber\": \"JC123456\"\n  },\n  \"offenceOccurenceDetails\": {\n    \"time\": \"2025-12-06T17:50:00.000Z\",\n    \"incidentLocation\": \"SI Line Military Station\",\n    \"description\": \"Overtaking In NO Over Taking Zone\",\n    \"authSpeed\": \"30\",\n    \"actualSpeedNoted\": \"41\",\n    \"overSpeedCalculated\": \"11\"\n  },\n  \"remark\": \"Speed violation recorded\",\n  \"customFields\": {},\n  \"actionStatus\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord"
+                            ]
+                        },
+                        "description": "Creates a new static speed check record"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Speed Check Record",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"actionStatus\": true,\n  \"offenceOccurenceDetails\": {\n    \"timeOfOffence\": \"2025-12-25T11:45:00.000Z\",\n    \"incidentLocation\": \"NH-12, Km 45\",\n    \"description\": \"Vehicle exceeding speed limit - Action taken\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord/{{recordId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord",
+                                "{{recordId}}"
+                            ]
+                        },
+                        "description": "Updates an existing speed check record"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Speed Check Record",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/speedCheckRecord/{{recordId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "speedCheckRecord",
+                                "{{recordId}}"
+                            ]
+                        },
+                        "description": "Deletes a speed check record by ID"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

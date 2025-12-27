@@ -51,6 +51,10 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
+    actionStatus: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

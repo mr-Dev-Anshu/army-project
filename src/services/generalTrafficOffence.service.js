@@ -4,6 +4,10 @@ export class GeneralTrafficOffenceService {
     return await generalTrafficOffenceRepo.getAll();
   }
 
+  async getGroupedByOffenceType(filters) {
+    return await generalTrafficOffenceRepo.getGroupedByOffenceType(filters);
+  }
+
   async getById(id) {
     const offence = await generalTrafficOffenceRepo.getById(id);
 
@@ -37,6 +41,7 @@ export class GeneralTrafficOffenceService {
 
     return { success: true, message: "Offence deleted successfully" };
   }
+
 }
 
 export const generalTrafficOffenceService = new GeneralTrafficOffenceService();
