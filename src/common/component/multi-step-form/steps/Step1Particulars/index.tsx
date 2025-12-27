@@ -1,6 +1,7 @@
 
 
 
+
 // "use client";
 
 // import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
@@ -19,23 +20,14 @@
 //       className="
 //         w-full h-full
 //         flex flex-col
-
-//         /* Responsive spacing */
 //         gap-4 sm:gap-5 lg:gap-6
 //         px-2 sm:px-3 md:px-4 lg:px-6
 //         pb-4
-
-//         /* Safe scroll */
 //         overflow-y-auto
 //       "
 //     >
-//       {/* ---------- SUB STEP 1 ---------- */}
-//       <div
-//         className="
-//           w-full 
-//           max-w-full
-//         "
-//       >
+//       {/* ---------- STEP 1 QUESTION ---------- */}
+//       <div className="w-full max-w-full">
 //         <VehiclePrimaryQuestion
 //           vehicleStatus={value}
 //           setVehicleStatus={onChange}
@@ -43,7 +35,7 @@
 //         />
 //       </div>
 
-//       {/* ---------- SUB STEP 2 ---------- */}
+//       {/* ---------- STEP 2 FORM RENDER ---------- */}
 //       <div
 //         className="
 //           w-full
@@ -72,62 +64,40 @@
 
 
 
+
 "use client";
 
+import { useState } from "react";
 import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
 import VehicleDetailsForm from "@/common/component/VehicleDetailsForm";
 import VehiclePrimaryQuestion from "@/common/component/VehiclePrimaryQuestion";
 
-export default function Step1Particulars({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
+export default function Step1Particulars({ value, onChange }) {
+
+  const [selectedCoDriver, setSelectedCoDriver] = useState("");
+
   return (
-    <div
-      className="
-        w-full h-full
-        flex flex-col
-        gap-4 sm:gap-5 lg:gap-6
-        px-2 sm:px-3 md:px-4 lg:px-6
-        pb-4
-        overflow-y-auto
-      "
-    >
-      {/* ---------- STEP 1 QUESTION ---------- */}
-      <div className="w-full max-w-full">
-        <VehiclePrimaryQuestion
-          vehicleStatus={value}
-          setVehicleStatus={onChange}
-          onChange={onChange}
-        />
-      </div>
+    <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
+      
+      <VehiclePrimaryQuestion vehicleStatus={value} setVehicleStatus={onChange} />
 
-      {/* ---------- STEP 2 FORM RENDER ---------- */}
-      <div
-        className="
-          w-full
-          min-h-[200px]
-          sm:min-h-[230px]
-          md:min-h-[260px]
-          lg:min-h-[300px]
-          flex
-        "
-      >
-        {value === "yes" && (
-          <div className="w-full">
-            <VehicleDetailsForm scope="traffic" />
-          </div>
-        )}
+      {value === "yes" && (
+        <>
+          <VehicleDetailsForm 
+            scope="traffic"
+            
+            // ⭐ yahi se 6 option select ka value aa jayega
+            onCoDriverSelect={(type) => setSelectedCoDriver(type)}
+          />
 
-        {value === "no" && (
-          <div className="w-full">
-            <OffenderWithoutVehicleForm />
-          </div>
-        )}
-      </div>
+          {/* ⭐ Yaha selected option wala form open hoga */}
+          {selectedCoDriver && (
+            <OffenderWithoutVehicleForm offenderType={selectedCoDriver} />
+          )}
+        </>
+      )}
+
+      {value === "no" && <OffenderWithoutVehicleForm />}
     </div>
   );
 }
