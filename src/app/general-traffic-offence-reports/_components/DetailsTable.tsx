@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import { toast } from "react-toastify";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import ReportPreviewModal from "@/components/common/ReportPreviewModal";
+import { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
 
 import {
   DropdownMenu,
@@ -38,6 +40,96 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
     type: "status",
     newStatus: false,
   });
+
+  const [previewState, setPreviewState] = React.useState<{ isOpen: boolean; data: MilitaryPoliceReportProps | null }>({
+    isOpen: false,
+    data: null
+  });
+
+  const mapOffenceToReportProps = (offence: any): MilitaryPoliceReportProps => {
+    const primary = offence.offenders?.[0]?.offenderDetails || {};
+    const secondary = offence.offenders?.[1]?.offenderDetails;
+    const mpDetails = offence.onDutyDetailsMPReporting || {};
+    const occDetails = offence.offenceOccurenceDetails || {};
+    const witness = offence.witnessDetails?.[0] || {};
+    const date = new Date(occDetails.timeOfOffence || offence.createdAt);
+
+    return {
+      reportNo: offence.reportNumber || "N/A",
+      reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
+      particulars: {
+        primary: {
+          aadharCardNo: primary.aadharCardNo || "N/A",
+          name: primary.name || "N/A",
+          so: primary.so || "N/A",
+          relation: primary.relation || "N/A",
+          armyNo: primary.armyNo || "N/A",
+          rank: primary.rank || "N/A",
+          unit: primary.unit || "N/A",
+          fmn: primary.fmn || "N/A",
+          command: primary.command || "N/A",
+          address: primary.address || "N/A",
+          iCardNo: primary.iCardNo || "N/A",
+        },
+        secondary: secondary ? {
+          aadharCardNo: secondary.aadharCardNo || "N/A",
+          name: secondary.name || "N/A",
+          so: secondary.so || "N/A",
+          relation: secondary.relation || "N/A",
+          armyNo: secondary.armyNo || "N/A",
+          rank: secondary.rank || "N/A",
+          unit: secondary.unit || "N/A",
+          fmn: secondary.fmn || "N/A",
+          command: secondary.command || "N/A",
+          address: secondary.address || "N/A",
+          iCardNo: secondary.iCardNo || "N/A",
+        } : undefined,
+        vehicle: offence.vehicleNumber ? {
+          baNo: offence.vehicleNumber,
+          makeAndTake: offence.vehicleName || "Unknown"
+        } : undefined,
+      },
+      occurrence: {
+        dateOfDuty: mpDetails.dateOfDuty ? new Date(mpDetails.dateOfDuty).toLocaleDateString("en-GB") : date.toLocaleDateString("en-GB"),
+        dutyTime: mpDetails.dutyTime || "N/A",
+        dutyLocation: mpDetails.placeOfDuty || "N/A",
+        nameOfWitnessingOfficial1: witness.name || "N/A",
+        nameOfWitnessingOfficial2: offence.witnessDetails?.[1]?.name || "",
+        nameOfWitnessingOfficial3: offence.witnessDetails?.[2]?.name || "",
+        timeOfOffence: date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }),
+        locationOfOffence: occDetails.incidentLocation || "N/A",
+        statement: occDetails.statement || "No statement provided.",
+      },
+      offence: {
+        type: offence.currentOffenceType || "Traffic Offence",
+        ref1: "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
+        ref2: "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order.",
+        description: occDetails.description || "No description provided.",
+      },
+      witnessSig: {
+        armyNo: witness.armyNo || "N/A",
+        rank: witness.rank || "N/A",
+        name: witness.name || "N/A",
+        unit: witness.unit || "N/A",
+      },
+      mpSig: {
+        armyNo: mpDetails.armyNoReportingMP || "N/A",
+        rank: mpDetails.rank || "N/A",
+        name: mpDetails.nameReportingMP || "N/A",
+        unit: mpDetails.unit || "N/A",
+      },
+      remarks: {
+        text: "The indl committed offence as enumerated under Para 3 above. Suitable discp action be initiated against the indl by the unit, and inform to this office within 15 days from issue of this report.",
+        station: "C/O 56 APO",
+        dated: new Date().toLocaleDateString("en-GB"),
+      },
+    };
+  };
+
+  const handleViewClick = (offence: any) => {
+    const data = mapOffenceToReportProps(offence);
+    setPreviewState({ isOpen: true, data });
+  };
 
   const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
     setModalState({
@@ -94,7 +186,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
             <div className="font-medium text-gray-900">
               {offence.offenceOccurenceDetails?.incidentLocation || "Unknown Location"}
             </div>
-            <div className="text-gray-500 font-normal mt-1">SI Line Military Station</div>
+            <div className="text-gray-500 font-normal mt-1"> {offence.offenceOccurenceDetails?.incidentLocation || "Unknown Location"}</div>
           </div>
         ),
         className: "min-w-[180px]"
@@ -118,7 +210,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       },
       {
         header: "FMN",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 CORPs",
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "N/A",
         className: "min-w-[100px]"
       },
       {
@@ -147,7 +239,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         header: "Report no.",
         className: "min-w-[140px]",
         cell: (offence) => (
-          <span className="text-gray-600 text-xs">{offence.reportNumber || "PRO/21 CPU/00042/102/25"}</span>
+          <span className="text-gray-600 text-xs">{offence.reportNumber || "N/A"}</span>
         )
       },
       {
@@ -194,13 +286,13 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
       {
         header: "FMN",
         className: "min-w-[100px]",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 CORPs"
+        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "N/A"
       },
       {
         header: "Report no.",
         className: "min-w-[140px]",
         cell: (offence) => (
-          <span className="text-gray-600 text-xs">{offence.reportNumber || "PRO/21 CPU/00042/102/25"}</span>
+          <span className="text-gray-600 text-xs">{offence.reportNumber || "N/A"}</span>
         )
       },
       {
@@ -261,7 +353,7 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => handleViewClick(offence)}>
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
@@ -325,6 +417,11 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         }
         confirmLabel={modalState.type === "status" ? "Yes, Change" : "Yes, Delete"}
         isProcessing={isUpdating || isDeleting}
+      />
+      <ReportPreviewModal
+        isOpen={previewState.isOpen}
+        onClose={() => setPreviewState({ ...previewState, isOpen: false })}
+        data={previewState.data}
       />
     </>
   );
