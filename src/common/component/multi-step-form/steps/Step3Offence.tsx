@@ -9,17 +9,31 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSection } from "../../FormSection";
 import CheckboxGroup from "../../CheckboxGroup";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { useForm } from "@/context/FormContext";
 
 export default function Step3Offence() {
   const { state, dispatch } = useForm();
-  const d = state.formData;
 
+  // 🔥 always target TRAFFIC form
+  const d = state.formData.traffic;
+
+  // 🔥 safe updater only for TRAFFIC
   const updateForm = (data: Partial<typeof d>) => {
     dispatch({
       type: "SET_FORM_DATA",
-      payload: data,
+      payload: {
+        traffic: {
+          ...state.formData.traffic,
+          ...data,
+        },
+      },
     });
   };
 
@@ -47,7 +61,9 @@ export default function Step3Offence() {
             <SelectContent>
               <SelectItem value="minor">Minor Offence</SelectItem>
               <SelectItem value="major">Major Offence</SelectItem>
-              <SelectItem value="disciplinary">Disciplinary Offence</SelectItem>
+              <SelectItem value="disciplinary">
+                Disciplinary Offence
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -69,7 +85,7 @@ export default function Step3Offence() {
 
           <Textarea
             placeholder="Provide description"
-            value={d.offenceOccurenceDetails.description}
+            value={d.offenceOccurenceDetails.description || ""}
             onChange={(e) =>
               updateForm({
                 offenceOccurenceDetails: {

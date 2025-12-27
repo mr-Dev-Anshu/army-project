@@ -7,6 +7,7 @@ export interface VehicleDetailsState {
   category: string;
   vehicleType: string;
   driverType: string;
+  vehicleName: string;
 
 }
 
@@ -40,10 +41,12 @@ export interface OnDutyDetailsMPReporting {
   rank: string;
   unit: string;
   armyNumber: string;
+  contactNumber:string;
 }
 
 export interface OffenceOccurenceDetails {
   timeOfOffence: string;
+  time?: string;
   incidentLocation: string;
   description: string;
   authSpeed?: string;

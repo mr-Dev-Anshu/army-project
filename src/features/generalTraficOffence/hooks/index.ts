@@ -22,7 +22,7 @@ export const useCreateTrafficOffence = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["create-traffic-offence"],
-    mutationFn: (data: api.CreateTrafficOffenceData) => api.createTrafficOffence(data),
+    mutationFn: (data: api.createTrafficOffence) => api.createTrafficOffence(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["traffic-offences"] });
     },
@@ -34,7 +34,7 @@ export const useUpdateTrafficOffence = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["update-traffic-offence"],
-    mutationFn: ({ id, data }: { id: string; data: api.UpdateTrafficOffenceData }) =>
+    mutationFn: ({ id, data }: { id: string; data: api.UpdateTrafficOffence }) =>
       api.updateTrafficOffence(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["traffic-offences"] });

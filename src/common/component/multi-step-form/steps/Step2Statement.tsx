@@ -10,29 +10,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FormDataState } from "@/common/types/form.types";
+import { Label } from "@radix-ui/react-label";
 
 export default function Step2Statement() {
   const { state, dispatch } = useForm();
 
-  const d = state.formData;
+  // 🔥 ALWAYS USE TRAFFIC FORM
+  const d = state.formData.traffic;
 
-  type FormKeys =
-    | "onDutyDetails"
-    | "onDutyDetailsMPReporting"
-    | "offenceOccurenceDetails";
-
-  const update = <K extends FormKeys>(
-    key: K,
-    value: Partial<FormDataState[K]>
+  const update = (
+    key:
+      | "onDutyDetails"
+      | "onDutyDetailsMPReporting"
+      | "offenceOccurenceDetails",
+    value: any
   ) => {
     dispatch({
       type: "SET_FORM_DATA",
       payload: {
-        ...state.formData,
-        [key]: {
-          ...state.formData[key],
-          ...value,
+        traffic: {
+          ...state.formData.traffic,
+          [key]: {
+            ...state.formData.traffic[key],
+            ...value,
+          },
         },
       },
     });
@@ -85,7 +86,7 @@ export default function Step2Statement() {
         />
       </FormSection>
 
-      {/* ---------------- 2️ REPORTING MP ---------------- */}
+      {/* ---------------- 2️⃣ REPORTING MP ---------------- */}
       <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
           <Input
@@ -98,14 +99,13 @@ export default function Step2Statement() {
             }
           />
 
-          {/*  RANK FIXED */}
           <Select
             value={d.onDutyDetailsMPReporting.rank}
             onValueChange={(v) =>
               update("onDutyDetailsMPReporting", { rank: v })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Rank" />
             </SelectTrigger>
 
@@ -119,14 +119,13 @@ export default function Step2Statement() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          {/*  UNIT FIXED */}
           <Select
             value={d.onDutyDetailsMPReporting.unit}
             onValueChange={(v) =>
               update("onDutyDetailsMPReporting", { unit: v })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Unit" />
             </SelectTrigger>
 
@@ -149,15 +148,15 @@ export default function Step2Statement() {
         </div>
       </FormSection>
 
-      {/* ---------------- 3️⃣ WITNESSING MP ---------------- */}
+      {/* ---------------- Witnessing MP ---------------- */}
       <FormSection title="On-Duty Details of Witnessing MP">
         {d.witnesses.map((witness, index) => (
           <div key={index} className="border p-4 rounded-lg space-y-4 mb-6">
-            <h3 className="font-semibold">Witness {index + 1}</h3>
-
             <div className="grid grid-cols-2 gap-4">
-              <Input
-                placeholder="Witness MP Name"
+              <div>
+                <Label className="mb-2 text-base">Name of Witnessing MP</Label>
+                <Input
+                placeholder="Name of Witnessing MP"
                 value={witness.reportingBlock.nameReportingMP}
                 onChange={(e) =>
                   dispatch({
@@ -176,6 +175,7 @@ export default function Step2Statement() {
                   })
                 }
               />
+              </div>
 
               <Select
                 value={witness.reportingBlock.rank}
@@ -193,16 +193,19 @@ export default function Step2Statement() {
                   })
                 }
               >
-                <SelectTrigger>
+              <div>
+                <Label className="mb-2 text-base">Rank</Label>
+                  <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Rank" />
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="Lieutenant">Lieutenant</SelectItem>
-                  <SelectItem value="Captain">Captain</SelectItem>
-                  <SelectItem value="Major">Major</SelectItem>
-                  <SelectItem value="Colonel">Colonel</SelectItem>
+                  <SelectItem value="L/Nk">L/Nk</SelectItem>
+                  <SelectItem value="Nk">Nk</SelectItem>
+                  <SelectItem value="Hav">Hav</SelectItem>
+                  <SelectItem value="Subedar">Subedar</SelectItem>
                 </SelectContent>
+              </div>
               </Select>
             </div>
 
@@ -223,18 +226,23 @@ export default function Step2Statement() {
                   })
                 }
               >
-                <SelectTrigger>
+                <div>
+                  <Label className="mb-2 text-base">Unit</Label>
+                  <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Unit" />
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="MP Unit 12">MP Unit 12</SelectItem>
-                  <SelectItem value="Unit 2">Unit 2</SelectItem>
-                  <SelectItem value="Unit 3">Unit 3</SelectItem>
+                  <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
+                  <SelectItem value="MP 12">MP 12</SelectItem>
+                  <SelectItem value="HQ Unit">HQ Unit</SelectItem>
                 </SelectContent>
+                </div>
               </Select>
 
-              <Input
+              <div>
+                <Label className="mb-2 text-base">Army No.</Label>
+                <Input
                 placeholder="Army No."
                 value={witness.reportingBlock.armyNumber}
                 onChange={(e) =>
@@ -254,69 +262,34 @@ export default function Step2Statement() {
                   })
                 }
               />
+              </div>
+
+            <div>
+              <Label className="mb-2 text-base">Contact Number</Label>
+                <Input
+                placeholder="Contact Number"
+                value={witness.reportingBlock?.contactNumber || ""}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_WITNESSES",
+                    payload: d.witnesses.map((w, i) =>
+                      i === index
+                        ? {
+                            ...w,
+                            reportingBlock: {
+                              ...w.reportingBlock,
+                              contactNumber: e.target.value,
+                            },
+                          }
+                        : w
+                    ),
+                  })
+                }
+              />
+            </div>
             </div>
           </div>
         ))}
-
-        {/* ➕ Add Witness */}
-        <button
-          className="px-4 py-2 bg-primary text-white rounded"
-          onClick={() =>
-            dispatch({
-              type: "SET_WITNESSES",
-              payload: [
-                ...d.witnesses,
-                {
-                  dutyBlock: d.onDutyDetails,
-                  reportingBlock: {
-                    nameReportingMP: "",
-                    rank: "",
-                    unit: "",
-                    armyNumber: "",
-                  },
-                  offenceBlock: d.offenceOccurenceDetails,
-                },
-              ],
-            })
-          }
-        >
-          + Add More Witness
-        </button>
-      </FormSection>
-
-      {/* ---------------- 3️ OFFENCE OCCURRENCE ---------------- */}
-      <FormSection title="Offence Occurrence Details">
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            type="time"
-            value={d.offenceOccurenceDetails.timeOfOffence}
-            onChange={(e) =>
-              update("offenceOccurenceDetails", {
-                timeOfOffence: e.target.value,
-              })
-            }
-          />
-
-          <Input
-            placeholder="Incident Location"
-            value={d.offenceOccurenceDetails.incidentLocation}
-            onChange={(e) =>
-              update("offenceOccurenceDetails", {
-                incidentLocation: e.target.value,
-              })
-            }
-          />
-        </div>
-
-        <Textarea
-          placeholder="Description"
-          value={d.offenceOccurenceDetails.description}
-          onChange={(e) =>
-            update("offenceOccurenceDetails", {
-              description: e.target.value,
-            })
-          }
-        />
       </FormSection>
     </div>
   );

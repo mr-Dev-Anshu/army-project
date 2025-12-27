@@ -56,21 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  // ---------- MENU DATA ----------
   const menuItems: MenuItem[] = [
     { icon: <Home className="w-5 h-5" />, label: "Dashboard", badge: "1" },
-  ];
-
-  const createNewRecordItems: MenuItem[] = [
-    {
-      icon: <FileText className="w-5 h-5" />,
-      label: "General & Traffic Offence Report",
-    },
-    { icon: <Gauge className="w-5 h-5" />, label: "Static Speed Check Report" },
-    {
-      icon: <ClipboardList className="w-5 h-5" />,
-      label: "MP Occurrence & Investigation Report",
-    },
   ];
 
   const formsAndCertificates: MenuItem = {
@@ -133,11 +120,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   const renderMenuItem = (item: MenuItem, isSubmenu = false) => (
     <button
       key={item.label}
-      onClick={() => {
-        if (item.label === "Dashboard") onMenuSelect("dashboard");
-      }}
+      onClick={() => item.label === "Dashboard" && onMenuSelect("dashboard")}
       className={cn(
-        "w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors",
+        "w-full flex items-start gap-3 px-4 py-2.5 text-left text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors",
         isSubmenu && "pl-12"
       )}
     >
@@ -145,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {!collapsed && (
         <>
-          <span className="flex-1 text-lg">{item.label}</span>
+          <span className="flex-1 text-base">{item.label}</span>
 
           {item.badge && (
             <span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded">
@@ -163,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     return (
       <Collapsible
         key={item.label}
-        open={!collapsed && openMenus.includes(item.label)}
+        open={openMenus.includes(item.label)}
         onOpenChange={() => toggleMenu(item.label)}
         className="w-full"
       >
@@ -198,9 +183,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         collapsed ? "w-[90px]" : "w-[340px]"
       )}
     >
-      {/* ---------- BRAND HEADER ---------- */}
       <div className="p-4 border-b border-gray-200 flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+        <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
           <Shield className="w-6 h-6 text-white" />
         </div>
 
@@ -211,7 +195,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/*  Collapse Button */}
         <button
           className="text-gray-400 hover:text-gray-600"
           onClick={() => setCollapsed(!collapsed)}
@@ -224,90 +207,87 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      {/* ---------- NAVIGATION ---------- */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-1 side-scrollbar">
         {menuItems.map((item) => renderMenuItem(item))}
 
-        {!collapsed && (
-          <>
-            <div className="pt-6">
-              <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
-                Create New Record
-              </h2>
+        {/* Create New Record (ALWAYS SHOW ICONS) */}
+        <div className="pt-6">
+          {!collapsed && (
+            <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
+              Create New Record
+            </h2>
+          )}
 
-              <div className="space-y-1">
-                {/*  GENERAL & TRAFFIC = MULTISTEP FORM */}
-                <button
-                  onClick={() => onMenuSelect("multiForm")}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 
-      text-left text-sm text-gray-600 hover:bg-gray-100 
-      rounded-lg transition-colors"
-                >
-                  <span className="text-gray-400">
-                    <FileText className="w-5 h-5" />
-                  </span>
-                  {!collapsed && (
-                    <span className="text-lg">
-                      General & Traffic Offence Report
-                    </span>
-                  )}
-                </button>
+          <div className="space-y-1">
+            {/* 1️⃣ GENERAL & TRAFFIC */}
+            <button
+              onClick={() => onMenuSelect("multiForm")}
+              className="w-full flex items-start justify-start gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <span className="text-gray-400">
+                <FileText className="w-5 h-5" />
+              </span>
 
-                {/* STATIC SPEED SAME */}
-                <button
-                  onClick={() => onMenuSelect("createRecord")}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left
-      text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <span className="text-gray-400">
-                    <Gauge className="w-5 h-5" />
-                  </span>
-                  {!collapsed && (
-                    <span className="text-lg">Static Speed Check Report</span>
-                  )}
-                </button>
+              {!collapsed && (
+                <span className="text-base text-left whitespace-normal break-words leading-snug flex-1">
+                  General & Traffic Offence Report
+                </span>
+              )}
+            </button>
 
-                {/* MP REPORT SAME */}
-                <button
-                  onClick={() => onMenuSelect("createRecord")}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left
-      text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <span className="text-gray-400">
-                    <ClipboardList className="w-5 h-5" />
-                  </span>
-                  {!collapsed && (
-                    <span className="text-lg">
-                      MP Occurrence & Investigation Report
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
+            {/* 2️⃣ STATIC SPEED */}
+            <button
+              onClick={() => onMenuSelect("createRecord")}
+              className="w-full flex items-start gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <span className="text-gray-400">
+                <Gauge className="w-5 h-5" />
+              </span>
 
-            <div className="pt-2">
-              {renderCollapsibleSection(formsAndCertificates)}
-            </div>
+              {!collapsed && (
+                <span className="text-base text-left whitespace-normal break-words leading-snug flex-1">
+                  Static Speed Check Report
+                </span>
+              )}
+            </button>
 
-            <div className="pt-6">
-              <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
-                Reports & Analysis
-              </h2>
-              <div className="space-y-1">
-                {reportsAndAnalysis.map((item) => renderMenuItem(item))}
-              </div>
-            </div>
+            {/* 3️⃣ MP REPORT */}
+            <button
+              onClick={() => onMenuSelect("createRecord")}
+              className="w-full flex items-start gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <span className="text-gray-400">
+                <ClipboardList className="w-5 h-5" />
+              </span>
 
-            <div className="pt-6 pb-4">
-              <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
-                System Setup
-              </h2>
-              <div className="space-y-1">
-                {systemSetup.map((item) => renderCollapsibleSection(item))}
-              </div>
-            </div>
-          </>
-        )}
+              {!collapsed && (
+                <span className="text-base text-left whitespace-normal break-words leading-snug flex-1">
+                  MP Occurrence & Investigation Report
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {renderCollapsibleSection(formsAndCertificates)}
+
+        <div className="pt-6">
+          {!collapsed && (
+            <h2 className="px-4 py-2 text-base font-bold text-gray-400 uppercase tracking-wider">
+              Reports & Analysis
+            </h2>
+          )}
+          {reportsAndAnalysis.map((item) => renderMenuItem(item))}
+        </div>
+
+        <div className="pt-6 pb-4">
+          {!collapsed && (
+            <h2 className="px-4 py-2 text-base font-bold text-gray-400 uppercase tracking-wider">
+              System Setup
+            </h2>
+          )}
+          {systemSetup.map((item) => renderCollapsibleSection(item))}
+        </div>
       </nav>
     </div>
   );
