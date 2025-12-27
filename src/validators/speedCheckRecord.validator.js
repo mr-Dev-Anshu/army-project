@@ -6,8 +6,8 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     "string.empty": "vehicleType cannot be empty",
   }),
   vehicleCategory: Joi.string().trim().optional(),
-  vehicleNumber: Joi.string().trim().optional(), 
-  vehicleName:Joi.string().trim().optional(),
+  vehicleNumber: Joi.string().trim().optional(),
+  vehicleName: Joi.string().trim().optional(),
   onDutyDetails: Joi.object({
     dateOfDuty: Joi.date().optional(),
     startTime: Joi.date().optional(),
@@ -15,7 +15,7 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     dutyLocation: Joi.string().trim().optional(),
     dutyType: Joi.string().trim().optional(),
     customFields: Joi.object().unknown(true).optional(),
-    
+
   }).optional(),
 
   onDutyDetailsMPReporting: Joi.object({
@@ -24,45 +24,43 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     unit: Joi.string().trim().optional(),
     armyNumber: Joi.string().trim().optional(),
     customFields: Joi.object().unknown(true).optional(),
-    
+
   }).optional(),
 
-offenceOccurenceDetails: Joi.object({
-  time: Joi.date().required().messages({
-    "any.required": "time of offence is required",
-  }),
+  offenceOccurenceDetails: Joi.object({
+    time: Joi.date().required().messages({
+      "any.required": "time of offence is required",
+    }),
 
-  incidentLocation: Joi.string().trim().optional(),
+    incidentLocation: Joi.string().trim().optional(),
 
-  // Accept frontend actualSpeed
-  actualSpeed: Joi.string().trim().optional(),
+    // Accept frontend actualSpeed
+    actualSpeed: Joi.string().trim().optional(),
 
-  // Accept backend key also (safe)
-  actualSpeedNoted: Joi.string().trim().optional(),
+    // Accept backend key also (safe)
+    actualSpeedNoted: Joi.string().trim().optional(),
 
-  authSpeed: Joi.string().trim().optional(),
+    authSpeed: Joi.string().trim().optional(),
 
-  // Accept frontend overSpeed
-  overSpeed: Joi.string().trim().optional(),
+    // Accept frontend overSpeed
+    overSpeed: Joi.string().trim().optional(),
 
-  // Accept backend key also
-  overSpeedCalculated: Joi.string().trim().optional(),
+    // Accept backend key also
+    overSpeedCalculated: Joi.string().trim().optional(),
 
-  description: Joi.string().trim().optional(),
+    description: Joi.string().trim().optional(),
 
-  customFields: Joi.object().unknown(true).optional(),
-}).required(),
+    customFields: Joi.object().unknown(true).optional(),
+  }).required(),
 
   remark: Joi.string().trim().optional(),
   customFields: Joi.object()
-      .unknown(true) 
-      .optional(),
+    .unknown(true)
+    .optional(),
+  actionStatus: Joi.boolean().optional(),
 });
 
 export const updateStaticSpeedCheckRecordSchema = createStaticSpeedCheckRecordSchema.fork(
-  [
-    "vehicleType",
-    "offenceOccurenceDetails.time",
-  ],
+  Object.keys(createStaticSpeedCheckRecordSchema.describe().keys),
   (schema) => schema.optional()
 );

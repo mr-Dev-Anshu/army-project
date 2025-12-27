@@ -51,24 +51,28 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
       enum: ["Civilian Vehicle", "DD Vehicle"],
     },
     vehicleNumber: { type: String },
-    vehicleName:{ 
-         type:String
+    vehicleName: {
+      type: String
     },
     onDutyDetails: onDutyDetailsSchema,
     onDutyDetailsMPReporting: onDutyDetailsMPReporting,
     offenceOccurenceDetails: offenceOccurenceDetails,
-    
+
     offenceTypes: [{ type: String }],
     offenceTypeReference: [{ type: String }],
-
+    actionStatus: {
+      type: Boolean,
+      default: false,
+    },
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
   },
-  { timestamps: true ,
-    strict:false
-     
+  {
+    timestamps: true,
+    strict: false
+
   }
 );
 

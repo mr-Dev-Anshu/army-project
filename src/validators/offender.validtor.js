@@ -1,5 +1,3 @@
-
-
 import Joi from "joi";
 
 export const createOffenderSchema = Joi.object({
@@ -9,7 +7,6 @@ export const createOffenderSchema = Joi.object({
     .messages({
       "string.pattern.base": "Invalid ObjectId format for offenceId",
     }),
-
   offenderType: Joi.string()
     .valid(
       "Military Person",
@@ -20,15 +17,14 @@ export const createOffenderSchema = Joi.object({
       "Temporary Hired Worker"
     )
     .required(),
-
+  category: Joi.string().optional(),
   offenderDetails: Joi.array()
     .items(
       Joi.object({
         type: Joi.string()
           .valid("Driver", "CoDriver")
           .required(),
-
-        details: Joi.object().unknown(true).required()
+        details: Joi.object().unknown(true).required(),
       })
     )
     .min(1)
@@ -38,6 +34,7 @@ export const createOffenderSchema = Joi.object({
     .unknown(true)
     .default({})
     .optional(),
+
 });
 
 export const updateOffenderSchema = createOffenderSchema.fork(
