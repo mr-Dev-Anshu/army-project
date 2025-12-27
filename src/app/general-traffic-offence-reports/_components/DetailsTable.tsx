@@ -119,9 +119,9 @@ export default function DetailsTable({ offences, isVehicleInvolved }: DetailsTab
         unit: mpDetails.unit || "N/A",
       },
       remarks: {
-        text: "The indl committed offence as enumerated under Para 3 above. Suitable discp action be initiated against the indl by the unit, and inform to this office within 15 days from issue of this report.",
-        station: "C/O 56 APO",
-        dated: new Date().toLocaleDateString("en-GB"),
+        text: offence.remarks || "The indl committed offence as enumerated under Para 3 above. Suitable discp action be initiated against the indl by the unit, and inform to this office within 15 days from issue of this report.",
+        station: offence.station || "C/O 56 APO",
+        dated: new Date(offence.createdAt).toLocaleDateString("en-GB"),
       },
     };
   };
