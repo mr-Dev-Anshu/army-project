@@ -124,22 +124,19 @@ export default function MultiStepForm() {
   const stepsConfig = {
     1: {
       title: "1. PARTICULARS:",
-      component: (
-        <Step1Particulars
-          value={state.formData.traffic.vehicleInvolved}
-          onChange={(v: string) =>
-            dispatch({
-              type: "SET_FORM_DATA",
-              payload: {
-                traffic: {
-                  ...state.formData.traffic,
-                  vehicleInvolved: v,
-                },
-              },
-            })
-          }
-        />
-      ),
+     component: (
+  <Step1Particulars
+    value={state.formData.traffic.vehicleInvolved}
+    onChange={(v: string) =>
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.traffic.vehicleInvolved",
+        value: v,
+      })
+    }
+  />
+),
+
     },
 
     2: {

@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -7,57 +9,33 @@ import { FormTextarea } from "@/common/component/FormTextarea";
 export default function Step11Remarks() {
   const { state, dispatch } = useForm();
 
-  const remarks = state.formData.mpReport.remarks || {
-    analysis: "",
-    recommendation: "",
-  };
+  const remarks = state.formData.mpReport.remarks;
 
-  /* ===== UPDATE CONTEXT ===== */
-  const updateRemarks = (key: "analysis" | "recommendation", value: string) => {
+  const set = (k: string, v: string) =>
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "remarks",
-      payload: {
-        [key]: value,
-      },
+      type: "SET_PATH",
+      path: `formData.mpReport.remarks.${k}`,
+      value: v,
     });
-  };
 
-  /* ===== CLEAR FORM ===== */
-  const clearForm = () => {
+  const clear = () =>
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "remarks",
-      payload: {
-        analysis: "",
-        recommendation: "",
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.remarks",
+      value: { analysis: "", recommendation: "" },
     });
-  };
 
   return (
-    <FormSection title="11. REMARKS OF CO/21C PROVOST UNIT :" onClear={clearForm}>
-      
-      {/* ANALYSIS */}
+    <FormSection title="11. REMARKS OF CO/21C PROVOST UNIT :" onClear={clear}>
       <div className="mt-2">
         <p className="font-semibold mb-1">ANALYSIS</p>
-        <FormTextarea
-          label=""
-          value={remarks.analysis}
-          onChange={(v) => updateRemarks("analysis", v)}
-        />
+        <FormTextarea value={remarks.analysis} onChange={(v) => set("analysis", v)} />
       </div>
 
-      {/* RECOMMENDATION */}
       <div className="mt-6">
         <p className="font-semibold mb-1">RECOMMENDATION</p>
-        <FormTextarea
-          label=""
-          value={remarks.recommendation}
-          onChange={(v) => updateRemarks("recommendation", v)}
-        />
+        <FormTextarea label="" value={remarks.recommendation} onChange={(v) => set("recommendation", v)} />
       </div>
-
     </FormSection>
   );
 }
