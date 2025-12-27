@@ -4,6 +4,7 @@
 import { FormSection } from "@/common/component/FormSection";
 import { FormInput, FormSelect } from "@/common/component/FormInput";
 import { useForm } from "@/context/FormContext";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export default function Step2MpParticulars() {
   const { state, dispatch } = useForm();
@@ -41,53 +42,43 @@ export default function Step2MpParticulars() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormInput label="Army Number" value={mp.armyNo} onChange={(v) => set("armyNo", v)} />
-        <FormSelect
+        <SuggestionInput
           label="Rank"
-          options={[
-            { label: "Pvt", value: "pvt" },
-            { label: "L/Nk", value: "lnk" },
-            { label: "Nk", value: "nk" },
-            { label: "Hav", value: "hav" },
-            { label: "Subedar", value: "subedar" },
-          ]}
+          placeholder="Select Rank"
           value={mp.rank}
           onChange={(v) => set("rank", v)}
+          fieldType="rank"
+          defaultOptions={["Pvt", "L/Nk", "Nk", "Hav", "Subedar"]}
         />
         <FormInput label="Name" value={mp.name} onChange={(v) => set("name", v)} />
-        <FormSelect
+        <SuggestionInput
           label="Unit"
-          options={[
-            { label: "11 Engr Regt", value: "11engr" },
-            { label: "HQ 21 Corps", value: "21corps" },
-            { label: "Signal Unit", value: "signal" },
-          ]}
+          placeholder="Select Unit"
           value={mp.unit}
           onChange={(v) => set("unit", v)}
+          fieldType="unit"
+          defaultOptions={["11 Engr Regt", "HQ 21 Corps", "Signal Unit"]}
         />
 
-        <FormSelect
+        <SuggestionInput
           label="FMN"
-          options={[
-            { label: "Central Command", value: "central" },
-            { label: "Western Command", value: "western" },
-            { label: "Northern Command", value: "northern" },
-          ]}
+          placeholder="Select FMN"
           value={mp.fmn}
           onChange={(v) => set("fmn", v)}
+          fieldType="fmn"
+          defaultOptions={["Central Command", "Western Command", "Northern Command"]}
         />
 
-        <FormSelect
+        <SuggestionInput
           label="Command"
-          options={[
-            { label: "Command A", value: "a" },
-            { label: "Command B", value: "b" },
-            { label: "Command C", value: "c" },
-          ]}
+          placeholder="Select Command"
           value={mp.command}
           onChange={(v) => set("command", v)}
+          fieldType="command"
+          defaultOptions={["Command A", "Command B", "Command C"]}
         />
 
-        <FormInput label="Address" value={mp.address} onChange={(v) => set("address", v)} />
+        <SuggestionInput label="Address" value={mp.address} onChange={(v) => set("address", v)} fieldType="address" />
         <FormInput label="I Card Number" value={mp.icard} onChange={(v) => set("icard", v)} />
       </div>
     </FormSection>

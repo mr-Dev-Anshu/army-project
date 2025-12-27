@@ -8,25 +8,25 @@ export const INVESTIGATION_REPORT_SUGGESTION_CONFIG = {
 
     nestedFields: {
         // Report Details
-        'reportDetails.command': 'reportCommand',
+        'reportDetails.command': 'command',
         'reportDetails.firNumber': 'firNumber',
 
         // Investigation Head
-        'investigationHead.rank': 'investigationHeadRank',
-        'investigationHead.name': 'investigationHeadName',
-        'investigationHead.unit': 'investigationHeadUnit',
-        'investigationHead.fmn': 'investigationHeadFmn',
-        'investigationHead.command': 'investigationHeadCommand',
-        'investigationHead.address': 'investigationHeadAddress',
+        'investigationHead.rank': 'rank',
+        'investigationHead.name': 'name',
+        'investigationHead.unit': 'unit',
+        'investigationHead.fmn': 'fmn',
+        'investigationHead.command': 'command',
+        'investigationHead.address': 'address',
 
         // Occurrence Details
-        'occurrenceDetails.offenceType': 'investigationOffenceType',
-        'occurrenceDetails.placeOfOccurrence': 'investigationPlace',
-        'occurrenceDetails.description': 'investigationDescription',
+        'occurrenceDetails.offenceType': 'offenceType',
+        'occurrenceDetails.placeOfOccurrence': 'placeOfOccurrence',
+        'occurrenceDetails.description': 'description',
 
         // Remarks
-        'remarks.analysis': 'investigationAnalysis',
-        'remarks.recommendation': 'investigationRecommendation',
+        'remarks.analysis': 'analysis',
+        'remarks.recommendation': 'recommendation',
     },
 
     arrayFields: {},

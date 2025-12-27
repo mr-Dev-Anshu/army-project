@@ -182,7 +182,7 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
                         </div>
                     </div>
                     <div className="w-64">
-                        <div className="font-bold mb-4 text-right">Sig of MP JCO/NCO</div>
+                        <div className="font-bold mb-4 text-left">Sig of MP JCO/NCO</div>
                         <div className="grid grid-cols-[70px_1fr] gap-y-1">
                             <span className="font-bold">Army No.</span>
                             <span>{mpSig.armyNo}</span>

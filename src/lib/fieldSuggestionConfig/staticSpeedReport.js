@@ -16,16 +16,16 @@ export const STATIC_SPEED_REPORT_SUGGESTION_CONFIG = {
 
         // Reporting MP details
         'onDutyDetailsMPReporting.nameReportingMP': 'reportingMPName',
-        'onDutyDetailsMPReporting.rank': 'reportingMPRank',
-        'onDutyDetailsMPReporting.unit': 'reportingMPUnit',
+        'onDutyDetailsMPReporting.rank': 'rank',
+        'onDutyDetailsMPReporting.unit': 'unit',
         'onDutyDetailsMPReporting.armyNumber': 'reportingMPArmyNo',
 
         // Offence occurrence details
         'offenceOccurenceDetails.incidentLocation': 'incidentLocation',
         'offenceOccurenceDetails.actualSpeedNoted': 'actualSpeedNoted',
-        'offenceOccurenceDetails.authSpeed': 'authorizedSpeed',
-        'offenceOccurenceDetails.overSpeedCalculated': 'overSpeedValue',
-        'offenceOccurenceDetails.description': 'offenceDescription',
+        'offenceOccurenceDetails.authSpeed': 'authSpeed',
+        'offenceOccurenceDetails.overSpeedCalculated': 'overSpeedCalculated',
+        'offenceOccurenceDetails.description': 'description',
     },
 
     // 3. No array fields in static speed report

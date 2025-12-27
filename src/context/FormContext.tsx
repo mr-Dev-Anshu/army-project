@@ -35,6 +35,7 @@ const initialState: GlobalFormState = {
         category: "",
         vehicleType: "",
         driverType: "",
+        vehicleName: "",
       },
 
       offenderWithoutVehicle: {
@@ -103,8 +104,8 @@ const initialState: GlobalFormState = {
         incidentLocation: "",
         description: "",
         authSpeed: "30",
-        actualSpeed: "",
-        overSpeed: "",
+        actualSpeedNoted: "",
+        overSpeedCalculated: "",
       },
     },
 

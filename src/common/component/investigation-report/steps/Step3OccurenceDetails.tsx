@@ -6,6 +6,7 @@ import { FormSection } from "@/common/component/FormSection";
 import { FormInput, FormSelect } from "@/common/component/FormInput";
 import { FormTextarea } from "@/common/component/FormTextarea";
 import { useForm } from "@/context/FormContext";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export default function Step3OccurrenceDetails() {
   const { state, dispatch } = useForm();
@@ -36,7 +37,7 @@ export default function Step3OccurrenceDetails() {
 
   return (
     <FormSection title="3. OCCURRENCE DETAILS:" onClear={clearForm}>
-      
+
       {/* OFFENCE TYPE */}
       <FormSelect
         label="Select Offence Type"
@@ -52,11 +53,12 @@ export default function Step3OccurrenceDetails() {
       />
 
       {/* PLACE */}
-      <FormInput
+      <SuggestionInput
         label="Place of Occurrence"
         placeholder="Location"
         value={mp.place}
         onChange={(v) => set("place", v)}
+        fieldType="placeOfOccurrence"
       />
 
       {/* DATE + TIME */}

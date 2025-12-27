@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export default function StaticSpeedStep2() {
   const { state, dispatch } = useForm();
@@ -73,18 +74,20 @@ export default function StaticSpeedStep2() {
         </div>
 
         <div>
-          <Label>Duty Location</Label>
-          <Input
+          <SuggestionInput
+            label="Duty Location"
             value={offence.dutyLocation || ""}
-            onChange={(e) => updateOffence("dutyLocation", e.target.value)}
+            onChange={(v) => updateOffence("dutyLocation", v)}
+            fieldType="Duty Location"
           />
         </div>
 
         <div>
-          <Label>Duty Type</Label>
-          <Input
+          <SuggestionInput
+            label="Duty Type"
             value={offence.dutyType || ""}
-            onChange={(e) => updateOffence("dutyType", e.target.value)}
+            onChange={(v) => updateOffence("dutyType", v)}
+            fieldType="Duty Type"
           />
         </div>
       </FormSection>
@@ -98,38 +101,23 @@ export default function StaticSpeedStep2() {
             onChange={(e) => updateOffence("nameReportingMP", e.target.value)}
           />
 
-          <Select
+          <SuggestionInput
+            placeholder="Select rank"
             value={offence.rank || ""}
-            onValueChange={(v) => updateOffence("rank", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select rank" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="L/Nk">L/Nk</SelectItem>
-              <SelectItem value="Nk">Nk</SelectItem>
-              <SelectItem value="Hav">Hav</SelectItem>
-              <SelectItem value="Subedar">Subedar</SelectItem>
-            </SelectContent>
-          </Select>
+            onChange={(v) => updateOffence("rank", v)}
+            fieldType="Rank"
+            defaultOptions={["L/Nk", "Nk", "Hav", "Subedar"]}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <Select
+          <SuggestionInput
+            placeholder="Select unit"
             value={offence.unit || ""}
-            onValueChange={(v) => updateOffence("unit", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select unit" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-              <SelectItem value="MP 12">MP 12</SelectItem>
-              <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-            </SelectContent>
-          </Select>
+            onChange={(v) => updateOffence("unit", v)}
+            fieldType="Unit"
+            defaultOptions={["11 Engr Regt", "MP 12", "HQ Unit"]}
+          />
 
           <Input
             placeholder="Army Number"
@@ -153,44 +141,29 @@ export default function StaticSpeedStep2() {
               }}
             />
 
-            <Select
+            <SuggestionInput
+              placeholder="Select Rank"
               value={w.reportingBlock?.rank || ""}
-              onValueChange={(v) => {
+              onChange={(v) => {
                 const copy = structuredClone(witnesses);
                 copy[index].reportingBlock.rank = v;
                 set("formData.staticSpeed.witnesses", copy);
               }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Rank" />
-              </SelectTrigger>
+              fieldType="Rank"
+              defaultOptions={["L/Nk", "Nk", "Hav", "Subedar"]}
+            />
 
-              <SelectContent>
-                <SelectItem value="L/Nk">L/Nk</SelectItem>
-                <SelectItem value="Nk">Nk</SelectItem>
-                <SelectItem value="Hav">Hav</SelectItem>
-                <SelectItem value="Subedar">Subedar</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
+            <SuggestionInput
+              placeholder="Select Unit"
               value={w.reportingBlock?.unit || ""}
-              onValueChange={(v) => {
+              onChange={(v) => {
                 const copy = structuredClone(witnesses);
                 copy[index].reportingBlock.unit = v;
                 set("formData.staticSpeed.witnesses", copy);
               }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Unit" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-                <SelectItem value="MP 12">MP 12</SelectItem>
-                <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-              </SelectContent>
-            </Select>
+              fieldType="Unit"
+              defaultOptions={["11 Engr Regt", "MP 12", "HQ Unit"]}
+            />
 
             <Input
               placeholder="Army No."
@@ -250,22 +223,23 @@ export default function StaticSpeedStep2() {
           }}
         />
 
-        <Input
+        <SuggestionInput
           placeholder="Incident Location"
           value={offence.incidentLocation || ""}
-          onChange={(e) => updateOffence("incidentLocation", e.target.value)}
+          onChange={(v) => updateOffence("incidentLocation", v)}
+          fieldType="Incident Location"
         />
 
         <Input
           placeholder="Actual Speed"
-          value={offence.actualSpeed || ""}
-          onChange={(e) => updateOffence("actualSpeed", e.target.value)}
+          value={offence.actualSpeedNoted || ""}
+          onChange={(e) => updateOffence("actualSpeedNoted", e.target.value)}
         />
 
         <Input
           placeholder="Over Speed"
-          value={offence.overSpeed || ""}
-          onChange={(e) => updateOffence("overSpeed", e.target.value)}
+          value={offence.overSpeedCalculated || ""}
+          onChange={(e) => updateOffence("overSpeedCalculated", e.target.value)}
         />
 
         <Textarea

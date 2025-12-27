@@ -1,11 +1,20 @@
 "use client";
 import { useState } from "react";
 import { FormInput, FormSelect } from "@/common/component/FormInput";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
+
+interface OffenderDynamicFormProps {
+  title: string;
+  helperText?: string;
+  fields: any[];
+  showCoDriver?: boolean;
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+}
 
 export default function OffenderDynamicForm({
   title,
@@ -13,7 +22,7 @@ export default function OffenderDynamicForm({
   fields,
   showCoDriver = false,
   scope = "traffic",
-}) {
+}: OffenderDynamicFormProps) {
   const { state, dispatch } = useForm();
 
   /* ACTIVE TYPE */
@@ -77,19 +86,19 @@ export default function OffenderDynamicForm({
       ? label.replace("CoDriver_", "")
       : label;
 
-    const updatePeopleArray = (existing = []) => {
+    const updatePeopleArray = (existing: any[] = []) => {
       const idx = existing.findIndex((p: any) => p.type === personType);
 
       if (idx >= 0) {
         return existing.map((p: any) =>
           p.type === personType
             ? {
-                ...p,
-                details: {
-                  ...p.details,
-                  [pureLabel]: value,
-                },
-              }
+              ...p,
+              details: {
+                ...p.details,
+                [pureLabel]: value,
+              },
+            }
             : p
         );
       }
@@ -130,20 +139,52 @@ export default function OffenderDynamicForm({
 
       {/* DRIVER FORM */}
       <div className="grid grid-cols-2 gap-4">
-        {fields.map((f, i) =>
-          f.type === "input" ? (
+        {fields.map((f: any, i: number) => {
+          const isSuggestion = [
+            "Unit", "FMN", "Command", "Select Rank", "Trade",
+            "Place of QTR.", "Place of Work", "Place of Stay", "Address", "Department"
+          ].includes(f.label);
+
+          if (isSuggestion) {
+            return (
+              <SuggestionInput
+                key={i}
+                label={f.label}
+                placeholder={f.placeholder}
+                value={driver[f.label] || ""}
+                onChange={(value) => saveField(f.label, value)}
+                fieldType={
+                  f.label === "Select Rank" ? "rank" :
+                    f.label.toLowerCase()
+                }
+                defaultOptions={
+                  f.label.includes("Rank")
+                    ? ["Pvt", "L/Nk", "Nk", "Hav", "Subedar"]
+                    : f.label === "Unit"
+                      ? ["11 Engr Regt", "MP 12", "HQ Unit"]
+                      : f.label === "FMN"
+                        ? ["Central Command", "Western Command", "Northern Command"]
+                        : f.label === "Command"
+                          ? ["Command A", "Command B", "Command C"]
+                          : []
+                }
+                className={cn(
+                  "transition-all",
+                  driver[f.label]
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
+              />
+            );
+          }
+
+          return f.type === "input" ? (
             <FormInput
               key={i}
               label={f.label}
               placeholder={f.placeholder}
               value={driver[f.label] || ""}
               onChange={(value) => saveField(f.label, value)}
-              inputClassName={cn(
-                "transition-all",
-                driver[f.label]
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300"
-              )}
             />
           ) : (
             <FormSelect
@@ -154,63 +195,66 @@ export default function OffenderDynamicForm({
               options={f.options || []}
               onChange={(value) => saveField(f.label, value)}
             />
-          )
-        )}
+          );
+        })}
       </div>
 
-      {/* CO DRIVER */}
-      {showCoDriver && (
-        <>
-          <div className="mt-6 flex items-start gap-2">
-            <Checkbox
-              checked={Boolean(state.formData.coDriverOrPillion)}
-              onCheckedChange={(v) =>
-                dispatch({
-                  type: "SET_PATH",
-                  path: "formData.coDriverOrPillion",
-                  value: Boolean(v),
-                })
-              }
-            />
-            <p className="text-sm">
-              Was there a <b>Co-Driver / Pillion Rider</b>?
-            </p>
-          </div>
 
-          {state.formData.coDriverOrPillion && (
-            <div className="mt-6 border rounded-xl bg-gray-50 p-6 space-y-5">
-              <RadioGroup
-                className="grid grid-cols-2 gap-3"
-                value={state.formData.coDriverType || ""}
-                onValueChange={(v) =>
+      {/* CO DRIVER */}
+      {
+        showCoDriver && (
+          <>
+            <div className="mt-6 flex items-start gap-2">
+              <Checkbox
+                checked={Boolean(state.formData.coDriverOrPillion)}
+                onCheckedChange={(v) =>
                   dispatch({
                     type: "SET_PATH",
-                    path: "formData.coDriverType",
-                    value: v,
+                    path: "formData.coDriverOrPillion",
+                    value: Boolean(v),
                   })
                 }
-              >
-                {[
-                  "Military Person",
-                  "Civilian",
-                  "Employee",
-                  "Servant/Maid",
-                  "Shop Keeper",
-                  "Temporary Hired Worker",
-                ].map((x) => (
-                  <label
-                    key={x}
-                    className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer bg-white"
-                  >
-                    <RadioGroupItem value={x} />
-                    {x}
-                  </label>
-                ))}
-              </RadioGroup>
+              />
+              <p className="text-sm">
+                Was there a <b>Co-Driver / Pillion Rider</b>?
+              </p>
             </div>
-          )}
-        </>
-      )}
-    </div>
+
+            {state.formData.coDriverOrPillion && (
+              <div className="mt-6 border rounded-xl bg-gray-50 p-6 space-y-5">
+                <RadioGroup
+                  className="grid grid-cols-2 gap-3"
+                  value={state.formData.coDriverType || ""}
+                  onValueChange={(v) =>
+                    dispatch({
+                      type: "SET_PATH",
+                      path: "formData.coDriverType",
+                      value: v,
+                    })
+                  }
+                >
+                  {[
+                    "Military Person",
+                    "Civilian",
+                    "Employee",
+                    "Servant/Maid",
+                    "Shop Keeper",
+                    "Temporary Hired Worker",
+                  ].map((x) => (
+                    <label
+                      key={x}
+                      className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer bg-white"
+                    >
+                      <RadioGroupItem value={x} />
+                      {x}
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+          </>
+        )
+      }
+    </div >
   );
 }

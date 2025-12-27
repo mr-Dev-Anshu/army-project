@@ -6,12 +6,12 @@ export const OFFENDER_SUGGESTION_CONFIG = {
 
     nestedFields: {
         // Mapping common military offender details that might be present in the Mixed type
-        'offenderDetails.rank': 'offenderRank',
+        'offenderDetails.rank': 'rank',
         'offenderDetails.name': 'offenderName',
-        'offenderDetails.unit': 'offenderUnit',
-        'offenderDetails.fmn': 'offenderFmn',
-        'offenderDetails.command': 'offenderCommand',
-        'offenderDetails.address': 'offenderAddress',
+        'offenderDetails.unit': 'unit',
+        'offenderDetails.fmn': 'fmn',
+        'offenderDetails.command': 'command',
+        'offenderDetails.address': 'address',
         'offenderDetails.fatherName': 'offenderFatherName',
         'offenderDetails.caste': 'offenderCaste',
         'offenderDetails.religion': 'offenderReligion',

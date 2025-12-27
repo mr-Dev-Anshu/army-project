@@ -14,6 +14,7 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { FormTextarea } from "../../FormTextarea";
 import { FormInput } from "../../FormInput";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export default function Step2Statement() {
   const { state, dispatch } = useForm();
@@ -61,23 +62,25 @@ export default function Step2Statement() {
           />
         </div>
 
-        <Input
+        <SuggestionInput
           placeholder="Duty Location"
           value={d.onDutyDetails.dutyLocation}
-          onChange={(e) =>
+          onChange={(v) =>
             set(
               "formData.traffic.onDutyDetails.dutyLocation",
-              e.target.value
+              v
             )
           }
+          fieldType="dutyLocation"
         />
 
-        <Input
+        <SuggestionInput
           placeholder="Duty Type"
           value={d.onDutyDetails.dutyType}
-          onChange={(e) =>
-            set("formData.traffic.onDutyDetails.dutyType", e.target.value)
+          onChange={(v) =>
+            set("formData.traffic.onDutyDetails.dutyType", v)
           }
+          fieldType="dutyType"
         />
       </FormSection>
 
@@ -95,42 +98,27 @@ export default function Step2Statement() {
             }
           />
 
-          <Select
+          <SuggestionInput
+            placeholder="Select Rank"
             value={d.onDutyDetailsMPReporting.rank}
-            onValueChange={(v) =>
+            onChange={(v) =>
               set("formData.traffic.onDutyDetailsMPReporting.rank", v)
             }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Rank" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="Lieutenant">Lieutenant</SelectItem>
-              <SelectItem value="Captain">Captain</SelectItem>
-              <SelectItem value="Major">Major</SelectItem>
-              <SelectItem value="Colonel">Colonel</SelectItem>
-            </SelectContent>
-          </Select>
+            fieldType="rank"
+            defaultOptions={["Lieutenant", "Captain", "Major", "Colonel"]}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Select
+          <SuggestionInput
+            placeholder="Select Unit"
             value={d.onDutyDetailsMPReporting.unit}
-            onValueChange={(v) =>
+            onChange={(v) =>
               set("formData.traffic.onDutyDetailsMPReporting.unit", v)
             }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Unit" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="MP Unit 12">MP Unit 12</SelectItem>
-              <SelectItem value="Unit 2">Unit 2</SelectItem>
-              <SelectItem value="Unit 3">Unit 3</SelectItem>
-            </SelectContent>
-          </Select>
+            fieldType="unit"
+            defaultOptions={["MP Unit 12", "Unit 2", "Unit 3"]}
+          />
 
           <Input
             placeholder="Army No."
@@ -146,86 +134,71 @@ export default function Step2Statement() {
       </FormSection>
 
       {/* ---------------- WITNESSING MP ---------------- */}
-     <FormSection title="On-Duty Details of Witnessing MP">
-  {d.witnesses.map((w, i) => (
-    <div key={i} className="border p-4 rounded-lg space-y-4 mb-6">
+      <FormSection title="On-Duty Details of Witnessing MP">
+        {d.witnesses.map((w, i) => (
+          <div key={i} className="border p-4 rounded-lg space-y-4 mb-6">
 
-      {/* Name */}
-      <Input
-        placeholder="Name of Witnessing MP"
-        value={w.reportingBlock.nameReportingMP}
-        onChange={(e) => {
-          const clone = structuredClone(d.witnesses);
-          clone[i].reportingBlock.nameReportingMP = e.target.value;
-          set("formData.traffic.witnesses", clone);
-        }}
-      />
+            {/* Name */}
+            <Input
+              placeholder="Name of Witnessing MP"
+              value={w.reportingBlock.nameReportingMP}
+              onChange={(e) => {
+                const clone = structuredClone(d.witnesses);
+                clone[i].reportingBlock.nameReportingMP = e.target.value;
+                set("formData.traffic.witnesses", clone);
+              }}
+            />
 
-      {/* Rank */}
-      <Select
-        value={w.reportingBlock.rank}
-        onValueChange={(v) => {
-          const clone = structuredClone(d.witnesses);
-          clone[i].reportingBlock.rank = v;
-          set("formData.traffic.witnesses", clone);
-        }}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Rank" />
-        </SelectTrigger>
+            {/* Rank */}
+            <SuggestionInput
+              placeholder="Select Rank"
+              value={w.reportingBlock.rank}
+              onChange={(v) => {
+                const clone = structuredClone(d.witnesses);
+                clone[i].reportingBlock.rank = v;
+                set("formData.traffic.witnesses", clone);
+              }}
+              fieldType="rank"
+              defaultOptions={["L/Nk", "Nk", "Hav", "Subedar"]}
+            />
 
-        <SelectContent>
-          <SelectItem value="L/Nk">L/Nk</SelectItem>
-          <SelectItem value="Nk">Nk</SelectItem>
-          <SelectItem value="Hav">Hav</SelectItem>
-          <SelectItem value="Subedar">Subedar</SelectItem>
-        </SelectContent>
-      </Select>
+            {/* ✅ REQUIRED FIELD — UNIT */}
+            <SuggestionInput
+              placeholder="Select Unit"
+              value={w.reportingBlock.unit}
+              onChange={(v) => {
+                const clone = structuredClone(d.witnesses);
+                clone[i].reportingBlock.unit = v;
+                set("formData.traffic.witnesses", clone);
+              }}
+              fieldType="unit"
+              defaultOptions={["11 Engr Regt", "MP 12", "HQ Unit"]}
+            />
 
-      {/* ✅ REQUIRED FIELD — UNIT */}
-      <Select
-        value={w.reportingBlock.unit}
-        onValueChange={(v) => {
-          const clone = structuredClone(d.witnesses);
-          clone[i].reportingBlock.unit = v;
-          set("formData.traffic.witnesses", clone);
-        }}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Unit" />
-        </SelectTrigger>
+            {/* Army Number */}
+            <Input
+              placeholder="Army No."
+              value={w.reportingBlock.armyNumber}
+              onChange={(e) => {
+                const clone = structuredClone(d.witnesses);
+                clone[i].reportingBlock.armyNumber = e.target.value;
+                set("formData.traffic.witnesses", clone);
+              }}
+            />
 
-        <SelectContent>
-          <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-          <SelectItem value="MP 12">MP 12</SelectItem>
-          <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Army Number */}
-      <Input
-        placeholder="Army No."
-        value={w.reportingBlock.armyNumber}
-        onChange={(e) => {
-          const clone = structuredClone(d.witnesses);
-          clone[i].reportingBlock.armyNumber = e.target.value;
-          set("formData.traffic.witnesses", clone);
-        }}
-      />
-
-      {/* Contact */}
-      <Input
-        placeholder="Contact Number"
-        value={w.reportingBlock.contactNumber || ""}
-        onChange={(e) => {
-          const clone = structuredClone(d.witnesses);
-          clone[i].reportingBlock.contactNumber = e.target.value;
-          set("formData.traffic.witnesses", clone);
-        }}
-      />
-    </div>
-  ))}
-</FormSection>
+            {/* Contact */}
+            <Input
+              placeholder="Contact Number"
+              value={w.reportingBlock.contactNumber || ""}
+              onChange={(e) => {
+                const clone = structuredClone(d.witnesses);
+                clone[i].reportingBlock.contactNumber = e.target.value;
+                set("formData.traffic.witnesses", clone);
+              }}
+            />
+          </div>
+        ))}
+      </FormSection>
 
 
       {/* ================= WITNESS SELECTION LIST ================= */}
@@ -303,7 +276,7 @@ export default function Step2Statement() {
             }
           />
 
-          <FormInput
+          <SuggestionInput
             label="Place Of Offence"
             placeholder="Location"
             value={d.offenceOccurenceDetails.incidentLocation}
@@ -313,6 +286,7 @@ export default function Step2Statement() {
                 v
               )
             }
+            fieldType="incidentLocation"
           />
         </div>
 

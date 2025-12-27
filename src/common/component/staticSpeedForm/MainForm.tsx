@@ -66,8 +66,8 @@ export default function StaticSpeedForm() {
           time: staticData.offenceOccurenceDetails.time,
           incidentLocation: staticData.offenceOccurenceDetails.incidentLocation,
           description: staticData.offenceOccurenceDetails.description,
-          overSpeed: staticData.offenceOccurenceDetails.overSpeed ?? "",
-          actualSpeed: staticData.offenceOccurenceDetails.actualSpeed ?? "",
+          overSpeedCalculated: staticData.offenceOccurenceDetails.overSpeedCalculated ?? "",
+          actualSpeedNoted: staticData.offenceOccurenceDetails.actualSpeedNoted ?? "",
           authSpeed: staticData.offenceOccurenceDetails.authSpeed ?? "",
         },
       };
@@ -132,8 +132,8 @@ export default function StaticSpeedForm() {
 
       toast.error(
         error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          "Failed to submit record"
+        error?.response?.data?.error ||
+        "Failed to submit record"
       );
     }
   };
