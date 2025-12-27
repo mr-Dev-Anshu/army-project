@@ -13,11 +13,12 @@ export class MPReportService {
     return report;
   }
 
-  async getAllReports( filters = {}) {
+  async getAllReports(filters = {}) {
     return await repo.findAll(filters);
   }
 
   async updateReport(id, data) {
+    // Check if report number matches existing if updating report number
     if (data.reportDetails?.reportNumber) {
       const existing = await repo.findByReportNumber(data.reportDetails.reportNumber);
       if (existing && existing._id.toString() !== id) {

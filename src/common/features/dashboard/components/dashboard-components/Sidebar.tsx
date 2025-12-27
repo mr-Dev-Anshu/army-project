@@ -76,7 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const reportsAndAnalysis: MenuItem[] = [
     {
       icon: <FileBarChart className="w-5 h-5" />,
-      label: "All Registered Reports",
+      label: "All Reports",
     },
     { icon: <BarChart3 className="w-5 h-5" />, label: "Analysis Dashboard" },
     { icon: <Users className="w-5 h-5" />, label: "Civil Employee Analysis" },
@@ -120,7 +120,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   const renderMenuItem = (item: MenuItem, isSubmenu = false) => (
     <button
       key={item.label}
-      onClick={() => item.label === "Dashboard" && onMenuSelect("dashboard")}
+      onClick={() => {
+        if (item.label === "Dashboard") onMenuSelect("dashboard");
+        if (item.label === "All Reports") onMenuSelect("viewReports");
+      }}
       className={cn(
         "w-full flex items-start gap-3 px-4 py-2.5 text-left text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors",
         isSubmenu && "pl-12"

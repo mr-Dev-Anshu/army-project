@@ -96,6 +96,10 @@ const mpReportSchema = new Schema(
     detailedOccurrenceReport: { type: String },
     pointsFindOutDuringInvestigation: { type: String },
     opinion: { type: String },
+    actionStatus: {
+      type: Boolean,
+      default: false,
+    },
     remarks: {
       analysis: { type: String },
       recommendation: { type: String },
@@ -104,7 +108,7 @@ const mpReportSchema = new Schema(
         default: {},
       },
     },
-    evidences:[evidenceSchema],
+    evidences: [evidenceSchema],
     customFields: {
       type: Schema.Types.Mixed,
       default: {},

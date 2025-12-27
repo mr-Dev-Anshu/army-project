@@ -16,6 +16,7 @@ export interface CreateTrafficOffenceData {
   witnesses: Witness[];
   offenderPeople: OffenderPerson[];
   remarks?: string;
+  actionStatus?: boolean;
 }
 
 

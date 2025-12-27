@@ -18,5 +18,6 @@ export interface StaticSpeedVehicle {
 export interface CreateStaticSpeedPayload
   extends StaticSpeedVehicle {
   offenceOccurenceDetails: StaticSpeedOffence;
+  actionStatus?: boolean;
 }
  

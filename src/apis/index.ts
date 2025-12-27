@@ -29,4 +29,6 @@ export * from "@/apis/offender/delete"
 export * from "@/apis/offender/update"
 export * from "@/apis/offender/getAll"
 export * from "@/apis/offender/getById"
+
+export * from "@/apis/mpReports";
  

@@ -15,6 +15,7 @@ import Sidebar from "./components/dashboard-components/Sidebar";
 import ActionCard from "./components/dashboard-components/ActionCard";
 import DynamicStatsCard from "./components/dashboard-components/DynamicStatsCard";
 import CreateNewRecordPanel from "./components/dashboard-components/CreateNewRecordPanel";
+import AllRegisteredReports from "./components/dashboard-components/AllRegisteredReports";
 
 import { useState } from "react";
 import MultiStepForm from "../../component/multi-step-form/MulitstepForm";
@@ -23,7 +24,7 @@ import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
 
-  const [page, setPage] = useState<"dashboard" | "createRecord" | "multiForm" |"staticSpeed">(
+  const [page, setPage] = useState<"dashboard" | "createRecord" | "multiForm" |"staticSpeed" | "viewReports">(
     "dashboard"
   );
 
@@ -117,6 +118,8 @@ export default function Dashboard() {
                     onClick={() => {
                       if (action.title === "Create New Record") {
                         setPage("createRecord");
+                      } else if (action.title === "View All Registered Reports") {
+                        setPage("viewReports");
                       }
                     }}
                   />
@@ -136,6 +139,9 @@ export default function Dashboard() {
 
         {/* ================== CREATE NEW RECORD PAGE ================== */}
         {page === "createRecord" && <CreateNewRecordPanel setCollapsed={setCollapsed} />}
+
+        {/* ================== VIEW ALL REPORTS PAGE ================== */}
+        {page === "viewReports" && <AllRegisteredReports />}
 
         {/* ================== MULTI STEP FORM ================== */}
         {page === "multiForm" && <MultiStepForm />}

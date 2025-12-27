@@ -72,6 +72,7 @@ export const createMPReportSchema = Joi.object({
     recommendation: optionalString,
     customFields,
   }).optional(),
+  actionStatus: Joi.boolean().optional(),
 
   customFields: Joi.object().unknown(true).optional(),
 });
