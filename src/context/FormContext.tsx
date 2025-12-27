@@ -178,6 +178,12 @@ const initialState: GlobalFormState = {
       },
 
       documents: [],
+      additionalIndividual: {
+        vehicleInvolved: "",
+        vehicleData: {},
+        driverType: "",
+        tempOffender: null,
+      },
 
       detailedReport: "",
       investigationPoints: "",
@@ -409,6 +415,23 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
               ...(state.formData.mpReport.documents || []),
               action.payload,
             ],
+          },
+        },
+      };
+
+    case "CLEAR_MP_ADDITIONAL":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          mpReport: {
+            ...state.formData.mpReport,
+            additionalIndividual: {
+              vehicleInvolved: "",
+              vehicleData: {},
+              driverType: "",
+              tempOffender: null,
+            },
           },
         },
       };

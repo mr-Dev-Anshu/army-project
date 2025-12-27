@@ -61,9 +61,8 @@ export interface Witness {
   offenceBlock: OffenceOccurenceDetails;
 }
 
+// ---------- MP REPORT MASTER ----------
 
-
-/* ================= MP INVESTIGATION REPORT ================= */
 export interface MpReportState {
 
   reportDetails: {
@@ -74,7 +73,7 @@ export interface MpReportState {
   };
 
   mpParticulars: {
-    armyNo : string;
+    armyNo: string;
     rank: string;
     name: string;
     unit: string;
@@ -86,37 +85,41 @@ export interface MpReportState {
 
   occurrenceDetails: {
     offenceType: string;
-    placeOfOccurrence: string;
+    place: string;     // <-- same as context
     date: string;
     time: string;
     description: string;
   };
 
-  /* Step-4 same traffic style handle hoga */
-individualDetails: {
-  vehicleInvolved: "yes" | "no" | "";
-  vehicleData: Partial<VehicleDetailsState>;
-  driverType: string;
-  offenderList: any[];
-};
-
+  /* ---------- STEP-4 ---------- */
+  individualDetails: {
+    vehicleInvolved: "yes" | "no" | "";
+    vehicleData: Partial<VehicleDetailsState>;
+    driverType: string;
+    offenderList: any[];
+    tempOffender?: any;     // <-- optional support so no TS error
+  };
 
   witnesses: Witness[];
+
   evidence: {
-    generalEvidence?: File | null;
-    sketch?: File | null;
+    attachEvidence?: File | null;
+    eyeSketch?: File | null;
     photos?: File[] | null;
     videos?: File[] | null;
   };
 
-  documents: {
-    statement: string;
-    url?: string;
-    attachments: string[];
+  documents: any[];
+
+  additionalIndividual: {
+    vehicleInvolved: "yes" | "no" | "";
+    vehicleData: Partial<VehicleDetailsState>;
+    driverType: string;
+    tempOffender: any | null;
   };
 
   detailedReport: string;
-  findings: string;
+  investigationPoints: string;
   opinion: string;
 
   remarks: {
@@ -124,6 +127,7 @@ individualDetails: {
     recommendation: string;
   };
 }
+
 
 // ---------- DEPENDENTS ----------
 export type DependentType =

@@ -28,24 +28,27 @@ export function FormSelect({
     <div className="space-y-1  w-full">
       <Label>{label}</Label>
 
-      <Select   defaultValue={options?.[0]?.value}  value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 
         <SelectContent>
-          {options.map((op) => (
-            <SelectItem key={op.value} value={op.value}>
-              {op.label}
-            </SelectItem>
-          ))}
+          {options.map((op: any) => {
+            const value = typeof op === "string" ? op : op.value;
+            const label = typeof op === "string" ? op : op.label;
+
+            return (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
     </div>
   );
 }
-
-
 
 interface FormInputProps {
   label: string;

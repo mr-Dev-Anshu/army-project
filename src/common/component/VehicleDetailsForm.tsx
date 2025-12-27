@@ -1,3 +1,5 @@
+
+
 "use client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,34 +12,64 @@ import { cn } from "@/lib/utils";
 export default function VehicleDetailsForm({
   scope = "traffic",
 }: {
-  scope?: "traffic" | "static";
+  scope?: "traffic" | "static" | "mp-main";
 }) {
   const { state, dispatch } = useForm();
 
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
+  const mp = state.formData.mpReport;
 
+  /* ================= VISIBILITY FIX ================= */
+
+  // Traffic + MP-main shared visibility
   if (
     scope === "traffic" &&
     traffic.vehicleInvolved !== "yes" &&
-    state.formData.mpReport.individualDetails?.vehicleInvolved !== "yes" &&
-    state.formData.mpReport.witnessVehicleStatus !== "yes"
+    mp.individualDetails?.vehicleInvolved !== "yes"
   ) {
     return null;
   }
 
+  // MP MAIN FORM visibility (❌ pehle yaha additional check ho raha tha)
+  if (scope === "mp-main" && mp.individualDetails.vehicleInvolved !== "yes") {
+    return null;
+  }
+
+  /* ================= STATE SOURCE FIX ================= */
+
   const vehicleState =
-    scope === "traffic" ? traffic.vehicleDetails : staticSpeed.vehicleDetails;
+    scope === "traffic"
+      ? traffic.vehicleDetails
+      : scope === "mp-main"
+      ? mp.individualDetails.vehicleData || {}
+      : staticSpeed.vehicleDetails;
 
-  const { category, vehicleType, driverType } = vehicleState;
+  const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
+  /* ================= UPDATE FIX ================= */
   const updateVehicle = (data: any) => {
     if (scope === "traffic") {
       dispatch({
         type: "SET_VEHICLE_DETAILS",
         payload: data,
       });
-    } else {
+    }
+
+    else if (scope === "mp-main") {
+      dispatch({
+        type: "SET_MP_SECTION",
+        section: "individualDetails",
+        payload: {
+          vehicleData: {
+            ...mp.individualDetails.vehicleData,
+            ...data,
+          },
+        },
+      });
+    }
+
+    else {
       dispatch({
         type: "SET_STATIC_SPEED_DATA",
         payload: {
@@ -120,7 +152,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* CIVILIAN VEHICLE DETAILS */}
+      {/* CIVILIAN VEHICLE */}
       {vehicleType === "civilian" && (
         <CivilianVehicleBlock
           vehicleState={vehicleState}
@@ -128,7 +160,7 @@ export default function VehicleDetailsForm({
         />
       )}
 
-      {/* DD VEHICLE DETAILS */}
+      {/* DD VEHICLE */}
       {vehicleType === "dd" && (
         <DDVehicleBlock
           vehicleState={vehicleState}
@@ -169,7 +201,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* DYNAMIC OFFENDER FORM */}
+      {/* DYNAMIC FORM */}
       {driverType && offenderFormsConfig[driverType] && (
         <OffenderDynamicForm
           scope={scope}
@@ -183,7 +215,7 @@ export default function VehicleDetailsForm({
   );
 }
 
-/* ------------ SMALL SUB COMPONENTS ------------- */
+/* ------------ SUB COMPONENTS ------------- */
 
 function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
   return (

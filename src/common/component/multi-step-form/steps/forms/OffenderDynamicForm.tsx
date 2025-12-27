@@ -33,13 +33,49 @@ export default function OffenderDynamicForm({
       ? state.formData.staticSpeed.offenderPeople || []
       : state.formData.traffic.offenderPeople || [];
 
-  const driver = people.find((p: any) => p.type === "Driver")?.details || {};
+  // ===== MP DRIVER SOURCE =====
+  const mpSection =
+    scope === "mp-additional" ? "additionalIndividual" : "individualDetails";
+
+  const mpTempDriver = state.formData.mpReport?.[mpSection]?.tempOffender || {};
+
+  // ===== NORMAL DRIVER SOURCE =====
+  const normalDriver =
+    people.find((p: any) => p.type === "Driver")?.details || {};
+
+  // ===== FINAL DRIVER (IMPORTANT) =====
+  const driver = scope.startsWith("mp") ? mpTempDriver : normalDriver;
+
+  /* ---------------- MP SAVE HANDLER ---------------- */
+  const saveToMp = (label: string, value: string) => {
+    const section =
+      scope === "mp-additional" ? "additionalIndividual" : "individualDetails";
+
+    const prev = state.formData.mpReport[section]?.tempOffender || {};
+
+    dispatch({
+      type: "SET_MP_SECTION",
+      section,
+      payload: {
+        tempOffender: {
+          ...prev,
+          [label]: value,
+        },
+      },
+    });
+  };
 
   /* ---------------- SAVE DRIVER + CODRIVER ---------------- */
   const saveField = (label: string, value: string) => {
+    // ================= MP FORM LOGIC =================
+    if (scope.startsWith("mp")) {
+      saveToMp(label, value);
+      return;
+    }
+
+    // ================= OLD TRAFFIC / STATIC LOGIC =================
     const isCoDriverField = label.startsWith("CoDriver_");
     const personType = isCoDriverField ? "CoDriver" : "Driver";
-
     const pureLabel = isCoDriverField ? label.replace("CoDriver_", "") : label;
 
     const updatePeopleArray = (existing = []) => {
