@@ -11,18 +11,19 @@ import VehiclePrimaryQuestion from "@/common/component/VehiclePrimaryQuestion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
+import DynamicOffenderList from "../../DynamicOffenderLIst";
 
 export default function Step4IndividualDetails() {
   const { state, dispatch } = useForm();
 
   const mp = state.formData.mpReport.individualDetails;
   const add = state.formData.mpReport.additionalIndividual;
-
   const offenders = mp.offenderList || [];
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [extraVehicleStatus, setExtraVehicleStatus] = useState("");
 
+  /* ========= VEHICLE STATUS ========= */
   const setVehicleInvolved = (value: any) => {
     const normalized =
       value === "vehicle" || value === "yes"
@@ -32,64 +33,87 @@ export default function Step4IndividualDetails() {
         : "";
 
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "individualDetails",
-      payload: { vehicleInvolved: normalized },
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.vehicleInvolved",
+      value: normalized,
     });
   };
 
-  // ========== SAVE MAIN OFFENDER ==========
+  /* ========= DELETE OFFENDER ========= */
+  const handleDeleteOffender = (index: number) => {
+    const updated = offenders.filter((_, i) => i !== index);
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.offenderList",
+      value: updated,
+    });
+  };
+
+  /* ========= SAVE MAIN ========= */
   const handleSaveMain = () => {
-    const data =
-      mp.vehicleInvolved === "yes" ? mp.vehicleData : mp.tempOffender;
-console.log(data);
-    if (!data || Object.keys(data).length === 0) {
+    const vehicle = mp.vehicleData || {};
+    const person = mp.tempOffender || {};
+
+    const finalData = {
+      ...vehicle,
+      ...person,
+      driverType:
+        vehicle?.driverType || person?.driverType || mp.driverType || "",
+    };
+
+    if (!Object.keys(finalData).length) {
       toast.error("Please fill main offender details!");
       return;
     }
 
-    // Add to list
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "individualDetails",
-      payload: {
-        offenderList: [...offenders, data],
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.offenderList",
+      value: [...offenders, finalData],
     });
 
-    // Clear temporary fields so next person starts fresh
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "individualDetails",
-      payload: {
-        vehicleData: {},
-        tempOffender: null,
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.tempOffender",
+      value: null,
+    });
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.vehicleData",
+      value: {},
     });
 
     toast.success("Main Person Added!");
   };
 
-  // ========== SAVE ADDITIONAL OFFENDER ==========
+  /* ========= SAVE ADDITIONAL ========= */
   const handleSaveAdditional = () => {
-    const data =
-      extraVehicleStatus === "yes" ? add.vehicleData : add.tempOffender;
+    const vehicle = add.vehicleData || {};
+    const person = add.tempOffender || {};
 
-    if (!data || Object.keys(data).length === 0) {
+    const finalData = {
+      ...vehicle,
+      ...person,
+      driverType:
+        vehicle?.driverType || person?.driverType || add.driverType || "",
+    };
+
+    if (!Object.keys(finalData).length) {
       toast.error("Please fill additional person details!");
       return;
     }
 
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "individualDetails",
-      payload: {
-        offenderList: [...offenders, data],
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.offenderList",
+      value: [...offenders, finalData],
     });
 
-    // Clear additional temp data
-    dispatch({ type: "CLEAR_MP_ADDITIONAL" });
+    dispatch({
+      type: "CLEAR_MP_ADDITIONAL",
+    });
 
     setExtraVehicleStatus("");
     setShowAddForm(false);
@@ -111,13 +135,20 @@ console.log(data);
         setVehicleStatus={setVehicleInvolved}
       />
 
-      {mp.vehicleInvolved === "yes" && <VehicleDetailsForm scope="mp-main" />}
+      {mp.vehicleInvolved === "yes" && (
+        <VehicleDetailsForm scope="mp-main" />
+      )}
 
-      {mp.vehicleInvolved === "no" && <OffenderWithoutVehicleForm scope="mp-main" />}
+      {mp.vehicleInvolved === "no" && (
+        <OffenderWithoutVehicleForm scope="mp-main" />
+      )}
 
       {mp.vehicleInvolved && (
         <div className="mt-4 flex justify-end">
-          <Button className="bg-green-600 hover:bg-green-700" onClick={handleSaveMain}>
+          <Button
+            className="bg-green-600 hover:bg-green-700"
+            onClick={handleSaveMain}
+          >
             Save Details
           </Button>
         </div>
@@ -143,69 +174,34 @@ console.log(data);
             setVehicleStatus={setExtraVehicleStatus}
           />
 
-          {extraVehicleStatus === "yes" && <VehicleDetailsForm scope="mp-additional" />}
+          {extraVehicleStatus === "yes" && (
+            <VehicleDetailsForm scope="mp-additional" />
+          )}
 
-          {extraVehicleStatus === "no" && <OffenderWithoutVehicleForm scope="mp-additional" />}
+          {extraVehicleStatus === "no" && (
+            <OffenderWithoutVehicleForm scope="mp-additional" />
+          )}
 
           <div className="mt-4 flex justify-end gap-3">
             <Button variant="outline" onClick={() => setShowAddForm(false)}>
               Cancel
             </Button>
-            <Button className="bg-green-600 hover:bg-green-700" onClick={handleSaveAdditional}>
+
+            <Button
+              className="bg-green-600 hover:bg-green-700"
+              onClick={handleSaveAdditional}
+            >
               Save Person
             </Button>
           </div>
         </div>
       )}
 
-      {/* OFFENDER LIST */}
-      {offenders.length > 0 && (
-        <div className="mt-8 border rounded-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <p className="font-semibold text-lg">Victim / Offender List:</p>
-            <span className="text-blue-600 font-bold text-lg">
-              ({String(offenders.length).padStart(2, "0")})
-            </span>
-          </div>
-
-          <table className="w-full text-sm table-auto border-collapse">
-            <thead>
-              <tr className="border-b bg-gray-100">
-                <th className="p-2 text-left">Sno.</th>
-                <th className="p-2 text-left">Army / Name</th>
-                <th className="p-2 text-left">ICard</th>
-                <th className="p-2 text-left">Unit / FMN</th>
-                <th className="p-2 text-left">Remark</th>
-              </tr>
-            </thead>
-            <tbody>
-              {offenders.map((p: any, i: number) => (
-                <tr key={i} className="border-b hover:bg-gray-50">
-                  <td className="p-2">{i + 1}.</td>
-                  <td className="p-2">
-                    <div><b>Name:</b> {p?.name || "-"}</div>
-                    <div><b>Army No:</b> {p?.armyNumber || "-"}</div>
-                    <div><b>Rank:</b> {p?.rank || "-"}</div>
-                  </td>
-                  <td className="p-2">{p?.iCard || p?.icard || "-"}</td>
-                  <td className="p-2">
-                    <div><b>Unit:</b> {p?.unit || "-"}</div>
-                    <div><b>FMN:</b> {p?.fmn || "-"}</div>
-                    <div><b>Address:</b> {p?.address || "-"}</div>
-                  </td>
-                  <td className="p-2 text-center">--</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <div className="mt-8 flex justify-end">
-        <Button variant="default" className="bg-blue-600">
-          Save & Next →
-        </Button>
-      </div>
+      <DynamicOffenderList
+        onDelete={handleDeleteOffender}
+        data={offenders}
+        title="Victim / Offender List"
+      />
     </FormSection>
   );
 }

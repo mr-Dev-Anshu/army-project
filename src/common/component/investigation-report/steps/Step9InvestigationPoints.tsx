@@ -1,5 +1,6 @@
-"use client";
 
+
+"use client";
 import { FormSection } from "@/common/component/FormSection";
 import { useForm } from "@/context/FormContext";
 import { FormTextarea } from "@/common/component/FormTextarea";
@@ -7,40 +8,25 @@ import { FormTextarea } from "@/common/component/FormTextarea";
 export default function Step9InvestigationPoints() {
   const { state, dispatch } = useForm();
 
-  const investigationPoints =
-    state.formData.mpReport.investigationPoints || "";
+  const value = state.formData.mpReport.investigationPoints;
 
-  /* ===== SAVE TO CONTEXT ===== */
-  const updatePoints = (value: string) => {
+  const set = (v: string) =>
     dispatch({
-      type: "SET_MP_DATA",
-      payload: {
-        investigationPoints: value,
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.investigationPoints",
+      value: v,
     });
-  };
 
-  /* ===== CLEAR FORM ===== */
-  const clearForm = () => {
+  const clear = () =>
     dispatch({
-      type: "SET_MP_DATA",
-      payload: {
-        investigationPoints: "",
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.investigationPoints",
+      value: "",
     });
-  };
 
   return (
-    <FormSection
-      title="9. POINTS FIND OUT DURING INVESTIGATION :"
-      onClear={clearForm}
-    >
-      <FormTextarea
-        label="List down all the Findings in points"
-        description=""
-        value={investigationPoints}
-        onChange={updatePoints}
-      />
+    <FormSection title="9. POINTS FIND OUT DURING INVESTIGATION :" onClear={clear}>
+      <FormTextarea label="" value={value} onChange={set} />
     </FormSection>
   );
 }

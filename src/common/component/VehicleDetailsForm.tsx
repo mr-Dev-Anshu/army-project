@@ -47,40 +47,36 @@ export default function VehicleDetailsForm({
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
-  /* ================= UPDATE FIX ================= */
-  const updateVehicle = (data: any) => {
-    if (scope === "traffic") {
-      dispatch({
-        type: "SET_VEHICLE_DETAILS",
-        payload: data,
-      });
-    }
-
-    else if (scope === "mp-main") {
-      dispatch({
-        type: "SET_MP_SECTION",
-        section: "individualDetails",
-        payload: {
-          vehicleData: {
-            ...mp.individualDetails.vehicleData,
-            ...data,
-          },
-        },
-      });
-    }
-
-    else {
-      dispatch({
-        type: "SET_STATIC_SPEED_DATA",
-        payload: {
-          vehicleDetails: {
-            ...staticSpeed.vehicleDetails,
-            ...data,
-          },
-        },
-      });
-    }
+ const updateVehicle = (data: any) => {
+  const updated = {
+    ...vehicleState,
+    ...data,
   };
+
+  if (scope === "traffic") {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.traffic.vehicleDetails",
+      value: updated,
+    });
+  }
+
+  else if (scope === "mp-main") {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.vehicleData",
+      value: updated,
+    });
+  }
+
+  else {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.staticSpeed.vehicleDetails",
+      value: updated,
+    });
+  }
+};
 
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6 max-h-[75vh] overflow-y-auto">
