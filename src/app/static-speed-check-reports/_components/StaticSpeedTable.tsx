@@ -26,9 +26,10 @@ import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 interface StaticSpeedTableProps {
   data: any[];
+  onView?: (item: any) => void;
 }
 
-export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
+export default function StaticSpeedTable({ data, onView }: StaticSpeedTableProps) {
   const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdateStaticSpeedRecord();
   const { mutateAsync: deleteRecord, isPending: isDeleting } = useDeleteStaticSpeedRecord();
   const [modalState, setModalState] = React.useState<{ isOpen: boolean; recordId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
@@ -201,7 +202,10 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onView && onView(item)}
+              >
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
@@ -233,7 +237,7 @@ export default function StaticSpeedTable({ data }: StaticSpeedTableProps) {
         )
       }
     ];
-  }, [updateRecord]);
+  }, [updateRecord, onView]);
 
   const processedData = useMemo(() => {
     return data.map((item, index) => ({
