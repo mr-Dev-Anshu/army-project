@@ -1,5 +1,7 @@
 import { StaticSpeedCheckRecord } from "@/models/StaticSpeedCheckRecord";
 import mongoose from "mongoose";
+import trackFieldSuggestions from "@/lib/fieldSuggestionTracker.js";
+import { STATIC_SPEED_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/staticSpeedReport.js";
 
 export class StaticSpeedCheckRecordRepository {
   async getAll() {
@@ -79,7 +81,16 @@ export class StaticSpeedCheckRecordRepository {
   async create(data) {
     const record = new StaticSpeedCheckRecord(data);
     await record.save();
-    return record.toObject();
+    const savedRecord = record.toObject();
+
+    // Track field suggestions
+    trackFieldSuggestions(data, STATIC_SPEED_REPORT_SUGGESTION_CONFIG)
+      .then((res) => console.log(res, "suggestions tracked on speed check create"))
+      .catch((err) => {
+        console.error("Suggestions track karne mein error (SpeedCheck):", err);
+      });
+
+    return savedRecord;
   }
 
   async update(id, data) {
