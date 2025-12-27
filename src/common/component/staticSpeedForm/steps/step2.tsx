@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -102,7 +101,7 @@ export default function StaticSpeedStep2() {
             value={offence.rank || ""}
             onValueChange={(v) => updateOffence("rank", v)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select rank" />
             </SelectTrigger>
 
@@ -120,7 +119,7 @@ export default function StaticSpeedStep2() {
             value={offence.unit || ""}
             onValueChange={(v) => updateOffence("unit", v)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select unit" />
             </SelectTrigger>
 
@@ -142,75 +141,95 @@ export default function StaticSpeedStep2() {
       {/* ================== WITNESSING MP ================== */}
       <FormSection title="On-Duty Details of Witnessing MP">
         {witnesses.map((w, index) => (
-          <div key={index} className="border p-4 rounded-lg space-y-4 mb-6">
-            <Input
-              placeholder="Name of Witnessing MP"
-              value={w.reportingBlock?.nameReportingMP || ""}
-              onChange={(e) => {
-                const copy = structuredClone(witnesses);
-                copy[index].reportingBlock.nameReportingMP = e.target.value;
-                set("formData.staticSpeed.witnesses", copy);
-              }}
-            />
+          <div key={index} className="border p-5 rounded-lg mb-6">
+            <div className="grid grid-cols-2 gap-6">
+              {/* NAME */}
+              <div>
+                <Label className="mb-2 block">Name of Witnessing MP</Label>
+                <Input
+                  placeholder="Name of Witnessing MP"
+                  value={w.reportingBlock?.nameReportingMP || ""}
+                  onChange={(e) => {
+                    const copy = structuredClone(witnesses);
+                    copy[index].reportingBlock.nameReportingMP = e.target.value;
+                    set("formData.staticSpeed.witnesses", copy);
+                  }}
+                />
+              </div>
 
-            <Select
-              value={w.reportingBlock?.rank || ""}
-              onValueChange={(v) => {
-                const copy = structuredClone(witnesses);
-                copy[index].reportingBlock.rank = v;
-                set("formData.staticSpeed.witnesses", copy);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Rank" />
-              </SelectTrigger>
+              {/* RANK */}
+              <div>
+                <Label className="mb-2 block">Rank</Label>
+                <Select
+                  value={w.reportingBlock?.rank || ""}
+                  onValueChange={(v) => {
+                    const copy = structuredClone(witnesses);
+                    copy[index].reportingBlock.rank = v;
+                    set("formData.staticSpeed.witnesses", copy);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Rank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="L/Nk">L/Nk</SelectItem>
+                    <SelectItem value="Nk">Nk</SelectItem>
+                    <SelectItem value="Hav">Hav</SelectItem>
+                    <SelectItem value="Subedar">Subedar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <SelectContent>
-                <SelectItem value="L/Nk">L/Nk</SelectItem>
-                <SelectItem value="Nk">Nk</SelectItem>
-                <SelectItem value="Hav">Hav</SelectItem>
-                <SelectItem value="Subedar">Subedar</SelectItem>
-              </SelectContent>
-            </Select>
+              {/* UNIT */}
+              <div>
+                <Label className="mb-2 block">Unit</Label>
+                <Select
+                  value={w.reportingBlock?.unit || ""}
+                  onValueChange={(v) => {
+                    const copy = structuredClone(witnesses);
+                    copy[index].reportingBlock.unit = v;
+                    set("formData.staticSpeed.witnesses", copy);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
+                    <SelectItem value="MP 12">MP 12</SelectItem>
+                    <SelectItem value="HQ Unit">HQ Unit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Select
-              value={w.reportingBlock?.unit || ""}
-              onValueChange={(v) => {
-                const copy = structuredClone(witnesses);
-                copy[index].reportingBlock.unit = v;
-                set("formData.staticSpeed.witnesses", copy);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Unit" />
-              </SelectTrigger>
+              {/* ARMY NUMBER */}
+              <div>
+                <Label className="mb-2 block">Army Number</Label>
+                <Input
+                  placeholder="Army No."
+                  value={w.reportingBlock?.armyNumber || ""}
+                  onChange={(e) => {
+                    const copy = structuredClone(witnesses);
+                    copy[index].reportingBlock.armyNumber = e.target.value;
+                    set("formData.staticSpeed.witnesses", copy);
+                  }}
+                />
+              </div>
 
-              <SelectContent>
-                <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-                <SelectItem value="MP 12">MP 12</SelectItem>
-                <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Input
-              placeholder="Army No."
-              value={w.reportingBlock?.armyNumber || ""}
-              onChange={(e) => {
-                const copy = structuredClone(witnesses);
-                copy[index].reportingBlock.armyNumber = e.target.value;
-                set("formData.staticSpeed.witnesses", copy);
-              }}
-            />
-
-            <Input
-              placeholder="Contact"
-              value={w.reportingBlock?.contactNumber || ""}
-              onChange={(e) => {
-                const copy = structuredClone(witnesses);
-                copy[index].reportingBlock.contactNumber = e.target.value;
-                set("formData.staticSpeed.witnesses", copy);
-              }}
-            />
+              {/* CONTACT */}
+              <div>
+                <Label className="mb-2 block">Contact Number</Label>
+                <Input
+                  placeholder="Contact Number"
+                  value={w.reportingBlock?.contactNumber || ""}
+                  onChange={(e) => {
+                    const copy = structuredClone(witnesses);
+                    copy[index].reportingBlock.contactNumber = e.target.value;
+                    set("formData.staticSpeed.witnesses", copy);
+                  }}
+                />
+              </div>
+            </div>
           </div>
         ))}
 
@@ -237,42 +256,61 @@ export default function StaticSpeedStep2() {
 
       {/* ================== OFFENCE DETAILS ================== */}
       <FormSection title="Offence Occurrence Details">
-        <Input
-          type="time"
-          value={offence.timeOfOffence || ""}
-          onChange={(e) => {
-            const t = e.target.value; // 17:30
-            const today = new Date().toISOString().split("T")[0];
-            const iso = `${today}T${t}:00.000Z`;
+        <div className="grid grid-cols-2 space-x-4">
+          <div className="mb-4">
+            <Label className="mb-3">Time of Offence</Label>
+            <Input
+              type="time"
+              value={offence.timeOfOffence || ""}
+              onChange={(e) => {
+                const t = e.target.value; // 17:30
+                const today = new Date().toISOString().split("T")[0];
+                const iso = `${today}T${t}:00.000Z`;
 
-            updateOffence("timeOfOffence", t);
-            updateOffence("time", iso);
-          }}
-        />
+                updateOffence("timeOfOffence", t);
+                updateOffence("time", iso);
+              }}
+            />
+          </div>
 
-        <Input
-          placeholder="Incident Location"
-          value={offence.incidentLocation || ""}
-          onChange={(e) => updateOffence("incidentLocation", e.target.value)}
-        />
+          <div>
+            <Label className="mb-3">Incident Location</Label>
+            <Input
+              placeholder="Incident Location"
+              value={offence.incidentLocation || ""}
+              onChange={(e) =>
+                updateOffence("incidentLocation", e.target.value)
+              }
+            />
+          </div>
 
-        <Input
-          placeholder="Actual Speed"
-          value={offence.actualSpeed || ""}
-          onChange={(e) => updateOffence("actualSpeed", e.target.value)}
-        />
+          <div>
+            <Label className="mb-3">Speed Details</Label>
+            <Input
+              placeholder="Actual Speed"
+              value={offence.actualSpeed || ""}
+              onChange={(e) => updateOffence("actualSpeed", e.target.value)}
+            />
+          </div>
 
-        <Input
-          placeholder="Over Speed"
-          value={offence.overSpeed || ""}
-          onChange={(e) => updateOffence("overSpeed", e.target.value)}
-        />
+          <div>
+            <Label className="mb-3">Over Speed</Label>
+            <Input
+              placeholder="Over Speed"
+              value={offence.overSpeed || ""}
+              onChange={(e) => updateOffence("overSpeed", e.target.value)}
+            />
+          </div>
+        </div>
 
-        <Textarea
-          placeholder="Full Description"
-          value={offence.description || ""}
-          onChange={(e) => updateOffence("description", e.target.value)}
-        />
+        <div>
+          <Label className="mb-3">Description of Offence</Label>
+          <Textarea
+            placeholder="Full Description"
+            value={offence.description || ""}
+            onChange={(e) => updateOffence("description", e.target.value)}
+          />
+        </div>
       </FormSection>
     </div>
   );
