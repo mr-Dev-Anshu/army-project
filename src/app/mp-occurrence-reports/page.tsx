@@ -294,7 +294,7 @@ export default function MpOccurrenceReportsPage() {
           <Button variant="ghost" size="sm" onClick={() => setViewingReport(null)} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
-          <h1 className="text-lg font-semibold text-gray-800">View Report</h1>
+          <h1 className="text-lg font-semibold text-gray-800">MP Occurrence & Investigation Report</h1>
           <div className="ml-auto">
             <Button onClick={() => window.print()} variant="outline" size="sm" className="gap-2">
               Print Report
