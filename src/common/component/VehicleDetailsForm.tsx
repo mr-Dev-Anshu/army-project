@@ -33,10 +33,6 @@ export default function VehicleDetailsForm({
     return null;
   }
 
- if (scope === "static" && staticSpeed?.vehicleInvolved !== "yes") {
-  return null;
-}
-
   /* ========= SOURCE ========= */
   const vehicleState: VehicleCommonState =
     scope === "traffic"
