@@ -220,7 +220,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
     >
       {/* HEADER */}
-      <div className="p-4 flex items-center gap-3">
+      <div className="p-4 flex items-center gap-3 relative group/sidebar">
         <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
           <Shield className="w-5 h-5 text-white" fill="white" />
         </div>
@@ -233,13 +233,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         <button
-          className="text-gray-300 hover:text-gray-500 transition-colors"
+          className="cursor-pointer absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm z-50 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all opacity-0 group-hover/sidebar:opacity-100"
           onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           ) : (
-            <ChevronLeft className="w-5 h-5 border border-gray-200 rounded-md bg-white -mr-8 shadow-sm" />
+            <ChevronLeft className="w-4 h-4" />
           )}
         </button>
       </div>
