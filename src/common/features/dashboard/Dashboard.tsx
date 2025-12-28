@@ -1,22 +1,11 @@
 "use client";
 
 import {
-  FileText,
   Gauge,
-  BarChart3,
   AlertTriangle,
-  PlusCircle,
-  Book,
-  FileBarChart,
-  Shield,
   Search,
-  File,
-  SquareSplitVertical,
   SquareSplitHorizontal,
-  Cone,
-  FilePlus2,
-  Layers,
-  BookOpen,
+
 } from "lucide-react";
 
 import Sidebar from "./components/dashboard-components/Sidebar";

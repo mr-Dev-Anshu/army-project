@@ -275,8 +275,8 @@ export default function DashboardReports() {
                 const isTaken = row.actionStatus === true;
                 return (
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleStatusClick(row._id, isTaken)}>
-                        <div className={cn("w-10 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out relative", isTaken ? "bg-green-500" : "bg-red-500")}>
-                            <div className={cn("bg-white w-4 h-4 rounded-full shadow-sm absolute top-1 transition-transform duration-200 ease-in-out", isTaken ? "left-[calc(100%-1.25rem)]" : "left-1")} />
+                        <div className={cn("w-10 h-5 rounded-full p-1 transition-colors duration-200 ease-in-out relative", isTaken ? "bg-green-500" : "bg-red-500")}>
+                            <div className={cn("bg-white w-3 h-3 rounded-full shadow-sm absolute top-1 transition-transform duration-200 ease-in-out", isTaken ? "left-[calc(100%-1.25rem)]" : "left-1")} />
                         </div>
                         <span className="text-sm text-gray-600">{isTaken ? "Taken" : "Pending"}</span>
                     </div>
