@@ -239,7 +239,12 @@ export default function MpOccurrenceReportsPage() {
       documents: docs,
       detailedReport: {
         statement: detailedStatement,
-        findings: Array.isArray(investigationFindings) ? investigationFindings : []
+        findings: Array.isArray(investigationFindings) ? investigationFindings : [],
+        opinion: raw.opinion || raw.detailedReport?.opinion || raw.customFields?.opinion || ""
+      },
+      remarks: {
+        analysis: raw.analysis || raw.coRemarks?.analysis || raw.customFields?.analysis || "",
+        recommendation: raw.recommendation || raw.coRemarks?.recommendation || raw.customFields?.recommendation || ""
       }
     };
   };

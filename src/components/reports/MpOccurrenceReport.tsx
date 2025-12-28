@@ -51,6 +51,11 @@ export interface MpOccurrenceReportProps {
     detailedReport: {
         statement: string;
         findings: string[];
+        opinion: string;
+    };
+    remarks: {
+        analysis: string;
+        recommendation: string;
     };
     className?: string;
 }
@@ -67,6 +72,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
     evidence,
     documents,
     detailedReport,
+    remarks,
     className
 }) => {
     return (
@@ -79,8 +85,8 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             <div className="max-w-[210mm] w-full mx-auto bg-white p-12 min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 1 */}
-                <div className="text-center font-bold text-xs underline mb-4">RESTRICTED</div>
-                <div className="text-right font-bold text-xs mb-8">IAFP-1479 (Revised)</div>
+                <div className="text-center font-bold text-xs underline mb-4 print:invisible">RESTRICTED</div>
+                <div className="text-right font-bold text-xs mb-8 print:mt-12">IAFP-1479 (Revised)</div>
 
                 <h1 className="text-center font-bold text-lg underline mb-8">
                     MP OCCURRENCE & INVESTIGATION REPORT
@@ -338,7 +344,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 3 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-12 min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-12 min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 3 */}
                 <div className="text-center font-bold mb-4">
@@ -371,6 +377,83 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* Page 3 Footer */}
                 <div className="mt-auto pt-8 text-center font-bold text-xs underline">RESTRICTED</div>
+
+            </div>
+
+            {/* ==================== PAGE 4 ==================== */}
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-12 min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+
+                {/* Header Page 4 */}
+                <div className="text-center font-bold mb-4">
+                    <div className="text-sm print:hidden">-4-</div>
+                    <div className="text-xs underline">RESTRICTED</div>
+                </div>
+
+                {/* OPINION */}
+                <div className="mb-6 flex-1">
+                    <div className="font-bold underline text-sm mb-4">OPINION:</div>
+                    <div className="text-sm text-justify leading-relaxed whitespace-pre-line">
+                        {detailedReport.opinion || "No opinion recorded."}
+                    </div>
+                </div>
+
+                <div className="mt-auto pt-16 flex justify-between items-end text-sm font-bold">
+                    <div>
+                        Dated : {new Date().toLocaleDateString("en-GB")}
+                    </div>
+                    <div className="text-center">
+                        (Signature of MP JCO/NCO)
+                    </div>
+                </div>
+
+                {/* Page 4 Footer */}
+                <div className="mt-8 pt-8 text-center font-bold text-xs underline">RESTRICTED</div>
+
+            </div>
+
+            {/* ==================== PAGE 5 ==================== */}
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-12 min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
+
+                {/* Header Page 5 */}
+                <div className="text-center font-bold mb-4">
+                    <div className="text-sm print:hidden">-5-</div>
+                    <div className="text-xs underline">RESTRICTED</div>
+                </div>
+
+                {/* REMARKS HEADING */}
+                <div className="text-center mb-8">
+                    <div className="text-sm font-bold underline uppercase">REMARKS CO/2IC PROVOST UNIT</div>
+                    <div className="text-xs mt-1">Check evidence gives analysis and recommendation and fill IAFP-901 if required</div>
+                </div>
+
+                {/* ANALYSIS */}
+                <div className="mb-8">
+                    <div className="font-bold underline text-sm mb-4">ANALYSIS-</div>
+                    <div className="text-sm text-justify leading-relaxed whitespace-pre-line">
+                        {remarks.analysis || "No analysis details recorded."}
+                    </div>
+                </div>
+
+                {/* RECOMMENDATION */}
+                <div className="mb-8 flex-1">
+                    <div className="font-bold underline text-sm mb-4">RECOMMENDATION-</div>
+                    <div className="text-sm text-justify leading-relaxed whitespace-pre-line">
+                        {remarks.recommendation || "No recommendation recorded."}
+                    </div>
+                </div>
+
+                <div className="mt-auto pt-16 flex justify-between items-end text-sm font-bold">
+                    <div className="space-y-1">
+                        <div>Station : C/O 56 APO</div>
+                        <div>Dated : {new Date().toLocaleDateString("en-GB")}</div>
+                    </div>
+                    <div className="text-center">
+                        (Signature of CO/2IC with unit seal)
+                    </div>
+                </div>
+
+                {/* Page 5 Footer */}
+                <div className="mt-8 pt-8 text-center font-bold text-xs underline">RESTRICTED</div>
 
             </div>
 
