@@ -10,7 +10,8 @@ import StaticSpeedReport, { StaticSpeedReportProps } from "@/components/reports/
 
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
+import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
 
 export default function StaticSpeedCheckReportsPage() {
   const { data, isLoading, isError } = useGetStaticSpeedRecords();
@@ -185,6 +186,17 @@ export default function StaticSpeedCheckReportsPage() {
     };
   };
 
+
+  const handleDownloadReport = (item: any) => {
+    const props = mapToReportProps(item);
+    generateStaticSpeedWordReport(props);
+  };
+
+  const handlePrintReport = (item: any) => {
+    setViewingReport(item);
+    setShouldAutoPrint(true);
+  };
+
   const distinctReportsCount = processedData.length;
   const pageTitle = "Static Speed Check Reports";
 
@@ -208,13 +220,14 @@ export default function StaticSpeedCheckReportsPage() {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
-          <Button variant="ghost" size="sm" onClick={() => setViewingReport(null)} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { setViewingReport(null); setShouldAutoPrint(false); }} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
           <h1 className="text-lg font-semibold text-gray-800">View Static Speed Check Report</h1>
           <div className="ml-auto">
-            <Button onClick={() => window.print()} variant="outline" size="sm" className="gap-2">
-              Print Report
+            <Button onClick={() => handleDownloadReport(viewingReport)} variant="outline" size="sm" className="gap-2">
+              <Download className="w-4 h-4" />
+              Download Word Report
             </Button>
           </div>
         </div>
@@ -265,10 +278,8 @@ export default function StaticSpeedCheckReportsPage() {
         <StaticSpeedTable
           data={processedData}
           onView={(item) => setViewingReport(item)}
-          onPrint={(item) => {
-            setViewingReport(item);
-            setShouldAutoPrint(true);
-          }}
+          onPrint={handlePrintReport}
+          onDownload={handleDownloadReport}
         />
       )}
     </div>

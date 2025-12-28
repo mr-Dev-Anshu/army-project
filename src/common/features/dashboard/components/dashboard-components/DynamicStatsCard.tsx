@@ -12,6 +12,8 @@ interface StatCardProps {
   };
   iconBgColor?: string;
   iconColor?: string;
+  cardBgColor?: string;
+  borderColor?: string;
 }
 
 const DynamicStatsCard: React.FC<StatCardProps> = ({
@@ -21,11 +23,15 @@ const DynamicStatsCard: React.FC<StatCardProps> = ({
   trend,
   iconBgColor,
   iconColor,
+  cardBgColor,
+  borderColor,
 }) => {
-  const finalValue = value || 42;
+  const finalValue = value ?? 42;
   const finalTitle = title || "Total General Traffic & Offence Reports";
   const finalIconBg = iconBgColor || "bg-gray-100";
   const finalIconColor = iconColor || "text-gray-600";
+  const finalCardBg = cardBgColor || "bg-white";
+  const finalBorderColor = borderColor || "border-gray-100";
 
   const trendValue = trend?.value || "+18.2%";
   const trendLabel = trend?.label || "than last week";
@@ -33,11 +39,12 @@ const DynamicStatsCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className="
-        bg-white
+      className={`
+        ${finalCardBg}
+        ${finalBorderColor}
         rounded-2xl
         shadow-sm
-        border border-gray-100
+        border
         hover:shadow-md
         transition-shadow
 
@@ -48,29 +55,24 @@ const DynamicStatsCard: React.FC<StatCardProps> = ({
         lg:w-full
 
         h-auto
-        min-h-[200px]
-        sm:min-h-[220px]
-        md:min-h-[230px]
+        min-h-[160px]
 
         p-5
         sm:p-6
-        md:p-8
-      "
+      `}
     >
       {/* Icon + Value */}
-      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-        <div className={`${finalIconBg} rounded-xl p-2 sm:p-3`}>
-          <div className={`w-5 h-5 sm:w-6 sm:h-6 ${finalIconColor}`}>
+      <div className="flex items-center gap-4 mb-4">
+        <div className={`${finalIconBg} rounded-xl p-3`}>
+          <div className={`w-6 h-6 ${finalIconColor}`}>
             {icon || <Construction className="w-full h-full" />}
           </div>
         </div>
 
         <span
           className="
-            text-xl
-            sm:text-2xl
-            md:text-3xl
-            font-normal
+            text-3xl
+            font-semibold
             text-gray-900
           "
         >
@@ -78,16 +80,14 @@ const DynamicStatsCard: React.FC<StatCardProps> = ({
         </span>
       </div>
 
-      <div className="mt-4 sm:mt-5 md:mt-6">
+      <div className="mt-2">
         <h3
           className="
-            text-md
-            sm:text-xl
-            md:text-xl
-            font-medium
-            text-gray-900
-            mb-1
-            sm:mb-2
+            text-sm
+            sm:text-base
+            font-semibold
+            text-[#0A0A0A]
+            mb-2
             line-clamp-2
           "
         >
@@ -99,10 +99,8 @@ const DynamicStatsCard: React.FC<StatCardProps> = ({
           className="
             flex
             items-center
-            gap-3
+            gap-2
             text-sm
-            sm:text-base
-            md:text-xs
           "
         >
           <span
@@ -114,11 +112,7 @@ const DynamicStatsCard: React.FC<StatCardProps> = ({
           >
             {trendValue}
           </span>
-          <span
-            className="text-gray-400 text-sm
-            sm:text-base
-            md:text-xs"
-          >
+          <span className="text-gray-400 text-xs sm:text-sm">
             {trendLabel}
           </span>
         </div>

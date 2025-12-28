@@ -80,7 +80,19 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
     className
 }) => {
     return (
-        <div className={`font-sans text-gray-900 bg-gray-500/10 p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 ${className || ''}`}>
+        <div className={`font-sans text-gray-900 bg-gray-500/10 p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 print:bg-white ${className || ''}`}>
+            <style type="text/css" media="print">
+                {`
+                  @page {
+                    size: A4;
+                    margin: 20mm;
+                  }
+                  body {
+                    background-color: white !important;
+                    -webkit-print-color-adjust: exact;
+                  }
+                `}
+            </style>
 
             {/* Print Only: Fixed Global Page Numbering */}
             <div className="hidden print:block fixed top-0 w-full text-center font-bold text-sm page-number mt-4 z-50"></div>
