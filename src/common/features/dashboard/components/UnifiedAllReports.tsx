@@ -5,7 +5,7 @@ import { useState } from "react";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 
-// SAME TABLE UI COMPONENT (jo screenshot jaisa layaega)
+// SAME TABLE UI COMPONENT
 import GroupedList from "@/app/general-traffic-offence-reports/_components/GroupedList";
 
 export default function UnifiedAllReports() {
@@ -49,9 +49,9 @@ export default function UnifiedAllReports() {
         }
       />
 
-      {/* EXACT SAME TABLE – NO EXTRA HEADER – NO COLLAPSIBLE */}
+      {/* EXACT SAME TABLE */}
       <div className="mt-4">
-        <GroupedList data={traffic} isVehicleInvolved />
+        <GroupedList data={traffic ?? []} isVehicleInvolved   onView={() => {}} />
       </div>
 
     </div>
