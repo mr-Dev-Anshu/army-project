@@ -1,38 +1,37 @@
+
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
 import { FormInput, FormSelect } from "@/common/component/FormInput";
 import { useForm } from "@/context/FormContext";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export default function Step2MpParticulars() {
   const { state, dispatch } = useForm();
-
   const mp = state.formData.mpReport.mpParticulars;
 
-  const handleChange = (key: string, value: any) => {
+  const set = (key: string, value: any) =>
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "mpParticulars",
-      payload: { [key]: value },
+      type: "SET_PATH",
+      path: `formData.mpReport.mpParticulars.${key}`,
+      value,
     });
-  };
 
-  const clearForm = () => {
+  const clearForm = () =>
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "mpParticulars",
-      payload: {
-        armyNumber: "",
+      type: "SET_PATH",
+      path: "formData.mpReport.mpParticulars",
+      value: {
+        armyNo: "",
         rank: "",
         name: "",
         unit: "",
         fmn: "",
         command: "",
         address: "",
-        iCardNumber: "",
+        icard: "",
       },
     });
-  };
 
   return (
     <FormSection title="2. MP PARTICULARS:" onClear={clearForm}>
@@ -42,92 +41,45 @@ export default function Step2MpParticulars() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-        {/* Army No */}
-        <FormInput
-          label="Army Number"
-          placeholder="e.g. 12345678A"
-          value={mp.armyNo}
-          onChange={(v) => handleChange("armyNo", v)}
-        />
-
-        {/* Rank Dropdown */}
-        <FormSelect
+        <FormInput label="Army Number" value={mp.armyNo} onChange={(v) => set("armyNo", v)} />
+        <SuggestionInput
           label="Rank"
-          placeholder="Select rank"
-          options={[
-            { label: "Pvt", value: "pvt" },
-            { label: "L/Nk", value: "lnk" },
-            { label: "Nk", value: "nk" },
-            { label: "Hav", value: "hav" },
-            { label: "Subedar", value: "subedar" },
-          ]}
+          placeholder="Select Rank"
           value={mp.rank}
-          onChange={(v) => handleChange("rank", v)}
+          onChange={(v) => set("rank", v)}
+          fieldType="rank"
+          defaultOptions={["Pvt", "L/Nk", "Nk", "Hav", "Subedar"]}
         />
-
-        {/* Name */}
-        <FormInput
-          label="Name"
-          placeholder="e.g. John Apradhi"
-          value={mp.name}
-          onChange={(v) => handleChange("name", v)}
-        />
-
-        {/* Unit Dropdown */}
-        <FormSelect
+        <FormInput label="Name" value={mp.name} onChange={(v) => set("name", v)} />
+        <SuggestionInput
           label="Unit"
-          placeholder="Select unit"
-          options={[
-            { label: "11 Engr Regt", value: "11engr" },
-            { label: "HQ 21 Corps", value: "21corps" },
-            { label: "Signal Unit", value: "signal" },
-          ]}
+          placeholder="Select Unit"
           value={mp.unit}
-          onChange={(v) => handleChange("unit", v)}
+          onChange={(v) => set("unit", v)}
+          fieldType="unit"
+          defaultOptions={["11 Engr Regt", "HQ 21 Corps", "Signal Unit"]}
         />
 
-        {/* FMN Dropdown */}
-        <FormSelect
+        <SuggestionInput
           label="FMN"
           placeholder="Select FMN"
-          options={[
-            { label: "Central Command", value: "central" },
-            { label: "Western Command", value: "western" },
-            { label: "Northern Command", value: "northern" },
-          ]}
           value={mp.fmn}
-          onChange={(v) => handleChange("fmn", v)}
+          onChange={(v) => set("fmn", v)}
+          fieldType="fmn"
+          defaultOptions={["Central Command", "Western Command", "Northern Command"]}
         />
 
-        {/* Command Dropdown */}
-        <FormSelect
+        <SuggestionInput
           label="Command"
           placeholder="Select Command"
-          options={[
-            { label: "Command A", value: "a" },
-            { label: "Command B", value: "b" },
-            { label: "Command C", value: "c" },
-          ]}
           value={mp.command}
-          onChange={(v) => handleChange("command", v)}
+          onChange={(v) => set("command", v)}
+          fieldType="command"
+          defaultOptions={["Command A", "Command B", "Command C"]}
         />
 
-        {/* Address */}
-        <FormInput
-          label="Address"
-          placeholder="e.g. C/O 56 APO"
-          value={mp.address}
-          onChange={(v) => handleChange("address", v)}
-        />
-
-        {/* ICard */}
-        <FormInput
-          label="I Card Number"
-          placeholder="e.g. A-123456"
-          value={mp.icard}
-          onChange={(v) => handleChange("icard", v)}
-        />
+        <SuggestionInput label="Address" value={mp.address} onChange={(v) => set("address", v)} fieldType="address" />
+        <FormInput label="I Card Number" value={mp.icard} onChange={(v) => set("icard", v)} />
       </div>
     </FormSection>
   );

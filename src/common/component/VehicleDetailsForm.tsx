@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
 import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
 
 export default function VehicleDetailsForm({
@@ -42,42 +43,38 @@ export default function VehicleDetailsForm({
     scope === "traffic"
       ? traffic.vehicleDetails
       : scope === "mp-main"
-      ? mp.individualDetails.vehicleData || {}
-      : staticSpeed.vehicleDetails;
+        ? mp.individualDetails.vehicleData || {}
+        : staticSpeed.vehicleDetails;
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
-  /* ================= UPDATE FIX ================= */
   const updateVehicle = (data: any) => {
+    const updated = {
+      ...vehicleState,
+      ...data,
+    };
+
     if (scope === "traffic") {
       dispatch({
-        type: "SET_VEHICLE_DETAILS",
-        payload: data,
+        type: "SET_PATH",
+        path: "formData.traffic.vehicleDetails",
+        value: updated,
       });
     }
 
     else if (scope === "mp-main") {
       dispatch({
-        type: "SET_MP_SECTION",
-        section: "individualDetails",
-        payload: {
-          vehicleData: {
-            ...mp.individualDetails.vehicleData,
-            ...data,
-          },
-        },
+        type: "SET_PATH",
+        path: "formData.mpReport.individualDetails.vehicleData",
+        value: updated,
       });
     }
 
     else {
       dispatch({
-        type: "SET_STATIC_SPEED_DATA",
-        payload: {
-          vehicleDetails: {
-            ...staticSpeed.vehicleDetails,
-            ...data,
-          },
-        },
+        type: "SET_PATH",
+        path: "formData.staticSpeed.vehicleDetails",
+        value: updated,
       });
     }
   };
@@ -225,10 +222,11 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <Label className="mb-3">Civil Vehicle Registration Number</Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. MP04 AB 1234"
             value={vehicleState.vehicleNumber || ""}
-            onChange={(e) => updateVehicle({ vehicleNumber: e.target.value })}
+            onChange={(v) => updateVehicle({ vehicleNumber: v })}
+            fieldType="vehicleNumber"
           />
         </div>
 
@@ -236,10 +234,11 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
           <Label className="mb-3">
             Make & Type <span className="text-gray-500">(Vehicle Name)</span>
           </Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. Honda CB Hornet"
             value={vehicleState.vehicleName || ""}
-            onChange={(e) => updateVehicle({ vehicleName: e.target.value })}
+            onChange={(v) => updateVehicle({ vehicleName: v })}
+            fieldType="vehicleName"
           />
         </div>
       </div>
@@ -255,10 +254,11 @@ function DDVehicleBlock({ vehicleState, updateVehicle }: any) {
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <Label className="mb-3">DD Vehicle BA Number</Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. 12A 345678Z"
             value={vehicleState.vehicleNumber || ""}
-            onChange={(e) => updateVehicle({ vehicleNumber: e.target.value })}
+            onChange={(v) => updateVehicle({ vehicleNumber: v })}
+            fieldType="vehicleNumber"
           />
         </div>
 
@@ -266,10 +266,11 @@ function DDVehicleBlock({ vehicleState, updateVehicle }: any) {
           <Label className="mb-3">
             Make & Type <span className="text-gray-500">(Vehicle Name)</span>
           </Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. ALS W/B"
             value={vehicleState.vehicleName || ""}
-            onChange={(e) => updateVehicle({ vehicleName: e.target.value })}
+            onChange={(v) => updateVehicle({ vehicleName: v })}
+            fieldType="vehicleName"
           />
         </div>
       </div>

@@ -1,9 +1,10 @@
+
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
 import { useForm } from "@/context/FormContext";
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Clipboard, FileIcon } from "lucide-react";
+import { Upload, Download, FileIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -19,17 +20,20 @@ export default function Step7Documents() {
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  /* SAVE */
+  /* ========= SAVE ========= */
   const saveDocument = () => {
     if (!statement.trim()) return alert("Statement required");
 
+    const newDoc = {
+      statement,
+      url,
+      fileName: file?.name || "",
+    };
+
     dispatch({
-      type: "ADD_MP_DOCUMENT",
-      payload: {
-        statement,
-        url,
-        fileName: file?.name || "",
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.documents",
+      value: [...documents, newDoc],
     });
 
     setStatement("");
@@ -37,12 +41,12 @@ export default function Step7Documents() {
     setFile(null);
   };
 
-  /* CLEAR */
+  /* ========= CLEAR ========= */
   const clearForm = () => {
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "documents",
-      payload: [],
+      type: "SET_PATH",
+      path: "formData.mpReport.documents",
+      value: [],
     });
 
     setStatement("");
@@ -140,11 +144,11 @@ export default function Step7Documents() {
                         }}
                       >
                         {d.fileName ? (
-                          <FileIcon size={18} /> 
+                          <FileIcon size={18} />
                         ) : d.url ? (
-                          <Download size={18} /> 
+                          <Download size={18} />
                         ) : (
-                          <Upload size={18} /> 
+                          <Upload size={18} />
                         )}
                       </Button>
                     </div>

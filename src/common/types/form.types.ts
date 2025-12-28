@@ -13,7 +13,7 @@ export interface VehicleDetailsState {
 
 // ---------- OFFENDER ----------
 export interface OffenderWithoutVehicleState {
-  offenderType: OffenderType;
+  offenderType: OffenderType | "";
 
   military: {
     armyNumber: string;
@@ -142,7 +142,8 @@ export interface OffenderPerson {
 }
 
 // ---------- FORM ROOT ----------
-export interface FormDataState {
+// ---------- TRAFFIC ----------
+export interface TrafficFormState {
   vehicleInvolved: string;
   vehicleDetails: VehicleDetailsState;
   offenderWithoutVehicle: OffenderWithoutVehicleState;
@@ -157,11 +158,61 @@ export interface FormDataState {
   offenceCode: string[];
 
   witnesses: Witness[];
+  selectedWitness?: Witness | null;
 
-  offendeDetails: Record<string, string>;
+  offenderDetails: Record<string, string>;
   offenderPeople: OffenderPerson[];
   coDriverOrPillion?: boolean;
+  coDriverType?: string;
+}
+
+// ---------- STATIC SPEED ----------
+export interface StaticSpeedFormState {
+  vehicleDetails: {
+    category: string;
+    vehicleType: string;
+    driverType: string;
+    vehicleNumber: string;
+    vehicleName: string;
+  };
+
+  witnesses: any[];
+  selectedWitness?: any;
+
+  offenderDetails: any;
+  offenderPeople: any[];
+
+  offenceOccurenceDetails: {
+    timeOfOffence: string;
+    incidentLocation: string;
+    description: string;
+    authSpeed: string;
+    actualSpeedNoted: string;
+    overSpeedCalculated: string;
+    dateOfDuty?: string; // observed in usage
+    startTime?: string;
+    endTime?: string;
+    dutyLocation?: string;
+    dutyType?: string;
+    nameReportingMP?: string;
+    rank?: string;
+    unit?: string;
+    armyNumber?: string;
+    time?: string;
+  };
+}
+
+// ---------- FORM ROOT ----------
+export interface FormDataState {
+  traffic: TrafficFormState;
+  staticSpeed: StaticSpeedFormState;
   mpReport: MpReportState;
+
+  // Keep these for backward compatibility if needed, or remove if unused 
+  // (Based on FormContext, they seem to be moved to 'traffic' but let's check usage)
+  // For now, I will remove them to align with FormContext.tsx strictly.
+  coDriverOrPillion?: boolean;
+  coDriverType?: string;
 }
 
 // ---------- GLOBAL ----------

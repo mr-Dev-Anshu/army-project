@@ -1,44 +1,40 @@
-"use client";
 
+"use client";
 import { FormSection } from "@/common/component/FormSection";
 import { useForm } from "@/context/FormContext";
 import EvidenceUploadSection from "@/common/component/EvidenceUploadSection";
 
 export default function Step6Evidence() {
   const { state, dispatch } = useForm();
-
   const evidence = state.formData.mpReport.evidence;
 
-  const handleChange = (key: string, file: any) => {
+  const set = (k: string, v: any) =>
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "evidence",
-      payload: { [key]: file },
+      type: "SET_PATH",
+      path: `formData.mpReport.evidence.${k}`,
+      value: v,
     });
-  };
 
-  const clearForm = () => {
+  const clear = () =>
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "evidence",
-      payload: {
-        generalEvidence: null,
-        sketch: null,
+      type: "SET_PATH",
+      path: "formData.mpReport.evidence",
+      value: {
+        attachEvidence: null,
+        eyeSketch: null,
         photos: [],
         videos: [],
       },
     });
-  };
 
   return (
-    <FormSection title="6. EVIDENCE:" onClear={clearForm}>
+    <FormSection title="6. EVIDENCE:" onClear={clear}>
       <EvidenceUploadSection
-        title=""
         values={evidence}
-        onChange={handleChange}
+        onChange={set}
         fields={[
-          { label: "Attach Evidence", key: "generalEvidence" },
-          { label: "Eye Sketch", key: "sketch" },
+          { label: "Attach Evidence", key: "attachEvidence" },
+          { label: "Eye Sketch", key: "eyeSketch" },
           { label: "Photos", key: "photos", multiple: true },
           { label: "Videos", key: "videos", multiple: true },
         ]}

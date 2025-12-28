@@ -7,38 +7,25 @@ import { FormTextarea } from "@/common/component/FormTextarea";
 export default function Step8DetailedOccurrence() {
   const { state, dispatch } = useForm();
 
-  const detailedReport =
-    state.formData.mpReport.detailedReport || "";
+  const value = state.formData.mpReport.detailedReport;
 
-  // SAVE TO CONTEXT
-  const updateReport = (value: string) => {
+  const set = (v: string) =>
     dispatch({
-      type: "SET_MP_SECTION",
-      section: "detailedReport",   // <-- IMPORTANT
-      payload: value,
+      type: "SET_PATH",
+      path: "formData.mpReport.detailedReport",
+      value: v,
     });
-  };
 
-  // CLEAR FORM
-  const clearForm = () => {
+  const clear = () =>
     dispatch({
-      type: "SET_MP_DATA",
-      payload: {
-        detailedReport: "",
-      },
+      type: "SET_PATH",
+      path: "formData.mpReport.detailedReport",
+      value: "",
     });
-  };
 
   return (
-    <FormSection
-      title="8. DETAILED OCCURRENCE REPORT :"
-      onClear={clearForm}
-    >
-      <FormTextarea
-        label="Fill Detailed Description of Offence"
-        value={detailedReport}
-        onChange={updateReport}
-      />
+    <FormSection title="8. DETAILED OCCURRENCE REPORT :" onClear={clear}>
+      <FormTextarea label="" value={value} onChange={set} />
     </FormSection>
   );
 }

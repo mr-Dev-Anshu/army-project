@@ -1,9 +1,18 @@
 import { MPReport } from "@/models/InvestigationReport";
+import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
+import { INVESTIGATION_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/investigationReport";
 
 export class MPReportRepository {
   async create(data) {
     const report = new MPReport(data);
-    return await report.save();
+    const saved = await report.save();
+
+    // Fire and forget suggestion tracking
+    trackFieldSuggestions(saved.toObject(), INVESTIGATION_REPORT_SUGGESTION_CONFIG).catch(err => {
+      console.error("Tracking Suggestions Error (MPReport):", err);
+    });
+
+    return saved;
   }
 
   async findById(id) {
@@ -15,7 +24,7 @@ export class MPReportRepository {
   }
 
   async findAll(query = {}) {
-    return await MPReport.find(query) 
+    return await MPReport.find(query)
   }
 
   async updateById(id, data) {

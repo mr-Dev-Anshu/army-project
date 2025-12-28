@@ -10,11 +10,11 @@ export const GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG = {
     'onDutyDetails.dutyLocation': 'dutyLocation',
     'onDutyDetails.dutyType': 'dutyType',
     'onDutyDetailsMPReporting.nameReportingMP': 'reportingMPName',
-    'onDutyDetailsMPReporting.rank': 'reportingMPRank',
-    'onDutyDetailsMPReporting.unit': 'reportingMPUnit',
+    'onDutyDetailsMPReporting.rank': 'rank',
+    'onDutyDetailsMPReporting.unit': 'unit',
     'onDutyDetailsMPReporting.armyNumber': 'reportingMPArmyNo',
     'offenceOccurenceDetails.incidentLocation': 'incidentLocation',
-    'offenceOccurenceDetails.description': 'offenceDescription',
+    'offenceOccurenceDetails.description': 'description',
   },
 
   arrayFields: {

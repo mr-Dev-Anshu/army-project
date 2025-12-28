@@ -1,20 +1,41 @@
+
+
+
+
+
 "use client";
 import { createContext, useContext, useReducer, ReactNode } from "react";
-import { Action, GlobalFormState } from "@/common/types/form.types";
+import { GlobalFormState } from "@/common/types/form.types";
 
+/* ------------------------------------
+   UNIVERSAL HELPERS
+------------------------------------ */
+const setByPath = (obj: any, path: string, value: any) => {
+  const keys = path.split(".");
+  const last = keys.pop()!;
+  const ref = keys.reduce((o, k) => (o[k] ??= {}), obj);
+  ref[last] = value;
+};
+
+const getByPath = (obj: any, path: string) =>
+  path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj);
+
+/* ------------------------------------
+   INITIAL STATE
+------------------------------------ */
 const initialState: GlobalFormState = {
   currentStep: 1,
   completedSteps: [],
 
   formData: {
-    /* ================= TRAFFIC FORM ================= */
+    /* ================= TRAFFIC ================= */
     traffic: {
       vehicleInvolved: "",
-
       vehicleDetails: {
         category: "",
         vehicleType: "",
         driverType: "",
+        vehicleName: "",
       },
 
       offenderWithoutVehicle: {
@@ -32,7 +53,6 @@ const initialState: GlobalFormState = {
       },
 
       offenderDetails: {},
-
       onDutyDetails: {
         dateOfDuty: "",
         startTime: "",
@@ -46,6 +66,7 @@ const initialState: GlobalFormState = {
         rank: "",
         unit: "",
         armyNumber: "",
+        contactNumber: "",
       },
 
       offenceOccurenceDetails: {
@@ -57,36 +78,12 @@ const initialState: GlobalFormState = {
 
       offenceTypes: [],
       offenceCode: [],
-
-      witnesses: [
-        {
-          dutyBlock: {
-            dateOfDuty: "",
-            startTime: "",
-            endTime: "",
-            dutyLocation: "",
-            dutyType: "",
-          },
-          reportingBlock: {
-            nameReportingMP: "",
-            rank: "",
-            unit: "",
-            armyNumber: "",
-            contactNumber: "",
-          },
-          offenceBlock: {
-            timeOfOffence: "",
-            incidentLocation: "",
-            description: "",
-          },
-        },
-      ],
+      witnesses: [],
       selectedWitness: null,
-
       offenderPeople: [],
     },
 
-    /* ================= STATIC SPEED FORM ================= */
+    /* ================= STATIC SPEED ================= */
     staticSpeed: {
       vehicleDetails: {
         category: "",
@@ -96,29 +93,7 @@ const initialState: GlobalFormState = {
         vehicleName: "",
       },
 
-      witnesses: [
-        {
-          dutyBlock: {
-            dateOfDuty: "",
-            startTime: "",
-            endTime: "",
-            dutyLocation: "",
-            dutyType: "",
-          },
-          reportingBlock: {
-            nameReportingMP: "",
-            rank: "",
-            unit: "",
-            armyNumber: "",
-            contactNumber: "",
-          },
-          offenceBlock: {
-            timeOfOffence: "",
-            incidentLocation: "",
-            description: "",
-          },
-        },
-      ],
+      witnesses: [],
       selectedWitness: null,
 
       offenderDetails: {},
@@ -129,11 +104,12 @@ const initialState: GlobalFormState = {
         incidentLocation: "",
         description: "",
         authSpeed: "30",
-        actualSpeed: "",
-        overSpeed: "",
+        actualSpeedNoted: "",
+        overSpeedCalculated: "",
       },
     },
 
+    /* ================= MP REPORT ================= */
     mpReport: {
       reportDetails: {
         reportNo: "",
@@ -169,7 +145,6 @@ const initialState: GlobalFormState = {
       },
 
       witnesses: [],
-
       evidence: {
         attachEvidence: null,
         eyeSketch: null,
@@ -178,6 +153,7 @@ const initialState: GlobalFormState = {
       },
 
       documents: [],
+
       additionalIndividual: {
         vehicleInvolved: "",
         vehicleData: {},
@@ -188,6 +164,7 @@ const initialState: GlobalFormState = {
       detailedReport: "",
       investigationPoints: "",
       opinion: "",
+
       remarks: {
         analysis: "",
         recommendation: "",
@@ -196,6 +173,19 @@ const initialState: GlobalFormState = {
   },
 };
 
+/* ------------------------------------
+   ACTION TYPES
+------------------------------------ */
+type Action =
+  | { type: "NEXT_STEP" }
+  | { type: "SET_STEP"; payload: number }
+  | { type: "SET_PATH"; path: string; value: any }
+  | { type: "PUSH_PATH"; path: string; value: any }
+  | { type: "REMOVE_PATH"; path: string; index: number };
+
+/* ------------------------------------
+   UNIVERSAL REDUCER
+------------------------------------ */
 function reducer(state: GlobalFormState, action: Action): GlobalFormState {
   switch (action.type) {
     case "NEXT_STEP":
@@ -210,237 +200,35 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
     case "SET_STEP":
       return { ...state, currentStep: action.payload };
 
-    /* ========= GENERIC FORM DATA MERGE ========= */
-    case "SET_FORM_DATA":
-      return {
-        ...state,
-        formData: { ...state.formData, ...action.payload },
-      };
+    case "SET_PATH": {
+      const newState = structuredClone(state);
+      setByPath(newState, action.path, action.value);
+      return newState;
+    }
 
-    /* ========= TRAFFIC VEHICLE ========= */
-    case "SET_VEHICLE_DETAILS":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          traffic: {
-            ...state.formData.traffic,
-            vehicleDetails: {
-              ...state.formData.traffic.vehicleDetails,
-              ...action.payload,
-            },
-          },
-        },
-      };
+    case "PUSH_PATH": {
+      const newState = structuredClone(state);
+      const arr = getByPath(newState, action.path) || [];
+      setByPath(newState, action.path, [...arr, action.value]);
+      return newState;
+    }
 
-    case "SET_OFFENDER_TYPE":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          traffic: {
-            ...state.formData.traffic,
-            offenderWithoutVehicle: {
-              ...state.formData.traffic.offenderWithoutVehicle,
-              offenderType: action.payload,
-            },
-          },
-        },
-      };
-
-    case "SET_OFFENDER_WITHOUT_VEHICLE_DETAILS":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          traffic: {
-            ...state.formData.traffic,
-            offenderWithoutVehicle: {
-              ...state.formData.traffic.offenderWithoutVehicle,
-              ...action.payload,
-            },
-          },
-        },
-      };
-
-    /* ========= TRAFFIC OFFENDER PEOPLE (FULL REPLACE) ========= */
-    case "SET_OFFENDER_PEOPLE":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          traffic: {
-            ...state.formData.traffic,
-            offenderPeople: action.payload,
-          },
-        },
-      };
-    case "SET_SELECTED_WITNESS":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          traffic: {
-            ...state.formData.traffic,
-            selectedWitness: action.payload,
-          },
-        },
-      };
-
-    /* ========= ADD OFFENDER (SAFE PUSH) ========= */
-    case "ADD_TRAFFIC_OFFENDER":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          traffic: {
-            ...state.formData.traffic,
-            offenderPeople: [
-              ...(state.formData.traffic.offenderPeople || []),
-              action.payload,
-            ],
-          },
-        },
-      };
-
-    /* ========= TRAFFIC WITNESSES ========= */
-    case "SET_WITNESSES":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          traffic: {
-            ...state.formData.traffic,
-            witnesses: action.payload,
-          },
-        },
-      };
-
-    /* ========= STATIC ========= */
-    case "SET_STATIC_WITNESSES":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          staticSpeed: {
-            ...state.formData.staticSpeed,
-            witnesses: action.payload,
-          },
-        },
-      };
-
-    case "SET_STATIC_SPEED_DATA":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          staticSpeed: {
-            ...state.formData.staticSpeed,
-
-            vehicleDetails: {
-              ...state.formData.staticSpeed.vehicleDetails,
-              ...(action.payload.vehicleDetails || {}),
-            },
-
-            offenceOccurenceDetails: {
-              ...state.formData.staticSpeed.offenceOccurenceDetails,
-              ...(action.payload.offenceOccurenceDetails || {}),
-            },
-
-            offenderDetails: {
-              ...state.formData.staticSpeed.offenderDetails,
-              ...(action.payload.offenderDetails || {}),
-            },
-
-            offenderPeople:
-              action.payload.offenderPeople ??
-              state.formData.staticSpeed.offenderPeople,
-
-            witnesses:
-              action.payload.witnesses ?? state.formData.staticSpeed.witnesses,
-          },
-        },
-      };
-
-    case "ADD_STATIC_OFFENDER":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          staticSpeed: {
-            ...state.formData.staticSpeed,
-            offenderPeople: [
-              ...(state.formData.staticSpeed.offenderPeople || []),
-              action.payload,
-            ],
-          },
-        },
-      };
-
-    case "SET_MP_DATA":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          mpReport: {
-            ...state.formData.mpReport,
-            ...action.payload,
-          },
-        },
-      };
-
-    case "SET_MP_SECTION":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          mpReport: {
-            ...state.formData.mpReport,
-            [action.section]: {
-              ...state.formData.mpReport[action.section],
-              ...action.payload,
-            },
-          },
-        },
-      };
-
-    case "ADD_MP_DOCUMENT":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          mpReport: {
-            ...state.formData.mpReport,
-            documents: [
-              ...(state.formData.mpReport.documents || []),
-              action.payload,
-            ],
-          },
-        },
-      };
-
-    case "CLEAR_MP_ADDITIONAL":
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          mpReport: {
-            ...state.formData.mpReport,
-            additionalIndividual: {
-              vehicleInvolved: "",
-              vehicleData: {},
-              driverType: "",
-              tempOffender: null,
-            },
-          },
-        },
-      };
+    case "REMOVE_PATH": {
+      const newState = structuredClone(state);
+      const arr = getByPath(newState, action.path) || [];
+      arr.splice(action.index, 1);
+      setByPath(newState, action.path, arr);
+      return newState;
+    }
 
     default:
       return state;
   }
 }
 
+/* ------------------------------------
+   CONTEXT PROVIDER
+------------------------------------ */
 const FormContext = createContext<{
   state: GlobalFormState;
   dispatch: React.Dispatch<Action>;
@@ -448,6 +236,7 @@ const FormContext = createContext<{
 
 export function FormProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
   return (
     <FormContext.Provider value={{ state, dispatch }}>
       {children}
