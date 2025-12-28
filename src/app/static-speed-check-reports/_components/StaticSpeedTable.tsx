@@ -7,7 +7,8 @@ import {
   Printer,
   Edit,
   Copy,
-  Trash
+  Trash,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -30,7 +31,7 @@ interface StaticSpeedTableProps {
   onPrint?: (item: any) => void;
 }
 
-export default function StaticSpeedTable({ data, onView, onPrint }: StaticSpeedTableProps) {
+export default function StaticSpeedTable({ data, onView, onPrint, onDownload }: StaticSpeedTableProps) {
   const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdateStaticSpeedRecord();
   const { mutateAsync: deleteRecord, isPending: isDeleting } = useDeleteStaticSpeedRecord();
   const [modalState, setModalState] = React.useState<{ isOpen: boolean; recordId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
