@@ -22,10 +22,13 @@ import CreateNewRecordPanel from "./components/dashboard-components/CreateNewRec
 import AllRegisteredReports from "./components/dashboard-components/AllRegisteredReports";
 import DashboardReports from "./components/dashboard-components/DashboardReports";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import MultiStepForm from "../../component/multi-step-form/MulitstepForm";
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
+import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
+import { useGetStaticSpeedRecords } from "@/features/staticSpeed/hooks";
+import { useGetAllMPReports } from "@/features/mpReports/hooks";
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
@@ -34,10 +37,55 @@ export default function Dashboard() {
     "dashboard"
   );
 
+  // Fetch Data
+  const { data: trafficOffences } = useGetAllTrafficOffences({ groupBy: "offenceType" });
+  const { data: staticSpeedRecords } = useGetStaticSpeedRecords();
+  const { data: mpReports } = useGetAllMPReports();
+
+  // Process Traffic Offences
+  const allTrafficOffences = useMemo(() => {
+    if (!trafficOffences) return [];
+    // Handle grouped data as seen in DashboardReports
+    let flattened: any[] = [];
+    if (Array.isArray(trafficOffences)) {
+      trafficOffences.forEach((group: any) => {
+        if (group.offences) {
+          flattened = [...flattened, ...group.offences];
+        } else {
+          // If not grouped, maybe it is the offence itself?
+          // But based on usage, we expect grouped if we passed groupBy.
+          // If API behavior differs without groupBy, we'd need to adjust.
+          // For consistency with DashboardReports, we use the same param and logic.
+          flattened.push(group);
+        }
+      });
+    }
+    return flattened;
+  }, [trafficOffences]);
+
+  const stats = useMemo(() => {
+    const trafficCount = allTrafficOffences.length;
+    const staticSpeedCount = staticSpeedRecords?.length || 0;
+    const mpCount = mpReports?.length || 0;
+
+    // Calculate pending actions (assuming filtered from traffic offences for now, 
+    // or we could combine pending from all types if they have status)
+    // DashboardReports only filtered traffic offences for "Action Status", so sticking to that.
+    const pendingCount = allTrafficOffences.filter((o: any) => o.actionStatus === false).length;
+
+    return {
+      traffic: trafficCount,
+      staticSpeed: staticSpeedCount,
+      mp: mpCount,
+      pending: pendingCount
+    }
+  }, [allTrafficOffences, staticSpeedRecords, mpReports]);
+
+
   const statsData = [
     {
       icon: <FileText />,
-      value: 42,
+      value: stats.traffic,
       title: "Total General Traffic & Offence Reports",
       trend: { value: "+18.2%", label: "than last week", direction: "up" as const },
       iconBgColor: "bg-gray-100",
@@ -45,7 +93,7 @@ export default function Dashboard() {
     },
     {
       icon: <Gauge />,
-      value: 42,
+      value: stats.staticSpeed,
       title: "Total Static Speed Report",
       trend: { value: "+18.2%", label: "than last week", direction: "up" as const },
       iconBgColor: "bg-gray-100",
@@ -53,13 +101,13 @@ export default function Dashboard() {
     },
     {
       icon: <BarChart3 />,
-      value: 42,
+      value: stats.mp,
       title: "Total Ongoing MP Occurrence & Investigation Report",
       trend: { value: "+18.2%", label: "than last week", direction: "up" as const },
     },
     {
       icon: <AlertTriangle />,
-      value: 42,
+      value: stats.pending,
       title: "Action Pending",
       trend: { value: "+18.2%", label: "than last week", direction: "up" as const },
       iconBgColor: "bg-red-100",
