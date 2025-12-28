@@ -224,6 +224,7 @@ export interface GlobalFormState {
   currentStep: number;
   completedSteps: number[];
   formData: FormDataState;
+  preview: boolean; 
 }
 
 /* ================= ACTIONS ================= */

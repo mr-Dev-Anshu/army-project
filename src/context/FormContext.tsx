@@ -21,6 +21,7 @@ const getByPath = (obj: any, path: string) =>
 const initialState: GlobalFormState = {
   currentStep: 1,
   completedSteps: [],
+  preview: false,
 
   formData: {
     /* ================= TRAFFIC ================= */
@@ -31,7 +32,7 @@ const initialState: GlobalFormState = {
         vehicleType: "",
         driverType: "",
         vehicleName: "",
-        vehicleNumber:"",
+        vehicleNumber: "",
       },
 
       offenderWithoutVehicle: {
@@ -77,7 +78,7 @@ const initialState: GlobalFormState = {
       witnesses: [],
       selectedWitness: null,
       offenderPeople: [],
-      remarks:"",
+      remarks: "",
     },
 
     /* ================= STATIC SPEED ================= */
@@ -158,7 +159,7 @@ const initialState: GlobalFormState = {
         vehicleData: {},
         driverType: "",
         offenderList: [],
-         tempOffender: {}, 
+        tempOffender: {},
       },
 
       witnesses: [],
@@ -199,7 +200,8 @@ type Action =
   | { type: "SET_STEP"; payload: number }
   | { type: "SET_PATH"; path: string; value: any }
   | { type: "PUSH_PATH"; path: string; value: any }
-  | { type: "REMOVE_PATH"; path: string; index: number };
+  | { type: "REMOVE_PATH"; path: string; index: number }
+  | { type: "SET_PREVIEW"; payload: boolean };
 
 /* ------------------------------------
    UNIVERSAL REDUCER
@@ -238,6 +240,11 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
       setByPath(newState, action.path, arr);
       return newState;
     }
+    case "SET_PREVIEW":
+      return {
+        ...state,
+        preview: action.payload,
+      };
 
     default:
       return state;

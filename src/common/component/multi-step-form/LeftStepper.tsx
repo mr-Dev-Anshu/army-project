@@ -34,6 +34,7 @@ export const LeftStepper = ({
   };
 
   useForm();
+  const { dispatch } = useForm();
 
   return (
     <div className="w-full lg:w-[380px] h-full p-4 sm:p-5 md:p-6 bg-gray-900 text-white rounded-xl flex flex-col">
@@ -111,9 +112,12 @@ export const LeftStepper = ({
           Cancel
         </Button>
 
-        <Button className="w-full sm:flex-1 bg-blue-600">
-          Preview & Save Report
-        </Button>
+        <Button
+      className="w-full sm:flex-1 bg-blue-600"
+      onClick={() => dispatch({ type: "SET_PREVIEW", payload: true })}
+    >
+      Preview & Save Report
+    </Button>
       </div>
     </div>
   );

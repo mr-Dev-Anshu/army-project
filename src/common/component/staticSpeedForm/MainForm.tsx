@@ -15,6 +15,7 @@ import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { OffenderType } from "@/apis/offender/types";
+import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
 
 export default function StaticSpeedForm() {
   const { state, dispatch } = useForm();
@@ -24,6 +25,108 @@ export default function StaticSpeedForm() {
   const createStaticRecord = useCreateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
+
+  const mapStaticToReport = (data: any) => {
+    const riderDetails = data?.offenderPeople?.[0]?.details || {};
+
+    const rider = {
+      armyNo:
+        riderDetails["DD veh rider no."] || riderDetails["Army No."] || "N/A",
+
+      name: riderDetails["Name"] || riderDetails["Driver Name"] || "N/A",
+
+      rank: riderDetails["Select Rank"] || riderDetails["Rank"] || "N/A",
+
+      unit: riderDetails["Unit"] || "N/A",
+
+      fmn: riderDetails["FMN"] || "N/A",
+
+      command: riderDetails["Command"] || "N/A",
+
+      address:
+        riderDetails["Address"] || riderDetails["Place of Stay"] || "N/A",
+
+      iCardNo: riderDetails["I Card No."] || riderDetails["ICard"] || "N/A",
+    };
+
+    const witness =
+      data.selectedWitness !== null
+        ? data.witnesses?.[data.selectedWitness]
+        : null;
+
+    return {
+      reportNo: "TEMP/STATIC/001",
+      reportDate: new Date().toLocaleDateString("en-GB"),
+
+      unitName: rider?.unit || "N/A",
+
+      /* -------- 1️⃣ PARTICULARS -------- */
+      particulars: {
+        rider: {
+          armyNo: rider?.armyNumber || rider?.armyNo || "N/A",
+          name: rider?.name || "N/A",
+          fmn: rider?.fmn || "N/A",
+          address: rider?.address || "N/A",
+          rank: rider?.rank || "N/A",
+          unit: rider?.unit || "N/A",
+          command: rider?.command || "N/A",
+          iCardNo: rider?.iCardNumber || rider?.icard || "N/A",
+        },
+
+        vehicle: {
+          baNo: data?.vehicleDetails?.vehicleNumber || "N/A",
+          makeAndTake: data?.vehicleDetails?.vehicleName || "N/A",
+        },
+      },
+
+      /* -------- 2️⃣ OCCURRENCE -------- */
+      occurrence: {
+        statement: data?.offenceBlock?.description || "No statement available",
+      },
+
+      /* -------- 3️⃣ OFFENCE -------- */
+      offence: {
+        actualSpeed:
+          data?.offenceBlock?.actualSpeedNoted ||
+          data?.offenceBlock?.actualSpeed ||
+          "N/A",
+
+        authSpeed: data?.offenceBlock?.authSpeed || "N/A",
+
+        overSpeed:
+          data?.offenceBlock?.overSpeedCalculated ||
+          data?.offenceBlock?.overSpeed ||
+          "N/A",
+      },
+
+      /* -------- 4️⃣ WITNESS SIGN -------- */
+      witnessSig: {
+        armyNo:
+          witness?.reportingBlock?.armyNumber ||
+          witness?.reportingBlock?.ArmyNo ||
+          "N/A",
+        rank: witness?.reportingBlock?.rank || "N/A",
+        name: witness?.reportingBlock?.nameReportingMP || "N/A",
+        unit: witness?.reportingBlock?.unit || "N/A",
+      },
+
+      /* -------- MP SIGN -------- */
+      mpSig: {
+        armyNo: data?.reportingBlock?.armyNumber || "N/A",
+        rank: data?.reportingBlock?.rank || "N/A",
+        name: data?.reportingBlock?.nameReportingMP || "N/A",
+        unit: data?.reportingBlock?.unit || "N/A",
+      },
+
+      /* -------- REMARKS -------- */
+      remarks: {
+        text:
+          data?.remarks || "Suitable disciplinary action may please be taken.",
+        station: data?.dutyBlock?.dutyLocation || "N/A",
+        dated: new Date().toLocaleDateString("en-GB"),
+      },
+    };
+  };
 
   const steps = [
     { id: 1, label: "Particulars", icon: "1" },
@@ -139,6 +242,11 @@ export default function StaticSpeedForm() {
     }
   };
 
+  if (state.preview) {
+    return (
+      <StaticSpeedReport {...mapStaticToReport(state.formData.staticSpeed)} />
+    );
+  }
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
       <div className="w-full bg-white rounded-lg overflow-hidden h-full">
