@@ -1,23 +1,16 @@
-
-
-
-
 "use client";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
 import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
-
-type ScopeType = "traffic" | "static" | "mp-main";
 
 interface VehicleDetailsFormProps {
   scope?: "traffic" | "static" | "mp-main";
   onCoDriverSelect?: (type: string) => void;
 }
-
 
 type VehicleCommonState = {
   category: string;
@@ -31,29 +24,20 @@ export default function VehicleDetailsForm({
   scope = "traffic",
   onCoDriverSelect,
 }: VehicleDetailsFormProps) {
-
   const { state, dispatch } = useForm();
 
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
   const mp = state.formData.mpReport;
-
-  /* ================= VISIBILITY CHECK ================= */
-
-  if (
-    scope === "traffic" &&
-    traffic.vehicleInvolved !== "yes" &&
-    mp.individualDetails?.vehicleInvolved !== "yes"
-  ) {
+  if (scope === "traffic" && traffic.vehicleInvolved !== "yes") {
     return null;
   }
 
-  if (scope === "mp-main" && mp.individualDetails.vehicleInvolved !== "yes") {
-    return null;
-  }
+ if (scope === "static" && staticSpeed?.vehicleInvolved !== "yes") {
+  return null;
+}
 
-  /* ================= SOURCE SELECT ================= */
-
+  /* ========= SOURCE ========= */
   const vehicleState: VehicleCommonState =
     scope === "traffic"
       ? traffic.vehicleDetails
@@ -63,13 +47,9 @@ export default function VehicleDetailsForm({
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
-  /* ================= UPDATE FUNCTION (STRICT) ================= */
-
+  /* ========= UPDATE ========= */
   const updateVehicle = (data: Partial<VehicleCommonState>) => {
-    const updated = {
-      ...vehicleState,
-      ...data,
-    };
+    const updated = { ...vehicleState, ...data };
 
     if (scope === "traffic") {
       dispatch({
@@ -162,7 +142,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* CIVILIAN VEHICLE */}
+      {/* CIVILIAN BLOCK */}
       {vehicleType === "civilian" && (
         <CivilianVehicleBlock
           vehicleState={vehicleState}
@@ -170,7 +150,7 @@ export default function VehicleDetailsForm({
         />
       )}
 
-      {/* DD VEHICLE */}
+      {/* DD BLOCK */}
       {vehicleType === "dd" && (
         <DDVehicleBlock
           vehicleState={vehicleState}
@@ -179,43 +159,40 @@ export default function VehicleDetailsForm({
       )}
 
       {/* DRIVER TYPE */}
-<div>
-  <p className="font-semibold mb-2">
-    Select Who was the Driver/Rider?
-  </p>
+      <div>
+        <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
 
-  <RadioGroup
-    value={driverType}
-    onValueChange={(v) => {
-      updateVehicle({ driverType: v });
-      onCoDriverSelect?.(v);
-    }}
-    className="grid sm:grid-cols-2 gap-3"
-  >
-    {[
-      "Military Person",
-      "Civilian",
-      "Employee",
-      "Servant/Maid",
-      "Shop Keeper",
-      "Temporary Hired Worker",
-    ].map((item) => (
-      <label
-        key={item}
-        className={cn(
-          "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-          driverType === item
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300"
-        )}
-      >
-        <RadioGroupItem value={item} />
-        {item}
-      </label>
-    ))}
-  </RadioGroup>
-</div>
-
+        <RadioGroup
+          value={driverType}
+          onValueChange={(v) => {
+            updateVehicle({ driverType: v });
+            onCoDriverSelect?.(v);
+          }}
+          className="grid sm:grid-cols-2 gap-3"
+        >
+          {[
+            "Military Person",
+            "Civilian",
+            "Employee",
+            "Servant/Maid",
+            "Shop Keeper",
+            "Temporary Hired Worker",
+          ].map((item) => (
+            <label
+              key={item}
+              className={cn(
+                "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
+                driverType === item
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-300"
+              )}
+            >
+              <RadioGroupItem value={item} />
+              {item}
+            </label>
+          ))}
+        </RadioGroup>
+      </div>
 
       {/* DYNAMIC FORM */}
       {driverType && offenderFormsConfig[driverType] && (
@@ -231,14 +208,16 @@ export default function VehicleDetailsForm({
   );
 }
 
-/* ------------ SUB COMPONENTS (TYPED) ------------- */
-
+/* -------- CIVILIAN BLOCK -------- */
 interface VehicleBlockProps {
   vehicleState: VehicleCommonState;
   updateVehicle: (d: Partial<VehicleCommonState>) => void;
 }
 
-function CivilianVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps) {
+function CivilianVehicleBlock({
+  vehicleState,
+  updateVehicle,
+}: VehicleBlockProps) {
   return (
     <div>
       <p className="font-semibold mb-2">Fill Vehicle Identification</p>
@@ -246,12 +225,11 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <Label className="mb-3">Civil Vehicle Registration Number</Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. MP04 AB 1234"
             value={vehicleState.vehicleNumber || ""}
-            onChange={(e) =>
-              updateVehicle({ vehicleNumber: e.target.value })
-            }
+            onChange={(v) => updateVehicle({ vehicleNumber: v })}
+            fieldType="vehicleNumber"
           />
         </div>
 
@@ -259,12 +237,11 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps
           <Label className="mb-3">
             Make & Type <span className="text-gray-500">(Vehicle Name)</span>
           </Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. Honda CB Hornet"
             value={vehicleState.vehicleName || ""}
-            onChange={(e) =>
-              updateVehicle({ vehicleName: e.target.value })
-            }
+            onChange={(v) => updateVehicle({ vehicleName: v })}
+            fieldType="vehicleName"
           />
         </div>
       </div>
@@ -272,6 +249,7 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps
   );
 }
 
+/* -------- DD BLOCK -------- */
 function DDVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps) {
   return (
     <div>
@@ -280,12 +258,11 @@ function DDVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps) {
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <Label className="mb-3">DD Vehicle BA Number</Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. 12A 345678Z"
             value={vehicleState.vehicleNumber || ""}
-            onChange={(e) =>
-              updateVehicle({ vehicleNumber: e.target.value })
-            }
+            onChange={(v) => updateVehicle({ vehicleNumber: v })}
+            fieldType="vehicleNumber"
           />
         </div>
 
@@ -293,12 +270,11 @@ function DDVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps) {
           <Label className="mb-3">
             Make & Type <span className="text-gray-500">(Vehicle Name)</span>
           </Label>
-          <Input
+          <SuggestionInput
             placeholder="e.g. ALS W/B"
             value={vehicleState.vehicleName || ""}
-            onChange={(e) =>
-              updateVehicle({ vehicleName: e.target.value })
-            }
+            onChange={(v) => updateVehicle({ vehicleName: v })}
+            fieldType="vehicleName"
           />
         </div>
       </div>

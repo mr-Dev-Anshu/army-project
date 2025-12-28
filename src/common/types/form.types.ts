@@ -90,6 +90,7 @@ export interface TrafficState {
 
 /* ================= STATIC SPEED (BEST STRUCTURE) ================= */
 export interface StaticSpeedState {
+ vehicleInvolved: "yes" | "no" | ""; 
   vehicleDetails: {
     category: string;
     vehicleType: string;
@@ -206,6 +207,8 @@ export interface FormDataState {
   traffic: TrafficState;
   staticSpeed: StaticSpeedState;
   mpReport: MpReportState;
+  coDriverOrPillion?: boolean;
+  coDriverType?: string;
 }
 
 /* ================= GLOBAL ================= */

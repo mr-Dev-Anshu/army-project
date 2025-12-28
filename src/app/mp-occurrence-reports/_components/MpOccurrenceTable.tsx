@@ -27,9 +27,11 @@ import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_componen
 
 interface MpOccurrenceTableProps {
   data: any[];
+  onView?: (item: any) => void;
+  onPrint?: (item: any) => void;
 }
 
-export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
+export default function MpOccurrenceTable({ data, onView, onPrint }: MpOccurrenceTableProps) {
   const { mutateAsync: updateReport, isPending: isUpdating } = useUpdateMPReport();
   const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteMPReport();
   const [modalState, setModalState] = React.useState<{ isOpen: boolean; reportId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
@@ -200,11 +202,17 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onView && onView(item)}
+              >
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onPrint && onPrint(item)}
+              >
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
@@ -232,7 +240,7 @@ export default function MpOccurrenceTable({ data }: MpOccurrenceTableProps) {
         )
       }
     ];
-  }, [updateReport]);
+  }, [updateReport, onView]);
 
   const processedData = useMemo(() => {
     return data.map((item, index) => ({

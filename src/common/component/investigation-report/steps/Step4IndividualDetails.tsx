@@ -1,3 +1,6 @@
+
+
+
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -20,10 +23,8 @@ export default function Step4IndividualDetails() {
   const offenders = mp.offenderList || [];
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [extraVehicleStatus, setExtraVehicleStatus] = useState<
-    "yes" | "no" | ""
-  >("");
 
+  /* ========= MAIN PERSON VEHICLE STATUS ========= */
   const setVehicleInvolved = (value: "yes" | "no" | "") => {
     dispatch({
       type: "SET_PATH",
@@ -31,6 +32,7 @@ export default function Step4IndividualDetails() {
       value,
     });
   };
+
   /* ========= DELETE OFFENDER ========= */
   const handleDeleteOffender = (index: number) => {
     const updated = offenders.filter((_, i) => i !== index);
@@ -42,88 +44,59 @@ export default function Step4IndividualDetails() {
     });
   };
 
-  const handleSaveMain = () => {
-    const vehicle = (mp.vehicleData || {}) as { driverType?: string };
-    const person = (mp.tempOffender || {}) as { driverType?: string };
+ const handleSaveMain = () => {
+  const person = mp.tempOffender || {};
 
-    const finalData = {
-      ...vehicle,
-      ...person,
-      driverType:
-        vehicle?.driverType || person?.driverType || mp.driverType || "",
-    };
+  if (!Object.keys(person).length) {
+    toast.error("Please fill main offender details!");
+    return;
+  }
 
-    if (!Object.keys(finalData).length) {
-      toast.error("Please fill main offender details!");
-      return;
-    }
+  dispatch({
+    type: "SET_PATH",
+    path: "formData.mpReport.individualDetails.offenderList",
+    value: [...offenders, person],
+  });
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.offenderList",
-      value: [...offenders, finalData],
-    });
+  // clear after save
+  dispatch({
+    type: "SET_PATH",
+    path: "formData.mpReport.individualDetails.tempOffender",
+    value: {},
+  });
 
-    // clear vehicle + temp person
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.vehicleData",
-      value: {},
-    });
+  toast.success("Main Person Added!");
+};
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.tempOffender",
-      value: {},
-    });
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.driverType",
-      value: "",
-    });
+ const handleSaveAdditional = () => {
+  const person = add.tempOffender || {};
 
-    toast.success("Main Person Added!");
-  };
+  if (!Object.keys(person).length) {
+    toast.error("Please fill additional person details!");
+    return;
+  }
 
-  const handleSaveAdditional = () => {
-    const vehicle = (mp.vehicleData || {}) as { driverType?: string };
-    const person = (mp.tempOffender || {}) as { driverType?: string };
+  dispatch({
+    type: "SET_PATH",
+    path: "formData.mpReport.individualDetails.offenderList",
+    value: [...offenders, person],
+  });
 
-    const finalData = {
-      ...vehicle,
-      ...person,
-      driverType:
-        vehicle?.driverType || person?.driverType || add.driverType || "",
-    };
+  dispatch({
+    type: "SET_PATH",
+    path: "formData.mpReport.additionalIndividual",
+    value: {
+      vehicleInvolved: "",
+      vehicleData: {},
+      driverType: "",
+      tempOffender: null,
+    },
+  });
 
-    if (!Object.keys(finalData).length) {
-      toast.error("Please fill additional person details!");
-      return;
-    }
-
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.offenderList",
-      value: [...offenders, finalData],
-    });
-
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.additionalIndividual",
-      value: {
-        vehicleInvolved: "",
-        vehicleData: {},
-        driverType: "",
-        tempOffender: null,
-      },
-    });
-
-    setExtraVehicleStatus("");
-    setShowAddForm(false);
-
-    toast.success("Additional Person Added!");
-  };
+  setShowAddForm(false);
+  toast.success("Additional Person Added!");
+};
 
   return (
     <FormSection title="4. DETAILS OF INDIVIDUAL:">
@@ -135,11 +108,13 @@ export default function Step4IndividualDetails() {
       {/* MAIN PERSON */}
       <VehiclePrimaryQuestion
         title="Does this occurrence involve vehicles?"
-        vehicleStatus={mp.vehicleInvolved}
+        vehicleStatus={mp.vehicleInvolved as any}
         setVehicleStatus={setVehicleInvolved}
       />
 
-      {mp.vehicleInvolved === "yes" && <VehicleDetailsForm scope="mp-main" />}
+      {mp.vehicleInvolved === "yes" && (
+        <VehicleDetailsForm scope="mp-main" />
+      )}
 
       {mp.vehicleInvolved === "no" && (
         <OffenderWithoutVehicleForm scope="mp-main" />
@@ -172,16 +147,22 @@ export default function Step4IndividualDetails() {
         <div className="mt-6 border rounded-lg p-6 bg-gray-50">
           <VehiclePrimaryQuestion
             title="Does this additional person involve vehicle?"
-            vehicleStatus={extraVehicleStatus}
-            setVehicleStatus={setExtraVehicleStatus}
+            vehicleStatus={add.vehicleInvolved as any}
+            setVehicleStatus={(v) =>
+              dispatch({
+                type: "SET_PATH",
+                path: "formData.mpReport.additionalIndividual.vehicleInvolved",
+                value: v,
+              })
+            }
           />
 
-          {extraVehicleStatus === "yes" && (
+          {add.vehicleInvolved === "yes" && (
             <VehicleDetailsForm scope="mp-main" />
           )}
 
-          {extraVehicleStatus === "no" && (
-            <OffenderWithoutVehicleForm scope="mp-additional" />
+          {add.vehicleInvolved === "no" && (
+            <OffenderWithoutVehicleForm scope="mp-main" />
           )}
 
           <div className="mt-4 flex justify-end gap-3">

@@ -43,6 +43,17 @@ export const occurrenceDetailsSchema = new Schema({
 });
 
 export const individualSchema = new Schema({
+  armyNo: { type: String },
+  rank: { type: String },
+  name: { type: String },
+  unit: { type: String },
+  fmn: { type: String },
+  address: { type: String },
+  iCardNumber: { type: String },
+  remark: { type: String },
+  role: { type: String }, // Victim, Offender, etc.
+
+  // Keep existing generic fields just in case
   isVehicleInvolved: { type: Boolean, default: false },
   vehicleCategory: { type: String },
   typeOfVehicle: { type: String },
@@ -55,6 +66,16 @@ export const individualSchema = new Schema({
 });
 
 export const witnessSchema = new Schema({
+  armyNo: { type: String },
+  rank: { type: String },
+  name: { type: String },
+  unit: { type: String },
+  fmn: { type: String },
+  address: { type: String },
+  iCardNumber: { type: String },
+  remark: { type: String },
+
+  // Keep existing generic fields just in case
   isVehicleInvolved: { type: Boolean, default: false },
   vehicleCategory: { type: String },
   typeOfVehicle: { type: String },
@@ -92,6 +113,10 @@ const mpReportSchema = new Schema(
     reportDetails: { type: reportDetailsSchema },
     investigationHead: { type: investigationHeadSchema },
     occurrenceDetails: { type: occurrenceDetailsSchema },
+
+    individuals: [individualSchema],
+    witnesses: [witnessSchema],
+
     documents: [documentSchema],
     detailedOccurrenceReport: { type: String },
     pointsFindOutDuringInvestigation: { type: String },

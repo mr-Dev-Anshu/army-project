@@ -1,4 +1,6 @@
 import { Offender } from "../models/Offenders";
+import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
+import { OFFENDER_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/offender";
 
 export class OffenderRepository {
   async getAll() {
@@ -16,7 +18,14 @@ export class OffenderRepository {
   async create(data) {
     const offender = new Offender(data);
     await offender.save();
-    return offender.toObject();
+    const saved = offender.toObject();
+
+    // Fire and forget suggestion tracking
+    trackFieldSuggestions(saved, OFFENDER_SUGGESTION_CONFIG).catch(err => {
+      console.error("Tracking Suggestions Error (Offender):", err);
+    });
+
+    return saved;
   }
 
   async update(id, data) {

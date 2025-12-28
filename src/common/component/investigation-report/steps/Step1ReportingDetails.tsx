@@ -6,6 +6,7 @@ import { FormInput, FormSelect } from "@/common/component/FormInput";
 import { useForm } from "@/context/FormContext";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export default function Step1ReportDetails() {
   const { state, dispatch } = useForm();
@@ -39,17 +40,18 @@ export default function Step1ReportDetails() {
         onChange={(v) => set("reportNo", v)}
       />
 
-      <FormSelect
+      <SuggestionInput
         label="Command:"
         placeholder="Select Origin"
-        options={[
-          { label: "Central Command", value: "central" },
-          { label: "Western Command", value: "western" },
-          { label: "Eastern Command", value: "eastern" },
-          { label: "Northern Command", value: "northern" },
-        ]}
         value={mp.command}
         onChange={(v) => set("command", v)}
+        fieldType="command"
+        defaultOptions={[
+          "Central Command",
+          "Western Command",
+          "Eastern Command",
+          "Northern Command",
+        ]}
       />
 
       <div>

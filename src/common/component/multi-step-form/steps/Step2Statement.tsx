@@ -1,19 +1,20 @@
-
 "use client";
 
 import { Input } from "@/components/ui/input";
 import { FormSection } from "../../FormSection";
 import { useForm } from "@/context/FormContext";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@radix-ui/react-label";
 import { FormTextarea } from "../../FormTextarea";
 import { FormInput } from "../../FormInput";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
+
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 export default function Step2Statement() {
   const { state, dispatch } = useForm();
@@ -26,7 +27,6 @@ export default function Step2Statement() {
       value,
     });
 
-  // ✅ Always keep at least 1 witness UI visible
   const witnesses =
     d.witnesses.length > 0
       ? d.witnesses
@@ -49,8 +49,7 @@ export default function Step2Statement() {
 
   return (
     <div className="space-y-10">
-
-      {/* ---------------- ON DUTY DETAILS ---------------- */}
+      {/* ================== ON DUTY DETAILS ================== */}
       <FormSection title="On-Duty Details">
         <div className="grid grid-cols-3 gap-4">
           <div>
@@ -87,30 +86,26 @@ export default function Step2Statement() {
           </div>
         </div>
 
-        <div>
-          <Label className="mb-2 font-semibold">Duty Location</Label>
-          <Input
-            placeholder="Duty Location"
-            value={d.onDutyDetails.dutyLocation}
-            onChange={(e) =>
-              set("formData.traffic.onDutyDetails.dutyLocation", e.target.value)
-            }
-          />
-        </div>
+        <Label className="mt-3 font-semibold">Duty Location</Label>
+        <SuggestionInput
+          placeholder="Duty Location"
+          value={d.onDutyDetails.dutyLocation}
+          onChange={(v) =>
+            set("formData.traffic.onDutyDetails.dutyLocation", v)
+          }
+          fieldType="dutyLocation"
+        />
 
-        <div>
-          <Label className="mb-2 font-semibold">Duty Type</Label>
-          <Input
-            placeholder="Duty Type"
-            value={d.onDutyDetails.dutyType}
-            onChange={(e) =>
-              set("formData.traffic.onDutyDetails.dutyType", e.target.value)
-            }
-          />
-        </div>
+        <Label className="mt-3 font-semibold">Duty Type</Label>
+        <SuggestionInput
+          placeholder="Duty Type"
+          value={d.onDutyDetails.dutyType}
+          onChange={(v) => set("formData.traffic.onDutyDetails.dutyType", v)}
+          fieldType="dutyType"
+        />
       </FormSection>
 
-      {/* ---------------- REPORTING MP ---------------- */}
+      {/* ================= MP REPORTING ================= */}
       <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -138,7 +133,6 @@ export default function Step2Statement() {
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Rank" />
               </SelectTrigger>
-
               <SelectContent>
                 <SelectItem value="Lieutenant">Lieutenant</SelectItem>
                 <SelectItem value="Captain">Captain</SelectItem>
@@ -149,7 +143,7 @@ export default function Step2Statement() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
             <Label className="mb-2 font-semibold">Unit</Label>
             <Select
@@ -186,95 +180,92 @@ export default function Step2Statement() {
         </div>
       </FormSection>
 
-      {/* ================== WITNESSING MP ================== */}
+      {/* ================= WITNESSING MP ================= */}
       <FormSection title="On-Duty Details of Witnessing MP">
-        {witnesses.map((w, index) => (
-          <div key={index} className="border p-5 rounded-lg mb-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <Label className="mb-2 block">Name of Witnessing MP</Label>
-                <Input
-                  placeholder="Name of Witnessing MP"
-                  value={w.reportingBlock?.nameReportingMP || ""}
-                  onChange={(e) => {
-                    const copy = structuredClone(witnesses);
-                    copy[index].reportingBlock.nameReportingMP =
-                      e.target.value;
-                    set("formData.traffic.witnesses", copy);
-                  }}
-                />
-              </div>
+        {witnesses.map((w, i) => (
+          <div key={i} className="border p-4 rounded-lg space-y-4 mb-6">
+            <div>
+              <Label className="mb-2 font-semibold">Witnessing MP Name</Label>
+              <Input
+                placeholder="Name of Witnessing MP"
+                value={w.reportingBlock.nameReportingMP}
+                onChange={(e) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.nameReportingMP = e.target.value;
+                  set("formData.traffic.witnesses", copy);
+                }}
+              />
+            </div>
 
-              <div>
-                <Label className="mb-2 block">Rank</Label>
-                <Select
-                  value={w.reportingBlock?.rank || ""}
-                  onValueChange={(v) => {
-                    const copy = structuredClone(witnesses);
-                    copy[index].reportingBlock.rank = v;
-                    set("formData.traffic.witnesses", copy);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Rank" />
-                  </SelectTrigger>
+            <div>
+              <Label className="mb-2 font-semibold">Rank</Label>
+              <Select
+                value={w.reportingBlock.rank}
+                onValueChange={(v) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.rank = v;
+                  set("formData.traffic.witnesses", copy);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Rank" />
+                </SelectTrigger>
 
-                  <SelectContent>
-                    <SelectItem value="L/Nk">L/Nk</SelectItem>
-                    <SelectItem value="Nk">Nk</SelectItem>
-                    <SelectItem value="Hav">Hav</SelectItem>
-                    <SelectItem value="Subedar">Subedar</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <SelectContent>
+                  <SelectItem value="L/Nk">L/Nk</SelectItem>
+                  <SelectItem value="Nk">Nk</SelectItem>
+                  <SelectItem value="Hav">Hav</SelectItem>
+                  <SelectItem value="Subedar">Subedar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div>
-                <Label className="mb-2 block">Unit</Label>
-                <Select
-                  value={w.reportingBlock?.unit || ""}
-                  onValueChange={(v) => {
-                    const copy = structuredClone(witnesses);
-                    copy[index].reportingBlock.unit = v;
-                    set("formData.traffic.witnesses", copy);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Unit" />
-                  </SelectTrigger>
+            <div>
+              <Label className="mb-2 font-semibold">Unit</Label>
+              <Select
+                value={w.reportingBlock.unit}
+                onValueChange={(v) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.unit = v;
+                  set("formData.traffic.witnesses", copy);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Unit" />
+                </SelectTrigger>
 
-                  <SelectContent>
-                    <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-                    <SelectItem value="MP 12">MP 12</SelectItem>
-                    <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <SelectContent>
+                  <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
+                  <SelectItem value="MP 12">MP 12</SelectItem>
+                  <SelectItem value="HQ Unit">HQ Unit</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div>
-                <Label className="mb-2 block">Army Number</Label>
-                <Input
-                  placeholder="Army No."
-                  value={w.reportingBlock?.armyNumber || ""}
-                  onChange={(e) => {
-                    const copy = structuredClone(witnesses);
-                    copy[index].reportingBlock.armyNumber = e.target.value;
-                    set("formData.traffic.witnesses", copy);
-                  }}
-                />
-              </div>
+            <div>
+              <Label className="mb-2 font-semibold">Army Number</Label>
+              <Input
+                placeholder="Army No."
+                value={w.reportingBlock.armyNumber}
+                onChange={(e) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.armyNumber = e.target.value;
+                  set("formData.traffic.witnesses", copy);
+                }}
+              />
+            </div>
 
-              <div>
-                <Label className="mb-2 block">Contact Number</Label>
-                <Input
-                  placeholder="Contact Number"
-                  value={w.reportingBlock?.contactNumber || ""}
-                  onChange={(e) => {
-                    const copy = structuredClone(witnesses);
-                    copy[index].reportingBlock.contactNumber = e.target.value;
-                    set("formData.traffic.witnesses", copy);
-                  }}
-                />
-              </div>
+            <div>
+              <Label className="mb-2 font-semibold">Contact Number</Label>
+              <Input
+                placeholder="Contact Number"
+                value={w.reportingBlock.contactNumber || ""}
+                onChange={(e) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.contactNumber = e.target.value;
+                  set("formData.traffic.witnesses", copy);
+                }}
+              />
             </div>
           </div>
         ))}
@@ -300,7 +291,65 @@ export default function Step2Statement() {
         </button>
       </FormSection>
 
-      {/* ================== OFFENCE OCCURRENCE DETAILS ================== */}
+      {/* ================== LIVE WITNESS LIST ================== */}
+      {hasFilledWitness && (
+        <FormSection title="List of On-Duty Details of Witnessing MP - Select One for Signature">
+          <div className="text-sm text-gray-500 mb-2">
+            List of Witnesses, choose one for Signature Proof
+          </div>
+
+          {witnesses
+            .filter((w) => {
+              const r = w.reportingBlock;
+              return r.nameReportingMP || r.rank || r.unit || r.armyNumber;
+            })
+            .map((w, index) => {
+              const data = w.reportingBlock;
+
+              return (
+                <label
+                  key={index}
+                  className="border rounded-md p-4 mb-3 flex gap-3 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="selectedWitnessTraffic"
+                    checked={d.selectedWitness === index}
+                    onChange={() =>
+                      set("formData.traffic.selectedWitness", index)
+                    }
+                  />
+
+                  <div className="w-full grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p>
+                        <span className="font-semibold">Name:</span>{" "}
+                        {data.nameReportingMP || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Unit:</span>{" "}
+                        {data.unit || "—"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p>
+                        <span className="font-semibold">Rank:</span>{" "}
+                        {data.rank || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Army no.:</span>{" "}
+                        {data.armyNumber || "—"}
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              );
+            })}
+        </FormSection>
+      )}
+
+      {/* ================= OFFENCE OCCURRENCE ================= */}
       <FormSection title="Offence Occurrence Details">
         <p className="text-gray-500">
           Enter the exact date and time when the incident occurred.
@@ -316,7 +365,7 @@ export default function Step2Statement() {
             }
           />
 
-          <FormInput
+          <SuggestionInput
             label="Place Of Offence"
             placeholder="Location"
             value={d.offenceOccurenceDetails.incidentLocation}
@@ -326,6 +375,7 @@ export default function Step2Statement() {
                 v
               )
             }
+            fieldType="incidentLocation"
           />
         </div>
 

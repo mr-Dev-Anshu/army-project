@@ -1,7 +1,7 @@
 import trackFieldSuggestions from "@/lib/fieldSuggestionTracker.js";
 import { GeneralTrafficOffence } from "../models/GeneralTraficOffence.js";
 import mongoose from "mongoose";
-import { GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG } from "@/lib/filedSuggestionConfig/GeneralTraficOffence.js";
+import { GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/GeneralTraficOffence.js";
 
 export class GeneralTrafficOffenceRepository {
   async getAll() {

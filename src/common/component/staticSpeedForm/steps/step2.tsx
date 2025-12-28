@@ -1,30 +1,44 @@
-
-
-
 "use client";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSection } from "../../FormSection";
 import { useForm } from "@/context/FormContext";
+import { Label } from "@/components/ui/label";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
+
 import {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 
 export default function StaticSpeedStep2() {
   const { state, dispatch } = useForm();
 
   const staticData = state.formData.staticSpeed;
 
-  const witnesses = staticData.witnesses || [];
   const duty = staticData.dutyBlock || {};
   const report = staticData.reportingBlock || {};
   const offence = staticData.offenceBlock || {};
+
+  // ALWAYS SHOW AT LEAST 1 WITNESS
+  const witnesses =
+    staticData.witnesses?.length > 0
+      ? staticData.witnesses
+      : [
+          {
+            reportingBlock: {
+              nameReportingMP: "",
+              rank: "",
+              unit: "",
+              armyNumber: "",
+              contactNumber: "",
+            },
+          },
+        ];
 
   const set = (path: string, value: any) =>
     dispatch({
@@ -33,14 +47,12 @@ export default function StaticSpeedStep2() {
       value,
     });
 
-  const updateDuty = (key: string, value: any) =>
-    set(`formData.staticSpeed.dutyBlock.${key}`, value);
-
-  const updateReport = (key: string, value: any) =>
-    set(`formData.staticSpeed.reportingBlock.${key}`, value);
-
-  const updateOffence = (key: string, value: any) =>
-    set(`formData.staticSpeed.offenceBlock.${key}`, value);
+  const updateDuty = (k: string, v: any) =>
+    set(`formData.staticSpeed.dutyBlock.${k}`, v);
+  const updateReport = (k: string, v: any) =>
+    set(`formData.staticSpeed.reportingBlock.${k}`, v);
+  const updateOffence = (k: string, v: any) =>
+    set(`formData.staticSpeed.offenceBlock.${k}`, v);
 
   return (
     <div className="space-y-10">
@@ -53,7 +65,7 @@ export default function StaticSpeedStep2() {
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <Label>Date of Duty</Label>
+            <Label className="mb-2 font-semibold">Date of Duty</Label>
             <Input
               type="date"
               value={duty.dateOfDuty || ""}
@@ -62,7 +74,7 @@ export default function StaticSpeedStep2() {
           </div>
 
           <div>
-            <Label>Start Time</Label>
+            <Label className="mb-2 font-semibold">Start Time</Label>
             <Input
               type="time"
               value={duty.startTime || ""}
@@ -71,7 +83,7 @@ export default function StaticSpeedStep2() {
           </div>
 
           <div>
-            <Label>End Time</Label>
+            <Label className="mb-2 font-semibold">End Time</Label>
             <Input
               type="time"
               value={duty.endTime || ""}
@@ -80,135 +92,321 @@ export default function StaticSpeedStep2() {
           </div>
         </div>
 
-        <div>
-          <Label>Duty Location</Label>
-          <Input
-            value={duty.dutyLocation || ""}
-            onChange={(e) => updateDuty("dutyLocation", e.target.value)}
-          />
-        </div>
+        <Label className="mt-3 font-semibold">Duty Location</Label>
+        <SuggestionInput
+          placeholder="Duty Location"
+          value={duty.dutyLocation || ""}
+          onChange={(v) => updateDuty("dutyLocation", v)}
+          fieldType="dutyLocation"
+        />
 
-        <div>
-          <Label>Duty Type</Label>
-          <Input
-            value={duty.dutyType || ""}
-            onChange={(e) => updateDuty("dutyType", e.target.value)}
-          />
-        </div>
+        <Label className="mt-3 font-semibold">Duty Type</Label>
+        <SuggestionInput
+          placeholder="Duty Type"
+          value={duty.dutyType || ""}
+          onChange={(v) => updateDuty("dutyType", v)}
+          fieldType="dutyType"
+        />
       </FormSection>
 
       {/* ================== MP REPORTING ================== */}
       <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
-          <Input
-            placeholder="Name of Reporting MP"
-            value={report.nameReportingMP || ""}
-            onChange={(e) =>
-              updateReport("nameReportingMP", e.target.value)
-            }
-          />
+          <div>
+            <Label className="mb-2 font-semibold">Reporting MP Name</Label>
+            <Input
+              placeholder="Reporting MP Name"
+              value={report.nameReportingMP || ""}
+              onChange={(e) => updateReport("nameReportingMP", e.target.value)}
+            />
+          </div>
 
-          <Select
-            value={report.rank || ""}
-            onValueChange={(v) => updateReport("rank", v)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select rank" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="L/Nk">L/Nk</SelectItem>
-              <SelectItem value="Nk">Nk</SelectItem>
-              <SelectItem value="Hav">Hav</SelectItem>
-              <SelectItem value="Subedar">Subedar</SelectItem>
-            </SelectContent>
-          </Select>
+          <div>
+            <Label className="mb-2 font-semibold">Rank</Label>
+            <Select
+              value={report.rank || ""}
+              onValueChange={(v) => updateReport("rank", v)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Rank" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="L/Nk">L/Nk</SelectItem>
+                <SelectItem value="Nk">Nk</SelectItem>
+                <SelectItem value="Hav">Hav</SelectItem>
+                <SelectItem value="Subedar">Subedar</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <Select
-            value={report.unit || ""}
-            onValueChange={(v) => updateReport("unit", v)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select unit" />
-            </SelectTrigger>
+          <div>
+            <Label className="mb-2 font-semibold">Unit</Label>
+            <Select
+              value={report.unit || ""}
+              onValueChange={(v) => updateReport("unit", v)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Unit" />
+              </SelectTrigger>
 
-            <SelectContent>
-              <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-              <SelectItem value="MP 12">MP 12</SelectItem>
-              <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-            </SelectContent>
-          </Select>
+              <SelectContent>
+                <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
+                <SelectItem value="MP 12">MP 12</SelectItem>
+                <SelectItem value="HQ Unit">HQ Unit</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Input
-            placeholder="Army Number"
-            value={report.armyNumber || ""}
-            onChange={(e) => updateReport("armyNumber", e.target.value)}
-          />
+          <div>
+            <Label className="mb-2 font-semibold">Army Number</Label>
+            <Input
+              placeholder="Army Number"
+              value={report.armyNumber || ""}
+              onChange={(e) => updateReport("armyNumber", e.target.value)}
+            />
+          </div>
         </div>
       </FormSection>
 
       {/* ================== WITNESSING MP ================== */}
-      {/* your same witnesses code stays as it is (already correct) */}
+      <FormSection title="On-Duty Details of Witnessing MP">
+        {witnesses.map((w, i) => (
+          <div
+            key={i}
+            className="border grid grid-cols-2 space-x-4 p-4 rounded-lg space-y-4 mb-6"
+          >
+            <div>
+              <Label className="mb-2 font-semibold">Witnessing MP Name</Label>
+              <Input
+                placeholder="Name of Witnessing MP"
+                value={w.reportingBlock.nameReportingMP}
+                onChange={(e) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.nameReportingMP = e.target.value;
+                  set("formData.staticSpeed.witnesses", copy);
+                }}
+              />
+            </div>
+
+            <div>
+              <Label className="mb-2 font-semibold">Rank</Label>
+              <Select
+                value={w.reportingBlock.rank}
+                onValueChange={(v) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.rank = v;
+                  set("formData.staticSpeed.witnesses", copy);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Rank" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="L/Nk">L/Nk</SelectItem>
+                  <SelectItem value="Nk">Nk</SelectItem>
+                  <SelectItem value="Hav">Hav</SelectItem>
+                  <SelectItem value="Subedar">Subedar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="mb-2 font-semibold">Unit</Label>
+              <Select
+                value={w.reportingBlock.unit}
+                onValueChange={(v) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.unit = v;
+                  set("formData.staticSpeed.witnesses", copy);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Unit" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
+                  <SelectItem value="MP 12">MP 12</SelectItem>
+                  <SelectItem value="HQ Unit">HQ Unit</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="mb-2 font-semibold">Army Number</Label>
+              <Input
+                placeholder="Army No."
+                value={w.reportingBlock.armyNumber}
+                onChange={(e) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.armyNumber = e.target.value;
+                  set("formData.staticSpeed.witnesses", copy);
+                }}
+              />
+            </div>
+
+            <div>
+              <Label className="mb-2 font-semibold">Contact Number</Label>
+              <Input
+                placeholder="Contact Number"
+                value={w.reportingBlock.contactNumber || ""}
+                onChange={(e) => {
+                  const copy = structuredClone(witnesses);
+                  copy[i].reportingBlock.contactNumber = e.target.value;
+                  set("formData.staticSpeed.witnesses", copy);
+                }}
+              />
+            </div>
+          </div>
+        ))}
+
+        <button
+          className="text-blue-600 text-sm"
+          onClick={() =>
+            set("formData.staticSpeed.witnesses", [
+              ...witnesses,
+              {
+                reportingBlock: {
+                  nameReportingMP: "",
+                  rank: "",
+                  unit: "",
+                  armyNumber: "",
+                  contactNumber: "",
+                },
+              },
+            ])
+          }
+        >
+          + Add More Witness
+        </button>
+      </FormSection>
+
+      {/* ================== LIVE WITNESS LIST ================== */}
+      <FormSection title="List of On-Duty Details of Witnessing MP - Select One for Signature">
+        <div className="text-sm text-gray-500 mb-2">
+          List of Witnesses, choose one for Signature Proof
+        </div>
+
+        <div>
+          {witnesses
+            .filter(
+              (w) =>
+                w.reportingBlock?.nameReportingMP ||
+                w.reportingBlock?.rank ||
+                w.reportingBlock?.unit ||
+                w.reportingBlock?.armyNumber
+            )
+            .map((w, index) => {
+              const data = w.reportingBlock;
+
+              return (
+                <label
+                  key={index}
+                  className="border rounded-md p-4 flex gap-3 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="selectedWitness"
+                    checked={staticData.selectedWitness === index}
+                    onChange={() =>
+                      set("formData.staticSpeed.selectedWitness", index)
+                    }
+                  />
+
+                  <div className="w-full grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p>
+                        <span className="font-semibold">Name:</span>{" "}
+                        {data.nameReportingMP || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Unit:</span>{" "}
+                        {data.unit || "—"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p>
+                        <span className="font-semibold">Rank:</span>{" "}
+                        {data.rank || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Army no.:</span>{" "}
+                        {data.armyNumber || "—"}
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              );
+            })}
+        </div>
+      </FormSection>
 
       {/* ================== OFFENCE DETAILS ================== */}
       <FormSection title="Offence Occurrence Details">
         <div className="grid grid-cols-2 space-x-4">
-          <div className="mb-4">
-            <Label className="mb-3">Time of Offence</Label>
-            <Input
-              type="time"
-              value={offence.timeOfOffence || ""}
-              onChange={(e) => {
-                const t = e.target.value;
-                const today = new Date().toISOString().split("T")[0];
-                const iso = `${today}T${t}:00.000Z`;
+          <div>
+            <div>
+              <Label className="mb-4 font-semibold">Time of Offence</Label>
+              <Input
+                type="time"
+                value={offence.timeOfOffence || ""}
+                onChange={(e) => {
+                  const t = e.target.value;
+                  const today = new Date().toISOString().split("T")[0];
+                  const iso = `${today}T${t}:00.000Z`;
 
-                updateOffence("timeOfOffence", t);
-                updateOffence("time", iso);
+                  updateOffence("timeOfOffence", t);
+                  updateOffence("time", iso);
+                }}
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="mb-2 font-semibold mt-2">Incident Location</Label>
+            <SuggestionInput
+              placeholder="Incident Location"
+              value={offence.incidentLocation || ""}
+              onChange={(v) => updateOffence("incidentLocation", v)}
+              fieldType="incidentLocation"
+            />
+          </div>
+          <div>
+            <Label className="mb-2 font-semibold mt-2">Actual Speed</Label>
+            <Input
+              placeholder="Actual Speed"
+              value={offence.actualSpeed || offence.actualSpeedNoted || ""}
+              onChange={(e) => {
+                updateOffence("actualSpeed", e.target.value);
+                updateOffence("actualSpeedNoted", e.target.value);
               }}
             />
           </div>
 
           <div>
-            <Label className="mb-3">Incident Location</Label>
-            <Input
-              placeholder="Incident Location"
-              value={offence.incidentLocation || ""}
-              onChange={(e) =>
-                updateOffence("incidentLocation", e.target.value)
-              }
-            />
-          </div>
-
-          <div>
-            <Label className="mb-3">Speed Details</Label>
-            <Input
-              placeholder="Actual Speed"
-              value={offence.actualSpeed || ""}
-              onChange={(e) => updateOffence("actualSpeed", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <Label className="mb-3">Over Speed</Label>
+            <Label className="mb-2 font-semibold mt-2">Over Speed</Label>
             <Input
               placeholder="Over Speed"
-              value={offence.overSpeed || ""}
-              onChange={(e) => updateOffence("overSpeed", e.target.value)}
+              value={offence.overSpeed || offence.overSpeedCalculated || ""}
+              onChange={(e) => {
+                updateOffence("overSpeed", e.target.value);
+                updateOffence("overSpeedCalculated", e.target.value);
+              }}
             />
           </div>
         </div>
 
-        <div>
-          <Label className="mb-3">Description of Offence</Label>
-          <Textarea
-            placeholder="Full Description"
-            value={offence.description || ""}
-            onChange={(e) => updateOffence("description", e.target.value)}
-          />
-        </div>
+        <Label className="mb-2 font-semibold mt-2">
+          Description of Offence
+        </Label>
+        <Textarea
+          placeholder="Full Description"
+          value={offence.description || ""}
+          onChange={(e) => updateOffence("description", e.target.value)}
+        />
       </FormSection>
     </div>
   );

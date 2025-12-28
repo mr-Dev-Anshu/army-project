@@ -34,3 +34,4 @@ export * from "@/apis/offender/getById"
 
 export * from "@/apis/mpReports";
  
+export * from "@/apis/suggestions/getSuggestions";

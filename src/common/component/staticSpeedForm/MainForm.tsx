@@ -58,13 +58,14 @@ export default function StaticSpeedForm() {
         vehicleName: staticData.vehicleDetails.vehicleName,
 
         offenceOccurenceDetails: {
+          // ---- MERGED + BACKEND SAFE ----
           time:
             staticData.dutyBlock.dateOfDuty &&
             staticData.offenceBlock.timeOfOffence
               ? new Date(
                   `${staticData.dutyBlock.dateOfDuty}T${staticData.offenceBlock.timeOfOffence}`
                 ).toISOString()
-              : "", // ❗ empty string do undefined nahi
+              : "",
 
           timeOfOffence: staticData.offenceBlock.timeOfOffence ?? "",
 
@@ -72,8 +73,15 @@ export default function StaticSpeedForm() {
           description: staticData.offenceBlock.description,
 
           authSpeed: staticData.offenceBlock.authSpeed ?? "",
-          actualSpeed: staticData.offenceBlock.actualSpeed ?? "",
-          overSpeed: staticData.offenceBlock.overSpeed ?? "",
+          actualSpeed:
+            (staticData.offenceBlock as any).actualSpeed ||
+            staticData.offenceOccurenceDetails?.actualSpeedNoted ||
+            "",
+
+          overSpeed:
+            (staticData.offenceBlock as any).overSpeed ||
+            staticData.offenceOccurenceDetails?.overSpeedCalculated ||
+            "",
         },
       };
 
@@ -150,7 +158,6 @@ export default function StaticSpeedForm() {
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            // 🔥 THIS is new safe wrapper
             setFormData={(data) => {
               Object.keys(data).forEach((key) => {
                 dispatch({
