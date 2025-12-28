@@ -57,6 +57,8 @@ export interface MpOccurrenceReportProps {
         analysis: string;
         recommendation: string;
     };
+    station: string;
+    reportDate: string;
     className?: string;
 }
 
@@ -73,6 +75,8 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
     documents,
     detailedReport,
     remarks,
+    station,
+    reportDate,
     className
 }) => {
     return (
@@ -399,7 +403,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 <div className="mt-auto pt-16 flex justify-between items-end text-sm font-bold">
                     <div>
-                        Dated : {new Date().toLocaleDateString("en-GB")}
+                        Dated : {reportDate}
                     </div>
                     <div className="text-center">
                         (Signature of MP JCO/NCO)
@@ -444,8 +448,8 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 <div className="mt-auto pt-16 flex justify-between items-end text-sm font-bold">
                     <div className="space-y-1">
-                        <div>Station : C/O 56 APO</div>
-                        <div>Dated : {new Date().toLocaleDateString("en-GB")}</div>
+                        <div>Station : {station}</div>
+                        <div>Dated : {reportDate}</div>
                     </div>
                     <div className="text-center">
                         (Signature of CO/2IC with unit seal)

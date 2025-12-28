@@ -197,18 +197,30 @@ export default function MpOccurrenceReportsPage() {
       return found ? (found.description || found.url || "Attached") : null;
     };
 
-    // Dynamic Fields: Detailed Report
+    // Dynamic Fields: Detailed Report & Remarks
     const detailedStatement =
+      raw.detailedOccurrenceReport ||
       raw.detailedStatement ||
       raw.detailedReport?.statement ||
       raw.customFields?.detailedStatement ||
       "";
 
-    const investigationFindings =
-      raw.investigationFindings ||
-      raw.detailedReport?.findings ||
-      raw.customFields?.investigationFindings ||
-      [];
+    // Handle findings whether stored as string (schema) or array
+    let findingsList: string[] = [];
+    const rawFindings = raw.pointsFindOutDuringInvestigation || raw.investigationFindings || raw.detailedReport?.findings;
+
+    if (typeof rawFindings === 'string') {
+      findingsList = rawFindings.split('\n').filter((line: string) => line.trim() !== '');
+    } else if (Array.isArray(rawFindings)) {
+      findingsList = rawFindings;
+    }
+
+    const reportDate = raw.createdAt
+      ? new Date(raw.createdAt).toLocaleDateString("en-GB")
+      : new Date().toLocaleDateString("en-GB");
+
+    // "Station" typically typically comes from unit address or similar
+    const station = invHead.address || raw.customFields?.station || invHead.unit || "";
 
     return {
       reportNo: reportDetails.reportNumber || "",
@@ -239,13 +251,15 @@ export default function MpOccurrenceReportsPage() {
       documents: docs,
       detailedReport: {
         statement: detailedStatement,
-        findings: Array.isArray(investigationFindings) ? investigationFindings : [],
+        findings: findingsList,
         opinion: raw.opinion || raw.detailedReport?.opinion || raw.customFields?.opinion || ""
       },
       remarks: {
-        analysis: raw.analysis || raw.coRemarks?.analysis || raw.customFields?.analysis || "",
-        recommendation: raw.recommendation || raw.coRemarks?.recommendation || raw.customFields?.recommendation || ""
-      }
+        analysis: raw.remarks?.analysis || raw.analysis || raw.coRemarks?.analysis || raw.customFields?.analysis || "",
+        recommendation: raw.remarks?.recommendation || raw.recommendation || raw.coRemarks?.recommendation || raw.customFields?.recommendation || ""
+      },
+      station: station,
+      reportDate: reportDate
     };
   };
 
