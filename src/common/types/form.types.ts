@@ -6,6 +6,8 @@ export interface VehicleDetailsState {
   vehicleType: string;
   driverType: string;
   vehicleName: string;
+  vehicleNumber?: string; 
+
 }
 
 /* ================= OFFENDER ================= */
@@ -49,7 +51,9 @@ export interface OffenceOccurenceDetails {
   description: string;
   authSpeed?: string;
   actualSpeed?: string;
+  actualSpeedNoted?: string;
   overSpeed?: string;
+ overSpeedCalculated?: string;
 }
 
 /* ================= WITNESS (AS IT IS) ================= */
@@ -70,6 +74,8 @@ export interface TrafficState {
     category: string;
     vehicleType: string;
     driverType: string;
+    vehicleNumber: string;
+    vehicleName: string;
   };
 
   offenderWithoutVehicle: OffenderWithoutVehicleState;
@@ -83,7 +89,8 @@ export interface TrafficState {
   offenceCode: string[];
 
   witnesses: Witness[];
-  selectedWitness: Witness | null;
+selectedWitness: number | null;
+
 
   offenderPeople: OffenderPerson[];
 }
@@ -105,7 +112,8 @@ export interface StaticSpeedState {
   offenceBlock: OffenceOccurenceDetails;
 
   witnesses: Witness[];
-  selectedWitness: Witness | null;
+selectedWitness: number | null;
+
 
   offenderDetails: Record<string, unknown>;
   offenderPeople: OffenderPerson[];

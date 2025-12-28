@@ -8,7 +8,7 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
 
 interface VehicleDetailsFormProps {
-  scope?: "traffic" | "static" | "mp-main";
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
   onCoDriverSelect?: (type: string) => void;
 }
 
@@ -29,6 +29,7 @@ export default function VehicleDetailsForm({
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
   const mp = state.formData.mpReport;
+
   if (scope === "traffic" && traffic.vehicleInvolved !== "yes") {
     return null;
   }
@@ -39,6 +40,8 @@ export default function VehicleDetailsForm({
       ? traffic.vehicleDetails
       : scope === "mp-main"
       ? (mp.individualDetails.vehicleData as VehicleCommonState) || {}
+      : scope === "mp-additional"
+      ? (mp.additionalIndividual.vehicleData as VehicleCommonState) || {}
       : staticSpeed.vehicleDetails;
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
@@ -57,6 +60,12 @@ export default function VehicleDetailsForm({
       dispatch({
         type: "SET_PATH",
         path: "formData.mpReport.individualDetails.vehicleData",
+        value: updated,
+      });
+    } else if (scope === "mp-additional") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mpReport.additionalIndividual.vehicleData",
         value: updated,
       });
     } else {

@@ -58,7 +58,6 @@ export default function StaticSpeedForm() {
         vehicleName: staticData.vehicleDetails.vehicleName,
 
         offenceOccurenceDetails: {
-          // ---- MERGED + BACKEND SAFE ----
           time:
             staticData.dutyBlock.dateOfDuty &&
             staticData.offenceBlock.timeOfOffence
@@ -68,20 +67,18 @@ export default function StaticSpeedForm() {
               : "",
 
           timeOfOffence: staticData.offenceBlock.timeOfOffence ?? "",
-
           incidentLocation: staticData.offenceBlock.incidentLocation,
           description: staticData.offenceBlock.description,
 
           authSpeed: staticData.offenceBlock.authSpeed ?? "",
-          actualSpeed:
-            (staticData.offenceBlock as any).actualSpeed ||
-            staticData.offenceOccurenceDetails?.actualSpeedNoted ||
-            "",
 
-          overSpeed:
-            (staticData.offenceBlock as any).overSpeed ||
-            staticData.offenceOccurenceDetails?.overSpeedCalculated ||
-            "",
+          actualSpeed: staticData.offenceBlock.actualSpeed || "",
+          overSpeed: staticData.offenceBlock.overSpeed || "",
+
+          // ⭐ REQUIRED by CreateStaticSpeedPayload
+          actualSpeedNoted: staticData.offenceBlock.actualSpeedNoted || "",
+          overSpeedCalculated:
+            staticData.offenceBlock.overSpeedCalculated || "",
         },
       };
 
