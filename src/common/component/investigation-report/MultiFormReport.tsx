@@ -17,6 +17,7 @@ import Step11Remarks from "./steps/Step11Remarks";
 import { useCreateMPReport } from "@/features/mpReports/hooks";
 import { createOffender } from "@/apis";
 import { OffenderType } from "@/apis/offender/types";
+import MpOccurrenceReport from "@/components/reports/MpOccurrenceReport";
 
 export default function MultiFormReport() {
   const { state, dispatch } = useForm();
@@ -36,6 +37,90 @@ export default function MultiFormReport() {
   ];
 
   const { mutate: createReport, isPending } = useCreateMPReport();
+
+
+
+const mapMpToReport = (mp: any) => {
+  const offenders = mp.individualDetails?.offenderList || [];
+  const witnessList = mp.witnesses || [];
+
+  return {
+    reportNo: mp.reportDetails.reportNo || "N/A",
+    command: mp.reportDetails.command || "N/A",
+    firNo: mp.reportDetails.firNo || "N/A",
+
+    mpDetails: {
+      armyNo: mp.mpParticulars.armyNo || "N/A",
+      rank: mp.mpParticulars.rank || "N/A",
+      name: mp.mpParticulars.name || "N/A",
+      unit: mp.mpParticulars.unit || "N/A",
+      fmn: mp.mpParticulars.fmn || "N/A",
+      command: mp.mpParticulars.command || "N/A",
+    },
+
+    occurrence: {
+      offenceType: mp.occurrenceDetails.offenceType || "N/A",
+      place: mp.occurrenceDetails.place || "N/A",
+      date: mp.occurrenceDetails.date || "N/A",
+      time: mp.occurrenceDetails.time || "N/A",
+    },
+
+    /* ---------- VICTIMS / OFFENDERS TABLE ---------- */
+    people: offenders.map((p: any, i: number) => ({
+      sno: i + 1,
+      armyNo: p.armyNumber || "N/A",
+      rank: p.rank || "N/A",
+      name: p.name || "N/A",
+      identityCard: p.iCardNumber || "N/A",
+      unitName: p.unit || "N/A",
+      fmn: p.fmn || "N/A",
+      address: p.address || "N/A",
+      remark: p.remark || "--",
+      role: "Offender",
+    })),
+
+    briefOfOccurrence: mp.occurrenceDetails.description || "N/A",
+
+    /* ---------- WITNESS TABLE ---------- */
+    witnesses: witnessList.map((p: any, i: number) => ({
+      sno: i + 1,
+      armyNo: p.armyNumber || "N/A",
+      rank: p.rank || "N/A",
+      name: p.name || "N/A",
+      identityCard: p.iCardNumber || "N/A",
+      unitName: p.unit || "N/A",
+      fmn: p.fmn || "N/A",
+      address: p.address || "N/A",
+      remark: p.remark || "--",
+    })),
+
+    evidence: {
+      eyeSketch: mp.evidence.eyeSketch || "",
+      photos: mp.evidence.photos?.length ? "Attached" : "",
+      videos: mp.evidence.videos?.length ? "Attached" : "",
+    },
+
+    documents: (mp.documents || []).map((d: any) => d.statement),
+
+    detailedReport: {
+      statement: mp.detailedReport || "",
+      findings: mp.investigationPoints
+        ? mp.investigationPoints.split("\n")
+        : [],
+      opinion: mp.opinion || "",
+    },
+
+    remarks: {
+      analysis: mp.remarks.analysis || "",
+      recommendation: mp.remarks.recommendation || "",
+    },
+
+    station: mp.reportDetails.command || "N/A",
+    reportDate: new Date().toLocaleDateString("en-GB"),
+  };
+};
+
+
 
   const onSubmitFinal = async () => {
     try {
@@ -197,6 +282,25 @@ export default function MultiFormReport() {
       component: <Step11Remarks />,
     },
   };
+
+
+  if (state.preview) {
+  return (
+    <div className="relative">
+      {/* CLOSE BUTTON */}
+      <button
+        onClick={() => dispatch({ type: "SET_PREVIEW", payload: false })}
+        className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 rounded"
+      >
+        Close Preview
+      </button>
+
+      <MpOccurrenceReport
+        {...mapMpToReport(state.formData.mpReport)}
+      />
+    </div>
+  );
+}
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 w-full px-6">

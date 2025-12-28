@@ -63,14 +63,14 @@ export default function StaticSpeedForm() {
       /* -------- 1️⃣ PARTICULARS -------- */
       particulars: {
         rider: {
-          armyNo: rider?.armyNumber || rider?.armyNo || "N/A",
+          armyNo: rider?.armyNo || rider?.armyNo || "N/A",
           name: rider?.name || "N/A",
           fmn: rider?.fmn || "N/A",
           address: rider?.address || "N/A",
           rank: rider?.rank || "N/A",
           unit: rider?.unit || "N/A",
           command: rider?.command || "N/A",
-          iCardNo: rider?.iCardNumber || rider?.icard || "N/A",
+          iCardNo: rider?.iCardNo || "N/A",
         },
 
         vehicle: {
