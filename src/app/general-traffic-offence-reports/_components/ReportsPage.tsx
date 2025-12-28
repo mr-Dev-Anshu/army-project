@@ -1,18 +1,23 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
+import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
+import { Button } from "@/components/ui/button";
+import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
 
 const TableSection = ({
   groups,
   isVehicleInvolved,
+  onView,
 }: {
   groups: any[];
   isVehicleInvolved: boolean;
+  onView: (offence: any) => void;
 }) => {
   const uniqueOffenceTypesCount = groups.length;
 
@@ -28,14 +33,10 @@ const TableSection = ({
       </div>
 
       {/* Content */}
-      <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} />
+      <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} onView={onView} />
     </div>
   );
 };
-
-import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 export default function ReportsPage({
   viewType = "vehicle",
@@ -43,6 +44,7 @@ export default function ReportsPage({
   viewType?: "vehicle" | "no-vehicle";
 }) {
   const [isCreating, setIsCreating] = useState(false);
+  const [viewingReport, setViewingReport] = useState<any | null>(null);
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -137,6 +139,86 @@ export default function ReportsPage({
     return { vehicleGroups: vGroups, noVehicleGroups: nvGroups };
   }, [data, filters]);
 
+  const mapToReportProps = (offence: any): MilitaryPoliceReportProps => {
+    const primary = offence.offenders?.[0]?.offenderDetails || {};
+    const secondary = offence.offenders?.[1]?.offenderDetails;
+    const mpDetails = offence.onDutyDetailsMPReporting || {};
+    const occDetails = offence.offenceOccurenceDetails || {};
+    const witness = offence.witnessDetails?.[0] || {};
+    const date = new Date(occDetails.timeOfOffence || offence.createdAt);
+
+    return {
+      reportNo: offence.reportNumber || "N/A",
+      reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
+      particulars: {
+        primary: {
+          aadharCardNo: primary.aadharCardNo || "N/A",
+          name: primary.name || "N/A",
+          so: primary.so || "N/A",
+          relation: primary.relation || "N/A",
+          armyNo: primary.armyNo || "N/A",
+          rank: primary.rank || "N/A",
+          unit: primary.unit || "N/A",
+          fmn: primary.fmn || "N/A",
+          command: primary.command || "N/A",
+          address: primary.address || "N/A",
+          iCardNo: primary.iCardNo || "N/A",
+        },
+        secondary: secondary ? {
+          aadharCardNo: secondary.aadharCardNo || "N/A",
+          name: secondary.name || "N/A",
+          so: secondary.so || "N/A",
+          relation: secondary.relation || "N/A",
+          armyNo: secondary.armyNo || "N/A",
+          rank: secondary.rank || "N/A",
+          unit: secondary.unit || "N/A",
+          fmn: secondary.fmn || "N/A",
+          command: secondary.command || "N/A",
+          address: secondary.address || "N/A",
+          iCardNo: secondary.iCardNo || "N/A",
+        } : undefined,
+        vehicle: offence.vehicleNumber ? {
+          baNo: offence.vehicleNumber,
+          makeAndTake: offence.vehicleName || "Unknown"
+        } : undefined,
+      },
+      occurrence: {
+        dateOfDuty: mpDetails.dateOfDuty ? new Date(mpDetails.dateOfDuty).toLocaleDateString("en-GB") : date.toLocaleDateString("en-GB"),
+        dutyTime: mpDetails.dutyTime || "N/A",
+        dutyLocation: mpDetails.placeOfDuty || "N/A",
+        nameOfWitnessingOfficial1: witness.name || "N/A",
+        nameOfWitnessingOfficial2: offence.witnessDetails?.[1]?.name || "",
+        nameOfWitnessingOfficial3: offence.witnessDetails?.[2]?.name || "",
+        timeOfOffence: date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }),
+        locationOfOffence: occDetails.incidentLocation || "N/A",
+        statement: occDetails.statement || "No statement provided.",
+      },
+      offence: {
+        type: offence.currentOffenceType || "Traffic Offence",
+        ref1: "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
+        ref2: "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order.",
+        description: occDetails.description || "No description provided.",
+      },
+      witnessSig: {
+        armyNo: witness.armyNo || "N/A",
+        rank: witness.rank || "N/A",
+        name: witness.name || "N/A",
+        unit: witness.unit || "N/A",
+      },
+      mpSig: {
+        armyNo: mpDetails.armyNoReportingMP || "N/A",
+        rank: mpDetails.rank || "N/A",
+        name: mpDetails.nameReportingMP || "N/A",
+        unit: mpDetails.unit || "N/A",
+      },
+      remarks: {
+        text: offence.remarks || "The indl committed offence as enumerated under Para 3 above. Suitable discp action be initiated against the indl by the unit, and inform to this office within 15 days from issue of this report.",
+        station: offence.station || "C/O 56 APO",
+        dated: new Date(offence.createdAt).toLocaleDateString("en-GB"),
+      },
+    };
+  };
+
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -151,6 +233,27 @@ export default function ReportsPage({
         </div>
       </div>
     )
+  }
+
+  if (viewingReport) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
+          <Button variant="ghost" size="sm" onClick={() => setViewingReport(null)} className="gap-2">
+            <ArrowLeft className="w-4 h-4" /> Back to Reports
+          </Button>
+          <h1 className="text-lg font-semibold text-gray-800">View General Traffic Offence Report</h1>
+          <div className="ml-auto">
+            <Button onClick={() => window.print()} variant="outline" size="sm" className="gap-2">
+              Print Report
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
+          <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+        </div>
+      </div>
+    );
   }
 
   const isVehicleView = viewType === "vehicle";
@@ -209,7 +312,7 @@ export default function ReportsPage({
         /* Conditional Table Rendering */
         isVehicleView ? (
           vehicleGroups.length > 0 ? (
-            <TableSection groups={vehicleGroups} isVehicleInvolved={true} />
+            <TableSection groups={vehicleGroups} isVehicleInvolved={true} onView={setViewingReport} />
           ) : (
             <div className="mt-12 text-center text-gray-500">
               No "Vehicle Involved" offences found.
@@ -219,6 +322,7 @@ export default function ReportsPage({
           <TableSection
             groups={noVehicleGroups}
             isVehicleInvolved={false}
+            onView={setViewingReport}
           />
         ) : (
           <div className="mt-12 text-center text-gray-500">
