@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "@/context/FormContext";
@@ -15,6 +14,7 @@ import { toast } from "react-toastify";
 import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
+import { OffenderType } from "@/apis/offender/types";
 
 export default function StaticSpeedForm() {
   const { state, dispatch } = useForm();
@@ -33,21 +33,15 @@ export default function StaticSpeedForm() {
   ];
 
   const stepsConfig = {
-    1: {
-      title: "1. PARTICULARS:",
-      component: <StaticSpeedStep1Particulars />,
-    },
-
+    1: { title: "1. PARTICULARS:", component: <StaticSpeedStep1Particulars /> },
     2: {
       title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
       component: <Step2Statement />,
     },
-
     3: {
       title: "3. OFFENCE COMMITTED / ORDERS CONTRAVENED:",
       component: <Step3Offence />,
     },
-
     4: {
       title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
       component: <Step4Remarks />,
@@ -56,6 +50,7 @@ export default function StaticSpeedForm() {
 
   const handleFinalSubmit = async () => {
     try {
+      /* ================= PAYLOAD ================= */
       const payload = {
         vehicleType: staticData.vehicleDetails.vehicleType,
         vehicleCategory: staticData.vehicleDetails.category,
@@ -63,20 +58,29 @@ export default function StaticSpeedForm() {
         vehicleName: staticData.vehicleDetails.vehicleName,
 
         offenceOccurenceDetails: {
-          time: staticData.offenceOccurenceDetails.time,
-          incidentLocation: staticData.offenceOccurenceDetails.incidentLocation,
-          description: staticData.offenceOccurenceDetails.description,
-          overSpeed: staticData.offenceOccurenceDetails.overSpeed ?? "",
-          actualSpeed: staticData.offenceOccurenceDetails.actualSpeed ?? "",
-          authSpeed: staticData.offenceOccurenceDetails.authSpeed ?? "",
+          time:
+            staticData.dutyBlock.dateOfDuty &&
+            staticData.offenceBlock.timeOfOffence
+              ? new Date(
+                  `${staticData.dutyBlock.dateOfDuty}T${staticData.offenceBlock.timeOfOffence}`
+                ).toISOString()
+              : "", // ❗ empty string do undefined nahi
+
+          timeOfOffence: staticData.offenceBlock.timeOfOffence ?? "",
+
+          incidentLocation: staticData.offenceBlock.incidentLocation,
+          description: staticData.offenceBlock.description,
+
+          authSpeed: staticData.offenceBlock.authSpeed ?? "",
+          actualSpeed: staticData.offenceBlock.actualSpeed ?? "",
+          overSpeed: staticData.offenceBlock.overSpeed ?? "",
         },
       };
 
       console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
 
-      // ========= 1️⃣ STATIC SPEED RECORD =========
+      /* ================= CREATE STATIC RECORD ================= */
       const staticRes = await createStaticRecord.mutateAsync(payload);
-
       toast.success("Static Record Created Successfully!");
 
       if (!staticRes?._id) {
@@ -84,15 +88,13 @@ export default function StaticSpeedForm() {
         return;
       }
 
-      // ========= 2️⃣ OFFENDER =========
+      /* ================= CREATE OFFENDER ================= */
       const offenderPayload = {
         offenceId: staticRes._id,
-        offenderType: staticData.vehicleDetails.driverType,
-
-        offenderDetails:
-          staticData.offenderPeople?.length > 0
-            ? staticData.offenderPeople
-            : [],
+        offenderType: staticData.vehicleDetails.driverType as OffenderType,
+        offenderDetails: staticData.offenderPeople?.length
+          ? staticData.offenderPeople
+          : [],
       };
 
       console.log("👮 STATIC OFFENDER PAYLOAD ===>", offenderPayload);
@@ -100,7 +102,7 @@ export default function StaticSpeedForm() {
       await createOffenderMutation.mutateAsync(offenderPayload);
       toast.success("Offender Saved!");
 
-      // ========= 3️⃣ WITNESSES =========
+      /* ================= CREATE WITNESS ================= */
       if (staticData.witnesses?.length > 0) {
         const witnessPayload = staticData.witnesses.map((w) => ({
           offenceId: staticRes._id,
@@ -114,21 +116,15 @@ export default function StaticSpeedForm() {
         console.log("👀 WITNESS PAYLOAD ===>", witnessPayload);
 
         await Promise.all(
-          witnessPayload.map((w) =>
-            createWitnessMutation.mutateAsync(w)
-          )
+          witnessPayload.map((w) => createWitnessMutation.mutateAsync(w))
         );
 
         toast.success("Witness Added!");
       }
 
       toast.success("🎉 All Static Speed Processes Completed!");
-
     } catch (error: any) {
-      console.log(
-        "❌ STATIC SPEED SUBMIT ERROR ===>",
-        error?.response?.data
-      );
+      console.log("❌ STATIC SPEED SUBMIT ERROR ===>", error?.response?.data);
 
       toast.error(
         error?.response?.data?.message ||
@@ -148,17 +144,22 @@ export default function StaticSpeedForm() {
             completedSteps={state.completedSteps}
             title="Create New Static Speed Check Record"
             reportNo="PRO/21 CPU/00042/106/25"
-            onStepClick={(id) =>
-              dispatch({ type: "SET_STEP", payload: id })
-            }
+            onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            setFormData={(data) =>
-              dispatch({ type: "SET_FORM_DATA", payload: data })
-            }
+            // 🔥 THIS is new safe wrapper
+            setFormData={(data) => {
+              Object.keys(data).forEach((key) => {
+                dispatch({
+                  type: "SET_PATH",
+                  path: `formData.${key}`,
+                  value: (data as any)[key],
+                });
+              });
+            }}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onSubmitFinal={handleFinalSubmit}
             stepsConfig={stepsConfig}

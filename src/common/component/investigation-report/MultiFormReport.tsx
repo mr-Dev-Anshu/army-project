@@ -16,6 +16,7 @@ import Step10Opinion from "./steps/Step10Opinion";
 import Step11Remarks from "./steps/Step11Remarks";
 import { useCreateMPReport } from "@/features/mpReports/hooks";
 import { createOffender } from "@/apis";
+import { OffenderType } from "@/apis/offender/types";
 
 export default function MultiFormReport() {
   const { state, dispatch } = useForm();
@@ -74,13 +75,13 @@ export default function MultiFormReport() {
         },
 
         documents: (mp.documents || [])
-          .filter((d) => d.url) // blank hatao
+          .filter((d) => d.url)
           .map((d) => ({
             statement: d.statement,
             url: d.url,
           })),
 
-        evidences: [], // 🚨 backend ko array chahiye — abhi empty bhej do
+        evidences: [],
 
         detailedOccurrenceReport: mp.detailedReport,
         pointsFindOutDuringInvestigation: mp.investigationPoints,
@@ -108,13 +109,13 @@ export default function MultiFormReport() {
             for (const offender of offenderList) {
               const offenderPayload = {
                 offenceId: reportId,
-                offenderType: offender.driverType || "Civilian", // ⭐ dynamic
+                offenderType: (offender.driverType as OffenderType )|| "Civilian",
                 category: "investigation",
 
                 offenderDetails: [
                   {
                     type: "Driver",
-                    details: offender, // ⭐ PURE COMPLETE OBJECT SEND
+                    details: offender,
                   },
                 ],
               };
@@ -123,7 +124,7 @@ export default function MultiFormReport() {
               await createOffender(offenderPayload);
             }
 
-            toast.success("Offender(s) Created Successfully 🎯");
+            // toast.success("Offender(s) Created Successfully 🎯");
           } catch (err: any) {
             console.log("OFFENDER CREATE ERROR ===>", err?.response || err);
             toast.error("Offender creation failed ❌");
@@ -137,10 +138,10 @@ export default function MultiFormReport() {
         },
 
         onError: (err: any) => {
-          console.log("🔥 RAW ERROR ===>", err);
-          console.log("🚨 STATUS ===>", err?.response?.status);
-          console.log("🚨 SERVER MESSAGE ===>", err?.response?.data?.message);
-          console.log("🚨 VALIDATION ERRORS ===>", err?.response?.data?.errors);
+          console.log(" RAW ERROR ===>", err);
+          console.log(" STATUS ===>", err?.response?.status);
+          console.log(" SERVER MESSAGE ===>", err?.response?.data?.message);
+          console.log(" VALIDATION ERRORS ===>", err?.response?.data?.errors);
 
           toast.error(
             err?.response?.data?.message || "Failed to create report"
@@ -215,8 +216,8 @@ export default function MultiFormReport() {
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            setFormData={(data) =>
-              dispatch({ type: "SET_FORM_DATA", payload: data })
+            setFormData={(path: string, value: unknown) =>
+              dispatch({ type: "SET_PATH", path, value })
             }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onSubmitFinal={onSubmitFinal}

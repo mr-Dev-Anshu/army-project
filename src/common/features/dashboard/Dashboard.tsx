@@ -25,11 +25,12 @@ import { useState } from "react";
 import MultiStepForm from "../../component/multi-step-form/MulitstepForm";
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
+import { Collapsible } from "@/components/ui/collapsible";
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
 
-  const [page, setPage] = useState<"dashboard" | "createRecord" | "multiForm" |"staticSpeed" | "investigation">(
+  const [page, setPage] = useState<"dashboard" | "createRecord" | "multiForm" |"staticSpeed" | "investigation" | "viewReports">(
     "dashboard"
   );
 
@@ -141,7 +142,7 @@ export default function Dashboard() {
               <h2 className="text-lg font-semibold mb-4">
                 All Registered Reports
               </h2>
-              <p className="text-gray-500">Coming Soon...</p>
+
             </div>
           </>
         )}

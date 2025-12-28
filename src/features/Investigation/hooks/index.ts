@@ -1,18 +1,13 @@
+import { createMPReport, deleteMPReport, getAllMPReports, getMPReportById, updateMPReport } from "@/apis";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  createMPReport,
-  getMPReports,
-  getMPReportById,
-  updateMPReport,
-  deleteMPReport,
-} from "@/apis/investigationReport";
+
 
 const REPORT_KEY = ["mp-reports"];
 
 export const useGetMPReports = (filters?: any) => {
   return useQuery({
     queryKey: [...REPORT_KEY, filters],
-    queryFn: () => getMPReports(filters),
+    queryFn: () => getAllMPReports(),
   });
 };
 

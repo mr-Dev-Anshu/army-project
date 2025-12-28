@@ -9,6 +9,7 @@ import Step3Offence from "./steps/Step3Offence";
 import Step4Remarks from "./steps/Step4Remarks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
+import { OffenderType } from "@/apis/offender/types";
 
 export default function MultiStepForm() {
   const { state, dispatch } = useForm();
@@ -72,10 +73,10 @@ export default function MultiStepForm() {
         return;
       }
 
-      const offenderType =
+      const offenderType: OffenderType =
         traffic.vehicleInvolved === "yes"
-          ? traffic?.vehicleDetails?.driverType
-          : traffic?.offenderWithoutVehicle?.offenderType;
+          ? (traffic.vehicleDetails.driverType as OffenderType)
+          : (traffic.offenderWithoutVehicle.offenderType as OffenderType);
 
       const offenderPayload = {
         offenceId,
@@ -87,7 +88,6 @@ export default function MultiStepForm() {
       };
 
       console.log("👮 TRAFFIC OFFENDER PAYLOAD ===>", offenderPayload);
-
 
       await createOffenderMutate(offenderPayload);
       toast.success("Offender Created Successfully!");
@@ -122,22 +122,11 @@ export default function MultiStepForm() {
 
   // ================== STEP CONFIG ==================
   const stepsConfig = {
-    1: {
-      title: "1. PARTICULARS:",
-     component: (
-  <Step1Particulars
-    value={state.formData.traffic.vehicleInvolved}
-    onChange={(v: string) =>
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.traffic.vehicleInvolved",
-        value: v,
-      })
-    }
-  />
-),
+   1: {
+  title: "1. PARTICULARS:",
+  component: <Step1Particulars />
+},
 
-    },
 
     2: {
       title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
@@ -171,11 +160,17 @@ export default function MultiStepForm() {
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            setFormData={(data) =>
-              dispatch({ type: "SET_FORM_DATA", payload: data })
-            }
+            setFormData={(data) => {
+              Object.entries(data).forEach(([key, value]) => {
+                dispatch({
+                  type: "SET_PATH",
+                  path: `formData.${key}`,
+                  value,
+                });
+              });
+            }}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onSubmitFinal={onSubmitFinal} // <<=== IMPORTANT!!!
+            onSubmitFinal={onSubmitFinal}
             stepsConfig={stepsConfig}
             mode="traffic"
           />

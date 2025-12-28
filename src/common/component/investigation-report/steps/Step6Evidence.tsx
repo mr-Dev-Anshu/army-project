@@ -30,6 +30,7 @@ export default function Step6Evidence() {
   return (
     <FormSection title="6. EVIDENCE:" onClear={clear}>
       <EvidenceUploadSection
+      title="Upload Evidence"
         values={evidence}
         onChange={set}
         fields={[

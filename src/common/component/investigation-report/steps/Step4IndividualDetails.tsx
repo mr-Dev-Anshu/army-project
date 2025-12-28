@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -21,24 +20,17 @@ export default function Step4IndividualDetails() {
   const offenders = mp.offenderList || [];
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [extraVehicleStatus, setExtraVehicleStatus] = useState("");
+  const [extraVehicleStatus, setExtraVehicleStatus] = useState<
+    "yes" | "no" | ""
+  >("");
 
-  /* ========= VEHICLE STATUS ========= */
-  const setVehicleInvolved = (value: any) => {
-    const normalized =
-      value === "vehicle" || value === "yes"
-        ? "yes"
-        : value === "noVehicle" || value === "no"
-        ? "no"
-        : "";
-
+  const setVehicleInvolved = (value: "yes" | "no" | "") => {
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.individualDetails.vehicleInvolved",
-      value: normalized,
+      value,
     });
   };
-
   /* ========= DELETE OFFENDER ========= */
   const handleDeleteOffender = (index: number) => {
     const updated = offenders.filter((_, i) => i !== index);
@@ -50,10 +42,9 @@ export default function Step4IndividualDetails() {
     });
   };
 
-  /* ========= SAVE MAIN ========= */
   const handleSaveMain = () => {
-    const vehicle = mp.vehicleData || {};
-    const person = mp.tempOffender || {};
+    const vehicle = (mp.vehicleData || {}) as { driverType?: string };
+    const person = (mp.tempOffender || {}) as { driverType?: string };
 
     const finalData = {
       ...vehicle,
@@ -73,25 +64,31 @@ export default function Step4IndividualDetails() {
       value: [...offenders, finalData],
     });
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.tempOffender",
-      value: null,
-    });
-
+    // clear vehicle + temp person
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.individualDetails.vehicleData",
       value: {},
     });
 
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.tempOffender",
+      value: {},
+    });
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.driverType",
+      value: "",
+    });
+
     toast.success("Main Person Added!");
   };
 
-  /* ========= SAVE ADDITIONAL ========= */
   const handleSaveAdditional = () => {
-    const vehicle = add.vehicleData || {};
-    const person = add.tempOffender || {};
+    const vehicle = (mp.vehicleData || {}) as { driverType?: string };
+    const person = (mp.tempOffender || {}) as { driverType?: string };
 
     const finalData = {
       ...vehicle,
@@ -112,7 +109,14 @@ export default function Step4IndividualDetails() {
     });
 
     dispatch({
-      type: "CLEAR_MP_ADDITIONAL",
+      type: "SET_PATH",
+      path: "formData.mpReport.additionalIndividual",
+      value: {
+        vehicleInvolved: "",
+        vehicleData: {},
+        driverType: "",
+        tempOffender: null,
+      },
     });
 
     setExtraVehicleStatus("");
@@ -135,9 +139,7 @@ export default function Step4IndividualDetails() {
         setVehicleStatus={setVehicleInvolved}
       />
 
-      {mp.vehicleInvolved === "yes" && (
-        <VehicleDetailsForm scope="mp-main" />
-      )}
+      {mp.vehicleInvolved === "yes" && <VehicleDetailsForm scope="mp-main" />}
 
       {mp.vehicleInvolved === "no" && (
         <OffenderWithoutVehicleForm scope="mp-main" />
@@ -175,7 +177,7 @@ export default function Step4IndividualDetails() {
           />
 
           {extraVehicleStatus === "yes" && (
-            <VehicleDetailsForm scope="mp-additional" />
+            <VehicleDetailsForm scope="mp-main" />
           )}
 
           {extraVehicleStatus === "no" && (

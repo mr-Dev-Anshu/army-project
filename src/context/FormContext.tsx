@@ -75,6 +75,7 @@ const initialState: GlobalFormState = {
       witnesses: [],
       selectedWitness: null,
       offenderPeople: [],
+      remarks:"",
     },
 
     /* ================= STATIC SPEED ================= */
@@ -87,20 +88,38 @@ const initialState: GlobalFormState = {
         vehicleName: "",
       },
 
-      witnesses: [],
-      selectedWitness: null,
+      /* ----- NEW BLOCK STRUCTURE ----- */
+      dutyBlock: {
+        dateOfDuty: "",
+        startTime: "",
+        endTime: "",
+        dutyLocation: "",
+        dutyType: "",
+      },
 
-      offenderDetails: {},
-      offenderPeople: [],
+      reportingBlock: {
+        nameReportingMP: "",
+        rank: "",
+        unit: "",
+        armyNumber: "",
+        contactNumber: "",
+      },
 
-      offenceOccurenceDetails: {
+      offenceBlock: {
         timeOfOffence: "",
+        time: "",
         incidentLocation: "",
         description: "",
         authSpeed: "30",
         actualSpeed: "",
         overSpeed: "",
       },
+
+      witnesses: [],
+      selectedWitness: null,
+
+      offenderDetails: {},
+      offenderPeople: [],
     },
 
     /* ================= MP REPORT ================= */
@@ -136,9 +155,11 @@ const initialState: GlobalFormState = {
         vehicleData: {},
         driverType: "",
         offenderList: [],
+         tempOffender: {}, 
       },
 
       witnesses: [],
+      witnessVehicleStatus: "",
       evidence: {
         attachEvidence: null,
         eyeSketch: null,

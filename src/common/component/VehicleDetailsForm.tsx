@@ -1,5 +1,7 @@
 
 
+
+
 "use client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,20 +11,35 @@ import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/co
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
 
+type ScopeType = "traffic" | "static" | "mp-main";
+
+interface VehicleDetailsFormProps {
+  scope?: "traffic" | "static" | "mp-main";
+  onCoDriverSelect?: (type: string) => void;
+}
+
+
+type VehicleCommonState = {
+  category: string;
+  vehicleType: string;
+  driverType: string;
+  vehicleNumber?: string;
+  vehicleName?: string;
+};
+
 export default function VehicleDetailsForm({
   scope = "traffic",
-}: {
-  scope?: "traffic" | "static" | "mp-main";
-}) {
+  onCoDriverSelect,
+}: VehicleDetailsFormProps) {
+
   const { state, dispatch } = useForm();
 
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
   const mp = state.formData.mpReport;
 
-  /* ================= VISIBILITY FIX ================= */
+  /* ================= VISIBILITY CHECK ================= */
 
-  // Traffic + MP-main shared visibility
   if (
     scope === "traffic" &&
     traffic.vehicleInvolved !== "yes" &&
@@ -31,52 +48,49 @@ export default function VehicleDetailsForm({
     return null;
   }
 
-  // MP MAIN FORM visibility (❌ pehle yaha additional check ho raha tha)
   if (scope === "mp-main" && mp.individualDetails.vehicleInvolved !== "yes") {
     return null;
   }
 
-  /* ================= STATE SOURCE FIX ================= */
+  /* ================= SOURCE SELECT ================= */
 
-  const vehicleState =
+  const vehicleState: VehicleCommonState =
     scope === "traffic"
       ? traffic.vehicleDetails
       : scope === "mp-main"
-      ? mp.individualDetails.vehicleData || {}
+      ? (mp.individualDetails.vehicleData as VehicleCommonState) || {}
       : staticSpeed.vehicleDetails;
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
- const updateVehicle = (data: any) => {
-  const updated = {
-    ...vehicleState,
-    ...data,
+  /* ================= UPDATE FUNCTION (STRICT) ================= */
+
+  const updateVehicle = (data: Partial<VehicleCommonState>) => {
+    const updated = {
+      ...vehicleState,
+      ...data,
+    };
+
+    if (scope === "traffic") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.traffic.vehicleDetails",
+        value: updated,
+      });
+    } else if (scope === "mp-main") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mpReport.individualDetails.vehicleData",
+        value: updated,
+      });
+    } else {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.staticSpeed.vehicleDetails",
+        value: updated,
+      });
+    }
   };
-
-  if (scope === "traffic") {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic.vehicleDetails",
-      value: updated,
-    });
-  }
-
-  else if (scope === "mp-main") {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.vehicleData",
-      value: updated,
-    });
-  }
-
-  else {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed.vehicleDetails",
-      value: updated,
-    });
-  }
-};
 
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6 max-h-[75vh] overflow-y-auto">
@@ -165,37 +179,43 @@ export default function VehicleDetailsForm({
       )}
 
       {/* DRIVER TYPE */}
-      <div>
-        <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
+<div>
+  <p className="font-semibold mb-2">
+    Select Who was the Driver/Rider?
+  </p>
 
-        <RadioGroup
-          value={driverType}
-          onValueChange={(v) => updateVehicle({ driverType: v })}
-          className="grid sm:grid-cols-2 gap-3"
-        >
-          {[
-            "Military Person",
-            "Civilian",
-            "Employee",
-            "Servant/Maid",
-            "Shop Keeper",
-            "Temporary Hired Worker",
-          ].map((item) => (
-            <label
-              key={item}
-              className={cn(
-                "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-                driverType === item
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300"
-              )}
-            >
-              <RadioGroupItem value={item} />
-              {item}
-            </label>
-          ))}
-        </RadioGroup>
-      </div>
+  <RadioGroup
+    value={driverType}
+    onValueChange={(v) => {
+      updateVehicle({ driverType: v });
+      onCoDriverSelect?.(v);
+    }}
+    className="grid sm:grid-cols-2 gap-3"
+  >
+    {[
+      "Military Person",
+      "Civilian",
+      "Employee",
+      "Servant/Maid",
+      "Shop Keeper",
+      "Temporary Hired Worker",
+    ].map((item) => (
+      <label
+        key={item}
+        className={cn(
+          "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
+          driverType === item
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-300"
+        )}
+      >
+        <RadioGroupItem value={item} />
+        {item}
+      </label>
+    ))}
+  </RadioGroup>
+</div>
+
 
       {/* DYNAMIC FORM */}
       {driverType && offenderFormsConfig[driverType] && (
@@ -211,9 +231,14 @@ export default function VehicleDetailsForm({
   );
 }
 
-/* ------------ SUB COMPONENTS ------------- */
+/* ------------ SUB COMPONENTS (TYPED) ------------- */
 
-function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
+interface VehicleBlockProps {
+  vehicleState: VehicleCommonState;
+  updateVehicle: (d: Partial<VehicleCommonState>) => void;
+}
+
+function CivilianVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps) {
   return (
     <div>
       <p className="font-semibold mb-2">Fill Vehicle Identification</p>
@@ -224,7 +249,9 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
           <Input
             placeholder="e.g. MP04 AB 1234"
             value={vehicleState.vehicleNumber || ""}
-            onChange={(e) => updateVehicle({ vehicleNumber: e.target.value })}
+            onChange={(e) =>
+              updateVehicle({ vehicleNumber: e.target.value })
+            }
           />
         </div>
 
@@ -235,7 +262,9 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
           <Input
             placeholder="e.g. Honda CB Hornet"
             value={vehicleState.vehicleName || ""}
-            onChange={(e) => updateVehicle({ vehicleName: e.target.value })}
+            onChange={(e) =>
+              updateVehicle({ vehicleName: e.target.value })
+            }
           />
         </div>
       </div>
@@ -243,7 +272,7 @@ function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
   );
 }
 
-function DDVehicleBlock({ vehicleState, updateVehicle }: any) {
+function DDVehicleBlock({ vehicleState, updateVehicle }: VehicleBlockProps) {
   return (
     <div>
       <p className="font-semibold mb-2">Fill Vehicle Identification</p>
@@ -254,7 +283,9 @@ function DDVehicleBlock({ vehicleState, updateVehicle }: any) {
           <Input
             placeholder="e.g. 12A 345678Z"
             value={vehicleState.vehicleNumber || ""}
-            onChange={(e) => updateVehicle({ vehicleNumber: e.target.value })}
+            onChange={(e) =>
+              updateVehicle({ vehicleNumber: e.target.value })
+            }
           />
         </div>
 
@@ -265,7 +296,9 @@ function DDVehicleBlock({ vehicleState, updateVehicle }: any) {
           <Input
             placeholder="e.g. ALS W/B"
             value={vehicleState.vehicleName || ""}
-            onChange={(e) => updateVehicle({ vehicleName: e.target.value })}
+            onChange={(e) =>
+              updateVehicle({ vehicleName: e.target.value })
+            }
           />
         </div>
       </div>

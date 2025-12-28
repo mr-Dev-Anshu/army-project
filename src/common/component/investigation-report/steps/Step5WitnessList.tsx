@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -13,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import DynamicOffenderList from "../../DynamicOffenderLIst";
 
+type YesNo = "yes" | "no" | "";
+
 export default function Step5WitnessList() {
   const { state, dispatch } = useForm();
 
@@ -20,12 +21,13 @@ export default function Step5WitnessList() {
   const witnesses = mp.witnesses || [];
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [extraVehicleStatus, setExtraVehicleStatus] = useState("");
+  const [extraVehicleStatus, setExtraVehicleStatus] =
+    useState<YesNo>("");
 
-  const witnessVehicleStatus = mp.witnessVehicleStatus || "";
+  const witnessVehicleStatus: YesNo = mp.witnessVehicleStatus || "";
 
   /* ========= VEHICLE STATUS ========= */
-  const setVehicleStatus = (value: "yes" | "no" | "") =>
+  const setVehicleStatus = (value: YesNo) =>
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.witnessVehicleStatus",
@@ -94,7 +96,16 @@ export default function Step5WitnessList() {
       value: [...witnesses, finalData],
     });
 
-    dispatch({ type: "CLEAR_MP_ADDITIONAL" });
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.additionalIndividual",
+      value: {
+        vehicleInvolved: "",
+        vehicleData: {},
+        driverType: "",
+        tempOffender: null,
+      },
+    });
 
     setExtraVehicleStatus("");
     setShowAddForm(false);
@@ -126,6 +137,7 @@ export default function Step5WitnessList() {
       {witnessVehicleStatus === "yes" && (
         <VehicleDetailsForm scope="mp-main" />
       )}
+
       {witnessVehicleStatus === "no" && (
         <OffenderWithoutVehicleForm scope="mp-main" />
       )}
@@ -160,10 +172,11 @@ export default function Step5WitnessList() {
           />
 
           {extraVehicleStatus === "yes" && (
-            <VehicleDetailsForm scope="mp-additional" />
+            <VehicleDetailsForm scope="mp-main" />
           )}
+
           {extraVehicleStatus === "no" && (
-            <OffenderWithoutVehicleForm scope="mp-additional" />
+            <OffenderWithoutVehicleForm scope="mp-main" />
           )}
 
           <div className="mt-4 flex justify-end gap-3">

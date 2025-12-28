@@ -1,3 +1,6 @@
+
+
+
 "use client";
 import { useState } from "react";
 import { FormInput, FormSelect } from "@/common/component/FormInput";
@@ -7,13 +10,28 @@ import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
 
+interface FieldType {
+  label: string;
+  placeholder?: string;
+  type: "input" | "select";
+  options?: string[];
+}
+
+interface OffenderDynamicFormProps {
+  title: string;
+  helperText?: string;
+  fields: FieldType[];
+  showCoDriver?: boolean;
+  scope?: "traffic" | "static" | "mp-main";
+}
+
 export default function OffenderDynamicForm({
   title,
   helperText,
   fields,
   showCoDriver = false,
   scope = "traffic",
-}) {
+}: OffenderDynamicFormProps) {
   const { state, dispatch } = useForm();
 
   /* ACTIVE TYPE */
@@ -25,7 +43,9 @@ export default function OffenderDynamicForm({
       : state.formData.staticSpeed?.vehicleDetails?.driverType;
 
   const [isDependent, setIsDependent] = useState(false);
-  const [dependents, setDependents] = useState([{ relation: "", whoIsIt: "" }]);
+  const [dependents, setDependents] = useState<
+    { relation: string; whoIsIt: string }[]
+  >([{ relation: "", whoIsIt: "" }]);
 
   /* ============ PEOPLE SOURCE OLD ============ */
   const people =
@@ -35,9 +55,10 @@ export default function OffenderDynamicForm({
 
   /* ============ MP SOURCE ============ */
   const mpSection =
-    scope === "mp-additional" ? "additionalIndividual" : "individualDetails";
+    scope === "mp-main" ? "additionalIndividual" : "individualDetails";
 
-  const mpTempDriver = state.formData.mpReport?.[mpSection]?.tempOffender || {};
+  const mpTempDriver =
+    state.formData.mpReport?.[mpSection]?.tempOffender || {};
 
   const normalDriver =
     people.find((p: any) => p.type === "Driver")?.details || {};
@@ -47,10 +68,9 @@ export default function OffenderDynamicForm({
   /* ========= UNIVERSAL MP SAVE ========= */
   const saveToMp = (label: string, value: string) => {
     const section =
-      scope === "mp-additional" ? "additionalIndividual" : "individualDetails";
+      scope === "mp-main" ? "additionalIndividual" : "individualDetails";
 
-    const prev =
-      state.formData.mpReport?.[section]?.tempOffender || {};
+    const prev = state.formData.mpReport?.[section]?.tempOffender || {};
 
     dispatch({
       type: "SET_PATH",
@@ -64,24 +84,22 @@ export default function OffenderDynamicForm({
 
   /* ========= UNIVERSAL SAVE ========= */
   const saveField = (label: string, value: string) => {
-    // ================= MP LOGIC =================
     if (scope.startsWith("mp")) {
       saveToMp(label, value);
       return;
     }
 
-    // ================= TRAFFIC / STATIC =================
     const isCoDriverField = label.startsWith("CoDriver_");
     const personType = isCoDriverField ? "CoDriver" : "Driver";
     const pureLabel = isCoDriverField
       ? label.replace("CoDriver_", "")
       : label;
 
-    const updatePeopleArray = (existing = []) => {
-      const idx = existing.findIndex((p: any) => p.type === personType);
+    const updatePeopleArray = (existing: any[] = []) => {
+      const idx = existing.findIndex((p) => p.type === personType);
 
       if (idx >= 0) {
-        return existing.map((p: any) =>
+        return existing.map((p) =>
           p.type === personType
             ? {
                 ...p,
@@ -136,11 +154,11 @@ export default function OffenderDynamicForm({
               key={i}
               label={f.label}
               placeholder={f.placeholder}
-              value={driver[f.label] || ""}
+              value={(driver as any)?.[f.label] || ""}
               onChange={(value) => saveField(f.label, value)}
               inputClassName={cn(
                 "transition-all",
-                driver[f.label]
+                (driver as any)?.[f.label]
                   ? "border-blue-500 bg-blue-50"
                   : "border-gray-300"
               )}
@@ -150,8 +168,8 @@ export default function OffenderDynamicForm({
               key={i}
               label={f.label}
               placeholder={f.placeholder}
-              value={driver[f.label] || ""}
-              options={f.options || []}
+              value={(driver as any)?.[f.label] || ""}
+              options={(f.options || []).map(o => ({ label: o, value: o }))} 
               onChange={(value) => saveField(f.label, value)}
             />
           )
@@ -163,11 +181,13 @@ export default function OffenderDynamicForm({
         <>
           <div className="mt-6 flex items-start gap-2">
             <Checkbox
-              checked={Boolean(state.formData.coDriverOrPillion)}
+              checked={Boolean(
+                state.formData.traffic.coDriverOrPillion
+              )}
               onCheckedChange={(v) =>
                 dispatch({
                   type: "SET_PATH",
-                  path: "formData.coDriverOrPillion",
+                  path: "formData.traffic.coDriverOrPillion",
                   value: Boolean(v),
                 })
               }
@@ -177,15 +197,15 @@ export default function OffenderDynamicForm({
             </p>
           </div>
 
-          {state.formData.coDriverOrPillion && (
+          {state.formData.traffic.coDriverOrPillion && (
             <div className="mt-6 border rounded-xl bg-gray-50 p-6 space-y-5">
               <RadioGroup
                 className="grid grid-cols-2 gap-3"
-                value={state.formData.coDriverType || ""}
+                value={state.formData.traffic.coDriverType || ""}
                 onValueChange={(v) =>
                   dispatch({
                     type: "SET_PATH",
-                    path: "formData.coDriverType",
+                    path: "formData.traffic.coDriverType",
                     value: v,
                   })
                 }

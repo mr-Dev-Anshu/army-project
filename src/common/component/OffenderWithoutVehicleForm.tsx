@@ -1,16 +1,29 @@
-"use client";
-
+import { useState } from "react";
+import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
+import { useForm } from "@/context/FormContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
-import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
 
-import { useState } from "react";
-import { useForm } from "@/context/FormContext";
 
-export default function OffenderWithoutVehicleForm() {
+
+
+type OffenderKey = keyof typeof offenderFormsConfig & string;
+
+interface OffenderWithoutVehicleFormProps {
+  offenderType?: OffenderKey;   
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+}
+
+export default function OffenderWithoutVehicleForm({
+  offenderType: externalType = "",
+  scope = "traffic",
+}: OffenderWithoutVehicleFormProps) {
   const offenderConfig = offenderFormsConfig;
 
-  const [offenderType, setOffenderType] = useState("");
+ const [offenderType, setOffenderType] = useState<OffenderKey | "">(
+  externalType as OffenderKey
+);
+
 
   const { dispatch } = useForm();
 
@@ -21,26 +34,26 @@ export default function OffenderWithoutVehicleForm() {
       <p className="font-semibold">Who was the Offender ?</p>
 
       <RadioGroup
-        value={offenderType}
-        onValueChange={(value) => {
+        value={offenderType ?? ""}
+        onValueChange={(value: OffenderKey) => {
           setOffenderType(value);
 
-          // 1️⃣ STORE OFFENDER
           dispatch({
-            type: "SET_OFFENDER_TYPE",
-            payload: value,
+            type: "SET_PATH",
+            path: "formData.traffic.offenderWithoutVehicle.offenderType",
+            value,
           });
 
-          // 2️⃣ FIX: FORCE NO VEHICLE MODE
           dispatch({
-            type: "SET_FORM_DATA",
-            payload: { vehicleInvolved: "no" },
+            type: "SET_PATH",
+            path: "formData.traffic.vehicleInvolved",
+            value: "no",
           });
 
-          // 3️⃣ OPTIONAL: CLEAR VEHICLE DETAILS SAFELY
           dispatch({
-            type: "SET_VEHICLE_DETAILS",
-            payload: {
+            type: "SET_PATH",
+            path: "formData.traffic.vehicleDetails",
+            value: {
               category: "",
               vehicleType: "",
               driverType: "",
@@ -61,16 +74,13 @@ export default function OffenderWithoutVehicleForm() {
       </RadioGroup>
 
       {offenderType && offenderConfig[offenderType] && (
-        <OffenderDynamicForm 
-        scope="traffic"
+        <OffenderDynamicForm
+          scope="traffic"
           title={offenderConfig[offenderType].title}
           helperText={offenderConfig[offenderType].helperText}
-          fields={
-            offenderConfig[offenderType].fields.slice(1) 
-          }
+          fields={offenderConfig[offenderType].fields.slice(1)}
           showCoDriver={false}
         />
-
       )}
     </div>
   );

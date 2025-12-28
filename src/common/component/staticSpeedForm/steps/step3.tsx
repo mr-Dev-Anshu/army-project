@@ -1,26 +1,26 @@
 
 
-
 "use client";
 
 import { useForm } from "@/context/FormContext";
 import { FormTextarea } from "../../FormTextarea";
+import { OffenceOccurenceDetails } from "@/common/types/form.types";
 
 export default function Step3Offence() {
   const { state, dispatch } = useForm();
 
   const staticData = state.formData.staticSpeed;
-  const offence = staticData?.offenceOccurenceDetails || {};
+  const offence: OffenceOccurenceDetails = staticData.offenceBlock;
 
-  const updateOffence = (value: any) => {
+  // --- STRICTLY TYPED UPDATER ---
+  const updateOffence = <K extends keyof OffenceOccurenceDetails>(
+    key: K,
+    value: OffenceOccurenceDetails[K]
+  ) => {
     dispatch({
-      type: "SET_STATIC_SPEED_DATA",
-      payload: {
-        offenceOccurenceDetails: {
-          ...offence,
-          ...value,
-        },
-      },
+      type: "SET_PATH",
+      path: `formData.staticSpeed.offenceBlock.${key}`,
+      value,
     });
   };
 
@@ -29,7 +29,7 @@ export default function Step3Offence() {
       <FormTextarea
         label="Brief Description of Offence (Optional)"
         value={offence.description || ""}
-        onChange={(e) => updateOffence({ description: e.target.value })}
+        onChange={(value) => updateOffence("description", value)}
       />
     </div>
   );
