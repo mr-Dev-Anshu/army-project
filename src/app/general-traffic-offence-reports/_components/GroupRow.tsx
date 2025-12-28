@@ -9,9 +9,10 @@ interface GroupRowProps {
   index: number;
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
+  onPrint?: (offence: any) => void;
 }
 
-export default function GroupRow({ group, index, isVehicleInvolved, onView }: GroupRowProps) {
+export default function GroupRow({ group, index, isVehicleInvolved, onView, onPrint }: GroupRowProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const offences = group.offences || [];
@@ -71,7 +72,7 @@ export default function GroupRow({ group, index, isVehicleInvolved, onView }: Gr
             </div>
           </div>
 
-          <DetailsTable offences={offences} isVehicleInvolved={isVehicleInvolved} onView={onView} />
+          <DetailsTable offences={offences} isVehicleInvolved={isVehicleInvolved} onView={onView} onPrint={onPrint} />
         </div>
       </div>
     </div>

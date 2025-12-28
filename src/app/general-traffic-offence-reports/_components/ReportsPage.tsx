@@ -14,10 +14,12 @@ const TableSection = ({
   groups,
   isVehicleInvolved,
   onView,
+  onPrint,
 }: {
   groups: any[];
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
+  onPrint?: (offence: any) => void;
 }) => {
   const uniqueOffenceTypesCount = groups.length;
 
@@ -33,7 +35,7 @@ const TableSection = ({
       </div>
 
       {/* Content */}
-      <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} onView={onView} />
+      <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} onView={onView} onPrint={onPrint} />
     </div>
   );
 };
@@ -45,6 +47,7 @@ export default function ReportsPage({
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
+  const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -54,6 +57,18 @@ export default function ReportsPage({
     actionStatus: "All",
     sortOrder: "desc" as "asc" | "desc", // Default
   });
+
+  // Auto Print Effect
+  React.useEffect(() => {
+    if (viewingReport && shouldAutoPrint) {
+      // Small timeout to allow render
+      const timer = setTimeout(() => {
+        window.print();
+        setShouldAutoPrint(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [viewingReport, shouldAutoPrint]);
 
   // Prepare params for backend
   const apiParams = useMemo(() => {
@@ -312,7 +327,15 @@ export default function ReportsPage({
         /* Conditional Table Rendering */
         isVehicleView ? (
           vehicleGroups.length > 0 ? (
-            <TableSection groups={vehicleGroups} isVehicleInvolved={true} onView={setViewingReport} />
+            <TableSection
+              groups={vehicleGroups}
+              isVehicleInvolved={true}
+              onView={setViewingReport}
+              onPrint={(item) => {
+                setViewingReport(item);
+                setShouldAutoPrint(true);
+              }}
+            />
           ) : (
             <div className="mt-12 text-center text-gray-500">
               No "Vehicle Involved" offences found.
@@ -323,6 +346,10 @@ export default function ReportsPage({
             groups={noVehicleGroups}
             isVehicleInvolved={false}
             onView={setViewingReport}
+            onPrint={(item) => {
+              setViewingReport(item);
+              setShouldAutoPrint(true);
+            }}
           />
         ) : (
           <div className="mt-12 text-center text-gray-500">

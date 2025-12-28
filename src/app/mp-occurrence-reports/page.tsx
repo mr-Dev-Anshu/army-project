@@ -15,6 +15,19 @@ export default function MpOccurrenceReportsPage() {
   const { data, isLoading, isError } = useGetAllMPReports();
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
+  const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
+
+  // Auto Print Effect
+  React.useEffect(() => {
+    if (viewingReport && shouldAutoPrint) {
+      // Small timeout to allow render
+      const timer = setTimeout(() => {
+        window.print();
+        setShouldAutoPrint(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [viewingReport, shouldAutoPrint]);
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -352,6 +365,10 @@ export default function MpOccurrenceReportsPage() {
         <MpOccurrenceTable
           data={processedData}
           onView={(item) => setViewingReport(item)}
+          onPrint={(item) => {
+            setViewingReport(item);
+            setShouldAutoPrint(true);
+          }}
         />
       )}
     </div>

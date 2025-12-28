@@ -7,9 +7,10 @@ interface GroupedListProps {
   data: any[];
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
+  onPrint?: (offence: any) => void;
 }
 
-export default function GroupedList({ data, isVehicleInvolved, onView }: GroupedListProps) {
+export default function GroupedList({ data, isVehicleInvolved, onView, onPrint }: GroupedListProps) {
   if (!data || data.length === 0) {
     return (
       <div className="p-8 text-center text-gray-500">
@@ -27,6 +28,7 @@ export default function GroupedList({ data, isVehicleInvolved, onView }: Grouped
           index={index}
           isVehicleInvolved={isVehicleInvolved}
           onView={onView}
+          onPrint={onPrint}
         />
       ))}
     </div>

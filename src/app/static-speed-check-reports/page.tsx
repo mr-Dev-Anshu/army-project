@@ -16,6 +16,19 @@ export default function StaticSpeedCheckReportsPage() {
   const { data, isLoading, isError } = useGetStaticSpeedRecords();
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
+  const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
+
+  // Auto Print Effect
+  React.useEffect(() => {
+    if (viewingReport && shouldAutoPrint) {
+      // Small timeout to allow render
+      const timer = setTimeout(() => {
+        window.print();
+        setShouldAutoPrint(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [viewingReport, shouldAutoPrint]);
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -252,6 +265,10 @@ export default function StaticSpeedCheckReportsPage() {
         <StaticSpeedTable
           data={processedData}
           onView={(item) => setViewingReport(item)}
+          onPrint={(item) => {
+            setViewingReport(item);
+            setShouldAutoPrint(true);
+          }}
         />
       )}
     </div>

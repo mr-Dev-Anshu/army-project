@@ -28,9 +28,10 @@ interface DetailsTableProps {
   offences: any[];
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
+  onPrint?: (offence: any) => void;
 }
 
-export default function DetailsTable({ offences, isVehicleInvolved, onView }: DetailsTableProps) {
+export default function DetailsTable({ offences, isVehicleInvolved, onView, onPrint }: DetailsTableProps) {
   const { mutateAsync: updateOffence, isPending: isUpdating } = useUpdateTrafficOffence();
   const { mutateAsync: deleteOffence, isPending: isDeleting } = useDeleteTrafficOffence();
   const [modalState, setModalState] = React.useState<{ isOpen: boolean; offenceId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
@@ -266,7 +267,10 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView }: De
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onPrint && onPrint(offence)}
+              >
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
