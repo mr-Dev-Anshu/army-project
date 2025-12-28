@@ -1,5 +1,7 @@
 "use client";
 
+"use client";
+
 import {
   PieChart,
   Users,
@@ -17,6 +19,13 @@ import {
   ChevronLeft,
   FileText,
   Settings,
+  Gauge,
+  Files,
+  BookOpen,
+  LineChart,
+  Network,
+  User as UserIcon,
+  Workflow,
 } from "lucide-react";
 
 import {
@@ -25,6 +34,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useState } from "react";
+import ConeIcon from "@/components/icons/ConeIcon";
 
 const cn = (...classes: (string | boolean | undefined)[]) =>
   classes.filter(Boolean).join(" ");
@@ -76,19 +86,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const reportsAndAnalysis: MenuItem[] = [
     {
-      icon: <FileBarChart className="w-5 h-5" />,
+      icon: <Files className="w-5 h-5" />,
       label: "All Reports",
     },
-    { icon: <BarChart3 className="w-5 h-5" />, label: "Analysis Dashboard" },
-    { icon: <Users className="w-5 h-5" />, label: "Civil Employee Analysis" },
-    { icon: <Car className="w-5 h-5" />, label: "Vehicle Tracking" },
     {
-      icon: <Book className="w-5 h-5" />,
-      label: "MP General Diary & Daily Occurrence Book",
+      icon: <BookOpen className="w-5 h-5" />,
+      label: "Registers/Books",
     },
     {
-      icon: <FileBarChart className="w-5 h-5" />,
-      label: "Outsidery Report Analysis Module",
+      icon: <LineChart className="w-5 h-5" />,
+      label: "MP Offence Analysis Monthly Report",
     },
   ];
 
@@ -97,25 +104,25 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <Database className="w-5 h-5" />,
       label: "Basic Information",
       submenu: [
-        { label: "Installation" },
+        { label: "Offence Types" },
+        { label: "Civil Employees Management" },
+        { label: "Vehicles (Make & Take)" },
         { label: "Ranks" },
         { label: "Units" },
-        { label: "Vehicles (Make & Take)" },
-        { label: "Offence Types" },
-        { label: "Civil Employees" },
+        { label: "Installation" },
       ],
     },
     {
-      icon: <Shield className="w-5 h-5" />,
+      icon: <Network className="w-5 h-5" />,
       label: "Military Structure Data",
       submenu: [
         { label: "Brigade" },
         { label: "Division" },
-        { label: "Corps/Sub-Area" },
-        { label: "Command/Area" },
+        { label: "Corps / Sub-Area" },
+        { label: "Command / Area" },
       ],
     },
-    { icon: <Settings className="w-5 h-5" />, label: "User Access Management" },
+    { icon: <UserIcon className="w-5 h-5" />, label: "User Access Management" },
   ];
 
   const renderMenuItem = (item: MenuItem, isSubmenu = false) => (
@@ -126,25 +133,36 @@ const Sidebar: React.FC<SidebarProps> = ({
         if (item.label === "All Reports") onMenuSelect("viewReports");
       }}
       className={cn(
-        "w-full relative flex items-center transition-all",
+        "w-full relative flex items-center transition-all group",
         collapsed
-          ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
-          : "px-4 py-2.5 gap-3 hover:bg-gray-100 rounded-lg",
-        isSubmenu && !collapsed && "pl-12"
+          ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
+          : cn(
+            "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg text-left",
+            isSubmenu && "py-1.5"
+          ),
       )}
     >
-      {/* ICON */}
-      <span className="text-gray-700 flex-shrink-0">{item.icon}</span>
+      {/* ICON (Only for main items) */}
+      {!isSubmenu && (
+        <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0">
+          {item.icon}
+        </span>
+      )}
 
       {/* TEXT IN EXPANDED */}
       {!collapsed && (
         <>
-          <span className="flex-1 text-base text-gray-700 text-left whitespace-normal break-words leading-snug">
+          <span
+            className={cn(
+              "flex-1 text-gray-600 group-hover:text-gray-900 whitespace-normal break-words leading-snug",
+              isSubmenu ? "text-sm" : "text-base"
+            )}
+          >
             {item.label}
           </span>
 
           {item.badge && (
-            <span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded">
+            <span className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-gray-200 text-gray-600 rounded-full">
               {item.badge}
             </span>
           )}
@@ -165,17 +183,17 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <CollapsibleTrigger
           className={cn(
-            "w-full flex items-center transition-all",
+            "w-full flex items-center transition-all group",
             collapsed
-              ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
+              ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
               : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100 rounded-lg"
           )}
         >
-          <span className="text-gray-400 flex-shrink-0">{item.icon}</span>
+          <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0">{item.icon}</span>
 
           {!collapsed && (
             <>
-              <span className="flex-1 text-lg text-gray-600">{item.label}</span>
+              <span className="flex-1 text-base text-gray-600 group-hover:text-gray-900 leading-snug">{item.label}</span>
               {openMenus.includes(item.label) ? (
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               ) : (
@@ -186,7 +204,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </CollapsibleTrigger>
 
         {!collapsed && (
-          <CollapsibleContent className="pt-1">
+          <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-200 space-y-1">
             {item.submenu?.map((sub) => renderMenuItem(sub, true))}
           </CollapsibleContent>
         )}
@@ -198,51 +216,51 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div
       className={cn(
         "h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
-        collapsed ? "w-[90px]" : "w-[340px]"
+        collapsed ? "w-[74px]" : "w-[340px]"
       )}
     >
-      <div className="p-4 border-b border-gray-200 flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
-          <Shield className="w-6 h-6 text-white" />
+      {/* HEADER */}
+      <div className="p-4 flex items-center gap-3">
+        <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
+          <Shield className="w-5 h-5 text-white" fill="white" />
         </div>
 
         {!collapsed && (
           <div className="flex-1">
-            <h1 className="text-xl font-semibold text-gray-900">Brand name</h1>
-            <p className="text-xs text-gray-400">Brand name</p>
+            <h1 className="text-base font-bold text-gray-900">Brand name</h1>
+            <p className="text-xs text-gray-400 font-medium">Brand name</p>
           </div>
         )}
 
         <button
-          className="text-gray-400 hover:text-gray-600"
+          className="text-gray-300 hover:text-gray-500 transition-colors"
           onClick={() => setCollapsed(!collapsed)}
         >
           {collapsed ? (
             <ChevronRight className="w-5 h-5" />
           ) : (
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 border border-gray-200 rounded-md bg-white -mr-8 shadow-sm" />
           )}
         </button>
       </div>
 
       <nav
         className={cn(
-          "flex-1 overflow-y-auto side-scrollbar",
-          collapsed ? "px-0 pt-4" : "p-4 space-y-1"
+          "flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']",
+          collapsed ? "px-2 pt-4" : "p-4 space-y-1"
         )}
       >
         {/* Dashboard */}
-        <div className={collapsed ? "px-2" : ""}>
+        <div className={collapsed ? "mb-2" : "mb-2"}>
           {menuItems.map((item) => renderMenuItem(item))}
         </div>
 
-        {/* Divider */}
-        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
+        <div className="w-full h-px bg-gray-100 my-2" />
 
         {/* Create New Record Section */}
-        <div className={collapsed ? "pt-4 px-2" : "pt-6"}>
+        <div className={collapsed ? "mb-2" : "mb-2"}>
           {!collapsed && (
-            <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
+            <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
               Create New Record
             </h2>
           )}
@@ -252,18 +270,18 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => onMenuSelect("multiForm")}
               className={cn(
-                "w-full flex items-start transition-all",
+                "w-full flex items-center transition-all group",
                 collapsed
-                  ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
+                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
               )}
             >
-              <span className="text-gray-400 flex-shrink-0">
-                <FileText className="w-5 h-5" />
+              <span className={cn("text-gray-500 group-hover:text-gray-900 flex-shrink-0", !collapsed && "pt-0.5")}>
+                <ConeIcon className="w-5 h-5" color="currentColor" />
               </span>
 
               {!collapsed && (
-                <span className="text-base text-left text-gray-600 whitespace-normal break-words leading-snug flex-1">
+                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 whitespace-normal break-words leading-tight flex-1">
                   General & Traffic Offence Report
                 </span>
               )}
@@ -273,18 +291,18 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => onMenuSelect("staticSpeed")}
               className={cn(
-                "w-full flex items-start transition-all",
+                "w-full flex items-center transition-all group",
                 collapsed
-                  ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
+                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
               )}
             >
-              <span className="text-gray-400 flex-shrink-0">
-                <Clock className="w-5 h-5" />
+              <span className={cn("text-gray-500 group-hover:text-gray-900 flex-shrink-0", !collapsed && "pt-0.5")}>
+                <Gauge className="w-5 h-5" />
               </span>
 
               {!collapsed && (
-                <span className="text-base text-left text-gray-600 whitespace-normal break-words leading-snug flex-1">
+                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 whitespace-normal break-words leading-tight flex-1">
                   Static Speed Check Report
                 </span>
               )}
@@ -294,18 +312,18 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => onMenuSelect("investigation")}
               className={cn(
-                "w-full flex items-start transition-all",
+                "w-full flex items-center transition-all group",
                 collapsed
-                  ? "h-12 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
+                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
               )}
             >
-              <span className="text-gray-400 flex-shrink-0">
+              <span className={cn("text-gray-500 group-hover:text-gray-900 flex-shrink-0", !collapsed && "pt-0.5")}>
                 <ClipboardList className="w-5 h-5" />
               </span>
 
               {!collapsed && (
-                <span className="text-base text-left text-gray-600 whitespace-normal break-words leading-snug flex-1">
+                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 whitespace-normal break-words leading-tight flex-1">
                   MP Occurrence & Investigation Report
                 </span>
               )}
@@ -313,40 +331,39 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Divider */}
-        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
-
-        {/* Forms & Certificates */}
-        <div className={collapsed ? "px-2" : ""}>
-          {renderCollapsibleSection(formsAndCertificates)}
-        </div>
-
-        {/* Divider */}
-        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
+        <div className="w-full h-px bg-gray-100 my-2" />
 
         {/* Reports & Analysis Section */}
-        <div className={collapsed ? "pt-4 px-2" : "pt-6"}>
+        <div className={collapsed ? "mb-2" : "mb-2"}>
           {!collapsed && (
-            <h2 className="px-4 py-2 text-base font-bold text-gray-400 uppercase tracking-wider">
+            <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
               Reports & Analysis
             </h2>
           )}
-          <div className="flex flex-col items-start justify-start w-full">
+          <div className="space-y-1">
             {reportsAndAnalysis.map((item) => renderMenuItem(item))}
           </div>
         </div>
 
-        {/* Divider */}
-        {collapsed && <div className="w-full h-px bg-gray-200 my-4" />}
+        <div className="w-full h-px bg-gray-100 my-2" />
+
+        {/* Forms & Certificates */}
+        <div className={collapsed ? "mb-2" : "mb-2"}>
+          {renderCollapsibleSection(formsAndCertificates)}
+        </div>
+
+        <div className="w-full h-px bg-gray-100 my-2" />
 
         {/* System Setup Section */}
-        <div className={collapsed ? "pt-4 px-2 pb-4" : "pt-6 pb-4"}>
+        <div className="pb-4">
           {!collapsed && (
-            <h2 className="px-4 py-2 text-base font-bold text-gray-400 uppercase tracking-wider">
+            <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
               System Setup
             </h2>
           )}
-          {systemSetup.map((item) => renderCollapsibleSection(item))}
+          <div className="space-y-1">
+            {systemSetup.map((item) => renderCollapsibleSection(item))}
+          </div>
         </div>
       </nav>
     </div>
