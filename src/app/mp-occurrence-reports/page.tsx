@@ -6,6 +6,7 @@ import MpOccurrenceTable from "./_components/MpOccurrenceTable";
 import { useGetAllMPReports } from "@/features/mpReports/hooks";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
+import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/reports/MpOccurrenceReport";
 
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -13,6 +14,7 @@ import { ArrowLeft } from "lucide-react";
 export default function MpOccurrenceReportsPage() {
   const { data, isLoading, isError } = useGetAllMPReports();
   const [isCreating, setIsCreating] = useState(false);
+  const [viewingReport, setViewingReport] = useState<any | null>(null);
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -28,7 +30,6 @@ export default function MpOccurrenceReportsPage() {
 
     // Filter raw data
     const filteredData = data.filter((item: any) => {
-      // ... existing filter logic ...
       const occurrence = item.occurrenceDetails || {};
 
       // Date Check
@@ -119,9 +120,129 @@ export default function MpOccurrenceReportsPage() {
         documents: item.documents || [],
         reportNumber: item.reportDetails?.reportNumber,
         actionStatus: item.actionStatus,
+        originalData: item // Store original data for report view
       };
     });
   }, [data, filters]);
+
+  const mapToReportProps = (item: any): MpOccurrenceReportProps => {
+    const raw = item.originalData || item || {};
+    const reportDetails = raw.reportDetails || {};
+    const invHead = raw.investigationHead || raw.mpParticulars || {}; // Check form state key variants
+    const occurrence = raw.occurrenceDetails || {};
+
+    // Dynamic Fields: People (Victims/Offenders/Individuals)
+    // Check all possible locations where the array might be stored
+    const rawPeople =
+      raw.individuals ||
+      raw.offenders ||
+      raw.individual ||
+      raw.offenderList ||
+      raw.customFields?.individuals ||
+      raw.customFields?.offenderList ||
+      [];
+
+    const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => ({
+      sno: index + 1,
+      armyNo: p.armyNumber || p.armyNo || p.aadharNumber || "",
+      rank: p.rank || "",
+      name: p.name || p.personName || "Unknown",
+      identityCard: p.iCardNumber || p.icard || p.idCardNumber || p.identityCard || "-",
+      unitName: p.unit || p.unitName || "",
+      fmn: p.fmn || p.fmnName || "",
+      address: p.address || "",
+      remark: p.remark || "--",
+      role: p.role || p.type || "Victim" // Default to Victim if unknown
+    })) : [];
+
+    // Dynamic Fields: Witnesses
+    const rawWitnesses =
+      raw.witnesses ||
+      raw.witness ||
+      raw.witnessList ||
+      raw.customFields?.witnesses ||
+      [];
+
+    const witnesses = Array.isArray(rawWitnesses) ? rawWitnesses.map((w: any, index: number) => ({
+      sno: index + 1,
+      armyNo: w.armyNumber || w.armyNo || "",
+      rank: w.rank || "",
+      name: w.name || w.witnessName || "Unknown",
+      identityCard: w.iCardNumber || w.icard || w.idCardNumber || "-",
+      unitName: w.unit || w.unitName || "",
+      fmn: w.fmn || w.fmnName || "",
+      address: w.address || "",
+      remark: w.remark || "--"
+    })) : [];
+
+    // Dynamic Fields: Documents
+    const rawDocs = raw.documents || [];
+    const docs = Array.isArray(rawDocs)
+      ? rawDocs.map((d: any) => typeof d === 'string' ? d : (d.statement || d.name || "Attached Document"))
+      : [];
+
+    // Dynamic Fields: Brief
+    const brief =
+      occurrence.description ||
+      occurrence.brief ||
+      occurrence.statement ||
+      raw.detailedOccurrenceReport ||
+      "";
+
+    // Dynamic Fields: Evidences
+    const evidences = raw.evidences || [];
+    // Helper to find specific evidence types if they exist in the array
+    const findEvidence = (type: string) => {
+      const found = evidences.find((e: any) => e.type?.toLowerCase().includes(type));
+      return found ? (found.description || found.url || "Attached") : null;
+    };
+
+    // Dynamic Fields: Detailed Report
+    const detailedStatement =
+      raw.detailedStatement ||
+      raw.detailedReport?.statement ||
+      raw.customFields?.detailedStatement ||
+      "";
+
+    const investigationFindings =
+      raw.investigationFindings ||
+      raw.detailedReport?.findings ||
+      raw.customFields?.investigationFindings ||
+      [];
+
+    return {
+      reportNo: reportDetails.reportNumber || "",
+      command: reportDetails.command || invHead.command || "",
+      firNo: reportDetails.firNumber || "",
+      mpDetails: {
+        armyNo: invHead.armyNumber || invHead.armyNo || "",
+        rank: invHead.rank || "",
+        name: invHead.name || "",
+        unit: invHead.unit || "",
+        fmn: invHead.fmn || "",
+        command: invHead.command || ""
+      },
+      occurrence: {
+        offenceType: occurrence.offenceType || "",
+        place: occurrence.placeOfOccurrence || "",
+        date: occurrence.dateOfOccurrence ? new Date(occurrence.dateOfOccurrence).toLocaleDateString("en-GB") : (raw.createdAt ? new Date(raw.createdAt).toLocaleDateString("en-GB") : ""),
+        time: occurrence.timeOfOccurrence ? new Date(occurrence.timeOfOccurrence).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }) : ""
+      },
+      people: people,
+      briefOfOccurrence: brief,
+      witnesses: witnesses,
+      evidence: {
+        eyeSketch: findEvidence("sketch") || "",
+        photos: findEvidence("photo") || "",
+        videos: findEvidence("video") || ""
+      },
+      documents: docs,
+      detailedReport: {
+        statement: detailedStatement,
+        findings: Array.isArray(investigationFindings) ? investigationFindings : []
+      }
+    };
+  };
 
   const distinctReportsCount = processedData.length;
   const pageTitle = "MP Occurrence & Investigation Report";
@@ -145,6 +266,27 @@ export default function MpOccurrenceReportsPage() {
         </div>
       </div>
     )
+  }
+
+  if (viewingReport) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
+          <Button variant="ghost" size="sm" onClick={() => setViewingReport(null)} className="gap-2">
+            <ArrowLeft className="w-4 h-4" /> Back to Reports
+          </Button>
+          <h1 className="text-lg font-semibold text-gray-800">View Report</h1>
+          <div className="ml-auto">
+            <Button onClick={() => window.print()} variant="outline" size="sm" className="gap-2">
+              Print Report
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
+          <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
+        </div>
+      </div>
+    );
   }
 
   if (isError) {
@@ -188,7 +330,10 @@ export default function MpOccurrenceReportsPage() {
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       ) : (
-        <MpOccurrenceTable data={processedData} />
+        <MpOccurrenceTable
+          data={processedData}
+          onView={(item) => setViewingReport(item)}
+        />
       )}
     </div>
   );

@@ -61,7 +61,7 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
     className,
 }) => {
     return (
-        <div className={`max-w-[210mm] mx-auto bg-white p-8 text-sm font-sans text-gray-900 border border-gray-200 shadow-md print:shadow-none print:border-none ${className || ''}`}>
+        <div className={`max-w-[210mm] mx-auto bg-white p-8 text-sm font-sans text-gray-900 border border-gray-200 shadow-md print:shadow-none print:border-none min-h-screen ${className || ''}`}>
             {/* Header */}
             <div className="flex flex-col mb-8">
                 <div className="text-right font-bold text-xs mb-4">In Lieu Of IAFP-1479</div>
