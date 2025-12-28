@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, Download } from "lucide-react";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
@@ -9,6 +9,7 @@ import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks"
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
+import { generateWordReport } from "@/utils/generateWordReport";
 
 const TableSection = ({
   groups,
@@ -49,16 +50,7 @@ export default function ReportsPage({
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
-  // State for filters
-  const [filters, setFilters] = useState({
-    search: "",
-    offenceType: "All",
-    date: "",
-    actionStatus: "All",
-    sortOrder: "desc" as "asc" | "desc", // Default
-  });
-
-  // Auto Print Effect
+  // Auto-print effect
   React.useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
       // Small timeout to allow render
@@ -69,6 +61,15 @@ export default function ReportsPage({
       return () => clearTimeout(timer);
     }
   }, [viewingReport, shouldAutoPrint]);
+
+  // State for filters
+  const [filters, setFilters] = useState({
+    search: "",
+    offenceType: "All",
+    date: "",
+    actionStatus: "All",
+    sortOrder: "desc" as "asc" | "desc", // Default
+  });
 
   // Prepare params for backend
   const apiParams = useMemo(() => {
@@ -234,6 +235,16 @@ export default function ReportsPage({
     };
   };
 
+  const handleDownloadReport = (offence: any) => {
+    const props = mapToReportProps(offence);
+    generateWordReport(props);
+  };
+
+  const handlePrintReport = (offence: any) => {
+    setViewingReport(offence);
+    setShouldAutoPrint(true);
+  };
+
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -259,8 +270,9 @@ export default function ReportsPage({
           </Button>
           <h1 className="text-lg font-semibold text-gray-800">View General Traffic Offence Report</h1>
           <div className="ml-auto">
-            <Button onClick={() => window.print()} variant="outline" size="sm" className="gap-2">
-              Print Report
+            <Button onClick={() => handleDownloadReport(viewingReport)} variant="outline" size="sm" className="gap-2">
+              <Download className="w-4 h-4" />
+              Download Word Report
             </Button>
           </div>
         </div>
@@ -331,10 +343,7 @@ export default function ReportsPage({
               groups={vehicleGroups}
               isVehicleInvolved={true}
               onView={setViewingReport}
-              onPrint={(item) => {
-                setViewingReport(item);
-                setShouldAutoPrint(true);
-              }}
+              onPrint={handlePrintReport}
             />
           ) : (
             <div className="mt-12 text-center text-gray-500">
@@ -346,10 +355,7 @@ export default function ReportsPage({
             groups={noVehicleGroups}
             isVehicleInvolved={false}
             onView={setViewingReport}
-            onPrint={(item) => {
-              setViewingReport(item);
-              setShouldAutoPrint(true);
-            }}
+            onPrint={handlePrintReport}
           />
         ) : (
           <div className="mt-12 text-center text-gray-500">
