@@ -60,6 +60,39 @@ export const createMPReportSchema = Joi.object({
     customFields,
   }).required(),
 
+  individuals: Joi.array().items(
+    Joi.object({
+      armyNumber: optionalString,
+      rank: optionalString,
+      name: optionalString,
+      unit: optionalString,
+      fmn: optionalString,
+      address: optionalString,
+      identityCard: optionalString,
+      remark: optionalString,
+      role: optionalString,
+      // Traffic fields
+      isVehicleInvolved: Joi.boolean().optional(),
+      vehicleCategory: optionalString,
+      vehicleNumber: optionalString,
+      customFields,
+    })
+  ).default([]),
+
+  witnesses: Joi.array().items(
+    Joi.object({
+      armyNumber: optionalString,
+      rank: optionalString,
+      name: optionalString,
+      unit: optionalString,
+      fmn: optionalString,
+      address: optionalString,
+      identityCard: optionalString,
+      remark: optionalString,
+      customFields,
+    })
+  ).default([]),
+
   documents: Joi.array().items(documentItem).default([]),
   evidences: Joi.array().items(evidenceItem).default([]),
 
