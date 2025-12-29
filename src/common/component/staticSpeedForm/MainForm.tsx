@@ -63,11 +63,7 @@ export default function StaticSpeedForm() {
         vehicleName: staticData.vehicleDetails.vehicleName,
 
         offenceOccurenceDetails: {
-          timeOfOffence:
-            staticData.offenceOccurenceDetails.timeOfOffence ||
-            staticData.offenceOccurenceDetails.time ||
-            "",
-          time: staticData.offenceOccurenceDetails.time,
+          time: staticData.offenceOccurenceDetails.time || "",
           incidentLocation: staticData.offenceOccurenceDetails.incidentLocation,
           description: staticData.offenceOccurenceDetails.description,
           overSpeedCalculated:
@@ -133,8 +129,8 @@ export default function StaticSpeedForm() {
 
       toast.error(
         error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          "Failed to submit record"
+        error?.response?.data?.error ||
+        "Failed to submit record"
       );
     }
   };
