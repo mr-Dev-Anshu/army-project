@@ -222,10 +222,10 @@ export default function StaticSpeedTable({ data, onView, onPrint, onDownload }: 
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              {/* <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Copy className="w-4 h-4" />
                 Duplicate Report
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 onClick={() => {

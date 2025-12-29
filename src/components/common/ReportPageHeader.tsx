@@ -33,14 +33,14 @@ export default function ReportPageHeader({
         <h1 className="text-xl font-bold text-gray-900">{title}</h1>
         <div className="flex items-center gap-4">
           <span className="text-sm font-semibold">{reportCount} Reports</span>
-          <Button
+          {/* <Button
             variant="outline"
             className="bg-black text-white hover:bg-gray-800 hover:text-white cursor-pointer border-none gap-2"
             onClick={onDownload}
           >
             Download & Print Report
             <Printer className="w-4 h-4" />
-          </Button>
+          </Button> */}
         </div>
       </div>
     </>

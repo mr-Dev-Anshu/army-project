@@ -35,7 +35,7 @@ export default function ReportFilterBar({
   filters,
   onFilterChange,
   offenceTypeOptions = [],
-  placeholder = "Search by report no, unit, offence type...",
+  placeholder = "Search by offence type...",
   showDate = true,
   showActionStatus = true,
   showOffenceType = true,

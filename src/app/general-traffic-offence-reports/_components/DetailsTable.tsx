@@ -278,10 +278,10 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              {/* <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Copy className="w-4 h-4" />
                 Duplicate Report
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 onClick={() => {

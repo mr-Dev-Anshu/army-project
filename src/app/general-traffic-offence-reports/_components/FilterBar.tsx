@@ -50,7 +50,7 @@ export default function FilterBar({ filters, setFilters, offenceTypeOptions }: F
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
         <Input
           type="text"
-          placeholder="Search by report no, unit, offence type..."
+          placeholder="Search by offence type..."
           className="pl-9 bg-white"
           value={filters.search}
           onChange={handleSearchChange}
@@ -58,11 +58,11 @@ export default function FilterBar({ filters, setFilters, offenceTypeOptions }: F
       </div>
 
       <div className="w-[200px]">
-        <Select value={filters.offenceType} onValueChange={handleOffenceTypeChange}>
+        <Select value={filters.offenceType} onValueChange={handleOffenceTypeChange} >
           <SelectTrigger className="bg-white">
             <div className="flex items-center truncate">
-               <span className="text-gray-500 mr-1">Offence Type:</span>
-               <SelectValue placeholder="All" />
+              <span className="text-gray-500 mr-1">Offence Type:</span>
+              <SelectValue placeholder="All" />
             </div>
           </SelectTrigger>
           <SelectContent>
@@ -77,24 +77,24 @@ export default function FilterBar({ filters, setFilters, offenceTypeOptions }: F
       </div>
 
       <div className="w-[180px] relative">
-         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none z-10">
-            Date:
-         </div>
-         <Input
-          type="text" 
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none z-10">
+          Date:
+        </div>
+        <Input
+          type="text"
           value={filters.date}
           onChange={handleDateChange}
-          className="bg-white pl-12 pr-9 text-sm" 
+          className="bg-white pl-12 pr-9 text-sm"
         />
         <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
       </div>
 
       <div className="w-[200px]">
-         <Select value={filters.actionStatus} onValueChange={handleActionStatusChange}>
+        <Select value={filters.actionStatus} onValueChange={handleActionStatusChange}>
           <SelectTrigger className="bg-white">
             <div className="flex items-center truncate">
-               <span className="text-gray-500 mr-1">Action Status:</span>
-               <SelectValue placeholder="All" />
+              <span className="text-gray-500 mr-1">Action Status:</span>
+              <SelectValue placeholder="All" />
             </div>
           </SelectTrigger>
           <SelectContent>
