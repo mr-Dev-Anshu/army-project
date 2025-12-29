@@ -113,7 +113,7 @@ export default function Step4IndividualDetails() {
       />
 
       {mp.vehicleInvolved === "yes" && (
-        <VehicleDetailsForm scope="mp-main" />
+        <VehicleDetailsForm scope="mp-additional" />
       )}
 
       {mp.vehicleInvolved === "no" && (
@@ -162,7 +162,7 @@ export default function Step4IndividualDetails() {
           )}
 
           {add.vehicleInvolved === "no" && (
-            <OffenderWithoutVehicleForm scope="mp-main" />
+            <OffenderWithoutVehicleForm scope="mp-additional" />
           )}
 
           <div className="mt-4 flex justify-end gap-3">
