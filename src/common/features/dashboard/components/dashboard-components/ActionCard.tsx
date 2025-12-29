@@ -18,24 +18,27 @@ const ActionCard: React.FC<ActionCardProps> = ({
       onClick={onClick}
       className="
     w-full
-    bg-[#1f1f1f]
-    rounded-md
-    px-8
-    h-18
+    bg-[#1A1A1A]
+    rounded-lg
+    px-6
+    h-20
     flex
     items-center
-    justify-center
+    justify-start
     gap-4
-    text-[#ffff]
-    hover:bg-[#2a2a2a]
+    text-white
+    hover:bg-[#252525]
     transition-colors
+    text-left
   "
     >
-      <div className="w-10 h-10 rounded-full bg-[#2f2f2f] flex items-center justify-center">
-        {icon}
+      <div className="w-10 h-10 shrink-0 rounded-full bg-[#262626] flex items-center justify-center text-gray-400">
+        <div className="w-5 h-5">
+          {icon}
+        </div>
       </div>
 
-      <span className="text-base font-medium tracking-wide">{title}</span>
+      <span className="text-lg font-medium leading-tight">{title}</span>
     </button>
   );
 };

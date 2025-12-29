@@ -183,7 +183,7 @@ export default function Step2Statement() {
       {/* ================= WITNESSING MP ================= */}
       <FormSection title="On-Duty Details of Witnessing MP">
         {witnesses.map((w, i) => (
-          <div key={i} className="border p-4 rounded-lg space-y-4 mb-6">
+          <div key={i} className="border grid grid-cols-2 space-x-4 p-4 rounded-lg space-y-4 mb-6">
             <div>
               <Label className="mb-2 font-semibold">Witnessing MP Name</Label>
               <Input

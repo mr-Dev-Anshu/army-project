@@ -7,7 +7,8 @@ import {
   Printer,
   Edit,
   Copy,
-  Trash
+  Trash,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -31,7 +32,7 @@ interface MpOccurrenceTableProps {
   onPrint?: (item: any) => void;
 }
 
-export default function MpOccurrenceTable({ data, onView, onPrint }: MpOccurrenceTableProps) {
+export default function MpOccurrenceTable({ data, onView, onPrint, onDownload }: MpOccurrenceTableProps) {
   const { mutateAsync: updateReport, isPending: isUpdating } = useUpdateMPReport();
   const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteMPReport();
   const [modalState, setModalState] = React.useState<{ isOpen: boolean; reportId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
