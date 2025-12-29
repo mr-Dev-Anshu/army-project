@@ -1,5 +1,3 @@
-
-
 "use client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +11,7 @@ import { cn } from "@/lib/utils";
 export default function VehicleDetailsForm({
   scope = "traffic",
 }: {
-  scope?: "traffic" | "static" | "mp-main";
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
 }) {
   const { state, dispatch } = useForm();
 
@@ -43,8 +41,8 @@ export default function VehicleDetailsForm({
     scope === "traffic"
       ? traffic.vehicleDetails
       : scope === "mp-main"
-        ? mp.individualDetails.vehicleData || {}
-        : staticSpeed.vehicleDetails;
+      ? mp.individualDetails.vehicleData || {}
+      : staticSpeed.vehicleDetails;
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
@@ -60,17 +58,13 @@ export default function VehicleDetailsForm({
         path: "formData.traffic.vehicleDetails",
         value: updated,
       });
-    }
-
-    else if (scope === "mp-main") {
+    } else if (scope === "mp-main") {
       dispatch({
         type: "SET_PATH",
         path: "formData.mpReport.individualDetails.vehicleData",
         value: updated,
       });
-    }
-
-    else {
+    } else {
       dispatch({
         type: "SET_PATH",
         path: "formData.staticSpeed.vehicleDetails",

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "@/context/FormContext";
@@ -15,6 +14,7 @@ import { toast } from "react-toastify";
 import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
+import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
 export default function StaticSpeedForm() {
   const { state, dispatch } = useForm();
@@ -63,11 +63,13 @@ export default function StaticSpeedForm() {
         vehicleName: staticData.vehicleDetails.vehicleName,
 
         offenceOccurenceDetails: {
-          time: staticData.offenceOccurenceDetails.time,
+          time: staticData.offenceOccurenceDetails.time || "",
           incidentLocation: staticData.offenceOccurenceDetails.incidentLocation,
           description: staticData.offenceOccurenceDetails.description,
-          overSpeedCalculated: staticData.offenceOccurenceDetails.overSpeedCalculated ?? "",
-          actualSpeedNoted: staticData.offenceOccurenceDetails.actualSpeedNoted ?? "",
+          overSpeedCalculated:
+            staticData.offenceOccurenceDetails.overSpeedCalculated ?? "",
+          actualSpeedNoted:
+            staticData.offenceOccurenceDetails.actualSpeedNoted ?? "",
           authSpeed: staticData.offenceOccurenceDetails.authSpeed ?? "",
         },
       };
@@ -85,14 +87,15 @@ export default function StaticSpeedForm() {
       }
 
       // ========= 2️⃣ OFFENDER =========
-      const offenderPayload = {
+      const offenderPayload: CreateOffenderData = {
         offenceId: staticRes._id,
-        offenderType: staticData.vehicleDetails.driverType,
+        offenderType:
+          (staticData.vehicleDetails.driverType as OffenderType) || "Civilian",
 
         offenderDetails:
           staticData.offenderPeople?.length > 0
-            ? staticData.offenderPeople
-            : [],
+            ? (staticData.offenderPeople as any)
+            : ([] as any),
       };
 
       console.log("👮 STATIC OFFENDER PAYLOAD ===>", offenderPayload);
@@ -114,21 +117,15 @@ export default function StaticSpeedForm() {
         console.log("👀 WITNESS PAYLOAD ===>", witnessPayload);
 
         await Promise.all(
-          witnessPayload.map((w) =>
-            createWitnessMutation.mutateAsync(w)
-          )
+          witnessPayload.map((w) => createWitnessMutation.mutateAsync(w))
         );
 
         toast.success("Witness Added!");
       }
 
       toast.success("🎉 All Static Speed Processes Completed!");
-
     } catch (error: any) {
-      console.log(
-        "❌ STATIC SPEED SUBMIT ERROR ===>",
-        error?.response?.data
-      );
+      console.log("❌ STATIC SPEED SUBMIT ERROR ===>", error?.response?.data);
 
       toast.error(
         error?.response?.data?.message ||
@@ -148,9 +145,7 @@ export default function StaticSpeedForm() {
             completedSteps={state.completedSteps}
             title="Create New Static Speed Check Record"
             reportNo="PRO/21 CPU/00042/106/25"
-            onStepClick={(id) =>
-              dispatch({ type: "SET_STEP", payload: id })
-            }
+            onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
           <RightPanel

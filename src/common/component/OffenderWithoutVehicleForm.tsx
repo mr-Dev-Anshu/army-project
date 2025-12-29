@@ -7,7 +7,13 @@ import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/co
 import { useState } from "react";
 import { useForm } from "@/context/FormContext";
 
-export default function OffenderWithoutVehicleForm() {
+interface OffenderWithoutVehicleFormProps {
+  scope?: string;
+}
+
+export default function OffenderWithoutVehicleForm({
+  scope,
+}: OffenderWithoutVehicleFormProps = {}) {
   const offenderConfig = offenderFormsConfig;
 
   const [offenderType, setOffenderType] = useState("");
@@ -27,20 +33,23 @@ export default function OffenderWithoutVehicleForm() {
 
           // 1️⃣ STORE OFFENDER
           dispatch({
-            type: "SET_OFFENDER_TYPE",
-            payload: value,
+            type: "SET_PATH",
+            path: "formData.traffic.offenderWithoutVehicle.offenderType",
+            value,
           });
 
           // 2️⃣ FIX: FORCE NO VEHICLE MODE
           dispatch({
-            type: "SET_FORM_DATA",
-            payload: { vehicleInvolved: "no" },
+            type: "SET_PATH",
+            path: "formData.traffic.vehicleInvolved",
+            value: "no",
           });
 
           // 3️⃣ OPTIONAL: CLEAR VEHICLE DETAILS SAFELY
           dispatch({
-            type: "SET_VEHICLE_DETAILS",
-            payload: {
+            type: "SET_PATH",
+            path: "formData.traffic.vehicleDetails",
+            value: {
               category: "",
               vehicleType: "",
               driverType: "",
@@ -61,16 +70,13 @@ export default function OffenderWithoutVehicleForm() {
       </RadioGroup>
 
       {offenderType && offenderConfig[offenderType] && (
-        <OffenderDynamicForm 
-        scope="traffic"
+        <OffenderDynamicForm
+          scope="traffic"
           title={offenderConfig[offenderType].title}
           helperText={offenderConfig[offenderType].helperText}
-          fields={
-            offenderConfig[offenderType].fields.slice(1) 
-          }
+          fields={offenderConfig[offenderType].fields.slice(1)}
           showCoDriver={false}
         />
-
       )}
     </div>
   );

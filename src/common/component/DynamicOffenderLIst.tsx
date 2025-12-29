@@ -1,15 +1,21 @@
 import { Trash2 } from "lucide-react";
 
+interface DynamicOffenderListProps {
+  data?: any[];
+  title?: string;
+  onDelete?: (index: number) => void;
+}
+
 export default function DynamicOffenderList({
   data = [],
   title = "Victim / Offender List",
-  onDelete = () => {},
-}) {
+  onDelete = (index: number) => {},
+}: DynamicOffenderListProps) {
   const offenders = data;
   if (!offenders.length) return null;
 
   // convert any key into pretty label
-  const formatFieldName = (key) => {
+  const formatFieldName = (key: string) => {
     return key
       ?.replace(/_/g, " ")
       ?.replace(/\s+/g, " ")
@@ -19,7 +25,7 @@ export default function DynamicOffenderList({
   };
 
   // helper -> get keys belonging to a column (by fuzzy match)
-  const pickMatching = (obj, keywords = []) => {
+  const pickMatching = (obj: any, keywords: string[] = []) => {
     return Object.entries(obj)
       .filter(([k, v]) => {
         if (!v) return false;

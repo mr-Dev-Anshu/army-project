@@ -1,7 +1,7 @@
 // ---------- TYPES ----------
 export interface StaticSpeedOffence {
-  time?: string;
-  timeOfOffence: string;       // "18:00" (HH:mm)
+  time: string;
+  timeOfOffence?: string;       // "18:00" (HH:mm)
   incidentLocation: string;
   description: string;
   authSpeed: string;
@@ -21,4 +21,3 @@ export interface CreateStaticSpeedPayload
   offenceOccurenceDetails: StaticSpeedOffence;
   actionStatus?: boolean;
 }
- 
