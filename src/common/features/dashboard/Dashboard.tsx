@@ -29,9 +29,8 @@ import { Loader2 } from "lucide-react";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 import { transformOffenceData } from "@/common/component/tables/transform";
 import ReportsPage from "@/app/hello/page";
-import StaticSpeedCheckReportsPage from "@/app/static-speed-check-reports/page";
-import MpOccurrenceReportsPage from "@/app/mp-occurrence-reports/page";
 import UnifiedAllReports from "./components/UnifiedAllReports";
+
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
