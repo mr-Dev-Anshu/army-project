@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import { useForm } from "@/context/FormContext";
@@ -14,12 +11,11 @@ export default function Step3Offence() {
 
   const updateOffence = (value: any) => {
     dispatch({
-      type: "SET_STATIC_SPEED_DATA",
-      payload: {
-        offenceOccurenceDetails: {
-          ...offence,
-          ...value,
-        },
+      type: "SET_PATH",
+      path: "formData.staticSpeed.offenceOccurenceDetails",
+      value: {
+        ...offence,
+        ...value,
       },
     });
   };
@@ -29,7 +25,7 @@ export default function Step3Offence() {
       <FormTextarea
         label="Brief Description of Offence (Optional)"
         value={offence.description || ""}
-        onChange={(e) => updateOffence({ description: e.target.value })}
+        onChange={(val) => updateOffence({ description: val })}
       />
     </div>
   );

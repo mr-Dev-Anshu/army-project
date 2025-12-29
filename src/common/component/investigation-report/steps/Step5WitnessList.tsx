@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -25,7 +24,7 @@ export default function Step5WitnessList() {
   const witnessVehicleStatus = mp.witnessVehicleStatus || "";
 
   /* ========= VEHICLE STATUS ========= */
-  const setVehicleStatus = (value: "yes" | "no" | "") =>
+  const setVehicleStatus = (value: string) =>
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.witnessVehicleStatus",
@@ -123,9 +122,7 @@ export default function Step5WitnessList() {
         onChange={setVehicleStatus}
       />
 
-      {witnessVehicleStatus === "yes" && (
-        <VehicleDetailsForm scope="mp-main" />
-      )}
+      {witnessVehicleStatus === "yes" && <VehicleDetailsForm scope="mp-main" />}
       {witnessVehicleStatus === "no" && (
         <OffenderWithoutVehicleForm scope="mp-main" />
       )}

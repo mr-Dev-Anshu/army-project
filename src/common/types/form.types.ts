@@ -1,6 +1,3 @@
-
-
-
 import { OffenderType } from "@/apis/offender/types";
 
 export interface VehicleDetailsState {
@@ -8,7 +5,6 @@ export interface VehicleDetailsState {
   vehicleType: string;
   driverType: string;
   vehicleName: string;
-
 }
 
 // ---------- OFFENDER ----------
@@ -41,7 +37,7 @@ export interface OnDutyDetailsMPReporting {
   rank: string;
   unit: string;
   armyNumber: string;
-  contactNumber:string;
+  contactNumber: string;
 }
 
 export interface OffenceOccurenceDetails {
@@ -64,7 +60,6 @@ export interface Witness {
 // ---------- MP REPORT MASTER ----------
 
 export interface MpReportState {
-
   reportDetails: {
     reportNo: string;
     command: string;
@@ -85,7 +80,7 @@ export interface MpReportState {
 
   occurrenceDetails: {
     offenceType: string;
-    place: string;     // <-- same as context
+    place: string; // <-- same as context
     date: string;
     time: string;
     description: string;
@@ -97,10 +92,11 @@ export interface MpReportState {
     vehicleData: Partial<VehicleDetailsState>;
     driverType: string;
     offenderList: any[];
-    tempOffender?: any;     // <-- optional support so no TS error
+    tempOffender?: any; // <-- optional support so no TS error
   };
 
   witnesses: Witness[];
+  witnessVehicleStatus?: "yes" | "no" | "";
 
   evidence: {
     attachEvidence?: File | null;
@@ -127,7 +123,6 @@ export interface MpReportState {
     recommendation: string;
   };
 }
-
 
 // ---------- DEPENDENTS ----------
 export type DependentType =
@@ -158,7 +153,7 @@ export interface TrafficFormState {
   offenceCode: string[];
 
   witnesses: Witness[];
-  selectedWitness?: Witness | null;
+  selectedWitness?: OnDutyDetailsMPReporting | null;
 
   offenderDetails: Record<string, string>;
   offenderPeople: OffenderPerson[];
@@ -207,8 +202,9 @@ export interface FormDataState {
   traffic: TrafficFormState;
   staticSpeed: StaticSpeedFormState;
   mpReport: MpReportState;
+  remarks?: string;
 
-  // Keep these for backward compatibility if needed, or remove if unused 
+  // Keep these for backward compatibility if needed, or remove if unused
   // (Based on FormContext, they seem to be moved to 'traffic' but let's check usage)
   // For now, I will remove them to align with FormContext.tsx strictly.
   coDriverOrPillion?: boolean;

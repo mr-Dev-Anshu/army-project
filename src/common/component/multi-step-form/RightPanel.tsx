@@ -17,7 +17,7 @@ interface Props {
   onNext: () => void;
   onSubmitFinal: () => void;
   stepsConfig: Record<string, StepConfig>;
-  mode?: "traffic" | "static";
+  mode?: "traffic" | "static" | "mp";
 }
 
 export const RightPanel = ({
@@ -99,7 +99,6 @@ export const RightPanel = ({
 
       {/* ---------- FOOTER ---------- */}
       <div className="mt-auto flex flex-col sm:flex-row justify-end gap-2">
-
         {!isLastStep && (
           <Button
             onClick={onNext}
