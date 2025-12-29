@@ -145,10 +145,11 @@ const mapTrafficToReport = (traffic: any) => {
     const traffic = state.formData.traffic;
     const date = traffic.onDutyDetails.dateOfDuty;
 
-    const toISO = (time: string) => {
-      if (!date || !time) return undefined;
-      return new Date(`${date}T${time}`).toISOString();
-    };
+    const toISO = (time?: string) => {
+  if (!date || !time) return undefined;
+  return new Date(`${date}T${time}`).toISOString();
+};
+
 
     const payload = {
       isVehicleInvolved: traffic.vehicleInvolved === "yes",

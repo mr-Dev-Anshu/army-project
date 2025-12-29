@@ -169,7 +169,6 @@ export default function StaticSpeedForm() {
                 ).toISOString()
               : "",
 
-          timeOfOffence: staticData.offenceBlock.timeOfOffence ?? "",
           incidentLocation: staticData.offenceBlock.incidentLocation,
           description: staticData.offenceBlock.description,
 

@@ -1,4 +1,3 @@
-
 "use client";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
@@ -10,7 +9,16 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export default function VehicleDetailsForm({ scope = "traffic" }) {
+/* 🔥 ADD THIS */
+type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional";
+
+interface VehicleDetailsFormProps {
+  scope?: ScopeType;
+}
+
+export default function VehicleDetailsForm({
+  scope = "traffic",
+}: VehicleDetailsFormProps) {
   const { state, dispatch } = useForm();
 
   const traffic = state.formData.traffic;

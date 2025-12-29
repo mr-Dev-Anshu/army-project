@@ -45,7 +45,7 @@ export interface OnDutyDetailsMPReporting {
 
 /* ================= PURE OFFENCE BLOCK ================= */
 export interface OffenceOccurenceDetails {
-  timeOfOffence: string;
+  timeOfOffence?: string;
   time?: string;
   incidentLocation: string;
   description: string;
