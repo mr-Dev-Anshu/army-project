@@ -1,17 +1,18 @@
-'use client'; 
+'use client';
 
 import React from 'react';
-import { ChevronRight } from 'lucide-react'; 
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+
 
 export interface BreadcrumbItem {
   label: React.ReactNode;
-  href?: string; 
+  href?: string;
 }
 
 export interface BreadcrumbProps {
   items: BreadcrumbItem[];
-  separator?: React.ReactNode; 
+  separator?: React.ReactNode;
   className?: string;
 }
 
