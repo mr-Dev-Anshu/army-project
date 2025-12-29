@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,16 +17,22 @@ interface FilterBarProps {
     date: string;
     actionStatus: string;
   };
-  setFilters: React.Dispatch<React.SetStateAction<{
-    search: string;
-    offenceType: string;
-    date: string;
-    actionStatus: string;
-  }>>;
+  setFilters: React.Dispatch<
+    React.SetStateAction<{
+      search: string;
+      offenceType: string;
+      date: string;
+      actionStatus: string;
+    }>
+  >;
   offenceTypeOptions: string[];
 }
 
-export default function FilterBar({ filters, setFilters, offenceTypeOptions }: FilterBarProps) {
+export default function FilterBar({
+  filters,
+  setFilters,
+  offenceTypeOptions,
+}: FilterBarProps) {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({ ...prev, search: e.target.value }));
   };
@@ -57,9 +62,12 @@ export default function FilterBar({ filters, setFilters, offenceTypeOptions }: F
         />
       </div>
 
-      <div className="w-[200px]">
-        <Select value={filters.offenceType} onValueChange={handleOffenceTypeChange} >
-          <SelectTrigger className="bg-white">
+      <div>
+        <Select
+          value={filters.offenceType}
+          onValueChange={handleOffenceTypeChange}
+        >
+          <SelectTrigger className="bg-white  w-[230px]">
             <div className="flex items-center truncate">
               <span className="text-gray-500 mr-1">Offence Type:</span>
               <SelectValue placeholder="All" />
@@ -90,7 +98,10 @@ export default function FilterBar({ filters, setFilters, offenceTypeOptions }: F
       </div>
 
       <div className="w-[200px]">
-        <Select value={filters.actionStatus} onValueChange={handleActionStatusChange}>
+        <Select
+          value={filters.actionStatus}
+          onValueChange={handleActionStatusChange}
+        >
           <SelectTrigger className="bg-white">
             <div className="flex items-center truncate">
               <span className="text-gray-500 mr-1">Action Status:</span>
@@ -105,11 +116,19 @@ export default function FilterBar({ filters, setFilters, offenceTypeOptions }: F
         </Select>
       </div>
 
-      <Button variant="outline" size="icon" className="bg-white w-10 h-10 shrink-0">
+      <Button
+        variant="outline"
+        size="icon"
+        className="bg-white w-10 h-10 shrink-0"
+      >
         <Filter className="w-4 h-4 text-gray-600" />
       </Button>
 
-      <Button variant="outline" size="icon" className="bg-white w-10 h-10 shrink-0">
+      <Button
+        variant="outline"
+        size="icon"
+        className="bg-white w-10 h-10 shrink-0"
+      >
         <ArrowUpDown className="w-4 h-4 text-gray-600" />
       </Button>
 

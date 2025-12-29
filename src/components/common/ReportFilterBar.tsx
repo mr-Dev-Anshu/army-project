@@ -64,7 +64,7 @@ export default function ReportFilterBar({
               value={filters.offenceType || "All"}
               onValueChange={(value) => onFilterChange("offenceType", value)}
             >
-              <SelectTrigger className="bg-white border-gray-300">
+              <SelectTrigger className="bg-white border-gray-300 w-[230px]">
                 <div className="flex items-center truncate">
                   <span className="text-gray-500 mr-1">Offence Type:</span>
                   <SelectValue placeholder="All" />
