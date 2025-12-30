@@ -9,6 +9,7 @@ export const SHOPKEEPER_SUGGESTION_CONFIG = {
     arrayObjectFields: {
         'workers': {
             'type': 'workerType',
+            'name': 'workerName',
         },
     },
 

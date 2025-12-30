@@ -17,14 +17,14 @@ import { format } from "date-fns";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { TempWorker } from "../types";
+import { useCreateShopkeeper } from "../hook";
 
 type WorkerType = string;
-
-
 
 export default function ShopkeeperSecurityPassEntryForm() {
   const { state, dispatch } = useForm();
   const shopkeeper = state.formData.shopkeeper;
+  const { mutate: createShopkeeper, isPending } = useCreateShopkeeper();
 
   const [tempWorker, setTempWorker] = useState<TempWorker>({
     name: "",
@@ -64,8 +64,15 @@ export default function ShopkeeperSecurityPassEntryForm() {
   };
 
   const handleSave = () => {
-    console.log("Final Shopkeeper Data:", shopkeeper);
-    alert("Security Pass Entry Saved & Generated!");
+    createShopkeeper(shopkeeper, {
+      onSuccess: () => {
+        alert("Security Pass Entry Saved & Generated!");
+      },
+      onError: (error) => {
+        console.error("Error creating shopkeeper pass:", error);
+        alert("Failed to create pass.");
+      }
+    });
   };
 
   return (
@@ -97,11 +104,11 @@ export default function ShopkeeperSecurityPassEntryForm() {
             placeholder="Enter unit responsible for this shop"
             value={shopkeeper.unit}
             onChange={(v) => setField("unit", v)}
-            fieldType="militaryUnit"
+            fieldType="unit"
           />
         </div>
       </section>
-<div className="my-12 border-t border-gray-200" />
+      <div className="my-12 border-t border-gray-200" />
 
       <section className="mb-10">
         <h3 className="text-lg font-bold mb-4">Shop Owner Details</h3>
@@ -137,7 +144,7 @@ export default function ShopkeeperSecurityPassEntryForm() {
           </div>
         </div>
       </section>
-<div className="my-12 border-t border-gray-200" />
+      <div className="my-12 border-t border-gray-200" />
 
       {/* Price List Status */}
       <section className="mb-10">
@@ -167,15 +174,15 @@ export default function ShopkeeperSecurityPassEntryForm() {
                     className={cn(
                       "w-full justify-start text-left font-normal",
                       !shopkeeper.priceListEffectiveFrom &&
-                        "text-muted-foreground"
+                      "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {shopkeeper.priceListEffectiveFrom
                       ? format(
-                          new Date(shopkeeper.priceListEffectiveFrom),
-                          "PPP"
-                        )
+                        new Date(shopkeeper.priceListEffectiveFrom),
+                        "PPP"
+                      )
                       : "Enter Date"}
                   </Button>
                 </PopoverTrigger>
@@ -200,7 +207,7 @@ export default function ShopkeeperSecurityPassEntryForm() {
           )}
         </div>
       </section>
-<div className="my-12 border-t border-gray-200" />
+      <div className="my-12 border-t border-gray-200" />
 
       {/* Worker Details & Man Power */}
       <section className="mb-10">
@@ -330,7 +337,7 @@ export default function ShopkeeperSecurityPassEntryForm() {
                     </tr>
                   </thead>
                   <tbody>
-                    {shopkeeper.workers.map((worker, idx) => (
+                    {shopkeeper.workers.map((worker: any, idx: number) => (
                       <tr key={idx} className="border-b">
                         <td className="py-2">{idx + 1}.</td>
                         <td className="py-2">{worker.name}</td>
@@ -341,8 +348,8 @@ export default function ShopkeeperSecurityPassEntryForm() {
                           {worker.type === "ex-man"
                             ? "Ex-Man"
                             : worker.type === "civil-male"
-                            ? "Civil (Male)"
-                            : "Civil (Female)"}
+                              ? "Civil (Male)"
+                              : "Civil (Female)"}
                         </td>
                         <td className="py-2">
                           <Button
@@ -362,84 +369,11 @@ export default function ShopkeeperSecurityPassEntryForm() {
           )}
         </div>
       </section>
-<div className="my-12 border-t border-gray-200" />
-
-      {/* Pass Validity */}
-      <section className="mb-10">
-        <h3 className="text-lg font-bold mb-4">Pass Validity</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-1">
-            <Label>Valid From</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !shopkeeper.validFrom && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {shopkeeper.validFrom
-                    ? format(new Date(shopkeeper.validFrom), "PPP")
-                    : "-- / -- / 25"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={
-                    shopkeeper.validFrom
-                      ? new Date(shopkeeper.validFrom)
-                      : undefined
-                  }
-                  onSelect={(date) =>
-                    setField("validFrom", date ? date.toISOString() : null)
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="space-y-1">
-            <Label>Valid Till</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !shopkeeper.validTill && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {shopkeeper.validTill
-                    ? format(new Date(shopkeeper.validTill), "PPP")
-                    : "-- / -- / 25"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={
-                    shopkeeper.validTill
-                      ? new Date(shopkeeper.validTill)
-                      : undefined
-                  }
-                  onSelect={(date) =>
-                    setField("validTill", date ? date.toISOString() : null)
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-      </section>
-<div className="my-12 border-t border-gray-200" />
+      <div className="my-12 border-t border-gray-200" />
       <div className="flex justify-end gap-4 mt-12">
         <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
-          Save & Generate
+        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700" disabled={isPending}>
+          {isPending ? "Saving..." : "Save & Generate"}
         </Button>
       </div>
     </div>

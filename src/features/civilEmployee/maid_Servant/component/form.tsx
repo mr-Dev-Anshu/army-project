@@ -16,10 +16,12 @@ import { format } from "date-fns";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { TempFamilyMember } from "../types";
+import { useCreateMaidServant } from "../hook";
 
 export default function MaidServantSecurityPassForm() {
   const { state, dispatch } = useForm();
   const maidServant = state.formData.maidServant || {};
+  const { mutate: createMaidServant, isPending } = useCreateMaidServant();
 
   const [tempMember, setTempMember] = useState({
     name: "",
@@ -63,8 +65,15 @@ export default function MaidServantSecurityPassForm() {
   };
 
   const handleSave = () => {
-    console.log("Final Maid Servant Data:", maidServant);
-    alert("Maid Servant Security Pass Saved & Generated!");
+    createMaidServant(maidServant, {
+      onSuccess: () => {
+        alert("Maid Servant Security Pass Saved & Generated!");
+      },
+      onError: (error) => {
+        console.error("Error creating pass:", error);
+        alert("Failed to create pass.");
+      }
+    });
   };
 
   return (
@@ -106,7 +115,7 @@ export default function MaidServantSecurityPassForm() {
               placeholder="Enter Rank"
               value={maidServant.ownerRank || ""}
               onChange={(v) => setField("ownerRank", v)}
-              fieldType="militaryRank"
+              fieldType="ownerRank"
             />
           </div>
           <div className="space-y-1">
@@ -115,7 +124,7 @@ export default function MaidServantSecurityPassForm() {
               placeholder="Enter unit"
               value={maidServant.ownerUnit || ""}
               onChange={(v) => setField("ownerUnit", v)}
-              fieldType="militaryUnit"
+              fieldType="ownerUnit"
             />
           </div>
         </div>
@@ -144,7 +153,7 @@ export default function MaidServantSecurityPassForm() {
               value={maidServant.servantMobile || ""}
               onChange={(v) => setField("servantMobile", v)}
               type="tel"
-              fieldType="mobileNumber"
+              fieldType="servantMobile"
             />
           </div>
 
@@ -173,7 +182,7 @@ export default function MaidServantSecurityPassForm() {
               placeholder="Address Line"
               value={maidServant.permanentAddressLine || ""}
               onChange={(v) => setField("permanentAddressLine", v)}
-              fieldType="addressLine"
+              fieldType="permanentAddressLine"
             />
           </div>
 
@@ -185,7 +194,7 @@ export default function MaidServantSecurityPassForm() {
                 placeholder="City / District"
                 value={maidServant.permanentCityDistrict || ""}
                 onChange={(v) => setField("permanentCityDistrict", v)}
-                fieldType="cityDistrict"
+                fieldType="permanentCityDistrict"
               />
             </div>
 
@@ -195,7 +204,7 @@ export default function MaidServantSecurityPassForm() {
                 placeholder="State"
                 value={maidServant.permanentState || ""}
                 onChange={(v) => setField("permanentState", v)}
-                fieldType="state"
+                fieldType="permanentState"
               />
             </div>
 
@@ -348,15 +357,16 @@ export default function MaidServantSecurityPassForm() {
             </div>
             <div className="space-y-1">
               <Label>Relationship</Label>
-              <Input
+              <SuggestionInput
                 placeholder="Name the relationship with the servant"
                 value={tempMember.relationship}
-                onChange={(e) =>
+                onChange={(v) =>
                   setTempMember((prev) => ({
                     ...prev,
-                    relationship: e.target.value,
+                    relationship: v,
                   }))
                 }
+                fieldType="relationship"
               />
             </div>
           </div>
@@ -414,8 +424,8 @@ export default function MaidServantSecurityPassForm() {
       {/* Actions */}
       <div className="flex justify-end gap-4 mt-12">
         <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
-          Save & Generate
+        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700" disabled={isPending}>
+          {isPending ? "Saving..." : "Save & Generate"}
         </Button>
       </div>
     </div>

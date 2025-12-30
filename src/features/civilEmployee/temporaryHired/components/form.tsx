@@ -12,10 +12,12 @@ import { format } from "date-fns";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { SubWorker } from "../types";
+import { useCreateTemporaryHiredWorker } from "../hook";
 
 export default function TemporaryHiredWorkerPassForm() {
   const { state, dispatch } = useForm();
   const tempWorker = state.formData.tempWorker || {};
+  const { mutate: createWorker, isPending } = useCreateTemporaryHiredWorker();
 
   const [tempSubWorker, setTempSubWorker] = useState({
     name: "",
@@ -55,8 +57,15 @@ export default function TemporaryHiredWorkerPassForm() {
   };
 
   const handleSave = () => {
-    console.log("Final Temporary Worker Data:", tempWorker);
-    alert("Temporary Hired Worker Pass Saved & Generated!");
+    createWorker(tempWorker, {
+      onSuccess: () => {
+        alert("Temporary Hired Worker Pass Saved & Generated!");
+      },
+      onError: (error) => {
+        console.error("Error creating worker pass:", error);
+        alert("Failed to create pass.");
+      }
+    });
   };
 
   return (
@@ -87,7 +96,7 @@ export default function TemporaryHiredWorkerPassForm() {
               value={tempWorker.workerMobile || ""}
               onChange={(v) => setField("workerMobile", v)}
               type="tel"
-              fieldType="mobileNumber"
+              fieldType="workerMobile"
             />
           </div>
 
@@ -112,7 +121,7 @@ export default function TemporaryHiredWorkerPassForm() {
               placeholder="Address Line"
               value={tempWorker.permanentAddressLine || ""}
               onChange={(v) => setField("permanentAddressLine", v)}
-              fieldType="addressLine"
+              fieldType="permanentAddressLine"
             />
           </div>
 
@@ -123,7 +132,7 @@ export default function TemporaryHiredWorkerPassForm() {
                 placeholder="City / District"
                 value={tempWorker.permanentCityDistrict || ""}
                 onChange={(v) => setField("permanentCityDistrict", v)}
-                fieldType="cityDistrict"
+                fieldType="permanentCityDistrict"
               />
             </div>
             <div className="space-y-1">
@@ -132,7 +141,7 @@ export default function TemporaryHiredWorkerPassForm() {
                 placeholder="State"
                 value={tempWorker.permanentState || ""}
                 onChange={(v) => setField("permanentState", v)}
-                fieldType="state"
+                fieldType="permanentState"
               />
             </div>
             <div className="space-y-1">
@@ -156,7 +165,7 @@ export default function TemporaryHiredWorkerPassForm() {
               placeholder="Enter Address"
               value={tempWorker.placeOfStay || ""}
               onChange={(v) => setField("placeOfStay", v)}
-              fieldType="campusAddress"
+              fieldType="placeOfStay"
             />
           </div>
 
@@ -166,7 +175,7 @@ export default function TemporaryHiredWorkerPassForm() {
               placeholder="Enter Address"
               value={tempWorker.placeOfDuty || ""}
               onChange={(v) => setField("placeOfDuty", v)}
-              fieldType="dutyAddress"
+              fieldType="placeOfDuty"
             />
           </div>
         </div>
@@ -355,8 +364,8 @@ export default function TemporaryHiredWorkerPassForm() {
       {/* Actions */}
       <div className="flex justify-end gap-4 mt-12">
         <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
-          Save & Generate
+        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700" disabled={isPending}>
+          {isPending ? "Saving..." : "Save & Generate"}
         </Button>
       </div>
     </div>
