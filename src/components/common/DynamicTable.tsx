@@ -5,7 +5,7 @@ export interface Column<T> {
   header: React.ReactNode | string;
   accessorKey?: keyof T;
   cell?: (item: T) => React.ReactNode;
-  className?: string;
+  className?: string | ((item: T) => string);
   headerClassName?: string;
 }
 
@@ -52,7 +52,10 @@ export function DynamicTable<T>({
                 {columns.map((col, colIndex) => (
                   <td
                     key={colIndex}
-                    className={cn("px-4 py-4 align-top", col.className)}
+                    className={cn(
+                      "px-4 py-4 align-top",
+                      typeof col.className === "function" ? col.className(item) : col.className
+                    )}
                   >
                     {col.cell
                       ? col.cell(item)

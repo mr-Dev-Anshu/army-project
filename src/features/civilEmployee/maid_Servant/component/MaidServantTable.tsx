@@ -88,7 +88,10 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
-            className: "w-16 sticky left-0 z-10 bg-white border-r border-gray-300",
+            className: (item) => {
+                const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                return `w-16 sticky left-0 z-10 border-r border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
+            },
             headerClassName: "z-20 left-0 bg-gray-100 border-r border-gray-300",
         },
         {
@@ -157,7 +160,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Pass Valid Date
                     </div>
-                    <div className="flex text-[10px] items-center text-gray-500 font-medium bg-gray-100">
+                    <div className="flex text-[10px] items-center text-black font-medium bg-gray-100">
                         <div className="flex-1 px-4 py-1 border-r border-gray-300 ">From</div>
                         <div className="flex-1 px-4 py-1">To</div>
                     </div>
@@ -170,21 +173,21 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 const daysAgo = isExpired && validTill ? differenceInDays(new Date(), validTill) : 0;
 
                 return (
-                    <div className="relative h-full flex items-start justify-center">
-                        <div className={`flex w-full ${isExpired ? 'opacity-40 blur-[0.5px]' : ''}`}>
-                            <div className="flex-1 px-4 border-r border-gray-100 text-sm font-medium text-gray-900 text-center">
+                    <div className="relative h-full flex flex-col items-center justify-center">
+                        <div className="flex w-full">
+                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
                                 {validFrom ? format(validFrom, "dd/MM/yyyy") : "-"}
                             </div>
-                            <div className="flex-1 px-4  text-sm font-medium text-gray-900 text-center">
+                            <div className={`flex-1 px-4 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
                                 {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
                             </div>
                         </div>
                         {isExpired && (
-                            <div className="absolute top-12 inset-0 flex flex-col items-center justify-center z-10">
-                                <span className="text-[16px] font-bold text-red-600 uppercase tracking-wide  px-2 py-0.5  ">
+                            <div className="flex flex-col items-center justify-center mt-1">
+                                <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
                                     PASS EXPIRED
                                 </span>
-                                <span className="text-[10px] font-semibold text-gray-800 mt-0.2">
+                                <span className="text-[10px] font-semibold text-gray-700">
                                     {daysAgo} Days Ago
                                 </span>
                             </div>
@@ -201,7 +204,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Servant's Family Details
                     </div>
-                    <div className="flex text-[10px] items-center text-gray-500 font-medium bg-gray-100">
+                    <div className="flex text-[10px] items-center text-black font-medium bg-gray-100">
                         <div className="w-[140px] px-4 py-1 border-r border-gray-300">Name</div>
                         <div className="w-[100px] px-4 py-1 border-r border-gray-300">Relationship</div>
                         <div className="w-[50px] px-4 py-1 text-center">Age</div>
@@ -257,8 +260,11 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
-            className: "w-[50px] sticky right-0 z-10 bg-white  border-l border-gray-200",
-            headerClassName: "z-20 right-0 bg-gray-50 border-l border-gray-200",
+            className: (item) => {
+                const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                return `w-[50px] sticky right-0 z-10 border-l border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
+            },
+            headerClassName: "z-20 right-0 bg-gray-100 border-l border-gray-300",
         },
     ];
 
@@ -327,7 +333,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
             />
 
             <DynamicTable
-                className="[&::-webkit-scrollbar]:hidden [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
+                className="[&::-webkit-scrollbar]:hidden border-gray-300 [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
                 data={filteredData}
                 columns={columns}
                 getRowClassName={(item) => {
