@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { MoreVertical } from "lucide-react";
 
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
+// ... (rest of imports)
+
 import ReportFilterBar, {
     FilterState,
 } from "@/components/common/ReportFilterBar";
@@ -159,20 +161,29 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
         {
             header: "Pass Valid Date To",
             cell: (item) => {
-                const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                const validTill = item.validTill ? new Date(item.validTill) : null;
+                const isExpired = validTill ? validTill < new Date() : false;
+                const daysAgo = isExpired && validTill ? differenceInDays(new Date(), validTill) : 0;
+
                 return (
-                    <div className="flex flex-col">
-                        <span className="whitespace-nowrap">
-                            {item.validTill ? format(new Date(item.validTill), "dd/MM/yyyy") : "-"}
+                    <div className="flex flex-col items-center justify-center">
+                        <span className="whitespace-nowrap text-gray-500 font-medium">
+                            {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
                         </span>
                         {isExpired && (
-                            <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1 py-0.5 rounded mt-1 inline-block text-center border border-red-100">
-                                PASS EXPIRED
-                            </span>
+                            <>
+                                <span className="text-[11px] font-bold text-red-500 mt-1 uppercase leading-tight">
+                                    PASS EXPIRED
+                                </span>
+                                <span className="text-[11px] text-gray-700 font-medium leading-tight">
+                                    {daysAgo} Days Ago
+                                </span>
+                            </>
                         )}
                     </div>
-                )
+                );
             },
+            className: "min-w-[110px]",
         },
         {
             header: "Actions",
@@ -234,6 +245,10 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
             <DynamicTable
                 data={filteredData}
                 columns={columns}
+                getRowClassName={(item) => {
+                    const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                    return isExpired ? "bg-red-50 border-red-200 border !text-gray-900" : "";
+                }}
             />
         </div>
     );
