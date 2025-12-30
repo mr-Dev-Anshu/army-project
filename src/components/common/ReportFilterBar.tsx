@@ -8,7 +8,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Calendar, Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Calendar, Plus, ArrowUpDown, Filter } from "lucide-react";
 
 export interface FilterState {
   search: string;
@@ -26,9 +32,12 @@ interface ReportFilterBarProps {
   placeholder?: string;
   showDate?: boolean;
   showActionStatus?: boolean;
+  statusLabel?: string;
   showOffenceType?: boolean;
   onAddNew?: () => void;
   onReset?: () => void;
+  showSort?: boolean;
+  showFilter?: boolean;
 }
 
 export default function ReportFilterBar({
@@ -38,27 +47,30 @@ export default function ReportFilterBar({
   placeholder = "Search by offence type...",
   showDate = true,
   showActionStatus = true,
+  statusLabel = "Action Status",
   showOffenceType = true,
   onAddNew,
   onReset,
+  showSort = false,
+  showFilter = false,
 }: ReportFilterBarProps) {
   return (
-    <div className="flex flex-wrap gap-3 justify-between items-center mb-6  bg-white ">
-      <div className="flex flex-wrap justify-center gap-3 items-center">
+    <div className="flex gap-3 justify-between items-center mb-6">
+      <div className="flex flex-1 gap-3 items-center">
         {/* Search Input */}
-        <div className="relative flex-1 min-w-[300px]">
+        <div className="relative flex-1 min-w-[200px] max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
             type="text"
             placeholder={placeholder}
-            className="pl-9 bg-white border-gray-300"
+            className="pl-9 bg-white border-gray-300 w-full"
             value={filters.search}
             onChange={(e) => onFilterChange("search", e.target.value)}
           />
         </div>
 
         {/* Offence Type Select */}
-        {showOffenceType && offenceTypeOptions.length > 0 && (
+        {showOffenceType && (
           <div className="w-[230px] shrink-0">
             <Select
               value={filters.offenceType || "All"}
@@ -84,26 +96,28 @@ export default function ReportFilterBar({
 
         {/* Date Input */}
         {showDate && (
-          <div className="w-auto relative">
-            <Input
+          <div className="flex items-center h-10 border border-gray-300 rounded-md bg-white px-3 w-auto min-w-[200px] hover:bg-gray-50 transition-colors cursor-pointer group shrink-0">
+            <span className="text-gray-500 mr-2 text-sm text-[16px]">Date:</span>
+            <input
               type="date"
               value={filters.date || ""}
               onChange={(e) => onFilterChange("date", e.target.value)}
-              className="bg-white border-gray-300 cursor-pointer"
+              className="bg-transparent border-none p-0 text-sm text-[16px] text-gray-900 focus:outline-none h-full w-full cursor-pointer font-medium uppercase font-sans placeholder-gray-500"
+              style={{ colorScheme: "light" }}
             />
           </div>
         )}
 
         {/* Action Status Select */}
         {showActionStatus && (
-          <div className="w-[200px]">
+          <div className="w-[200px] shrink-0">
             <Select
               value={filters.actionStatus || "All"}
               onValueChange={(value) => onFilterChange("actionStatus", value)}
             >
               <SelectTrigger className="bg-white border-gray-300">
                 <div className="flex items-center truncate">
-                  <span className="text-gray-500 mr-1">Action Status:</span>
+                  <span className="text-gray-500 mr-1">{statusLabel}:</span>
                   <SelectValue placeholder="All" />
                 </div>
               </SelectTrigger>
@@ -115,35 +129,52 @@ export default function ReportFilterBar({
             </Select>
           </div>
         )}
-        {/* <Button
-          variant="outline"
-          size="icon"
-          className="bg-white w-10 h-10 shrink-0 border-gray-300"
-          onClick={() => {
-             const newOrder = filters.sortOrder === "asc" ? "desc" : "asc";
-             onFilterChange("sortOrder", newOrder);
-          }}
-        >
-          <ArrowUpDown className={`w-4 h-4 text-gray-600 ${filters.sortOrder === 'asc' ? 'transform rotate-180' : ''}`} />
-        </Button> */}
 
-        {/* Reset Filter Button */}
-        {onReset && (
+        {/* Filter Button */}
+        {showFilter && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="w-10 h-10 bg-white border-gray-300 hover:bg-gray-50 ml-1 shrink-0"
+              >
+                <Filter className="w-4 h-4 text-gray-500" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              {onReset && (
+                <DropdownMenuItem onClick={onReset} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                  <span className="flex items-center gap-2">
+                    Reset Filter
+                  </span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {/* Sort Button */}
+        {/* {showSort && (
           <Button
             variant="outline"
-            className="bg-white border-gray-300 text-gray-600 hover:bg-gray-100"
-            onClick={onReset}
+            size="icon"
+            className="w-10 h-10 bg-white border-gray-300 hover:bg-gray-50 shrink-0"
+            onClick={() => {
+              const newOrder = filters.sortOrder === "asc" ? "desc" : "asc";
+              onFilterChange("sortOrder", newOrder);
+            }}
           >
-            Reset Filter
+            <ArrowUpDown className="w-4 h-4 text-gray-600" />
           </Button>
-        )}
+        )} */}
       </div>
 
       {/* Add New Button */}
       {onAddNew && (
         <Button
           onClick={onAddNew}
-          className="ml-auto bg-blue-600 hover:bg-blue-700 text-white gap-2 px-4 shadow-sm"
+          className="ml-auto bg-[#0088FF] hover:bg-[#0088FF] cursor-pointer text-white gap-2 px-4 shadow-sm shrink-0"
         >
           <Plus className="w-4 h-4" />
           Add New

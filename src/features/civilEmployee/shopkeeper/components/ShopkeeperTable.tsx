@@ -73,6 +73,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         offenceType: "All",
         date: "",
         actionStatus: "All",
+        sortOrder: "asc",
     });
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
@@ -107,17 +108,23 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
-            className: "w-16 sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
-            headerClassName: "z-20 left-0 bg-gray-50 border-r border-gray-200",
+            className: (item) => {
+                const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                return `w-16 sticky left-0 z-10 border-r border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
+            },
+            headerClassName: "z-20 left-0 bg-gray-100 border-r border-gray-300",
         },
         {
             header: "Shop Address",
             accessorKey: "shopAddress",
-            className: "font-medium text-gray-900",
+            className: "font-medium text-gray-900 border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Shop Name",
             accessorKey: "shopName",
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Shop Owner Name & Mobile No.",
@@ -127,16 +134,22 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                     <span className="text-gray-500 text-xs">{item.ownerMobile}</span>
                 </div>
             ),
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Unit",
             accessorKey: "unit",
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Price List Status",
             cell: (item) => (
                 <span>{item.priceListApproved ? "Yes" : "No"}</span>
             ),
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         // Flattened Man Power columns
         {
@@ -145,6 +158,8 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 const count = item.workers?.filter(w => w.type === "ex-man").length || 0;
                 return String(count).padStart(2, '0');
             },
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Civ(M)",
@@ -152,6 +167,8 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 const count = item.workers?.filter(w => w.type === "civil-male").length || 0;
                 return String(count).padStart(2, '0');
             },
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Civ(F)",
@@ -159,12 +176,16 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 const count = item.workers?.filter(w => w.type === "civil-female").length || 0;
                 return String(count).padStart(2, '0');
             },
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Total",
             cell: (item) => (
                 <span className="font-bold">{item.workers?.length || 0}</span>
             ),
+            className: "border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Worker Details (each)",
@@ -177,42 +198,52 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                     ))}
                 </div>
             ),
-            className: "min-w-[150px]",
+            className: "min-w-[150px] border-r border-gray-300",
+            headerClassName: "min-w-[150px] border-r border-gray-300 bg-gray-100",
         },
         {
-            header: "Pass Valid Date From",
-            cell: (item) => (
-                <span className="whitespace-nowrap">
-                    {item.validFrom ? format(new Date(item.validFrom), "dd/MM/yyyy") : "-"}
-                </span>
+            header: (
+                <div className="flex flex-col h-full">
+                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
+                        Pass Valid Date
+                    </div>
+                    <div className="flex text-[10px] items-center text-black font-medium bg-gray-100">
+                        <div className="flex-1 px-4 py-1 border-r border-gray-300 ">From</div>
+                        <div className="flex-1 px-4 py-1">To</div>
+                    </div>
+                </div>
             ),
-        },
-        {
-            header: "Pass Valid Date To",
             cell: (item) => {
+                const validFrom = item.validFrom ? new Date(item.validFrom) : null;
                 const validTill = item.validTill ? new Date(item.validTill) : null;
                 const isExpired = validTill ? validTill < new Date() : false;
                 const daysAgo = isExpired && validTill ? differenceInDays(new Date(), validTill) : 0;
 
                 return (
-                    <div className="flex flex-col items-center justify-center">
-                        <span className="whitespace-nowrap text-gray-500 font-medium">
-                            {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
-                        </span>
+                    <div className="relative h-full flex flex-col items-center justify-center">
+                        <div className="flex w-full">
+                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
+                                {validFrom ? format(validFrom, "dd/MM/yyyy") : "-"}
+                            </div>
+                            <div className={`flex-1 px-4 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
+                                {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
+                            </div>
+                        </div>
                         {isExpired && (
-                            <>
-                                <span className="text-[11px] font-bold text-red-500 mt-1 uppercase leading-tight">
+                            <div className="flex flex-col items-center justify-center mt-1">
+                                <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
                                     PASS EXPIRED
                                 </span>
-                                <span className="text-[11px] text-gray-700 font-medium leading-tight">
+                                <span className="text-[10px] font-semibold text-gray-700">
                                     {daysAgo} Days Ago
                                 </span>
-                            </>
+                            </div>
                         )}
                     </div>
                 );
             },
-            className: "min-w-[110px]",
+            className: "min-w-[220px] py-4 align-top border-r border-gray-300",
+            headerClassName: "p-0 min-w-[220px] border-r border-gray-300",
         },
         {
             header: "Actions",
@@ -239,8 +270,11 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
-            className: "w-[50px] sticky right-0 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
-            headerClassName: "z-20 right-0 bg-gray-50 border-l border-gray-200",
+            className: (item) => {
+                const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                return `w-[50px] sticky right-0 z-10 border-l border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
+            },
+            headerClassName: "z-20 right-0 bg-gray-100 border-l border-gray-300",
         },
     ];
 
@@ -267,18 +301,28 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 offenceTypeOptions={["Option 1", "Option 2"]} // Example options
                 showOffenceType={true}
                 showActionStatus={true}
+                statusLabel="Pass Status"
                 showDate={true}
+                showSort={true}
+                showFilter={true}
                 onAddNew={onAddNew}
+                onReset={() => setFilters({
+                    search: "",
+                    offenceType: "All",
+                    date: "",
+                    actionStatus: "All",
+                    sortOrder: "asc",
+                })}
                 placeholder="Search by shop name, owner, unit..."
             />
 
             <DynamicTable
-                className="[&::-webkit-scrollbar]:hidden"
+                className="[&::-webkit-scrollbar]:hidden border-gray-300 [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
                 data={filteredData}
                 columns={columns}
                 getRowClassName={(item) => {
                     const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
-                    return isExpired ? "bg-red-50 border-red-200 border !text-gray-900" : "";
+                    return isExpired ? "bg-red-50 border border-red-500 hover:bg-red-50" : "border-b border-gray-300 hover:bg-white";
                 }}
             />
 

@@ -314,6 +314,8 @@ export default function ReportsPage({
         }
         offenceTypeOptions={offenceTypeOptions}
         showOffenceType={true}
+        showSort={true}
+        showFilter={true}
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({

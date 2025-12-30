@@ -40,6 +40,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
         offenceType: "All",
         date: "",
         actionStatus: "All",
+        sortOrder: "asc",
     });
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
@@ -325,10 +326,19 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 offenceTypeOptions={[]}
-                showOffenceType={false}
+                showOffenceType={true}
                 showActionStatus={false}
                 showDate={true}
+                showSort={true}
+                showFilter={true}
                 onAddNew={onAddNew}
+                onReset={() => setFilters({
+                    search: "",
+                    offenceType: "All",
+                    date: "",
+                    actionStatus: "All",
+                    sortOrder: "asc",
+                })}
                 placeholder="Search by name, qtr no, pass number..."
             />
 
