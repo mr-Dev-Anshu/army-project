@@ -1,4 +1,4 @@
-
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { deleteTemporaryHiredWorker, getTemporaryHiredWorkerById, updateTemporaryHiredWorker } from "@/services/TemporaryHiredWorker.service";
 import { updateTemporaryHiredWorkerSchema } from "@/validators/temporaryHiredWorker.validator";
@@ -7,7 +7,7 @@ import { updateTemporaryHiredWorkerSchema } from "@/validators/temporaryHiredWor
 export async function GET(request, { params }) {
   try {
     await connectDB()
-        const { id } = await params;
+    const { id } = await params;
 
     const worker = await getTemporaryHiredWorkerById(id);
     if (!worker) {
@@ -25,10 +25,10 @@ export async function GET(request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
-        await connectDB()
+    await connectDB()
 
     const body = await request.json();
-     
+
     const { id } = await params;
     const { error, value } = updateTemporaryHiredWorkerSchema.validate(body, {
       abortEarly: false,
@@ -59,7 +59,7 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-        await connectDB()
+    await connectDB()
     const { id } = await params;
     const worker = await deleteTemporaryHiredWorker(id);
     if (!worker) {

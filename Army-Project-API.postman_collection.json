@@ -1108,6 +1108,386 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Civil Employee",
+            "item": [
+                {
+                    "name": "Shopkeeper",
+                    "item": [
+                        {
+                            "name": "Get All Shopkeepers",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/shopkeeper",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "shopkeeper"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Create Shopkeeper",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "if (pm.response.code === 201) {",
+                                            "    const response = pm.response.json();",
+                                            "    pm.collectionVariables.set('shopkeeperId', response._id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"shopName\": \"Gupta General Store\",\n  \"shopAddress\": \"Sadar Bazar, Delhi Cantt\",\n  \"unit\": \"HQ 21 Corps\",\n  \"ownerName\": \"Rajesh Gupta\",\n  \"ownerMobile\": \"9876543210\",\n  \"ownerAadhar\": \"123456789012\",\n  \"passNumber\": \"SK-2025-001\",\n  \"priceListApproved\": true,\n  \"workers\": [\n    {\n      \"name\": \"Ramu Kaka\",\n      \"aadhar\": \"112233445566\",\n      \"type\": \"Helper\"\n    }\n  ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/shopkeeper",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "shopkeeper"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Shopkeeper By ID",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/shopkeeper/{{shopkeeperId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "shopkeeper",
+                                        "{{shopkeeperId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Update Shopkeeper",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"shopName\": \"Gupta Super Market\",\n  \"workers\": [\n    {\n      \"name\": \"Ramu Kaka\",\n      \"aadhar\": \"112233445566\",\n      \"type\": \"Head Helper\"\n    }\n  ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/shopkeeper/{{shopkeeperId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "shopkeeper",
+                                        "{{shopkeeperId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Delete Shopkeeper",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/shopkeeper/{{shopkeeperId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "shopkeeper",
+                                        "{{shopkeeperId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Maid Servant",
+                    "item": [
+                        {
+                            "name": "Get All Maid Servants",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/maidServant",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "maidServant"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Create Maid Servant",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "if (pm.response.code === 201) {",
+                                            "    const response = pm.response.json();",
+                                            "    pm.collectionVariables.set('maidServantId', response._id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"qtrNumber\": \"Type-2/14\",\n  \"ownerName\": \"Major Vikram Singh\",\n  \"ownerRank\": \"Major\",\n  \"ownerUnit\": \"5 Raj Rif\",\n  \"servantName\": \"Kamla Devi\",\n  \"servantMobile\": \"8877665544\",\n  \"servantAadhar\": \"998877665544\",\n  \"permanentAddressLine\": \"Village Rampur\",\n  \"permanentCityDistrict\": \"Meerut\",\n  \"permanentState\": \"UP\",\n  \"passNumber\": \"MS-2025-055\",\n  \"familyMembers\": [\n    {\n      \"name\": \"Raju (Son)\",\n      \"relationship\": \"Son\",\n      \"age\": \"10\"\n    }\n  ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/maidServant",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "maidServant"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Maid Servant By ID",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/maidServant/{{maidServantId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "maidServant",
+                                        "{{maidServantId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Update Maid Servant",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"servantMobile\": \"9999999999\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/maidServant/{{maidServantId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "maidServant",
+                                        "{{maidServantId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Delete Maid Servant",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/maidServant/{{maidServantId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "maidServant",
+                                        "{{maidServantId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Temporary Hired Worker",
+                    "item": [
+                        {
+                            "name": "Get All Temporary Hired Workers",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/temporaryHiredWorker",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "temporaryHiredWorker"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Create Temporary Hired Worker",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "if (pm.response.code === 201) {",
+                                            "    const response = pm.response.json();",
+                                            "    pm.collectionVariables.set('tempWorkerId', response._id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"workerName\": \"Construction Team Alpha\",\n  \"workerMobile\": \"7778889990\",\n  \"workerAadhar\": \"123123123123\",\n  \"permanentAddressLine\": \"Sector 15\",\n  \"permanentCityDistrict\": \"Gurgaon\",\n  \"permanentState\": \"Haryana\",\n  \"placeOfStay\": \"Labor Colony, Cantonment\",\n  \"placeOfDuty\": \"MES Site 4\",\n  \"passNumber\": \"THW-2025-999\",\n  \"subWorkers\": [\n    {\n      \"name\": \"Chotu\",\n      \"mobile\": \"9000011111\",\n      \"aadhar\": \"111111111111\"\n    },\n    {\n      \"name\": \"Bhim\",\n      \"mobile\": \"9000022222\",\n      \"aadhar\": \"222222222222\"\n    }\n  ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/temporaryHiredWorker",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "temporaryHiredWorker"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Temporary Hired Worker By ID",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/temporaryHiredWorker/{{tempWorkerId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "temporaryHiredWorker",
+                                        "{{tempWorkerId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Update Temporary Hired Worker",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"placeOfDuty\": \"MES Site 5 (New Location)\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/temporaryHiredWorker/{{tempWorkerId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "temporaryHiredWorker",
+                                        "{{tempWorkerId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Delete Temporary Hired Worker",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/temporaryHiredWorker/{{tempWorkerId}}",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "temporaryHiredWorker",
+                                        "{{tempWorkerId}}"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { createTemporaryHiredWorker, getAllTemporaryHiredWorkers } from "@/services/TemporaryHiredWorker.service";
 import { createTemporaryHiredWorkerSchema } from "@/validators/temporaryHiredWorker.validator";
