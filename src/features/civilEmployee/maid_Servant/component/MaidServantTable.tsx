@@ -288,49 +288,24 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
         <div className="w-full">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                        {/* Icon for Maid Servant */}
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 28 28"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="text-gray-600"
-                        >
-                            <path
-                                d="M18.6667 25.6667L17.5 21"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                            <path
-                                d="M22.1641 16.3217C22.4735 16.3217 22.7702 16.1988 22.989 15.98C23.2078 15.7612 23.3307 15.4645 23.3307 15.155V14C23.3307 13.3812 23.0849 12.7877 22.6473 12.3501C22.2097 11.9125 21.6162 11.6667 20.9974 11.6667H17.4974C17.188 11.6667 16.8912 11.5438 16.6724 11.325C16.4536 11.1062 16.3307 10.8095 16.3307 10.5V4.66671C16.3307 4.04787 16.0849 3.45438 15.6473 3.01679C15.2097 2.57921 14.6162 2.33337 13.9974 2.33337C13.3786 2.33337 12.7851 2.57921 12.3475 3.01679C11.9099 3.45438 11.6641 4.04787 11.6641 4.66671V10.5C11.6641 10.8095 11.5411 11.1062 11.3224 11.325C11.1036 11.5438 10.8068 11.6667 10.4974 11.6667H6.9974C6.37856 11.6667 5.78506 11.9125 5.34748 12.3501C4.9099 12.7877 4.66406 13.3812 4.66406 14V15.155C4.66406 15.4645 4.78698 15.7612 5.00577 15.98C5.22456 16.1988 5.52131 16.3217 5.83073 16.3217"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                            <path
-                                d="M5.83394 16.3334H22.1673L24.4691 24.2282C24.5102 24.3997 24.5119 24.5783 24.474 24.7506C24.4361 24.9229 24.3597 25.0843 24.2504 25.2228C24.1411 25.3612 24.0019 25.4731 23.8432 25.55C23.6844 25.6269 23.5103 25.6668 23.3339 25.6667H4.66728C4.4909 25.6668 4.31679 25.6269 4.15805 25.55C3.99932 25.4731 3.86008 25.3612 3.75082 25.2228C3.64155 25.0843 3.56511 24.9229 3.52723 24.7506C3.48934 24.5783 3.49101 24.3997 3.53211 24.2282L5.83394 16.3334Z"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                            <path
-                                d="M9.33594 25.6667L10.5026 21"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-800">Maid Servants Security Passes</h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="24" height="24" rx="12" fill="#E5E5E5" />
+                        <g clip-path="url(#clip0_683_98670)">
+                            <path d="M14 17L13.5 15" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M15.5 12.995C15.6326 12.995 15.7598 12.9423 15.8536 12.8486C15.9473 12.7548 16 12.6276 16 12.495V12C16 11.7348 15.8946 11.4804 15.7071 11.2929C15.5196 11.1054 15.2652 11 15 11H13.5C13.3674 11 13.2402 10.9473 13.1464 10.8536C13.0527 10.7598 13 10.6326 13 10.5V8C13 7.73478 12.8946 7.48043 12.7071 7.29289C12.5196 7.10536 12.2652 7 12 7C11.7348 7 11.4804 7.10536 11.2929 7.29289C11.1054 7.48043 11 7.73478 11 8V10.5C11 10.6326 10.9473 10.7598 10.8536 10.8536C10.7598 10.9473 10.6326 11 10.5 11H9C8.73478 11 8.48043 11.1054 8.29289 11.2929C8.10536 11.4804 8 11.7348 8 12V12.495C8 12.6276 8.05268 12.7548 8.14645 12.8486C8.24021 12.9423 8.36739 12.995 8.5 12.995" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M8.50026 13H15.5003L16.4868 16.3835C16.5044 16.457 16.5051 16.5336 16.4889 16.6074C16.4726 16.6812 16.4399 16.7504 16.393 16.8097C16.3462 16.8691 16.2865 16.917 16.2185 16.95C16.1505 16.9829 16.0759 17 16.0003 17H8.00026C7.92467 17 7.85005 16.9829 7.78202 16.95C7.71399 16.917 7.65432 16.8691 7.60749 16.8097C7.56067 16.7504 7.5279 16.6812 7.51167 16.6074C7.49543 16.5336 7.49615 16.457 7.51376 16.3835L8.50026 13Z" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M10 17L10.5 15" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_683_98670">
+                                <rect width="12" height="12" fill="white" transform="translate(6 6)" />
+                            </clipPath>
+                        </defs>
+                    </svg>
+
+                    <h2 className="text-lg font-semibold text-[#404040]">Maid Servants Security Passes</h2>
                 </div>
-                <span className="text-sm font-medium text-gray-500">{maidServants.length} Servants</span>
+                <span className="text-sm font-medium text-[#0A0A0A]">{maidServants.length} Servants</span>
             </div>
 
             <ReportFilterBar

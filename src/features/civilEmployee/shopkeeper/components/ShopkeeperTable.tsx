@@ -297,13 +297,23 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         <div className="w-full">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                        {/* Placeholder icon */}
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-800">Shopkeepers & Workers Security Passes</h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="24" height="24" rx="12" fill="#E5E5E5" />
+                        <g clip-path="url(#clip0_670_96759)">
+                            <path d="M10 17C10.2761 17 10.5 16.7761 10.5 16.5C10.5 16.2239 10.2761 16 10 16C9.72386 16 9.5 16.2239 9.5 16.5C9.5 16.7761 9.72386 17 10 17Z" stroke="#404040" stroke-width="1.2" stroke-linejoin="round" />
+                            <path d="M15.5 17C15.7761 17 16 16.7761 16 16.5C16 16.2239 15.7761 16 15.5 16C15.2239 16 15 16.2239 15 16.5C15 16.7761 15.2239 17 15.5 17Z" stroke="#404040" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round" />
+                            <path d="M7.02344 7.02499H8.02344L9.35344 13.235C9.40223 13.4624 9.52877 13.6657 9.71129 13.8099C9.89381 13.9541 10.1209 14.0302 10.3534 14.025H15.2434C15.471 14.0246 15.6917 13.9466 15.869 13.8039C16.0462 13.6612 16.1695 13.4623 16.2184 13.24L17.0434 9.52499H8.55844" stroke="#404040" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round" />
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_670_96759">
+                                <rect width="12" height="12" fill="white" transform="translate(6 6)" />
+                            </clipPath>
+                        </defs>
+                    </svg>
+
+                    <h2 className="text-lg font-semibold text-[#404040]">Shopkeepers & Workers Security Passes</h2>
                 </div>
-                <span className="text-sm font-medium text-gray-500">{shopkeepers.length} Shop owners & Workers</span>
+                <span className="text-sm font-medium  text-[#0A0A0A]">{shopkeepers.length} Shop owners & Workers</span>
             </div>
 
             <ReportFilterBar

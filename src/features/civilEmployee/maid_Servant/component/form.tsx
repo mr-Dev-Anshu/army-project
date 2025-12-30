@@ -118,7 +118,21 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
   };
 
   const handleSave = () => {
-    createMaidServant(maidServant, {
+    // Sanitize data
+    const sanitizedData = { ...maidServant };
+    delete (sanitizedData as any)._id;
+    delete (sanitizedData as any).createdAt;
+    delete (sanitizedData as any).updatedAt;
+    delete (sanitizedData as any).__v;
+
+    if (sanitizedData.familyMembers) {
+      sanitizedData.familyMembers = sanitizedData.familyMembers.map((member: any) => {
+        const { _id, ...rest } = member;
+        return rest;
+      });
+    }
+
+    createMaidServant(sanitizedData, {
       onSuccess: () => {
         toast.success("Maid Servant Security Pass Saved & Generated!");
         handleReset();
