@@ -104,7 +104,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         {
             header: "Sr no.",
             cell: (item) => (
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-[#0A0A0A]">
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
@@ -117,7 +117,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         {
             header: "Shop Address",
             accessorKey: "shopAddress",
-            className: "font-medium text-gray-900 border-r border-gray-300",
+            className: "font-medium text-[#0A0A0A] border-r border-gray-300",
             headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
@@ -130,8 +130,8 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
             header: "Shop Owner Name & Mobile No.",
             cell: (item) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-gray-900">{item.ownerName}</span>
-                    <span className="text-gray-500 text-xs">{item.ownerMobile}</span>
+                    <span className="font-medium text-[#0A0A0A]">{item.ownerName}</span>
+                    <span className="text-[#0A0A0A] text-xs">{item.ownerMobile}</span>
                 </div>
             ),
             className: "border-r border-gray-300",
@@ -151,48 +151,44 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
             className: "border-r border-gray-300",
             headerClassName: "border-r border-gray-300 bg-gray-100",
         },
-        // Flattened Man Power columns
         {
-            header: "Ex-Man",
-            cell: (item) => {
-                const count = item.workers?.filter(w => w.type === "ex-man").length || 0;
-                return String(count).padStart(2, '0');
-            },
-            className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
-        },
-        {
-            header: "Civ(M)",
-            cell: (item) => {
-                const count = item.workers?.filter(w => w.type === "civil-male").length || 0;
-                return String(count).padStart(2, '0');
-            },
-            className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
-        },
-        {
-            header: "Civ(F)",
-            cell: (item) => {
-                const count = item.workers?.filter(w => w.type === "civil-female").length || 0;
-                return String(count).padStart(2, '0');
-            },
-            className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
-        },
-        {
-            header: "Total",
-            cell: (item) => (
-                <span className="font-bold">{item.workers?.length || 0}</span>
+            header: (
+                <div className="flex flex-col h-full">
+                    <div className="text-xs font-semibold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100 text-center">
+                        Man Power
+                    </div>
+                    <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
+                        <div className="w-[70px] px-2 py-1 border-r border-gray-300 text-center">Ex-Man</div>
+                        <div className="w-[70px] px-2 py-1 border-r border-gray-300 text-center">Civ(M)</div>
+                        <div className="w-[70px] px-2 py-1 border-r border-gray-300 text-center">Civ(F)</div>
+                        <div className="w-[70px] px-2 py-1 text-center font-bold">Total</div>
+                    </div>
+                </div>
             ),
-            className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            cell: (item) => {
+                const exMan = item.workers?.filter(w => w.type === "ex-man").length || 0;
+                const civM = item.workers?.filter(w => w.type === "civil-male").length || 0;
+                const civF = item.workers?.filter(w => w.type === "civil-female").length || 0;
+                const total = item.workers?.length || 0;
+
+                return (
+                    <div className="flex h-full items-center">
+                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm py-4">{String(exMan).padStart(2, '0')}</div>
+                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm py-4">{String(civM).padStart(2, '0')}</div>
+                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm py-4">{String(civF).padStart(2, '0')}</div>
+                        <div className="w-[70px] px-2 text-center font-bold text-sm py-4">{String(total).padStart(2, '0')}</div>
+                    </div>
+                );
+            },
+            className: "p-0 align-top border-r border-gray-300 min-w-[280px]",
+            headerClassName: "p-0 border-r border-gray-300 min-w-[280px]",
         },
         {
             header: "Worker Details (each)",
             cell: (item) => (
                 <div className="space-y-1 max-h-[60px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
                     {item.workers?.map((w, i) => (
-                        <div key={i} className="text-xs text-gray-700">
+                        <div key={i} className="text-xs text-[#0A0A0A]">
                             {i + 1}. {w.name}
                         </div>
                     ))}
@@ -204,10 +200,10 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
+                    <div className="text-xs font-semibold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Pass Valid Date
                     </div>
-                    <div className="flex text-[10px] items-center text-black font-medium bg-gray-100">
+                    <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
                         <div className="flex-1 px-4 py-1 border-r border-gray-300 ">From</div>
                         <div className="flex-1 px-4 py-1">To</div>
                     </div>
@@ -222,10 +218,10 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 return (
                     <div className="relative h-full flex flex-col items-center justify-center">
                         <div className="flex w-full">
-                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
+                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
                                 {validFrom ? format(validFrom, "dd/MM/yyyy") : "-"}
                             </div>
-                            <div className={`flex-1 px-4 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
+                            <div className={`flex-1 px-4 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
                                 {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
                             </div>
                         </div>
@@ -234,7 +230,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                                 <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
                                     PASS EXPIRED
                                 </span>
-                                <span className="text-[10px] font-semibold text-gray-700">
+                                <span className="text-[10px] font-semibold text-[#0A0A0A]">
                                     {daysAgo} Days Ago
                                 </span>
                             </div>

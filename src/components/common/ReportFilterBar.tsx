@@ -58,7 +58,7 @@ export default function ReportFilterBar({
     <div className="flex gap-3 justify-between items-center mb-6">
       <div className="flex flex-1 gap-3 items-center">
         {/* Search Input */}
-        <div className="relative flex-1 min-w-[200px] max-w-md">
+        <div className="relative flex-1 max-w-[220px] ">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
             type="text"
@@ -71,12 +71,12 @@ export default function ReportFilterBar({
 
         {/* Offence Type Select */}
         {showOffenceType && (
-          <div className="w-[230px] shrink-0">
+          <div className="w-[220px] shrink-0">
             <Select
               value={filters.offenceType || "All"}
               onValueChange={(value) => onFilterChange("offenceType", value)}
             >
-              <SelectTrigger className="bg-white border-gray-300 w-[230px]">
+              <SelectTrigger className="bg-white border-gray-300 w-[220px]">
                 <div className="flex items-center truncate">
                   <span className="text-gray-500 mr-1">Offence Type:</span>
                   <SelectValue placeholder="All" />
@@ -96,7 +96,7 @@ export default function ReportFilterBar({
 
         {/* Date Input */}
         {showDate && (
-          <div className="flex items-center h-10 border border-gray-300 rounded-md bg-white px-3 w-auto min-w-[200px] hover:bg-gray-50 transition-colors cursor-pointer group shrink-0">
+          <div className="flex items-center h-9 border border-gray-300 rounded-md bg-white px-2 w-auto min-w-[200px] hover:bg-gray-50 transition-colors cursor-pointer group shrink-0">
             <span className="text-gray-500 mr-2 text-sm text-[16px]">Date:</span>
             <input
               type="date"
@@ -110,7 +110,7 @@ export default function ReportFilterBar({
 
         {/* Action Status Select */}
         {showActionStatus && (
-          <div className="w-[200px] shrink-0">
+          <div className="max-w-[200px] shrink-0">
             <Select
               value={filters.actionStatus || "All"}
               onValueChange={(value) => onFilterChange("actionStatus", value)}
@@ -137,12 +137,15 @@ export default function ReportFilterBar({
               <Button
                 variant="outline"
                 size="icon"
-                className="w-10 h-10 bg-white border-gray-300 hover:bg-gray-50 ml-1 shrink-0"
+                className="w-10 h-9 bg-white border-gray-300 hover:bg-gray-50 ml-1 shrink-0"
               >
-                <Filter className="w-4 h-4 text-gray-500" />
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 11.125C9.41421 11.125 9.75 11.4608 9.75 11.875C9.75 12.2892 9.41421 12.625 9 12.625H6C5.58579 12.625 5.25 12.2892 5.25 11.875C5.25 11.4608 5.58579 11.125 6 11.125H9ZM11.25 6.625C11.6642 6.625 12 6.96079 12 7.375C12 7.78921 11.6642 8.125 11.25 8.125H3.75C3.33579 8.125 3 7.78921 3 7.375C3 6.96079 3.33579 6.625 3.75 6.625H11.25ZM14.25 2.125C14.6642 2.125 15 2.46079 15 2.875C15 3.28921 14.6642 3.625 14.25 3.625H0.75C0.335786 3.625 0 3.28921 0 2.875C0 2.46079 0.335786 2.125 0.75 2.125H14.25Z" fill="#0A0A0A" />
+                </svg>
+
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuContent align="start" className="">
               {onReset && (
                 <DropdownMenuItem onClick={onReset} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
                   <span className="flex items-center gap-2">
