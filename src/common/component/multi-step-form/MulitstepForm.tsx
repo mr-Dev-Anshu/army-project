@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useForm } from "@/context/FormContext";
@@ -30,125 +28,210 @@ export default function MultiStepForm() {
     { id: 4, label: "Remarks of CO/2IC Provost Unit", icon: "4" },
   ];
 
-const mapTrafficToReport = (traffic: any) => {
-  /* ========= Primary Offender Resolver ========= */
-  const getPrimaryOffender = () => {
-    // VEHICLE = YES  → offenderPeople me hota hai
-    if (traffic.vehicleInvolved === "yes" && traffic?.offenderPeople?.length) {
-      return traffic.offenderPeople[0]?.details || {};
-    }
+  const mapTrafficToReport = (traffic: any) => {
+    /* ========= Primary Offender Resolver ========= */
+    const getPrimaryOffender = () => {
+      // VEHICLE = YES  → offenderPeople me hota hai
+      if (
+        traffic.vehicleInvolved === "yes" &&
+        traffic?.offenderPeople?.length
+      ) {
+        return traffic.offenderPeople[0]?.details || {};
+      }
 
-    // VEHICLE = NO → offenderWithoutVehicle.military se lo
-    return traffic?.offenderWithoutVehicle?.military || {};
-  };
+      // VEHICLE = NO → offenderWithoutVehicle.military se lo
+      return traffic?.offenderWithoutVehicle?.military || {};
+    };
 
-  const offender = getPrimaryOffender();
-  const occ = traffic?.offenceOccurenceDetails || {};
-  const duty = traffic?.onDutyDetails || {};
-  const mp = traffic?.onDutyDetailsMPReporting || {};
+    const offender = getPrimaryOffender();
+    const occ = traffic?.offenceOccurenceDetails || {};
+    const duty = traffic?.onDutyDetails || {};
+    const mp = traffic?.onDutyDetailsMPReporting || {};
 
-  /* ========= Selected Witness ========= */
-  const selectedWitness =
-    traffic.selectedWitness !== null
-      ? traffic.witnesses?.[traffic.selectedWitness]
-      : null;
+    /* ========= Selected Witness ========= */
+    const selectedWitness =
+      traffic.selectedWitness !== null
+        ? traffic.witnesses?.[traffic.selectedWitness]
+        : null;
 
-  return {
-    reportNo: "TEMP/REPORT/001",
-    reportDate: new Date().toLocaleDateString("en-GB"),
+    return {
+      reportNo: "TEMP/REPORT/001",
+      reportDate: new Date().toLocaleDateString("en-GB"),
 
-    /* ======================= 1️⃣ PARTICULARS ======================= */
-    particulars: {
-      primary: {
-        aadharCardNo: offender?.aadharNumber || "N/A",
-        name: offender?.name || "N/A",
-        so: offender?.so || "N/A",
-        relation: offender?.relation || "N/A",
+      /* ======================= 1️⃣ PARTICULARS ======================= */
+      particulars: {
+        primary: {
+          aadharCardNo: offender?.aadharNumber || "N/A",
+          name: offender?.name || "N/A",
+          so: offender?.so || "N/A",
+          relation: offender?.relation || "N/A",
 
-        armyNo: offender?.armyNumber || "N/A",
-        rank: offender?.rank || "N/A",
-        unit: offender?.unit || "N/A",
-        command: offender?.command || "N/A",
-        fmn: offender?.fmn || "N/A",
-        address: offender?.address || "N/A",
-        iCardNo: offender?.iCardNumber || "N/A",
+          armyNo: offender?.armyNumber || "N/A",
+          rank: offender?.rank || "N/A",
+          unit: offender?.unit || "N/A",
+          command: offender?.command || "N/A",
+          fmn: offender?.fmn || "N/A",
+          address: offender?.address || "N/A",
+          iCardNo: offender?.iCardNumber || "N/A",
+        },
+
+        /* Vehicle block only when YES */
+        vehicle:
+          traffic.vehicleInvolved === "yes"
+            ? {
+                baNo: traffic.vehicleDetails?.vehicleNumber || "N/A",
+                makeAndTake: traffic.vehicleDetails?.vehicleName || "N/A",
+              }
+            : undefined,
       },
 
-      /* Vehicle block only when YES */
-      vehicle:
-        traffic.vehicleInvolved === "yes"
-          ? {
-              baNo: traffic.vehicleDetails?.vehicleNumber || "N/A",
-              makeAndTake: traffic.vehicleDetails?.vehicleName || "N/A",
-            }
-          : undefined,
-    },
+      /* ======================= 2️⃣ OCCURRENCE ======================= */
+      occurrence: {
+        dateOfDuty: duty?.dateOfDuty || "N/A",
+        dutyTime: duty?.startTime || "N/A",
+        dutyLocation: duty?.dutyLocation || "N/A",
 
-    /* ======================= 2️⃣ OCCURRENCE ======================= */
-    occurrence: {
-      dateOfDuty: duty?.dateOfDuty || "N/A",
-      dutyTime: duty?.startTime || "N/A",
-      dutyLocation: duty?.dutyLocation || "N/A",
+        nameOfWitnessingOfficial1:
+          traffic?.witnesses?.[0]?.reportingBlock?.nameReportingMP || "N/A",
+        nameOfWitnessingOfficial2:
+          traffic?.witnesses?.[1]?.reportingBlock?.nameReportingMP || "",
+        nameOfWitnessingOfficial3:
+          traffic?.witnesses?.[2]?.reportingBlock?.nameReportingMP || "",
 
-      nameOfWitnessingOfficial1:
-        traffic?.witnesses?.[0]?.reportingBlock?.nameReportingMP || "N/A",
-      nameOfWitnessingOfficial2:
-        traffic?.witnesses?.[1]?.reportingBlock?.nameReportingMP || "",
-      nameOfWitnessingOfficial3:
-        traffic?.witnesses?.[2]?.reportingBlock?.nameReportingMP || "",
+        timeOfOffence: occ?.timeOfOffence || occ?.time || "N/A",
+        locationOfOffence: occ?.incidentLocation || "N/A",
+        statement: occ?.description || "No statement available",
+      },
 
-      timeOfOffence: occ?.timeOfOffence || occ?.time || "N/A",
-      locationOfOffence: occ?.incidentLocation || "N/A",
-      statement: occ?.description || "No statement available",
-    },
+      /* ======================= 3️⃣ OFFENCE ======================= */
+      offence: {
+        type: traffic?.offenceTypes?.[0] || "disciplinary",
+        ref1: traffic?.offenceCode?.[0] || "Mil Tfc Offence",
+        ref2: traffic?.offenceCode?.[1] || "Station Order / SAO",
+        description: occ?.description || "No description provided",
+      },
 
-    /* ======================= 3️⃣ OFFENCE ======================= */
-    offence: {
-      type: traffic?.offenceTypes?.[0] || "disciplinary",
-      ref1: traffic?.offenceCode?.[0] || "Mil Tfc Offence",
-      ref2: traffic?.offenceCode?.[1] || "Station Order / SAO",
-      description: occ?.description || "No description provided",
-    },
+      /* ======================= SIGNATURE ======================= */
+      witnessSig: {
+        armyNo:
+          selectedWitness?.reportingBlock?.armyNumber ||
+          selectedWitness?.reportingBlock?.ArmyNo ||
+          "N/A",
+        rank: selectedWitness?.reportingBlock?.rank || "N/A",
+        name: selectedWitness?.reportingBlock?.nameReportingMP || "N/A",
+        unit: selectedWitness?.reportingBlock?.unit || "N/A",
+      },
 
-    /* ======================= SIGNATURE ======================= */
-    witnessSig: {
-      armyNo:
-        selectedWitness?.reportingBlock?.armyNumber ||
-        selectedWitness?.reportingBlock?.ArmyNo ||
-        "N/A",
-      rank: selectedWitness?.reportingBlock?.rank || "N/A",
-      name: selectedWitness?.reportingBlock?.nameReportingMP || "N/A",
-      unit: selectedWitness?.reportingBlock?.unit || "N/A",
-    },
+      mpSig: {
+        armyNo: mp?.armyNumber || mp?.armyNo || "N/A",
+        rank: mp?.rank || "N/A",
+        name: mp?.nameReportingMP || "N/A",
+        unit: mp?.unit || "N/A",
+      },
 
-    mpSig: {
-      armyNo: mp?.armyNumber || mp?.armyNo || "N/A",
-      rank: mp?.rank || "N/A",
-      name: mp?.nameReportingMP || "N/A",
-      unit: mp?.unit || "N/A",
-    },
-
-    /* ======================= REMARKS ======================= */
-    remarks: {
-      text:
-        traffic?.remarks ||
-        "Suitable disciplinary action may be taken and intimated.",
-      station: duty?.dutyLocation || "N/A",
-      dated: new Date().toLocaleDateString("en-GB"),
-    },
+      /* ======================= REMARKS ======================= */
+      remarks: {
+        text:
+          traffic?.remarks ||
+          "Suitable disciplinary action may be taken and intimated.",
+        station: duty?.dutyLocation || "N/A",
+        dated: new Date().toLocaleDateString("en-GB"),
+      },
+    };
   };
-};
 
   // ===================== FINAL SUBMIT =====================
+  //   const onSubmitFinal = async () => {
+  //     const traffic = state.formData.traffic;
+  //     const date = traffic.onDutyDetails.dateOfDuty;
+
+  //     const toISO = (time?: string) => {
+  //   if (!date || !time) return undefined;
+  //   return new Date(`${date}T${time}`).toISOString();
+  // };
+
+  //     const payload = {
+  //       isVehicleInvolved: traffic.vehicleInvolved === "yes",
+
+  //       onDutyDetails: {
+  //         ...traffic.onDutyDetails,
+  //         startTime: toISO(traffic.onDutyDetails.startTime),
+  //         endTime: toISO(traffic.onDutyDetails.endTime),
+  //       },
+
+  //       onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
+
+  //       offenceOccurenceDetails: {
+  //         ...traffic.offenceOccurenceDetails,
+  //         timeOfOffence: toISO(traffic.offenceOccurenceDetails.timeOfOffence),
+  //         incidentLocation:
+  //           traffic.offenceOccurenceDetails.incidentLocation?.trim() || undefined,
+  //       },
+
+  //       offenceTypes: traffic.offenceTypes,
+  //       offenceTypeReference: traffic.offenceCode,
+  //     };
+
+  //     try {
+  //       toast.info("Creating Offence...");
+  //       const offence = await mutateAsync(payload);
+  //       toast.success("Offence Created Successfully!");
+
+  //       const offenceId = offence?._id;
+  //       if (!offenceId) return toast.error("Offence ID missing!");
+
+  //       const offenderType: OffenderType =
+  //         traffic.vehicleInvolved === "yes"
+  //           ? (traffic.vehicleDetails.driverType as OffenderType)
+  //           : (traffic.offenderWithoutVehicle.offenderType as OffenderType);
+
+  //       const offenderPayload: CreateOffenderData = {
+  //         offenceId,
+  //         offenderType: (offenderType as OffenderType) ?? "Civilian",
+  //         offenderDetails:
+  //           traffic.offenderPeople && traffic.offenderPeople.length > 0
+  //             ? (traffic.offenderPeople as any)
+  //             : ([] as any),
+  //       };
+
+  //       toast.success("Offender Saved");
+
+  //       await createOffenderMutate(offenderPayload);
+  //       toast.success("Offender Created Successfully!");
+
+  //       // ================== WITNESS ==================
+  //       if (traffic.witnesses?.length > 0) {
+  //         await Promise.all(
+  //           traffic.witnesses.map((w) =>
+  //             createWitnessMutate({
+  //               offenceId,
+  //               rank: w.reportingBlock.rank,
+  //               unit: w.reportingBlock.unit,
+  //               ArmyNo: w.reportingBlock.armyNumber,
+  //               name: w.reportingBlock.nameReportingMP,
+  //             })
+  //           )
+  //         );
+  //       }
+
+  //       toast.success("🎉 Final Submit Completed Successfully!");
+  //     } catch (err: any) {
+  //       toast.error(
+  //         err?.response?.data?.message ||
+  //           err?.response?.data?.error ||
+  //           "Something went wrong!"
+  //       );
+  //     }
+  //   };
+
   const onSubmitFinal = async () => {
     const traffic = state.formData.traffic;
     const date = traffic.onDutyDetails.dateOfDuty;
 
     const toISO = (time?: string) => {
-  if (!date || !time) return undefined;
-  return new Date(`${date}T${time}`).toISOString();
-};
-
+      if (!date || !time) return undefined;
+      return new Date(`${date}T${time}`).toISOString();
+    };
 
     const payload = {
       isVehicleInvolved: traffic.vehicleInvolved === "yes",
@@ -172,35 +255,54 @@ const mapTrafficToReport = (traffic: any) => {
       offenceTypeReference: traffic.offenceCode,
     };
 
+    console.log("🚔 TRAFFIC FINAL SUBMIT PAYLOAD ===>", payload);
+
     try {
       toast.info("Creating Offence...");
+
       const offence = await mutateAsync(payload);
+      console.log("✅ OFFENCE CREATED RESPONSE ===>", offence);
+
       toast.success("Offence Created Successfully!");
 
       const offenceId = offence?._id;
-      if (!offenceId) return toast.error("Offence ID missing!");
+      if (!offenceId) {
+        console.error("❌ Offence ID missing in response", offence);
+        return toast.error("Offence ID missing!");
+      }
 
+      /* ================== OFFENDER ================== */
       const offenderType: OffenderType =
         traffic.vehicleInvolved === "yes"
           ? (traffic.vehicleDetails.driverType as OffenderType)
           : (traffic.offenderWithoutVehicle.offenderType as OffenderType);
 
-      const offenderPayload: CreateOffenderData = {
-        offenceId,
-        offenderType: (offenderType as OffenderType) ?? "Civilian",
-        offenderDetails:
-          traffic.offenderPeople && traffic.offenderPeople.length > 0
-            ? (traffic.offenderPeople as any)
-            : ([] as any),
-      };
+      if (!traffic.offenderPeople || traffic.offenderPeople.length === 0) {
+        toast.error("Please add at least one offender before submit!");
+        console.error("❌ No offender found. Cannot submit offender!");
+      } else {
+        const offenderPayload: CreateOffenderData = {
+          offenceId,
+          offenderType: (offenderType as OffenderType) ?? "Civilian",
 
-      toast.success("Offender Saved");
+          // 🔥 REAL FIX — yahi problem thi
+          offenderDetails: traffic.offenderPeople.map((o: any) => {
+            return o.details ? o.details : o;
+          }),
+        };
 
-      await createOffenderMutate(offenderPayload);
-      toast.success("Offender Created Successfully!");
+        console.log("👮 OFFENDER PAYLOAD ===>", offenderPayload);
 
-      // ================== WITNESS ==================
+        await createOffenderMutate(offenderPayload);
+        console.log("✅ OFFENDER CREATED SUCCESS");
+
+        toast.success("Offender Created Successfully!");
+      }
+
+      /* ================== WITNESS ================== */
       if (traffic.witnesses?.length > 0) {
+        console.log("👀 WITNESS PAYLOAD ===>", traffic.witnesses);
+
         await Promise.all(
           traffic.witnesses.map((w) =>
             createWitnessMutate({
@@ -212,10 +314,17 @@ const mapTrafficToReport = (traffic: any) => {
             })
           )
         );
+
+        console.log("✅ WITNESS CREATED SUCCESS");
+      } else {
+        console.log("ℹ️ No Witness Found — Skipping Witness Creation");
       }
 
       toast.success("🎉 Final Submit Completed Successfully!");
     } catch (err: any) {
+      console.error("❌ FINAL SUBMIT ERROR ===>", err);
+      console.error("❌ ERROR RESPONSE ===>", err?.response?.data);
+
       toast.error(
         err?.response?.data?.message ||
           err?.response?.data?.error ||
