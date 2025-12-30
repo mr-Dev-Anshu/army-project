@@ -9,7 +9,6 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 
-/* 🔥 ADD THIS */
 type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional";
 
 interface VehicleDetailsFormProps {
@@ -24,10 +23,8 @@ export default function VehicleDetailsForm({
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
 
-  // TRAFFIC — only show if vehicle involved
   if (scope === "traffic" && traffic.vehicleInvolved !== "yes") return null;
 
-  /* ================= VEHICLE STATE PICKER ================= */
   const vehicleState =
     scope === "traffic"
       ? traffic.vehicleDetails
@@ -41,54 +38,53 @@ export default function VehicleDetailsForm({
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
-  /* ================= UPDATE VEHICLE GLOBAL ================= */
+  /* ================= UPDATE VEHICLE ================= */
   const updateVehicle = (data: any) => {
     const updated = { ...vehicleState, ...data };
 
-    if (scope === "traffic") {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.traffic.vehicleDetails",
-        value: updated,
-      });
-    }
-
-    if (scope === "static") {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.staticSpeed.vehicleDetails",
-        value: updated,
-      });
-    }
-
-    if (scope === "mp-main") {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.mpReport.individualDetails.vehicleData",
-        value: updated,
-      });
-    }
-
-    if (scope === "mp-additional") {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.mpReport.additionalIndividual.vehicleData",
-        value: updated,
-      });
-    }
+    dispatch({
+      type: "SET_PATH",
+      path:
+        scope === "traffic"
+          ? "formData.traffic.vehicleDetails"
+          : scope === "static"
+          ? "formData.staticSpeed.vehicleDetails"
+          : scope === "mp-main"
+          ? "formData.mpReport.individualDetails.vehicleData"
+          : "formData.mpReport.additionalIndividual.vehicleData",
+      value: updated,
+    });
   };
 
-  /* ================= LOCAL STATES ================= */
+  /* ================= LOCAL ================= */
   const [hasCoDriver, setHasCoDriver] = useState("");
   const [coDriverType, setCoDriverType] = useState("");
   const [civilianRelative, setCivilianRelative] = useState("");
 
+  /* ================= DYNAMIC PATHS ================= */
+  const driverPath =
+    scope === "traffic"
+      ? "formData.traffic.vehicleDetails.driver"
+      : scope === "static"
+      ? "formData.staticSpeed.vehicleDetails.driver"
+      : scope === "mp-main"
+      ? "formData.mpReport.individualDetails.tempOffender"
+      : "formData.mpReport.additionalIndividual.tempOffender";
+
+  const coDriverPath =
+    scope === "traffic"
+      ? "formData.traffic.vehicleDetails.coDriver"
+      : scope === "static"
+      ? "formData.staticSpeed.vehicleDetails.coDriver"
+      : scope === "mp-main"
+      ? "formData.mpReport.individualDetails.tempOffender"
+      : "formData.mpReport.additionalIndividual.tempOffender";
+
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6">
-      {/* ================= VEHICLE CATEGORY ================= */}
+      {/* CATEGORY */}
       <div>
         <p className="font-semibold mb-2">Select Vehicle Category</p>
-
         <RadioGroup
           value={category}
           onValueChange={(v) => updateVehicle({ category: v })}
@@ -97,7 +93,9 @@ export default function VehicleDetailsForm({
           <label
             className={cn(
               "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-              category === "2w" ? "border-blue-500 bg-blue-50" : "border-gray-300"
+              category === "2w"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
             )}
           >
             <RadioGroupItem value="2w" /> 2-Wheeler
@@ -106,7 +104,9 @@ export default function VehicleDetailsForm({
           <label
             className={cn(
               "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-              category === "4w" ? "border-blue-500 bg-blue-50" : "border-gray-300"
+              category === "4w"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300"
             )}
           >
             <RadioGroupItem value="4w" /> 4-Wheeler
@@ -114,7 +114,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* ================= VEHICLE TYPE ================= */}
+      {/* VEHICLE TYPE */}
       <div>
         <p className="font-semibold mb-2">
           Which Type Of Vehicle Was Involved?
@@ -155,11 +155,10 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* ================= CIVILIAN VEHICLE FORM ================= */}
+      {/* CIVILIAN */}
       {vehicleType === "civilian" && (
         <div>
           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
-
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <Label className="mb-3">Civil Vehicle Registration Number</Label>
@@ -173,7 +172,8 @@ export default function VehicleDetailsForm({
 
             <div>
               <Label className="mb-3">
-                Make & Type <span className="text-gray-500">(Vehicle Name)</span>
+                Make & Type{" "}
+                <span className="text-gray-500">(Vehicle Name)</span>
               </Label>
               <SuggestionInput
                 placeholder="e.g. Honda CB Hornet"
@@ -186,7 +186,7 @@ export default function VehicleDetailsForm({
         </div>
       )}
 
-      {/* ================= DD VEHICLE FORM ================= */}
+      {/* DD VEHICLE */}
       {vehicleType === "dd" && (
         <div>
           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
@@ -204,7 +204,8 @@ export default function VehicleDetailsForm({
 
             <div>
               <Label className="mb-3">
-                Make & Type <span className="text-gray-500">(Vehicle Name)</span>
+                Make & Type{" "}
+                <span className="text-gray-500">(Vehicle Name)</span>
               </Label>
               <SuggestionInput
                 placeholder="e.g. ALS W/B"
@@ -217,7 +218,7 @@ export default function VehicleDetailsForm({
         </div>
       )}
 
-      {/* ================= DRIVER TYPE ================= */}
+      {/* DRIVER TYPE */}
       <div>
         <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
 
@@ -255,7 +256,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* ================= NON CIVILIAN FLOW ================= */}
+      {/* NON CIVILIAN */}
       {driverType && driverType !== "Civilian" && (
         <>
           <OffenderDynamicForm
@@ -263,6 +264,7 @@ export default function VehicleDetailsForm({
             title={offenderFormsConfig[driverType].title}
             fields={offenderFormsConfig[driverType].fields}
             showCoDriver={false}
+            path={driverPath}
           />
 
           <p className="font-semibold flex items-center gap-3">
@@ -303,6 +305,7 @@ export default function VehicleDetailsForm({
                   helperText="Co-Driver Details"
                   fields={offenderFormsConfig[coDriverType].fields}
                   showCoDriver={false}
+                  path={coDriverPath}
                 />
               )}
             </>
@@ -310,7 +313,7 @@ export default function VehicleDetailsForm({
         </>
       )}
 
-      {/* ================= CIVILIAN FLOW ================= */}
+      {/* CIVILIAN */}
       {driverType === "Civilian" && (
         <>
           <OffenderDynamicForm
@@ -318,32 +321,72 @@ export default function VehicleDetailsForm({
             title="Civilian Details"
             fields={offenderFormsConfig["Civilian"].fields}
             showCoDriver={false}
+            path={driverPath}
           />
 
-          <p className="font-semibold mt-4">
-            Does Civilian have any Military Relative?
+          {/* CHECKBOX */}
+          <p className="font-semibold mt-4 flex items-center gap-3">
+            <Checkbox
+              checked={civilianRelative === "yes"}
+              onCheckedChange={(checked) =>
+                setCivilianRelative(checked ? "yes" : "")
+              }
+              className="w-5 h-5"
+            />
+            Civilian has Military Relative?
           </p>
 
-          <RadioGroup
-            value={civilianRelative}
-            onValueChange={setCivilianRelative}
-            className="flex gap-6"
-          >
-            <label className="flex gap-2">
-              <RadioGroupItem value="yes" /> Yes
-            </label>
-            <label className="flex gap-2">
-              <RadioGroupItem value="no" /> No
-            </label>
-          </RadioGroup>
-
           {civilianRelative === "yes" && (
-            <OffenderDynamicForm
-              scope={scope}
-              title="Military Relative Details"
-              fields={offenderFormsConfig["Military Person"].fields}
-              showCoDriver={false}
-            />
+            <>
+              {/* STEP 2 — RELATION (OPTIONAL INPUT) */}
+              <p className="font-semibold mt-3">
+                Enter Relation of Military Person
+              </p>
+
+              <SuggestionInput
+                placeholder="e.g. Father / Husband / Brother "
+                value={coDriverType}
+                onChange={setCoDriverType}
+                fieldType="relation"
+              />
+
+              {/* STEP 3 — CATEGORY OPTIONS (ALWAYS SHOW AFTER YES) */}
+              <p className="font-semibold mt-4">Select Military Person Type</p>
+
+              <RadioGroup
+                onValueChange={setHasCoDriver}
+                value={hasCoDriver}
+                className="grid sm:grid-cols-2 gap-3"
+              >
+                {[
+                  "Military Person",
+                  "Employee",
+                  "Servant/Maid",
+                  "Shop Keeper",
+                  "Temporary Hired Worker",
+                ].map((item) => (
+                  <label
+                    key={item}
+                    className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+                  >
+                    <RadioGroupItem value={item} />
+                    {item}
+                  </label>
+                ))}
+              </RadioGroup>
+
+              {/* FINAL FORM */}
+              {hasCoDriver && (
+                <OffenderDynamicForm
+                  scope={scope}
+                  title={`${hasCoDriver} Details`}
+                  helperText={coDriverType ? `Relation: ${coDriverType}` : ""}
+                  fields={offenderFormsConfig[hasCoDriver].fields}
+                  showCoDriver={false}
+                  path={coDriverPath}
+                />
+              )}
+            </>
           )}
         </>
       )}

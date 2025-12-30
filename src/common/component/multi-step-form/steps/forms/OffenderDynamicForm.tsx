@@ -1,11 +1,10 @@
-
-
 "use client";
 
 import { FormInput, FormSelect } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 interface FieldType {
   label: string;
@@ -20,7 +19,14 @@ interface OffenderDynamicFormProps {
   fields: FieldType[];
   showCoDriver?: boolean;
   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+  path?: string;
 }
+
+/* safe getter */
+const getValueByPath = (obj: any, path?: string) => {
+  if (!path) return {};
+  return path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj) || {};
+};
 
 export default function OffenderDynamicForm({
   title,
@@ -28,93 +34,58 @@ export default function OffenderDynamicForm({
   fields,
   showCoDriver = false,
   scope = "traffic",
+  path,
 }: OffenderDynamicFormProps) {
+
   const { state, dispatch } = useForm();
 
-  const people =
-    scope === "static"
-      ? state.formData.staticSpeed.offenderPeople || []
-      : state.formData.traffic.offenderPeople || [];
+  const preData =
+    scope === "traffic" && path 
+      ? getValueByPath(state, path)
+      : {};
 
-  const mpDriver =
-    scope === "mp-main"
-      ? state.formData.mpReport.individualDetails.tempOffender || {}
-      : state.formData.mpReport.additionalIndividual.tempOffender || {};
+  const [localData, setLocalData] = useState<any>({});
 
-  const normalDriver =
-    people.find((p: any) => p.type === "Driver")?.details || {};
+  /* ✅ traffic ko hi preload karna allowed */
+  useEffect(() => {
+    if (scope === "traffic" && path) {
+      setLocalData(preData);
+    } else {
+      setLocalData({});
+    }
+  }, [scope, path]);        //  IMPORTANT FIX
 
-  const driver = scope.startsWith("mp") ? mpDriver : normalDriver;
+  const saveField = (label: string, value: string) => {
+    let targetPath = path;
 
-  /* ========= MP SAVE ========= */
-  const saveToMp = (label: string, value: string) => {
-    const section =
-      scope === "mp-main" ? "individualDetails" : "additionalIndividual";
+    if (!targetPath && scope === "mp-main") {
+      targetPath = "formData.mpReport.individualDetails.tempOffender";
+    }
 
-    const prev = state.formData.mpReport?.[section]?.tempOffender || {};
+    if (!targetPath && scope === "mp-additional") {
+      targetPath = "formData.mpReport.additionalIndividual.tempOffender";
+    }
+
+    if (!targetPath) return;
+
+    // 🔥 Always use latest value from global also
+    const prevGlobal = getValueByPath(state, targetPath) || {};
+
+    const updated = {
+      ...(localData || {}),
+      ...prevGlobal,
+      [label]: value,
+    };
+
+    setLocalData(updated);
 
     dispatch({
       type: "SET_PATH",
-      path: `formData.mpReport.${section}.tempOffender`,
-      value: {
-        ...prev,
-        [label]: value,
-      },
+      path: targetPath,
+      value: updated,
     });
-  };
 
-  /* ========= UNIVERSAL SAVE ========= */
-  const saveField = (label: string, value: string) => {
-    if (scope.startsWith("mp")) {
-      saveToMp(label, value);
-      return;
-    }
-
-    const isCoDriverField = label.startsWith("CoDriver_");
-    const personType = isCoDriverField ? "CoDriver" : "Driver";
-    const pureLabel = isCoDriverField ? label.replace("CoDriver_", "") : label;
-
-    const updatePeopleArray = (existing: any[] = []) => {
-      const idx = existing.findIndex((p: any) => p.type === personType);
-
-      if (idx >= 0) {
-        return existing.map((p) =>
-          p.type === personType
-            ? {
-                ...p,
-                details: {
-                  ...p.details,
-                  [pureLabel]: value,
-                },
-              }
-            : p
-        );
-      }
-
-      return [
-        ...existing,
-        {
-          type: personType,
-          details: {
-            [pureLabel]: value,
-          },
-        },
-      ];
-    };
-
-    if (scope === "static") {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.staticSpeed.offenderPeople",
-        value: updatePeopleArray(state.formData.staticSpeed.offenderPeople),
-      });
-    } else {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.traffic.offenderPeople",
-        value: updatePeopleArray(state.formData.traffic.offenderPeople),
-      });
-    }
+    console.log("🔥 TEMP UPDATED =>", updated);
   };
 
   return (
@@ -126,45 +97,32 @@ export default function OffenderDynamicForm({
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f, i) => {
           const label = f.label;
+          const value = localData?.[label] || "";
 
-          /* ---------- FORCE RANK DROPDOWN ---------- */
-          if (label === "Select Rank") {
+          if (label === "Select Rank")
             return (
               <FormSelect
                 key={i}
                 label="Select Rank"
                 placeholder="Select Rank"
-                value={(driver as any)?.["Select Rank"] || ""}
-                options={[
-                  "L/Nk",
-                  "Nk",
-                  "Hav",
-                  "Subedar",
-                ]}
-                onChange={(value) => saveField("Select Rank", value)}
+                value={value}
+                options={["L/Nk", "Nk", "Hav", "Subedar"]}
+                onChange={(v) => saveField("Select Rank", v)}
               />
             );
-          }
 
-          /* ---------- FORCE UNIT DROPDOWN ---------- */
-          if (label === "Unit") {
+          if (label === "Unit")
             return (
               <FormSelect
                 key={i}
                 label="Unit"
                 placeholder="Select Unit"
-                value={(driver as any)?.["Unit"] || ""}
-                options={[
-                  "11 Engr Regt",
-                  "MP Unit 12",
-                  "HQ Unit",
-                ]}
-                onChange={(value) => saveField("Unit", value)}
+                value={value}
+                options={["11 Engr Regt", "MP Unit 12", "HQ Unit"]}
+                onChange={(v) => saveField("Unit", v)}
               />
             );
-          }
 
-          /* ---------- SUGGESTION INPUTS ---------- */
           const isSuggestion = [
             "FMN",
             "Command",
@@ -176,46 +134,42 @@ export default function OffenderDynamicForm({
             "Department",
           ].includes(label);
 
-          if (isSuggestion) {
+          if (isSuggestion)
             return (
               <SuggestionInput
                 key={i}
                 label={label}
                 placeholder={f.placeholder}
-                value={(driver as any)?.[label] || ""}
-                onChange={(value) => saveField(label, value)}
+                value={value}
+                onChange={(v) => saveField(label, v)}
                 fieldType={label.toLowerCase()}
                 className={cn(
                   "transition-all",
-                  (driver as any)?.[label]
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300"
+                  value ? "border-blue-500 bg-blue-50" : "border-gray-300"
                 )}
               />
             );
-          }
 
-          /* ---------- DEFAULT INPUT / SELECT ---------- */
           return f.type === "input" ? (
             <FormInput
               key={i}
               label={label}
               placeholder={f.placeholder}
-              value={(driver as any)?.[label] || ""}
-              onChange={(value) => saveField(label, value)}
+              value={value}
+              onChange={(v) => saveField(label, v)}
             />
           ) : (
             <FormSelect
               key={i}
               label={label}
               placeholder={f.placeholder}
-              value={(driver as any)?.[label] || ""}
+              value={value}
               options={(f.options || []).map((o: any) =>
                 typeof o === "string"
                   ? { label: o, value: o }
                   : { label: o.label, value: o.value }
               )}
-              onChange={(value) => saveField(label, value)}
+              onChange={(v) => saveField(label, v)}
             />
           );
         })}

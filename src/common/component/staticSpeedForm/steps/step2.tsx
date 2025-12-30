@@ -404,8 +404,8 @@ export default function StaticSpeedStep2() {
         </Label>
         <Textarea
           placeholder="Full Description"
-          value={offence.description || ""}
-          onChange={(e) => updateOffence("description", e.target.value)}
+          value={offence.description2 || ""}
+          onChange={(e) => updateOffence("description2", e.target.value)}
         />
       </FormSection>
     </div>

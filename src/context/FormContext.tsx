@@ -177,7 +177,7 @@ const initialState: GlobalFormState = {
         vehicleInvolved: "",
         vehicleData: {},
         driverType: "",
-        tempOffender: null,
+        tempOffender: {},
       },
 
       detailedReport: "",
