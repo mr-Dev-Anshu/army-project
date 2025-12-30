@@ -88,13 +88,14 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
-            className: "w-16 sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
-            headerClassName: "z-20 left-0 bg-gray-50 border-r border-gray-200",
+            className: "w-16 sticky left-0 z-10 bg-white border-r border-gray-300",
+            headerClassName: "z-20 left-0 bg-gray-100 border-r border-gray-300",
         },
         {
             header: "QTR No.",
             accessorKey: "qtrNumber",
-            className: "font-medium text-gray-900 min-w-[100px]",
+            className: "font-medium text-gray-900 min-w-[100px] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Name of Owner",
@@ -104,12 +105,14 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     <span className="text-gray-700"><span className="text-gray-500 font-normal">Rank:</span> {item.ownerRank}</span>
                 </div>
             ),
-            className: "min-w-[180px]",
+            className: "min-w-[180px] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Unit",
             accessorKey: "ownerUnit",
-            className: "min-w-[120px]",
+            className: "min-w-[120px] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Name of Servant & Mobile No.",
@@ -119,7 +122,8 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     <span className="text-gray-500 text-xs">{item.servantMobile}</span>
                 </div>
             ),
-            className: "min-w-[180px]",
+            className: "min-w-[180px] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Permanent Address",
@@ -128,12 +132,14 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     {item.permanentAddressLine}, {item.permanentCityDistrict}, {item.permanentState} - {item.permanentPincode}
                 </div>
             ),
-            className: "min-w-[200px]",
+            className: "min-w-[200px] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Pass No.",
             accessorKey: "passNumber",
-            className: "font-medium text-gray-900 min-w-[100px]",
+            className: "font-medium text-gray-900 border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: "Pass ID",
@@ -142,16 +148,17 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     {item._id ? item._id.slice(-4).toUpperCase() : "-"}
                 </span>
             ),
-            className: "min-w-[100px]",
+            className: "min-w-[100px] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100",
         },
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-200 px-4 pt-3">
+                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Pass Valid Date
                     </div>
-                    <div className="flex text-[10px] items-center text-gray-500 font-medium bg-gray-50">
-                        <div className="flex-1 px-4 py-1 border-r border-gray-200">From</div>
+                    <div className="flex text-[10px] items-center text-gray-500 font-medium bg-gray-100">
+                        <div className="flex-1 px-4 py-1 border-r border-gray-300 ">From</div>
                         <div className="flex-1 px-4 py-1">To</div>
                     </div>
                 </div>
@@ -185,18 +192,18 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     </div>
                 );
             },
-            className: "min-w-[220px] py-4 align-top",
-            headerClassName: "p-0 min-w-[220px]",
+            className: "min-w-[220px] py-4 align-top border-r border-gray-300",
+            headerClassName: "p-0 min-w-[220px] border-r border-gray-300",
         },
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-200 px-4 pt-3">
+                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Servant's Family Details
                     </div>
-                    <div className="flex text-[10px] items-center text-gray-500 font-medium bg-gray-50">
-                        <div className="w-[140px] px-4 py-1 border-r border-gray-200">Name</div>
-                        <div className="w-[100px] px-4 py-1 border-r border-gray-200">Relationship</div>
+                    <div className="flex text-[10px] items-center text-gray-500 font-medium bg-gray-100">
+                        <div className="w-[140px] px-4 py-1 border-r border-gray-300">Name</div>
+                        <div className="w-[100px] px-4 py-1 border-r border-gray-300">Relationship</div>
                         <div className="w-[50px] px-4 py-1 text-center">Age</div>
                     </div>
                 </div>
@@ -205,11 +212,11 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 <div className="flex flex-col w-full max-h-[150px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
                     {item.familyMembers && item.familyMembers.length > 0 ? (
                         item.familyMembers.map((member, i) => (
-                            <div key={i} className="flex border-b border-gray-100 last:border-0 text-sm text-gray-700 items-center shrink-0">
-                                <div className="w-[140px] px-4 py-2 border-r border-gray-100 font-medium truncate" title={member.name}>
+                            <div key={i} className="flex border-b border-gray-300 last:border-0 text-sm text-gray-700 items-center shrink-0">
+                                <div className="w-[140px] px-4 py-2 border-r border-gray-300 font-medium truncate" title={member.name}>
                                     {i + 1}. {member.name}
                                 </div>
-                                <div className="w-[100px] px-4 py-2 border-r border-gray-100 truncate" title={member.relationship}>
+                                <div className="w-[100px] px-4 py-2 border-r border-gray-300 truncate" title={member.relationship}>
                                     {member.relationship}
                                 </div>
                                 <div className="w-[50px] px-4 py-2 text-center">
@@ -222,8 +229,8 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     )}
                 </div>
             ),
-            className: "min-w-[300px] p-0 align-top",
-            headerClassName: "p-0 min-w-[300px]",
+            className: "min-w-[300px] p-0 align-top border-r border-gray-300",
+            headerClassName: "p-0 min-w-[300px] border-r border-gray-300",
         },
         {
             header: "Actions",
@@ -250,7 +257,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
-            className: "w-[50px] sticky right-0 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
+            className: "w-[50px] sticky right-0 z-10 bg-white  border-l border-gray-200",
             headerClassName: "z-20 right-0 bg-gray-50 border-l border-gray-200",
         },
     ];
@@ -320,12 +327,12 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
             />
 
             <DynamicTable
-                className="[&::-webkit-scrollbar]:hidden"
+                className="[&::-webkit-scrollbar]:hidden [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
                 data={filteredData}
                 columns={columns}
                 getRowClassName={(item) => {
                     const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
-                    return isExpired ? "bg-red-50 border border-red-500 hover:bg-red-50" : "";
+                    return isExpired ? "bg-red-50 border border-red-500 hover:bg-red-50" : "border-b border-gray-300 hover:bg-white";
                 }}
             />
 
