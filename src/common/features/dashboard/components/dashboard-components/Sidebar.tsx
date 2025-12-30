@@ -131,6 +131,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       onClick={() => {
         if (item.label === "Dashboard") onMenuSelect("dashboard");
         if (item.label === "All Reports") onMenuSelect("viewReports");
+        if (item.label === "Civil Employees Management")
+          onMenuSelect("civilEmployees");
       }}
       className={cn(
         "w-full relative flex items-center transition-all group",
@@ -139,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           : cn(
             "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg text-left",
             isSubmenu && "py-1.5"
-          ),
+          )
       )}
     >
       {/* ICON (Only for main items) */}
