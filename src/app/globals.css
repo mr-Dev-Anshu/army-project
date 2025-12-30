@@ -130,6 +130,48 @@
   }
 }
 
+/* PRINT ONLY REPORT */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #mp-report,
+  #mp-report * {
+    visibility: visible;
+  }
+
+  /* Center page */
+  #mp-report {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+
+
+/* PRINT ONLY STATIC REPORT */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #static-report,
+  #static-report * {
+    visibility: visible;
+  }
+
+  #static-report {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+
 
 
 @layer utilities {

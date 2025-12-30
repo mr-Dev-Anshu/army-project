@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -45,7 +44,6 @@ export default function Dashboard() {
 
   return (
     <div className="w-full h-screen flex bg-[#f5f5f7]">
-
       {/* -------- SIDEBAR -------- */}
       <Sidebar
         collapsed={collapsed}
@@ -55,7 +53,6 @@ export default function Dashboard() {
 
       {/* -------- RIGHT CONTENT -------- */}
       <div className="flex-1 p-4 sm:p-5 md:p-6 space-y-8 overflow-y-auto">
-
         {/* ---------------- DASHBOARD ---------------- */}
         {page === "dashboard" && (
           <>
@@ -68,10 +65,26 @@ export default function Dashboard() {
 
             {/* QUICK CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-              <DynamicStatsCard icon={<FileText />} value={42} title="Traffic Reports" />
-              <DynamicStatsCard icon={<Gauge />} value={42} title="Static Speed" />
-              <DynamicStatsCard icon={<BarChart3 />} value={42} title="MP Reports" />
-              <DynamicStatsCard icon={<AlertTriangle />} value={42} title="Pending" />
+              <DynamicStatsCard
+                icon={<FileText />}
+                value={42}
+                title="Traffic Reports"
+              />
+              <DynamicStatsCard
+                icon={<Gauge />}
+                value={42}
+                title="Static Speed"
+              />
+              <DynamicStatsCard
+                icon={<BarChart3 />}
+                value={42}
+                title="MP Reports"
+              />
+              <DynamicStatsCard
+                icon={<AlertTriangle />}
+                value={42}
+                title="Pending"
+              />
             </div>
 
             {/* QUICK ACTIONS */}
@@ -89,6 +102,30 @@ export default function Dashboard() {
                   title="View All Registered Reports"
                   icon={<FileBarChart />}
                   onClick={() => setPage("reportsCategory")}
+                />
+
+                <ActionCard
+                  title="Certificates &  Forms"
+                  icon={<FileText />}
+                  onClick={() => setPage("viewReports")}
+                />
+
+                <ActionCard
+                  title="MP General Diary & Daily Occurrence Book"
+                  icon={<Gauge />}
+                  onClick={() => setPage("staticSpeed")}
+                />
+
+                <ActionCard
+                  title="Outsidery Report Analysis Module"
+                  icon={<AlertTriangle />}
+                  onClick={() => setPage("investigation")}
+                />
+
+                <ActionCard
+                  title="Millitary Structure"
+                  icon={<SquareSplitHorizontal />}
+                  onClick={() => setPage("multiForm")}
                 />
               </div>
             </div>
@@ -122,30 +159,19 @@ export default function Dashboard() {
 
         {/* -------- INDIVIDUAL PAGES (ALL INSIDE SAME AREA 💯) -------- */}
 
-        {page === "noVehicleReports" && (
-          <ReportsPage viewType="no-vehicle" />
-        )}
+        {page === "noVehicleReports" && <ReportsPage viewType="no-vehicle" />}
 
-        {page === "viewReports" && (
-          <ReportsPage viewType="vehicle" />
-        )}
+        {page === "viewReports" && <ReportsPage viewType="vehicle" />}
 
-        {page === "staticSpeed" && (
-          <StaticSpeedForm />
-        )}
+        {page === "staticSpeed" && <StaticSpeedForm />}
 
-        {page === "investigation" && (
-          <MultiFormReport />
-        )}
+        {page === "investigation" && <MultiFormReport />}
 
-        {page === "multiForm" && (
-          <MultiStepForm />
-        )}
+        {page === "multiForm" && <MultiStepForm />}
 
         {page === "createRecord" && (
           <CreateNewRecordPanel setCollapsed={setCollapsed} />
         )}
-
       </div>
     </div>
   );
