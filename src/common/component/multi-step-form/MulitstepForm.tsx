@@ -398,6 +398,7 @@ export default function MultiStepForm() {
               });
             }}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
+            onPrev={() => dispatch({ type: "PREV_STEP" })}
             onSubmitFinal={onSubmitFinal}
             stepsConfig={stepsConfig}
             mode="traffic"

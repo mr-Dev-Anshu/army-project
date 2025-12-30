@@ -29,24 +29,16 @@ export const LeftStepper = ({
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
-    if (completedSteps?.includes(id)) return "completed";
+
+    if (id < currentStep) return "completed";
+
     return "pending";
   };
 
   const { dispatch } = useForm();
 
   return (
-    <div
-      className="
-      w-full 
-      lg:w-[380px] 
-      h-full 
-      bg-gray-900 text-white 
-      rounded-xl 
-      flex flex-col 
-      p-3 sm:p-4 md:p-6
-    "
-    >
+    <div className="w-full lg:w-[380px] h-full bg-[#171717] text-white rounded-xl flex flex-col p-3 sm:p-4 md:p-6">
       {/* HEADER */}
       <div>
         <h2 className="font-bold text-base sm:text-lg md:text-xl mb-2 sm:mb-3">
@@ -61,16 +53,7 @@ export const LeftStepper = ({
       </div>
 
       {/* STEPS */}
-      <div
-        className="
-          mt-4 sm:mt-6 
-          flex-1 
-          overflow-y-auto 
-          space-y-2
-          pr-1 
-          custom-scrollbar
-        "
-      >
+      <div className="mt-4 sm:mt-6 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
         {steps.map((step, index) => {
           const status = getStatus(step.id);
 
@@ -87,11 +70,6 @@ export const LeftStepper = ({
                   rounded-lg 
                   text-left 
                   transition
-                  ${
-                    status === "active"
-                      ? "bg-gray-800"
-                      : "hover:bg-gray-800"
-                  }
                 `}
               >
                 <div
@@ -100,13 +78,13 @@ export const LeftStepper = ({
                     rounded-full font-semibold
                     flex-shrink-0
                     aspect-square
-                    w-9 sm:w-10 md:w-12
+                    w-9 sm:w-10 md:w-10
                     ${
                       status === "completed"
                         ? "bg-green-500"
                         : status === "active"
                         ? "bg-blue-500"
-                        : "bg-gray-600"
+                        : "border-1"
                     }
                   `}
                 >
@@ -118,19 +96,26 @@ export const LeftStepper = ({
                 </div>
 
                 <span
-                  className="
+                  className={`
                     text-sm sm:text-base md:text-lg 
-                    text-gray-300 
-                    leading-tight
-                    break-words
-                  "
+                    leading-tight break-words
+                    ${status === "active" ? "text-blue-400" : "text-gray-300"}
+                  `}
                 >
                   {step.label}
                 </span>
               </button>
 
               {index < steps.length - 1 && (
-                <div className="ml-[34px] sm:ml-[32px] md:ml-[42px] pl-4 h-6 sm:h-8 border-l-2 border-dashed border-gray-700" />
+                <div
+                  className={`
+      ml-[26px] sm:ml-[32px] md:ml-[38px]
+      pl-4 
+      h-6 sm:h-8 
+      border-l-2 border-dashed
+      ${status === "active" ? "border-blue-500" : "border-gray-700"}
+    `}
+                />
               )}
             </div>
           );
@@ -139,15 +124,7 @@ export const LeftStepper = ({
 
       {/* FOOTER */}
       <div className="mt-4 flex flex-col sm:flex-row gap-2">
-        <Button
-          className="
-            w-full 
-            sm:w-fit 
-            border border-gray-50 
-            bg-transparent
-            text-sm sm:text-base
-          "
-        >
+        <Button className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base">
           Cancel
         </Button>
 

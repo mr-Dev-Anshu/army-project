@@ -19,7 +19,7 @@ export default function VehiclePrimaryQuestion({
 }: VehiclePrimaryQuestionProps) {
   return (
     <div className="border rounded-lg p-6">
-      <h3 className="font-semibold mb-3">{title}</h3>
+      <h3 className="font-semibold text-xl mb-3">{title}</h3>
 
       <div className="flex gap-6">
         {/* YES */}

@@ -1,3 +1,5 @@
+
+
 "use client";
 import { createContext, useContext, useReducer, ReactNode } from "react";
 import { GlobalFormState } from "@/common/types/form.types";
@@ -24,7 +26,6 @@ const initialState: GlobalFormState = {
   preview: false,
 
   formData: {
-    /* ================= TRAFFIC ================= */
     traffic: {
       vehicleInvolved: "",
       vehicleDetails: {
@@ -81,7 +82,6 @@ const initialState: GlobalFormState = {
       remarks: "",
     },
 
-    /* ================= STATIC SPEED ================= */
     staticSpeed: {
       vehicleInvolved: "",
       vehicleDetails: {
@@ -92,7 +92,6 @@ const initialState: GlobalFormState = {
         vehicleName: "",
       },
 
-      /* ----- NEW BLOCK STRUCTURE ----- */
       dutyBlock: {
         dateOfDuty: "",
         startTime: "",
@@ -126,7 +125,6 @@ const initialState: GlobalFormState = {
       offenderPeople: [],
     },
 
-    /* ================= MP REPORT ================= */
     mpReport: {
       reportDetails: {
         reportNo: "",
@@ -197,6 +195,7 @@ const initialState: GlobalFormState = {
 ------------------------------------ */
 type Action =
   | { type: "NEXT_STEP" }
+  | { type: "PREV_STEP" } // <-- NEW
   | { type: "SET_STEP"; payload: number }
   | { type: "SET_PATH"; path: string; value: any }
   | { type: "PUSH_PATH"; path: string; value: any }
@@ -206,7 +205,7 @@ type Action =
   | { type: "CLEAR_MP_ADDITIONAL" };
 
 /* ------------------------------------
-   UNIVERSAL REDUCER
+   REDUCER
 ------------------------------------ */
 function reducer(state: GlobalFormState, action: Action): GlobalFormState {
   switch (action.type) {
@@ -217,6 +216,13 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
           ? state.completedSteps
           : [...state.completedSteps, state.currentStep],
         currentStep: state.currentStep + 1,
+      };
+
+    case "PREV_STEP":
+      console.log("REDUCER PREV HIT — New Step:", state.currentStep - 1);
+      return {
+        ...state,
+        currentStep: Math.max(1, state.currentStep - 1),
       };
 
     case "SET_STEP":
@@ -242,18 +248,12 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
       setByPath(newState, action.path, arr);
       return newState;
     }
-    case "SET_PREVIEW":
-      return {
-        ...state,
-        preview: action.payload,
-      };
 
-    case "SET_FORM_DATA": {
-      return {
-        ...state,
-        formData: action.payload,
-      };
-    }
+    case "SET_PREVIEW":
+      return { ...state, preview: action.payload };
+
+    case "SET_FORM_DATA":
+      return { ...state, formData: action.payload };
 
     case "CLEAR_MP_ADDITIONAL": {
       const newState = structuredClone(state);
@@ -276,7 +276,7 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
 }
 
 /* ------------------------------------
-   CONTEXT PROVIDER
+   CONTEXT
 ------------------------------------ */
 const FormContext = createContext<{
   state: GlobalFormState;

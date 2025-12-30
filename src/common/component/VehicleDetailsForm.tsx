@@ -23,6 +23,7 @@ export default function VehicleDetailsForm({
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
 
+  // Hide if traffic and vehicle not involved
   if (scope === "traffic" && traffic.vehicleInvolved !== "yes") return null;
 
   const vehicleState =
@@ -38,7 +39,7 @@ export default function VehicleDetailsForm({
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
-  /* ================= UPDATE VEHICLE ================= */
+  /* ================= UPDATE ================= */
   const updateVehicle = (data: any) => {
     const updated = { ...vehicleState, ...data };
 
@@ -61,7 +62,7 @@ export default function VehicleDetailsForm({
   const [coDriverType, setCoDriverType] = useState("");
   const [civilianRelative, setCivilianRelative] = useState("");
 
-  /* ================= DYNAMIC PATHS ================= */
+  /* ================= PATHS ================= */
   const driverPath =
     scope === "traffic"
       ? "formData.traffic.vehicleDetails.driver"
@@ -82,9 +83,10 @@ export default function VehicleDetailsForm({
 
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6">
-      {/* CATEGORY */}
+      {/* ================= CATEGORY ================= */}
       <div>
         <p className="font-semibold mb-2">Select Vehicle Category</p>
+
         <RadioGroup
           value={category}
           onValueChange={(v) => updateVehicle({ category: v })}
@@ -114,11 +116,9 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* VEHICLE TYPE */}
+      {/* ================= VEHICLE TYPE ================= */}
       <div>
-        <p className="font-semibold mb-2">
-          Which Type Of Vehicle Was Involved?
-        </p>
+        <p className="font-semibold mb-2">Which Type Of Vehicle Was Involved?</p>
 
         <RadioGroup
           value={vehicleType}
@@ -155,70 +155,113 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* CIVILIAN */}
+      {/* ================= CIVILIAN ================= */}
       {vehicleType === "civilian" && (
         <div>
           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
+
           <div className="grid sm:grid-cols-2 gap-4">
+            {/* Number */}
             <div>
               <Label className="mb-3">Civil Vehicle Registration Number</Label>
-              <SuggestionInput
-                placeholder="e.g. MP04 AB 1234"
-                value={vehicleState.vehicleNumber || ""}
-                onChange={(v) => updateVehicle({ vehicleNumber: v })}
-                fieldType="vehicleNumber"
-              />
+
+              <div
+                className={cn(
+                  "border rounded-lg",
+                  vehicleState.vehicleNumber
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
+              >
+                <SuggestionInput
+                  placeholder="e.g. MP04 AB 1234"
+                  value={vehicleState.vehicleNumber || ""}
+                  onChange={(v) => updateVehicle({ vehicleNumber: v })}
+                  fieldType="vehicleNumber"
+                />
+              </div>
             </div>
 
+            {/* Name */}
             <div>
               <Label className="mb-3">
-                Make & Type{" "}
-                <span className="text-gray-500">(Vehicle Name)</span>
+                Make & Type <span className="text-gray-500">(Vehicle Name)</span>
               </Label>
-              <SuggestionInput
-                placeholder="e.g. Honda CB Hornet"
-                value={vehicleState.vehicleName || ""}
-                onChange={(v) => updateVehicle({ vehicleName: v })}
-                fieldType="vehicleName"
-              />
+
+              <div
+                className={cn(
+                  "border rounded-lg",
+                  vehicleState.vehicleName
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
+              >
+                <SuggestionInput
+                  placeholder="e.g. Honda CB Hornet"
+                  value={vehicleState.vehicleName || ""}
+                  onChange={(v) => updateVehicle({ vehicleName: v })}
+                  fieldType="vehicleName"
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* DD VEHICLE */}
+      {/* ================= DD VEHICLE ================= */}
       {vehicleType === "dd" && (
         <div>
           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
 
           <div className="grid sm:grid-cols-2 gap-4">
+            {/* BA Number */}
             <div>
               <Label className="mb-3">DD Vehicle BA Number</Label>
-              <SuggestionInput
-                placeholder="e.g. 12A 345678Z"
-                value={vehicleState.vehicleNumber || ""}
-                onChange={(v) => updateVehicle({ vehicleNumber: v })}
-                fieldType="vehicleNumber"
-              />
+
+              <div
+                className={cn(
+                  "border rounded-lg",
+                  vehicleState.vehicleNumber
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
+              >
+                <SuggestionInput
+                  placeholder="e.g. 12A 345678Z"
+                  value={vehicleState.vehicleNumber || ""}
+                  onChange={(v) => updateVehicle({ vehicleNumber: v })}
+                  fieldType="vehicleNumber"
+                />
+              </div>
             </div>
 
+            {/* Name */}
             <div>
               <Label className="mb-3">
-                Make & Type{" "}
-                <span className="text-gray-500">(Vehicle Name)</span>
+                Make & Type <span className="text-gray-500">(Vehicle Name)</span>
               </Label>
-              <SuggestionInput
-                placeholder="e.g. ALS W/B"
-                value={vehicleState.vehicleName || ""}
-                onChange={(v) => updateVehicle({ vehicleName: v })}
-                fieldType="vehicleName"
-              />
+
+              <div
+                className={cn(
+                  "border rounded-lg",
+                  vehicleState.vehicleName
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
+              >
+                <SuggestionInput
+                  placeholder="e.g. ALS W/B"
+                  value={vehicleState.vehicleName || ""}
+                  onChange={(v) => updateVehicle({ vehicleName: v })}
+                  fieldType="vehicleName"
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* DRIVER TYPE */}
+      {/* ================= DRIVER TYPE ================= */}
       <div>
         <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
 
@@ -256,7 +299,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* NON CIVILIAN */}
+      {/* ================= NON CIV ================= */}
       {driverType && driverType !== "Civilian" && (
         <>
           <OffenderDynamicForm
@@ -313,7 +356,7 @@ export default function VehicleDetailsForm({
         </>
       )}
 
-      {/* CIVILIAN */}
+      {/* ================= CIVILIAN ================= */}
       {driverType === "Civilian" && (
         <>
           <OffenderDynamicForm
@@ -324,7 +367,6 @@ export default function VehicleDetailsForm({
             path={driverPath}
           />
 
-          {/* CHECKBOX */}
           <p className="font-semibold mt-4 flex items-center gap-3">
             <Checkbox
               checked={civilianRelative === "yes"}
@@ -338,20 +380,20 @@ export default function VehicleDetailsForm({
 
           {civilianRelative === "yes" && (
             <>
-              {/* STEP 2 — RELATION (OPTIONAL INPUT) */}
               <p className="font-semibold mt-3">
                 Enter Relation of Military Person
               </p>
 
               <SuggestionInput
-                placeholder="e.g. Father / Husband / Brother "
+                placeholder="e.g. Father / Husband / Brother"
                 value={coDriverType}
                 onChange={setCoDriverType}
                 fieldType="relation"
               />
 
-              {/* STEP 3 — CATEGORY OPTIONS (ALWAYS SHOW AFTER YES) */}
-              <p className="font-semibold mt-4">Select Military Person Type</p>
+              <p className="font-semibold mt-4">
+                Select Military Person Type
+              </p>
 
               <RadioGroup
                 onValueChange={setHasCoDriver}
@@ -375,7 +417,6 @@ export default function VehicleDetailsForm({
                 ))}
               </RadioGroup>
 
-              {/* FINAL FORM */}
               {hasCoDriver && (
                 <OffenderDynamicForm
                   scope={scope}

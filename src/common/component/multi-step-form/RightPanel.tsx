@@ -1,4 +1,3 @@
-
 "use client";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Eye } from "lucide-react";
@@ -15,6 +14,7 @@ interface Props {
   formData: FormDataState;
   setFormData?: (path: string, value: unknown) => void;
   onNext: () => void;
+  onPrev: () => void;
   onSubmitFinal: () => void;
   stepsConfig: Record<string, StepConfig>;
   mode?: "traffic" | "static" | "mp";
@@ -24,6 +24,7 @@ export const RightPanel = ({
   step,
   formData,
   onNext,
+  onPrev,
   onSubmitFinal,
   stepsConfig,
   mode,
@@ -47,66 +48,79 @@ export const RightPanel = ({
 
   return (
     <div className="flex-1 h-full p-3 sm:p-5 lg:p-8 flex flex-col w-full overflow-hidden">
-
       {/* ---------- HEADER ---------- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-5 lg:mb-6 gap-2 sm:gap-3">
-        <h3 className="font-bold leading-tight 
-          text-base sm:text-lg lg:text-xl">
+        <h3
+          className="font-bold leading-tight 
+          text-base sm:text-lg lg:text-xl"
+        >
           {current?.title || "Step"}
         </h3>
 
         <div className="flex gap-2 ">
-          <Button variant="outline" size="sm" className="text-xs sm:text-xs">
+          <Button
+            size="sm"
+            className="text-xs bg-gray-100 text-black sm:text-xs"
+          >
             <CiEraser size={14} className="sm:size-[16px]" /> Clear
           </Button>
 
-          <Button
-            className="bg-black text-white"
-            variant="outline"
-            size="sm"
-          >
+          <Button className="bg-black text-white" variant="outline" size="sm">
             <Eye size={14} className="sm:size-[16px]" />
           </Button>
         </div>
       </div>
 
       {/* ---------- CONTENT ---------- */}
-      <div className="
+      <div
+        className="
         border rounded-lg 
         p-3 sm:p-4 lg:px-6
         mb-3 sm:mb-5 
         overflow-y-auto
         max-h-[58vh] sm:max-h-[70vh] lg:max-h-none 
         text-xs sm:text-sm lg:text-base
-      ">
+      "
+      >
         {current?.component || <p>Step Content Coming Soon...</p>}
       </div>
 
       {/* ---------- FOOTER ---------- */}
-      <div className="mt-auto flex flex-col sm:flex-row justify-end gap-2">
-        {!isLastStep && (
-          <Button
-            onClick={onNext}
-            disabled={isNextDisabled()}
-            className="
-              bg-blue-600 disabled:bg-gray-400 
-              w-full sm:w-auto
-              text-xs sm:text-sm lg:text-base
-            "
-          >
-            Save & Next
-            <ChevronRight size={14} className="sm:size-[16px] ml-2" />
-          </Button>
-        )}
+      <div className="mt-auto flex flex-col sm:flex-row justify-between gap-2">
+        <Button
+          variant="outline"
+          disabled={step === 1}
+          onClick={() => {
+            console.log("BACK CLICKED", step);
+            onPrev();
+          }}
+        >
+          Back
+        </Button>
 
-        {isLastStep && (
-          <Button
-            className="bg-blue-600 w-full sm:w-auto text-xs sm:text-sm lg:text-base"
-            onClick={onSubmitFinal}
-          >
-            Submit & Create Offence
-          </Button>
-        )}
+        {/* RIGHT SIDE — NEXT / SUBMIT */}
+        <div className="flex gap-2 w-full sm:w-auto">
+          {!isLastStep && (
+            <Button
+              onClick={onNext}
+              disabled={isNextDisabled()}
+              className="bg-black text-white disabled:bg-gray-400 
+          w-full sm:w-auto text-xs sm:text-sm lg:text-base"
+            >
+              Save & Next
+              <ChevronRight size={14} className="sm:size-[16px] ml-2" />
+            </Button>
+          )}
+
+          {isLastStep && (
+            <Button
+              className="bg-black text-white w-full sm:w-auto text-xs sm:text-sm lg:text-base"
+              onClick={onSubmitFinal}
+            >
+              Submit & Create Offence
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

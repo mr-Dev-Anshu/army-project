@@ -1,6 +1,7 @@
 
 "use client";
 
+import { FormSection } from "@/common/component/FormSection";
 import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
 import VehicleDetailsForm from "@/common/component/VehicleDetailsForm";
 import VehiclePrimaryQuestion from "@/common/component/VehiclePrimaryQuestion";
@@ -21,9 +22,11 @@ export default function Step1Particulars() {
     });
 
   return (
-    <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
+    
+      <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
 
       <VehiclePrimaryQuestion
+      title="Does this offence involve vehicles?"
         vehicleStatus={value}
         setVehicleStatus={setVehicle}
       />
@@ -33,5 +36,6 @@ export default function Step1Particulars() {
       {value === "no" && <OffenderWithoutVehicleForm />}
 
     </div>
+    
   );
 }
