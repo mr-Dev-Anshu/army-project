@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,20 +10,72 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "@/context/FormContext";
+
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { SubWorker } from "../types";
-import { useCreateTemporaryHiredWorker } from "../hook";
+import { useCreateTemporaryHiredWorker, useUpdateTemporaryHiredWorker } from "../hook";
+import { toast } from "react-toastify";
 
-export default function TemporaryHiredWorkerPassForm() {
+const INITIAL_TEMP_WORKER_STATE = {
+  workerName: "",
+  workerMobile: "",
+  workerAadhar: "",
+  permanentAddressLine: "",
+  permanentCityDistrict: "",
+  permanentState: "",
+  permanentPincode: "",
+  placeOfStay: "",
+  placeOfDuty: "",
+  passNumber: "",
+  validFrom: null,
+  validTill: null,
+  subWorkers: [],
+};
+
+interface TemporaryHiredWorkerPassFormProps {
+  onCancel: () => void;
+  onSuccess: () => void;
+  initialData?: any;
+}
+
+export default function TemporaryHiredWorkerPassForm({
+  onCancel,
+  onSuccess,
+  initialData
+}: TemporaryHiredWorkerPassFormProps) {
   const { state, dispatch } = useForm();
   const tempWorker = state.formData.tempWorker || {};
-  const { mutate: createWorker, isPending } = useCreateTemporaryHiredWorker();
+  const { mutate: createWorker, isPending: isCreating } = useCreateTemporaryHiredWorker();
+  const { mutate: updateWorker, isPending: isUpdating } = useUpdateTemporaryHiredWorker();
+
+  const isPending = isCreating || isUpdating;
 
   const [tempSubWorker, setTempSubWorker] = useState({
     name: "",
     mobile: "",
     aadhar: "",
   });
+
+  useEffect(() => {
+    // Reset form on mount
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.tempWorker",
+      value: INITIAL_TEMP_WORKER_STATE,
+    });
+
+    // If initialData exists (Edit Mode), populate the form
+    if (initialData) {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.tempWorker",
+        value: {
+          ...initialData,
+          subWorkers: initialData.subWorkers || [],
+        },
+      });
+    }
+  }, [initialData, dispatch]);
 
   const setField = (field: string, value: unknown) => {
     dispatch({
@@ -57,15 +109,43 @@ export default function TemporaryHiredWorkerPassForm() {
   };
 
   const handleSave = () => {
-    createWorker(tempWorker, {
-      onSuccess: () => {
-        alert("Temporary Hired Worker Pass Saved & Generated!");
-      },
-      onError: (error) => {
-        console.error("Error creating worker pass:", error);
-        alert("Failed to create pass.");
-      }
-    });
+    // Sanitize data before sending (remove backend-generated fields)
+    const sanitizedData = { ...tempWorker };
+    delete (sanitizedData as any)._id;
+    delete (sanitizedData as any).createdAt;
+    delete (sanitizedData as any).updatedAt;
+    delete (sanitizedData as any).__v;
+
+    if (sanitizedData.subWorkers) {
+      sanitizedData.subWorkers = sanitizedData.subWorkers.map((sub: any) => {
+        const { _id, ...rest } = sub;
+        return rest;
+      });
+    }
+
+    if (initialData?._id) {
+      updateWorker({ id: initialData._id, data: sanitizedData }, {
+        onSuccess: () => {
+          toast.success("Temporary Hired Worker Security Pass Updated!");
+          onSuccess();
+        },
+        onError: (error) => {
+          console.error("Error updating worker pass:", error);
+          toast.error("Failed to update pass. Please try again.");
+        }
+      });
+    } else {
+      createWorker(sanitizedData, {
+        onSuccess: () => {
+          toast.success("Temporary Hired Worker Security Pass Saved & Generated!");
+          onSuccess();
+        },
+        onError: (error) => {
+          console.error("Error creating worker pass:", error);
+          toast.error("Failed to create pass. Please try again.");
+        }
+      });
+    }
   };
 
   return (
@@ -361,12 +441,14 @@ export default function TemporaryHiredWorkerPassForm() {
 
       <div className="my-12 border-t border-gray-200" />
 
-      {/* Actions */}
-      <div className="flex justify-end gap-4 mt-12">
-        <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700" disabled={isPending}>
-          {isPending ? "Saving..." : "Save & Generate"}
-        </Button>
+      {/* Footer Actions */}
+      <div className="pt-4 border-t mt-8 bg-white sticky bottom-0 z-10">
+        <div className="flex justify-between gap-4">
+          <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
+          <Button onClick={handleSave} className="bg-[#0088FF] cursor-pointer  hover:bg-blue-700 px-8" disabled={isPending}>
+            {isPending ? "Saving..." : "Save & Generate"}
+          </Button>
+        </div>
       </div>
     </div>
   );

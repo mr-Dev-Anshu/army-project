@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { ShoppingCart, HardHat } from "lucide-react";
 import ShopkeeperTable from "./shopkeeper/components/ShopkeeperTable";
 import MaidServantTable from "./maid_Servant/component/MaidServantTable";
+import TemporaryHiredTable from "./temporaryHired/components/TemporaryHiredTable";
 import RightSideSheet from "@/components/common/RightSideSheet";
 import ShopkeeperSecurityPassEntryForm from "./shopkeeper/components/form";
 import MaidServantSecurityPassEntryForm from "./maid_Servant/component/form";
+import TemporaryHiredWorkerPassForm from "./temporaryHired/components/form";
 
 type CivilEmployeeView = "menu" | "shopkeepers" | "maidServants" | "temporaryWorkers";
 
@@ -13,6 +15,7 @@ const CivilEmployeePage = () => {
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingShopkeeper, setEditingShopkeeper] = useState<any>(null);
     const [editingMaidServant, setEditingMaidServant] = useState<any>(null);
+    const [editingTemporaryWorker, setEditingTemporaryWorker] = useState<any>(null);
 
     const cards = [
         {
@@ -65,7 +68,7 @@ const CivilEmployeePage = () => {
         {
             title: "Temporary Hired Worker Security Passes",
             icon: <HardHat className="w-8 h-8 text-white" />,
-            onClick: () => console.log("Temporary Hired Worker clicked"),
+            onClick: () => setCurrentView("temporaryWorkers"),
         },
     ];
 
@@ -110,6 +113,14 @@ const CivilEmployeePage = () => {
                             <span className="mx-2 text-gray-400">&gt;</span>
                             <span className="font-medium text-gray-900">
                                 Maid Servants Security Passes
+                            </span>
+                        </>
+                    )}
+                    {currentView === "temporaryWorkers" && (
+                        <>
+                            <span className="mx-2 text-gray-400">&gt;</span>
+                            <span className="font-medium text-gray-900">
+                                Temporary Hired Worker Security Passes
                             </span>
                         </>
                     )}
@@ -169,6 +180,18 @@ const CivilEmployeePage = () => {
                         }}
                     />
                 )}
+                {currentView === "temporaryWorkers" && (
+                    <TemporaryHiredTable
+                        onAddNew={() => {
+                            setEditingTemporaryWorker(null);
+                            setIsAddOpen(true);
+                        }}
+                        onEdit={(item) => {
+                            setEditingTemporaryWorker(item);
+                            setIsAddOpen(true);
+                        }}
+                    />
+                )}
             </div>
 
             {/* Right Side Sheet for Add New */}
@@ -178,16 +201,21 @@ const CivilEmployeePage = () => {
                     setIsAddOpen(false);
                     setEditingShopkeeper(null);
                     setEditingMaidServant(null);
+                    setEditingTemporaryWorker(null);
                 }}
                 title={
                     currentView === "shopkeepers"
                         ? (editingShopkeeper ? "Edit Security Pass Entry" : "Add Security Pass Entry")
-                        : (editingMaidServant ? "Edit Maid Servant Pass" : "Add Maid Servant Pass")
+                        : currentView === "maidServants"
+                            ? (editingMaidServant ? "Edit Maid Servant Pass" : "Add Maid Servant Pass")
+                            : (editingTemporaryWorker ? "Edit Temporary Worker Pass" : "Add Temporary Worker Pass")
                 }
                 description={
                     currentView === "shopkeepers"
                         ? (editingShopkeeper ? "Update details to modify pass record" : "Fill details to generate pass record")
-                        : (editingMaidServant ? "Update details to modify maid servant pass" : "Fill details to generate maid servant pass")
+                        : currentView === "maidServants"
+                            ? (editingMaidServant ? "Update details to modify maid servant pass" : "Fill details to generate maid servant pass")
+                            : (editingTemporaryWorker ? "Update details to modify temporary worker pass" : "Fill details to generate temporary worker pass")
                 }
             >
                 {currentView === "shopkeepers" && (
@@ -215,6 +243,20 @@ const CivilEmployeePage = () => {
                             setEditingMaidServant(null);
                         }}
                         initialData={editingMaidServant}
+                    />
+                )}
+
+                {currentView === "temporaryWorkers" && (
+                    <TemporaryHiredWorkerPassForm
+                        onCancel={() => {
+                            setIsAddOpen(false);
+                            setEditingTemporaryWorker(null);
+                        }}
+                        onSuccess={() => {
+                            setIsAddOpen(false);
+                            setEditingTemporaryWorker(null);
+                        }}
+                        initialData={editingTemporaryWorker}
                     />
                 )}
             </RightSideSheet>
