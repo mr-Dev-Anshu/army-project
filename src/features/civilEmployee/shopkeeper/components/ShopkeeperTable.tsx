@@ -76,18 +76,11 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
             header: "Sr no.",
             cell: (item) => (
                 <span className="font-medium text-gray-900">
-                    {/* We can't easily get index here unless we map separately, 
-              but DynamicTable maps data. 
-              Workaround: find index in filteredData or use a generated ID if needed. 
-              For now, simple incremental number isn't passed to cell.
-              We can accept item._id or just calculate it if we passed context.
-              Let's just show a slice index or hash for now, 
-              or simplified 1,2,3 if we map data before passing.
-           */}
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
-            className: "w-16",
+            className: "w-16 sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
+            headerClassName: "z-20 left-0 bg-gray-50 border-r border-gray-200",
         },
         {
             header: "Shop Address",
@@ -219,7 +212,8 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
-            className: "w-[50px]",
+            className: "w-[50px] sticky right-0 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
+            headerClassName: "z-20 right-0 bg-gray-50 border-l border-gray-200",
         },
     ];
 
@@ -252,6 +246,7 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
             />
 
             <DynamicTable
+                className="[&::-webkit-scrollbar]:hidden"
                 data={filteredData}
                 columns={columns}
                 getRowClassName={(item) => {
