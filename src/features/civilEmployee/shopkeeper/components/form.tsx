@@ -12,8 +12,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { Trash2 } from "lucide-react";
+// import { format } from "date-fns";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { TempWorker } from "../types";
@@ -21,7 +21,27 @@ import { useCreateShopkeeper } from "../hook";
 
 type WorkerType = string;
 
-export default function ShopkeeperSecurityPassEntryForm() {
+const INITIAL_SHOPKEEPER_STATE = {
+  shopName: "",
+  shopAddress: "",
+  unit: "",
+  ownerName: "",
+  ownerMobile: "",
+  ownerAadhar: "",
+  passNumber: "",
+  priceListApproved: false,
+  priceListEffectiveFrom: null,
+  workers: [],
+  validFrom: null,
+  validTill: null,
+};
+
+interface Props {
+  onCancel?: () => void;
+  onSuccess?: () => void;
+}
+
+export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }: Props) {
   const { state, dispatch } = useForm();
   const shopkeeper = state.formData.shopkeeper;
   const { mutate: createShopkeeper, isPending } = useCreateShopkeeper();
@@ -29,7 +49,7 @@ export default function ShopkeeperSecurityPassEntryForm() {
   const [tempWorker, setTempWorker] = useState<TempWorker>({
     name: "",
     aadhar: "",
-    type: "",
+    type: "ex-man",
   });
 
   const setField = (field: string, value: unknown) => {
@@ -63,318 +83,345 @@ export default function ShopkeeperSecurityPassEntryForm() {
     });
   };
 
+  const handleReset = () => {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.shopkeeper",
+      value: INITIAL_SHOPKEEPER_STATE,
+    });
+    setTempWorker({ name: "", aadhar: "", type: "ex-man" });
+  };
+
   const handleSave = () => {
+    // Basic Validation
+    if (!shopkeeper.shopName || !shopkeeper.ownerName) {
+      alert("Please fill in at least Shop Name and Owner Name.");
+      return;
+    }
+
+    if (!shopkeeper.passNumber) {
+      alert("Pass Number is required.");
+      return;
+    }
+
+    if (shopkeeper.ownerAadhar && shopkeeper.ownerAadhar.length !== 12) {
+      alert("Owner Aadhar number must be 12 characters long.");
+      return;
+    }
+
+    // Worker validation
+    for (let i = 0; i < shopkeeper.workers.length; i++) {
+      const worker = shopkeeper.workers[i] as TempWorker;
+      if (worker.aadhar && worker.aadhar.length !== 12) {
+        alert(`Worker "${worker.name}" Aadhar number must be 12 characters long.`);
+        return;
+      }
+    }
+
     createShopkeeper(shopkeeper, {
       onSuccess: () => {
         alert("Security Pass Entry Saved & Generated!");
+        handleReset();
+        onSuccess?.();
       },
       onError: (error) => {
         console.error("Error creating shopkeeper pass:", error);
-        alert("Failed to create pass.");
+        alert("Failed to create pass. Please try again.");
       }
     });
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-2">Add Security Pass Entry</h2>
-      <p className="text-sm text-gray-600 mb-8">
-        Fill details to generate pass record
-      </p>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 space-y-8 p-1">
 
-      <section className="mb-10">
-        <h3 className="text-lg font-bold mb-4">Shop Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SuggestionInput
-            label="Shop Name"
-            placeholder="eg. Fresh Grocery Store"
-            value={shopkeeper.shopName}
-            onChange={(v) => setField("shopName", v)}
-            fieldType="shopName"
-          />
-          <SuggestionInput
-            label="Shop Address"
-            placeholder="Shop Location"
-            value={shopkeeper.shopAddress}
-            onChange={(v) => setField("shopAddress", v)}
-            fieldType="shopAddress"
-          />
-          <SuggestionInput
-            label="Unit"
-            placeholder="Enter unit responsible for this shop"
-            value={shopkeeper.unit}
-            onChange={(v) => setField("unit", v)}
-            fieldType="unit"
-          />
-        </div>
-      </section>
-      <div className="my-12 border-t border-gray-200" />
-
-      <section className="mb-10">
-        <h3 className="text-lg font-bold mb-4">Shop Owner Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SuggestionInput
-            label="Shop Owner Name"
-            placeholder="eg. Robert"
-            value={shopkeeper.ownerName}
-            onChange={(v) => setField("ownerName", v)}
-            fieldType="ownerName"
-          />
-          <SuggestionInput
-            label="Mobile Number"
-            placeholder="eg. +91 12345 67890"
-            value={shopkeeper.ownerMobile}
-            onChange={(v) => setField("ownerMobile", v)}
-            type="tel"
-            fieldType="mobileNumber"
-          />
-          <div className="col-span-2 space-y-1">
-            <Label>Enter Aadhar Card No. for Govt. ID Proof</Label>
-            <Input
-              placeholder="---- ---- ----"
-              value={shopkeeper.ownerAadhar}
-              onChange={(e) =>
-                setField(
-                  "ownerAadhar",
-                  e.target.value.replace(/\D/g, "").slice(0, 12)
-                )
-              }
-              maxLength={12}
-            />
-          </div>
-        </div>
-      </section>
-      <div className="my-12 border-t border-gray-200" />
-
-      {/* Price List Status */}
-      <section className="mb-10">
-        <h3 className="text-lg font-bold mb-4">Price List Status</h3>
-        <div className="space-y-4">
-          <RadioGroup
-            value={shopkeeper.priceListApproved ? "yes" : "no"}
-            onValueChange={(v) => setField("priceListApproved", v === "yes")}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="yes" id="price-approved-yes" />
-              <Label htmlFor="price-approved-yes">Yes, approved</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="no" id="price-approved-no" />
-              <Label htmlFor="price-approved-no">No, not approved</Label>
-            </div>
-          </RadioGroup>
-
-          {shopkeeper.priceListApproved && (
-            <div className="space-y-1 w-64">
-              <Label>Effective from</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !shopkeeper.priceListEffectiveFrom &&
-                      "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {shopkeeper.priceListEffectiveFrom
-                      ? format(
-                        new Date(shopkeeper.priceListEffectiveFrom),
-                        "PPP"
-                      )
-                      : "Enter Date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      shopkeeper.priceListEffectiveFrom
-                        ? new Date(shopkeeper.priceListEffectiveFrom)
-                        : undefined
-                    }
-                    onSelect={(date) =>
-                      setField(
-                        "priceListEffectiveFrom",
-                        date ? date.toISOString() : null
-                      )
-                    }
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          )}
-        </div>
-      </section>
-      <div className="my-12 border-t border-gray-200" />
-
-      {/* Worker Details & Man Power */}
-      <section className="mb-10">
-        <h3 className="text-lg font-bold mb-4">
-          Worker Details & Man Power
-        </h3>
-
-        <div className="space-y-1 mb-6 max-w-xs">
-          <Label>Total Number of Workers</Label>
-          <Input
-            type="number"
-            value={shopkeeper.workers.length}
-            readOnly
-            className="bg-gray-100"
-          />
-        </div>
-
-        <div className="  ">
-          <p className="text-sm text-gray-600 mb-4">
-            Click on &quot;Add Worker&quot; button to add all workers details
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
+        {/* Shop Details */}
+        <section>
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Shop Details</h3>
+          <div className="space-y-4">
             <div className="space-y-1">
-              <Label>Name of Worker</Label>
               <SuggestionInput
-                placeholder="Enter Name here"
-                value={tempWorker.name}
-                onChange={(v) =>
-                  setTempWorker((prev) => ({ ...prev, name: v }))
-                }
-                fieldType="workerName"
+                label="Shop Name"
+                placeholder="eg. Fresh Grocery Store"
+                value={shopkeeper.shopName}
+                onChange={(v) => setField("shopName", v)}
+                fieldType="shopName"
               />
             </div>
-
             <div className="space-y-1">
-              <Label>Aadhar Card No.</Label>
-              <Input
-                placeholder="---- ---- ----"
-                value={tempWorker.aadhar}
-                onChange={(e) =>
-                  setTempWorker((prev) => ({
-                    ...prev,
-                    aadhar: e.target.value.replace(/\D/g, "").slice(0, 12),
-                  }))
-                }
-                maxLength={12}
+              <SuggestionInput
+                label="Shop Address"
+                placeholder="Shop Location"
+                value={shopkeeper.shopAddress}
+                onChange={(v) => setField("shopAddress", v)}
+                fieldType="shopAddress"
               />
             </div>
-
-            <div className="space-y-1 ">
-              <Label>This worker is?</Label>
-              <RadioGroup
-                value={tempWorker.type}
-                onValueChange={(v) =>
-                  setTempWorker((prev) => ({ ...prev, type: v as WorkerType }))
-                }
-                className="flex justify-between"
-              >
-                {[
-                  { value: "ex-man" as WorkerType, label: "Ex-Man" },
-                  { value: "civil-male" as WorkerType, label: "Civil (Male)" },
-                  {
-                    value: "civil-female" as WorkerType,
-                    label: "Civil (Female)",
-                  },
-                ].map(({ value, label }) => (
-                  <div
-                    key={value}
-                    className={cn(
-                      "flex items-center space-x-3 px-5 py-3 rounded-lg border transition-all cursor-pointer",
-                      tempWorker.type === value
-                        ? "border-gray-500 bg-gray-50 shadow-sm"
-                        : "border-transparent hover:bg-gray-50"
-                    )}
-                    onClick={() =>
-                      setTempWorker((prev) => ({ ...prev, type: value }))
-                    } // Optional: click whole row
-                  >
-                    <RadioGroupItem
-                      value={value}
-                      id={`worker-type-${value}`}
-                      className="w-5 h-5 border-2 border-[#D4D4D4] data-[state=checked]:border-[#0A0A0A] data-[state=checked]:bg-white focus-visible:ring-0 focus-visible:ring-offset-0"
-                      style={{
-                        backgroundColor: "white",
-                        boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
-                      }}
-                    >
-                      <div className="flex items-center justify-center w-full h-full">
-                        <div className="w-2.5 h-2.5 rounded-full bg-black scale-0 data-[state=checked]:scale-100 transition-transform duration-200" />
-                      </div>
-                    </RadioGroupItem>
-
-                    <Label
-                      htmlFor={`worker-type-${value}`}
-                      className="text-base font-normal cursor-pointer select-none flex-1"
-                    >
-                      {label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
+            <div className="space-y-1">
+              <SuggestionInput
+                label="Unit"
+                placeholder="Enter unit responsible for this shop"
+                value={shopkeeper.unit}
+                onChange={(v) => setField("unit", v)}
+                fieldType="unit"
+              />
+            </div>
+            {/* Added Pass Number */}
+            <div className="space-y-1">
+              <Label>Pass Number / ID</Label>
+              <Input
+                placeholder="Enter Pass Number"
+                value={shopkeeper.passNumber}
+                onChange={(e) => setField("passNumber", e.target.value)}
+              />
             </div>
           </div>
-          <div className=" w-full  flex  justify-end">
-            <Button
-              variant={"save-generate"}
-              onClick={handleAddWorker}
-              className="mb-6 "
-            >
-              + Add Worker
-            </Button>
-          </div>
+        </section>
 
-          {shopkeeper.workers.length > 0 && (
-            <div className="mt-6">
-              <h4 className="font-medium mb-2">List of Workers:</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">Sr no.</th>
-                      <th className="text-left py-2">Worker Name</th>
-                      <th className="text-left py-2">Aadhar Card No.</th>
-                      <th className="text-left py-2">Worker Type</th>
-                      <th className="text-left py-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {shopkeeper.workers.map((worker: any, idx: number) => (
-                      <tr key={idx} className="border-b">
-                        <td className="py-2">{idx + 1}.</td>
-                        <td className="py-2">{worker.name}</td>
-                        <td className="py-2">
-                          {worker.aadhar.replace(/(\d{4})(?=\d)/g, "$1 ")}
-                        </td>
-                        <td className="py-2">
-                          {worker.type === "ex-man"
-                            ? "Ex-Man"
-                            : worker.type === "civil-male"
-                              ? "Civil (Male)"
-                              : "Civil (Female)"}
-                        </td>
-                        <td className="py-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveWorker(idx)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        {/* Shop Owner Details */}
+        <section>
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Shop Owner Details</h3>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <SuggestionInput
+                label="Shop Owner Name"
+                placeholder="eg. Robert"
+                value={shopkeeper.ownerName}
+                onChange={(v) => setField("ownerName", v)}
+                fieldType="ownerName"
+              />
+              <SuggestionInput
+                label="Mobile Number"
+                placeholder="eg. +91 12345 67890"
+                value={shopkeeper.ownerMobile}
+                onChange={(v) => setField("ownerMobile", v)}
+                type="tel"
+                fieldType="mobileNumber"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Enter Aadhar Card No. for Govt. ID Proof</Label>
+              <div className="relative">
+                <Input
+                  placeholder="---- ---- ----"
+                  value={shopkeeper.ownerAadhar}
+                  onChange={(e) =>
+                    setField(
+                      "ownerAadhar",
+                      e.target.value.replace(/\D/g, "").slice(0, 12)
+                    )
+                  }
+                  maxLength={12}
+                  className="pr-10"
+                />
+                {/* Optional: Add icon inside input if needed */}
               </div>
             </div>
-          )}
+          </div>
+        </section>
+
+        {/* Price List Status */}
+        <section>
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Price List Status</h3>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Price List Approved?</Label>
+              <RadioGroup
+                value={shopkeeper.priceListApproved ? "yes" : "no"}
+                onValueChange={(v) => setField("priceListApproved", v === "yes")}
+                className="grid grid-cols-2 gap-4"
+              >
+                <label
+                  className={cn(
+                    "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-gray-50 transition-colors",
+                    shopkeeper.priceListApproved ? "border-black bg-gray-50" : "border-gray-200"
+                  )}
+                >
+                  <RadioGroupItem value="yes" id="price-yes" />
+                  <span className="text-sm font-medium">Yes, approved</span>
+                </label>
+                <label
+                  className={cn(
+                    "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-gray-50 transition-colors",
+                    !shopkeeper.priceListApproved ? "border-black bg-gray-50" : "border-gray-200"
+                  )}
+                >
+                  <RadioGroupItem value="no" id="price-no" />
+                  <span className="text-sm font-medium">No, not approved</span>
+                </label>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Effective from</Label>
+              <Input
+                type="date"
+                value={shopkeeper.priceListEffectiveFrom ? shopkeeper.priceListEffectiveFrom.split('T')[0] : ""}
+                onChange={(e) => setField("priceListEffectiveFrom", e.target.value ? new Date(e.target.value).toISOString() : null)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Worker Details & Man Power */}
+        <section>
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Worker Details & Man Power</h3>
+
+          <div className="space-y-4 mb-6">
+            <div className="space-y-1">
+              <Label>Total Number of Workers</Label>
+              <Input
+                type="text"
+                value={shopkeeper.workers.length > 0 ? shopkeeper.workers.length : "eg. 10"}
+                readOnly
+                className="bg-gray-50 text-gray-500"
+              />
+            </div>
+
+            <div className="space-y-4 rounded-lg bg-gray-50/50 p-4 border border-gray-100">
+              <h4 className="text-sm font-medium text-gray-900">Enter Each Worker Details</h4>
+              <p className="text-xs text-gray-500 -mt-3">Click on "Add Worker button" to add all workers details</p>
+
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label>Name of Worker</Label>
+                  <SuggestionInput
+                    placeholder="Enter Name here"
+                    value={tempWorker.name}
+                    onChange={(v) => setTempWorker((prev) => ({ ...prev, name: v }))}
+                    fieldType="workerName"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Aadhar Card No.</Label>
+                  <Input
+                    placeholder="---- ---- ----"
+                    value={tempWorker.aadhar}
+                    onChange={(e) =>
+                      setTempWorker((prev) => ({
+                        ...prev,
+                        aadhar: e.target.value.replace(/\D/g, "").slice(0, 12),
+                      }))
+                    }
+                    maxLength={12}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>This worker is?</Label>
+                  <RadioGroup
+                    value={tempWorker.type}
+                    onValueChange={(v) =>
+                      setTempWorker((prev) => ({ ...prev, type: v as WorkerType }))
+                    }
+                    className="grid grid-cols-3 gap-3"
+                  >
+                    {[
+                      { value: "ex-man", label: "Ex-Man" },
+                      { value: "civil-male", label: "Civil (Male)" },
+                      { value: "civil-female", label: "Civil (Female)" },
+                    ].map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={cn(
+                          "flex items-center justify-center space-x-2 rounded-md border py-2 px-1 cursor-pointer hover:bg-gray-50 transition-colors",
+                          tempWorker.type === opt.value ? "border-black bg-gray-50" : "border-gray-200"
+                        )}
+                      >
+                        <RadioGroupItem value={opt.value} id={`w-${opt.value}`} />
+                        <span className="text-xs font-medium">{opt.label}</span>
+                      </label>
+                    ))}
+                  </RadioGroup>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <Button
+                    onClick={handleAddWorker}
+                    variant="outline"
+                    className="gap-2 text-xs h-9 bg-white hover:bg-gray-50"
+                  >
+                    <span>+</span> Add Worker
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Workers List Table */}
+            {shopkeeper.workers.length > 0 && (
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-sm font-medium">List of Workers:</h4>
+                </div>
+                <div className="border rounded-md overflow-hidden">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-gray-50 text-gray-500 font-medium">
+                      <tr>
+                        <th className="px-4 py-2 w-12">Sr no.</th>
+                        <th className="px-4 py-2">Worker Name</th>
+                        <th className="px-4 py-2">Aadhar Card No.</th>
+                        <th className="px-4 py-2">Worker Type</th>
+                        <th className="px-4 py-2 w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {shopkeeper.workers.map((worker: any, idx: number) => (
+                        <tr key={idx} className="bg-white">
+                          <td className="px-4 py-2 text-gray-500">{idx + 1}.</td>
+                          <td className="px-4 py-2 font-medium">{worker.name}</td>
+                          <td className="px-4 py-2 text-gray-500">{worker.aadhar}</td>
+                          <td className="px-4 py-2 text-gray-500">
+                            {worker.type === "ex-man" ? "Ex-Man" : worker.type === "civil-male" ? "Civil (Male)" : "Civil (Female)"}
+                          </td>
+                          <td className="px-4 py-2">
+                            <button
+                              onClick={() => handleRemoveWorker(idx)}
+                              className="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded hover:bg-red-100 transition-colors"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Pass Validity */}
+        <section>
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Pass Validity</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label>Valid From</Label>
+              <Input
+                type="date"
+                value={shopkeeper.validFrom ? shopkeeper.validFrom.split('T')[0] : ""}
+                onChange={(e) => setField("validFrom", e.target.value ? new Date(e.target.value).toISOString() : null)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Valid Till</Label>
+              <Input
+                type="date"
+                value={shopkeeper.validTill ? shopkeeper.validTill.split('T')[0] : ""}
+                onChange={(e) => setField("validTill", e.target.value ? new Date(e.target.value).toISOString() : null)}
+              />
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      {/* Footer Actions */}
+      <div className="pt-4 border-t mt-8 bg-white sticky bottom-0 z-10">
+        <div className="flex justify-between gap-4">
+          <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
+          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 px-8" disabled={isPending}>
+            {isPending ? "Saving..." : "Save & Generate"}
+          </Button>
         </div>
-      </section>
-      <div className="my-12 border-t border-gray-200" />
-      <div className="flex justify-end gap-4 mt-12">
-        <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700" disabled={isPending}>
-          {isPending ? "Saving..." : "Save & Generate"}
-        </Button>
       </div>
     </div>
   );

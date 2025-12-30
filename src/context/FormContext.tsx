@@ -173,6 +173,7 @@ const initialState: GlobalFormState = {
       ownerName: "",
       ownerMobile: "",
       ownerAadhar: "",
+      passNumber: "",
       priceListApproved: false,
       priceListEffectiveFrom: null,
       workers: [],

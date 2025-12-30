@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { ShoppingCart, HardHat } from "lucide-react";
 import ShopkeeperTable from "./shopkeeper/components/ShopkeeperTable";
+import RightSideSheet from "@/components/common/RightSideSheet";
+import ShopkeeperSecurityPassEntryForm from "./shopkeeper/components/form";
 
 type CivilEmployeeView = "menu" | "shopkeepers" | "maidServants" | "temporaryWorkers";
 
 const CivilEmployeePage = () => {
     const [currentView, setCurrentView] = useState<CivilEmployeeView>("menu");
+    const [isAddOpen, setIsAddOpen] = useState(false);
 
     const cards = [
         {
@@ -94,7 +97,7 @@ const CivilEmployeePage = () => {
                     <span className="mx-2 text-gray-400">&gt;</span>
                     <button
                         onClick={() => setCurrentView("menu")}
-                        className={`font-medium ${currentView === 'menu' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+                        className={`font - medium ${currentView === 'menu' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} `}
                     >
                         Civil Employees Management
                     </button>
@@ -139,9 +142,22 @@ const CivilEmployeePage = () => {
                 )}
 
                 {currentView === "shopkeepers" && (
-                    <ShopkeeperTable onAddNew={() => console.log("Open Add New Shopkeeper Form")} />
+                    <ShopkeeperTable onAddNew={() => setIsAddOpen(true)} />
                 )}
             </div>
+
+            {/* Right Side Sheet for Add New */}
+            <RightSideSheet
+                isOpen={isAddOpen}
+                onClose={() => setIsAddOpen(false)}
+                title="Add Security Pass Entry"
+                description="Fill details to generate pass record"
+            >
+                <ShopkeeperSecurityPassEntryForm
+                    onCancel={() => setIsAddOpen(false)}
+                    onSuccess={() => setIsAddOpen(false)}
+                />
+            </RightSideSheet>
         </div>
     );
 };

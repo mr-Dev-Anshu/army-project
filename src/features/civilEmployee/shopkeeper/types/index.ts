@@ -1,4 +1,4 @@
-export interface Worker  {
+export interface Worker {
   name: string;
   aadhar: string;
   type: string;
@@ -18,8 +18,9 @@ export interface Shopkeeper {
 
   workers: Worker[];
 
-  validFrom: string | null; 
-  validTill: string | null; 
+  validFrom: string | null;
+  validTill: string | null;
+  passNumber: string;
 }
 
 export interface TempWorker {
