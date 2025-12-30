@@ -120,15 +120,24 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
         // Flattened Man Power columns
         {
             header: "Ex-Man",
-            cell: () => "01", // Placeholder or calculate from item.workers
+            cell: (item) => {
+                const count = item.workers?.filter(w => w.type === "ex-man").length || 0;
+                return String(count).padStart(2, '0');
+            },
         },
         {
             header: "Civ(M)",
-            cell: () => "02", // Placeholder
+            cell: (item) => {
+                const count = item.workers?.filter(w => w.type === "civil-male").length || 0;
+                return String(count).padStart(2, '0');
+            },
         },
         {
             header: "Civ(F)",
-            cell: () => "01", // Placeholder
+            cell: (item) => {
+                const count = item.workers?.filter(w => w.type === "civil-female").length || 0;
+                return String(count).padStart(2, '0');
+            },
         },
         {
             header: "Total",
@@ -239,7 +248,7 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
                 showActionStatus={true}
                 showDate={true}
                 onAddNew={onAddNew}
-                placeholder="Search by report no, unit, offence type..."
+                placeholder="Search by shop name, owner, unit..."
             />
 
             <DynamicTable

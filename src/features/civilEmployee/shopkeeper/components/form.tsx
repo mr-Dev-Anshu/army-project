@@ -142,7 +142,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
             <div className="space-y-1">
               <SuggestionInput
                 label="Shop Name"
-                placeholder="eg. Fresh Grocery Store"
+                placeholder="Enter Shop Name"
                 value={shopkeeper.shopName}
                 onChange={(v) => setField("shopName", v)}
                 fieldType="shopName"
@@ -151,7 +151,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
             <div className="space-y-1">
               <SuggestionInput
                 label="Shop Address"
-                placeholder="Shop Location"
+                placeholder="Enter Shop Address"
                 value={shopkeeper.shopAddress}
                 onChange={(v) => setField("shopAddress", v)}
                 fieldType="shopAddress"
@@ -160,7 +160,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
             <div className="space-y-1">
               <SuggestionInput
                 label="Unit"
-                placeholder="Enter unit responsible for this shop"
+                placeholder="Enter Unit"
                 value={shopkeeper.unit}
                 onChange={(v) => setField("unit", v)}
                 fieldType="unit"
@@ -185,14 +185,14 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
             <div className="grid grid-cols-2 gap-4">
               <SuggestionInput
                 label="Shop Owner Name"
-                placeholder="eg. Robert"
+                placeholder="Enter Owner Name"
                 value={shopkeeper.ownerName}
                 onChange={(v) => setField("ownerName", v)}
                 fieldType="ownerName"
               />
               <SuggestionInput
                 label="Mobile Number"
-                placeholder="eg. +91 12345 67890"
+                placeholder="Enter Mobile Number"
                 value={shopkeeper.ownerMobile}
                 onChange={(v) => setField("ownerMobile", v)}
                 type="tel"
@@ -203,7 +203,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
               <Label>Enter Aadhar Card No. for Govt. ID Proof</Label>
               <div className="relative">
                 <Input
-                  placeholder="---- ---- ----"
+                  placeholder="Enter Aadhar Number"
                   value={shopkeeper.ownerAadhar}
                   onChange={(e) =>
                     setField(
@@ -272,7 +272,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
               <Label>Total Number of Workers</Label>
               <Input
                 type="text"
-                value={shopkeeper.workers.length > 0 ? shopkeeper.workers.length : "eg. 10"}
+                value={shopkeeper.workers.length}
                 readOnly
                 className="bg-gray-50 text-gray-500"
               />
@@ -286,7 +286,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
                 <div className="space-y-1">
                   <Label>Name of Worker</Label>
                   <SuggestionInput
-                    placeholder="Enter Name here"
+                    placeholder="Enter Worker Name"
                     value={tempWorker.name}
                     onChange={(v) => setTempWorker((prev) => ({ ...prev, name: v }))}
                     fieldType="workerName"
@@ -295,7 +295,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
                 <div className="space-y-1">
                   <Label>Aadhar Card No.</Label>
                   <Input
-                    placeholder="---- ---- ----"
+                    placeholder="Enter Aadhar Number"
                     value={tempWorker.aadhar}
                     onChange={(e) =>
                       setTempWorker((prev) => ({
