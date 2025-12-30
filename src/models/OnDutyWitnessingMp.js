@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
-const onDutyWitnessingMpSchema = new mongoose.Schema({  // schema naam consistent rakha
+const onDutyWitnessingMpSchema = new mongoose.Schema({  
   offenceId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "GeneralTrafficOffence",  // optional: populate ke liye achha
+    ref: "GeneralTrafficOffence",
     required: true,
   },
   rank: {
     type: String,
-    required: true,  // required mark kiya consistency ke liye
+    required: true,
     trim: true,
   },
   unit: {
