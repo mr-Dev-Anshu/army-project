@@ -1,14 +1,26 @@
 export const TEMPORARY_HIRED_WORKER_SUGGESTION_CONFIG = {
     fields: [
+        'workerName',
+        'workerMobile',
+        'workerAadhar',
         'permanentAddressLine',
         'permanentCityDistrict',
         'permanentState',
+        'permanentPincode',
         'placeOfStay',
         'placeOfDuty',
+        'passNumber',
+        'validFrom',
+        'validTill',
     ],
 
-    // No complex nested or array fields that need suggestions for now?
-    // subWorkers has 'name', probably not reusable.
+    arrayObjectFields: {
+        'subWorkers': {
+            'name': 'subWorkerName',
+            'mobile': 'subWorkerMobile',
+            'aadhar': 'subWorkerAadhar',
+        },
+    },
 
     trackCustomFields: 'specific',
 };

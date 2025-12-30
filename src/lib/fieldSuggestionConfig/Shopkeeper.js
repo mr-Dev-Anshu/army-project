@@ -4,12 +4,20 @@ export const SHOPKEEPER_SUGGESTION_CONFIG = {
         'shopAddress',
         'unit',
         'ownerName',
+        'ownerMobile',
+        'ownerAadhar',
+        'priceListApproved',
+        'priceListEffectiveFrom',
+        'passNumber',
+        'validFrom',
+        'validTill',
     ],
 
     arrayObjectFields: {
         'workers': {
-            'type': 'workerType',
             'name': 'workerName',
+            'aadhar': 'workerAadhar',
+            'type': 'workerType',
         },
     },
 

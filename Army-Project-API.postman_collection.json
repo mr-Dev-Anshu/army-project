@@ -1488,6 +1488,40 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Suggestions",
+            "item": [
+                {
+                    "name": "Get Field Suggestions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/suggestions?fieldType=shopName&query=",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "suggestions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "fieldType",
+                                    "value": "shopName",
+                                    "description": "Field type (e.g., shopName, ownerName, workerName, permanentToCity)"
+                                },
+                                {
+                                    "key": "query",
+                                    "value": "",
+                                    "description": "Search term"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }
