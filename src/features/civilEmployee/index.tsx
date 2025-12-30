@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { ShoppingCart, HardHat } from "lucide-react";
 import ShopkeeperTable from "./shopkeeper/components/ShopkeeperTable";
+import MaidServantTable from "./maid_Servant/component/MaidServantTable";
 import RightSideSheet from "@/components/common/RightSideSheet";
 import ShopkeeperSecurityPassEntryForm from "./shopkeeper/components/form";
+import MaidServantSecurityPassEntryForm from "./maid_Servant/component/form";
 
 type CivilEmployeeView = "menu" | "shopkeepers" | "maidServants" | "temporaryWorkers";
 
@@ -10,6 +12,7 @@ const CivilEmployeePage = () => {
     const [currentView, setCurrentView] = useState<CivilEmployeeView>("menu");
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingShopkeeper, setEditingShopkeeper] = useState<any>(null);
+    const [editingMaidServant, setEditingMaidServant] = useState<any>(null);
 
     const cards = [
         {
@@ -57,7 +60,7 @@ const CivilEmployeePage = () => {
                     />
                 </svg>
             ),
-            onClick: () => console.log("Maid Servants clicked"),
+            onClick: () => setCurrentView("maidServants"),
         },
         {
             title: "Temporary Hired Worker Security Passes",
@@ -110,6 +113,14 @@ const CivilEmployeePage = () => {
                             </span>
                         </>
                     )}
+                    {currentView === "maidServants" && (
+                        <>
+                            <span className="mx-2 text-gray-400">&gt;</span>
+                            <span className="font-medium text-gray-900">
+                                Maid Servants Security Passes
+                            </span>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -154,6 +165,18 @@ const CivilEmployeePage = () => {
                         }}
                     />
                 )}
+                {currentView === "maidServants" && (
+                    <MaidServantTable
+                        onAddNew={() => {
+                            setEditingMaidServant(null);
+                            setIsAddOpen(true);
+                        }}
+                        onEdit={(item) => {
+                            setEditingMaidServant(item);
+                            setIsAddOpen(true);
+                        }}
+                    />
+                )}
             </div>
 
             {/* Right Side Sheet for Add New */}
@@ -162,21 +185,46 @@ const CivilEmployeePage = () => {
                 onClose={() => {
                     setIsAddOpen(false);
                     setEditingShopkeeper(null);
+                    setEditingMaidServant(null);
                 }}
-                title={editingShopkeeper ? "Edit Security Pass Entry" : "Add Security Pass Entry"}
-                description={editingShopkeeper ? "Update details to modify pass record" : "Fill details to generate pass record"}
+                title={
+                    currentView === "shopkeepers"
+                        ? (editingShopkeeper ? "Edit Security Pass Entry" : "Add Security Pass Entry")
+                        : (editingMaidServant ? "Edit Maid Servant Pass" : "Add Maid Servant Pass")
+                }
+                description={
+                    currentView === "shopkeepers"
+                        ? (editingShopkeeper ? "Update details to modify pass record" : "Fill details to generate pass record")
+                        : (editingMaidServant ? "Update details to modify maid servant pass" : "Fill details to generate maid servant pass")
+                }
             >
-                <ShopkeeperSecurityPassEntryForm
-                    onCancel={() => {
-                        setIsAddOpen(false);
-                        setEditingShopkeeper(null);
-                    }}
-                    onSuccess={() => {
-                        setIsAddOpen(false);
-                        setEditingShopkeeper(null);
-                    }}
-                    initialData={editingShopkeeper}
-                />
+                {currentView === "shopkeepers" && (
+                    <ShopkeeperSecurityPassEntryForm
+                        onCancel={() => {
+                            setIsAddOpen(false);
+                            setEditingShopkeeper(null);
+                        }}
+                        onSuccess={() => {
+                            setIsAddOpen(false);
+                            setEditingShopkeeper(null);
+                        }}
+                        initialData={editingShopkeeper}
+                    />
+                )}
+
+                {currentView === "maidServants" && (
+                    <MaidServantSecurityPassEntryForm
+                        onCancel={() => {
+                            setIsAddOpen(false);
+                            setEditingMaidServant(null);
+                        }}
+                        onSuccess={() => {
+                            setIsAddOpen(false);
+                            setEditingMaidServant(null);
+                        }}
+                        initialData={editingMaidServant}
+                    />
+                )}
             </RightSideSheet>
         </div>
     );
