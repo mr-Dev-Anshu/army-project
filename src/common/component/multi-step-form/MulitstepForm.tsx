@@ -13,8 +13,7 @@ import Step3Offence from "./steps/Step3Offence";
 import Step4Remarks from "./steps/Step4Remarks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
-import { OffenderType } from "@/apis/offender/types";
-
+import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
 
 export default function MultiStepForm() {
@@ -186,14 +185,21 @@ const mapTrafficToReport = (traffic: any) => {
           ? (traffic.vehicleDetails.driverType as OffenderType)
           : (traffic.offenderWithoutVehicle.offenderType as OffenderType);
 
-      await createOffenderMutate({
+      const offenderPayload: CreateOffenderData = {
         offenceId,
-        offenderType,
-        offenderDetails: traffic.offenderPeople || [],
-      });
+        offenderType: (offenderType as OffenderType) ?? "Civilian",
+        offenderDetails:
+          traffic.offenderPeople && traffic.offenderPeople.length > 0
+            ? (traffic.offenderPeople as any)
+            : ([] as any),
+      };
 
       toast.success("Offender Saved");
 
+      await createOffenderMutate(offenderPayload);
+      toast.success("Offender Created Successfully!");
+
+      // ================== WITNESS ==================
       if (traffic.witnesses?.length > 0) {
         await Promise.all(
           traffic.witnesses.map((w) =>
@@ -220,7 +226,22 @@ const mapTrafficToReport = (traffic: any) => {
 
   // ================== STEP CONFIG ==================
   const stepsConfig = {
-    1: { title: "1. PARTICULARS:", component: <Step1Particulars /> },
+    1: {
+      title: "1. PARTICULARS:",
+      component: (
+        <Step1Particulars
+          value={state.formData.traffic.vehicleInvolved}
+          onChange={(v: string) =>
+            dispatch({
+              type: "SET_PATH",
+              path: "formData.traffic.vehicleInvolved",
+              value: v,
+            })
+          }
+        />
+      ),
+    },
+
     2: {
       title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
       component: <Step2Statement />,

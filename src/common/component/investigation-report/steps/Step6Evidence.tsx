@@ -1,4 +1,3 @@
-
 "use client";
 import { FormSection } from "@/common/component/FormSection";
 import { useForm } from "@/context/FormContext";
@@ -30,7 +29,7 @@ export default function Step6Evidence() {
   return (
     <FormSection title="6. EVIDENCE:" onClear={clear}>
       <EvidenceUploadSection
-      title="Upload Evidence"
+        title="Upload evidence"
         values={evidence}
         onChange={set}
         fields={[

@@ -99,8 +99,35 @@ export default function OffenderWithoutVehicleForm({
 
       {/* PRIMARY OFFENDER SELECT */}
       <RadioGroup
-        value={offenderType ?? ""}
-        onValueChange={handleOffenderSelect}
+        value={offenderType}
+        onValueChange={(value) => {
+          setOffenderType(value);
+
+          // 1️ STORE OFFENDER
+          dispatch({
+            type: "SET_PATH",
+            path: "formData.traffic.offenderWithoutVehicle.offenderType",
+            value,
+          });
+
+          // 2️ FIX: FORCE NO VEHICLE MODE
+          dispatch({
+            type: "SET_PATH",
+            path: "formData.traffic.vehicleInvolved",
+            value: "no",
+          });
+
+          //  OPTIONAL: CLEAR VEHICLE DETAILS SAFELY
+          dispatch({
+            type: "SET_PATH",
+            path: "formData.traffic.vehicleDetails",
+            value: {
+              category: "",
+              vehicleType: "",
+              driverType: "",
+            },
+          });
+        }}
         className="grid grid-cols-2 gap-3"
       >
         {Object.keys(offenderConfig).map((item) => (

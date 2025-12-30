@@ -43,24 +43,36 @@ export default function Dashboard() {
   const { isLoading } = useGetAllTrafficOffences();
 
   return (
-    <div className="w-full h-screen flex">
+    <div className="w-full h-screen flex bg-[#f5f5f7]">
       {/* -------- SIDEBAR -------- */}
-      <Sidebar
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-        onMenuSelect={(p) => setPage(p as any)}
-      />
+      <div className="print:hidden">
+        <Sidebar
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          onMenuSelect={(p) => setPage(p as any)}
+        />
+      </div>
 
       {/* -------- RIGHT CONTENT -------- */}
-      <div className="flex-1 p-4 sm:p-5 md:p-6 space-y-8 overflow-y-auto">
+      <div className="flex-1 p-4 sm:p-5 md:p-6 space-y-8 overflow-y-auto no-scrollbar">
         {/* ---------------- DASHBOARD ---------------- */}
         {page === "dashboard" && (
           <>
             {/* SEARCH BAR */}
-            <div className="w-full flex items-center gap-2 px-4 py-2 border rounded-xl">
-              <SquareSplitHorizontal onClick={() => setCollapsed(!collapsed)} />
-              <Search />
-              <input type="text" placeholder="Search..." />
+            <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-3 print:hidden">
+              <button
+                onClick={() => setCollapsed(!collapsed)}
+                className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"
+              >
+                <SquareSplitHorizontal className="w-5 h-5" />
+              </button>
+
+              <Search className="text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Type to search..."
+                className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400"
+              />
             </div>
 
             {/* QUICK CARDS */}
@@ -70,16 +82,8 @@ export default function Dashboard() {
                 value={42}
                 title="Traffic Reports"
               />
-              <DynamicStatsCard
-                icon={<Gauge />}
-                value={42}
-                title="Static Speed"
-              />
-              <DynamicStatsCard
-                icon={<BarChart3 />}
-                value={42}
-                title="MP Reports"
-              />
+              <DynamicStatsCard icon={<Gauge />} value={42} title="Static Speed" />
+              <DynamicStatsCard icon={<BarChart3 />} value={42} title="MP Reports" />
               <DynamicStatsCard
                 icon={<AlertTriangle />}
                 value={42}
@@ -157,18 +161,12 @@ export default function Dashboard() {
           />
         )}
 
-        {/* -------- INDIVIDUAL PAGES (ALL INSIDE SAME AREA 💯) -------- */}
-
+        {/* -------- INDIVIDUAL PAGES -------- */}
         {page === "noVehicleReports" && <ReportsPage viewType="no-vehicle" />}
-
         {page === "viewReports" && <ReportsPage viewType="vehicle" />}
-
         {page === "staticSpeed" && <StaticSpeedForm />}
-
         {page === "investigation" && <MultiFormReport />}
-
         {page === "multiForm" && <MultiStepForm />}
-
         {page === "createRecord" && (
           <CreateNewRecordPanel setCollapsed={setCollapsed} />
         )}

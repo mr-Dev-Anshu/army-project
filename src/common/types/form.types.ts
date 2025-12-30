@@ -6,8 +6,6 @@ export interface VehicleDetailsState {
   vehicleType: string;
   driverType: string;
   vehicleName: string;
-  vehicleNumber?: string; 
-
 }
 
 /* ================= OFFENDER ================= */
@@ -146,7 +144,7 @@ export interface MpReportState {
 
   occurrenceDetails: {
     offenceType: string;
-    place: string;
+    place: string; // <-- same as context
     date: string;
     time: string;
     description: string;
@@ -156,12 +154,11 @@ export interface MpReportState {
     vehicleInvolved: "yes" | "no" | "";
     vehicleData: Partial<VehicleDetailsState>;
     driverType: string;
-    offenderList: MpOffender[];
-    tempOffender?: MpOffender;
+    offenderList: any[];
+    tempOffender?: any; // <-- optional support so no TS error
   };
 
- witnesses: Record<string, any>[];
-
+  witnesses: Witness[];
   witnessVehicleStatus?: "yes" | "no" | "";
 
   evidence: {
@@ -193,7 +190,7 @@ export interface MpReportState {
   };
 }
 
-/* ================= DEPENDENTS ================= */
+// ---------- DEPENDENTS ----------
 export type DependentType =
   | "Military Person"
   | "Servant/Maid"
@@ -201,9 +198,64 @@ export type DependentType =
   | "Temporary Hired Worker";
 
 export interface OffenderPerson {
-  type: "Driver" | "CoDriver";
-  details: {
-    name?: string;
+  relation: string;
+  whoIsIt: DependentType;
+}
+
+// ---------- FORM ROOT ----------
+// ---------- TRAFFIC ----------
+export interface TrafficFormState {
+  vehicleInvolved: string;
+  vehicleDetails: VehicleDetailsState;
+  offenderWithoutVehicle: OffenderWithoutVehicleState;
+
+  remarks?: string;
+
+  onDutyDetails: OnDutyDetails;
+  onDutyDetailsMPReporting: OnDutyDetailsMPReporting;
+  offenceOccurenceDetails: OffenceOccurenceDetails;
+
+  offenceTypes: string[];
+  offenceCode: string[];
+
+  witnesses: Witness[];
+  selectedWitness?: OnDutyDetailsMPReporting | null;
+
+  offenderDetails: Record<string, string>;
+  offenderPeople: OffenderPerson[];
+  coDriverOrPillion?: boolean;
+  coDriverType?: string;
+}
+
+// ---------- STATIC SPEED ----------
+export interface StaticSpeedFormState {
+  vehicleDetails: {
+    category: string;
+    vehicleType: string;
+    driverType: string;
+    vehicleNumber: string;
+    vehicleName: string;
+  };
+
+  witnesses: any[];
+  selectedWitness?: any;
+
+  offenderDetails: any;
+  offenderPeople: any[];
+
+  offenceOccurenceDetails: {
+    timeOfOffence: string;
+    incidentLocation: string;
+    description: string;
+    authSpeed: string;
+    actualSpeedNoted: string;
+    overSpeedCalculated: string;
+    dateOfDuty?: string; // observed in usage
+    startTime?: string;
+    endTime?: string;
+    dutyLocation?: string;
+    dutyType?: string;
+    nameReportingMP?: string;
     rank?: string;
     unit?: string;
     relation?: string;
@@ -216,6 +268,11 @@ export interface FormDataState {
   traffic: TrafficState;
   staticSpeed: StaticSpeedState;
   mpReport: MpReportState;
+  remarks?: string;
+
+  // Keep these for backward compatibility if needed, or remove if unused
+  // (Based on FormContext, they seem to be moved to 'traffic' but let's check usage)
+  // For now, I will remove them to align with FormContext.tsx strictly.
   coDriverOrPillion?: boolean;
   coDriverType?: string;
 }
@@ -227,11 +284,13 @@ export interface GlobalFormState {
   formData: FormDataState;
   preview: boolean; 
 }
-
 /* ================= ACTIONS ================= */
 export type Action =
   | { type: "NEXT_STEP" }
   | { type: "SET_STEP"; payload: number }
   | { type: "SET_PATH"; path: string; value: unknown }
   | { type: "PUSH_PATH"; path: string; value: unknown }
-  | { type: "REMOVE_PATH"; path: string; index: number };
+  | { type: "REMOVE_PATH"; path: string; index: number }
+  | { type: "SET_FORM_DATA"; payload: FormDataState }   
+  | { type: "CLEAR_MP_ADDITIONAL" }                      
+  | { type: "SET_PREVIEW"; payload: boolean };           

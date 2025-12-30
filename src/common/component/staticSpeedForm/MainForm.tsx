@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
-import { OffenderType } from "@/apis/offender/types";
+import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
 
 export default function StaticSpeedForm() {
@@ -161,26 +161,14 @@ export default function StaticSpeedForm() {
         vehicleName: staticData.vehicleDetails.vehicleName,
 
         offenceOccurenceDetails: {
-          time:
-            staticData.dutyBlock.dateOfDuty &&
-            staticData.offenceBlock.timeOfOffence
-              ? new Date(
-                  `${staticData.dutyBlock.dateOfDuty}T${staticData.offenceBlock.timeOfOffence}`
-                ).toISOString()
-              : "",
-
-          incidentLocation: staticData.offenceBlock.incidentLocation,
-          description: staticData.offenceBlock.description,
-
-          authSpeed: staticData.offenceBlock.authSpeed ?? "",
-
-          actualSpeed: staticData.offenceBlock.actualSpeed || "",
-          overSpeed: staticData.offenceBlock.overSpeed || "",
-
-          // ⭐ REQUIRED by CreateStaticSpeedPayload
-          actualSpeedNoted: staticData.offenceBlock.actualSpeedNoted || "",
+          time: staticData.offenceOccurenceDetails.time || "",
+          incidentLocation: staticData.offenceOccurenceDetails.incidentLocation,
+          description: staticData.offenceOccurenceDetails.description,
           overSpeedCalculated:
-            staticData.offenceBlock.overSpeedCalculated || "",
+            staticData.offenceOccurenceDetails.overSpeedCalculated ?? "",
+          actualSpeedNoted:
+            staticData.offenceOccurenceDetails.actualSpeedNoted ?? "",
+          authSpeed: staticData.offenceOccurenceDetails.authSpeed ?? "",
         },
       };
 
@@ -195,13 +183,16 @@ export default function StaticSpeedForm() {
         return;
       }
 
-      /* ================= CREATE OFFENDER ================= */
-      const offenderPayload = {
+      // ========= 2️⃣ OFFENDER =========
+      const offenderPayload: CreateOffenderData = {
         offenceId: staticRes._id,
-        offenderType: staticData.vehicleDetails.driverType as OffenderType,
-        offenderDetails: staticData.offenderPeople?.length
-          ? staticData.offenderPeople
-          : [],
+        offenderType:
+          (staticData.vehicleDetails.driverType as OffenderType) || "Civilian",
+
+        offenderDetails:
+          staticData.offenderPeople?.length > 0
+            ? (staticData.offenderPeople as any)
+            : ([] as any),
       };
 
       console.log("👮 STATIC OFFENDER PAYLOAD ===>", offenderPayload);

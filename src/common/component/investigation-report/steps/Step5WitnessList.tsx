@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -37,6 +36,7 @@ export default function Step5WitnessList() {
       value,
     });
 
+    
   /* ========= DELETE ========= */
   const handleDeleteWitness = (index: number) => {
     const updated = witnesses.filter((_, i) => i !== index);
@@ -113,10 +113,7 @@ export default function Step5WitnessList() {
         setVehicleStatus={setVehicleStatus}
       />
 
-      {witnessVehicleStatus === "yes" && (
-        <VehicleDetailsForm scope="mp-main" />
-      )}
-
+      {witnessVehicleStatus === "yes" && <VehicleDetailsForm scope="mp-main" />}
       {witnessVehicleStatus === "no" && (
         <OffenderWithoutVehicleForm scope="mp-main" />
       )}

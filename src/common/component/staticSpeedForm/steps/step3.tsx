@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useForm } from "@/context/FormContext";
@@ -19,8 +17,11 @@ export default function Step3Offence() {
   ) => {
     dispatch({
       type: "SET_PATH",
-      path: `formData.staticSpeed.offenceBlock.${key}`,
-      value,
+      path: "formData.staticSpeed.offenceOccurenceDetails",
+      value: {
+        ...offence,
+        ...value,
+      },
     });
   };
 

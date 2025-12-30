@@ -201,7 +201,9 @@ type Action =
   | { type: "SET_PATH"; path: string; value: any }
   | { type: "PUSH_PATH"; path: string; value: any }
   | { type: "REMOVE_PATH"; path: string; index: number }
-  | { type: "SET_PREVIEW"; payload: boolean };
+  | { type: "SET_PREVIEW"; payload: boolean }
+  | { type: "SET_FORM_DATA"; payload: any }
+  | { type: "CLEAR_MP_ADDITIONAL" };
 
 /* ------------------------------------
    UNIVERSAL REDUCER
@@ -245,6 +247,28 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
         ...state,
         preview: action.payload,
       };
+
+    case "SET_FORM_DATA": {
+      return {
+        ...state,
+        formData: action.payload,
+      };
+    }
+
+    case "CLEAR_MP_ADDITIONAL": {
+      const newState = structuredClone(state);
+      setByPath(
+        newState,
+        "formData.mpReport.individualDetails.tempOffender",
+        null
+      );
+      setByPath(
+        newState,
+        "formData.mpReport.individualDetails.vehicleData",
+        {}
+      );
+      return newState;
+    }
 
     default:
       return state;

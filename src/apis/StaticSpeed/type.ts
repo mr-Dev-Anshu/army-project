@@ -21,4 +21,3 @@ export interface CreateStaticSpeedPayload
   offenceOccurenceDetails: StaticSpeedOffence;
   actionStatus?: boolean;
 }
- 
