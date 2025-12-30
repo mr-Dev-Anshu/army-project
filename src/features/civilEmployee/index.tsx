@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ShoppingCart, HardHat } from "lucide-react";
 import ShopkeeperTable from "./shopkeeper/components/ShopkeeperTable";

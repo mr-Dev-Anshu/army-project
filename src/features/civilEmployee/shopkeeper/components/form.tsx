@@ -146,7 +146,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
 
     if (initialData?._id) {
       // Remove fields that should not be sent in update
-      const { _id, createdAt, updatedAt, __v, ...shopkeeperData } = shopkeeper;
+      const { _id, createdAt, updatedAt, __v, ...shopkeeperData } = shopkeeper as any;
 
       // Clean up workers array to remove _id
       if (shopkeeperData.workers && Array.isArray(shopkeeperData.workers)) {
