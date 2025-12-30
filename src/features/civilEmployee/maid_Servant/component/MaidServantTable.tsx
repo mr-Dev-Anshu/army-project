@@ -77,7 +77,18 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 (item.createdAt && item.createdAt.includes(filters.date))
                 : true;
 
-            return matchesSearch && matchesDate;
+            // Pass Status Logic
+            let matchesStatus = true;
+            if (filters.actionStatus && filters.actionStatus !== "All") {
+                const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                if (filters.actionStatus === "Valid") {
+                    matchesStatus = !isExpired;
+                } else if (filters.actionStatus === "Expired") {
+                    matchesStatus = isExpired;
+                }
+            }
+
+            return matchesSearch && matchesDate && matchesStatus;
         });
     }, [maidServants, filters]);
 
@@ -327,7 +338,9 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 onFilterChange={handleFilterChange}
                 offenceTypeOptions={[]}
                 showOffenceType={true}
-                showActionStatus={false}
+                showActionStatus={true}
+                statusLabel="Pass Status"
+                actionStatusOptions={["Valid", "Expired"]}
                 showDate={true}
                 showSort={true}
                 showFilter={true}

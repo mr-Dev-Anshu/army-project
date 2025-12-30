@@ -33,6 +33,7 @@ interface ReportFilterBarProps {
   showDate?: boolean;
   showActionStatus?: boolean;
   statusLabel?: string;
+  actionStatusOptions?: string[];
   showOffenceType?: boolean;
   onAddNew?: () => void;
   onReset?: () => void;
@@ -48,6 +49,7 @@ export default function ReportFilterBar({
   showDate = true,
   showActionStatus = true,
   statusLabel = "Action Status",
+  actionStatusOptions = ["Pending", "Taken"],
   showOffenceType = true,
   onAddNew,
   onReset,
@@ -123,8 +125,11 @@ export default function ReportFilterBar({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All">All</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Taken">Taken</SelectItem>
+                {actionStatusOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -96,9 +96,24 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 (item.createdAt && item.createdAt.includes(filters.date))
                 : true;
 
-            return matchesSearch && matchesDate;
+            // Pass Status Logic
+            let matchesStatus = true;
+            if (filters.actionStatus && filters.actionStatus !== "All") {
+                const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
+                if (filters.actionStatus === "Valid") {
+                    matchesStatus = !isExpired;
+                } else if (filters.actionStatus === "Expired") {
+                    matchesStatus = isExpired;
+                }
+            }
+
+            return matchesSearch && matchesDate && matchesStatus;
         });
     }, [shopkeepers, filters]);
+
+
+
+
 
     const columns: Column<Shopkeeper>[] = [
         {
@@ -200,7 +215,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs font-semibold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
+                    <div className="text-xs text-center font-semibold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Pass Valid Date
                     </div>
                     <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
@@ -298,6 +313,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 showOffenceType={true}
                 showActionStatus={true}
                 statusLabel="Pass Status"
+                actionStatusOptions={["Valid", "Expired"]}
                 showDate={true}
                 showSort={true}
                 showFilter={true}
