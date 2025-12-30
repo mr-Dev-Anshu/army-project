@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { MaidServant } from "../types";
 
-// Exteding types locally if needed to include _id which comes from DB
+// Extending types locally if needed to include _id which comes from DB
 interface MaidServantWithId extends MaidServant {
     _id: string;
     createdAt: string;
@@ -133,12 +133,17 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
         {
             header: "Pass No.",
             accessorKey: "passNumber",
-            className: "font-medium text-gray-900",
+            className: "font-medium text-gray-900 min-w-[100px]",
         },
-        // Assuming no distinct "Pass ID" field exists in type, skipping or reusing ID/PassNo if needed. 
-        // For strict adherence to image, maybe user wants a placeholder or separate ID.
-        // I will wait for user correction if "Pass ID" is a distinct required field not in type. 
-        // For now I'll just skip or add a placeholder if needed, but let's stick to real data.
+        {
+            header: "Pass ID",
+            cell: (item) => (
+                <span className="font-medium text-gray-900">
+                    {item._id ? item._id.slice(-4).toUpperCase() : "-"}
+                </span>
+            ),
+            className: "min-w-[100px]",
+        },
         {
             header: (
                 <div className="flex flex-col h-full">
@@ -158,29 +163,29 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 const daysAgo = isExpired && validTill ? differenceInDays(new Date(), validTill) : 0;
 
                 return (
-                    <div className="relative h-full flex items-center">
+                    <div className="relative h-full flex items-start justify-center">
+                        <div className={`flex w-full ${isExpired ? 'opacity-40 blur-[0.5px]' : ''}`}>
+                            <div className="flex-1 px-4 border-r border-gray-100 text-sm font-medium text-gray-900 text-center">
+                                {validFrom ? format(validFrom, "dd/MM/yyyy") : "-"}
+                            </div>
+                            <div className="flex-1 px-4  text-sm font-medium text-gray-900 text-center">
+                                {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
+                            </div>
+                        </div>
                         {isExpired && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-50/80 z-10 text-center">
-                                <span className="text-[10px] font-bold text-red-500 uppercase leading-tight">
+                            <div className="absolute top-12 inset-0 flex flex-col items-center justify-center z-10">
+                                <span className="text-[16px] font-bold text-red-600 uppercase tracking-wide  px-2 py-0.5  ">
                                     PASS EXPIRED
                                 </span>
-                                <span className="text-[10px] text-gray-700 font-medium leading-tight">
+                                <span className="text-[10px] font-semibold text-gray-800 mt-0.2">
                                     {daysAgo} Days Ago
                                 </span>
                             </div>
                         )}
-                        <div className={`flex w-full ${isExpired ? 'opacity-25' : ''}`}>
-                            <div className="flex-1 px-4 py-2 border-r border-gray-100 text-sm font-medium text-gray-900">
-                                {validFrom ? format(validFrom, "dd/MM/yyyy") : "-"}
-                            </div>
-                            <div className="flex-1 px-4 py-2 text-sm font-medium text-gray-900">
-                                {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
-                            </div>
-                        </div>
                     </div>
                 );
             },
-            className: "min-w-[220px] p-0 align-middle",
+            className: "min-w-[220px] py-4 align-top",
             headerClassName: "p-0 min-w-[220px]",
         },
         {
@@ -197,10 +202,10 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 </div>
             ),
             cell: (item) => (
-                <div className="flex flex-col w-full">
+                <div className="flex flex-col w-full max-h-[150px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
                     {item.familyMembers && item.familyMembers.length > 0 ? (
                         item.familyMembers.map((member, i) => (
-                            <div key={i} className="flex border-b border-gray-100 last:border-0 text-sm text-gray-700 items-center">
+                            <div key={i} className="flex border-b border-gray-100 last:border-0 text-sm text-gray-700 items-center shrink-0">
                                 <div className="w-[140px] px-4 py-2 border-r border-gray-100 font-medium truncate" title={member.name}>
                                     {i + 1}. {member.name}
                                 </div>
@@ -311,7 +316,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 showActionStatus={false}
                 showDate={true}
                 onAddNew={onAddNew}
-                placeholder="Search by report no, unit, offence type..."
+                placeholder="Search by name, qtr no, pass number..."
             />
 
             <DynamicTable
@@ -320,7 +325,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 columns={columns}
                 getRowClassName={(item) => {
                     const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
-                    return isExpired ? "bg-red-50 border-red-200 border !text-gray-900" : "";
+                    return isExpired ? "bg-red-50 border border-red-500 hover:bg-red-50" : "";
                 }}
             />
 
