@@ -1,8 +1,13 @@
-import {TemporaryHiredWorker} from "@/models/TemporaryHiredWorker";
+import { TemporaryHiredWorker } from "@/models/TemporaryHiredWorker";
+import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
+import { TEMPORARY_HIRED_WORKER_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/TemporaryHiredWorker";
 
 export async function createWorkerRepo(data) {
   const worker = new TemporaryHiredWorker(data);
-  return await worker.save();
+  const result = await worker.save();
+  // Track suggestions asynchronously
+  trackFieldSuggestions(data, TEMPORARY_HIRED_WORKER_SUGGESTION_CONFIG);
+  return result;
 }
 
 export async function findAllWorkersRepo() {
@@ -14,10 +19,14 @@ export async function findWorkerByIdRepo(id) {
 }
 
 export async function updateWorkerByIdRepo(id, data) {
-  return await TemporaryHiredWorker.findByIdAndUpdate(id, data, {
+  const result = await TemporaryHiredWorker.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,
   });
+  if (result) {
+    trackFieldSuggestions(data, TEMPORARY_HIRED_WORKER_SUGGESTION_CONFIG);
+  }
+  return result;
 }
 
 export async function deleteWorkerByIdRepo(id) {

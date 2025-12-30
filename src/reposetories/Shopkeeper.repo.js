@@ -1,11 +1,15 @@
 // repositories/shopkeeperSecurityPassRepository.js
 
 import { ShopkeeperSecurityPass } from "@/models/ShopKeeper";
+import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
+import { SHOPKEEPER_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/Shopkeeper";
 
 
 export async function createShopkeeperRepo(data) {
-  const pass = new ShopkeeperSecurityPass(data);
-  return await pass.save();
+  const result = await new ShopkeeperSecurityPass(data).save();
+  // Track suggestions asynchronously
+  trackFieldSuggestions(data, SHOPKEEPER_SUGGESTION_CONFIG);
+  return result;
 }
 
 export async function findAllShopkeepersRepo() {
@@ -17,10 +21,14 @@ export async function findShopkeeperByIdRepo(id) {
 }
 
 export async function updateShopkeeperByIdRepo(id, data) {
-  return await ShopkeeperSecurityPass.findByIdAndUpdate(id, data, {
+  const result = await ShopkeeperSecurityPass.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,
   });
+  if (result) {
+    trackFieldSuggestions(data, SHOPKEEPER_SUGGESTION_CONFIG);
+  }
+  return result;
 }
 
 export async function deleteShopkeeperByIdRepo(id) {

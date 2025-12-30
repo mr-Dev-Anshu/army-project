@@ -1,10 +1,14 @@
 // repositories/maidServantSecurityPassRepository.js
 
 import { MaidServantSecurityPass } from "@/models/MaidServant";
+import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
+import { MAID_SERVANT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/MaidServant";
 
 export async function createMaidServantRepo(data) {
   const pass = new MaidServantSecurityPass(data);
-  return await pass.save();
+  const result = await pass.save();
+  trackFieldSuggestions(data, MAID_SERVANT_SUGGESTION_CONFIG);
+  return result;
 }
 
 export async function findAllMaidServantRepo() {
@@ -16,10 +20,14 @@ export async function findMaidServantByIdRepo(id) {
 }
 
 export async function updateMaidServantByIdRepo(id, data) {
-  return await MaidServantSecurityPass.findByIdAndUpdate(id, data, {
+  const result = await MaidServantSecurityPass.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,
   });
+  if (result) {
+    trackFieldSuggestions(data, MAID_SERVANT_SUGGESTION_CONFIG);
+  }
+  return result;
 }
 
 export async function deleteMaidServantByIdRepo(id) {
