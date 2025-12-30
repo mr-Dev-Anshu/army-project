@@ -96,7 +96,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
         {
             header: "Sr no.",
             cell: (item) => (
-                <span className="font-medium text-gray-900">
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
@@ -104,75 +104,75 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
                 return `w-16 sticky left-0 z-10 border-r border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
             },
-            headerClassName: "z-20 left-0 bg-gray-100 border-r border-gray-300",
+            headerClassName: "z-20 left-0 bg-gray-100 border-r border-gray-300 font-bold text-[#0A0A0A]",
         },
         {
             header: "QTR No.",
             accessorKey: "qtrNumber",
-            className: "font-medium text-gray-900 min-w-[100px] border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            className: "font-normal font-[Arial] text-[#0A0A0A] min-w-[100px] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Name of Owner",
             cell: (item) => (
-                <div className="flex flex-col">
-                    <span className="font-medium text-gray-900"><span className="text-gray-500 font-normal">Name:</span> {item.ownerName}</span>
-                    <span className="text-gray-700"><span className="text-gray-500 font-normal">Rank:</span> {item.ownerRank}</span>
+                <div className="flex flex-col font-[Arial]">
+                    <span className="font-normal text-[#0A0A0A]"><span className="text-[#0A0A0A] font-semibold">Name:</span> {item.ownerName}</span>
+                    <span className="text-[#0A0A0A] font-normal"><span className="text-[#0A0A0A] font-semibold">Rank:</span> {item.ownerRank}</span>
                 </div>
             ),
             className: "min-w-[180px] border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Unit",
             accessorKey: "ownerUnit",
-            className: "min-w-[120px] border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            className: "min-w-[120px] font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Name of Servant & Mobile No.",
             cell: (item) => (
-                <div className="flex flex-col">
-                    <span className="font-medium text-gray-900">{item.servantName}</span>
-                    <span className="text-gray-500 text-xs">{item.servantMobile}</span>
+                <div className="flex flex-col font-[Arial]">
+                    <span className="font-normal text-[#0A0A0A]">{item.servantName}</span>
+                    <span className="text-[#0A0A0A] font-normal text-xs">{item.servantMobile}</span>
                 </div>
             ),
             className: "min-w-[180px] border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Permanent Address",
             cell: (item) => (
-                <div className="text-sm text-gray-700 max-w-[200px]">
+                <div className="text-sm font-normal font-[Arial] text-[#0A0A0A] max-w-[200px]">
                     {item.permanentAddressLine}, {item.permanentCityDistrict}, {item.permanentState} - {item.permanentPincode}
                 </div>
             ),
             className: "min-w-[200px] border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Pass No.",
             accessorKey: "passNumber",
-            className: "font-medium text-gray-900 border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Pass ID",
             cell: (item) => (
-                <span className="font-medium text-gray-900">
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
                     {item._id ? item._id.slice(-4).toUpperCase() : "-"}
                 </span>
             ),
             className: "min-w-[100px] border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
+                    <div className="text-xs text-center font-bold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Pass Valid Date
                     </div>
-                    <div className="flex text-[10px] items-center text-black font-medium bg-gray-100">
+                    <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
                         <div className="flex-1 px-4 py-1 border-r border-gray-300 ">From</div>
                         <div className="flex-1 px-4 py-1">To</div>
                     </div>
@@ -185,21 +185,21 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 const daysAgo = isExpired && validTill ? differenceInDays(new Date(), validTill) : 0;
 
                 return (
-                    <div className="relative h-full flex flex-col items-center justify-center">
+                    <div className="relative h-full flex flex-col items-center justify-center font-[Arial]">
                         <div className="flex w-full">
-                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
+                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-normal text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
                                 {validFrom ? format(validFrom, "dd/MM/yyyy") : "-"}
                             </div>
-                            <div className={`flex-1 px-4 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-gray-900"}`}>
+                            <div className={`flex-1 px-4 text-sm font-normal text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
                                 {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
                             </div>
                         </div>
                         {isExpired && (
-                            <div className="flex flex-col items-center justify-center mt-1">
-                                <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
+                            <div className="flex flex-col items-center justify-center mt-3">
+                                <span className="text-[12px] font-bold text-red-600 uppercase tracking-wide">
                                     PASS EXPIRED
                                 </span>
-                                <span className="text-[10px] font-semibold text-gray-700">
+                                <span className="text-[10px] font-semibold text-[#0A0A0A]">
                                     {daysAgo} Days Ago
                                 </span>
                             </div>
@@ -208,15 +208,15 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 );
             },
             className: "min-w-[220px] py-4 align-top border-r border-gray-300",
-            headerClassName: "p-0 min-w-[220px] border-r border-gray-300",
+            headerClassName: "p-0 min-w-[220px] border-r border-gray-300 font-bold text-[#0A0A0A]",
         },
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs font-semibold uppercase text-gray-900 pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
+                    <div className="text-xs text-center font-bold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Servant's Family Details
                     </div>
-                    <div className="flex text-[10px] items-center text-black font-medium bg-gray-100">
+                    <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
                         <div className="w-[140px] px-4 py-1 border-r border-gray-300">Name</div>
                         <div className="w-[100px] px-4 py-1 border-r border-gray-300">Relationship</div>
                         <div className="w-[50px] px-4 py-1 text-center">Age</div>
@@ -224,28 +224,28 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 </div>
             ),
             cell: (item) => (
-                <div className="flex flex-col w-full max-h-[150px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                <div className="flex flex-col w-full max-h-[150px] overflow-y-auto [&::-webkit-scrollbar]:hidden font-[Arial]">
                     {item.familyMembers && item.familyMembers.length > 0 ? (
                         item.familyMembers.map((member, i) => (
-                            <div key={i} className="flex border-b border-gray-300 last:border-0 text-sm text-gray-700 items-center shrink-0">
-                                <div className="w-[140px] px-4 py-2 border-r border-gray-300 font-medium truncate" title={member.name}>
+                            <div key={i} className="flex border-b border-gray-300 last:border-0 text-sm text-[#0A0A0A] items-center shrink-0">
+                                <div className="w-[140px] px-4 py-2 border-r border-gray-300 font-normal truncate" title={member.name}>
                                     {i + 1}. {member.name}
                                 </div>
-                                <div className="w-[100px] px-4 py-2 border-r border-gray-300 truncate" title={member.relationship}>
+                                <div className="w-[100px] px-4 py-2 border-r border-gray-300 truncate font-normal" title={member.relationship}>
                                     {member.relationship}
                                 </div>
-                                <div className="w-[50px] px-4 py-2 text-center">
+                                <div className="w-[50px] px-4 py-2 text-center font-normal">
                                     {member.age}
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="px-4 py-2 text-gray-400 text-xs">-</div>
+                        <div className="px-4 py-2 text-gray-400 text-xs font-normal">-</div>
                     )}
                 </div>
             ),
             className: "min-w-[300px] p-0 align-top border-r border-gray-300",
-            headerClassName: "p-0 min-w-[300px] border-r border-gray-300",
+            headerClassName: "p-0 min-w-[300px] border-r border-gray-300 font-bold text-[#0A0A0A]",
         },
         {
             header: "Actions",
@@ -276,7 +276,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
                 return `w-[50px] sticky right-0 z-10 border-l border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
             },
-            headerClassName: "z-20 right-0 bg-gray-100 border-l border-gray-300",
+            headerClassName: "z-20 right-0 bg-gray-100 border-l border-gray-300 font-bold text-[#0A0A0A]",
         },
     ];
 

@@ -469,7 +469,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
       <div className="pt-4 border-t mt-8 bg-white sticky bottom-0 z-10">
         <div className="flex justify-between gap-4">
           <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 px-8" disabled={isPending}>
+          <Button onClick={handleSave} className="bg-[#0088FF] cursor-pointer  hover:bg-blue-700 px-8" disabled={isPending}>
             {isPending ? "Saving..." : "Save & Generate"}
           </Button>
         </div>

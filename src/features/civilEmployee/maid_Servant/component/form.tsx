@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,21 +13,74 @@ import {
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { TempFamilyMember } from "../types";
 import { useCreateMaidServant } from "../hook";
 
-export default function MaidServantSecurityPassForm() {
+const INITIAL_MAID_SERVANT_STATE = {
+  qtrNumber: "",
+  ownerName: "",
+  ownerRank: "",
+  ownerUnit: "",
+  servantName: "",
+  servantMobile: "",
+  servantAadhar: "",
+  permanentAddressLine: "",
+  permanentCityDistrict: "",
+  permanentState: "",
+  permanentPincode: "",
+  passNumber: "",
+  validFrom: null,
+  validTill: null,
+  familyMembers: [],
+};
+
+interface Props {
+  onCancel?: () => void;
+  onSuccess?: () => void;
+  initialData?: any;
+}
+
+export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initialData }: Props) {
   const { state, dispatch } = useForm();
   const maidServant = state.formData.maidServant || {};
   const { mutate: createMaidServant, isPending } = useCreateMaidServant();
+
+  useEffect(() => {
+    if (initialData) {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.maidServant",
+        value: {
+          ...INITIAL_MAID_SERVANT_STATE,
+          ...initialData,
+        },
+      });
+    } else {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.maidServant",
+        value: INITIAL_MAID_SERVANT_STATE,
+      });
+    }
+  }, [initialData, dispatch]);
 
   const [tempMember, setTempMember] = useState({
     name: "",
     age: "",
     relationship: "",
   });
+
+  const handleReset = () => {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.maidServant",
+      value: INITIAL_MAID_SERVANT_STATE,
+    });
+    setTempMember({ name: "", age: "", relationship: "" });
+  };
 
   const setField = (field: string, value: unknown) => {
     dispatch({
@@ -67,11 +120,13 @@ export default function MaidServantSecurityPassForm() {
   const handleSave = () => {
     createMaidServant(maidServant, {
       onSuccess: () => {
-        alert("Maid Servant Security Pass Saved & Generated!");
+        toast.success("Maid Servant Security Pass Saved & Generated!");
+        handleReset();
+        onSuccess?.(); // also call onSuccess prop if provided
       },
       onError: (error) => {
         console.error("Error creating pass:", error);
-        alert("Failed to create pass.");
+        toast.error("Failed to create pass. Please try again.");
       }
     });
   };
@@ -421,12 +476,14 @@ export default function MaidServantSecurityPassForm() {
 
       <div className="my-12 border-t border-gray-200" />
 
-      {/* Actions */}
-      <div className="flex justify-end gap-4 mt-12">
-        <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700" disabled={isPending}>
-          {isPending ? "Saving..." : "Save & Generate"}
-        </Button>
+      {/* Footer Actions */}
+      <div className="pt-4 border-t mt-8 bg-white sticky bottom-0 z-10">
+        <div className="flex justify-between gap-4">
+          <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
+          <Button onClick={handleSave} className="bg-[#0088FF] cursor-pointer  hover:bg-blue-700 px-8" disabled={isPending}>
+            {isPending ? "Saving..." : "Save & Generate"}
+          </Button>
+        </div>
       </div>
     </div>
   );

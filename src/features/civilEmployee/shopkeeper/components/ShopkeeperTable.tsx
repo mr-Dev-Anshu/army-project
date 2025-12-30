@@ -119,7 +119,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         {
             header: "Sr no.",
             cell: (item) => (
-                <span className="font-medium text-[#0A0A0A]">
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
@@ -127,49 +127,49 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
                 return `w-16 sticky left-0 z-10 border-r border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
             },
-            headerClassName: "z-20 left-0 bg-gray-100 border-r border-gray-300",
+            headerClassName: "z-20 left-0 bg-gray-100 border-r border-gray-300 font-bold text-[#0A0A0A]",
         },
         {
             header: "Shop Address",
             accessorKey: "shopAddress",
-            className: "font-medium text-[#0A0A0A] border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Shop Name",
             accessorKey: "shopName",
-            className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Shop Owner Name & Mobile No.",
             cell: (item) => (
-                <div className="flex flex-col">
-                    <span className="font-medium text-[#0A0A0A]">{item.ownerName}</span>
-                    <span className="text-[#0A0A0A] text-xs">{item.ownerMobile}</span>
+                <div className="flex flex-col font-[Arial]">
+                    <span className="font-normal text-[#0A0A0A]">{item.ownerName}</span>
+                    <span className="text-[#0A0A0A] font-normal text-xs">{item.ownerMobile}</span>
                 </div>
             ),
             className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Unit",
             accessorKey: "unit",
-            className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: "Price List Status",
             cell: (item) => (
-                <span>{item.priceListApproved ? "Yes" : "No"}</span>
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">{item.priceListApproved ? "Yes" : "No"}</span>
             ),
             className: "border-r border-gray-300",
-            headerClassName: "border-r border-gray-300 bg-gray-100",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs font-semibold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100 text-center">
+                    <div className="text-xs font-bold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100 text-center">
                         Man Power
                     </div>
                     <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
@@ -187,35 +187,35 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 const total = item.workers?.length || 0;
 
                 return (
-                    <div className="flex h-full items-center">
-                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm py-4">{String(exMan).padStart(2, '0')}</div>
-                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm py-4">{String(civM).padStart(2, '0')}</div>
-                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm py-4">{String(civF).padStart(2, '0')}</div>
-                        <div className="w-[70px] px-2 text-center font-bold text-sm py-4">{String(total).padStart(2, '0')}</div>
+                    <div className="flex h-full items-center font-[Arial]">
+                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm font-normal py-4 text-[#0A0A0A]">{String(exMan).padStart(2, '0')}</div>
+                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm font-normal py-4 text-[#0A0A0A]">{String(civM).padStart(2, '0')}</div>
+                        <div className="w-[70px] px-2 text-center border-r border-gray-300 text-sm font-normal py-4 text-[#0A0A0A]">{String(civF).padStart(2, '0')}</div>
+                        <div className="w-[70px] px-2 text-center font-bold text-sm py-4 text-[#0A0A0A]">{String(total).padStart(2, '0')}</div>
                     </div>
                 );
             },
             className: "p-0 align-top border-r border-gray-300 min-w-[280px]",
-            headerClassName: "p-0 border-r border-gray-300 min-w-[280px]",
+            headerClassName: "p-0 border-r border-gray-300 min-w-[280px] font-bold text-[#0A0A0A]",
         },
         {
             header: "Worker Details (each)",
             cell: (item) => (
-                <div className="space-y-1 max-h-[60px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                <div className="space-y-1 max-h-[60px] overflow-y-auto [&::-webkit-scrollbar]:hidden font-[Arial]">
                     {item.workers?.map((w, i) => (
-                        <div key={i} className="text-xs text-[#0A0A0A]">
+                        <div key={i} className="text-xs font-normal text-[#0A0A0A]">
                             {i + 1}. {w.name}
                         </div>
                     ))}
                 </div>
             ),
             className: "min-w-[150px] border-r border-gray-300",
-            headerClassName: "min-w-[150px] border-r border-gray-300 bg-gray-100",
+            headerClassName: "min-w-[150px] border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
         {
             header: (
                 <div className="flex flex-col h-full">
-                    <div className="text-xs text-center font-semibold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
+                    <div className="text-xs text-center font-bold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
                         Pass Valid Date
                     </div>
                     <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
@@ -231,18 +231,18 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 const daysAgo = isExpired && validTill ? differenceInDays(new Date(), validTill) : 0;
 
                 return (
-                    <div className="relative h-full flex flex-col items-center justify-center">
+                    <div className="relative h-full flex flex-col items-center justify-center font-[Arial]">
                         <div className="flex w-full">
-                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
+                            <div className={`flex-1 px-4 border-r border-gray-100 text-sm font-normal text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
                                 {validFrom ? format(validFrom, "dd/MM/yyyy") : "-"}
                             </div>
-                            <div className={`flex-1 px-4 text-sm font-medium text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
+                            <div className={`flex-1 px-4 text-sm font-normal text-center ${isExpired ? "text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
                                 {validTill ? format(validTill, "dd/MM/yyyy") : "-"}
                             </div>
                         </div>
                         {isExpired && (
-                            <div className="flex flex-col items-center justify-center mt-1">
-                                <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
+                            <div className="flex flex-col items-center justify-center mt-3">
+                                <span className="text-[12px] font-bold text-red-600 uppercase tracking-wide">
                                     PASS EXPIRED
                                 </span>
                                 <span className="text-[10px] font-semibold text-[#0A0A0A]">
@@ -254,7 +254,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 );
             },
             className: "min-w-[220px] py-4 align-top border-r border-gray-300",
-            headerClassName: "p-0 min-w-[220px] border-r border-gray-300",
+            headerClassName: "p-0 min-w-[220px] border-r border-gray-300 font-bold text-[#0A0A0A]",
         },
         {
             header: "Actions",
@@ -285,7 +285,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
                 return `w-[50px] sticky right-0 z-10 border-l border-gray-300 ${isExpired ? "bg-red-50 hover:bg-red-50" : "bg-white border-b border-gray-300"}`;
             },
-            headerClassName: "z-20 right-0 bg-gray-100 border-l border-gray-300",
+            headerClassName: "z-20 right-0 bg-gray-100 border-l border-gray-300 font-bold text-[#0A0A0A]",
         },
     ];
 
