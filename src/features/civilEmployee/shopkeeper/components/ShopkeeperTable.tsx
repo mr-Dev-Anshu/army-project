@@ -10,7 +10,9 @@ import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import ReportFilterBar, {
     FilterState,
 } from "@/components/common/ReportFilterBar";
-import { useGetAllShopkeepers } from "../hook";
+import { useGetAllShopkeepers, useDeleteShopkeeper } from "../hook";
+import { toast } from "react-toastify";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,8 +27,11 @@ interface Shopkeeper {
     shopName: string;
     ownerName: string;
     ownerMobile: string;
+    ownerAadhar: string;
+    passNumber: string;
     unit: string;
     priceListApproved: boolean;
+    priceListEffectiveFrom: string;
     workers: {
         name: string;
         type: string;
@@ -37,8 +42,31 @@ interface Shopkeeper {
     createdAt: string;
 }
 
-const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
+const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (item: Shopkeeper) => void }) => {
     const { data: shopkeepers = [], isLoading } = useGetAllShopkeepers();
+    const { mutateAsync: deleteShopkeeper, isPending: isDeleting } = useDeleteShopkeeper();
+
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({
+        isOpen: false,
+        id: null,
+    });
+
+    const handleDeleteClick = (id: string) => {
+        setDeleteModal({ isOpen: true, id });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deleteModal.id) return;
+        try {
+            await deleteShopkeeper(deleteModal.id);
+            toast.success("Shopkeeper deleted successfully");
+            setDeleteModal({ isOpen: false, id: null });
+        } catch (error) {
+            console.error("Failed to delete shopkeeper:", error);
+            toast.error("Failed to delete shopkeeper");
+        }
+    };
+
 
     const [filters, setFilters] = useState<FilterState>({
         search: "",
@@ -141,13 +169,12 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
         {
             header: "Worker Details (each)",
             cell: (item) => (
-                <div className="space-y-1">
-                    {item.workers?.slice(0, 3).map((w, i) => (
+                <div className="space-y-1 max-h-[60px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                    {item.workers?.map((w, i) => (
                         <div key={i} className="text-xs text-gray-700">
                             {i + 1}. {w.name}
                         </div>
                     ))}
-                    {/* Show '...' if more */}
                 </div>
             ),
             className: "min-w-[150px]",
@@ -199,12 +226,12 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                            onClick={() => console.log("Edit", item._id)}
+                            onClick={() => onEdit(item)}
                         >
                             Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => console.log("Delete", item._id)}
+                            onClick={() => handleDeleteClick(item._id)}
                             className="text-red-600"
                         >
                             Delete
@@ -253,6 +280,16 @@ const ShopkeeperTable = ({ onAddNew }: { onAddNew: () => void }) => {
                     const isExpired = item.validTill ? new Date(item.validTill) < new Date() : false;
                     return isExpired ? "bg-red-50 border-red-200 border !text-gray-900" : "";
                 }}
+            />
+
+            <ConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, id: null })}
+                onConfirm={handleConfirmDelete}
+                title="Delete Shopkeeper"
+                message="Are you sure you want to delete this shopkeeper? This action cannot be undone."
+                confirmLabel="Delete"
+                isProcessing={isDeleting}
             />
         </div>
     );

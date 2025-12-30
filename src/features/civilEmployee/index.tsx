@@ -9,6 +9,7 @@ type CivilEmployeeView = "menu" | "shopkeepers" | "maidServants" | "temporaryWor
 const CivilEmployeePage = () => {
     const [currentView, setCurrentView] = useState<CivilEmployeeView>("menu");
     const [isAddOpen, setIsAddOpen] = useState(false);
+    const [editingShopkeeper, setEditingShopkeeper] = useState<any>(null);
 
     const cards = [
         {
@@ -142,20 +143,39 @@ const CivilEmployeePage = () => {
                 )}
 
                 {currentView === "shopkeepers" && (
-                    <ShopkeeperTable onAddNew={() => setIsAddOpen(true)} />
+                    <ShopkeeperTable
+                        onAddNew={() => {
+                            setEditingShopkeeper(null);
+                            setIsAddOpen(true);
+                        }}
+                        onEdit={(item) => {
+                            setEditingShopkeeper(item);
+                            setIsAddOpen(true);
+                        }}
+                    />
                 )}
             </div>
 
             {/* Right Side Sheet for Add New */}
             <RightSideSheet
                 isOpen={isAddOpen}
-                onClose={() => setIsAddOpen(false)}
-                title="Add Security Pass Entry"
-                description="Fill details to generate pass record"
+                onClose={() => {
+                    setIsAddOpen(false);
+                    setEditingShopkeeper(null);
+                }}
+                title={editingShopkeeper ? "Edit Security Pass Entry" : "Add Security Pass Entry"}
+                description={editingShopkeeper ? "Update details to modify pass record" : "Fill details to generate pass record"}
             >
                 <ShopkeeperSecurityPassEntryForm
-                    onCancel={() => setIsAddOpen(false)}
-                    onSuccess={() => setIsAddOpen(false)}
+                    onCancel={() => {
+                        setIsAddOpen(false);
+                        setEditingShopkeeper(null);
+                    }}
+                    onSuccess={() => {
+                        setIsAddOpen(false);
+                        setEditingShopkeeper(null);
+                    }}
+                    initialData={editingShopkeeper}
                 />
             </RightSideSheet>
         </div>

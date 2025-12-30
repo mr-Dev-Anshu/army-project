@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,12 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
 // import { format } from "date-fns";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { TempWorker } from "../types";
-import { useCreateShopkeeper } from "../hook";
+import { useCreateShopkeeper, useUpdateShopkeeper } from "../hook";
 
 type WorkerType = string;
 
@@ -39,12 +40,37 @@ const INITIAL_SHOPKEEPER_STATE = {
 interface Props {
   onCancel?: () => void;
   onSuccess?: () => void;
+  initialData?: any;
 }
 
-export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }: Props) {
+export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, initialData }: Props) {
   const { state, dispatch } = useForm();
   const shopkeeper = state.formData.shopkeeper;
-  const { mutate: createShopkeeper, isPending } = useCreateShopkeeper();
+  const { mutate: createShopkeeper, isPending: isCreating } = useCreateShopkeeper();
+  const { mutate: updateShopkeeper, isPending: isUpdating } = useUpdateShopkeeper();
+
+  const isPending = isCreating || isUpdating;
+
+  useEffect(() => {
+    if (initialData) {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.shopkeeper",
+        value: {
+          ...INITIAL_SHOPKEEPER_STATE,
+          ...initialData,
+          // Ensure dates are strings for inputs if needed, though state usually keeps them as is until render
+        },
+      });
+    } else {
+      // Reset if no initial data (add mode)
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.shopkeeper",
+        value: INITIAL_SHOPKEEPER_STATE,
+      });
+    }
+  }, [initialData, dispatch]);
 
   const [tempWorker, setTempWorker] = useState<TempWorker>({
     name: "",
@@ -95,17 +121,17 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
   const handleSave = () => {
     // Basic Validation
     if (!shopkeeper.shopName || !shopkeeper.ownerName) {
-      alert("Please fill in at least Shop Name and Owner Name.");
+      toast.error("Please fill in at least Shop Name and Owner Name.");
       return;
     }
 
     if (!shopkeeper.passNumber) {
-      alert("Pass Number is required.");
+      toast.error("Pass Number is required.");
       return;
     }
 
     if (shopkeeper.ownerAadhar && shopkeeper.ownerAadhar.length !== 12) {
-      alert("Owner Aadhar number must be 12 characters long.");
+      toast.error("Owner Aadhar number must be 12 characters long.");
       return;
     }
 
@@ -113,22 +139,47 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess }:
     for (let i = 0; i < shopkeeper.workers.length; i++) {
       const worker = shopkeeper.workers[i] as TempWorker;
       if (worker.aadhar && worker.aadhar.length !== 12) {
-        alert(`Worker "${worker.name}" Aadhar number must be 12 characters long.`);
+        toast.error(`Worker "${worker.name}" Aadhar number must be 12 characters long.`);
         return;
       }
     }
 
-    createShopkeeper(shopkeeper, {
-      onSuccess: () => {
-        alert("Security Pass Entry Saved & Generated!");
-        handleReset();
-        onSuccess?.();
-      },
-      onError: (error) => {
-        console.error("Error creating shopkeeper pass:", error);
-        alert("Failed to create pass. Please try again.");
+    if (initialData?._id) {
+      // Remove fields that should not be sent in update
+      const { _id, createdAt, updatedAt, __v, ...shopkeeperData } = shopkeeper;
+
+      // Clean up workers array to remove _id
+      if (shopkeeperData.workers && Array.isArray(shopkeeperData.workers)) {
+        shopkeeperData.workers = shopkeeperData.workers.map((worker: any) => {
+          const { _id, ...rest } = worker;
+          return rest;
+        });
       }
-    });
+
+      updateShopkeeper({ id: initialData._id, data: shopkeeperData }, {
+        onSuccess: () => {
+          toast.success("Security Pass Entry Updated!");
+          handleReset();
+          onSuccess?.();
+        },
+        onError: (error) => {
+          console.error("Error updating shopkeeper pass:", error);
+          toast.error("Failed to update pass. Please try again.");
+        }
+      });
+    } else {
+      createShopkeeper(shopkeeper, {
+        onSuccess: () => {
+          toast.success("Security Pass Entry Saved & Generated!");
+          handleReset();
+          onSuccess?.();
+        },
+        onError: (error) => {
+          console.error("Error creating shopkeeper pass:", error);
+          toast.error("Failed to create pass. Please try again.");
+        }
+      });
+    }
   };
 
   return (
