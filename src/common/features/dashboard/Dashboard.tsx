@@ -43,7 +43,7 @@ export default function Dashboard() {
   const { isLoading } = useGetAllTrafficOffences();
 
   return (
-    <div className="w-full h-screen flex bg-[#f5f5f7]">
+    <div className="w-full h-screen flex bg-white">
       {/* -------- SIDEBAR -------- */}
       <div className="print:hidden">
         <Sidebar

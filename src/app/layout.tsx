@@ -24,7 +24,7 @@ export default function RootLayout({
         {/* Main Content */}
         <Wrapper>
           <FormProvider>
-            <main className="min-h-screen bg-gray-50">
+            <main className="min-h-screen ">
               {children}
               <ToastContainer position="top-right" autoClose={3000} />
             </main>

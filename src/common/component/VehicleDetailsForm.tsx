@@ -149,7 +149,7 @@
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <Label>Civil Vehicle Registration Number</Label>
+                <Label className="mb-3 ">Civil Vehicle Registration Number</Label>
                 <SuggestionInput
                   placeholder="e.g. MP04 AB 1234"
                   value={vehicleState.vehicleNumber || ""}
@@ -159,7 +159,7 @@
               </div>
 
               <div>
-                <Label>Make & Type (Vehicle Name)</Label>
+                <Label className="mb-3">Make & Type (Vehicle Name)</Label>
                 <SuggestionInput
                   placeholder="e.g. Honda CB Hornet"
                   value={vehicleState.vehicleName || ""}

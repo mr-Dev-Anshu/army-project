@@ -199,7 +199,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </CollapsibleTrigger>
 
         {!collapsed && (
-          <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-200 space-y-1">
+          <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-400 space-y-1">
             {item.submenu?.map((sub) => renderMenuItem(sub, true))}
           </CollapsibleContent>
         )}
@@ -211,7 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div
       className={cn(
-        "h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
+        "h-screen bg-white border-r border-gray-300 flex flex-col transition-all duration-300",
         collapsed ? "w-[74px]" : "w-[340px]"
       )}
     >
@@ -249,7 +249,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Dashboard */}
         <div className="mb-2">{menuItems.map((item) => renderMenuItem(item))}</div>
 
-        <div className="w-full h-px bg-gray-100 my-2" />
+        <div className="w-full h-px bg-gray-300 my-2" />
 
         {/* Create New Record */}
         <div className="mb-2">
@@ -349,7 +349,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        <div className="w-full h-px bg-gray-100 my-2" />
+        <div className="w-full h-px bg-gray-300 my-2" />
 
         {/* Reports */}
         {!collapsed && (
@@ -359,11 +359,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
         {reportsAndAnalysis.map((item) => renderMenuItem(item))}
 
-        <div className="w-full h-px bg-gray-100 my-2" />
+        <div className="w-full h-px bg-gray-300 my-2" />
 
         {renderCollapsibleSection(formsAndCertificates)}
 
-        <div className="w-full h-px bg-gray-100 my-2" />
+        <div className="w-full h-px bg-gray-300 my-2" />
 
         {!collapsed && (
           <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
