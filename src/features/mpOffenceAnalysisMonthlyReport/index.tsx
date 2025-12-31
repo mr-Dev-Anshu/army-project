@@ -25,24 +25,19 @@ export default function MpOffenceAnalysisMonthlyReport() {
         groupBy: "formation",
     });
 
-    const { mainFormation, otherFormations } = useMemo(() => {
-        if (!analyticsData) return { mainFormation: null, otherFormations: [] };
+    const { totalOffences, totalPending, severity } = useMemo(() => {
+        if (!analyticsData || !Array.isArray(analyticsData)) {
+            return { totalOffences: 0, totalPending: 0, severity: "Low Risk" };
+        }
 
-        // Normalize to upper case for comparison
-        const target = "HQ 21 CORPS";
-        const main = analyticsData.find(
-            (d: any) => d.groupKey?.toUpperCase() === target
-        );
-        const others = analyticsData.filter(
-            (d: any) => d.groupKey?.toUpperCase() !== target
-        );
+        const total = analyticsData.reduce((acc: number, curr: any) => acc + (curr.total || 0), 0);
+        const pending = analyticsData.reduce((acc: number, curr: any) => acc + (curr.actionPending || 0), 0);
 
-        // If main not found, maybe just take the first one? 
-        // For now, let's strictly look for it, or fallback if empty
-        return {
-            mainFormation: main || others[0] || null,
-            otherFormations: main ? others : others.slice(1)
-        };
+        let risk = "Low Risk";
+        if (pending > 20) risk = "High Risk";
+        else if (pending > 10) risk = "Medium Risk";
+
+        return { totalOffences: total, totalPending: pending, severity: risk };
     }, [analyticsData]);
 
     /* Static Data for UI matching */
@@ -91,10 +86,14 @@ export default function MpOffenceAnalysisMonthlyReport() {
     return (
         <div className="p-2 space-y-8 min-h-screen bg-transparent font-sans">
             {/* Header */}
-            <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+            <div className="flex justify-between items-center pb-4 border-b border-gray-300">
                 <div className="flex items-center text-sm text-gray-500">
-                    <BarChart3 className="w-5 h-5 mr-3 text-gray-400" />
-                    <span className="hover:text-gray-700 cursor-pointer">Reports & Analysis</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 2V14H14" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M12.6641 6L9.33073 9.33333L6.66406 6.66667L4.66406 8.66667" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+
+                    <span className="hover:text-gray-700 cursor-pointer ml-2">Reports & Analysis</span>
                     <ChevronRight className="w-4 h-4 mx-2" />
                     <span className="font-semibold text-gray-900">
                         MP Offence Analysis Monthly Report
@@ -141,7 +140,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                 </div>
 
                 {/* Main Card */}
-                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full max-w-[340px] hover:shadow-md transition-shadow relative overflow-hidden">
+                <div className="bg-white border border-gray-200 rounded-xl p-5  shadow-sm w-full max-w-[340px] hover:shadow-md transition-shadow relative overflow-hidden">
                     <div className="mb-8">
                         <h3 className="font-bold text-xl text-gray-900">HQ 21 CORPS</h3>
                         <p className="text-gray-500 text-sm font-bold mt-1">
@@ -152,15 +151,17 @@ export default function MpOffenceAnalysisMonthlyReport() {
                     <div className="space-y-4 text-base text-gray-500">
                         <div className="flex justify-between items-center">
                             <span>Total Offence</span>
-                            <span className="font-semibold text-gray-900">148</span>
+                            <span className="font-semibold text-gray-900">{totalOffences}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span>Pending Cases</span>
-                            <span className="font-semibold text-gray-900">26</span>
+                            <span className="font-semibold text-gray-900">{totalPending}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span>Severity</span>
-                            <span className="font-semibold text-gray-900">High Risk</span>
+                            <span className={`font-semibold ${severity === 'High Risk' ? 'text-red-600' : severity === 'Medium Risk' ? 'text-amber-600' : 'text-green-600'}`}>
+                                {severity}
+                            </span>
                         </div>
                     </div>
 
