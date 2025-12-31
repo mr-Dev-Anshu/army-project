@@ -129,18 +129,8 @@ export default function Step5WitnessList() {
         </div>
       )}
 
-      {/* ADD MORE */}
-      <div className="mt-6">
-        <Button
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => setShowAddForm(true)}
-          disabled={showAddForm}
-        >
-          + Add More Witness
-        </Button>
-      </div>
 
-      {/* ADDITIONAL FORM */}
+       {/* ADDITIONAL FORM */}
       {showAddForm && (
         <div className="mt-6 border rounded-lg p-6 bg-gray-50">
           <VehiclePrimaryQuestion
@@ -171,6 +161,18 @@ export default function Step5WitnessList() {
           </div>
         </div>
       )}
+
+      {/* ADD MORE */}
+      <div className="mt-6">
+        <Button
+          className="bg-black text-white cursor-pointer"
+          onClick={() => setShowAddForm(true)}
+        >
+          + Add More Witness
+        </Button>
+      </div>
+
+     
 
       {/* LIST */}
       <DynamicOffenderList

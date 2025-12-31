@@ -176,18 +176,25 @@
 
 @layer utilities {
 
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none !important;
-  }
+  /* Dark Matching Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
 
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .no-scrollbar {
-    -ms-overflow-style: none !important;
-    /* IE and Edge */
-    scrollbar-width: none !important;
-    /* Firefox */
-  }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0f0f0f; /* stepper bg se thoda dark */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2e2e2e; /* smooth dark grey */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4b4b4b;
+}
+
 }
 
 /* Print Specific Styles */

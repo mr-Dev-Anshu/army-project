@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -44,8 +42,7 @@ export default function Step4IndividualDetails() {
   /* ================== MAIN SAVE ================== */
   const handleSaveMain = () => {
     // 🔥 Always read fresh value
-    const person =
-      state.formData.mpReport.individualDetails.tempOffender || {};
+    const person = state.formData.mpReport.individualDetails.tempOffender || {};
 
     console.log("🔥 MAIN PERSON =>", person);
 
@@ -127,9 +124,7 @@ export default function Step4IndividualDetails() {
         setVehicleStatus={setVehicleInvolved}
       />
 
-      {mp.vehicleInvolved === "yes" && (
-        <VehicleDetailsForm scope="mp-main" />
-      )}
+      {mp.vehicleInvolved === "yes" && <VehicleDetailsForm scope="mp-main" />}
 
       {mp.vehicleInvolved === "no" && (
         <OffenderWithoutVehicleForm scope="mp-main" />
@@ -146,18 +141,7 @@ export default function Step4IndividualDetails() {
         </div>
       )}
 
-      {/* ADD MORE */}
-      <div className="mt-6">
-        <Button
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => setShowAddForm(true)}
-          disabled={showAddForm}
-        >
-          + Add More People
-        </Button>
-      </div>
-
-      {/* ADDITIONAL */}
+      {/* ADDITIONAL FORM */}
       {showAddForm && (
         <div className="mt-6 border rounded-lg p-6 bg-gray-50">
           <VehiclePrimaryQuestion
@@ -166,8 +150,7 @@ export default function Step4IndividualDetails() {
             setVehicleStatus={(v) =>
               dispatch({
                 type: "SET_PATH",
-                path:
-                  "formData.mpReport.additionalIndividual.vehicleInvolved",
+                path: "formData.mpReport.additionalIndividual.vehicleInvolved",
                 value: v,
               })
             }
@@ -195,6 +178,16 @@ export default function Step4IndividualDetails() {
           </div>
         </div>
       )}
+
+      {/* ADD MORE BUTTON ALWAYS BELOW */}
+      <div className="mt-6">
+        <Button
+          className="bg-black text-white cursor-pointer"
+          onClick={() => setShowAddForm(true)}
+        >
+          + Add More People
+        </Button>
+      </div>
 
       <DynamicOffenderList
         onDelete={handleDeleteOffender}
