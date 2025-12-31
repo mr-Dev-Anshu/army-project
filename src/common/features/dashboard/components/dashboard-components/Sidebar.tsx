@@ -131,6 +131,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       onClick={() => {
         if (item.label === "Dashboard") onMenuSelect("dashboard");
         if (item.label === "All Reports") onMenuSelect("viewReports");
+        if (item.label === "MP Offence Analysis Monthly Report")
+          onMenuSelect("mpOffenceAnalysis");
       }}
       className={cn(
         "w-full relative flex items-center transition-all group",

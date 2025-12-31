@@ -7,7 +7,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const month = searchParams.get("month");
     const year = searchParams.get("year");
-    const offenceType = searchParams.get("offenceType"); 
+    const offenceType = searchParams.get("offenceType");
     const analytics = await getDomesticAnalytics({
       month,
       year,
