@@ -89,25 +89,24 @@ export default function OffenderDynamicForm({
           const label = f.label;
           const value = localData?.[label] || "";
 
-          return f.type === "input" ? (
+          if (f.type === "suggestion") {
+            return (
+              <SuggestionInput
+                key={i}
+                placeholder={f.placeholder}
+                value={value}
+                onChange={(v) => saveField(label, v)}
+                fieldType={(f as any).fieldType}
+              />
+            );
+          }
+
+          return (
             <FormInput
               key={i}
               label={label}
               placeholder={f.placeholder}
               value={value}
-              onChange={(v) => saveField(label, v)}
-            />
-          ) : (
-            <FormSelect
-              key={i}
-              label={label}
-              placeholder={f.placeholder}
-              value={value}
-              options={(f.options || []).map((o: any) =>
-                typeof o === "string"
-                  ? { label: o, value: o }
-                  : { label: o.label, value: o.value }
-              )}
               onChange={(v) => saveField(label, v)}
             />
           );
