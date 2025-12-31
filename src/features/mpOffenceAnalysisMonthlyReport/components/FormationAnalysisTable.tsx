@@ -112,14 +112,14 @@ export default function FormationAnalysisTable({
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
                         placeholder="Search by offence type..."
-                        className="pl-9 h-10 bg-white border-gray-200 rounded-md"
+                        className="pl-9 h-10 bg-white border-gray-300 rounded-md"
                     />
                 </div>
 
                 <div className="flex items-center gap-3">
                     <div className="flex items-center">
                         <Select defaultValue="All">
-                            <SelectTrigger className="h-10 w-auto min-w-[170px] bg-white border-gray-200 rounded-md text-gray-700 gap-2">
+                            <SelectTrigger className="h-10 w-auto min-w-[170px] bg-white border-gray-300 rounded-md text-gray-700 gap-2">
                                 <div className="flex items-center gap-1">
                                     <span className="text-gray-500">Offence Type:</span>
                                     <SelectValue />
@@ -138,74 +138,76 @@ export default function FormationAnalysisTable({
 
                     <Button
                         variant="outline"
-                        className="h-10 bg-white border-gray-200 text-gray-700 font-normal rounded-md px-3 gap-2"
+                        className="h-10 bg-white border-gray-300 text-gray-700 font-normal rounded-md px-3 gap-2"
                     >
                         <span className="text-gray-500">Date:</span>
                         <span>06/12/2025</span>
                         <Calendar className="w-4 h-4 text-gray-400 ml-1" />
                     </Button>
 
-                    <Button variant="outline" size="icon" className="h-10 w-10 bg-white border-gray-200 rounded-md">
+                    <Button variant="outline" size="icon" className="h-10 w-10 bg-white border-gray-300 rounded-md">
                         <Filter className="w-4 h-4 text-gray-500" />
                     </Button>
-                    <Button variant="outline" size="icon" className="h-10 w-10 bg-white border-gray-200 rounded-md">
+                    <Button variant="outline" size="icon" className="h-10 w-10 bg-white border-gray-300 rounded-md">
                         <ArrowUpDown className="w-4 h-4 text-gray-500" />
                     </Button>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-[#F9FAFB] text-gray-900 font-semibold border-b border-gray-200">
-                        <tr>
-                            <th className="py-3 px-4 w-16">Sr no.</th>
-                            <th className="py-3 px-4">Offence Type</th>
-                            <th className="py-3 px-4">Total Case</th>
-                            <th className="py-3 px-4">Action Taken</th>
-                            <th className="py-3 px-4">Action Pending</th>
-                            <th className="py-3 px-4">Remark</th>
-                            <th className="py-3 px-4 w-10"></th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {tableData.map((row) => (
-                            <tr key={row.id} className="hover:bg-gray-50">
-                                <td className="py-3 px-4 text-gray-500">{row.id}</td>
-                                <td className="py-3 px-4 font-medium text-gray-900">{row.offenceType}</td>
-                                <td className="py-3 px-4">
-                                    {row.totalCase > 0 ? (
-                                        <span className="font-semibold">{String(row.totalCase).padStart(2, '0')}</span>
-                                    ) : (
-                                        <span className="text-gray-400">--</span>
-                                    )}
-                                </td>
-                                <td className="py-3 px-4">
-                                    {row.actionTaken > 0 ? (
-                                        <span className="font-semibold">{String(row.actionTaken).padStart(2, '0')}</span>
-                                    ) : (
-                                        <span className="text-gray-400">--</span>
-                                    )}
-                                </td>
-                                <td className="py-3 px-4">
-                                    {row.actionPending > 0 ? (
-                                        <span className="font-semibold">{String(row.actionPending).padStart(2, '0')}</span>
-                                    ) : (
-                                        <span className="text-gray-400">--</span>
-                                    )}
-                                </td>
-                                <td className="py-3 px-4">
-                                    {row.remark !== "--" ? row.remark : <span className="text-gray-400">--</span>}
-                                </td>
-                                <td className="py-3 px-4 text-center">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        <MoreVertical className="w-4 h-4 text-gray-400" />
-                                    </Button>
-                                </td>
+            {/* Table Container with scroll */}
+            <div className="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm flex flex-col">
+                <div className="overflow-auto max-h-[460px] relative no-scrollbar">
+                    <table className="w-full text-sm text-left border-collapse">
+                        <thead className="bg-[#F9FAFB] text-gray-900 font-semibold border-b border-gray-300 sticky top-0 z-40">
+                            <tr>
+                                <th className="py-3 px-4 w-18 border-r border-gray-300 sticky left-0 z-50 bg-[#F9FAFB]">Sr no.</th>
+                                <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[200px]">Offence Type</th>
+                                <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[120px]">Total Case</th>
+                                <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[130px]">Action Taken</th>
+                                <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[140px]">Action Pending</th>
+                                <th className="py-3 px-4 border-r border-gray-300 min-w-[200px]">Remark</th>
+                                <th className="py-3 px-4 w-14 sticky right-0 z-50 bg-[#F9FAFB] border-l border-gray-300"></th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {tableData.map((row) => (
+                                <tr key={row.id} className="hover:bg-gray-50 group">
+                                    <td className="py-3 px-4 text-center text-gray-500 border-r border-gray-300 sticky left-0 z-30 bg-white group-hover:bg-gray-50">{row.id}</td>
+                                    <td className="py-3 px-4 font-medium text-gray-900 border-r border-gray-300">{row.offenceType}</td>
+                                    <td className="py-3 px-4 border-r border-gray-300">
+                                        {row.totalCase > 0 ? (
+                                            <span className="font-semibold">{String(row.totalCase).padStart(2, '0')}</span>
+                                        ) : (
+                                            <span className="text-gray-400">--</span>
+                                        )}
+                                    </td>
+                                    <td className="py-3 px-4 border-r border-gray-300">
+                                        {row.actionTaken > 0 ? (
+                                            <span className="font-semibold">{String(row.actionTaken).padStart(2, '0')}</span>
+                                        ) : (
+                                            <span className="text-gray-400">--</span>
+                                        )}
+                                    </td>
+                                    <td className="py-3 px-4 border-r border-gray-300">
+                                        {row.actionPending > 0 ? (
+                                            <span className="font-semibold">{String(row.actionPending).padStart(2, '0')}</span>
+                                        ) : (
+                                            <span className="text-gray-400">--</span>
+                                        )}
+                                    </td>
+                                    <td className="py-3 px-4 border-r border-gray-300">
+                                        {row.remark !== "--" ? row.remark : <span className="text-gray-400">--</span>}
+                                    </td>
+                                    <td className="py-3 px-4 text-center sticky right-0 z-30 bg-white group-hover:bg-gray-50 border-l border-gray-300 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <MoreVertical className="w-4 h-4 text-gray-400" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
