@@ -106,7 +106,14 @@ export default function Step2Statement() {
       </FormSection>
 
       {/* ================= MP REPORTING ================= */}
-      <FormSection title="On-Duty Details of MP Reporting">
+      <FormSection
+        title={
+          <>
+            On-Duty Details of{" "}
+            <span className="text-blue-500">MP Reporting</span>
+          </>
+        }
+      >
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="mb-2 font-semibold">Reporting MP Name</Label>
@@ -181,9 +188,19 @@ export default function Step2Statement() {
       </FormSection>
 
       {/* ================= WITNESSING MP ================= */}
-      <FormSection title="On-Duty Details of Witnessing MP">
+      <FormSection
+        title={
+          <>
+            On-Duty Details of{" "}
+            <span className="text-blue-500">MP Witnessing</span>
+          </>
+        }
+      >
         {witnesses.map((w, i) => (
-          <div key={i} className="border grid grid-cols-2 space-x-4 p-4 rounded-lg space-y-4 mb-6">
+          <div
+            key={i}
+            className="border grid grid-cols-2 space-x-4 p-4 rounded-lg space-y-4 mb-6"
+          >
             <div>
               <Label className="mb-2 font-semibold">Witnessing MP Name</Label>
               <Input
@@ -271,7 +288,7 @@ export default function Step2Statement() {
         ))}
 
         <button
-          className="text-blue-600 text-sm"
+          className="text-blue-600 text-sm ml-200"
           onClick={() =>
             set("formData.traffic.witnesses", [
               ...witnesses,

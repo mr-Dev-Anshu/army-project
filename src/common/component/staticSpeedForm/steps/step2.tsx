@@ -443,10 +443,6 @@
 //   );
 // }
 
-
-
-
-
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -559,7 +555,14 @@ export default function StaticSpeedStep2() {
       </FormSection>
 
       {/* ================== MP REPORTING ================== */}
-      <FormSection title="On-Duty Details of MP Reporting">
+      <FormSection
+        title={
+          <>
+            On-Duty Details of{" "}
+            <span className="text-blue-500">MP Reporting</span>
+          </>
+        }
+      >
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="mb-2 font-semibold">Reporting MP Name</Label>
@@ -606,7 +609,14 @@ export default function StaticSpeedStep2() {
       </FormSection>
 
       {/* ================== WITNESSING MP ================== */}
-      <FormSection title="On-Duty Details of Witnessing MP">
+      <FormSection
+        title={
+          <>
+            On-Duty Details of{" "}
+            <span className="text-blue-500">MP Witnessing</span>
+          </>
+        }
+      >
         {witnesses.map((w, i) => (
           <div
             key={i}
@@ -684,7 +694,7 @@ export default function StaticSpeedStep2() {
         ))}
 
         <button
-          className="text-blue-600 ml-140 text-sm"
+          className="text-blue-600 ml-200 text-sm"
           onClick={() =>
             set("formData.staticSpeed.witnesses", [
               ...witnesses,

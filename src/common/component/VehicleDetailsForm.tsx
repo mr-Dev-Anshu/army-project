@@ -84,7 +84,7 @@ export default function VehicleDetailsForm({
 
   return (
     <div className="border rounded-lg bg-white p-4 space-y-6">
-      {/* VEHICLE CATEGORY */}
+      {/* ================= VEHICLE CATEGORY ================= */}
       <div>
         <p className="font-semibold mb-2">Select Vehicle Category</p>
 
@@ -117,7 +117,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* VEHICLE TYPE */}
+      {/* ================= VEHICLE TYPE ================= */}
       <div>
         <p className="font-semibold mb-2">
           Which Type Of Vehicle Was Involved?
@@ -158,7 +158,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* VEHICLE DETAILS */}
+      {/* ================= CIVILIAN DETAILS ================= */}
       {vehicleType === "civilian" && (
         <div>
           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
@@ -186,8 +186,7 @@ export default function VehicleDetailsForm({
 
             <div>
               <Label className="mb-3">
-                Make & Type{" "}
-                <span className="text-gray-500">(Vehicle Name)</span>
+                Make & Type <span className="text-gray-500">(Vehicle Name)</span>
               </Label>
 
               <div
@@ -210,7 +209,59 @@ export default function VehicleDetailsForm({
         </div>
       )}
 
-      {/* DRIVER TYPE */}
+      {/* ================= DD VEHICLE DETAILS ================= */}
+      {vehicleType === "dd" && (
+        <div>
+          <p className="font-semibold mb-2">Fill DD Vehicle Identification</p>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <Label className="mb-3">DD Vehicle BA Number</Label>
+
+              <div
+                className={cn(
+                  "border rounded-lg",
+                  vehicleState.vehicleNumber
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
+              >
+                <SuggestionInput
+                  placeholder="e.g. 12A 345678Z"
+                  value={vehicleState.vehicleNumber || ""}
+                  onChange={(v) => updateVehicle({ vehicleNumber: v })}
+                  fieldType="vehicleNumber"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="mb-3">
+                Make & Type{" "}
+                <span className="text-gray-500">(Vehicle Name)</span>
+              </Label>
+
+              <div
+                className={cn(
+                  "border rounded-lg",
+                  vehicleState.vehicleName
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
+              >
+                <SuggestionInput
+                  placeholder="e.g. ALS W/B"
+                  value={vehicleState.vehicleName || ""}
+                  onChange={(v) => updateVehicle({ vehicleName: v })}
+                  fieldType="vehicleName"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= DRIVER TYPE ================= */}
       <div>
         <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
 
@@ -249,7 +300,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* ================= NON CIV FLOW ================= */}
+      {/* ================= NON CIVILIAN FLOW ================= */}
       {driverType && driverType !== "Civilian" && (
         <>
           {offenders.map((o, index) => (
@@ -258,7 +309,6 @@ export default function VehicleDetailsForm({
                 Select Who was Person #{index + 1}
               </p>
 
-              {/* ALWAYS SHOW OPTIONS */}
               <RadioGroup
                 className="grid sm:grid-cols-2 gap-3"
                 value={o.type ?? ""}
@@ -284,7 +334,6 @@ export default function VehicleDetailsForm({
                 ))}
               </RadioGroup>
 
-              {/* SHOW FORM BELOW OPTIONS */}
               {o.type && (
                 <div className="mt-4">
                   <OffenderDynamicForm
@@ -298,16 +347,19 @@ export default function VehicleDetailsForm({
             </div>
           ))}
 
-         <div className="flex justify-end -mt-6">
-           <button
-            className="mt-4 px-4 py-2 bg-black  text-white rounded-md "
-            onClick={() =>
-              setOffenders((prev) => [...prev, { id: Date.now(), type: null }])
-            }
-          >
-            + Add More Person
-          </button>
-         </div>
+          <div className="flex justify-end -mt-6">
+            <button
+              className="mt-4 px-4 py-2 bg-black text-white rounded-md"
+              onClick={() =>
+                setOffenders((prev) => [
+                  ...prev,
+                  { id: Date.now(), type: null },
+                ])
+              }
+            >
+              + Add More Person
+            </button>
+          </div>
         </>
       )}
 
