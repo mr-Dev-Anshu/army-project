@@ -1,5 +1,7 @@
+
+
 "use client";
-import { FormInput, FormSelect } from "@/common/component/FormInput";
+import { FormInput } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
@@ -43,6 +45,11 @@ export default function OffenderDynamicForm({
   const [localData, setLocalData] = useState<any>({});
   const [hasCoDriver, setHasCoDriver] = useState(false);
   const [coDriverType, setCoDriverType] = useState("");
+
+  // 🔥 NEW STATES
+  const [civilianRelative, setCivilianRelative] = useState(false);
+  const [relativeRelation, setRelativeRelation] = useState("");
+  const [relativeType, setRelativeType] = useState("");
 
   useEffect(() => {
     if (scope === "traffic" && path) setLocalData(preData);
@@ -89,7 +96,7 @@ export default function OffenderDynamicForm({
           const label = f.label;
           const value = localData?.[label] || "";
 
-          if (f.type === "suggestion") {
+          if ((f as any).type === "suggestion") {
             return (
               <SuggestionInput
                 key={i}
@@ -113,6 +120,7 @@ export default function OffenderDynamicForm({
         })}
       </div>
 
+      {/* ================= CODRIVER FLOW ================= */}
       {showCoDriver && (
         <>
           <p className="font-semibold mt-4">
@@ -122,6 +130,9 @@ export default function OffenderDynamicForm({
               onChange={(e) => {
                 setHasCoDriver(e.target.checked);
                 setCoDriverType("");
+                setCivilianRelative(false);
+                setRelativeRelation("");
+                setRelativeType("");
               }}
               className="mr-2"
             />
@@ -164,14 +175,105 @@ export default function OffenderDynamicForm({
                 ))}
               </div>
 
-              {coDriverType && offenderFormsConfig[coDriverType] && (
-                <OffenderDynamicForm
-                  title={`${coDriverType} Details`}
-                  fields={offenderFormsConfig[coDriverType].fields}
-                  scope={scope}
-                  showCoDriver={false}
-                />
+              {/* ================= CIVILIAN SPECIAL FLOW ================= */}
+              {coDriverType === "Civilian" && (
+                <>
+                  <OffenderDynamicForm
+                    title="Civilian Co-Driver Details"
+                    fields={offenderFormsConfig["Civilian"].fields}
+                    scope={scope}
+                    showCoDriver={false}
+                  />
+
+                  <p className="font-semibold mt-4">
+                    <input
+                      type="checkbox"
+                      checked={civilianRelative}
+                      onChange={(e) => {
+                        setCivilianRelative(e.target.checked);
+                        setRelativeRelation("");
+                        setRelativeType("");
+                      }}
+                      className="mr-2"
+                    />
+                    Kya is Civilian Co-Driver ka koi Military Relative hai?
+                  </p>
+
+                  {civilianRelative && (
+                    <>
+                      <p className="font-semibold mt-3">
+                        Enter Relation of Military Person
+                      </p>
+
+                      <SuggestionInput
+                        placeholder="e.g. Father / Husband / Brother"
+                        value={relativeRelation}
+                        onChange={setRelativeRelation}
+                        fieldType="relation"
+                      />
+
+                      <p className="font-semibold mt-4">
+                        Select Military Relative Type
+                      </p>
+
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {[
+                          "Military Person",
+                          "Employee",
+                          "Servant/Maid",
+                          "Shop Keeper",
+                          "Temporary Hired Worker",
+                        ].map((item) => (
+                          <label
+                            key={item}
+                            className={cn(
+                              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
+                              relativeType === item
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300"
+                            )}
+                          >
+                            <input
+                              type="radio"
+                              name="relativeType"
+                              value={item}
+                              checked={relativeType === item}
+                              onChange={() => setRelativeType(item)}
+                            />
+                            {item}
+                          </label>
+                        ))}
+                      </div>
+
+                      {relativeType && (
+                        <OffenderDynamicForm
+                          title={`${relativeType} Details`}
+                          helperText={
+                            relativeRelation
+                              ? `Relation: ${relativeRelation}`
+                              : ""
+                          }
+                          fields={offenderFormsConfig[relativeType].fields}
+                          scope={scope}
+                          showCoDriver={false}
+                        />
+                      )}
+                    </>
+                  )}
+                </>
               )}
+
+              {/* ================= OTHER CODRIVER TYPES ================= */}
+              {coDriverType &&
+                coDriverType !== "Civilian" &&
+                offenderFormsConfig[coDriverType] && (
+                  <OffenderDynamicForm
+                    title={`${coDriverType} Details`}
+                    fields={offenderFormsConfig[coDriverType].fields}
+                    scope={scope}
+                    showCoDriver={false}
+                  />
+                )}
             </>
           )}
         </>
