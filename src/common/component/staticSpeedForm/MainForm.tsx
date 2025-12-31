@@ -99,7 +99,7 @@ export default function StaticSpeedForm() {
           "N/A",
       },
 
-      /* -------- 4️⃣ WITNESS SIGN -------- */
+      /* -------- 4️ WITNESS SIGN -------- */
       witnessSig: {
         armyNo:
           witness?.reportingBlock?.armyNumber ||
