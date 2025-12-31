@@ -19,8 +19,18 @@ import {
     Filter,
     MoreVertical,
     Printer,
+    Edit,
+    Plus,
+    X,
 } from "lucide-react";
-import { useGetDomesticAnalytics } from "../domesticAnalysis/hooks";
+import { useGetDomesticAnalytics, useGetAnalysisRemarks, useCreateAnalysisRemark, useUpdateAnalysisRemark } from "../domesticAnalysis/hooks";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "react-toastify";
 
 interface FormationAnalysisTableProps {
     formation: {
@@ -48,6 +58,12 @@ export default function FormationAnalysisTable({
     const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
     const dateInputRef = React.useRef<HTMLInputElement>(null);
 
+    // Remark State
+    const [isRemarkModalOpen, setIsRemarkModalOpen] = React.useState(false);
+    const [remarkContent, setRemarkContent] = React.useState("");
+    const [editingRemarkId, setEditingRemarkId] = React.useState<string | null>(null);
+    const [currentOffenceType, setCurrentOffenceType] = React.useState<string | null>(null);
+
     const currentMonth = selectedDate.getMonth() + 1;
     const currentYear = selectedDate.getFullYear();
 
@@ -57,19 +73,34 @@ export default function FormationAnalysisTable({
         year: currentYear,
     });
 
+    // Fetch remarks data
+    const { data: remarksData } = useGetAnalysisRemarks();
+    const { mutate: createRemark } = useCreateAnalysisRemark();
+    const { mutate: updateRemark } = useUpdateAnalysisRemark();
+
     // Map API data directly for dynamic offence types
     const tableData = useMemo(() => {
         if (!analyticsData || !Array.isArray(analyticsData)) return [];
 
-        return analyticsData.map((item: AnalyticsItem, index: number) => ({
-            id: index + 1,
-            offenceType: item.offenceType || "Unknown",
-            totalCase: item.total || 0,
-            actionTaken: item.actionTaken || 0,
-            actionPending: item.actionPending || 0,
-            remark: item.remark || "--",
-        }));
-    }, [analyticsData]);
+        return analyticsData.map((item: AnalyticsItem, index: number) => {
+            // Find matching remark
+            const matchingRemark = remarksData?.find((r: any) =>
+                r.offenceType === item.offenceType &&
+                new Date(r.monthYear).getMonth() + 1 === currentMonth &&
+                new Date(r.monthYear).getFullYear() === currentYear
+            );
+
+            return {
+                id: index + 1,
+                offenceType: item.offenceType || "Unknown",
+                totalCase: item.total || 0,
+                actionTaken: item.actionTaken || 0,
+                actionPending: item.actionPending || 0,
+                remark: matchingRemark ? matchingRemark.remark : "--",
+                remarkId: matchingRemark?._id,
+            };
+        });
+    }, [analyticsData, remarksData, currentMonth, currentYear]);
 
     // Extract unique offence types BEFORE filtering to keep dropdown consistent
     const uniqueOffenceTypes = useMemo(() => {
@@ -108,8 +139,46 @@ export default function FormationAnalysisTable({
 
     const isFilterActive = searchQuery !== "" ||
         selectedOffenceType !== "All" ||
-        selectedDate.getMonth() !== new Date().getMonth() ||
         selectedDate.getFullYear() !== new Date().getFullYear();
+
+    const handleSaveRemark = () => {
+        if (!currentOffenceType) return;
+
+        if (editingRemarkId) {
+            updateRemark({
+                id: editingRemarkId,
+                data: { remark: remarkContent }
+            }, {
+                onSuccess: () => {
+                    toast.success("Remark updated successfully");
+                    setIsRemarkModalOpen(false);
+                    setRemarkContent("");
+                    setEditingRemarkId(null);
+                    setCurrentOffenceType(null);
+                },
+                onError: () => {
+                    toast.error("Failed to update remark");
+                }
+            });
+        } else {
+            createRemark({
+                offenceType: currentOffenceType,
+                remark: remarkContent,
+                monthYear: selectedDate,
+            }, {
+                onSuccess: () => {
+                    toast.success("Remark added successfully");
+                    setIsRemarkModalOpen(false);
+                    setRemarkContent("");
+                    setEditingRemarkId(null);
+                    setCurrentOffenceType(null);
+                },
+                onError: () => {
+                    toast.error("Failed to add remark");
+                }
+            });
+        }
+    };
 
     const handleResetFilters = () => {
         setSearchQuery("");
@@ -301,9 +370,34 @@ export default function FormationAnalysisTable({
                                             {row.remark !== "--" ? row.remark : <span className="text-gray-400">--</span>}
                                         </td>
                                         <td className="py-3 px-4 text-center sticky right-0 z-30 bg-white group-hover:bg-gray-50 border-l border-gray-300 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <MoreVertical className="w-4 h-4 text-gray-400" />
-                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100">
+                                                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-40">
+                                                    <DropdownMenuItem
+                                                        className="gap-2 cursor-pointer"
+                                                        onClick={() => {
+                                                            setCurrentOffenceType(row.offenceType);
+                                                            setEditingRemarkId(row.remarkId || null);
+                                                            setRemarkContent(row.remark !== "--" ? row.remark : "");
+                                                            setIsRemarkModalOpen(true);
+                                                        }}
+                                                    >
+                                                        {row.remarkId ? (
+                                                            <>
+                                                                <Edit className="w-4 h-4" /> Edit Remark
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Plus className="w-4 h-4" /> Add Remark
+                                                            </>
+                                                        )}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </td>
                                     </tr>
                                 ))
@@ -312,6 +406,47 @@ export default function FormationAnalysisTable({
                     </table>
                 </div>
             </div>
+            {/* Remark Modal */}
+            {isRemarkModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                {editingRemarkId ? "Edit Remark" : "Add Remark"}
+                            </h3>
+                            <button
+                                onClick={() => setIsRemarkModalOpen(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors rounded-full p-1 hover:bg-gray-100"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Remark</label>
+                            <textarea
+                                value={remarkContent}
+                                onChange={(e) => setRemarkContent(e.target.value)}
+                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
+                                placeholder="Enter analysis remark here..."
+                            />
+                        </div>
+                        <div className="px-6 py-4 bg-gray-50 flex items-center justify-end gap-3 border-t border-gray-100">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsRemarkModalOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleSaveRemark}
+                                className="bg-[#007AFF] hover:bg-blue-600 text-white"
+                            >
+                                Save Remark
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
