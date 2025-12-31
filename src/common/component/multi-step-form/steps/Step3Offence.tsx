@@ -32,8 +32,8 @@ export default function Step3Offence() {
   ];
 
   return (
-    <FormSection title="Offence Details">
-      <Label>Select Offence Type</Label>
+    <FormSection title="">
+      <Label className="text-xl text-gray-600">Select Offence Type</Label>
 
       <Select
         value={d.offenceTypes?.[0] ?? ""}
@@ -41,7 +41,7 @@ export default function Step3Offence() {
           set("formData.traffic.offenceTypes", [v])
         }
       >
-        <SelectTrigger>
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Select Offence" />
         </SelectTrigger>
 

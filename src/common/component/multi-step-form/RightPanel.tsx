@@ -67,7 +67,7 @@ export const RightPanel = ({
             size="sm"
             className="text-xs bg-gray-100 text-black sm:text-xs"
           >
-            <CiEraser size={14} className="sm:size-[16px]" /> Clear
+            <CiEraser size={14} className="sm:size-[16px]" /> Clear Form
           </Button>
 
           <Button className="bg-black text-white" variant="outline" size="sm">
@@ -111,7 +111,7 @@ export const RightPanel = ({
             <Button
               onClick={onNext}
               disabled={isNextDisabled()}
-              className="bg-black text-white disabled:bg-gray-400 
+              className="bg-blue-500 text-white disabled:bg-gray-400 
           w-full sm:w-auto text-xs sm:text-sm lg:text-base"
             >
               Save & Next
