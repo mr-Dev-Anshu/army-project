@@ -1,11 +1,20 @@
+"use client";
 import React from "react";
+
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart3, ChevronRight } from "lucide-react";
 
 import { useGetDomesticAnalytics } from "./domesticAnalysis/hooks";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import FormationAnalysisTable from "./components/FormationAnalysisTable";
 
 export default function MpOffenceAnalysisMonthlyReport() {
+    const [selectedFormation, setSelectedFormation] = useState<{
+        groupKey: string;
+        subtitle: string;
+    } | null>(null);
+
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
@@ -70,6 +79,15 @@ export default function MpOffenceAnalysisMonthlyReport() {
 
     if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
+    if (selectedFormation) {
+        return (
+            <FormationAnalysisTable
+                formation={selectedFormation}
+                onBack={() => setSelectedFormation(null)}
+            />
+        );
+    }
+
     return (
         <div className="p-8 space-y-8 min-h-screen bg-transparent font-sans">
             {/* Header */}
@@ -131,7 +149,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                         </p>
                     </div>
 
-                    <div className="space-y-3 text-base text-gray-500">
+                    <div className="space-y-4 text-base text-gray-500">
                         <div className="flex justify-between items-center">
                             <span>Total Offence</span>
                             <span className="font-semibold text-gray-900">148</span>
@@ -143,7 +161,8 @@ export default function MpOffenceAnalysisMonthlyReport() {
                         <div className="flex justify-between items-center relative">
                             <span>Severity</span>
                             <span className="font-semibold text-gray-900">High Risk</span>
-
+                            {/* Purple Indicator */}
+                            <div className="absolute -right-6 top-1/2 -translate-y-1/2 h-5 w-1.5 bg-[#8B5CF6] rounded-l-full" />
                         </div>
                     </div>
 
@@ -151,6 +170,12 @@ export default function MpOffenceAnalysisMonthlyReport() {
                         <Button
                             size="icon"
                             className="bg-[#007AFF] hover:bg-blue-600 rounded-lg w-10 h-10 shadow-sm"
+                            onClick={() =>
+                                setSelectedFormation({
+                                    groupKey: "HQ 21 CORPS",
+                                    subtitle: "21 Corps Provost Unit",
+                                })
+                            }
                         >
                             <ArrowRight className="w-5 h-5 text-white" />
                         </Button>
@@ -175,6 +200,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                             totalOffence={formation.total}
                             pendingCases={formation.actionPending}
                             severity={formation.severity}
+                            onClick={() => setSelectedFormation(formation)}
                         />
                     ))}
                 </div>
@@ -189,43 +215,47 @@ function FormationCard({
     totalOffence,
     pendingCases,
     severity,
+    onClick,
 }: {
     title: string;
     subtitle: string;
     totalOffence: number;
     pendingCases: number;
     severity: string;
+    onClick: () => void;
 }) {
     return (
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-            <div>
-                <div className="mb-6">
-                    <h3 className="font-bold text-base text-gray-900">{title}</h3>
-                    <p className="text-gray-500 text-sm font-medium mt-1">{subtitle}</p>
-                </div>
+            <div className="mb-4">
+                <h3 className="font-bold text-lg text-gray-900 break-words">{title}</h3>
+                <p className="text-gray-500 text-xs font-medium uppercase mt-1">
+                    {subtitle}
+                </p>
+            </div>
 
-                <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex justify-between items-center">
-                        <span>Total Offence</span>
-                        <span className="font-bold text-gray-900">{totalOffence}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span>Pending Cases</span>
-                        <span className="font-bold text-gray-900">{pendingCases}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span>Severity</span>
-                        <span className="font-bold text-gray-900">{severity}</span>
-                    </div>
+            <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex justify-between items-center">
+                    <span>Total Offence</span>
+                    <span className="font-bold text-gray-900">{totalOffence}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span>Pending Cases</span>
+                    <span className="font-bold text-gray-900">{pendingCases}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span>Severity</span>
+                    <span className="font-bold text-gray-900">{severity}</span>
                 </div>
             </div>
 
             <div className="mt-6 flex justify-end">
                 <Button
                     size="icon"
-                    className="bg-black hover:bg-gray-800 rounded-lg w-10 h-10 shadow-sm"
+                    variant="secondary"
+                    className="bg-black hover:bg-gray-800 text-white rounded-lg w-10 h-10"
+                    onClick={onClick}
                 >
-                    <ArrowRight className="w-5 h-5 text-white" />
+                    <ArrowRight className="w-5 h-5" />
                 </Button>
             </div>
         </div>
