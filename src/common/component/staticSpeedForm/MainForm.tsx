@@ -161,14 +161,14 @@ export default function StaticSpeedForm() {
         vehicleName: staticData.vehicleDetails.vehicleName,
 
         offenceOccurenceDetails: {
-          time: staticData.offenceOccurenceDetails.time || "",
-          incidentLocation: staticData.offenceOccurenceDetails.incidentLocation,
-          description: staticData.offenceOccurenceDetails.description,
+          time: staticData.offenceBlock?.time || "",
+          incidentLocation: staticData.offenceBlock?.incidentLocation || "",
+          description: staticData.offenceBlock?.description || "",
+
           overSpeedCalculated:
-            staticData.offenceOccurenceDetails.overSpeedCalculated ?? "",
-          actualSpeedNoted:
-            staticData.offenceOccurenceDetails.actualSpeedNoted ?? "",
-          authSpeed: staticData.offenceOccurenceDetails.authSpeed ?? "",
+            staticData.offenceBlock?.overSpeedCalculated ?? "",
+          actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
+          authSpeed: staticData.offenceBlock?.authSpeed ?? "",
         },
       };
 
@@ -183,16 +183,19 @@ export default function StaticSpeedForm() {
         return;
       }
 
-      // ========= 2️⃣ OFFENDER =========
       const offenderPayload: CreateOffenderData = {
         offenceId: staticRes._id,
+
         offenderType:
           (staticData.vehicleDetails.driverType as OffenderType) || "Civilian",
 
-        offenderDetails:
-          staticData.offenderPeople?.length > 0
-            ? (staticData.offenderPeople as any)
-            : ([] as any),
+        offenderDetails: Array.isArray(staticData.offenderPeople)
+          ? staticData.offenderPeople.map((o: any) => ({
+              type: o?.type === "CoDriver" ? "CoDriver" : "Driver",
+
+              details: o?.details ? o.details : o || {},
+            }))
+          : [],
       };
 
       console.log("👮 STATIC OFFENDER PAYLOAD ===>", offenderPayload);
@@ -222,21 +225,20 @@ export default function StaticSpeedForm() {
 
       toast.success("🎉 All Static Speed Processes Completed!");
     } catch (error: any) {
-      console.log("❌ STATIC SPEED SUBMIT ERROR ===>", error?.response?.data);
+      console.log("❌ STATIC SPEED SUBMIT ERROR RAW ===>", error);
 
-      toast.error(
+      const msg =
         error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          "Failed to submit record"
-      );
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to submit record";
+
+      console.log("❌ FINAL ERROR MESSAGE ===>", msg);
+
+      toast.error(msg);
     }
   };
 
-  if (state.preview) {
-    return (
-      <StaticSpeedReport {...mapStaticToReport(state.formData.staticSpeed)} />
-    );
-  }
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
       <div className="w-full bg-white rounded-lg overflow-hidden h-full">
@@ -247,6 +249,7 @@ export default function StaticSpeedForm() {
             completedSteps={state.completedSteps}
             title="Create New Static Speed Check Record"
             reportNo="PRO/21 CPU/00042/106/25"
+            onCreate={handleFinalSubmit}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
@@ -264,9 +267,9 @@ export default function StaticSpeedForm() {
             }}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onPrev={() => dispatch({ type: "PREV_STEP" })}
-            onSubmitFinal={handleFinalSubmit}
             stepsConfig={stepsConfig}
             mode="static"
+            mapTrafficToReport={mapStaticToReport} // ⭐⭐ THIS IS IMPORTANT
           />
         </div>
       </div>

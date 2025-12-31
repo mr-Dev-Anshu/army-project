@@ -298,7 +298,7 @@ export default function MultiStepForm() {
           }),
         };
 
-        console.log("👮 SAFE OFFENDER PAYLOAD ===>", offenderPayload);
+        // console.log("👮 SAFE OFFENDER PAYLOAD ===>", offenderPayload);
 
         await createOffenderMutate(offenderPayload);
         toast.success("Offenders Saved Successfully!");
