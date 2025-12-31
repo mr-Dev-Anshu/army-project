@@ -7,15 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { FormSection } from "../../FormSection";
 
 export default function Step4Remarks() {
   const { state, dispatch } = useForm();
   const d = state.formData.traffic;
 
   const remarkOptions = [
-    "The indl committed offence...",
-    "Suitable disciplinary action...",
-    "Unit should ensure traffic compliance...",
+    "The indl committed offence as enumerated under para 3 above.Suitable discription action be initiated against the indl by the unit , and inform to this office within 15 days from issue of this ",
+    "The indl committed offence as enumerated under para 3 above.Suitable discription action be initiated against the indl by the unit , and inform to this office within 15 days from issue of this ",
+    "The indl committed offence as enumerated under para 3 above.Suitable discription action be initiated against the indl by the unit , and inform to this office within 15 days from issue of this ",
   ];
 
   const [selected, setSelected] = useState<number | null>(0);
@@ -28,13 +29,13 @@ export default function Step4Remarks() {
     });
 
   return (
-    <div className="space-y-6 px-4">
-      <Textarea
+   <FormSection title="ADD REMARKS">
+     <Textarea
         value={d.remarks || ""}
         onChange={(e) => set(e.target.value)}
         className="min-h-[140px]"
       />
-
+      <p className="text-gray-400">Pre Written Remarks</p>
       {remarkOptions.map((text, i) => (
         <label key={i} className="flex gap-2">
           <Checkbox
@@ -47,6 +48,6 @@ export default function Step4Remarks() {
           {text}
         </label>
       ))}
-    </div>
+   </FormSection>
   );
 }

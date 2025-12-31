@@ -263,6 +263,7 @@ export default function StaticSpeedForm() {
               });
             }}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
+            onPrev={() => dispatch({ type: "PREV_STEP" })}
             onSubmitFinal={handleFinalSubmit}
             stepsConfig={stepsConfig}
             mode="static"

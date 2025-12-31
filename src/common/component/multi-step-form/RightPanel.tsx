@@ -1,8 +1,11 @@
+
 "use client";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Eye } from "lucide-react";
 import { CiEraser } from "react-icons/ci";
 import { FormDataState } from "@/common/types/form.types";
+import { FaArrowLeftLong } from "react-icons/fa6";
+import { useForm } from "@/context/FormContext";
 
 interface StepConfig {
   title: string;
@@ -14,7 +17,7 @@ interface Props {
   formData: FormDataState;
   setFormData?: (path: string, value: unknown) => void;
   onNext: () => void;
-  onPrev: () => void;
+  onPrev?: () => void; // ⬅️ made optional
   onSubmitFinal: () => void;
   stepsConfig: Record<string, StepConfig>;
   mode?: "traffic" | "static" | "mp";
@@ -29,6 +32,8 @@ export const RightPanel = ({
   stepsConfig,
   mode,
 }: Props) => {
+  const { dispatch } = useForm();
+
   const current = stepsConfig?.[String(step)];
   const totalSteps = Object.keys(stepsConfig || {}).length;
   const isLastStep = step === totalSteps;
@@ -85,17 +90,19 @@ export const RightPanel = ({
         {current?.component || <p>Step Content Coming Soon...</p>}
       </div>
 
+  
+
       {/* ---------- FOOTER ---------- */}
       <div className="mt-auto flex flex-col sm:flex-row justify-between gap-2">
         <Button
-          variant="outline"
+          className="bg-black text-white flex items-center justify-center"
           disabled={step === 1}
           onClick={() => {
             console.log("BACK CLICKED", step);
-            onPrev();
+            onPrev?.();
           }}
         >
-          Back
+          <FaArrowLeftLong size={14} className="sm:size-[16px] mr-2" />
         </Button>
 
         {/* RIGHT SIDE — NEXT / SUBMIT */}
