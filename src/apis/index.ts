@@ -24,6 +24,14 @@ export * from "@/apis/StaticSpeed/getStaticSpeed"
 
 
 
+export * from "@/apis/mtAccidentReport/create";
+export * from "@/apis/mtAccidentReport/delete";
+export * from "@/apis/mtAccidentReport/getAll";
+export * from "@/apis/mtAccidentReport/getById";
+export * from "@/apis/mtAccidentReport/update";
+
+
+
 export * from "@/apis/offender/create"
 export * from "@/apis/offender/delete"
 export * from "@/apis/offender/update"

@@ -3,6 +3,12 @@ const Schema = mongoose.Schema;
 
 const MTAccidentReportSchema = new Schema(
   {
+    individualType: {
+      type: String,
+      enum: ["Military Personnel", "Civilian", "Employee", "Servant / Maid", "Shop Keeper", "Temporary Hired Worker"],
+      required: false,
+      trim: true,
+    },
     dateOfAccident: {
       type: Date,
       default: null,
@@ -60,7 +66,7 @@ const MTAccidentReportSchema = new Schema(
       default: 0,
       min: 0,
     },
-    firMactNumber: {
+    firCaseNumber: {
       type: String,
       required: false,
       trim: true,

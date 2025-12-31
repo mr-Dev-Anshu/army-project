@@ -165,6 +165,31 @@ const initialState: GlobalFormState = {
         recommendation: "",
       },
     },
+
+    /* ================= MT ACCIDENT REPORT ================= */
+    mtAccidentReport: {
+      individualType: "",
+      dateOfAccident: "",
+      timeOfAccident: "",
+      placeOfAccident: "",
+      typeOfAccident: "",
+      probableCause: "",
+
+      vehicleNumber: "",
+      makeAndModel: "",
+
+      injuredCivil: 0,
+      injuredMilitary: 0,
+      diedCivil: 0,
+      diedMilitary: 0,
+
+      firCaseNumber: "",
+      firDate: "",
+      firPoliceStation: "",
+
+      actionStatus: false,
+      remark: "",
+    },
   },
 };
 
