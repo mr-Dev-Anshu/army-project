@@ -1,175 +1,265 @@
+// "use client";
+// import { Button } from "@/components/ui/button";
+// import { ChevronRight, Eye } from "lucide-react";
+// import { CiEraser } from "react-icons/ci";
+// import { FaArrowLeftLong } from "react-icons/fa6";
+// import { useForm } from "@/context/FormContext";
+// import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
+
+// interface StepConfig {
+//   title: string;
+//   component: React.ReactNode;
+// }
+
+// export const RightPanel = ({
+//   step,
+//   formData,
+//   onNext,
+//   onPrev,
+//   stepsConfig,
+//   mode,
+//   mapTrafficToReport,
+// }: any) => {
+//   const { state, dispatch } = useForm();
+
+//   const current = stepsConfig?.[String(step)];
+//   const totalSteps = Object.keys(stepsConfig || {}).length;
+//   const isLastStep = step === totalSteps;
+
+//   const isNextDisabled = () => {
+//     if (mode === "static" && step === 1) {
+//       const vd = formData.staticSpeed?.vehicleDetails;
+//       return !(vd?.vehicleType && vd?.category);
+//     }
+
+//     if (mode === "traffic" && step === 1)
+//       return !formData.traffic?.vehicleInvolved;
+
+//     return false;
+//   };
+
+//   return (
+//     <div className="flex-1 h-full p-3 sm:p-5 lg:p-8 flex flex-col w-full overflow-hidden">
+//       <div className="border rounded-lg w-full h-full flex flex-col">
+//         {/* HEADER */}
+//         <div className="flex justify-between px-4 py-3 border-b bg-white">
+//           <h3 className="font-bold text-lg">{current?.title || "Step"}</h3>
+
+//           <div className="flex gap-2">
+//             <Button
+//               size="sm"
+//               className="text-xs bg-gray-100 text-black"
+//               onClick={() =>
+//                 dispatch({
+//                   type: "SET_PATH",
+//                   path: "formData.traffic",
+//                   value: {},
+//                 })
+//               }
+//             >
+//               <CiEraser size={16} /> Clear
+//             </Button>
+
+//             <Button variant="outline" size="sm">
+//               <Eye size={16} />
+//             </Button>
+//           </div>
+//         </div>
+
+//         {/* SCROLL BODY */}
+//         <div className="flex-1 overflow-y-auto px-4 py-4">
+//           {!state.preview ? (
+//             current?.component || <p>Step Coming…</p>
+//           ) : (
+//             <MilitaryPoliceReport
+//               {...mapTrafficToReport(state.formData.traffic)}
+//             />
+//           )}
+//         </div>
+
+//         {/* FOOTER */}
+//         {!state.preview && (
+//           <div className="border-t px-4 py-3 bg-white flex justify-between gap-2">
+//             <Button
+//               className="bg-black text-white"
+//               disabled={step === 1}
+//               onClick={() => onPrev?.()}
+//             >
+//               <FaArrowLeftLong className="mr-2" />
+//               Back
+//             </Button>
+
+//             {!isLastStep ? (
+//               <Button
+//                 onClick={onNext}
+//                 disabled={isNextDisabled()}
+//                 className="bg-blue-500 text-white"
+//               >
+//                 Save & Next
+//                 <ChevronRight className="ml-2" />
+//               </Button>
+//             ) : (
+//               <Button
+//                 className="bg-blue-500 text-white"
+//                 onClick={() => dispatch({ type: "SET_PREVIEW", payload: true })}
+//               >
+//                 Preview Report
+//               </Button>
+//             )}
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
 "use client";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Eye } from "lucide-react";
+import { ChevronRight, Cross, Eye } from "lucide-react";
 import { CiEraser } from "react-icons/ci";
-import { FormDataState } from "@/common/types/form.types";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useForm } from "@/context/FormContext";
-
-interface StepConfig {
-  title: string;
-  component: React.ReactNode;
-}
-
-interface Props {
-  step: number;
-  formData: FormDataState;
-  onNext: () => void;
-  onPrev?: () => void;
-  onSubmitFinal: () => void;
-  stepsConfig: Record<string, StepConfig>;
-  mode?: "traffic" | "static" | "mp";
-}
+import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
 
 export const RightPanel = ({
   step,
   formData,
   onNext,
   onPrev,
-  onSubmitFinal,
   stepsConfig,
   mode,
-}: Props) => {
-  const { dispatch } = useForm();
+  mapTrafficToReport,
+}: any) => {
+  const { state, dispatch } = useForm();
 
   const current = stepsConfig?.[String(step)];
   const totalSteps = Object.keys(stepsConfig || {}).length;
   const isLastStep = step === totalSteps;
 
   const isNextDisabled = () => {
-    if (mode === "static" && step === 1) {
-      const vd = formData.staticSpeed?.vehicleDetails;
-      return !(vd?.vehicleType && vd?.category);
-    }
+    if (mode === "static" && step === 1)
+      return !(
+        formData.staticSpeed?.vehicleDetails?.vehicleType &&
+        formData.staticSpeed?.vehicleDetails?.category
+      );
 
-    if (mode === "traffic" && step === 1) {
+    if (mode === "traffic" && step === 1)
       return !formData.traffic?.vehicleInvolved;
-    }
 
     return false;
   };
 
   return (
     <div className="flex-1 h-full p-3 sm:p-5 lg:p-8 flex flex-col w-full overflow-hidden">
-      {/* OUTER BORDER BOX */}
       <div className="border rounded-lg w-full h-full flex flex-col">
-        {/* ---------- HEADER (FIXED) ---------- */}
-        <div
-          className="flex flex-col sm:flex-row sm:items-center justify-between 
-        px-4 py-3 border-b bg-white"
-        >
-          <h3 className="font-bold text-base sm:text-lg lg:text-xl">
-            {current?.title || "Step"}
-          </h3>
+        {/* ================= HEADER ================= */}
+        <div className="flex justify-between px-4 py-3 border-b bg-white">
+          <h3 className="font-bold text-lg">{current?.title || "Step"}</h3>
 
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              className="text-xs bg-gray-100 cursor-pointer text-black"
-              onClick={() => {
-                if (mode === "traffic") {
+          {!state.preview && (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="text-xs bg-gray-100 text-black"
+                onClick={() =>
                   dispatch({
                     type: "SET_PATH",
                     path: "formData.traffic",
-                    value: {
-                      vehicleInvolved: "",
-                      vehicleDetails: {},
-                      offenderWithoutVehicle: {},
-                      offenderPeople: [],
-                      witnesses: [],
-                      selectedWitness: null,
-                      offenceOccurenceDetails: {},
-                      onDutyDetails: {},
-                      onDutyDetailsMPReporting: {},
-                      offenceTypes: [],
-                      offenceCode: [],
-                      remarks: "",
-                    },
-                  });
+                    value: {},
+                  })
                 }
+              >
+                <CiEraser size={16} /> Clear
+              </Button>
 
-                if (mode === "static") {
-                  dispatch({
-                    type: "SET_PATH",
-                    path: "formData.staticSpeed",
-                    value: {
-                      vehicleDetails: {
-                        vehicleType: "",
-                        category: "",
-                      },
-                      offenceOccurenceDetails: {
-                        description: "",
-                      },
-                      witnesses: [],
-                    },
-                  });
-                }
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => dispatch({ type: "SET_PREVIEW", payload: true })}
+              >
+                <Eye size={16} />
+              </Button>
+            </div>
+          )}
+        </div>
 
-                if (mode === "mp") {
-                  dispatch({
-                    type: "SET_PATH",
-                    path: "formData.mpReport",
-                    value: {}, // jo tum chaho structure set kar sakte ho
-                  });
-                }
-              }}
+        {/* ================= BODY ================= */}
+        <div className="flex-1 overflow-y-auto px-4 py-4">
+          {/* ==== FORM MODE ==== */}
+          {!state.preview && (current?.component || <p>Step Coming…</p>)}
+
+          {/* ==== PREVIEW MODE ==== */}
+          {state.preview && (
+            <div className="w-full h-full flex flex-col">
+              <div className="flex justify-between mb-3">
+                <h2 className="text-xl font-bold">REPORT PREVIEW</h2>
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.print()}
+                  >
+                    🖨️ Print
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    className="bg-black text-white"
+                    onClick={() =>
+                      dispatch({ type: "SET_PREVIEW", payload: false })
+                    }
+                  >
+                    close
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border bg-white shadow-lg rounded-md p-4">
+                <MilitaryPoliceReport
+                  {...mapTrafficToReport(state.formData.traffic)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ================= FOOTER ================= */}
+        {!state.preview && (
+          <div className="border-t px-4 py-3 bg-white flex justify-between gap-2">
+            <Button
+              className="bg-black text-white"
+              disabled={step === 1}
+              onClick={() => onPrev?.()}
             >
-              <CiEraser size={16} />
-              Clear Form
+              <FaArrowLeftLong className="mr-2" />
+              Back
             </Button>
 
-            <Button className="bg-black text-white" variant="outline" size="sm">
-              <Eye size={16} />
-            </Button>
-          </div>
-        </div>
-
-        {/* ---------- SCROLL AREA (ONLY THIS SCROLLS) ---------- */}
-        <div
-          className="
-            flex-1 
-            overflow-y-auto 
-            px-4 py-4 
-            text-xs sm:text-sm lg:text-base
-          "
-        >
-          {current?.component || <p>Step Content Coming Soon...</p>}
-        </div>
-
-        {/* ---------- FOOTER (FIXED) ---------- */}
-        <div className="border-t px-4 py-3 bg-white flex flex-col sm:flex-row justify-between gap-2">
-          <Button
-            className="bg-black text-white flex items-center justify-center"
-            disabled={step === 1}
-            onClick={() => onPrev?.()}
-          >
-            <FaArrowLeftLong size={16} className="mr-2" />
-            Back
-          </Button>
-
-          <div className="flex gap-2 w-full sm:w-auto">
+            {/* NOT LAST STEP */}
             {!isLastStep && (
               <Button
                 onClick={onNext}
                 disabled={isNextDisabled()}
-                className="bg-blue-500 text-white disabled:bg-gray-400 
-                w-full sm:w-auto"
+                className="bg-blue-500 text-white"
               >
                 Save & Next
                 <ChevronRight className="ml-2" />
               </Button>
             )}
 
+            {/* LAST STEP → OPEN PREVIEW */}
             {isLastStep && (
               <Button
-                className="bg-black text-white w-full sm:w-auto"
-                onClick={onSubmitFinal}
+                className="bg-blue-500 text-white"
+                onClick={() => dispatch({ type: "SET_PREVIEW", payload: true })}
               >
-                Submit & Create Offence
+                 Preview Report
+                <ChevronRight className="ml-2" />
               </Button>
             )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

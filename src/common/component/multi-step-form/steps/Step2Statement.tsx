@@ -28,7 +28,7 @@ export default function Step2Statement() {
     });
 
   const witnesses =
-    d.witnesses.length > 0
+    Array.isArray(d?.witnesses) && d.witnesses.length > 0
       ? d.witnesses
       : [
           {
@@ -56,7 +56,7 @@ export default function Step2Statement() {
             <Label className="mb-2 font-semibold">Date of Duty</Label>
             <Input
               type="date"
-              value={d.onDutyDetails.dateOfDuty}
+              value={d.onDutyDetails?.dateOfDuty}
               onChange={(e) =>
                 set("formData.traffic.onDutyDetails.dateOfDuty", e.target.value)
               }
@@ -67,7 +67,7 @@ export default function Step2Statement() {
             <Label className="mb-2 font-semibold">Start Time</Label>
             <Input
               type="time"
-              value={d.onDutyDetails.startTime}
+              value={d.onDutyDetails?.startTime}
               onChange={(e) =>
                 set("formData.traffic.onDutyDetails.startTime", e.target.value)
               }
@@ -78,7 +78,7 @@ export default function Step2Statement() {
             <Label className="mb-2 font-semibold">End Time</Label>
             <Input
               type="time"
-              value={d.onDutyDetails.endTime}
+              value={d.onDutyDetails?.endTime}
               onChange={(e) =>
                 set("formData.traffic.onDutyDetails.endTime", e.target.value)
               }

@@ -1,5 +1,3 @@
-
-
 "use client";
 import { createContext, useContext, useReducer, ReactNode } from "react";
 import { GlobalFormState } from "@/common/types/form.types";
@@ -8,14 +6,15 @@ import { GlobalFormState } from "@/common/types/form.types";
    UNIVERSAL HELPERS
 ------------------------------------ */
 const setByPath = (obj: any, path: string, value: any) => {
-  const keys = path.split(".");
+  const keys = path.match(/[^[.\]]+/g) || [];
   const last = keys.pop()!;
-  const ref = keys.reduce((o, k) => (o[k] ??= {}), obj);
+  const ref = keys.reduce((o, k) => (o[k] ??= isNaN(Number(k)) ? {} : []), obj);
   ref[last] = value;
 };
-
-const getByPath = (obj: any, path: string) =>
-  path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj);
+const getByPath = (obj: any, path: string) => {
+  const keys = path.match(/[^[.\]]+/g) || [];
+  return keys.reduce((o, k) => (o ? o[k] : undefined), obj);
+};
 
 /* ------------------------------------
    INITIAL STATE

@@ -170,7 +170,7 @@ export default function OffenderWithoutVehicleForm({
               }}
             />
             <p className="font-semibold">
-              Does Civilian have any Military Relative?
+              Is this person Dependent /Relative of Millitary Personnel or Other Registered?
             </p>
           </div>
 

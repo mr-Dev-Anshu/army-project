@@ -37,13 +37,14 @@ export default function Step4Remarks() {
       />
       <p className="text-gray-400 mt-4 mb-3">Pre Written Remarks</p>
       {remarkOptions.map((text, i) => (
-        <label key={i} className="flex gap-2">
+        <label key={i} className="flex gap-2 mt-4 ">
           <Checkbox
             checked={selected === i}
             onCheckedChange={() => {
               setSelected(i);
               set(text);
             }}
+            className="mt-2"
           />
           {text}
         </label>

@@ -26,7 +26,8 @@ interface OffenderDynamicFormProps {
 
 const getValueByPath = (obj: any, path?: string) => {
   if (!path) return {};
-  return path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj) || {};
+  const keys = path.match(/[^[.\]]+/g) || [];
+  return keys.reduce((o, k) => (o ? o[k] : undefined), obj) || {};
 };
 
 export default function OffenderDynamicForm({
@@ -56,33 +57,40 @@ export default function OffenderDynamicForm({
     else setLocalData({});
   }, [scope, path]);
 
+
+
   const saveField = (label: string, value: string) => {
-    let targetPath = path;
+  let targetPath = path;
 
-    if (!targetPath && scope === "mp-main")
-      targetPath = "formData.mpReport.individualDetails.tempOffender";
+  if (!targetPath && scope === "mp-main")
+    targetPath = "formData.mpReport.individualDetails.tempOffender";
 
-    if (!targetPath && scope === "mp-additional")
-      targetPath = "formData.mpReport.additionalIndividual.tempOffender";
+  if (!targetPath && scope === "mp-additional")
+    targetPath = "formData.mpReport.additionalIndividual.tempOffender";
 
-    if (!targetPath) return;
+  // ALWAYS UPDATE LOCAL UI FIRST 🔥
+  setLocalData((prev: any) => ({
+    ...(prev || {}),
+    [label]: value,
+  }));
 
-    const prevGlobal = getValueByPath(state, targetPath) || {};
+  // If no path → bas local UI me hi rakho
+  if (!targetPath) return;
 
-    const updated = {
-      ...(localData || {}),
+  const prevGlobal = getValueByPath(state, targetPath) || {};
+
+  dispatch({
+    type: "SET_PATH",
+    path: targetPath,
+    value: {
       ...prevGlobal,
       [label]: value,
-    };
+    },
+  });
+};
 
-    setLocalData(updated);
 
-    dispatch({
-      type: "SET_PATH",
-      path: targetPath,
-      value: updated,
-    });
-  };
+
 
   return (
     <div className="space-y-6 mt-4 bg-white p-6 shadow-sm">
@@ -136,7 +144,7 @@ export default function OffenderDynamicForm({
               }}
               className="mr-2"
             />
-            Was there any Co-Driver / Rider?
+            Was there a Co-Driver or Pillion Rider with the driver/rider?
           </p>
 
           {hasCoDriver && (
@@ -196,7 +204,7 @@ export default function OffenderDynamicForm({
                       }}
                       className="mr-2"
                     />
-                    Kya is Civilian Co-Driver ka koi Military Relative hai?
+                    Is this person Dependent/Relative of Millitary Personnel or Other Registered?
                   </p>
 
                   {civilianRelative && (
