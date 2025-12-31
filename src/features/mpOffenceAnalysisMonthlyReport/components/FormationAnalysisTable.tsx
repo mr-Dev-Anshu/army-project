@@ -154,7 +154,7 @@ export default function FormationAnalysisTable({
 
             {/* Filters Bar */}
             <div className="flex justify-between items-center gap-4 mb-6">
-                <div className="relative w-80">
+                <div className="relative w-80" title="Search by offence type">
                     <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${searchQuery ? "text-blue-500" : "text-gray-400"}`} />
                     <Input
                         placeholder="Search by offence type..."
@@ -166,7 +166,7 @@ export default function FormationAnalysisTable({
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center">
+                    <div className="flex items-center" title="Filter by Offence Type">
                         <Select value={selectedOffenceType} onValueChange={setSelectedOffenceType}>
                             <SelectTrigger className={`h-10 min-w-[230px] max-w-[230px] rounded-md text-gray-700 gap-2 overflow-hidden transition-colors ${selectedOffenceType !== "All" ? "border-blue-500 bg-blue-50/50 ring-1 ring-blue-200" : "bg-white border-gray-300"
                                 }`}>
@@ -186,7 +186,7 @@ export default function FormationAnalysisTable({
                         </Select>
                     </div>
 
-                    <div className="relative">
+                    <div className="relative" title="Filter by Month & Year">
                         <Button
                             variant="outline"
                             onClick={() => dateInputRef.current?.showPicker()}
