@@ -287,25 +287,27 @@ export default function Step2Statement() {
           </div>
         ))}
 
-        <button
-          className="text-blue-600 text-sm ml-200"
-          onClick={() =>
-            set("formData.traffic.witnesses", [
-              ...witnesses,
-              {
-                reportingBlock: {
-                  nameReportingMP: "",
-                  rank: "",
-                  unit: "",
-                  armyNumber: "",
-                  contactNumber: "",
+        <div className="w-full flex justify-end mt-2">
+          <button
+            className="text-blue-600 text-sm sm:text-base"
+            onClick={() =>
+              set("formData.traffic.witnesses", [
+                ...witnesses,
+                {
+                  reportingBlock: {
+                    nameReportingMP: "",
+                    rank: "",
+                    unit: "",
+                    armyNumber: "",
+                    contactNumber: "",
+                  },
                 },
-              },
-            ])
-          }
-        >
-          + Add More Witness
-        </button>
+              ])
+            }
+          >
+            + Add More Witness
+          </button>
+        </div>
       </FormSection>
 
       {/* ================== LIVE WITNESS LIST ================== */}

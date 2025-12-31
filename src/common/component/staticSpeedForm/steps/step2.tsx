@@ -693,25 +693,28 @@ export default function StaticSpeedStep2() {
           </div>
         ))}
 
-        <button
-          className="text-blue-600 ml-200 text-sm"
-          onClick={() =>
-            set("formData.staticSpeed.witnesses", [
-              ...witnesses,
-              {
-                reportingBlock: {
-                  nameReportingMP: "",
-                  rank: "",
-                  unit: "",
-                  armyNumber: "",
-                  contactNumber: "",
-                },
-              },
-            ])
-          }
-        >
-          + Add More Witness
-        </button>
+       <div className="w-full flex justify-end mt-2">
+  <button
+    className="text-blue-600 text-sm sm:text-base"
+    onClick={() =>
+      set("formData.traffic.witnesses", [
+        ...witnesses,
+        {
+          reportingBlock: {
+            nameReportingMP: "",
+            rank: "",
+            unit: "",
+            armyNumber: "",
+            contactNumber: "",
+          },
+        },
+      ])
+    }
+  >
+    + Add More Witness
+  </button>
+</div>
+
       </FormSection>
 
       {/* ================== LIVE WITNESS LIST ================== */}

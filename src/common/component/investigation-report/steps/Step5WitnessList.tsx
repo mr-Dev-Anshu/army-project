@@ -162,15 +162,16 @@ export default function Step5WitnessList() {
         </div>
       )}
 
-      {/* ADD MORE */}
-      <div className="mt-6">
-        <Button
-          className="bg-black text-white cursor-pointer"
-          onClick={() => setShowAddForm(true)}
-        >
-          + Add More Witness
-        </Button>
-      </div>
+    {/* ADD MORE */}
+<div className="mt-6 flex w-full justify-start">
+  <Button
+    className="bg-black text-white cursor-pointer px-4 py-2 text-sm sm:text-base"
+    onClick={() => setShowAddForm(true)}
+  >
+    + Add More Witness
+  </Button>
+</div>
+
 
      
 
