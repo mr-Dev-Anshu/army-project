@@ -89,7 +89,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
     }
 
     return (
-        <div className="p-8 space-y-8 min-h-screen bg-transparent font-sans">
+        <div className="p-2 space-y-8 min-h-screen bg-transparent font-sans">
             {/* Header */}
             <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                 <div className="flex items-center text-sm text-gray-500">
@@ -158,11 +158,9 @@ export default function MpOffenceAnalysisMonthlyReport() {
                             <span>Pending Cases</span>
                             <span className="font-semibold text-gray-900">26</span>
                         </div>
-                        <div className="flex justify-between items-center relative">
+                        <div className="flex justify-between items-center">
                             <span>Severity</span>
                             <span className="font-semibold text-gray-900">High Risk</span>
-                            {/* Purple Indicator */}
-                            <div className="absolute -right-6 top-1/2 -translate-y-1/2 h-5 w-1.5 bg-[#8B5CF6] rounded-l-full" />
                         </div>
                     </div>
 

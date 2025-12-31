@@ -11,13 +11,14 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    ChevronLeft,
-    Filter,
-    MoreVertical,
-    Printer,
     Search,
     ArrowUpDown,
     Calendar,
+    ChevronRight,
+    LineChart,
+    Filter,
+    MoreVertical,
+    Printer,
 } from "lucide-react";
 import { useGetDomesticAnalytics } from "../domesticAnalysis/hooks";
 
@@ -73,34 +74,34 @@ export default function FormationAnalysisTable({
     const uniqueOffenceTypes = Array.from(new Set(tableData.map(d => d.offenceType)));
 
     return (
-        <div className="p-8 space-y-6 min-h-screen bg-transparent font-sans">
+        <div className="space-y-6 min-h-screen ">
             {/* Header / Breadcrumbs */}
-            <div className="flex items-center text-sm text-gray-500 mb-2">
+            <div className="flex items-center text-sm text-gray-500 mb-6 w-full border-b border-gray-300 pb-4">
+                <LineChart className="w-5 h-5 text-gray-500 mr-3" />
+                <div className="h-4 w-px bg-gray-300 mr-3"></div>
+                <span className="text-gray-500">Reports & Analysis</span>
+                <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
                 <span
-                    className="hover:text-gray-700 cursor-pointer flex items-center"
+                    className="hover:text-gray-700 cursor-pointer transition-colors"
                     onClick={onBack}
                 >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Back
-                </span>
-                <span className="mx-2">/</span>
-                <span className="hover:text-gray-700 cursor-pointer" onClick={onBack}>
                     MP Offence Analysis Monthly Report
                 </span>
-                <span className="mx-2">/</span>
+                <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
                 <span className="font-semibold text-gray-900">{formation.groupKey}</span>
             </div>
 
-            <div className="flex justify-between items-start">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-4">
+                    <h1 className="text-lg font-bold text-gray-900">
                         {formation.groupKey}
-                        <span className="text-base font-normal text-gray-500 border-l border-gray-300 pl-3">
-                            {formation.subtitle}
-                        </span>
                     </h1>
+                    <div className="h-5 w-px bg-gray-400"></div>
+                    <span className="text-gray-600">
+                        {formation.subtitle}
+                    </span>
                 </div>
-                <Button className="bg-black text-white hover:bg-gray-800 gap-2">
+                <Button className="bg-black text-white hover:bg-gray-800 gap-2 px-6">
                     Download & Print Report
                     <Printer className="w-4 h-4" />
                 </Button>
@@ -119,7 +120,7 @@ export default function FormationAnalysisTable({
                 <div className="flex items-center gap-3">
                     <div className="flex items-center">
                         <Select defaultValue="All">
-                            <SelectTrigger className="h-10 w-auto min-w-[170px] bg-white border-gray-300 rounded-md text-gray-700 gap-2">
+                            <SelectTrigger className="h-10 min-w-[230px] max-w-[230px] bg-white border-gray-300 rounded-md text-gray-700 gap-2 overflow-hidden">
                                 <div className="flex items-center gap-1">
                                     <span className="text-gray-500">Offence Type:</span>
                                     <SelectValue />
