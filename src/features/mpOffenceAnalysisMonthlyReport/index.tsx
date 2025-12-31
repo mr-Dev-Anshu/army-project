@@ -89,8 +89,8 @@ export default function MpOffenceAnalysisMonthlyReport() {
             <div className="flex justify-between items-center pb-4 border-b border-gray-300">
                 <div className="flex items-center text-sm text-gray-500">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 2V14H14" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M12.6641 6L9.33073 9.33333L6.66406 6.66667L4.66406 8.66667" stroke="#404040" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M2 2V14H14" stroke="#404040" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M12.6641 6L9.33073 9.33333L6.66406 6.66667L4.66406 8.66667" stroke="#404040" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
 
                     <span className="hover:text-gray-700 cursor-pointer ml-2">Reports & Analysis</span>
