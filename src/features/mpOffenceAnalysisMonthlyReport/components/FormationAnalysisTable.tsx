@@ -190,10 +190,10 @@ export default function FormationAnalysisTable({
     return (
         <div className="space-y-6 min-h-screen ">
             {/* Header / Breadcrumbs */}
-            <div className="flex items-center text-sm text-gray-500 mb-6 w-full border-b border-gray-300 pb-4">
-                <LineChart className="w-5 h-5 text-gray-500 mr-3" />
-                <div className="h-4 w-px bg-gray-300 mr-3"></div>
-                <span className="text-gray-500">Reports & Analysis</span>
+            <div className="flex items-center text-sm text-[#404040] mb-6 w-full border-b border-gray-300 pb-4">
+                <LineChart className="w-5 h-5 text-[#404040] mr-3" />
+                <div className="h-4 w-px bg-[#E5E5E5] mr-3"></div>
+                <span className="text-[#404040]">Reports & Analysis</span>
                 <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
                 <span
                     className="hover:text-gray-700 cursor-pointer transition-colors"
@@ -202,20 +202,20 @@ export default function FormationAnalysisTable({
                     MP Offence Analysis Monthly Report
                 </span>
                 <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
-                <span className="font-semibold text-gray-900">{formation.groupKey}</span>
+                <span className="font-semibold text-[#404040]">{formation.groupKey}</span>
             </div>
 
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-4">
-                    <h1 className="text-lg font-bold text-gray-900">
+                    <h1 className="text-lg font-bold text-[#404040]">
                         {formation.groupKey}
                     </h1>
-                    <div className="h-5 w-px bg-gray-400"></div>
-                    <span className="text-gray-600">
+                    <div className="h-5 w-px bg-[#404040]"></div>
+                    <span className=" text-[#404040] font-medium">
                         {formation.subtitle}
                     </span>
                 </div>
-                <Button className="bg-black text-white hover:bg-gray-800 gap-2 px-6">
+                <Button className="bg-black text-white font-medium hover:bg-gray-800 gap-2 px-6 cursor-pointer">
                     Download & Print Report
                     <Printer className="w-4 h-4" />
                 </Button>
@@ -240,7 +240,7 @@ export default function FormationAnalysisTable({
                             <SelectTrigger className={`h-10 min-w-[230px] max-w-[230px] rounded-md text-gray-700 gap-2 overflow-hidden transition-colors ${selectedOffenceType !== "All" ? "border-blue-500 bg-blue-50/50 ring-1 ring-blue-200" : "bg-white border-gray-300"
                                 }`}>
                                 <div className="flex items-center gap-1">
-                                    <span className={selectedOffenceType !== "All" ? "text-blue-700" : "text-gray-500"}>Offence Type:</span>
+                                    <span className={selectedOffenceType !== "All" ? "text-blue-700" : "text-[#404040]"}>Offence Type:</span>
                                     <SelectValue />
                                 </div>
                             </SelectTrigger>
@@ -293,7 +293,10 @@ export default function FormationAnalysisTable({
                             }`}
                         title="Reset Filters"
                     >
-                        <Filter className="w-4 h-4" />
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 11.125C9.41421 11.125 9.75 11.4608 9.75 11.875C9.75 12.2892 9.41421 12.625 9 12.625H6C5.58579 12.625 5.25 12.2892 5.25 11.875C5.25 11.4608 5.58579 11.125 6 11.125H9ZM11.25 6.625C11.6642 6.625 12 6.96079 12 7.375C12 7.78921 11.6642 8.125 11.25 8.125H3.75C3.33579 8.125 3 7.78921 3 7.375C3 6.96079 3.33579 6.625 3.75 6.625H11.25ZM14.25 2.125C14.6642 2.125 15 2.46079 15 2.875C15 3.28921 14.6642 3.625 14.25 3.625H0.75C0.335786 3.625 0 3.28921 0 2.875C0 2.46079 0.335786 2.125 0.75 2.125H14.25Z" fill="#0A0A0A" />
+                        </svg>
+
                     </Button>
                     <Button
                         variant="outline"
@@ -312,15 +315,15 @@ export default function FormationAnalysisTable({
             <div className="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm flex flex-col">
                 <div className="overflow-auto max-h-[460px] relative no-scrollbar">
                     <table className="w-full text-sm text-left border-collapse">
-                        <thead className="bg-[#F9FAFB] text-gray-900 font-semibold border-b border-gray-300 sticky top-0 z-40">
+                        <thead className="bg-[#E5E5E5] text-[#0A0A0A] font-bold border-b border-gray-300 sticky top-0 z-40">
                             <tr>
-                                <th className="py-3 px-4 w-18 border-r border-gray-300 sticky left-0 z-50 bg-[#F9FAFB]">Sr no.</th>
+                                <th className="py-3 px-4 w-18 border-r border-gray-300 sticky left-0 z-50 bg-[#E5E5E5]">Sr no.</th>
                                 <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[200px]">Offence Type</th>
                                 <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[120px]">Total Case</th>
                                 <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[130px]">Action Taken</th>
                                 <th className="py-3 px-4 border-r border-gray-300 whitespace-nowrap min-w-[140px]">Action Pending</th>
                                 <th className="py-3 px-4 border-r border-gray-300 min-w-[200px]">Remark</th>
-                                <th className="py-3 px-4 w-14 sticky right-0 z-50 bg-[#F9FAFB] border-l border-gray-300"></th>
+                                <th className="py-3 px-4 w-14 sticky right-0 z-50 bg-[#E5E5E5] border-l border-gray-300"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
@@ -342,9 +345,9 @@ export default function FormationAnalysisTable({
                             ) : (
                                 filteredTableData.map((row) => (
                                     <tr key={row.id} className="hover:bg-gray-50 group">
-                                        <td className="py-3 px-4 text-center text-gray-500 border-r border-gray-300 sticky left-0 z-30 bg-white group-hover:bg-gray-50">{row.displayId}</td>
+                                        <td className="py-3 px-4 text-center text-gray-500  border-r border-gray-300 sticky left-0 z-30 bg-white group-hover:bg-gray-50">{row.displayId}</td>
 
-                                        <td className="py-3 px-4 font-medium text-gray-900 border-r border-gray-300">{row.offenceType}</td>
+                                        <td className="py-3 px-4 font-medium text-[#404040] border-r border-gray-300">{row.offenceType}</td>
                                         <td className="py-3 px-4 border-r border-gray-300">
                                             {row.totalCase > 0 ? (
                                                 <span className="font-semibold">{String(row.totalCase).padStart(2, '0')}</span>
@@ -411,7 +414,7 @@ export default function FormationAnalysisTable({
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold text-[#404040]">
                                 {editingRemarkId ? "Edit Remark" : "Add Remark"}
                             </h3>
                             <button

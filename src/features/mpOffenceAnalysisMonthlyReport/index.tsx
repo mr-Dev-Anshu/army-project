@@ -87,19 +87,19 @@ export default function MpOffenceAnalysisMonthlyReport() {
         <div className="p-2 space-y-8 min-h-screen bg-transparent font-sans">
             {/* Header */}
             <div className="flex justify-between items-center pb-4 border-b border-gray-300">
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-[#404040]">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M2 2V14H14" stroke="#404040" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                         <path d="M12.6641 6L9.33073 9.33333L6.66406 6.66667L4.66406 8.66667" stroke="#404040" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-
-                    <span className="hover:text-gray-700 cursor-pointer ml-2">Reports & Analysis</span>
+                    <div className="h-4 w-px bg-[#E5E5E5] mx-2"></div>
+                    <span className="hover:text-gray-700 cursor-pointer ml-2 ">Reports & Analysis</span>
                     <ChevronRight className="w-4 h-4 mx-2" />
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-[#0A0A0A]">
                         MP Offence Analysis Monthly Report
                     </span>
                 </div>
-                <Button className="bg-[#007AFF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium">
+                <Button className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer">
                     View Overall Formation Analysis
                     <BarChart3 className="w-4 h-4 ml-1" />
                 </Button>
@@ -107,59 +107,59 @@ export default function MpOffenceAnalysisMonthlyReport() {
 
             {/* Main Formation Section */}
             <div className="space-y-6">
-                <h2 className="text-lg font-bold text-gray-900">
+                <h2 className="text-lg font-bold text-[#0A0A0A]">
                     Formations(HQ 21 CORPS) Analysis Data:
                 </h2>
 
                 {/* Command Info Bar */}
-                <div className="bg-black text-white py-4 px-6 rounded-md flex flex-wrap items-center gap-x-8 gap-y-2 text-sm shadow-md">
+                <div className="bg-black text-white py-4 px-6 rounded-md flex flex-wrap items-center justify-between gap-x-8 gap-y-2 text-sm shadow-md">
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-400 font-light">Command:</span>
-                        <span className="font-semibold">Central Command</span>
+                        <span className="text-[#E5E5E5] font-medium">Command:</span>
+                        <span className="font-semibold text-[#FFFFFF]">Central Command</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-400 font-light">Formation:</span>
-                        <span className="font-semibold">21 Corps</span>
+                        <span className="text-[#E5E5E5] font-medium">Formation:</span>
+                        <span className="font-semibold text-[#FFFFFF]">21 Corps</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-400 font-light">Unit:</span>
-                        <span className="font-semibold">Provost Unit</span>
+                        <span className="text-[#E5E5E5] font-medium">Unit:</span>
+                        <span className="font-semibold text-[#FFFFFF]">Provost Unit</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-400 font-light">C/O:</span>
-                        <span className="font-semibold">56 APO</span>
+                        <span className="text-[#E5E5E5] font-medium">C/O:</span>
+                        <span className="font-semibold text-[#FFFFFF]">56 APO</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-400 font-light">Station:</span>
-                        <span className="font-semibold">Bhopal</span>
+                        <span className="text-[#E5E5E5] font-medium">Station:</span>
+                        <span className="font-semibold text-[#FFFFFF]">Bhopal</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-400 font-light">State:</span>
-                        <span className="font-semibold">Madhya Pradesh</span>
+                        <span className="text-[#E5E5E5] font-medium">State:</span>
+                        <span className="font-semibold text-[#FFFFFF]">Madhya Pradesh</span>
                     </div>
                 </div>
 
                 {/* Main Card */}
                 <div className="bg-white border border-gray-200 rounded-xl p-5  shadow-sm w-full max-w-[340px] hover:shadow-md transition-shadow relative overflow-hidden">
                     <div className="mb-8">
-                        <h3 className="font-bold text-xl text-gray-900">HQ 21 CORPS</h3>
-                        <p className="text-gray-500 text-sm font-bold mt-1">
+                        <h3 className="font-bold text-xl text-[#0A0A0A]">HQ 21 CORPS</h3>
+                        <p className="text-[#737373] text-sm font-bold mt-1">
                             21 Corps Provost Unit
                         </p>
                     </div>
 
-                    <div className="space-y-4 text-base text-gray-500">
+                    <div className="space-y-4 text-base text-[#737373]">
                         <div className="flex justify-between items-center">
                             <span>Total Offence</span>
-                            <span className="font-semibold text-gray-900">{totalOffences}</span>
+                            <span className="font-normal text-[#0A0A0A]">{totalOffences}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span>Pending Cases</span>
-                            <span className="font-semibold text-gray-900">{totalPending}</span>
+                            <span className="font-normal text-[#0A0A0A]">{totalPending}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span>Severity</span>
-                            <span className={`font-semibold ${severity === 'High Risk' ? 'text-red-600' : severity === 'Medium Risk' ? 'text-amber-600' : 'text-green-600'}`}>
+                            <span className={`font-normal ${severity === 'High Risk' ? 'text-red-600' : severity === 'Medium Risk' ? 'text-amber-600' : 'text-green-600'}`}>
                                 {severity}
                             </span>
                         </div>
@@ -168,7 +168,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                     <div className="mt-8 flex justify-end">
                         <Button
                             size="icon"
-                            className="bg-[#007AFF] hover:bg-blue-600 rounded-lg w-10 h-10 shadow-sm"
+                            className="bg-[#0088FF] hover:bg-blue-600 rounded-lg w-10 h-10 shadow-sm cursor-pointer"
                             onClick={() =>
                                 setSelectedFormation({
                                     groupKey: "HQ 21 CORPS",
@@ -184,10 +184,10 @@ export default function MpOffenceAnalysisMonthlyReport() {
             {/* Other Formations Section */}
             <div className="space-y-6 pt-4">
                 <div className="flex justify-between items-end border-b border-gray-100 pb-2">
-                    <h2 className="text-lg font-bold text-gray-900">
+                    <h2 className="text-lg font-bold text-[#0A0A0A]">
                         Other Formations Analysis Data:
                     </h2>
-                    <span className="text-sm font-bold text-gray-900">04 Divisions</span>
+                    <span className="text-sm font-bold text-[#0A0A0A]">04 Divisions</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -226,24 +226,24 @@ function FormationCard({
     return (
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
             <div className="mb-4">
-                <h3 className="font-bold text-lg text-gray-900 break-words">{title}</h3>
+                <h3 className="font-bold text-lg text-[#0A0A0A] break-words">{title}</h3>
                 <p className="text-gray-500 text-xs font-medium uppercase mt-1">
                     {subtitle}
                 </p>
             </div>
 
-            <div className="space-y-2 text-sm text-gray-600">
+            <div className="space-y-2 text-sm text-[#737373]">
                 <div className="flex justify-between items-center">
                     <span>Total Offence</span>
-                    <span className="font-bold text-gray-900">{totalOffence}</span>
+                    <span className="font-normal text-[#0A0A0A]">{totalOffence}</span>
                 </div>
                 <div className="flex justify-between items-center">
                     <span>Pending Cases</span>
-                    <span className="font-bold text-gray-900">{pendingCases}</span>
+                    <span className="font-normal text-[#0A0A0A]">{pendingCases}</span>
                 </div>
                 <div className="flex justify-between items-center">
                     <span>Severity</span>
-                    <span className="font-bold text-gray-900">{severity}</span>
+                    <span className="font-normal text-[#0A0A0A]">{severity}</span>
                 </div>
             </div>
 
@@ -251,8 +251,8 @@ function FormationCard({
                 <Button
                     size="icon"
                     variant="secondary"
-                    className="bg-black hover:bg-gray-800 text-white rounded-lg w-10 h-10"
-                    onClick={onClick}
+                    className="bg-black hover:bg-gray-800 text-white rounded-lg w-10 h-10 cursor-pointer"
+                // onClick={onClick}
                 >
                     <ArrowRight className="w-5 h-5" />
                 </Button>
