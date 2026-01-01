@@ -94,229 +94,237 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
         </div>
 
         {/* 1. PARTICULARS */}
-        <div className="mb-6">
-          <h2 className="font-bold text-xs mb-4">1. &nbsp;&nbsp; <span className="underline">PARTICULARS:</span></h2>
+        {(Object.values(particulars.primary).some(val => val) || particulars.secondary || particulars.vehicle) && (
+          <div className="mb-6">
+            <h2 className="font-bold text-xs mb-4">1. &nbsp;&nbsp; <span className="underline">PARTICULARS:</span></h2>
 
-          {/* 1.1 Primary Person */}
-          <div className="border border-gray-300 mb-4 rounded-sm bg-gray-50/30">
-            <div className="p-4 pb-2">
-              <div className="grid grid-cols-12 gap-x-4">
-                <div className="col-span-1 text-xs text-[#0A0A0A]">(1.1)</div>
-                <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                  {particulars.primary.aadharCardNo && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Aadhar Card No.</span>
-                      <span className="text-xs">{particulars.primary.aadharCardNo}</span>
-                    </div>
-                  )}
-                  {particulars.primary.so && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">S/O</span>
-                      <span className="text-xs">{particulars.primary.so}</span>
-                    </div>
-                  )}
+            {/* 1.1 Primary Person */}
+            {/* Check if any "1.1" specific fields are present */}
+            {(particulars.primary.aadharCardNo || particulars.primary.so || particulars.primary.name || particulars.primary.relation) && (
+              <div className="border border-gray-300 mb-4 rounded-sm bg-gray-50/30">
+                <div className="p-4 pb-2">
+                  <div className="grid grid-cols-12 gap-x-4">
+                    <div className="col-span-1 text-xs text-[#0A0A0A]">(1.1)</div>
+                    <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
+                      {particulars.primary.aadharCardNo && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-xs text-[#0A0A0A]">Aadhar Card No.</span>
+                          <span className="text-xs">{particulars.primary.aadharCardNo}</span>
+                        </div>
+                      )}
+                      {particulars.primary.so && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-xs text-[#0A0A0A]">S/O</span>
+                          <span className="text-xs">{particulars.primary.so}</span>
+                        </div>
+                      )}
 
-                  {particulars.primary.name && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
-                      <span className="text-xs">{particulars.primary.name}</span>
+                      {particulars.primary.name && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
+                          <span className="text-xs">{particulars.primary.name}</span>
+                        </div>
+                      )}
+                      {particulars.primary.relation && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-xs text-[#0A0A0A]">Name the Relation</span>
+                          <span className="text-xs">{particulars.primary.relation}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {particulars.primary.relation && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Name the Relation</span>
-                      <span className="text-xs">{particulars.primary.relation}</span>
+                  </div>
+                </div>
+
+                {/* Sub-block 1.1.1 */}
+                {(particulars.primary.armyNo || particulars.primary.rank || particulars.primary.unit || particulars.primary.fmn || particulars.primary.command || particulars.primary.address || particulars.primary.iCardNo) && (
+                  <>
+                    <hr className="border-t border-gray-300 mx-4 opacity-50" />
+                    <div className="p-4 pt-2">
+                      <div className="grid grid-cols-12 gap-x-4">
+                        <div className="col-span-1 text-xs text-[#0A0A0A]">(1.1.1)</div>
+                        <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
+                          {particulars.primary.armyNo && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">Army No.</span>
+                              <span className="text-xs">{particulars.primary.armyNo}</span>
+                            </div>
+                          )}
+                          {particulars.primary.rank && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">Rank</span>
+                              <span className="text-xs">{particulars.primary.rank}</span>
+                            </div>
+                          )}
+
+                          {particulars.primary.name && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
+                              <span className="text-xs">{particulars.primary.name}</span>
+                            </div>
+                          )}
+                          {particulars.primary.unit && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">Unit</span>
+                              <span className="text-xs">{particulars.primary.unit}</span>
+                            </div>
+                          )}
+
+                          {particulars.primary.fmn && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">FMN</span>
+                              <span className="text-xs">{particulars.primary.fmn}</span>
+                            </div>
+                          )}
+                          {particulars.primary.command && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">Command</span>
+                              <span className="text-xs">{particulars.primary.command}</span>
+                            </div>
+                          )}
+
+                          {particulars.primary.address && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">Address</span>
+                              <span className="text-xs">{particulars.primary.address}</span>
+                            </div>
+                          )}
+                          {particulars.primary.iCardNo && (
+                            <div className="grid grid-cols-[140px_1fr] items-baseline">
+                              <span className="font-bold text-xs text-[#0A0A0A]">I Card No.</span>
+                              <span className="text-xs">{particulars.primary.iCardNo}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* 1.2 Secondary Person (Optional) */}
+            {particulars.secondary && (
+              <div className="border border-gray-300 mb-4 rounded-sm bg-gray-50/30">
+                <div className="p-4 pb-2">
+                  <div className="grid grid-cols-12 gap-x-4">
+                    <div className="col-span-1 text-[#0A0A0A] text-xs">(1.2)</div>
+                    <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
+                      {particulars.secondary.aadharCardNo && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Aadhar Card No.</span>
+                          <span className="text-xs">{particulars.secondary.aadharCardNo}</span>
+                        </div>
+                      )}
+                      {particulars.secondary.so && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">S/O</span>
+                          <span className="text-xs">{particulars.secondary.so}</span>
+                        </div>
+                      )}
+
+                      {particulars.secondary.name && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
+                          <span className="text-xs">{particulars.secondary.name}</span>
+                        </div>
+                      )}
+                      {particulars.secondary.relation && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Name the Relation</span>
+                          <span className="text-xs">{particulars.secondary.relation}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <hr className="border-t border-gray-300 mx-4 opacity-50" />
+
+                <div className="p-4 pt-2">
+                  <div className="grid grid-cols-12 gap-x-4">
+                    <div className="col-span-1 text-[#0A0A0A] text-xs">(1.2.1)</div>
+                    <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
+                      {particulars.secondary.armyNo && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Army No.</span>
+                          <span className="text-xs">{particulars.secondary.armyNo}</span>
+                        </div>
+                      )}
+                      {particulars.secondary.rank && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Rank</span>
+                          <span className="text-xs">{particulars.secondary.rank}</span>
+                        </div>
+                      )}
+
+                      {particulars.secondary.name && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
+                          <span className="text-xs">{particulars.secondary.name}</span>
+                        </div>
+                      )}
+                      {particulars.secondary.unit && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Unit</span>
+                          <span className="text-xs">{particulars.secondary.unit}</span>
+                        </div>
+                      )}
+
+                      {particulars.secondary.fmn && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">FMN</span>
+                          <span className="text-xs">{particulars.secondary.fmn}</span>
+                        </div>
+                      )}
+                      {particulars.secondary.command && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Command</span>
+                          <span className="text-xs">{particulars.secondary.command}</span>
+                        </div>
+                      )}
+
+                      {particulars.secondary.address && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">Address</span>
+                          <span className="text-xs">{particulars.secondary.address}</span>
+                        </div>
+                      )}
+                      {particulars.secondary.iCardNo && (
+                        <div className="grid grid-cols-[140px_1fr] items-baseline">
+                          <span className="font-bold text-[#0A0A0A] text-xs">I Card No.</span>
+                          <span className="text-xs">{particulars.secondary.iCardNo}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <hr className="border-t border-gray-300 mx-4 opacity-50" />
-
-            {/* Sub-block 1.1.1 */}
-            <div className="p-4 pt-2">
-              <div className="grid grid-cols-12 gap-x-4">
-                <div className="col-span-1 text-xs text-[#0A0A0A]">(1.1.1)</div>
-                <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                  {particulars.primary.armyNo && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Army No.</span>
-                      <span className="text-xs">{particulars.primary.armyNo}</span>
-                    </div>
-                  )}
-                  {particulars.primary.rank && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Rank</span>
-                      <span className="text-xs">{particulars.primary.rank}</span>
-                    </div>
-                  )}
-
-                  {particulars.primary.name && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
-                      <span className="text-xs">{particulars.primary.name}</span>
-                    </div>
-                  )}
-                  {particulars.primary.unit && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Unit</span>
-                      <span className="text-xs">{particulars.primary.unit}</span>
-                    </div>
-                  )}
-
-                  {particulars.primary.fmn && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">FMN</span>
-                      <span className="text-xs">{particulars.primary.fmn}</span>
-                    </div>
-                  )}
-                  {particulars.primary.command && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Command</span>
-                      <span className="text-xs">{particulars.primary.command}</span>
-                    </div>
-                  )}
-
-                  {particulars.primary.address && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">Address</span>
-                      <span className="text-xs">{particulars.primary.address}</span>
-                    </div>
-                  )}
-                  {particulars.primary.iCardNo && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-xs text-[#0A0A0A]">I Card No.</span>
-                      <span className="text-xs">{particulars.primary.iCardNo}</span>
-                    </div>
-                  )}
+            {/* 1.3 Vehicle Details (Optional) */}
+            {particulars.vehicle && (
+              <div className="border border-gray-300 mb-4 rounded-sm bg-gray-50/30 p-4">
+                <div className="grid grid-cols-12 gap-x-4 items-center">
+                  <div className="col-span-1 text-[#0A0A0A] text-xs">(1.3)</div>
+                  <div className="col-span-11 grid grid-cols-2 gap-x-8">
+                    {particulars.vehicle.baNo && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">DD Veh. BA No.</span>
+                        <span className="text-xs">{particulars.vehicle.baNo}</span>
+                      </div>
+                    )}
+                    {particulars.vehicle.makeAndTake && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Make & Take</span>
+                        <span className="text-xs">{particulars.vehicle.makeAndTake}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-
-          {/* 1.2 Secondary Person (Optional) */}
-          {particulars.secondary && (
-            <div className="border border-gray-300 mb-4 rounded-sm bg-gray-50/30">
-              <div className="p-4 pb-2">
-                <div className="grid grid-cols-12 gap-x-4">
-                  <div className="col-span-1 text-[#0A0A0A] text-xs">(1.2)</div>
-                  <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                    {particulars.secondary.aadharCardNo && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Aadhar Card No.</span>
-                        <span className="text-xs">{particulars.secondary.aadharCardNo}</span>
-                      </div>
-                    )}
-                    {particulars.secondary.so && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">S/O</span>
-                        <span className="text-xs">{particulars.secondary.so}</span>
-                      </div>
-                    )}
-
-                    {particulars.secondary.name && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
-                        <span className="text-xs">{particulars.secondary.name}</span>
-                      </div>
-                    )}
-                    {particulars.secondary.relation && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Name the Relation</span>
-                        <span className="text-xs">{particulars.secondary.relation}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <hr className="border-t border-gray-300 mx-4 opacity-50" />
-
-              <div className="p-4 pt-2">
-                <div className="grid grid-cols-12 gap-x-4">
-                  <div className="col-span-1 text-[#0A0A0A] text-xs">(1.2.1)</div>
-                  <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                    {particulars.secondary.armyNo && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Army No.</span>
-                        <span className="text-xs">{particulars.secondary.armyNo}</span>
-                      </div>
-                    )}
-                    {particulars.secondary.rank && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Rank</span>
-                        <span className="text-xs">{particulars.secondary.rank}</span>
-                      </div>
-                    )}
-
-                    {particulars.secondary.name && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
-                        <span className="text-xs">{particulars.secondary.name}</span>
-                      </div>
-                    )}
-                    {particulars.secondary.unit && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Unit</span>
-                        <span className="text-xs">{particulars.secondary.unit}</span>
-                      </div>
-                    )}
-
-                    {particulars.secondary.fmn && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">FMN</span>
-                        <span className="text-xs">{particulars.secondary.fmn}</span>
-                      </div>
-                    )}
-                    {particulars.secondary.command && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Command</span>
-                        <span className="text-xs">{particulars.secondary.command}</span>
-                      </div>
-                    )}
-
-                    {particulars.secondary.address && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">Address</span>
-                        <span className="text-xs">{particulars.secondary.address}</span>
-                      </div>
-                    )}
-                    {particulars.secondary.iCardNo && (
-                      <div className="grid grid-cols-[140px_1fr] items-baseline">
-                        <span className="font-bold text-[#0A0A0A] text-xs">I Card No.</span>
-                        <span className="text-xs">{particulars.secondary.iCardNo}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 1.3 Vehicle Details (Optional) */}
-          {particulars.vehicle && (
-            <div className="border border-gray-300 mb-4 rounded-sm bg-gray-50/30 p-4">
-              <div className="grid grid-cols-12 gap-x-4 items-center">
-                <div className="col-span-1 text-[#0A0A0A] text-xs">(1.3)</div>
-                <div className="col-span-11 grid grid-cols-2 gap-x-8">
-                  {particulars.vehicle.baNo && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">DD Veh. BA No.</span>
-                      <span className="text-xs">{particulars.vehicle.baNo}</span>
-                    </div>
-                  )}
-                  {particulars.vehicle.makeAndTake && (
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Make & Take</span>
-                      <span className="text-xs">{particulars.vehicle.makeAndTake}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* 2. STATEMENT OF EVIDENCE/OCCURRENCE */}
         {occurrence.dateOfDuty && (
