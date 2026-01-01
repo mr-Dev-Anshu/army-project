@@ -123,8 +123,10 @@ export default function TemporaryHiredWorkerPassForm({
       });
     }
 
-    if (initialData?._id) {
-      updateWorker({ id: initialData._id, data: sanitizedData }, {
+    const idToUpdate = (tempWorker as any)._id || (initialData as any)?._id;
+
+    if (idToUpdate) {
+      updateWorker({ id: idToUpdate, data: sanitizedData }, {
         onSuccess: () => {
           toast.success("Temporary Hired Worker Security Pass Updated!");
           onSuccess();
@@ -446,7 +448,7 @@ export default function TemporaryHiredWorkerPassForm({
         <div className="flex justify-between gap-4">
           <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
           <Button onClick={handleSave} className="bg-[#0088FF] cursor-pointer  hover:bg-blue-700 px-8" disabled={isPending}>
-            {isPending ? "Saving..." : "Save & Generate"}
+            {isPending ? (isUpdating ? "Updating..." : "Saving...") : (((tempWorker as any)._id || (initialData as any)?._id) ? "Update & Generate" : "Save & Generate")}
           </Button>
         </div>
       </div>

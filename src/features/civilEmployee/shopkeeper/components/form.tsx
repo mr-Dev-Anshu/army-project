@@ -196,7 +196,10 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
     }
 
 
-    if (initialData?._id) {
+    // Check for ID in either shopkeeper state or initialData to determine if this is an update
+    const idToUpdate = (shopkeeper as any)._id || (initialData as any)?._id;
+
+    if (idToUpdate) {
       // Remove fields that should not be sent in update
       const { _id, createdAt, updatedAt, __v, ...shopkeeperData } = shopkeeper as any;
 
@@ -208,15 +211,17 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
         });
       }
 
-      updateShopkeeper({ id: initialData._id, data: shopkeeperData }, {
+      updateShopkeeper({ id: idToUpdate, data: shopkeeperData }, {
         onSuccess: () => {
           toast.success("Security Pass Entry Updated!");
           handleReset();
           onSuccess?.();
         },
-        onError: (error) => {
+        onError: (error: any) => {
           console.error("Error updating shopkeeper pass:", error);
-          toast.error("Failed to update pass. Please try again.");
+          // Handle specific error messages if available
+          const errorMessage = error.response?.data?.error || "Failed to update pass. Please try again.";
+          toast.error(typeof errorMessage === 'string' ? errorMessage : "Failed to update pass.");
         }
       });
     } else {
@@ -530,7 +535,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
         <div className="flex justify-between gap-4">
           <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
           <Button onClick={handleSave} className="bg-[#0088FF] cursor-pointer  hover:bg-blue-700 px-8" disabled={isPending}>
-            {isPending ? "Saving..." : "Save & Generate"}
+            {isPending ? (isUpdating ? "Updating..." : "Saving...") : (((shopkeeper as any)._id || (initialData as any)?._id) ? "Update & Generate" : "Save & Generate")}
           </Button>
         </div>
       </div>
