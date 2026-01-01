@@ -121,7 +121,6 @@ const mapMpToReport = (mp: any) => {
 };
 
 
-
   const onSubmitFinal = async () => {
     try {
       const mp = state.formData.mpReport;
@@ -241,67 +240,47 @@ const mapMpToReport = (mp: any) => {
 
   // ================= RIGHT PANEL STEP CONFIG =================
   const stepsConfig = {
-    1: { title: "Report Details", component: <Step1ReportDetails /> },
+    1: { title: " 1. REPORT DETAILS :", component: <Step1ReportDetails /> },
 
-    2: { title: "MP Particulars", component: <Step2 /> },
+    2: { title: "2. MP PARTICULARS :", component: <Step2 /> },
 
     3: {
-      title: "Occurrence Details",
+      title: "3. OCCURENCE DETAILS : ",
       component: <Step3OccurrenceDetails />,
     },
     4: {
-      title: "Details of Individual",
+      title: "4. DETAILS OF INDIVIDUALS :",
       component: <Step4IndividualDetails />,
     },
     5: {
-      title: "Witness",
+      title: "5. WITNESS LIST :",
       component: <Step5WitnessList />,
     },
     6: {
-      title: "Evidence",
+      title: "6. EVIDENCE :",
       component: <Step6Evidence />,
     },
     7: {
-      title: "Documents",
+      title: "7. DOCUMENTS :",
       component: <Step7Documents />,
     },
     8: {
-      title: "Detailed Occurrence Report",
+      title: "8. DETAILED OCCURRENCE REPORT :",
       component: <Step8DetailedOccurrence />,
     },
     9: {
-      title: "Points found during investigation",
+      title: "9. POINTS FIND OUT DURING INVESTIGATION :",
       component: <Step9InvestigationPoints />,
     },
     10: {
-      title: "Opinion",
+      title: "10. OPINION :",
       component: <Step10Opinion />,
     },
     11: {
-      title: "Remarks of CO/21C Provost Unit",
+      title: "11. REMARKS OF CO/21C PROVOST UNIT :",
       component: <Step11Remarks />,
     },
   };
-
-
-  if (state.preview) {
-  return (
-    <div className="relative">
-      {/* CLOSE BUTTON */}
-      <button
-        onClick={() => dispatch({ type: "SET_PREVIEW", payload: false })}
-        className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 rounded"
-      >
-        Close Preview
-      </button>
-
-      <MpOccurrenceReport
-        {...mapMpToReport(state.formData.mpReport)}
-      />
-    </div>
-  );
-}
-
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 w-full px-6">
       <div className="w-full bg-white rounded-lg overflow-hidden h-full">
@@ -327,6 +306,7 @@ const mapMpToReport = (mp: any) => {
             onSubmitFinal={onSubmitFinal}
             stepsConfig={stepsConfig}
             mode="mp"
+            mapMpToReport={mapMpToReport}
           />
         </div>
       </div>

@@ -111,7 +111,7 @@ export default function Step4IndividualDetails() {
   };
 
   return (
-    <FormSection title="4. DETAILS OF INDIVIDUAL:">
+    <FormSection title="">
       <p className="font-semibold">MP must verify personal particulars</p>
       <p className="text-sm text-gray-500">
         (To be read out to the Offender(s) by the MP…)

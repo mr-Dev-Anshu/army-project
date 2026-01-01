@@ -16,6 +16,7 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
+import { StaticSpeedState } from "@/common/types/form.types";
 
 export default function StaticSpeedForm() {
   const { state, dispatch } = useForm();
@@ -256,7 +257,7 @@ export default function StaticSpeedForm() {
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            setFormData={(data) => {
+            setFormData={(data:StaticSpeedState) => {
               Object.keys(data).forEach((key) => {
                 dispatch({
                   type: "SET_PATH",

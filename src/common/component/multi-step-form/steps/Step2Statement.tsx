@@ -3,7 +3,6 @@
 import { Input } from "@/components/ui/input";
 import { FormSection } from "../../FormSection";
 import { useForm } from "@/context/FormContext";
-import { Label } from "@radix-ui/react-label";
 import { FormTextarea } from "../../FormTextarea";
 import { FormInput } from "../../FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
@@ -15,6 +14,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function Step2Statement() {
   const { state, dispatch } = useForm();
@@ -51,6 +51,10 @@ export default function Step2Statement() {
     <div className="space-y-10">
       {/* ================== ON DUTY DETAILS ================== */}
       <FormSection title="On-Duty Details">
+        <p className="text-gray-600 -mt-8 mb-4">
+          Enter when and where the witness was on duty while reporting the
+          offence.
+        </p>
         <div className="grid grid-cols-3 gap-4">
           <div>
             <Label className="mb-2 font-semibold">Date of Duty</Label>
@@ -86,7 +90,7 @@ export default function Step2Statement() {
           </div>
         </div>
 
-        <Label className="mt-3 font-semibold">Duty Location</Label>
+        <Label className="mt-3 mb-2 font-semibold">Duty Location</Label>
         <SuggestionInput
           placeholder="Duty Location"
           value={d.onDutyDetails.dutyLocation}
@@ -96,7 +100,7 @@ export default function Step2Statement() {
           fieldType="dutyLocation"
         />
 
-        <Label className="mt-3 font-semibold">Duty Type</Label>
+        <Label className="mt-3 mb-2 font-semibold">Duty Type</Label>
         <SuggestionInput
           placeholder="Duty Type"
           value={d.onDutyDetails.dutyType}
@@ -131,44 +135,28 @@ export default function Step2Statement() {
 
           <div>
             <Label className="mb-2 font-semibold">Rank</Label>
-            <Select
+            <SuggestionInput
+              placeholder="Rank"
               value={d.onDutyDetailsMPReporting.rank}
-              onValueChange={(v) =>
+              onChange={(v) =>
                 set("formData.traffic.onDutyDetailsMPReporting.rank", v)
               }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Rank" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Lieutenant">Lieutenant</SelectItem>
-                <SelectItem value="Captain">Captain</SelectItem>
-                <SelectItem value="Major">Major</SelectItem>
-                <SelectItem value="Colonel">Colonel</SelectItem>
-              </SelectContent>
-            </Select>
+              fieldType="rank"
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
             <Label className="mb-2 font-semibold">Unit</Label>
-            <Select
+            <SuggestionInput
+              placeholder="Unit"
               value={d.onDutyDetailsMPReporting.unit}
-              onValueChange={(v) =>
+              onChange={(v) =>
                 set("formData.traffic.onDutyDetailsMPReporting.unit", v)
               }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Unit" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="MP Unit 12">MP Unit 12</SelectItem>
-                <SelectItem value="Unit 2">Unit 2</SelectItem>
-                <SelectItem value="Unit 3">Unit 3</SelectItem>
-              </SelectContent>
-            </Select>
+              fieldType="unit"
+            />
           </div>
 
           <div>
@@ -199,7 +187,7 @@ export default function Step2Statement() {
         {witnesses.map((w, i) => (
           <div
             key={i}
-            className="border grid grid-cols-2 space-x-4 p-4 rounded-lg space-y-4 mb-6"
+            className=" grid grid-cols-2 space-x-4 p-4 rounded-lg space-y-4 mb-6"
           >
             <div>
               <Label className="mb-2 font-semibold">Witnessing MP Name</Label>
@@ -216,47 +204,30 @@ export default function Step2Statement() {
 
             <div>
               <Label className="mb-2 font-semibold">Rank</Label>
-              <Select
+              <SuggestionInput
+                placeholder="Rank"
                 value={w.reportingBlock.rank}
-                onValueChange={(v) => {
+                onChange={(v) => {
                   const copy = structuredClone(witnesses);
                   copy[i].reportingBlock.rank = v;
                   set("formData.traffic.witnesses", copy);
                 }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Rank" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="L/Nk">L/Nk</SelectItem>
-                  <SelectItem value="Nk">Nk</SelectItem>
-                  <SelectItem value="Hav">Hav</SelectItem>
-                  <SelectItem value="Subedar">Subedar</SelectItem>
-                </SelectContent>
-              </Select>
+                fieldType="rank"
+              />
             </div>
 
             <div>
               <Label className="mb-2 font-semibold">Unit</Label>
-              <Select
+              <SuggestionInput
+                placeholder="Unit"
                 value={w.reportingBlock.unit}
-                onValueChange={(v) => {
+                onChange={(v) => {
                   const copy = structuredClone(witnesses);
                   copy[i].reportingBlock.unit = v;
                   set("formData.traffic.witnesses", copy);
                 }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Unit" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="11 Engr Regt">11 Engr Regt</SelectItem>
-                  <SelectItem value="MP 12">MP 12</SelectItem>
-                  <SelectItem value="HQ Unit">HQ Unit</SelectItem>
-                </SelectContent>
-              </Select>
+                fieldType="unit"
+              />
             </div>
 
             <div>

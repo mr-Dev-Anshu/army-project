@@ -6,6 +6,7 @@ export interface VehicleDetailsState {
   vehicleType: string;
   driverType: string;
   vehicleName: string;
+  vehicleNumber:string;
 }
 
 /* ================= OFFENDER ================= */
@@ -65,9 +66,11 @@ export interface Witness {
 export interface TrafficState {
  vehicleInvolved: "yes" | "no" | "";
   remarks: string;
+  description?:string;
 
   coDriverOrPillion?: boolean;
   coDriverType?: string;
+  offenceType?:string;
 
   vehicleDetails: {
     category: string;
@@ -96,7 +99,10 @@ selectedWitness: number | null;
 
 /* ================= STATIC SPEED (BEST STRUCTURE) ================= */
 export interface StaticSpeedState {
- vehicleInvolved: "yes" | "no" | ""; 
+ vehicleInvolved: "yes" | "no" | "";
+ remarks:string;
+ offenceType?:string; 
+ description?:string;
   vehicleDetails: {
     category: string;
     vehicleType: string;

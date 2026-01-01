@@ -83,19 +83,16 @@ export function FormInput({
 }: FormInputProps) {
   return (
     <div className="space-y-1">
-      <Label>{label}</Label>
-     <Input
-  type={type}
-  placeholder={placeholder}
-  value={value}
-  onChange={(e) => onChange?.(e.target.value)}
-  className={
-    value && value.toString().trim() !== ""
-      ? "!border-blue-500 "
-      : ""
-  }
-/>
-
+      <Label className="mb-3">{label}</Label>
+      <Input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        className={
+          value && value.toString().trim() !== "" ? "!border-blue-500 " : ""
+        }
+      />
     </div>
   );
 }

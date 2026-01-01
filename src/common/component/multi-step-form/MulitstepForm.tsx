@@ -197,7 +197,7 @@ export default function MultiStepForm() {
         return v;
       };
 
-      const date = safe(traffic?.onDutyDetails?.dateOfDuty, null);
+      const date = safe(traffic?.onDutyDetails?.dateOfDuty);
 
       const toISO = (time?: string) => {
         if (!date || !time) return undefined;
@@ -213,9 +213,9 @@ export default function MultiStepForm() {
         isVehicleInvolved: traffic?.vehicleInvolved === "yes",
 
         onDutyDetails: {
-          dateOfDuty: safe(traffic?.onDutyDetails?.dateOfDuty, null),
-          dutyLocation: safe(traffic?.onDutyDetails?.dutyLocation, null),
-          dutyType: safe(traffic?.onDutyDetails?.dutyType, null),
+          dateOfDuty: safe(traffic?.onDutyDetails?.dateOfDuty),
+          dutyLocation: safe(traffic?.onDutyDetails?.dutyLocation),
+          dutyType: safe(traffic?.onDutyDetails?.dutyType),
           startTime: toISO(traffic?.onDutyDetails?.startTime),
           endTime: toISO(traffic?.onDutyDetails?.endTime),
         },
@@ -224,14 +224,14 @@ export default function MultiStepForm() {
           nameReportingMP: safe(
             traffic?.onDutyDetailsMPReporting?.nameReportingMP
           ),
-          rank: safe(traffic?.onDutyDetailsMPReporting?.rank, null),
-          unit: safe(traffic?.onDutyDetailsMPReporting?.unit, null),
-          armyNumber: safe(traffic?.onDutyDetailsMPReporting?.armyNumber, null),
+          rank: safe(traffic?.onDutyDetailsMPReporting?.rank),
+          unit: safe(traffic?.onDutyDetailsMPReporting?.unit),
+          armyNumber: safe(traffic?.onDutyDetailsMPReporting?.armyNumber),
           contactNumber: safe(traffic?.onDutyDetailsMPReporting?.contactNumber),
         },
 
         offenceOccurenceDetails: {
-          description: safe(traffic?.offenceOccurenceDetails?.description, ""),
+          description: safe(traffic?.offenceOccurenceDetails?.description),
           description2: safe(traffic?.offenceOccurenceDetails?.description2),
           incidentLocation: safe(
             traffic?.offenceOccurenceDetails?.incidentLocation
@@ -310,11 +310,11 @@ export default function MultiStepForm() {
       if (Array.isArray(traffic?.witnesses) && traffic?.witnesses?.length > 0) {
         const witnessPayload = traffic.witnesses.map((w) => ({
           offenceId,
-          rank: safe(w?.reportingBlock?.rank, null),
-          unit: safe(w?.reportingBlock?.unit, null),
-          ArmyNo: safe(w?.reportingBlock?.armyNumber, null),
-          name: safe(w?.reportingBlock?.nameReportingMP, null),
-          contactNumber: safe(w?.reportingBlock?.contactNumber, null),
+          rank: safe(w?.reportingBlock?.rank),
+          unit: safe(w?.reportingBlock?.unit),
+          ArmyNo: safe(w?.reportingBlock?.armyNumber),
+          name: safe(w?.reportingBlock?.nameReportingMP),
+          contactNumber: safe(w?.reportingBlock?.contactNumber),
         }));
 
         console.log("👀 SAFE WITNESS PAYLOAD ===>", witnessPayload);
@@ -343,14 +343,7 @@ export default function MultiStepForm() {
       title: "1. PARTICULARS:",
       component: (
         <Step1Particulars
-          value={state.formData.traffic.vehicleInvolved}
-          onChange={(v: string) =>
-            dispatch({
-              type: "SET_PATH",
-              path: "formData.traffic.vehicleInvolved",
-              value: v,
-            })
-          }
+         
         />
       ),
     },

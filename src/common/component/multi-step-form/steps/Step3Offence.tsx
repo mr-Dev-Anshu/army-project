@@ -1,74 +1,82 @@
+
 "use client";
 
 import { useForm } from "@/context/FormContext";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FormSection } from "../../FormSection";
-import CheckboxGroup from "../../CheckboxGroup";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
-export default function Step3Offence() {
+export default function Step4Remarks() {
   const { state, dispatch } = useForm();
-  const d = state.formData.traffic;
 
-  const set = (path: string, value: any) =>
+  const isStatic = !!state?.formData?.staticSpeed;
+  const d = isStatic
+    ? state.formData.staticSpeed
+    : state.formData.traffic;
+
+  const remarkOptions = [
+    "The indl committed offence as enumerated under para 3 above. Suitable disciplinary action be initiated and intimated to this office within 15 days.",
+    "The indl violated rules as stated above. Necessary action may please be taken.",
+    "The indl is liable for disciplinary action as mentioned.",
+  ];
+
+  const [selected, setSelected] = useState<number | null>(0);
+
+  const set = (value: string) =>
     dispatch({
       type: "SET_PATH",
-      path,
+      path: isStatic
+        ? "formData.staticSpeed.remarks"
+        : "formData.traffic.remarks",
       value,
     });
 
-  const referenceOptions = [
-    "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
-    "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order.",
-    "Violation of sec 42(f) of the Army Act 1950.",
-  ];
-
   return (
     <div>
-      <Label className="text-xl text-gray-600">Select Offence Type</Label>
+      {/* ⭐ Offence Type Suggestion Input ⭐ */}
+      <Label className="font-bold mb-2 block">Offence Type</Label>
 
-      <Select
-        value={d.offenceTypes?.[0] ?? undefined}
-        onValueChange={(v) => set("formData.traffic.offenceTypes", [v])}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select Offence Type" />
-        </SelectTrigger>
-
-        <SelectContent>
-          <SelectItem value="minor">Minor Offence</SelectItem>
-          <SelectItem value="major">Major Offence</SelectItem>
-          <SelectItem value="disciplinary">Disciplinary Offence</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Label className="mt-4 mb-3">Reference:</Label>
-
-      <CheckboxGroup
-        options={referenceOptions}
-        selected={d.offenceCode}
-        onChange={(v) => set("formData.traffic.offenceCode", v)}
+      <SuggestionInput
+        placeholder="Enter Offence Type"
+        value={d?.offenceType || ""}
+        onChange={(v) =>
+          dispatch({
+            type: "SET_PATH",
+            path: isStatic
+              ? "formData.staticSpeed.offenceType"
+              : "formData.traffic.offenceType",
+            value: v,
+          })
+        }
+        fieldType="offenceType"
       />
 
-      <Label className="mt-6">Brief Description</Label>
+      {/* ⭐ Remarks */}
+      <Label className="mb-4 font-bold mt-4 block">ADD REMARKS:</Label>
 
       <Textarea
-        value={d.offenceOccurenceDetails.description || ""}
-        onChange={(e) =>
-          set(
-            "formData.traffic.offenceOccurenceDetails.description",
-            e.target.value
-          )
-        }
+        value={d.description || ""}
+        onChange={(e) => set(e.target.value)}
         className="min-h-[140px]"
       />
+
+      <p className="text-gray-400 mt-4 mb-3">Pre Written Remarks</p>
+
+      {remarkOptions.map((text, i) => (
+        <label key={i} className="flex gap-2 mt-4">
+          <Checkbox
+            checked={selected === i}
+            onCheckedChange={() => {
+              setSelected(i);
+              set(text);
+            }}
+            className="mt-2"
+          />
+          {text}
+        </label>
+      ))}
     </div>
   );
 }

@@ -10,20 +10,20 @@ export default function Step3Offence() {
   const staticData = state.formData.staticSpeed;
   const offence: OffenceOccurenceDetails = staticData.offenceBlock;
 
-  // --- STRICTLY TYPED UPDATER ---
-  const updateOffence = <K extends keyof OffenceOccurenceDetails>(
-    key: K,
-    value: OffenceOccurenceDetails[K]
-  ) => {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed.offenceOccurenceDetails",
-      value: {
-        ...offence,
-        ...value,
-      },
-    });
-  };
+ const updateOffence = <K extends keyof OffenceOccurenceDetails>(
+  key: K,
+  value: OffenceOccurenceDetails[K]
+) => {
+  dispatch({
+    type: "SET_PATH",
+    path: "formData.staticSpeed.offenceBlock",
+    value: {
+      ...offence,
+      [key]: value,
+    },
+  });
+};
+
 
   return (
     <div className="space-y-10 px-6">
