@@ -320,11 +320,11 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 offenceTypeOptions={["Option 1", "Option 2"]} // Example options
-                showOffenceType={true}
+                showOffenceType={false}
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
-                showDate={true}
+                showDate={false}
                 showSort={true}
                 showFilter={true}
                 onAddNew={onAddNew}

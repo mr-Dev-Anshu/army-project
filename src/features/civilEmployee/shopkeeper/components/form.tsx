@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { toast } from "react-toastify";
 // import { format } from "date-fns";
 import { useForm } from "@/context/FormContext";
@@ -86,8 +86,40 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
     });
   };
 
+  const [editWorkerIndex, setEditWorkerIndex] = useState<number | null>(null);
+
   const handleAddWorker = () => {
-    if (tempWorker.name.trim() && tempWorker.aadhar) {
+    if (!tempWorker.name.trim()) {
+      toast.error("Please enter worker name");
+      return;
+    }
+    if (!tempWorker.aadhar) {
+      toast.error("Please enter worker Aadhar number");
+      return;
+    }
+    if (tempWorker.aadhar.length !== 12) {
+      toast.error("Worker Aadhar number must be 12 digits");
+      return;
+    }
+
+    if (editWorkerIndex !== null) {
+      // Update existing worker
+      const updatedWorkers = [...shopkeeper.workers];
+      updatedWorkers[editWorkerIndex] = {
+        ...updatedWorkers[editWorkerIndex],
+        name: tempWorker.name.trim(),
+        aadhar: tempWorker.aadhar,
+        type: tempWorker.type,
+      };
+
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.shopkeeper.workers",
+        value: updatedWorkers,
+      });
+      setEditWorkerIndex(null);
+    } else {
+      // Add new worker
       dispatch({
         type: "PUSH_PATH",
         path: "formData.shopkeeper.workers",
@@ -97,8 +129,18 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
           type: tempWorker.type,
         },
       });
-      setTempWorker({ name: "", aadhar: "", type: "ex-man" });
     }
+    setTempWorker({ name: "", aadhar: "", type: "ex-man" });
+  };
+
+  const handleEditWorker = (index: number) => {
+    const workerToEdit = shopkeeper.workers[index];
+    setTempWorker({
+      name: workerToEdit.name,
+      aadhar: workerToEdit.aadhar,
+      type: workerToEdit.type,
+    });
+    setEditWorkerIndex(index);
   };
 
   const handleRemoveWorker = (index: number) => {
@@ -135,6 +177,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
       return;
     }
 
+
     // Worker validation
     for (let i = 0; i < shopkeeper.workers.length; i++) {
       const worker = shopkeeper.workers[i] as TempWorker;
@@ -143,6 +186,15 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
         return;
       }
     }
+
+    // Date validation
+    if (shopkeeper.validFrom && shopkeeper.validTill) {
+      if (new Date(shopkeeper.validTill) <= new Date(shopkeeper.validFrom)) {
+        toast.error("Valid Till date must be greater than Valid From date.");
+        return;
+      }
+    }
+
 
     if (initialData?._id) {
       // Remove fields that should not be sent in update
@@ -219,11 +271,12 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
             </div>
             {/* Added Pass Number */}
             <div className="space-y-1">
-              <Label>Pass Number / ID</Label>
-              <Input
+              <SuggestionInput
+                label="Pass Number / ID"
                 placeholder="Enter Pass Number"
                 value={shopkeeper.passNumber}
-                onChange={(e) => setField("passNumber", e.target.value)}
+                onChange={(v) => setField("passNumber", v)}
+                fieldType="passNumber"
               />
             </div>
           </div>
@@ -251,22 +304,19 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
               />
             </div>
             <div className="space-y-1">
-              <Label>Enter Aadhar Card No. for Govt. ID Proof</Label>
-              <div className="relative">
-                <Input
-                  placeholder="Enter Aadhar Number"
-                  value={shopkeeper.ownerAadhar}
-                  onChange={(e) =>
-                    setField(
-                      "ownerAadhar",
-                      e.target.value.replace(/\D/g, "").slice(0, 12)
-                    )
-                  }
-                  maxLength={12}
-                  className="pr-10"
-                />
-                {/* Optional: Add icon inside input if needed */}
-              </div>
+              <SuggestionInput
+                label="Enter Aadhar Card No. for Govt. ID Proof"
+                placeholder="Enter Aadhar Number"
+                value={shopkeeper.ownerAadhar}
+                onChange={(v) =>
+                  setField(
+                    "ownerAadhar",
+                    v.replace(/\D/g, "").slice(0, 12)
+                  )
+                }
+                maxLength={12}
+                fieldType="ownerAadhar"
+              />
             </div>
           </div>
         </section>
@@ -344,17 +394,18 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label>Aadhar Card No.</Label>
-                  <Input
+                  <SuggestionInput
+                    label="Aadhar Card No."
                     placeholder="Enter Aadhar Number"
                     value={tempWorker.aadhar}
-                    onChange={(e) =>
+                    onChange={(v) =>
                       setTempWorker((prev) => ({
                         ...prev,
-                        aadhar: e.target.value.replace(/\D/g, "").slice(0, 12),
+                        aadhar: v.replace(/\D/g, "").slice(0, 12),
                       }))
                     }
                     maxLength={12}
+                    fieldType="workerAadhar"
                   />
                 </div>
                 <div className="space-y-2">
@@ -390,7 +441,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
                     variant="outline"
                     className="gap-2 text-xs h-9 bg-white hover:bg-gray-50"
                   >
-                    <span>+</span> Add Worker
+                    <span>{editWorkerIndex !== null ? "✎" : "+"}</span> {editWorkerIndex !== null ? "Update Worker" : "Add Worker"}
                   </Button>
                 </div>
               </div>
@@ -423,12 +474,20 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
                             {worker.type === "ex-man" ? "Ex-Man" : worker.type === "civil-male" ? "Civil (Male)" : "Civil (Female)"}
                           </td>
                           <td className="px-4 py-2">
-                            <button
-                              onClick={() => handleRemoveWorker(idx)}
-                              className="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded hover:bg-red-100 transition-colors"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleEditWorker(idx)}
+                                className="text-blue-500 hover:text-blue-700 bg-blue-50 p-1 rounded hover:bg-blue-100 transition-colors"
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveWorker(idx)}
+                                className="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded hover:bg-red-100 transition-colors"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -456,6 +515,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
               <Label>Valid Till</Label>
               <Input
                 type="date"
+                min={shopkeeper.validFrom ? shopkeeper.validFrom.split('T')[0] : undefined}
                 value={shopkeeper.validTill ? shopkeeper.validTill.split('T')[0] : ""}
                 onChange={(e) => setField("validTill", e.target.value ? new Date(e.target.value).toISOString() : null)}
               />
