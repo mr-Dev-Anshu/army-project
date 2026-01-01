@@ -129,10 +129,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     <button
       key={item.label}
       onClick={() => {
-        if (item.label === "Dashboard") onMenuSelect("dashboard");
-        if (item.label === "All Reports") onMenuSelect("viewReports");
-        if (item.label === "MP Offence Analysis Monthly Report")
+        if (item.label === "Dashboard") {
+          onMenuSelect("dashboard");
+          setCollapsed(true);
+        }
+        if (item.label === "All Reports") {
+          onMenuSelect("viewReports");
+          setCollapsed(true);
+        }
+        if (item.label === "MP Offence Analysis Monthly Report") {
           onMenuSelect("mpOffenceAnalysis");
+          setCollapsed(true);
+        }
       }}
       className={cn(
         "w-full relative flex items-center transition-all group",
@@ -271,7 +279,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-1">
             {/* 1️⃣ GENERAL & TRAFFIC */}
             <button
-              onClick={() => onMenuSelect("multiForm")}
+              onClick={() => {
+                onMenuSelect("multiForm");
+                setCollapsed(true);
+              }}
               className={cn(
                 "w-full flex items-center transition-all group",
                 collapsed
@@ -292,7 +303,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {/* 2️⃣ STATIC SPEED */}
             <button
-              onClick={() => onMenuSelect("staticSpeed")}
+              onClick={() => {
+                onMenuSelect("staticSpeed");
+                setCollapsed(true);
+              }}
               className={cn(
                 "w-full flex items-center transition-all group",
                 collapsed
@@ -313,7 +327,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             {/* 3️⃣ MP REPORT */}
             <button
-              onClick={() => onMenuSelect("investigation")}
+              onClick={() => {
+                onMenuSelect("investigation");
+                setCollapsed(true);
+              }}
               className={cn(
                 "w-full flex items-center transition-all group",
                 collapsed
