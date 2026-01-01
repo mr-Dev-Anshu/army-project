@@ -162,8 +162,18 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
 
   const handleSave = () => {
     // Basic Validation
-    if (!shopkeeper.shopName || !shopkeeper.ownerName) {
-      toast.error("Please fill in at least Shop Name and Owner Name.");
+    if (!shopkeeper.shopName) {
+      toast.error("Shop Name is required.");
+      return;
+    }
+
+    if (!shopkeeper.shopAddress) {
+      toast.error("Shop Address is required.");
+      return;
+    }
+
+    if (!shopkeeper.unit) {
+      toast.error("Unit is required.");
       return;
     }
 
@@ -172,8 +182,28 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
       return;
     }
 
-    if (shopkeeper.ownerAadhar && shopkeeper.ownerAadhar.length !== 12) {
-      toast.error("Owner Aadhar number must be 12 characters long.");
+    if (!shopkeeper.ownerName) {
+      toast.error("Owner Name is required.");
+      return;
+    }
+
+    if (!shopkeeper.ownerMobile) {
+      toast.error("Owner Mobile Number is required.");
+      return;
+    }
+
+    if (shopkeeper.ownerMobile.length < 10) {
+      toast.error("Please enter a valid 10-digit Mobile Number.");
+      return;
+    }
+
+    if (!shopkeeper.ownerAadhar) {
+      toast.error("Owner Aadhar Number is required.");
+      return;
+    }
+
+    if (shopkeeper.ownerAadhar.length !== 12) {
+      toast.error("Owner Aadhar number must be 12 digits.");
       return;
     }
 
@@ -188,6 +218,11 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
     }
 
     // Date validation
+    if (!shopkeeper.validFrom || !shopkeeper.validTill) {
+      toast.error("Please select both Valid From and Valid Till dates.");
+      return;
+    }
+
     if (shopkeeper.validFrom && shopkeeper.validTill) {
       if (new Date(shopkeeper.validTill) <= new Date(shopkeeper.validFrom)) {
         toast.error("Valid Till date must be greater than Valid From date.");

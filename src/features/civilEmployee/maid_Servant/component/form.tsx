@@ -97,41 +97,48 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
   };
 
   const handleAddMember = () => {
-    if (
-      tempMember.name.trim() &&
-      tempMember.age.trim() &&
-      tempMember.relationship.trim()
-    ) {
-      if (editMemberIndex !== null) {
-        // Update existing member
-        const updatedMembers = [...(maidServant.familyMembers || [])];
-        updatedMembers[editMemberIndex] = {
-          ...updatedMembers[editMemberIndex],
+    if (!tempMember.name.trim()) {
+      toast.error("Member Name is required.");
+      return;
+    }
+    if (!tempMember.age.trim()) {
+      toast.error("Member Age is required.");
+      return;
+    }
+    if (!tempMember.relationship.trim()) {
+      toast.error("Relationship is required.");
+      return;
+    }
+
+    if (editMemberIndex !== null) {
+      // Update existing member
+      const updatedMembers = [...(maidServant.familyMembers || [])];
+      updatedMembers[editMemberIndex] = {
+        ...updatedMembers[editMemberIndex],
+        name: tempMember.name.trim(),
+        age: tempMember.age.trim(),
+        relationship: tempMember.relationship.trim(),
+      };
+
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.maidServant.familyMembers",
+        value: updatedMembers,
+      });
+      setEditMemberIndex(null);
+    } else {
+      // Add new member
+      dispatch({
+        type: "PUSH_PATH",
+        path: "formData.maidServant.familyMembers",
+        value: {
           name: tempMember.name.trim(),
           age: tempMember.age.trim(),
           relationship: tempMember.relationship.trim(),
-        };
-
-        dispatch({
-          type: "SET_PATH",
-          path: "formData.maidServant.familyMembers",
-          value: updatedMembers,
-        });
-        setEditMemberIndex(null);
-      } else {
-        // Add new member
-        dispatch({
-          type: "PUSH_PATH",
-          path: "formData.maidServant.familyMembers",
-          value: {
-            name: tempMember.name.trim(),
-            age: tempMember.age.trim(),
-            relationship: tempMember.relationship.trim(),
-          },
-        });
-      }
-      setTempMember({ name: "", age: "", relationship: "" });
+        },
+      });
     }
+    setTempMember({ name: "", age: "", relationship: "" });
   };
 
   const handleEditMember = (index: number) => {
@@ -153,7 +160,91 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
   };
 
   const handleSave = () => {
+    // Basic Validation
+    // Owner Details Validation
+    if (!maidServant.qtrNumber) {
+      toast.error("Quarter Number is required.");
+      return;
+    }
+
+    if (!maidServant.ownerName) {
+      toast.error("Shop Owner Name is required.");
+      return;
+    }
+
+    if (!maidServant.ownerRank) {
+      toast.error("Rank is required.");
+      return;
+    }
+
+    if (!maidServant.ownerUnit) {
+      toast.error("Unit is required.");
+      return;
+    }
+
+    // Servant Details Validation
+    if (!maidServant.servantName) {
+      toast.error("Servant Name is required.");
+      return;
+    }
+
+    if (!maidServant.servantMobile) {
+      toast.error("Servant Mobile Number is required.");
+      return;
+    }
+
+    if (maidServant.servantMobile.length < 10) {
+      toast.error("Please enter a valid 10-digit Mobile Number.");
+      return;
+    }
+
+    if (!maidServant.servantAadhar) {
+      toast.error("Servant Aadhar Number is required.");
+      return;
+    }
+
+    if (maidServant.servantAadhar.length !== 12) {
+      toast.error("Servant Aadhar number must be 12 digits.");
+      return;
+    }
+
+    if (!maidServant.passNumber) {
+      toast.error("Pass Number is required.");
+      return;
+    }
+
+    // Address Validation
+    if (!maidServant.permanentAddressLine) {
+      toast.error("Permanent Address Line is required.");
+      return;
+    }
+
+    if (!maidServant.permanentCityDistrict) {
+      toast.error("Permanent City / District is required.");
+      return;
+    }
+
+    if (!maidServant.permanentState) {
+      toast.error("Permanent State is required.");
+      return;
+    }
+
+    if (!maidServant.permanentPincode) {
+      toast.error("Permanent Pincode is required.");
+      return;
+    }
+
+    if (maidServant.permanentPincode.length !== 6) {
+      toast.error("Permanent Pincode must be 6 digits.");
+      return;
+    }
+
     // Date validation
+    if (!maidServant.validFrom || !maidServant.validTill) {
+      toast.error("Please select both Valid From and Valid Till dates.");
+      return;
+    }
+
     if (maidServant.validFrom && maidServant.validTill) {
       if (new Date(maidServant.validTill) <= new Date(maidServant.validFrom)) {
         toast.error("Valid Till date must be greater than Valid From date.");

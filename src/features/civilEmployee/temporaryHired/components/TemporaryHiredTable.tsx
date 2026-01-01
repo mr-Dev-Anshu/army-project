@@ -289,12 +289,12 @@ const TemporaryHiredTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdi
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 offenceTypeOptions={[]}
-                showOffenceType={true}
+                showOffenceType={false}
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
-                showDate={true}
-                showSort={true}
+                showDate={false}
+                showSort={false}
                 showFilter={true}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
