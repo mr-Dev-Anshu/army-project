@@ -88,8 +88,8 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
             MILITARY POLICE REPORT<br />(GEN AND TRAFFIC OFFENCE)
           </h1>
           <div className="flex justify-between items-end">
-            <div className="font-normal text-xs">Report No- {reportNo}</div>
-            <div className="font-normal text-xs">Report Date- {reportDate}</div>
+            {reportNo && <div className="font-normal text-xs">Report No- {reportNo}</div>}
+            {reportDate && <div className="font-normal text-xs">Report Date- {reportDate}</div>}
           </div>
         </div>
 
@@ -103,23 +103,31 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
               <div className="grid grid-cols-12 gap-x-4">
                 <div className="col-span-1 text-xs text-[#0A0A0A]">(1.1)</div>
                 <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Aadhar Card No.</span>
-                    <span className="text-xs">{particulars.primary.aadharCardNo}</span>
-                  </div>
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">S/O</span>
-                    <span className="text-xs">{particulars.primary.so}</span>
-                  </div>
+                  {particulars.primary.aadharCardNo && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Aadhar Card No.</span>
+                      <span className="text-xs">{particulars.primary.aadharCardNo}</span>
+                    </div>
+                  )}
+                  {particulars.primary.so && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">S/O</span>
+                      <span className="text-xs">{particulars.primary.so}</span>
+                    </div>
+                  )}
 
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
-                    <span className="text-xs">{particulars.primary.name}</span>
-                  </div>
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Name the Relation</span>
-                    <span className="text-xs">{particulars.primary.relation}</span>
-                  </div>
+                  {particulars.primary.name && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
+                      <span className="text-xs">{particulars.primary.name}</span>
+                    </div>
+                  )}
+                  {particulars.primary.relation && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Name the Relation</span>
+                      <span className="text-xs">{particulars.primary.relation}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -131,41 +139,57 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
               <div className="grid grid-cols-12 gap-x-4">
                 <div className="col-span-1 text-xs text-[#0A0A0A]">(1.1.1)</div>
                 <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Army No.</span>
-                    <span className="text-xs">{particulars.primary.armyNo}</span>
-                  </div>
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Rank</span>
-                    <span className="text-xs">{particulars.primary.rank}</span>
-                  </div>
+                  {particulars.primary.armyNo && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Army No.</span>
+                      <span className="text-xs">{particulars.primary.armyNo}</span>
+                    </div>
+                  )}
+                  {particulars.primary.rank && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Rank</span>
+                      <span className="text-xs">{particulars.primary.rank}</span>
+                    </div>
+                  )}
 
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
-                    <span className="text-xs">{particulars.primary.name}</span>
-                  </div>
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Unit</span>
-                    <span className="text-xs">{particulars.primary.unit}</span>
-                  </div>
+                  {particulars.primary.name && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Name</span>
+                      <span className="text-xs">{particulars.primary.name}</span>
+                    </div>
+                  )}
+                  {particulars.primary.unit && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Unit</span>
+                      <span className="text-xs">{particulars.primary.unit}</span>
+                    </div>
+                  )}
 
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">FMN</span>
-                    <span className="text-xs">{particulars.primary.fmn}</span>
-                  </div>
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Command</span>
-                    <span className="text-xs">{particulars.primary.command}</span>
-                  </div>
+                  {particulars.primary.fmn && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">FMN</span>
+                      <span className="text-xs">{particulars.primary.fmn}</span>
+                    </div>
+                  )}
+                  {particulars.primary.command && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Command</span>
+                      <span className="text-xs">{particulars.primary.command}</span>
+                    </div>
+                  )}
 
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">Address</span>
-                    <span className="text-xs">{particulars.primary.address}</span>
-                  </div>
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-xs text-[#0A0A0A]">I Card No.</span>
-                    <span className="text-xs">{particulars.primary.iCardNo}</span>
-                  </div>
+                  {particulars.primary.address && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">Address</span>
+                      <span className="text-xs">{particulars.primary.address}</span>
+                    </div>
+                  )}
+                  {particulars.primary.iCardNo && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-xs text-[#0A0A0A]">I Card No.</span>
+                      <span className="text-xs">{particulars.primary.iCardNo}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -178,23 +202,31 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
                 <div className="grid grid-cols-12 gap-x-4">
                   <div className="col-span-1 text-[#0A0A0A] text-xs">(1.2)</div>
                   <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Aadhar Card No.</span>
-                      <span className="text-xs">{particulars.secondary.aadharCardNo}</span>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">S/O</span>
-                      <span className="text-xs">{particulars.secondary.so}</span>
-                    </div>
+                    {particulars.secondary.aadharCardNo && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Aadhar Card No.</span>
+                        <span className="text-xs">{particulars.secondary.aadharCardNo}</span>
+                      </div>
+                    )}
+                    {particulars.secondary.so && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">S/O</span>
+                        <span className="text-xs">{particulars.secondary.so}</span>
+                      </div>
+                    )}
 
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
-                      <span className="text-xs">{particulars.secondary.name}</span>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Name the Relation</span>
-                      <span className="text-xs">{particulars.secondary.relation}</span>
-                    </div>
+                    {particulars.secondary.name && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
+                        <span className="text-xs">{particulars.secondary.name}</span>
+                      </div>
+                    )}
+                    {particulars.secondary.relation && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Name the Relation</span>
+                        <span className="text-xs">{particulars.secondary.relation}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -205,41 +237,57 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
                 <div className="grid grid-cols-12 gap-x-4">
                   <div className="col-span-1 text-[#0A0A0A] text-xs">(1.2.1)</div>
                   <div className="col-span-11 grid grid-cols-2 gap-x-8 gap-y-1">
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Army No.</span>
-                      <span className="text-xs">{particulars.secondary.armyNo}</span>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Rank</span>
-                      <span className="text-xs">{particulars.secondary.rank}</span>
-                    </div>
+                    {particulars.secondary.armyNo && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Army No.</span>
+                        <span className="text-xs">{particulars.secondary.armyNo}</span>
+                      </div>
+                    )}
+                    {particulars.secondary.rank && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Rank</span>
+                        <span className="text-xs">{particulars.secondary.rank}</span>
+                      </div>
+                    )}
 
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
-                      <span className="text-xs">{particulars.secondary.name}</span>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Unit</span>
-                      <span className="text-xs">{particulars.secondary.unit}</span>
-                    </div>
+                    {particulars.secondary.name && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Name</span>
+                        <span className="text-xs">{particulars.secondary.name}</span>
+                      </div>
+                    )}
+                    {particulars.secondary.unit && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Unit</span>
+                        <span className="text-xs">{particulars.secondary.unit}</span>
+                      </div>
+                    )}
 
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">FMN</span>
-                      <span className="text-xs">{particulars.secondary.fmn}</span>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Command</span>
-                      <span className="text-xs">{particulars.secondary.command}</span>
-                    </div>
+                    {particulars.secondary.fmn && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">FMN</span>
+                        <span className="text-xs">{particulars.secondary.fmn}</span>
+                      </div>
+                    )}
+                    {particulars.secondary.command && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Command</span>
+                        <span className="text-xs">{particulars.secondary.command}</span>
+                      </div>
+                    )}
 
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">Address</span>
-                      <span className="text-xs">{particulars.secondary.address}</span>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] items-baseline">
-                      <span className="font-bold text-[#0A0A0A] text-xs">I Card No.</span>
-                      <span className="text-xs">{particulars.secondary.iCardNo}</span>
-                    </div>
+                    {particulars.secondary.address && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">Address</span>
+                        <span className="text-xs">{particulars.secondary.address}</span>
+                      </div>
+                    )}
+                    {particulars.secondary.iCardNo && (
+                      <div className="grid grid-cols-[140px_1fr] items-baseline">
+                        <span className="font-bold text-[#0A0A0A] text-xs">I Card No.</span>
+                        <span className="text-xs">{particulars.secondary.iCardNo}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -252,14 +300,18 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
               <div className="grid grid-cols-12 gap-x-4 items-center">
                 <div className="col-span-1 text-[#0A0A0A] text-xs">(1.3)</div>
                 <div className="col-span-11 grid grid-cols-2 gap-x-8">
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-[#0A0A0A] text-xs">DD Veh. BA No.</span>
-                    <span className="text-xs">{particulars.vehicle.baNo}</span>
-                  </div>
-                  <div className="grid grid-cols-[140px_1fr] items-baseline">
-                    <span className="font-bold text-[#0A0A0A] text-xs">Make & Take</span>
-                    <span className="text-xs">{particulars.vehicle.makeAndTake}</span>
-                  </div>
+                  {particulars.vehicle.baNo && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-[#0A0A0A] text-xs">DD Veh. BA No.</span>
+                      <span className="text-xs">{particulars.vehicle.baNo}</span>
+                    </div>
+                  )}
+                  {particulars.vehicle.makeAndTake && (
+                    <div className="grid grid-cols-[140px_1fr] items-baseline">
+                      <span className="font-bold text-[#0A0A0A] text-xs">Make & Take</span>
+                      <span className="text-xs">{particulars.vehicle.makeAndTake}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -267,129 +319,205 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
         </div>
 
         {/* 2. STATEMENT OF EVIDENCE/OCCURRENCE */}
-        <div className="mb-6">
-          <h2 className="font-bold text-xs mb-4">2. &nbsp;&nbsp; <span className="text-[#0A0A0A] underline">STATEMENT OF EVIDENCE/OCCURRENCE:</span></h2>
+        {occurrence.dateOfDuty && (
+          <div className="mb-6">
+            <h2 className="font-bold text-xs mb-4">2. &nbsp;&nbsp; <span className="text-[#0A0A0A] underline">STATEMENT OF EVIDENCE/OCCURRENCE:</span></h2>
 
-          <div className="mb-4">
-            <p className="mb-3 font-normal text-xs">On-Duty Details of Witnessing Official:</p>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-2 ml-4">
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.1) &nbsp; <span className="font-bold ">Date of Duty</span></span>
+            <div className="mb-4">
+              <p className="mb-3 font-normal text-xs">On-Duty Details of Witnessing Official:</p>
+              <div className="grid grid-cols-2 gap-x-12 gap-y-2 ml-4">
+                {occurrence.dateOfDuty && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.1) &nbsp; <span className="font-bold ">Date of Duty</span></span>
 
-                <span className="text-xs">{occurrence.dateOfDuty}</span>
-              </div>
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.2) &nbsp; <span className="font-bold">Duty Time</span></span>
-                <span className="text-xs">{occurrence.dutyTime}</span>
-              </div>
+                    <span className="text-xs">{occurrence.dateOfDuty}</span>
+                  </div>
+                )}
+                {occurrence.dutyTime && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.2) &nbsp; <span className="font-bold">Duty Time</span></span>
+                    <span className="text-xs">{occurrence.dutyTime}</span>
+                  </div>
+                )}
 
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.3) &nbsp; <span className="font-bold">Duty Location</span></span>
-                <span className="text-xs">{occurrence.dutyLocation}</span>
-              </div>
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.4.1) &nbsp; <span className="font-bold">Name of Witnessing Official</span></span>
-                <span className="text-xs">{occurrence.nameOfWitnessingOfficial1}</span>
-              </div>
+                {occurrence.dutyLocation && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.3) &nbsp; <span className="font-bold">Duty Location</span></span>
+                    <span className="text-xs">{occurrence.dutyLocation}</span>
+                  </div>
+                )}
+                {occurrence.nameOfWitnessingOfficial1 && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.4.1) &nbsp; <span className="font-bold">Name of Witnessing Official</span></span>
+                    <span className="text-xs">{occurrence.nameOfWitnessingOfficial1}</span>
+                  </div>
+                )}
 
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.4.2) &nbsp; <span className="font-bold">Name of Witnessing Official</span></span>
-                <span className="text-xs">{occurrence.nameOfWitnessingOfficial2}</span>
-              </div>
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.4.3) &nbsp; <span className="font-bold">Name of Witnessing Official</span></span>
-                <span className="text-xs">{occurrence.nameOfWitnessingOfficial3}</span>
-              </div>
+                {occurrence.nameOfWitnessingOfficial2 && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.4.2) &nbsp; <span className="font-bold">Name of Witnessing Official</span></span>
+                    <span className="text-xs">{occurrence.nameOfWitnessingOfficial2}</span>
+                  </div>
+                )}
+                {occurrence.nameOfWitnessingOfficial3 && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.4.3) &nbsp; <span className="font-bold">Name of Witnessing Official</span></span>
+                    <span className="text-xs">{occurrence.nameOfWitnessingOfficial3}</span>
+                  </div>
+                )}
 
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.5) &nbsp; <span className="font-bold">Time of Offence</span></span>
-                <span className="text-xs">{occurrence.timeOfOffence}</span>
-              </div>
-              <div className="grid grid-cols-[150px_1fr]">
-                <span className="text-xs">(2.6) &nbsp; <span className="font-bold">Location of Offence</span></span>
-                <span className="text-xs">{occurrence.locationOfOffence}</span>
+                {occurrence.timeOfOffence && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.5) &nbsp; <span className="font-bold">Time of Offence</span></span>
+                    <span className="text-xs">{occurrence.timeOfOffence}</span>
+                  </div>
+                )}
+                {occurrence.locationOfOffence && (
+                  <div className="grid grid-cols-[150px_1fr]">
+                    <span className="text-xs">(2.6) &nbsp; <span className="font-bold">Location of Offence</span></span>
+                    <span className="text-xs">{occurrence.locationOfOffence}</span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className="text-justify ml-4 text-[#0A0A0A] text-xs leading-relaxed">
-            <span className="mr-2 text-xs">(2.7)</span>
-            {occurrence.statement}
+            {occurrence.statement && (
+              <div className="text-justify ml-4 text-[#0A0A0A] text-xs leading-relaxed">
+                <span className="mr-2 text-xs">(2.7)</span>
+                {occurrence.statement}
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         {/* 3. OFFENCE COMMITTED */}
-        <div className="mb-8">
-          <h2 className="font-bold  mb-4 text-xs">3. &nbsp;&nbsp; <span className="text-[#0A0A0A] underline">OFFENCE COMMITTED/ORDERS CONTRAVENED:</span></h2>
-          <div className="ml-4">
-            <div className="flex mb-2">
-              <span className=" mr-2 text-xs">(3.1)  <span className='font-bold'>Offence Type</span></span>
-              <span className="text-xs">{offence.type}</span>
-            </div>
-            <div className="ml-8 mb-2">
-              <span className="font-bold mr-2 text-xs">Ref :-</span>
-              <span className="mr-2 text-xs">(i.)</span>
-              <span className="text-xs">{offence.ref1}</span>
-            </div>
-            <div className="ml-[70px] mb-4">
-              <span className="mr-2 text-xs">(ii.)</span>
-              <span className="text-xs">{offence.ref2}</span>
-            </div>
-            <div className="flex mb-2">
-              <span className=" mr-2 text-xs">(3.2)  <span className="text-justify leading-relaxed text-xs ml-4">
-                {offence.description}
-              </span>
-              </span>
-            </div>
+        {offence.type && (
+          <div className="mb-8">
+            <h2 className="font-bold  mb-4 text-xs">3. &nbsp;&nbsp; <span className="text-[#0A0A0A] underline">OFFENCE COMMITTED/ORDERS CONTRAVENED:</span></h2>
+            <div className="ml-4">
+              {offence.type && (
+                <div className="flex mb-2">
+                  <span className=" mr-2 text-xs">(3.1)  <span className='font-bold'>Offence Type</span></span>
+                  <span className="text-xs">{offence.type}</span>
+                </div>
+              )}
+              {offence.ref1 && (
+                <div className="ml-8 mb-2">
+                  <span className="font-bold mr-2 text-xs">Ref :-</span>
+                  <span className="mr-2 text-xs">(i.)</span>
+                  <span className="text-xs">{offence.ref1}</span>
+                </div>
+              )}
+              {offence.ref2 && (
+                <div className="ml-[70px] mb-4">
+                  <span className="mr-2 text-xs">(ii.)</span>
+                  <span className="text-xs">{offence.ref2}</span>
+                </div>
+              )}
+              {offence.description && (
+                <div className="flex mb-2">
+                  <span className=" mr-2 text-xs">(3.2)  <span className="text-justify leading-relaxed text-xs ml-4">
+                    {offence.description}
+                  </span>
+                  </span>
+                </div>
+              )}
 
 
+            </div>
           </div>
-        </div>
-
+        )}
         {/* Signatures */}
-        <div className="flex justify-between items-start mb-5">
-          <div className="w-64">
-            <div className="font-bold text-xs mb-4">Sig of Witness &nbsp;&nbsp;&nbsp; _______________</div>
-            <div className="grid grid-cols-[60px_1fr] gap-y-1">
-              <span className="font-bold text-xs">Army No.</span>
-              <span className="text-xs">{witnessSig.armyNo}</span>
-              <span className="font-bold text-xs">Rank</span>
-              <span className="text-xs">{witnessSig.rank}</span>
-              <span className="font-bold text-xs">Name</span>
-              <span className="text-xs">{witnessSig.name}</span>
-              <span className="font-bold text-xs">Unit</span>
-              <span className="text-xs">{witnessSig.unit}</span>
+        {witnessSig.armyNo && (
+
+          <div className="flex justify-between items-start mb-5">
+            <div className="w-64">
+              <div className="font-bold text-xs mb-4">Sig of Witness &nbsp;&nbsp;&nbsp; _______________</div>
+              <div className="grid grid-cols-[60px_1fr] gap-y-1">
+                {witnessSig.armyNo && (
+                  <>
+                    <span className="font-bold text-xs">Army No.</span>
+                    <span className="text-xs">{witnessSig.armyNo}</span>
+                  </>
+                )}
+                {witnessSig.rank && (
+                  <>
+                    <span className="font-bold text-xs">Rank</span>
+                    <span className="text-xs">{witnessSig.rank}</span>
+                  </>
+                )}
+                {witnessSig.name && (
+                  <>
+                    <span className="font-bold text-xs">Name</span>
+                    <span className="text-xs">{witnessSig.name}</span>
+                  </>
+                )}
+                {witnessSig.unit && (
+                  <>
+                    <span className="font-bold text-xs">Unit</span>
+                    <span className="text-xs">{witnessSig.unit}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="w-64">
+              <div className="font-bold mb-4 text-left text-xs">Sig of MP JCO/NCO</div>
+              <div className="grid grid-cols-[60px_1fr] gap-y-1">
+                {mpSig.armyNo && (
+                  <>
+                    <span className="font-bold text-xs">Army No.</span>
+                    <span className="text-xs">{mpSig.armyNo}</span>
+                  </>
+                )}
+                {mpSig.rank && (
+                  <>
+                    <span className="font-bold text-xs">Rank</span>
+                    <span className="text-xs">{mpSig.rank}</span>
+                  </>
+                )}
+                {mpSig.name && (
+                  <>
+                    <span className="font-bold text-xs">Name</span>
+                    <span className="text-xs">{mpSig.name}</span>
+                  </>
+                )}
+                {mpSig.unit && (
+                  <>
+                    <span className="font-bold text-xs">Unit</span>
+                    <span className="text-xs">{mpSig.unit}</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-          <div className="w-64">
-            <div className="font-bold mb-4 text-left text-xs">Sig of MP JCO/NCO</div>
-            <div className="grid grid-cols-[60px_1fr] gap-y-1">
-              <span className="font-bold text-xs">Army No.</span>
-              <span className="text-xs">{mpSig.armyNo}</span>
-              <span className="font-bold text-xs">Rank</span>
-              <span className="text-xs">{mpSig.rank}</span>
-              <span className="font-bold text-xs">Name</span>
-              <span className="text-xs">{mpSig.name}</span>
-              <span className="font-bold text-xs">Unit</span>
-              <span className="text-xs" >{mpSig.unit}</span>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Remarks Footer */}
-        <div className="mt-2 border-t-0 pt-4 flex-1">
-          <h3 className="text-center font-bold underline mb-4 text-xs">REMARKS OF CO/2IC PROVOST UNIT</h3>
-          <p className="text-justify mb-8 ml-8 text-xs">
-            {remarks.text}
-          </p>
+        {remarks.text && (
+          <div className="mt-2 border-t-0 pt-4 flex-1">
+            <h3 className="text-center font-bold underline mb-4 text-xs">REMARKS OF CO/2IC PROVOST UNIT</h3>
+            {remarks.text && (
+              <p className="text-justify mb-8 ml-8 text-xs">
+                {remarks.text}
+              </p>
+            )}
 
-          <div className="grid grid-cols-[80px_1fr] gap-y-2 ml-4">
-            <div className="font-bold text-xs">Station :</div>
-            <div className="text-xs">{remarks.station}</div>
-            <div className="font-bold text-xs">Dated :</div>
-            <div className="text-xs">{remarks.dated}</div>
+            <div className="grid grid-cols-[80px_1fr] gap-y-2 ml-4">
+              {remarks.station && (
+                <>
+                  <div className="font-bold text-xs">Station :</div>
+                  <div className="text-xs">{remarks.station}</div>
+                </>
+              )}
+              {remarks.dated && (
+                <>
+                  <div className="font-bold text-xs">Dated :</div>
+                  <div className="text-xs">{remarks.dated}</div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
