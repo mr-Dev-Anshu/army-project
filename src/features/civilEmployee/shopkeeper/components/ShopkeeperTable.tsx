@@ -73,6 +73,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         offenceType: "All",
         date: "",
         actionStatus: "All",
+        priceListStatus: "All",
         sortOrder: "asc",
     });
 
@@ -107,7 +108,17 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 }
             }
 
-            return matchesSearch && matchesDate && matchesStatus;
+            // Price List Status Logic
+            let matchesPriceList = true;
+            if (filters.priceListStatus && filters.priceListStatus !== "All") {
+                if (filters.priceListStatus === "Approved") {
+                    matchesPriceList = item.priceListApproved === true;
+                } else if (filters.priceListStatus === "Not Approved") {
+                    matchesPriceList = item.priceListApproved === false;
+                }
+            }
+
+            return matchesSearch && matchesDate && matchesStatus && matchesPriceList;
         });
     }, [shopkeepers, filters]);
 
@@ -119,7 +130,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         {
             header: "Sr no.",
             cell: (item) => (
-                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                <span className="font-normal font-[Arial] text-[#0A0A0A] ">
                     {filteredData.indexOf(item) + 1}
                 </span>
             ),
@@ -242,7 +253,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                         </div>
                         {isExpired && (
                             <div className="flex flex-col items-center justify-center mt-3">
-                                <span className="text-[12px] font-bold text-red-600 uppercase tracking-wide">
+                                <span className="text-[12px] font-bold text-[#FF383C] uppercase tracking-wide">
                                     PASS EXPIRED
                                 </span>
                                 <span className="text-[10px] font-semibold text-[#0A0A0A]">
@@ -324,6 +335,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
+                showPriceListFilter={true}
                 showDate={false}
                 showSort={true}
                 showFilter={true}
@@ -333,6 +345,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                     offenceType: "All",
                     date: "",
                     actionStatus: "All",
+                    priceListStatus: "All",
                     sortOrder: "asc",
                 })}
                 placeholder="Search by shop name, owner, unit..."
