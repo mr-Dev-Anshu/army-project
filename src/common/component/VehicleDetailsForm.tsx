@@ -1,5 +1,3 @@
-
-
 "use client";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
@@ -276,11 +274,27 @@ export default function VehicleDetailsForm({
                 scope={scope}
                 title={`${o.type} Details`}
                 fields={offenderFormsConfig[o.type!].fields}
-                path={`${driverPath}[${index}].details`}
+                path={
+                  scope === "mp-main" || scope === "mp-additional"
+                    ? driverPath
+                    : `${driverPath}[${index}].details`
+                }
                 showCoDriver={index === 0}
               />
             </div>
           ))}
+
+          {/* {offenders.map((o, index) => (
+            <div key={o.id} className="border rounded-xl p-4 mt-4">
+              <OffenderDynamicForm
+                scope={scope}
+                title={`${o.type} Details`}
+                fields={offenderFormsConfig[o.type!].fields}
+                path={`${driverPath}[${index}].details`}
+                showCoDriver={index === 0}
+              />
+            </div>
+          ))} */}
         </>
       )}
 

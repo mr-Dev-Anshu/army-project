@@ -82,6 +82,7 @@ const initialState: GlobalFormState = {
     },
 
     staticSpeed: {
+      remarks:"",
       vehicleInvolved: "",
       vehicleDetails: {
         category: "",

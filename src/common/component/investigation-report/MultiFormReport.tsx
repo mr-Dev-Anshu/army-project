@@ -293,6 +293,8 @@ const mapMpToReport = (mp: any) => {
             title="Create New MP Occurrence & Investigation Report"
             reportNo="PRO/21 CPU/00042/106/25"
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
+            onCreate={onSubmitFinal}
+
           />
 
           {/* RIGHT SIDE DYNAMIC CONTENT */}
@@ -307,6 +309,7 @@ const mapMpToReport = (mp: any) => {
             stepsConfig={stepsConfig}
             mode="mp"
             mapMpToReport={mapMpToReport}
+            
           />
         </div>
       </div>
