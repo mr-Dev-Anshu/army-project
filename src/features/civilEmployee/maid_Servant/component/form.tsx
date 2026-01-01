@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { TempFamilyMember } from "../types";
-import { useCreateMaidServant } from "../hook";
+import { useCreateMaidServant, useUpdateMaidServant } from "../hook";
 
 const INITIAL_MAID_SERVANT_STATE = {
   qtrNumber: "",
@@ -46,7 +46,10 @@ interface Props {
 export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initialData }: Props) {
   const { state, dispatch } = useForm();
   const maidServant = state.formData.maidServant || {};
-  const { mutate: createMaidServant, isPending } = useCreateMaidServant();
+  const { mutate: createMaidServant, isPending: isCreating } = useCreateMaidServant();
+  const { mutate: updateMaidServant, isPending: isUpdating } = useUpdateMaidServant();
+
+  const isPending = isCreating || isUpdating;
 
   useEffect(() => {
     if (initialData) {
@@ -73,6 +76,8 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
     relationship: "",
   });
 
+  const [editMemberIndex, setEditMemberIndex] = useState<number | null>(null);
+
   const handleReset = () => {
     dispatch({
       type: "SET_PATH",
@@ -80,6 +85,7 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
       value: INITIAL_MAID_SERVANT_STATE,
     });
     setTempMember({ name: "", age: "", relationship: "" });
+    setEditMemberIndex(null);
   };
 
   const setField = (field: string, value: unknown) => {
@@ -96,17 +102,46 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
       tempMember.age.trim() &&
       tempMember.relationship.trim()
     ) {
-      dispatch({
-        type: "PUSH_PATH",
-        path: "formData.maidServant.familyMembers",
-        value: {
+      if (editMemberIndex !== null) {
+        // Update existing member
+        const updatedMembers = [...(maidServant.familyMembers || [])];
+        updatedMembers[editMemberIndex] = {
+          ...updatedMembers[editMemberIndex],
           name: tempMember.name.trim(),
           age: tempMember.age.trim(),
           relationship: tempMember.relationship.trim(),
-        },
-      });
+        };
+
+        dispatch({
+          type: "SET_PATH",
+          path: "formData.maidServant.familyMembers",
+          value: updatedMembers,
+        });
+        setEditMemberIndex(null);
+      } else {
+        // Add new member
+        dispatch({
+          type: "PUSH_PATH",
+          path: "formData.maidServant.familyMembers",
+          value: {
+            name: tempMember.name.trim(),
+            age: tempMember.age.trim(),
+            relationship: tempMember.relationship.trim(),
+          },
+        });
+      }
       setTempMember({ name: "", age: "", relationship: "" });
     }
+  };
+
+  const handleEditMember = (index: number) => {
+    const memberToEdit = maidServant.familyMembers[index];
+    setTempMember({
+      name: memberToEdit.name,
+      age: memberToEdit.age,
+      relationship: memberToEdit.relationship,
+    });
+    setEditMemberIndex(index);
   };
 
   const handleRemoveMember = (index: number) => {
@@ -118,8 +153,19 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
   };
 
   const handleSave = () => {
+    // Date validation
+    if (maidServant.validFrom && maidServant.validTill) {
+      if (new Date(maidServant.validTill) <= new Date(maidServant.validFrom)) {
+        toast.error("Valid Till date must be greater than Valid From date.");
+        return;
+      }
+    }
+
     // Sanitize data
     const sanitizedData = { ...maidServant };
+    // Capture ID before deleting it for sanitization, if it exists
+    const idToUpdate = (maidServant as any)._id || (initialData as any)?._id;
+
     delete (sanitizedData as any)._id;
     delete (sanitizedData as any).createdAt;
     delete (sanitizedData as any).updatedAt;
@@ -132,17 +178,31 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
       });
     }
 
-    createMaidServant(sanitizedData, {
-      onSuccess: () => {
-        toast.success("Maid Servant Security Pass Saved & Generated!");
-        handleReset();
-        onSuccess?.(); // also call onSuccess prop if provided
-      },
-      onError: (error) => {
-        console.error("Error creating pass:", error);
-        toast.error("Failed to create pass. Please try again.");
-      }
-    });
+    if (idToUpdate) {
+      updateMaidServant({ id: idToUpdate, data: sanitizedData }, {
+        onSuccess: () => {
+          toast.success("Maid Servant Security Pass Updated!");
+          handleReset();
+          onSuccess?.();
+        },
+        onError: (error) => {
+          console.error("Error updating pass:", error);
+          toast.error("Failed to update pass. Please try again.");
+        }
+      });
+    } else {
+      createMaidServant(sanitizedData, {
+        onSuccess: () => {
+          toast.success("Maid Servant Security Pass Saved & Generated!");
+          handleReset();
+          onSuccess?.(); // also call onSuccess prop if provided
+        },
+        onError: (error) => {
+          console.error("Error creating pass:", error);
+          toast.error("Failed to create pass. Please try again.");
+        }
+      });
+    }
   };
 
   return (
@@ -228,16 +288,17 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
 
           <div className="col-span-2 space-y-1">
             <Label>Enter Aadhar Card No. for Govt. ID Proof</Label>
-            <Input
+            <SuggestionInput
               placeholder="---- ---- ----"
               value={maidServant.servantAadhar || ""}
-              onChange={(e) =>
+              onChange={(v) =>
                 setField(
                   "servantAadhar",
-                  e.target.value.replace(/\D/g, "").slice(0, 12)
+                  v.replace(/\D/g, "").slice(0, 12)
                 )
               }
               maxLength={12}
+              fieldType="servantAadhar"
             />
           </div>
         </div>
@@ -279,16 +340,17 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
 
             <div className="space-y-1">
               <Label>Pin code</Label>
-              <Input
+              <SuggestionInput
                 placeholder="Pin code"
                 value={maidServant.permanentPincode || ""}
-                onChange={(e) =>
+                onChange={(v) =>
                   setField(
                     "permanentPincode",
-                    e.target.value.replace(/\D/g, "").slice(0, 6)
+                    v.replace(/\D/g, "").slice(0, 6)
                   )
                 }
                 maxLength={6}
+                fieldType="permanentPincode"
               />
             </div>
           </div>
@@ -303,78 +365,32 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
 
         <div className="space-y-1 max-w-xs mb-6">
           <Label>Pass Number</Label>
-          <Input
+          <SuggestionInput
             placeholder="0000"
             value={maidServant.passNumber || ""}
-            onChange={(e) => setField("passNumber", e.target.value)}
+            onChange={(v) => setField("passNumber", v)}
+            fieldType="passNumber"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
             <Label>Valid From</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !maidServant.validFrom && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {maidServant.validFrom
-                    ? format(new Date(maidServant.validFrom), "PPP")
-                    : "-- / -- / 25"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={
-                    maidServant.validFrom
-                      ? new Date(maidServant.validFrom)
-                      : undefined
-                  }
-                  onSelect={(date) =>
-                    setField("validFrom", date ? date.toISOString() : null)
-                  }
-                />
-              </PopoverContent>
-            </Popover>
+            <Input
+              type="date"
+              value={maidServant.validFrom ? maidServant.validFrom.split('T')[0] : ""}
+              onChange={(e) => setField("validFrom", e.target.value ? new Date(e.target.value).toISOString() : null)}
+            />
           </div>
 
           <div className="space-y-1">
             <Label>Valid Till</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !maidServant.validTill && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {maidServant.validTill
-                    ? format(new Date(maidServant.validTill), "PPP")
-                    : "-- / -- / 25"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={
-                    maidServant.validTill
-                      ? new Date(maidServant.validTill)
-                      : undefined
-                  }
-                  onSelect={(date) =>
-                    setField("validTill", date ? date.toISOString() : null)
-                  }
-                />
-              </PopoverContent>
-            </Popover>
+            <Input
+              type="date"
+              min={maidServant.validFrom ? maidServant.validFrom.split('T')[0] : undefined}
+              value={maidServant.validTill ? maidServant.validTill.split('T')[0] : ""}
+              onChange={(e) => setField("validTill", e.target.value ? new Date(e.target.value).toISOString() : null)}
+            />
           </div>
         </div>
       </section>
@@ -411,17 +427,18 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
                 onChange={(v) =>
                   setTempMember((prev) => ({ ...prev, name: v }))
                 }
-                fieldType="memberName"
+                fieldType="familyMemberName"
               />
             </div>
             <div className="space-y-1">
               <Label>Age</Label>
-              <Input
+              <SuggestionInput
                 placeholder="eg. 00"
                 value={tempMember.age}
-                onChange={(e) =>
-                  setTempMember((prev) => ({ ...prev, age: e.target.value }))
+                onChange={(v) =>
+                  setTempMember((prev) => ({ ...prev, age: v }))
                 }
+                fieldType="age"
               />
             </div>
             <div className="space-y-1">
@@ -442,7 +459,7 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
 
           <div className="w-full flex justify-end">
             <Button variant="save-generate" onClick={handleAddMember}>
-              + Add Member
+              {editMemberIndex !== null ? "Update Member" : "+ Add Member"}
             </Button>
           </div>
 
@@ -469,13 +486,25 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
                           <td className="py-2">{member.relationship}</td>
                           <td className="py-2">{member.age}</td>
                           <td className="py-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveMember(idx)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleEditMember(idx)}
+                                className="text-blue-500 hover:text-blue-700 bg-blue-50 p-1 rounded hover:bg-blue-100 transition-colors"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                                  <path d="m15 5 4 4" />
+                                </svg>
+                              </button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveMember(idx)}
+                                className="p-1 h-auto"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       )
@@ -495,7 +524,7 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
         <div className="flex justify-between gap-4">
           <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
           <Button onClick={handleSave} className="bg-[#0088FF] cursor-pointer  hover:bg-blue-700 px-8" disabled={isPending}>
-            {isPending ? "Saving..." : "Save & Generate"}
+            {isPending ? (isUpdating ? "Updating..." : "Saving...") : (((maidServant as any)._id || (initialData as any)?._id) ? "Update & Generate" : "Save & Generate")}
           </Button>
         </div>
       </div>

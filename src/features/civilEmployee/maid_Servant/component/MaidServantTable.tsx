@@ -312,12 +312,12 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 offenceTypeOptions={[]}
-                showOffenceType={true}
+                showOffenceType={false}
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
-                showDate={true}
-                showSort={true}
+                showDate={false}
+                showSort={false}
                 showFilter={true}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
