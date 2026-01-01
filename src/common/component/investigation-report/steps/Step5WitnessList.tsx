@@ -46,7 +46,6 @@ export default function Step5WitnessList() {
     });
   };
 
-  /* ========= SAVE MAIN WITNESS ========= */
   const handleSaveMainWitness = () => {
     const person = mp.individualDetails?.tempOffender || {};
 
@@ -64,15 +63,14 @@ export default function Step5WitnessList() {
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.individualDetails.tempOffender",
-      value: {},
+      value: {}, // ⭐ ye reset hoga
     });
 
     toast.success("Witness Added!");
   };
 
-  /* ========= SAVE ADDITIONAL ========= */
   const handleSaveAdditionalWitness = () => {
-    const person = add.tempOffender || {};
+    const person = mp.additionalIndividual?.tempOffender || {};
 
     if (!Object.keys(person).length) {
       toast.error("Please fill additional witness details!");
@@ -92,7 +90,7 @@ export default function Step5WitnessList() {
         vehicleInvolved: "",
         vehicleData: {},
         driverType: "",
-        tempOffender: null,
+        tempOffender: {}, // ⭐ null nahi, empty object rakho
       },
     });
 
