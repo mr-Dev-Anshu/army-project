@@ -5,7 +5,7 @@
 
 
 export const offenderFormsConfig: any = {
-  "Military Person": {
+  "Military Personnel": {
     title: "Fill Offender Particulars",
     helperText: "Select who the offender is and fill their details.",
     fields: [

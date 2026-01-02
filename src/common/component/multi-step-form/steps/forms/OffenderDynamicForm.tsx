@@ -20,7 +20,7 @@ interface OffenderDynamicFormProps {
   helperText?: string;
   fields: FieldType[];
   showCoDriver?: boolean;
-  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+scope?: "traffic" | "static" | "mp-main" | "mp-additional" | "mt-accident";
   path?: string;
 }
 
@@ -59,7 +59,7 @@ export default function OffenderDynamicForm({
 
 
 
-  const saveField = (label: string, value: string) => {
+ const saveField = (label: string, value: string) => {
   let targetPath = path;
 
   if (!targetPath && scope === "mp-main")
@@ -68,13 +68,16 @@ export default function OffenderDynamicForm({
   if (!targetPath && scope === "mp-additional")
     targetPath = "formData.mpReport.additionalIndividual.tempOffender";
 
-  // ALWAYS UPDATE LOCAL UI FIRST 🔥
+  // ✅ ADD THIS BLOCK
+  if (!targetPath && scope === "mt-accident")
+    targetPath = "formData.mtAccidentReport.offenderDetails";
+
+  // Update local UI first
   setLocalData((prev: any) => ({
     ...(prev || {}),
     [label]: value,
   }));
 
-  // If no path → bas local UI me hi rakho
   if (!targetPath) return;
 
   const prevGlobal = getValueByPath(state, targetPath) || {};

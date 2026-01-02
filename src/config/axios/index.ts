@@ -40,9 +40,14 @@ api.interceptors.response.use(
       if (typeof responseData === "string") {
         message = responseData.slice(0, 200);
       } else if (responseData.message) {
-        message = responseData.message;
+        message = String(responseData.message);
       } else if (responseData.error) {
-        message = responseData.error;
+        // Handle error as string or object
+        if (typeof responseData.error === "string") {
+          message = responseData.error;
+        } else if (typeof responseData.error === "object") {
+          message = JSON.stringify(responseData.error);
+        }
       }
     }
 
@@ -54,6 +59,7 @@ api.interceptors.response.use(
       (status === 401 ||
         status === 403 ||
         (message &&
+          typeof message === "string" &&
           (message.toLowerCase().includes("unauthorized") ||
             message.toLowerCase().includes("token expired") ||
             message.toLowerCase().includes("unauthenticated") ||
