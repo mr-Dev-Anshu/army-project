@@ -313,7 +313,7 @@ export default function FormationAnalysisTable({
 
             {/* Table Container with scroll */}
             <div className="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm flex flex-col">
-                <div className="overflow-auto max-h-[460px] relative no-scrollbar">
+                <div className="overflow-auto h-[calc(100vh-400px)] min-h-[520px] relative no-scrollbar">
                     <table className="w-full text-sm text-left border-collapse">
                         <thead className="bg-[#E5E5E5] text-[#0A0A0A] font-bold border-b border-gray-300 sticky top-0 z-40">
                             <tr>
