@@ -19,9 +19,9 @@ const isPublicRoute = (path: string) => {
 
 const api = axios.create({
   baseURL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // headers: {
+  //   "Content-Type": "application/json",
+  // },
   withCredentials: true,
   validateStatus: (status) => status >= 200 && status < 300,
 });
