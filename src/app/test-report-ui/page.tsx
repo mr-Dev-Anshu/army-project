@@ -2,6 +2,9 @@
 
 import React from "react";
 import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
+import { generateWordReport } from "@/utils/generateWordReport";
 
 const mockData: MilitaryPoliceReportProps = {
   reportNo: "PRO/21 CPU/00042/102/25",
@@ -20,19 +23,19 @@ const mockData: MilitaryPoliceReportProps = {
       address: "C/O 56 APO",
       iCardNo: "F-835402",
     },
-    secondary: { 
-        // Image shows identical data in 1.2 block as 1.1, I will replicate it to match exact image appearance
-        aadharCardNo: "6648 1882 3227",
-        name: "Mr. Rakesh Kumar",
-        so: "Ravindra Thakur Baliya",
-        relation: "Brother-in-law",
-        armyNo: "615699057Y",
-        rank: "Hav(CLK)",
-        unit: "21 Corps Signal Regt (AREN)",
-        fmn: "HQ 21 Corps",
-        command: "Southern Comd",
-        address: "C/O 56 APO",
-        iCardNo: "F-835402",
+    secondary: {
+      // Image shows identical data in 1.2 block as 1.1, I will replicate it to match exact image appearance
+      aadharCardNo: "6648 1882 3227",
+      name: "Mr. Rakesh Kumar",
+      so: "Ravindra Thakur Baliya",
+      relation: "Brother-in-law",
+      armyNo: "615699057Y",
+      rank: "Hav(CLK)",
+      unit: "21 Corps Signal Regt (AREN)",
+      fmn: "HQ 21 Corps",
+      command: "Southern Comd",
+      address: "C/O 56 APO",
+      iCardNo: "F-835402",
     },
     vehicle: {
       baNo: "12A123456B",
@@ -76,9 +79,22 @@ const mockData: MilitaryPoliceReportProps = {
 };
 
 export default function TestReportPage() {
+  const handleDownload = async () => {
+    try {
+      await generateWordReport(mockData);
+    } catch (error) {
+      console.error("Failed to generate report:", error);
+      alert("Failed to generate report");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 py-12 flex justify-center">
-       <MilitaryPoliceReport {...mockData} />
+    <div className="min-h-screen bg-gray-100 py-12 flex flex-col items-center gap-6">
+      <Button onClick={handleDownload} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+        <FileDown className="w-4 h-4" />
+        Download Word Report
+      </Button>
+      <MilitaryPoliceReport {...mockData} />
     </div>
   );
 }
