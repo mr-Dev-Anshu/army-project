@@ -1,133 +1,41 @@
 
-
-
-// "use client";
-
-// import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
-// import VehicleDetailsForm from "@/common/component/VehicleDetailsForm";
-// import VehiclePrimaryQuestion from "@/common/component/VehiclePrimaryQuestion";
-
-// export default function Step1Particulars({
-//   value,
-//   onChange,
-// }: {
-//   value: string;
-//   onChange: (v: string) => void;
-// }) {
-//   return (
-//     <div
-//       className="
-//         w-full h-full
-//         flex flex-col
-
-//         /* Responsive spacing */
-//         gap-4 sm:gap-5 lg:gap-6
-//         px-2 sm:px-3 md:px-4 lg:px-6
-//         pb-4
-
-//         /* Safe scroll */
-//         overflow-y-auto
-//       "
-//     >
-//       {/* ---------- SUB STEP 1 ---------- */}
-//       <div
-//         className="
-//           w-full 
-//           max-w-full
-//         "
-//       >
-//         <VehiclePrimaryQuestion
-//           vehicleStatus={value}
-//           setVehicleStatus={onChange}
-//           onChange={onChange}
-//         />
-//       </div>
-
-//       {/* ---------- SUB STEP 2 ---------- */}
-//       <div
-//         className="
-//           w-full
-//           min-h-[200px]
-//           sm:min-h-[230px]
-//           md:min-h-[260px]
-//           lg:min-h-[300px]
-//           flex
-//         "
-//       >
-//         {value === "yes" && (
-//           <div className="w-full">
-//             <VehicleDetailsForm scope="traffic" />
-//           </div>
-//         )}
-
-//         {value === "no" && (
-//           <div className="w-full">
-//             <OffenderWithoutVehicleForm />
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
 "use client";
 
+import { FormSection } from "@/common/component/FormSection";
 import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
 import VehicleDetailsForm from "@/common/component/VehicleDetailsForm";
 import VehiclePrimaryQuestion from "@/common/component/VehiclePrimaryQuestion";
+import { useForm } from "@/context/FormContext";
 
-export default function Step1Particulars({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
+type YesNo = "yes" | "no" | "";
+
+export default function Step1Particulars() {
+  const { state, dispatch } = useForm();
+
+  const value: YesNo = state.formData.traffic.vehicleInvolved || "";
+
+  const setVehicle = (v: YesNo) =>
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.traffic.vehicleInvolved",
+      value: v,
+    });
+
   return (
-    <div
-      className="
-        w-full h-full
-        flex flex-col
-        gap-4 sm:gap-5 lg:gap-6
-        px-2 sm:px-3 md:px-4 lg:px-6
-        pb-4
-        overflow-y-auto
-      "
-    >
-      {/* ---------- STEP 1 QUESTION ---------- */}
-      <div className="w-full max-w-full">
-        <VehiclePrimaryQuestion
-          vehicleStatus={value}
-          setVehicleStatus={onChange}
-          onChange={onChange}
-        />
-      </div>
+    
+      <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
 
-      {/* ---------- STEP 2 FORM RENDER ---------- */}
-      <div
-        className="
-          w-full
-          min-h-[200px]
-          sm:min-h-[230px]
-          md:min-h-[260px]
-          lg:min-h-[300px]
-          flex
-        "
-      >
-        {value === "yes" && (
-          <div className="w-full">
-            <VehicleDetailsForm scope="traffic" />
-          </div>
-        )}
+      <VehiclePrimaryQuestion
+      title="Does this offence involve vehicles?"
+        vehicleStatus={value}
+        setVehicleStatus={setVehicle}
+      />
 
-        {value === "no" && (
-          <div className="w-full">
-            <OffenderWithoutVehicleForm />
-          </div>
-        )}
-      </div>
+      {value === "yes" && <VehicleDetailsForm scope="traffic" />}
+
+      {value === "no" && <OffenderWithoutVehicleForm />}
+
     </div>
+    
   );
 }
