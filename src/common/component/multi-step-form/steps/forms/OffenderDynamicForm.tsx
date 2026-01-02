@@ -193,6 +193,7 @@ export default function OffenderDynamicForm({
                     title="Civilian Co-Driver Details"
                     fields={offenderFormsConfig["Civilian"].fields}
                     scope={scope}
+                    path={`${path}.coDriver`}
                     showCoDriver={false}
                   />
 
@@ -266,6 +267,7 @@ export default function OffenderDynamicForm({
                           }
                           fields={offenderFormsConfig[relativeType].fields}
                           scope={scope}
+                          path={`${path}.coDriver.militaryRelative`}
                           showCoDriver={false}
                         />
                       )}
@@ -282,6 +284,7 @@ export default function OffenderDynamicForm({
                     title={`${coDriverType} Details`}
                     fields={offenderFormsConfig[coDriverType].fields}
                     scope={scope}
+                    path={`${path}.coDriver`}
                     showCoDriver={false}
                   />
                 )}
