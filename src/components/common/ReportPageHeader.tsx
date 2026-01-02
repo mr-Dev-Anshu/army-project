@@ -60,13 +60,15 @@ export default function ReportPageHeader({
           <span className="font-semibold text-[#0A0A0A]">{title}</span>
         </div>
       </div>
-      <Button
-        className="bg-[#0A0A0A] text-white hover:bg-gray-800 gap-2 h-9 px-4 text-xs font-medium"
-        onClick={onDownload}
-      >
-        Download & Print Report
-        <Printer className="w-3.5 h-3.5" />
-      </Button>
+      {onDownload && (
+        <Button
+          className="bg-[#0A0A0A] text-white hover:bg-gray-800 gap-2 h-9 px-4 text-xs font-medium"
+          onClick={onDownload}
+        >
+          Download & Print Report
+          <Printer className="w-3.5 h-3.5" />
+        </Button>
+      )}
     </div>
   );
 }
