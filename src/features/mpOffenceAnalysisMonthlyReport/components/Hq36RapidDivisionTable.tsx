@@ -18,6 +18,7 @@ import {
     Plus,
     MoreVertical,
     Trash2,
+    ArrowUpDown,
 } from "lucide-react";
 import { useGetDivisionAnalysis, useDeleteDivisionAnalysis } from "../hooks/useDivisionAnalysis";
 import {
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "react-toastify";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 import Hq36RapidDivisionForm from "./Hq36RapidDivisionForm";
 
@@ -45,9 +47,11 @@ export default function Hq36RapidDivisionTable({
 }: Hq36RapidDivisionTableProps) {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editingEntry, setEditingEntry] = React.useState<any>(null);
+    const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [selectedOffenceType, setSelectedOffenceType] = React.useState("All");
     const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
+    const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
     const dateInputRef = React.useRef<HTMLInputElement>(null);
 
     const currentMonth = selectedDate.getMonth() + 1;
@@ -59,15 +63,21 @@ export default function Hq36RapidDivisionTable({
         divisionName: formation.groupKey
     });
 
-    const { mutate: deleteEntry } = useDeleteDivisionAnalysis();
+    const { mutate: deleteEntry, isPending: isDeleting } = useDeleteDivisionAnalysis();
 
-    const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this entry?")) {
-            deleteEntry(id, {
-                onSuccess: () => toast.success("Entry deleted"),
-                onError: () => toast.error("Failed to delete entry")
-            });
-        }
+    const handleDeleteClick = (id: string) => {
+        setDeleteId(id);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!deleteId) return;
+        deleteEntry(deleteId, {
+            onSuccess: () => {
+                toast.success("Entry deleted");
+                setDeleteId(null);
+            },
+            onError: () => toast.error("Failed to delete entry")
+        });
     };
 
     // Mock data for specific MT Accident fields
@@ -134,8 +144,26 @@ export default function Hq36RapidDivisionTable({
             data = data.filter(item => item.offenceType === selectedOffenceType);
         }
 
-        return data;
-    }, [tableData, searchQuery, selectedOffenceType]);
+        data.sort((a, b) => {
+            if (sortOrder === 'asc') {
+                return a.totalCase - b.totalCase;
+            } else {
+                return b.totalCase - a.totalCase;
+            }
+        });
+
+        // Re-assign IDs for display purposes based on sort order if needed, 
+        // but typically IDs should persist. 
+        // If "Sr no." is meant to be just a row number, we can map it here.
+        // Let's keep original IDs for now as they might track back to something,
+        // OR if the user wants row numbers 1,2,3... regardless of sort:
+        return data.map((item, index) => ({ ...item, displayId: index + 1 }));
+    }, [tableData, searchQuery, selectedOffenceType, sortOrder]);
+
+    const isFilterActive = searchQuery !== "" ||
+        selectedOffenceType !== "All" ||
+        sortOrder !== "desc" ||
+        (selectedDate.getMonth() !== new Date().getMonth() || selectedDate.getFullYear() !== new Date().getFullYear());
 
     // Split data into General and MT Accident
     const generalOffences = filteredData.filter(d => d.offenceType !== "MT Accident");
@@ -144,8 +172,8 @@ export default function Hq36RapidDivisionTable({
     const generalColumns: Column<typeof tableData[0]>[] = [
         {
             header: "Sr no.",
-            accessorKey: "id",
-            cell: (item) => <span className="text-gray-500">{item.id}</span>,
+            accessorKey: "displayId",
+            cell: (item: any) => <span className="text-gray-500">{item.displayId}</span>,
             className: "w-16 text-center border-r border-gray-100",
             headerClassName: "w-16 text-center border-r border-gray-200"
         },
@@ -204,7 +232,7 @@ export default function Hq36RapidDivisionTable({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer text-red-600 focus:text-red-600"
-                            onClick={() => handleDelete(row._id)}
+                            onClick={() => handleDeleteClick(row._id)}
                         >
                             <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
@@ -219,8 +247,8 @@ export default function Hq36RapidDivisionTable({
     const mtAccidentColumns: Column<typeof tableData[0]>[] = [
         {
             header: "Sr no.",
-            accessorKey: "id",
-            cell: (item) => <span className="text-gray-500">{item.id}</span>,
+            accessorKey: "displayId",
+            cell: (item: any) => <span className="text-gray-500">{item.displayId}</span>,
             className: "w-16 text-center border-r border-gray-100",
             headerClassName: "w-16 text-center border-r border-gray-200"
         },
@@ -307,7 +335,7 @@ export default function Hq36RapidDivisionTable({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer text-red-600 focus:text-red-600"
-                            onClick={() => handleDelete(row._id)}
+                            onClick={() => handleDeleteClick(row._id)}
                         >
                             <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
@@ -322,6 +350,7 @@ export default function Hq36RapidDivisionTable({
     const handleResetFilters = () => {
         setSearchQuery("");
         setSelectedOffenceType("All");
+        setSortOrder("desc");
         setSelectedDate(new Date());
     };
 
@@ -401,9 +430,10 @@ export default function Hq36RapidDivisionTable({
                 <div className="flex items-center gap-3">
                     <div className="flex items-center" title="Filter by Offence Type">
                         <Select value={selectedOffenceType} onValueChange={setSelectedOffenceType}>
-                            <SelectTrigger className={`h-10 min-w-[200px] max-w-[200px] rounded-md text-gray-700 gap-2 bg-white border-gray-200`}>
+                            <SelectTrigger className={`h-10 min-w-[200px] max-w-[200px] rounded-md text-gray-700 gap-2 overflow-hidden transition-colors ${selectedOffenceType !== "All" ? "border-blue-500 bg-blue-50/50 ring-1 ring-blue-200" : "bg-white border-gray-200"
+                                }`}>
                                 <div className="flex items-center gap-1">
-                                    <span className="text-gray-500">Offence Type:</span>
+                                    <span className={selectedOffenceType !== "All" ? "text-blue-700" : "text-gray-500"}>Offence Type:</span>
                                     <SelectValue />
                                 </div>
                             </SelectTrigger>
@@ -422,11 +452,14 @@ export default function Hq36RapidDivisionTable({
                         <Button
                             variant="outline"
                             onClick={() => dateInputRef.current?.showPicker()}
-                            className={`h-10 text-gray-700 font-normal rounded-md px-3 gap-2 bg-white border-gray-200`}
+                            className={`h-10 text-gray-700 font-normal rounded-md px-3 gap-2 ${(selectedDate.getMonth() !== new Date().getMonth() || selectedDate.getFullYear() !== new Date().getFullYear())
+                                ? "border-blue-500 bg-blue-50/50 text-blue-700 ring-1 ring-blue-200"
+                                : "bg-white border-gray-200"
+                                }`}
                         >
-                            <span className="text-gray-500">Date:</span>
+                            <span className={(selectedDate.getMonth() !== new Date().getMonth() || selectedDate.getFullYear() !== new Date().getFullYear()) ? "text-blue-700" : "text-gray-500"}>Date:</span>
                             <span>{selectedDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</span>
-                            <Calendar className="w-4 h-4 ml-1 text-gray-400" />
+                            <Calendar className={`w-4 h-4 ml-1 ${(selectedDate.getMonth() !== new Date().getMonth() || selectedDate.getFullYear() !== new Date().getFullYear()) ? "text-blue-500" : "text-gray-400"}`} />
                         </Button>
                         <input
                             ref={dateInputRef}
@@ -443,15 +476,27 @@ export default function Hq36RapidDivisionTable({
                         />
                     </div>
                     <div className="flex space-x-1">
-                        <Button variant="outline" size="icon" className="h-10 w-10 border-gray-200 bg-white">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2 4H14M4 8H12M6 12H10" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleResetFilters}
+                            className={`h-10 w-10 rounded-md transition-colors ${isFilterActive ? "border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:border-red-300" : "bg-white border-gray-200 text-gray-500"
+                                }`}
+                            title="Reset Filters"
+                        >
+                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 11.125C9.41421 11.125 9.75 11.4608 9.75 11.875C9.75 12.2892 9.41421 12.625 9 12.625H6C5.58579 12.625 5.25 12.2892 5.25 11.875C5.25 11.4608 5.58579 11.125 6 11.125H9ZM11.25 6.625C11.6642 6.625 12 6.96079 12 7.375C12 7.78921 11.6642 8.125 11.25 8.125H3.75C3.33579 8.125 3 7.78921 3 7.375C3 6.96079 3.33579 6.625 3.75 6.625H11.25ZM14.25 2.125C14.6642 2.125 15 2.46079 15 2.875C15 3.28921 14.6642 3.625 14.25 3.625H0.75C0.335786 3.625 0 3.28921 0 2.875C0 2.46079 0.335786 2.125 0.75 2.125H14.25Z" fill="currentColor" />
                             </svg>
                         </Button>
-                        <Button variant="outline" size="icon" className="h-10 w-10 border-gray-200 bg-white">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 8L8 4M8 4L12 8M8 4V14" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                            className={`h-10 w-10 rounded-md transition-colors ${sortOrder === 'asc' ? "border-blue-500 bg-blue-50 text-blue-600" : "bg-white border-gray-200 text-gray-500"
+                                }`}
+                            title={`Sort by Total Cases ${sortOrder === 'asc' ? '(Ascending)' : '(Descending)'}`}
+                        >
+                            <ArrowUpDown className="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
@@ -483,6 +528,17 @@ export default function Hq36RapidDivisionTable({
                 )}
             </div>
 
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Entry"
+                message="Are you sure you want to delete this offence entry? This action cannot be undone."
+                confirmLabel="Delete"
+                variant="danger"
+                isProcessing={isDeleting}
+            />
         </div>
     );
 }

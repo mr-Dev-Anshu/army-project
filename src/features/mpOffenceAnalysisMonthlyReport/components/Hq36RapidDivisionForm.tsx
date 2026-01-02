@@ -22,6 +22,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { toast } from "react-toastify";
 import { useGetDivisionAnalysis, useCreateDivisionAnalysis, useDeleteDivisionAnalysis, useUpdateDivisionAnalysis } from "../hooks/useDivisionAnalysis";
 
@@ -52,6 +53,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
     const [actionPending, setActionPending] = useState<string>(initialData?.actionPending?.toString() || "00");
     const [remark, setRemark] = useState(initialData?.remark || "");
     const [sessionAddedIds, setSessionAddedIds] = useState<string[]>([]);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
     // Calculated Field
     const totalCases = useMemo(() => {
@@ -68,7 +70,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
 
     const { mutate: createEntry, isPending: isCreating } = useCreateDivisionAnalysis();
     const { mutate: updateEntry, isPending: isUpdating } = useUpdateDivisionAnalysis();
-    const { mutate: deleteEntry } = useDeleteDivisionAnalysis();
+    const { mutate: deleteEntry, isPending: isDeleting } = useDeleteDivisionAnalysis();
 
     // Handlers
     const handleAddEntry = () => {
@@ -119,16 +121,20 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
         }
     };
 
-    const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this entry?")) {
-            deleteEntry(id, {
-                onSuccess: () => {
-                    toast.success("Entry deleted");
-                    setSessionAddedIds(prev => prev.filter(sid => sid !== id));
-                },
-                onError: () => toast.error("Failed to delete entry")
-            });
-        }
+    const handleDeleteClick = (id: string) => {
+        setDeleteId(id);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!deleteId) return;
+        deleteEntry(deleteId, {
+            onSuccess: () => {
+                toast.success("Entry deleted");
+                setSessionAddedIds(prev => prev.filter(sid => sid !== deleteId));
+                setDeleteId(null);
+            },
+            onError: () => toast.error("Failed to delete entry")
+        });
     };
 
     // Table Data Mapping
@@ -231,7 +237,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer text-red-600 focus:text-red-600"
-                            onClick={() => handleDelete(row._id)}
+                            onClick={() => handleDeleteClick(row._id)}
                         >
                             <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
@@ -435,7 +441,19 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                     </>
                 )}
             </div>
-        </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Entry"
+                message="Are you sure you want to delete this offence entry? This action cannot be undone."
+                confirmLabel="Delete"
+                variant="danger"
+                isProcessing={isDeleting}
+            />
+        </div >
     );
 }
 
