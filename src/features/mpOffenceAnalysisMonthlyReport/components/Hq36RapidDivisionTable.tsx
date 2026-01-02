@@ -169,47 +169,47 @@ export default function Hq36RapidDivisionTable({
     const generalOffences = filteredData.filter(d => d.offenceType !== "MT Accident");
     const mtAccidentOffences = filteredData.filter(d => d.offenceType === "MT Accident");
 
-    const generalColumns: Column<typeof tableData[0]>[] = [
+    const generalColumns: Column<any>[] = [
         {
             header: "Sr no.",
             accessorKey: "displayId",
-            cell: (item: any) => <span className="text-gray-500">{item.displayId}</span>,
-            className: "w-16 text-center border-r border-gray-100",
-            headerClassName: "w-16 text-center border-r border-gray-200"
+            cell: (item: any) => <span className="text-gray-500 font-medium">{item.displayId}</span>,
+            className: "w-16 text-center border-r border-b border-gray-300",
+            headerClassName: "w-16 text-center border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case sticky left-0 z-50"
         },
         {
             header: "Offence Type",
             accessorKey: "offenceType",
-            className: "font-medium text-gray-900 border-r border-gray-100",
-            headerClassName: "border-r border-gray-200"
+            className: "font-medium text-[#404040] border-r border-b border-gray-300",
+            headerClassName: "border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Total Case",
             accessorKey: "totalCase",
-            cell: (item) => item.totalCase > 0 ? String(item.totalCase).padStart(2, '0') : "--",
-            className: "w-32 border-r border-gray-100",
-            headerClassName: "w-32 border-r border-gray-200"
+            cell: (item) => item.totalCase > 0 ? <span className="font-semibold">{String(item.totalCase).padStart(2, '0')}</span> : <span className="text-gray-400">0</span>,
+            className: "w-32 border-r border-b border-gray-300",
+            headerClassName: "w-32 border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Action Taken",
             accessorKey: "actionTaken",
-            cell: (item) => item.actionTaken > 0 ? String(item.actionTaken).padStart(2, '0') : "--",
-            className: "w-32 border-r border-gray-100",
-            headerClassName: "w-32 border-r border-gray-200"
+            cell: (item) => item.actionTaken > 0 ? <span className="font-semibold">{String(item.actionTaken).padStart(2, '0')}</span> : <span className="text-gray-400">0</span>,
+            className: "w-32 border-r border-b border-gray-300",
+            headerClassName: "w-32 border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Action Pending",
             accessorKey: "actionPending",
-            cell: (item) => item.actionPending > 0 ? String(item.actionPending).padStart(2, '0') : "--",
-            className: "w-32 border-r border-gray-100",
-            headerClassName: "w-32 border-r border-gray-200"
+            cell: (item) => item.actionPending > 0 ? <span className="font-semibold">{String(item.actionPending).padStart(2, '0')}</span> : <span className="text-gray-400">0</span>,
+            className: "w-32 border-r border-b border-gray-300",
+            headerClassName: "w-32 border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Remark",
             accessorKey: "remark",
-            cell: (item) => item.remark,
-            className: "border-r border-gray-100",
-            headerClassName: "border-r border-gray-200"
+            cell: (item) => item.remark !== "--" ? item.remark : <span className="text-gray-400">--</span>,
+            className: "border-r border-b border-gray-300",
+            headerClassName: "border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "",
@@ -239,80 +239,80 @@ export default function Hq36RapidDivisionTable({
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
-            className: "w-14 text-center sticky right-0 z-30 bg-gray-50/50 group-hover:bg-gray-100/50 backdrop-blur-sm",
-            headerClassName: "w-14 sticky right-0 z-50 bg-[#F9FAFB]"
+            className: "w-14 text-center sticky right-0 z-30 bg-white group-hover:bg-gray-50 border-l border-b border-gray-300",
+            headerClassName: "w-14 sticky right-0 z-50 bg-[#E5E5E5] border-l border-b border-gray-300"
         }
     ];
 
-    const mtAccidentColumns: Column<typeof tableData[0]>[] = [
+    const mtAccidentColumns: Column<any>[] = [
         {
             header: "Sr no.",
             accessorKey: "displayId",
-            cell: (item: any) => <span className="text-gray-500">{item.displayId}</span>,
-            className: "w-16 text-center border-r border-gray-100",
-            headerClassName: "w-16 text-center border-r border-gray-200"
+            cell: (item: any) => <span className="text-gray-500 font-medium">{item.displayId}</span>,
+            className: "w-16 text-center border-r border-b border-gray-300",
+            headerClassName: "w-16 text-center border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case sticky left-0 z-50"
         },
         {
             header: "Offence Type",
             accessorKey: "offenceType",
-            className: "font-medium text-gray-900 border-r border-gray-100",
-            headerClassName: "border-r border-gray-200"
+            className: "font-medium text-[#404040] border-r border-b border-gray-300",
+            headerClassName: "border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Injured(Civ)",
             accessorKey: "injuredCiv",
-            cell: (item) => item.injuredCiv > 0 ? String(item.injuredCiv).padStart(2, '0') : "--",
-            className: "w-28 border-r border-gray-100 bg-red-50/30",
-            headerClassName: "w-28 border-r border-gray-200 bg-gray-50"
+            cell: (item) => item.injuredCiv > 0 ? <span className="font-semibold">{String(item.injuredCiv).padStart(2, '0')}</span> : <span className="text-gray-400">--</span>,
+            className: "w-28 border-r border-b border-gray-300 bg-red-50/30",
+            headerClassName: "w-28 border-r border-b border-gray-300 bg-gray-50 text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Injured(Mil)",
             accessorKey: "injuredMil",
-            cell: (item) => item.injuredMil > 0 ? String(item.injuredMil).padStart(2, '0') : "--",
-            className: "w-28 border-r border-gray-100 bg-red-50/30",
-            headerClassName: "w-28 border-r border-gray-200 bg-gray-50"
+            cell: (item) => item.injuredMil > 0 ? <span className="font-semibold">{String(item.injuredMil).padStart(2, '0')}</span> : <span className="text-gray-400">--</span>,
+            className: "w-28 border-r border-b border-gray-300 bg-red-50/30",
+            headerClassName: "w-28 border-r border-b border-gray-300 bg-gray-50 text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Died(Civ)",
             accessorKey: "diedCiv",
-            cell: (item) => item.diedCiv > 0 ? String(item.diedCiv).padStart(2, '0') : "--",
-            className: "w-24 border-r border-gray-100 bg-red-50/30",
-            headerClassName: "w-24 border-r border-gray-200 bg-gray-50"
+            cell: (item) => item.diedCiv > 0 ? <span className="font-semibold">{String(item.diedCiv).padStart(2, '0')}</span> : <span className="text-gray-400">--</span>,
+            className: "w-24 border-r border-b border-gray-300 bg-red-50/30",
+            headerClassName: "w-24 border-r border-b border-gray-300 bg-gray-50 text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Died(Mil)",
             accessorKey: "diedMil",
-            cell: (item) => item.diedMil > 0 ? String(item.diedMil).padStart(2, '0') : "--",
-            className: "w-24 border-r border-gray-100 bg-red-50/30",
-            headerClassName: "w-24 border-r border-gray-200 bg-gray-50"
+            cell: (item) => item.diedMil > 0 ? <span className="font-semibold">{String(item.diedMil).padStart(2, '0')}</span> : <span className="text-gray-400">--</span>,
+            className: "w-24 border-r border-b border-gray-300 bg-red-50/30",
+            headerClassName: "w-24 border-r border-b border-gray-300 bg-gray-50 text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Total Case",
             accessorKey: "totalCase",
-            cell: (item) => item.totalCase > 0 ? String(item.totalCase).padStart(2, '0') : "--",
-            className: "w-32 border-r border-gray-100",
-            headerClassName: "w-32 border-r border-gray-200"
+            cell: (item) => item.totalCase > 0 ? <span className="font-semibold">{String(item.totalCase).padStart(2, '0')}</span> : <span className="text-gray-400">0</span>,
+            className: "w-32 border-r border-b border-gray-300",
+            headerClassName: "w-32 border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Action Taken",
             accessorKey: "actionTaken",
-            cell: (item) => item.actionTaken > 0 ? String(item.actionTaken).padStart(2, '0') : "--",
-            className: "w-32 border-r border-gray-100",
-            headerClassName: "w-32 border-r border-gray-200"
+            cell: (item) => item.actionTaken > 0 ? <span className="font-semibold">{String(item.actionTaken).padStart(2, '0')}</span> : <span className="text-gray-400">0</span>,
+            className: "w-32 border-r border-b border-gray-300",
+            headerClassName: "w-32 border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Action Pending",
             accessorKey: "actionPending",
-            cell: (item) => item.actionPending > 0 ? String(item.actionPending).padStart(2, '0') : "--",
-            className: "w-32 border-r border-gray-100",
-            headerClassName: "w-32 border-r border-gray-200"
+            cell: (item) => item.actionPending > 0 ? <span className="font-semibold">{String(item.actionPending).padStart(2, '0')}</span> : <span className="text-gray-400">0</span>,
+            className: "w-32 border-r border-b border-gray-300",
+            headerClassName: "w-32 border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "Remark",
             accessorKey: "remark",
-            cell: (item) => item.remark,
-            className: "border-r border-gray-100",
-            headerClassName: "border-r border-gray-200"
+            cell: (item) => item.remark !== "--" ? item.remark : <span className="text-gray-400">--</span>,
+            className: "border-r border-b border-gray-300",
+            headerClassName: "border-r border-b border-gray-300 bg-[#E5E5E5] text-[#0A0A0A] font-bold text-sm normal-case"
         },
         {
             header: "",
@@ -342,8 +342,8 @@ export default function Hq36RapidDivisionTable({
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
-            className: "w-14 text-center sticky right-0 z-30 bg-gray-50/50 group-hover:bg-gray-100/50 backdrop-blur-sm",
-            headerClassName: "w-14 sticky right-0 z-50 bg-[#F9FAFB]"
+            className: "w-14 text-center sticky right-0 z-30 bg-white group-hover:bg-gray-50 border-l border-b border-gray-300",
+            headerClassName: "w-14 sticky right-0 z-50 bg-[#E5E5E5] border-l border-b border-gray-300"
         }
     ];
 
@@ -415,7 +415,7 @@ export default function Hq36RapidDivisionTable({
             </div>
 
             {/* Filters Bar */}
-            <div className="flex justify-between items-center gap-4 mb-2">
+            <div className="flex justify-between items-center gap-4 mb-6">
                 <div className="relative w-80" title="Search by offence type">
                     <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${searchQuery ? "text-blue-500" : "text-gray-400"}`} />
                     <Input
@@ -508,7 +508,7 @@ export default function Hq36RapidDivisionTable({
                     <DynamicTable
                         data={generalOffences}
                         columns={generalColumns}
-                        className="max-h-full border-b-0 rounded-b-none"
+                        className="max-h-full border-b-0 rounded-b-none border-gray-300"
                     />
                 )}
                 {mtAccidentOffences.length > 0 && (
@@ -517,7 +517,7 @@ export default function Hq36RapidDivisionTable({
                         <DynamicTable
                             data={mtAccidentOffences}
                             columns={mtAccidentColumns}
-                            className="max-h-full rounded-t-none border-t-0"
+                            className="max-h-full rounded-t-none border-t-0 border-gray-300"
                         />
                     </div>
                 )}

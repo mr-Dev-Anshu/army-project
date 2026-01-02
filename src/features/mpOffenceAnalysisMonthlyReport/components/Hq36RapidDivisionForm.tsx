@@ -269,7 +269,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                     <span className="mx-2 text-gray-400">›</span>
                     <span className="font-bold text-[#0A0A0A]">Fill New Analysis Data</span>
                 </div>
-                <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-gray-100 rounded-full">
+                <Button variant="ghost" size="icon" onClick={onClose} className=" bg-white rounded-lg shadow-xl cursor-pointer">
                     <X className="w-5 h-5 text-gray-500" />
                 </Button>
             </div>
@@ -281,17 +281,17 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
             {/* Info Bar */}
             <div className="bg-[#171717] text-white py-4 px-6 rounded-md flex flex-wrap items-center justify-between gap-x-8 gap-y-2 text-sm shadow-md">
                 <div className="flex items-center gap-2">
-                    <span className="text-[#898989] font-medium">Division</span>
+                    <span className="text-[#E5E5E5] font-normal">Division</span>
                     <span className="font-semibold text-white">{formation.groupKey}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[#898989] font-medium">Unit:</span>
+                    <span className="text-[#E5E5E5] font-normal">Unit:</span>
                     <span className="font-semibold text-white">{formation.subtitle}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[#898989] font-medium">Reporting Period:</span>
+                    <span className="text-[#E5E5E5] font-normal">Reporting Period:</span>
                     <span className="font-semibold text-white">{currentMonthYearStr}</span>
-                    <span className="text-[#898989] font-normal">(Month & Year)</span>
+                    <span className="text-[#E5E5E5] font-normal">(Month & Year)</span>
                 </div>
             </div>
 
@@ -434,7 +434,10 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                                     onClose();
                                 }}
                             >
-                                <Check className="w-4 h-4" />
+                                <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M13.626 4.58423C14.0164 4.19384 14.6495 4.19412 15.04 4.58423C15.4306 4.97475 15.4306 5.60777 15.04 5.99829L10.04 10.9983C9.64951 11.3888 9.0165 11.3888 8.62598 10.9983L7.62598 9.99829C7.23587 9.60773 7.23559 8.97462 7.62598 8.58423C8.01636 8.19384 8.64948 8.19412 9.04004 8.58423L9.33301 8.8772L13.626 4.58423ZM10.96 1.91821C11.3505 1.52785 11.9836 1.52774 12.374 1.91821C12.7643 2.3087 12.7643 2.94182 12.374 3.33228L5.04004 10.6653C4.64953 11.0556 4.01645 11.0557 3.62598 10.6653L0.292969 7.33228C-0.0975012 6.94181 -0.0973928 6.30875 0.292969 5.91821C0.683493 5.52769 1.31651 5.52769 1.70703 5.91821L4.33301 8.54419L10.96 1.91821Z" fill="white" />
+                                </svg>
+
                                 Submit Monthly Report
                             </Button>
                         </div>
