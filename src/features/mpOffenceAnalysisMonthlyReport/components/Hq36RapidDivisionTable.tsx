@@ -19,7 +19,7 @@ import {
     MoreVertical,
     Trash2,
 } from "lucide-react";
-import { useGetDomesticAnalytics, useGetAnalysisRemarks, useCreateAnalysisRemark, useUpdateAnalysisRemark } from "../domesticAnalysis/hooks";
+import { useGetDivisionAnalysis, useDeleteDivisionAnalysis } from "../hooks/useDivisionAnalysis";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,6 +29,8 @@ import {
 import { toast } from "react-toastify";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 
+import Hq36RapidDivisionForm from "./Hq36RapidDivisionForm";
+
 interface Hq36RapidDivisionTableProps {
     formation: {
         groupKey: string;
@@ -37,51 +39,44 @@ interface Hq36RapidDivisionTableProps {
     onBack: () => void;
 }
 
-interface AnalyticsItem {
-    offenceType: string;
-    total: number;
-    actionTaken: number;
-    actionPending: number;
-    remark?: string;
-}
-
 export default function Hq36RapidDivisionTable({
     formation,
     onBack,
 }: Hq36RapidDivisionTableProps) {
+    const [isEditing, setIsEditing] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [selectedOffenceType, setSelectedOffenceType] = React.useState("All");
     const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
     const dateInputRef = React.useRef<HTMLInputElement>(null);
 
-    // Remark State
-    const [isRemarkModalOpen, setIsRemarkModalOpen] = React.useState(false);
-    const [remarkContent, setRemarkContent] = React.useState("");
-    const [editingRemarkId, setEditingRemarkId] = React.useState<string | null>(null);
-    const [currentOffenceType, setCurrentOffenceType] = React.useState<string | null>(null);
-
     const currentMonth = selectedDate.getMonth() + 1;
     const currentYear = selectedDate.getFullYear();
 
-    // Fetch analytics data
-    const { data: analyticsData, isLoading } = useGetDomesticAnalytics({
-        month: currentMonth,
-        year: currentYear,
+    // Fetch data from new API
+    // We fetch all and filter client side as per current backend implementation
+    const { data: analysisData, isLoading, refetch } = useGetDivisionAnalysis({
+        divisionName: formation.groupKey
     });
 
-    // Fetch remarks data
-    const { data: remarksData } = useGetAnalysisRemarks();
-    const { mutate: createRemark } = useCreateAnalysisRemark();
-    const { mutate: updateRemark } = useUpdateAnalysisRemark();
+    const { mutate: deleteEntry } = useDeleteDivisionAnalysis();
 
-    // Mock data for specific MT Accident fields as they are not in the API response yet
+    const handleDelete = (id: string) => {
+        if (confirm("Are you sure you want to delete this entry?")) {
+            deleteEntry(id, {
+                onSuccess: () => toast.success("Entry deleted"),
+                onError: () => toast.error("Failed to delete entry")
+            });
+        }
+    };
+
+    // Mock data for specific MT Accident fields
     const getMockAccidentData = (offenceType: string) => {
         if (offenceType === "MT Accident") {
             return {
                 injuredCiv: 1,
                 injuredMil: 1,
                 diedCiv: 0,
-                diedMil: 0, // Using 0 for "--" representation logic or string
+                diedMil: 0,
             };
         }
         return {
@@ -93,29 +88,32 @@ export default function Hq36RapidDivisionTable({
     };
 
     const tableData = useMemo(() => {
-        if (!analyticsData || !Array.isArray(analyticsData)) return [];
+        if (!analysisData || !Array.isArray(analysisData)) return [];
 
-        return analyticsData.map((item: AnalyticsItem, index: number) => {
-            const matchingRemark = remarksData?.find((r: any) =>
-                r.offenceType === item.offenceType &&
-                new Date(r.monthYear).getMonth() + 1 === currentMonth &&
-                new Date(r.monthYear).getFullYear() === currentYear
-            );
+        // Filter by date and formation
+        const filtered = analysisData.filter((item: any) => {
+            if (!item.monthYear) return false;
+            const d = new Date(item.monthYear);
+            return d.getMonth() === selectedDate.getMonth() &&
+                d.getFullYear() === selectedDate.getFullYear() &&
+                item.divisionName === formation.groupKey;
+        });
 
-            const accidentData = getMockAccidentData(item.offenceType || "Unknown");
+        return filtered.map((item: any, index: number) => {
+            const accidentData = getMockAccidentData(item.offence || "Unknown");
 
             return {
                 id: index + 1,
-                offenceType: item.offenceType || "Unknown",
-                totalCase: item.total || 0,
+                _id: item._id, // Keep _id for deletion
+                offenceType: item.offence || "Unknown",
+                totalCase: item.totalNumberOfCases || 0,
                 actionTaken: item.actionTaken || 0,
                 actionPending: item.actionPending || 0,
-                remark: matchingRemark ? matchingRemark.remark : "--",
-                remarkId: matchingRemark?._id,
+                remark: item.remark || "--",
                 ...accidentData
             };
         });
-    }, [analyticsData, remarksData, currentMonth, currentYear]);
+    }, [analysisData, selectedDate, formation.groupKey]);
 
     const uniqueOffenceTypes = useMemo(() => {
         return Array.from(new Set(tableData.map(d => d.offenceType)));
@@ -315,6 +313,15 @@ export default function Hq36RapidDivisionTable({
         setSelectedDate(new Date());
     };
 
+    if (isEditing) {
+        return (
+            <Hq36RapidDivisionForm
+                formation={formation}
+                onClose={() => setIsEditing(false)}
+            />
+        );
+    }
+
     return (
         <div className="space-y-6 min-h-screen">
             {/* Header / Breadcrumbs */}
@@ -337,7 +344,10 @@ export default function Hq36RapidDivisionTable({
                     <span className="mx-2 text-gray-400">›</span>
                     <span className="font-bold text-[#0A0A0A]">HQ 36 RAPID Division</span>
                 </div>
-                <Button className="bg-[#0088FF] text-white font-medium hover:bg-blue-600 gap-2 px-6 cursor-pointer rounded-md">
+                <Button
+                    className="bg-[#0088FF] text-white font-medium hover:bg-blue-600 gap-2 px-6 cursor-pointer rounded-md"
+                    onClick={() => setIsEditing(true)}
+                >
                     Fill New Analysis Data
                     <Edit className="w-4 h-4 ml-1" />
                 </Button>
