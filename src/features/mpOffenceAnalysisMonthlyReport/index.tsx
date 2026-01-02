@@ -108,7 +108,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
             {/* Main Formation Section */}
             <div className="space-y-6">
                 <h2 className="text-lg font-bold text-[#0A0A0A]">
-                    Formations(HQ 21 CORPS) Analysis Data:
+                    Formations (HQ 21 CORPS) Analysis Data:
                 </h2>
 
                 {/* Command Info Bar */}

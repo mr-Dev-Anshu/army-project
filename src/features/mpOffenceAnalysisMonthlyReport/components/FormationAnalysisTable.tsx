@@ -352,21 +352,21 @@ export default function FormationAnalysisTable({
                                             {row.totalCase > 0 ? (
                                                 <span className="font-semibold">{String(row.totalCase).padStart(2, '0')}</span>
                                             ) : (
-                                                <span className="text-gray-400">--</span>
+                                                <span className="text-gray-400">0</span>
                                             )}
                                         </td>
                                         <td className="py-3 px-4 border-r border-gray-300">
                                             {row.actionTaken > 0 ? (
                                                 <span className="font-semibold">{String(row.actionTaken).padStart(2, '0')}</span>
                                             ) : (
-                                                <span className="text-gray-400">--</span>
+                                                <span className="text-gray-400">0</span>
                                             )}
                                         </td>
                                         <td className="py-3 px-4 border-r border-gray-300">
                                             {row.actionPending > 0 ? (
                                                 <span className="font-semibold">{String(row.actionPending).padStart(2, '0')}</span>
                                             ) : (
-                                                <span className="text-gray-400">--</span>
+                                                <span className="text-gray-400">0</span>
                                             )}
                                         </td>
                                         <td className="py-3 px-4 border-r border-gray-300">
