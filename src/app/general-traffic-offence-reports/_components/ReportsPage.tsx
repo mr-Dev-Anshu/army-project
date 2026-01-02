@@ -163,8 +163,11 @@ export default function ReportsPage({
     const witness = offence.witnessDetails?.[0] || {};
     const date = new Date(occDetails.timeOfOffence || offence.createdAt);
 
+    // Generate report number if not provided
+    const generatedReportNo = offence.reportNumber || `GTO/21 CPU/${(offence._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`;
+
     return {
-      reportNo: offence.reportNumber || "N/A",
+      reportNo: generatedReportNo,
       reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
       particulars: {
         primary: {
@@ -174,8 +177,8 @@ export default function ReportsPage({
           relation: primary.relation || "N/A",
           armyNo: primary.armyNo || "N/A",
           rank: primary.rank || "N/A",
-          unit: primary.unit || "N/A",
-          fmn: primary.fmn || "N/A",
+          unit: mpDetails.unit || primary.unit || "MP Unit",
+          fmn: offence.fmn || primary.fmn || "HQ 21 Corps",
           command: primary.command || "N/A",
           address: primary.address || "N/A",
           iCardNo: primary.iCardNo || "N/A",
@@ -187,8 +190,8 @@ export default function ReportsPage({
           relation: secondary.relation || "N/A",
           armyNo: secondary.armyNo || "N/A",
           rank: secondary.rank || "N/A",
-          unit: secondary.unit || "N/A",
-          fmn: secondary.fmn || "N/A",
+          unit: mpDetails.unit || secondary.unit || "MP Unit",
+          fmn: offence.fmn || secondary.fmn || "HQ 21 Corps",
           command: secondary.command || "N/A",
           address: secondary.address || "N/A",
           iCardNo: secondary.iCardNo || "N/A",
@@ -201,18 +204,18 @@ export default function ReportsPage({
       occurrence: {
         dateOfDuty: mpDetails.dateOfDuty ? new Date(mpDetails.dateOfDuty).toLocaleDateString("en-GB") : date.toLocaleDateString("en-GB"),
         dutyTime: mpDetails.dutyTime || "N/A",
-        dutyLocation: mpDetails.placeOfDuty || "N/A",
+        dutyLocation: mpDetails.dutyLocation || mpDetails.placeOfDuty || "N/A",
         nameOfWitnessingOfficial1: witness.name || "N/A",
         nameOfWitnessingOfficial2: offence.witnessDetails?.[1]?.name || "",
         nameOfWitnessingOfficial3: offence.witnessDetails?.[2]?.name || "",
         timeOfOffence: date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }),
         locationOfOffence: occDetails.incidentLocation || "N/A",
-        statement: occDetails.statement || "No statement provided.",
+        statement: occDetails.statement || occDetails.description || "No statement provided.",
       },
       offence: {
-        type: offence.currentOffenceType || "Traffic Offence",
-        ref1: "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
-        ref2: "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order.",
+        type: offence.currentOffenceType || offence.offenceTypes?.[0] || "Traffic Offence",
+        ref1: offence.offenceTypeReference?.[0] || "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
+        ref2: offence.offenceTypeReference?.[1] || "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order.",
         description: occDetails.description || "No description provided.",
       },
       witnessSig: {
@@ -222,7 +225,7 @@ export default function ReportsPage({
         unit: witness.unit || "N/A",
       },
       mpSig: {
-        armyNo: mpDetails.armyNoReportingMP || "N/A",
+        armyNo: mpDetails.armyNumber || mpDetails.armyNoReportingMP || "N/A",
         rank: mpDetails.rank || "N/A",
         name: mpDetails.nameReportingMP || "N/A",
         unit: mpDetails.unit || "N/A",
