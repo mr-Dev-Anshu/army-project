@@ -8,6 +8,7 @@ import { ArrowRight, BarChart3, ChevronRight } from "lucide-react";
 import { useGetDomesticAnalytics } from "./domesticAnalysis/hooks";
 import { useMemo, useState } from "react";
 import FormationAnalysisTable from "./components/FormationAnalysisTable";
+import Hq36RapidDivisionTable from "./components/Hq36RapidDivisionTable";
 
 export default function MpOffenceAnalysisMonthlyReport() {
     const [selectedFormation, setSelectedFormation] = useState<{
@@ -75,6 +76,14 @@ export default function MpOffenceAnalysisMonthlyReport() {
     if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
     if (selectedFormation) {
+        if (selectedFormation.groupKey === "HQ 36 RAPID Division") {
+            return (
+                <Hq36RapidDivisionTable
+                    formation={selectedFormation}
+                    onBack={() => setSelectedFormation(null)}
+                />
+            );
+        }
         return (
             <FormationAnalysisTable
                 formation={selectedFormation}
@@ -252,7 +261,7 @@ function FormationCard({
                     size="icon"
                     variant="secondary"
                     className="bg-black hover:bg-gray-800 text-white rounded-lg w-10 h-10 cursor-pointer"
-                // onClick={onClick}
+                    onClick={onClick}
                 >
                     <ArrowRight className="w-5 h-5" />
                 </Button>
