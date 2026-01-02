@@ -347,7 +347,7 @@ export default function MpOccurrenceReportsPage() {
       <ReportPageHeader
         title={pageTitle}
         reportCount={distinctReportsCount}
-        onDownload={() => console.log("Download Clicked")}
+        onDownload={() => window.print()}
       />
 
       {/* Filters */}
@@ -357,6 +357,8 @@ export default function MpOccurrenceReportsPage() {
           setFilters((prev) => ({ ...prev, [key]: value }))
         }
         showOffenceType={false}
+        // showSort={true}
+        showFilter={true}
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({

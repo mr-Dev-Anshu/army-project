@@ -38,6 +38,9 @@ export const offenceOccurenceDetails = new mongoose.Schema({
 
 const generalTrafficOffenceSchema = new mongoose.Schema(
   {
+    reportId: {
+      type: String,
+    },
     isVehicleInvolved: {
       type: Boolean,
       required: true,
@@ -63,6 +66,9 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     actionStatus: {
       type: Boolean,
       default: false,
+    },
+    actionStatusRemark: {
+      type: String,
     },
     customFields: {
       type: mongoose.Schema.Types.Mixed,

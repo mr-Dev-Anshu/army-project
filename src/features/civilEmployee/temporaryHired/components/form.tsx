@@ -1,0 +1,570 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { useForm } from "@/context/FormContext";
+
+import { SuggestionInput } from "@/common/component/SuggestionInput";
+import { SubWorker } from "../types";
+import { useCreateTemporaryHiredWorker, useUpdateTemporaryHiredWorker } from "../hook";
+import { toast } from "react-toastify";
+
+const INITIAL_TEMP_WORKER_STATE = {
+  workerName: "",
+  workerMobile: "",
+  workerAadhar: "",
+  permanentAddressLine: "",
+  permanentCityDistrict: "",
+  permanentState: "",
+  permanentPincode: "",
+  placeOfStay: "",
+  placeOfDuty: "",
+  passNumber: "",
+  validFrom: null,
+  validTill: null,
+  subWorkers: [],
+};
+
+interface TemporaryHiredWorkerPassFormProps {
+  onCancel: () => void;
+  onSuccess: () => void;
+  initialData?: any;
+}
+
+export default function TemporaryHiredWorkerPassForm({
+  onCancel,
+  onSuccess,
+  initialData
+}: TemporaryHiredWorkerPassFormProps) {
+  const { state, dispatch } = useForm();
+  const tempWorker = state.formData.tempWorker || {};
+  const { mutate: createWorker, isPending: isCreating } = useCreateTemporaryHiredWorker();
+  const { mutate: updateWorker, isPending: isUpdating } = useUpdateTemporaryHiredWorker();
+
+  const isPending = isCreating || isUpdating;
+
+  const [tempSubWorker, setTempSubWorker] = useState({
+    name: "",
+    mobile: "",
+    aadhar: "",
+  });
+
+  const [editSubWorkerIndex, setEditSubWorkerIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Reset form on mount
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.tempWorker",
+      value: INITIAL_TEMP_WORKER_STATE,
+    });
+    setTempSubWorker({ name: "", mobile: "", aadhar: "" });
+    setEditSubWorkerIndex(null);
+
+    // If initialData exists (Edit Mode), populate the form
+    if (initialData) {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.tempWorker",
+        value: {
+          ...initialData,
+          subWorkers: initialData.subWorkers || [],
+        },
+      });
+    }
+  }, [initialData, dispatch]);
+
+  const setField = (field: string, value: unknown) => {
+    dispatch({
+      type: "SET_PATH",
+      path: `formData.tempWorker.${field}`,
+      value,
+    });
+  };
+
+  const handleAddSubWorker = () => {
+    if (!tempSubWorker.name.trim()) {
+      toast.error("Please enter sub-worker name");
+      return;
+    }
+    if (!tempSubWorker.aadhar || tempSubWorker.aadhar.length !== 12) {
+      toast.error("Sub-worker Aadhar number must be 12 digits");
+      return;
+    }
+
+    if (editSubWorkerIndex !== null) {
+      // Update existing sub-worker
+      const updatedSubWorkers = [...(tempWorker.subWorkers || [])];
+      updatedSubWorkers[editSubWorkerIndex] = {
+        ...updatedSubWorkers[editSubWorkerIndex],
+        name: tempSubWorker.name.trim(),
+        mobile: tempSubWorker.mobile,
+        aadhar: tempSubWorker.aadhar,
+      };
+
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.tempWorker.subWorkers",
+        value: updatedSubWorkers,
+      });
+      setEditSubWorkerIndex(null);
+    } else {
+      // Add new sub-worker
+      dispatch({
+        type: "PUSH_PATH",
+        path: "formData.tempWorker.subWorkers",
+        value: {
+          name: tempSubWorker.name.trim(),
+          mobile: tempSubWorker.mobile,
+          aadhar: tempSubWorker.aadhar,
+        },
+      });
+    }
+    setTempSubWorker({ name: "", mobile: "", aadhar: "" });
+  };
+
+  const handleEditSubWorker = (index: number) => {
+    const workerToEdit = tempWorker.subWorkers[index];
+    setTempSubWorker({
+      name: workerToEdit.name,
+      mobile: workerToEdit.mobile,
+      aadhar: workerToEdit.aadhar,
+    });
+    setEditSubWorkerIndex(index);
+  };
+
+  const handleRemoveSubWorker = (index: number) => {
+    dispatch({
+      type: "REMOVE_PATH",
+      path: "formData.tempWorker.subWorkers",
+      index,
+    });
+  };
+
+  const handleSave = () => {
+    // Basic Validation
+    if (!tempWorker.workerName) {
+      toast.error("Worker Name is required.");
+      return;
+    }
+
+    if (!tempWorker.workerMobile) {
+      toast.error("Worker Mobile Number is required.");
+      return;
+    }
+
+    if (tempWorker.workerMobile.length < 10) {
+      toast.error("Please enter a valid 10-digit Mobile Number.");
+      return;
+    }
+
+    if (!tempWorker.workerAadhar) {
+      toast.error("Worker Aadhar Number is required.");
+      return;
+    }
+
+    if (tempWorker.workerAadhar.length !== 12) {
+      toast.error("Worker Aadhar number must be 12 digits.");
+      return;
+    }
+
+    // Address Validation
+    // Address Validation
+    if (!tempWorker.permanentAddressLine) {
+      toast.error("Permanent Address Line is required.");
+      return;
+    }
+
+    if (!tempWorker.permanentCityDistrict) {
+      toast.error("Permanent City / District is required.");
+      return;
+    }
+
+    if (!tempWorker.permanentState) {
+      toast.error("Permanent State is required.");
+      return;
+    }
+
+    if (!tempWorker.permanentPincode) {
+      toast.error("Permanent Pincode is required.");
+      return;
+    }
+
+    if (tempWorker.permanentPincode.length !== 6) {
+      toast.error("Permanent Pincode must be 6 digits.");
+      return;
+    }
+
+    if (!tempWorker.placeOfStay) {
+      toast.error("Place of Stay (in campus) is required.");
+      return;
+    }
+
+    if (!tempWorker.placeOfDuty) {
+      toast.error("Place of Duty is required.");
+      return;
+    }
+
+    if (!tempWorker.passNumber) {
+      toast.error("Pass Number is required.");
+      return;
+    }
+
+    // Sub-worker validation
+    if (tempWorker.subWorkers && tempWorker.subWorkers.length > 0) {
+      for (let i = 0; i < tempWorker.subWorkers.length; i++) {
+        const sub = tempWorker.subWorkers[i] as SubWorker;
+        if (sub.aadhar && sub.aadhar.length !== 12) {
+          toast.error(`Sub-worker "${sub.name}" Aadhar number must be 12 digits.`);
+          return;
+        }
+      }
+    }
+
+    // Date validation
+    if (!tempWorker.validFrom || !tempWorker.validTill) {
+      toast.error("Please select both Valid From and Valid Till dates.");
+      return;
+    }
+
+    if (tempWorker.validFrom && tempWorker.validTill) {
+      if (new Date(tempWorker.validTill) <= new Date(tempWorker.validFrom)) {
+        toast.error("Valid Till date must be greater than Valid From date.");
+        return;
+      }
+    }
+
+    // Sanitize data before sending (remove backend-generated fields)
+    const sanitizedData = { ...tempWorker };
+    delete (sanitizedData as any)._id;
+    delete (sanitizedData as any).createdAt;
+    delete (sanitizedData as any).updatedAt;
+    delete (sanitizedData as any).__v;
+
+    if (sanitizedData.subWorkers) {
+      sanitizedData.subWorkers = sanitizedData.subWorkers.map((sub: any) => {
+        const { _id, ...rest } = sub;
+        return rest;
+      });
+    }
+
+    const idToUpdate = (tempWorker as any)._id || (initialData as any)?._id;
+
+    if (idToUpdate) {
+      updateWorker({ id: idToUpdate, data: sanitizedData }, {
+        onSuccess: () => {
+          toast.success("Temporary Hired Worker Security Pass Updated!");
+          onSuccess();
+        },
+        onError: (error) => {
+          console.error("Error updating worker pass:", error);
+          toast.error("Failed to update pass. Please try again.");
+        }
+      });
+    } else {
+      createWorker(sanitizedData, {
+        onSuccess: () => {
+          toast.success("Temporary Hired Worker Security Pass Saved & Generated!");
+          onSuccess();
+        },
+        onError: (error) => {
+          console.error("Error creating worker pass:", error);
+          toast.error("Failed to create pass. Please try again.");
+        }
+      });
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-2">Add Temporary Hired Worker Pass</h2>
+      <p className="text-sm text-gray-600 mb-8">
+        Fill details to issue temporary hired worker security pass
+      </p>
+
+      {/* Worker Details */}
+      <section className="mb-10">
+        <h3 className="text-lg font-bold mb-4">Worker Details</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="space-y-1">
+            <Label>Worker Name</Label>
+            <SuggestionInput
+              placeholder="eg. Robert"
+              value={tempWorker.workerName || ""}
+              onChange={(v) => setField("workerName", v)}
+              fieldType="workerName"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label>Mobile Number</Label>
+            <SuggestionInput
+              placeholder="eg. +91 12345 67890"
+              value={tempWorker.workerMobile || ""}
+              onChange={(v) => setField("workerMobile", v)}
+              type="tel"
+              fieldType="workerMobile"
+            />
+          </div>
+
+          <div className="col-span-2 space-y-1">
+            <Label>Enter Aadhar Card No. for Govt. ID Proof</Label>
+            <SuggestionInput
+              placeholder="---- ---- ----"
+              value={tempWorker.workerAadhar || ""}
+              onChange={(v) =>
+                setField("workerAadhar", v.replace(/\D/g, "").slice(0, 12))
+              }
+              maxLength={12}
+              fieldType="workerAadhar"
+            />
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <Label className="text-base font-medium">Permanent Address</Label>
+
+          <div className="space-y-1 mt-4">
+            <SuggestionInput
+              placeholder="Address Line"
+              value={tempWorker.permanentAddressLine || ""}
+              onChange={(v) => setField("permanentAddressLine", v)}
+              fieldType="permanentAddressLine"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="space-y-1">
+              <Label>City / District</Label>
+              <SuggestionInput
+                placeholder="City / District"
+                value={tempWorker.permanentCityDistrict || ""}
+                onChange={(v) => setField("permanentCityDistrict", v)}
+                fieldType="permanentCityDistrict"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>State</Label>
+              <SuggestionInput
+                placeholder="State"
+                value={tempWorker.permanentState || ""}
+                onChange={(v) => setField("permanentState", v)}
+                fieldType="permanentState"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Pin code</Label>
+              <SuggestionInput
+                placeholder="Pin code"
+                value={tempWorker.permanentPincode || ""}
+                onChange={(v) =>
+                  setField("permanentPincode", v.replace(/\D/g, "").slice(0, 6))
+                }
+                maxLength={6}
+                fieldType="permanentPincode"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          <div className="space-y-1">
+            <Label>Place of Stay (in campus)</Label>
+            <SuggestionInput
+              placeholder="Enter Address"
+              value={tempWorker.placeOfStay || ""}
+              onChange={(v) => setField("placeOfStay", v)}
+              fieldType="placeOfStay"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label>Place of Duty</Label>
+            <SuggestionInput
+              placeholder="Enter Address"
+              value={tempWorker.placeOfDuty || ""}
+              onChange={(v) => setField("placeOfDuty", v)}
+              fieldType="placeOfDuty"
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="my-12 border-t border-gray-200" />
+
+      {/* Pass Details */}
+      <section className="mb-10">
+        <h3 className="text-lg font-bold mb-4">Pass Details</h3>
+
+        <div className="space-y-1 max-w-xs mb-6">
+          <Label>Pass Number</Label>
+          <SuggestionInput
+            placeholder="0000"
+            value={tempWorker.passNumber || ""}
+            onChange={(v) => setField("passNumber", v)}
+            fieldType="passNumber"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <Label>Valid From</Label>
+            <Input
+              type="date"
+              value={tempWorker.validFrom ? tempWorker.validFrom.split('T')[0] : ""}
+              onChange={(e) => setField("validFrom", e.target.value ? new Date(e.target.value).toISOString() : null)}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label>Valid Till</Label>
+            <Input
+              type="date"
+              min={tempWorker.validFrom ? tempWorker.validFrom.split('T')[0] : undefined}
+              value={tempWorker.validTill ? tempWorker.validTill.split('T')[0] : ""}
+              onChange={(e) => setField("validTill", e.target.value ? new Date(e.target.value).toISOString() : null)}
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="my-12 border-t border-gray-200" />
+
+      {/* List of Sub-Workers & Their Details */}
+      <section className="mb-10">
+        <h3 className="text-lg font-bold mb-4">List of Sub-Workers & Their Details</h3>
+
+        <div className="space-y-1 mb-6 max-w-xs">
+          <Label>Total Number of Sub-workers</Label>
+          <Input
+            type="number"
+            value={(tempWorker.subWorkers || []).length}
+            readOnly
+            className="bg-gray-100"
+          />
+        </div>
+
+        <div className="border rounded-lg p-6 bg-gray-50">
+          <p className="text-sm text-gray-600 mb-4">
+            Click on &quot;Add Sub-workers&quot; button to add all member details
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="space-y-1">
+              <Label>Name of Sub-Worker</Label>
+              <SuggestionInput
+                placeholder="eg. Robert"
+                value={tempSubWorker.name}
+                onChange={(v) => setTempSubWorker((prev) => ({ ...prev, name: v }))}
+                fieldType="subWorkerName"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Mobile Number</Label>
+              <SuggestionInput
+                placeholder="eg. +91 12345 67890"
+                value={tempSubWorker.mobile}
+                onChange={(v) => setTempSubWorker((prev) => ({ ...prev, mobile: v }))}
+                type="tel"
+                fieldType="mobileNumber"
+              />
+            </div>
+
+            <div className="col-span-2 space-y-1">
+              <Label>Aadhar Card No.</Label>
+              <SuggestionInput
+                placeholder="---- ---- ----"
+                value={tempSubWorker.aadhar}
+                onChange={(v) =>
+                  setTempSubWorker((prev) => ({
+                    ...prev,
+                    aadhar: v.replace(/\D/g, "").slice(0, 12),
+                  }))
+                }
+                maxLength={12}
+                fieldType="subWorkerAadhar"
+              />
+            </div>
+          </div>
+
+          <div className="w-full flex justify-end">
+            <Button variant="save-generate" onClick={handleAddSubWorker}>
+              {editSubWorkerIndex !== null ? "Update Sub-worker" : "+ Add Sub-workers"}
+            </Button>
+          </div>
+
+          {(tempWorker.subWorkers || []).length > 0 && (
+            <div className="mt-8">
+              <h4 className="font-medium mb-3">List of Sub-workers:</h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Sr no.</th>
+                      <th className="text-left py-2">Sub-Worker Name</th>
+                      <th className="text-left py-2">Aadhar Card No.</th>
+                      <th className="text-left py-2">Mobile Number</th>
+                      <th className="text-left py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(tempWorker.subWorkers || []).map((worker: SubWorker, idx: number) => (
+                      <tr key={idx} className="border-b">
+                        <td className="py-2">{idx + 1}.</td>
+                        <td className="py-2">{worker.name}</td>
+                        <td className="py-2">
+                          {worker.aadhar.replace(/(\d{4})(?=\d)/g, "$1 ")}
+                        </td>
+                        <td className="py-2">{worker.mobile}</td>
+                        <td className="py-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleEditSubWorker(idx)}
+                              className="text-blue-500 hover:text-blue-700 bg-blue-50 p-1 rounded hover:bg-blue-100 transition-colors"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                                <path d="m15 5 4 4" />
+                              </svg>
+                            </button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveSubWorker(idx)}
+                              className="p-1 h-auto"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <div className="my-12 border-t border-gray-200" />
+
+      {/* Footer Actions */}
+      <div className="pt-4 border-t mt-8 bg-white sticky bottom-0 z-10">
+        <div className="flex justify-between gap-4">
+          <Button variant="outline" onClick={onCancel} className="px-8">Cancel</Button>
+          <Button onClick={handleSave} className="bg-[#0088FF] cursor-pointer  hover:bg-blue-700 px-8" disabled={isPending}>
+            {isPending ? (isUpdating ? "Updating..." : "Saving...") : (((tempWorker as any)._id || (initialData as any)?._id) ? "Update & Generate" : "Save & Generate")}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

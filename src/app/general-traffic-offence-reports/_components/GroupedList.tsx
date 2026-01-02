@@ -1,6 +1,5 @@
 "use client";
-
-import React from "react";
+import React, { useState } from "react";
 import GroupRow from "./GroupRow";
 
 interface GroupedListProps {
@@ -11,6 +10,8 @@ interface GroupedListProps {
 }
 
 export default function GroupedList({ data, isVehicleInvolved, onView, onPrint }: GroupedListProps) {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
   if (!data || data.length === 0) {
     return (
       <div className="p-8 text-center text-gray-500">
@@ -18,6 +19,10 @@ export default function GroupedList({ data, isVehicleInvolved, onView, onPrint }
       </div>
     );
   }
+
+  const handleToggle = (index: number) => {
+    setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
 
   return (
     <div className="divide-y divide-gray-100">
@@ -29,6 +34,8 @@ export default function GroupedList({ data, isVehicleInvolved, onView, onPrint }
           isVehicleInvolved={isVehicleInvolved}
           onView={onView}
           onPrint={onPrint}
+          isOpen={expandedIndex === index}
+          onToggle={() => handleToggle(index)}
         />
       ))}
     </div>
