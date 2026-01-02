@@ -58,6 +58,10 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    offenceType: {
+      type: String,
+      default: "Over Speeding",
+    },
   },
   {
     timestamps: true,
