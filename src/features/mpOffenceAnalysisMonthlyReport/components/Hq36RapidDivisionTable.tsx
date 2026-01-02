@@ -44,6 +44,7 @@ export default function Hq36RapidDivisionTable({
     onBack,
 }: Hq36RapidDivisionTableProps) {
     const [isEditing, setIsEditing] = React.useState(false);
+    const [editingEntry, setEditingEntry] = React.useState<any>(null);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [selectedOffenceType, setSelectedOffenceType] = React.useState("All");
     const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
@@ -105,6 +106,7 @@ export default function Hq36RapidDivisionTable({
             return {
                 id: index + 1,
                 _id: item._id, // Keep _id for deletion
+                monthYear: item.monthYear, // Needed for edit
                 offenceType: item.offence || "Unknown",
                 totalCase: item.totalNumberOfCases || 0,
                 actionTaken: item.actionTaken || 0,
@@ -193,11 +195,16 @@ export default function Hq36RapidDivisionTable({
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer"
+                            onClick={() => {
+                                setEditingEntry(row);
+                                setIsEditing(true);
+                            }}
                         >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                            onClick={() => handleDelete(row._id)}
                         >
                             <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
@@ -291,11 +298,16 @@ export default function Hq36RapidDivisionTable({
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer"
+                            onClick={() => {
+                                setEditingEntry(row);
+                                setIsEditing(true);
+                            }}
                         >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                            onClick={() => handleDelete(row._id)}
                         >
                             <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
@@ -317,7 +329,11 @@ export default function Hq36RapidDivisionTable({
         return (
             <Hq36RapidDivisionForm
                 formation={formation}
-                onClose={() => setIsEditing(false)}
+                onClose={() => {
+                    setIsEditing(false);
+                    setEditingEntry(null);
+                }}
+                initialData={editingEntry}
             />
         );
     }

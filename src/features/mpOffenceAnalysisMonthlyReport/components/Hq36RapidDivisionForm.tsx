@@ -12,7 +12,8 @@ import {
     Trash2,
     MoreVertical,
     Check,
-    ArrowDown
+    ArrowDown,
+    Save
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -22,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import { toast } from "react-toastify";
-import { useGetDivisionAnalysis, useCreateDivisionAnalysis, useDeleteDivisionAnalysis } from "../hooks/useDivisionAnalysis";
+import { useGetDivisionAnalysis, useCreateDivisionAnalysis, useDeleteDivisionAnalysis, useUpdateDivisionAnalysis } from "../hooks/useDivisionAnalysis";
 
 interface Hq36RapidDivisionFormProps {
     onClose: () => void;
@@ -30,18 +31,27 @@ interface Hq36RapidDivisionFormProps {
         groupKey: string;
         subtitle: string;
     };
+    initialData?: {
+        _id: string;
+        offenceType: string;
+        actionTaken: number;
+        actionPending: number;
+        remark: string;
+        monthYear: Date | string;
+    } | null;
 }
 
-export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidDivisionFormProps) {
+export default function Hq36RapidDivisionForm({ onClose, formation, initialData }: Hq36RapidDivisionFormProps) {
     // State
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date>(initialData?.monthYear ? new Date(initialData.monthYear) : new Date());
     const dateInputRef = React.useRef<HTMLInputElement>(null);
 
     // Form State
-    const [offenceType, setOffenceType] = useState("");
-    const [actionTaken, setActionTaken] = useState<string>("00");
-    const [actionPending, setActionPending] = useState<string>("00");
-    const [remark, setRemark] = useState("");
+    const [offenceType, setOffenceType] = useState(initialData?.offenceType || "");
+    const [actionTaken, setActionTaken] = useState<string>(initialData?.actionTaken?.toString() || "00");
+    const [actionPending, setActionPending] = useState<string>(initialData?.actionPending?.toString() || "00");
+    const [remark, setRemark] = useState(initialData?.remark || "");
+    const [sessionAddedIds, setSessionAddedIds] = useState<string[]>([]);
 
     // Calculated Field
     const totalCases = useMemo(() => {
@@ -57,6 +67,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
     });
 
     const { mutate: createEntry, isPending: isCreating } = useCreateDivisionAnalysis();
+    const { mutate: updateEntry, isPending: isUpdating } = useUpdateDivisionAnalysis();
     const { mutate: deleteEntry } = useDeleteDivisionAnalysis();
 
     // Handlers
@@ -74,29 +85,47 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
             actionPending: parseInt(actionPending) || 0,
             totalNumberOfCases: totalCases,
             remark: remark,
-            // Custom fields for specific validation if needed
         };
 
-        createEntry(payload, {
-            onSuccess: () => {
-                toast.success("Entry added successfully");
-                // Reset form
-                setOffenceType("");
-                setActionTaken("00");
-                setActionPending("00");
-                setRemark("");
-            },
-            onError: (err) => {
-                toast.error("Failed to add entry");
-                console.error(err);
-            }
-        });
+        if (initialData && initialData._id) {
+            updateEntry({ id: initialData._id, data: payload }, {
+                onSuccess: () => {
+                    toast.success("Entry updated successfully");
+                    onClose();
+                },
+                onError: (err) => {
+                    toast.error("Failed to update entry");
+                    console.error(err);
+                }
+            });
+        } else {
+            createEntry(payload, {
+                onSuccess: (data: any) => {
+                    toast.success("Entry added successfully");
+                    // Reset form
+                    setOffenceType("");
+                    setActionTaken("00");
+                    setActionPending("00");
+                    setRemark("");
+                    if (data && data._id) {
+                        setSessionAddedIds(prev => [...prev, data._id]);
+                    }
+                },
+                onError: (err) => {
+                    toast.error("Failed to add entry");
+                    console.error(err);
+                }
+            });
+        }
     };
 
     const handleDelete = (id: string) => {
         if (confirm("Are you sure you want to delete this entry?")) {
             deleteEntry(id, {
-                onSuccess: () => toast.success("Entry deleted"),
+                onSuccess: () => {
+                    toast.success("Entry deleted");
+                    setSessionAddedIds(prev => prev.filter(sid => sid !== id));
+                },
                 onError: () => toast.error("Failed to delete entry")
             });
         }
@@ -127,6 +156,9 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
 
         return analysisData.filter((item: any) => {
             if (!item.monthYear) return false;
+            // Only show items added in this session
+            if (!sessionAddedIds.includes(item._id)) return false;
+
             const d = new Date(item.monthYear);
             return d.getMonth() === selectedDate.getMonth() &&
                 d.getFullYear() === selectedDate.getFullYear() &&
@@ -140,7 +172,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
             actionPending: item.actionPending,
             remark: item.remark || "--",
         }));
-    }, [analysisData, selectedDate, formation.groupKey]);
+    }, [analysisData, selectedDate, formation.groupKey, sessionAddedIds]);
 
     const columns: Column<any>[] = [
         {
@@ -236,7 +268,9 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
                 </Button>
             </div>
 
-            <h1 className="text-xl font-bold text-[#404040]">Enter Monthly Offence Data</h1>
+            <h1 className="text-xl font-bold text-[#404040]">
+                {initialData ? "Edit Monthly Offence Data" : "Enter Monthly Offence Data"}
+            </h1>
 
             {/* Info Bar */}
             <div className="bg-[#171717] text-white py-4 px-6 rounded-md flex flex-wrap items-center justify-between gap-x-8 gap-y-2 text-sm shadow-md">
@@ -259,8 +293,12 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
             <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h2 className="text-lg font-bold text-[#0A0A0A]">Add Offence Entry One By One</h2>
-                        <p className="text-gray-500 text-sm mt-1">Each submission adds one row to the table below</p>
+                        <h2 className="text-lg font-bold text-[#0A0A0A]">
+                            {initialData ? "Edit Offence Entry" : "Add Offence Entry One By One"}
+                        </h2>
+                        {!initialData && (
+                            <p className="text-gray-500 text-sm mt-1">Each submission adds one row to the table below</p>
+                        )}
                     </div>
                     <div className="relative">
                         <span className="text-xs text-gray-500 font-medium block mb-1">Select Reporting Period:</span>
@@ -345,11 +383,20 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
                         <Button
                             className="bg-[#0A0A0A] hover:bg-gray-800 text-white font-medium gap-2 px-6 h-11 rounded-md"
                             onClick={handleAddEntry}
-                            disabled={isCreating}
+                            disabled={isCreating || isUpdating}
                         >
-                            <PlusIcon className="w-4 h-4" />
-                            Add to Analysis Table
-                            <ArrowDown className="w-4 h-4 ml-1" />
+                            {initialData ? (
+                                <>
+                                    <Save className="w-4 h-4" />
+                                    Update Entry
+                                </>
+                            ) : (
+                                <>
+                                    <PlusIcon className="w-4 h-4" />
+                                    Add to Analysis Table
+                                    <ArrowDown className="w-4 h-4 ml-1" />
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>
@@ -357,32 +404,36 @@ export default function Hq36RapidDivisionForm({ onClose, formation }: Hq36RapidD
 
             {/* Table Section */}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-white">
-                    <h3 className="font-bold text-lg text-[#0A0A0A]">Monthly Offence Analysis – Data Entered</h3>
-                    <span className="text-blue-600 text-sm font-medium">Total Offence Types Added: {tableData.length}</span>
-                </div>
+                {!initialData && (
+                    <>
+                        <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-white">
+                            <h3 className="font-bold text-lg text-[#0A0A0A]">Monthly Offence Analysis – Data Entered</h3>
+                            <span className="text-blue-600 text-sm font-medium">Total Offence Types Added: {tableData.length}</span>
+                        </div>
 
-                <DynamicTable
-                    data={tableData}
-                    columns={columns}
-                    className="border-none rounded-none max-h-[500px]"
-                />
+                        <DynamicTable
+                            data={tableData}
+                            columns={columns}
+                            className="border-none rounded-none max-h-[500px]"
+                        />
 
-                <div className="px-6 py-4 flex justify-between items-center border-t border-gray-200 bg-white">
-                    <Button variant="outline" className="text-gray-600 hover:text-gray-900" onClick={onClose}>
-                        Close
-                    </Button>
-                    <Button
-                        className="bg-[#0088FF] hover:bg-blue-600 text-white font-medium gap-2 px-6"
-                        onClick={() => {
-                            toast.success("Monthly Report Submitted Successfully");
-                            onClose();
-                        }}
-                    >
-                        <Check className="w-4 h-4" />
-                        Submit Monthly Report
-                    </Button>
-                </div>
+                        <div className="px-6 py-4 flex justify-between items-center border-t border-gray-200 bg-white">
+                            <Button variant="outline" className="text-gray-600 hover:text-gray-900" onClick={onClose}>
+                                Close
+                            </Button>
+                            <Button
+                                className="bg-[#0088FF] hover:bg-blue-600 text-white font-medium gap-2 px-6"
+                                onClick={() => {
+                                    toast.success("Monthly Report Submitted Successfully");
+                                    onClose();
+                                }}
+                            >
+                                <Check className="w-4 h-4" />
+                                Submit Monthly Report
+                            </Button>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
