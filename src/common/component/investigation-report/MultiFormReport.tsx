@@ -1,4 +1,4 @@
-import { useForm } from "@/context/FormContext";
+import { initialState, useForm } from "@/context/FormContext";
 
 import { toast } from "react-toastify";
 import Step1ReportDetails from "./steps/Step1ReportingDetails";
@@ -17,10 +17,15 @@ import Step11Remarks from "./steps/Step11Remarks";
 import { useCreateMPReport } from "@/features/mpReports/hooks";
 import { createOffender } from "@/apis";
 import { OffenderType } from "@/apis/offender/types";
-import MpOccurrenceReport from "@/components/reports/MpOccurrenceReport";
+import { useState } from "react";
 
-export default function MultiFormReport() {
+export default function MultiFormReport({
+  onCancel,
+}: {
+  onCancel: () => void;
+}) {
   const { state, dispatch } = useForm();
+  const [mode, setMode] = useState("");
   // ================= MP STEPPER STEPS =================
   const steps = [
     { id: 1, label: "Report Details", icon: "1" },
@@ -38,269 +43,380 @@ export default function MultiFormReport() {
 
   const { mutate: createReport, isPending } = useCreateMPReport();
 
+  const mapMpToReport = (mp: any) => {
+    const offenders = mp.individualDetails?.offenderList || [];
+    const witnessList = mp.witnesses || [];
 
+    return {
+      reportNo: mp.reportDetails.reportNo || "N/A",
+      command: mp.reportDetails.command || "N/A",
+      firNo: mp.reportDetails.firNo || "N/A",
 
-const mapMpToReport = (mp: any) => {
-  const offenders = mp.individualDetails?.offenderList || [];
-  const witnessList = mp.witnesses || [];
-
-  return {
-    reportNo: mp.reportDetails.reportNo || "N/A",
-    command: mp.reportDetails.command || "N/A",
-    firNo: mp.reportDetails.firNo || "N/A",
-
-    mpDetails: {
-      armyNo: mp.mpParticulars.armyNo || "N/A",
-      rank: mp.mpParticulars.rank || "N/A",
-      name: mp.mpParticulars.name || "N/A",
-      unit: mp.mpParticulars.unit || "N/A",
-      fmn: mp.mpParticulars.fmn || "N/A",
-      command: mp.mpParticulars.command || "N/A",
-    },
-
-    occurrence: {
-      offenceType: mp.occurrenceDetails.offenceType || "N/A",
-      place: mp.occurrenceDetails.place || "N/A",
-      date: mp.occurrenceDetails.date || "N/A",
-      time: mp.occurrenceDetails.time || "N/A",
-    },
-
-    /* ---------- VICTIMS / OFFENDERS TABLE ---------- */
-    people: offenders.map((p: any, i: number) => ({
-      sno: i + 1,
-      armyNo: p.armyNumber || "N/A",
-      rank: p.rank || "N/A",
-      name: p.name || "N/A",
-      identityCard: p.iCardNumber || "N/A",
-      unitName: p.unit || "N/A",
-      fmn: p.fmn || "N/A",
-      address: p.address || "N/A",
-      remark: p.remark || "--",
-      role: "Offender",
-    })),
-
-    briefOfOccurrence: mp.occurrenceDetails.description || "N/A",
-
-    /* ---------- WITNESS TABLE ---------- */
-    witnesses: witnessList.map((p: any, i: number) => ({
-      sno: i + 1,
-      armyNo: p.armyNumber || "N/A",
-      rank: p.rank || "N/A",
-      name: p.name || "N/A",
-      identityCard: p.iCardNumber || "N/A",
-      unitName: p.unit || "N/A",
-      fmn: p.fmn || "N/A",
-      address: p.address || "N/A",
-      remark: p.remark || "--",
-    })),
-
-    evidence: {
-      eyeSketch: mp.evidence.eyeSketch || "",
-      photos: mp.evidence.photos?.length ? "Attached" : "",
-      videos: mp.evidence.videos?.length ? "Attached" : "",
-    },
-
-    documents: (mp.documents || []).map((d: any) => d.statement),
-
-    detailedReport: {
-      statement: mp.detailedReport || "",
-      findings: mp.investigationPoints
-        ? mp.investigationPoints.split("\n")
-        : [],
-      opinion: mp.opinion || "",
-    },
-
-    remarks: {
-      analysis: mp.remarks.analysis || "",
-      recommendation: mp.remarks.recommendation || "",
-    },
-
-    station: mp.reportDetails.command || "N/A",
-    reportDate: new Date().toLocaleDateString("en-GB"),
-  };
-};
-
-
-
-
-const onSubmitFinal = async () => {
-  try {
-    const mp = state.formData.mpReport;
-
-    const offenders = mp?.individualDetails?.offenderList || [];
-    const witnessList = mp?.witnesses || [];
-
-    const payload = {
-      reportDetails: {
-        reportNumber: mp.reportDetails.reportNo,
-        command: mp.reportDetails.command,
-        firNumber: mp.reportDetails.firNo,
-        ...(mp.reportDetails.firFile
-          ? { firFileUrl: mp.reportDetails.firFile }
-          : {}),
+      mpDetails: {
+        armyNo: mp.mpParticulars.armyNo || "N/A",
+        rank: mp.mpParticulars.rank || "N/A",
+        name: mp.mpParticulars.name || "N/A",
+        unit: mp.mpParticulars.unit || "N/A",
+        fmn: mp.mpParticulars.fmn || "N/A",
+        command: mp.mpParticulars.command || "N/A",
       },
 
-      investigationHead: {
-        armyNumber: mp.mpParticulars.armyNo,
-        rank: mp.mpParticulars.rank,
-        name: mp.mpParticulars.name,
-        unit: mp.mpParticulars.unit,
-        fmn: mp.mpParticulars.fmn,
-        command: mp.mpParticulars.command,
-        address: mp.mpParticulars.address,
-        iCardNumber: mp.mpParticulars.icard,
+      occurrence: {
+        offenceType: mp.occurrenceDetails.offenceType || "N/A",
+        place: mp.occurrenceDetails.place || "N/A",
+        date: mp.occurrenceDetails.date || "N/A",
+        time: mp.occurrenceDetails.time || "N/A",
       },
 
-      occurrenceDetails: {
-        offenceType: mp.occurrenceDetails.offenceType,
-        placeOfOccurrence: mp.occurrenceDetails.place,
-        dateOfOccurrence: mp.occurrenceDetails.date,
-        timeOfOccurrence: new Date(
-          `${mp.occurrenceDetails.date}T${mp.occurrenceDetails.time}:00`
-        ).toISOString(),
-        description: mp.occurrenceDetails.description,
-      },
-
-      /* ⭐⭐⭐ INDIVIDUALS ⭐⭐⭐ */
-      individuals: offenders.map((p: any) => ({
-        armyNumber:
-          p.armyNumber ||
-          p.armyNo ||
-          p["Army Rider / Driver Number"] ||
-          p["Army Number"] ||
-          "",
-
-        rank: p.rank || p["Rank"] || "",
-        name: p.name || p["Name"] || "",
-        unit: p.unit || p["Unit"] || "",
-        fmn: p.fmn || p["FMN"] || "",
-        address: p.address || p["Address"] || "",
-
-        identityCard:
-          p.iCardNumber ||
-          p.icard ||
-          p["ID Card Number"] ||
-          p["Identity Card Number"] ||
-          "",
-
-        role: "offender",
-
-        isVehicleInvolved:
-          mp?.individualDetails?.vehicleInvolved === "yes" ? true : false,
-
-        vehicleCategory: p?.vehicleCategory || "",
-        vehicleNumber:
-          p?.vehicleDetails?.vehicleNumber ||
-          p?.vehicleNumber ||
-          p?.["Vehicle Number"] ||
-          "",
+      /* ---------- VICTIMS / OFFENDERS TABLE ---------- */
+      people: offenders.map((p: any, i: number) => ({
+        sno: i + 1,
+        armyNo: p.armyNumber || "N/A",
+        rank: p.rank || "N/A",
+        name: p.name || "N/A",
+        identityCard: p.iCardNumber || "N/A",
+        unitName: p.unit || "N/A",
+        fmn: p.fmn || "N/A",
+        address: p.address || "N/A",
+        remark: p.remark || "--",
+        role: "Offender",
       })),
 
-      /* ⭐⭐⭐ WITNESSES ⭐⭐⭐ */
-      witnesses: witnessList.map((p: any) => ({
-        armyNumber:
-          p.armyNumber ||
-          p.armyNo ||
-          p["Army Rider / Driver Number"] ||
-          p["Army Number"] ||
-          "",
+      briefOfOccurrence: mp.occurrenceDetails.description || "N/A",
 
-        rank: p.rank || p["Rank"] || "",
-        name: p.name || p["Name"] || "",
-        unit: p.unit || p["Unit"] || "",
-        fmn: p.fmn || p["FMN"] || "",
-        address: p.address || p["Address"] || "",
-
-        identityCard:
-          p.iCardNumber ||
-          p.icard ||
-          p["ID Card Number"] ||
-          p["Identity Card Number"] ||
-          "",
-
-        isVehicleInvolved: p?.vehicleInvolved === "yes" ? true : false,
+      /* ---------- WITNESS TABLE ---------- */
+      witnesses: witnessList.map((p: any, i: number) => ({
+        sno: i + 1,
+        armyNo: p.armyNumber || "N/A",
+        rank: p.rank || "N/A",
+        name: p.name || "N/A",
+        identityCard: p.iCardNumber || "N/A",
+        unitName: p.unit || "N/A",
+        fmn: p.fmn || "N/A",
+        address: p.address || "N/A",
+        remark: p.remark || "--",
       })),
 
-      documents: (mp.documents || [])
-        .filter((d) => d.url)
-        .map((d) => ({
-          statement: d.statement,
-          url: d.url,
-        })),
+      evidence: {
+        eyeSketch: mp.evidence.eyeSketch || "",
+        photos: mp.evidence.photos?.length ? "Attached" : "",
+        videos: mp.evidence.videos?.length ? "Attached" : "",
+      },
 
-      evidences: [],
+      documents: (mp.documents || []).map((d: any) => d.statement),
 
-      detailedOccurrenceReport: mp.detailedReport,
-      pointsFindOutDuringInvestigation: mp.investigationPoints,
-      opinion: mp.opinion,
+      detailedReport: {
+        statement: mp.detailedReport || "",
+        findings: mp.investigationPoints
+          ? mp.investigationPoints.split("\n")
+          : [],
+        opinion: mp.opinion || "",
+      },
 
       remarks: {
-        analysis: mp.remarks.analysis,
-        recommendation: mp.remarks.recommendation,
+        analysis: mp.remarks.analysis || "",
+        recommendation: mp.remarks.recommendation || "",
       },
+
+      station: mp.reportDetails.command || "N/A",
+      reportDate: new Date().toLocaleDateString("en-GB"),
     };
+  };
 
-    console.log("MP REPORT PAYLOAD ===>", payload);
+  const onSubmitFinal = async () => {
+    try {
+      const mp = state.formData.mpReport;
 
-    createReport(payload, {
-      onSuccess: async (res: any) => {
-        toast.success("MP Investigation Report Created Successfully 🎉");
+      const offenders = (mp?.individualDetails?.offenderList || []).filter(
+        (p: any) =>
+          p && Object.values(p).some((v) => v && String(v).trim() !== "")
+      );
 
-        const reportId = res?._id;
+      const witnessList = (mp?.witnesses || []).filter(
+        (p: any) =>
+          p && Object.values(p).some((v) => v && String(v).trim() !== "")
+      );
 
-        try {
-          const offenderList =
-            state.formData.mpReport.individualDetails.offenderList;
+      const payload = {
+        reportDetails: {
+          reportNumber: mp.reportDetails.reportNo,
+          command: mp.reportDetails.command,
+          firNumber: mp.reportDetails.firNo,
+          ...(mp.reportDetails.firFile
+            ? { firFileUrl: mp.reportDetails.firFile }
+            : {}),
+        },
 
-          for (const offender of offenderList) {
-            const offenderPayload = {
-              offenceId: reportId,
-              offenderType:
-                (offender.driverType as OffenderType) || "Civilian",
-              category: "investigation",
+        investigationHead: {
+          armyNumber: mp.mpParticulars.armyNo,
+          rank: mp.mpParticulars.rank,
+          name: mp.mpParticulars.name,
+          unit: mp.mpParticulars.unit,
+          fmn: mp.mpParticulars.fmn,
+          command: mp.mpParticulars.command,
+          address: mp.mpParticulars.address,
+          iCardNumber: mp.mpParticulars.icard,
+        },
 
-              offenderDetails: [
-                {
-                  type: "Driver",
-                  details: offender,
-                },
-              ],
+        occurrenceDetails: {
+          offenceType: mp.occurrenceDetails.offenceType,
+          placeOfOccurrence: mp.occurrenceDetails.place,
+          dateOfOccurrence: mp.occurrenceDetails.date,
+          timeOfOccurrence: new Date(
+            `${mp.occurrenceDetails.date}T${mp.occurrenceDetails.time}:00`
+          ).toISOString(),
+          description: mp.occurrenceDetails.description,
+        },
+
+        individuals: offenders.map((p: any) => {
+          const type = p?.driverType || p?.offenderType || "Civilian";
+
+          if (type === "Military Person") {
+            return {
+              armyNumber:
+                p["Army Rider / Driver Number"] ||
+                p["Army Number"] ||
+                p.armyNumber ||
+                p.armyNo ||
+                "",
+              name: p["Name"] || p.name || "",
+              rank: p["Rank"] || p.rank || "",
+              unit: p["Unit"] || p.unit || "",
+              fmn: p["FMN"] || p.fmn || "",
+              command: p["Command"] || p.command || "",
+              address: p["Address"] || p.address || "",
+              identityCard:
+                p["ID Card Number"] ||
+                p["I Card Number"] ||
+                p.icard ||
+                p.iCardNumber ||
+                "",
+              role: "offender",
+              isVehicleInvolved:
+                mp?.individualDetails?.vehicleInvolved === "yes",
+              vehicleCategory:
+                p?.vehicleCategory || p?.vehicleDetails?.vehicleType || "",
+              vehicleNumber:
+                p?.vehicleDetails?.vehicleNumber || p?.vehicleNumber || "",
             };
-
-            console.log("FINAL OFFENDER PAYLOAD ===>", offenderPayload);
-            await createOffender(offenderPayload);
           }
-        } catch (err: any) {
-          console.log("OFFENDER CREATE ERROR ===>", err?.response || err);
-          toast.error("Offender creation failed ❌");
-        }
 
-        dispatch({
-          type: "SET_PATH",
-          path: "mpReport.createdId",
-          value: reportId,
-        });
-      },
+          if (type === "Civilian") {
+            return {
+              name:
+                p["Full Name"] || p["FullName"] || p["Name"] || p.name || "",
+              fatherOrHusbandName:
+                p["Father / Husband Name"] ||
+                p["Father’s Name (Son of)"] ||
+                p["Father Name"] ||
+                p.fatherName ||
+                "",
+              address:
+                p["Address"] ||
+                p["Shop Address"] ||
+                p["Place of Stay"] ||
+                p.address ||
+                "",
+              identityCard:
+                p["Aadhar Card Number"] ||
+                p["Aadhaar Card Number"] ||
+                p["Aadhar Number"] ||
+                p["Aadhaar Number"] ||
+                p.icard ||
+                "",
+              rank: "",
+              unit: "",
+              fmn: "",
+              command: "",
+              role: "offender",
+              isVehicleInvolved: false,
+              vehicleCategory: "",
+              vehicleNumber: "",
+            };
+          }
 
-      onError: (err: any) => {
-        console.log(" RAW ERROR ===>", err);
-        toast.error(
-          err?.response?.data?.message || "Failed to create report"
-        );
-      },
-    });
-  } catch (err) {
-    console.log("SUBMIT TRY/CATCH ERROR ===>", err);
-    toast.error("Invalid form data");
-  }
-};
+          if (type === "Employee") {
+            return {
+              serviceNumber: p["Service Number"] || p.serviceNumber || "",
+              name: p["Name"] || p.name || "",
+              rank: p["Rank"] || p.rank || "",
+              unit: p["Unit"] || p.unit || "",
+              fmn: p["FMN"] || p.fmn || "",
+              command: p["Command"] || p.command || "",
+              address: p["Address"] || p.address || "",
+              identityCard:
+                p["I Card Number"] || p["ID Card Number"] || p.icard || "",
+              role: "offender",
+              isVehicleInvolved: false,
+              vehicleCategory: "",
+              vehicleNumber: "",
+            };
+          }
 
+          if (type === "Servant/Maid") {
+            return {
+              passNumber:
+                p["Maid/Servant Pass Number*"] || p["Pass Number"] || "",
+              fatherOrHusbandName: p["Father’s Name (Son of)"] || "",
+              identityCard: p["Pass ID"] || p["I Card Number"] || p.icard || "",
+              name: p["Name"] || p.name || "",
+              rank: p["C/O Rank"] || p.rank || "",
+              unit: p["Unit"] || p.unit || "",
+              fmn: p["FMN"] || p.fmn || "",
+              command: p["Command"] || p.command || "",
+              address: p["Address"] || p.address || "",
+              role: "offender",
+              isVehicleInvolved: false,
+              vehicleCategory: "",
+              vehicleNumber: "",
+            };
+          }
 
+          if (type === "Shop Keeper") {
+            return {
+              name: p["Rider/Driver Name"] || p.name || "",
+              shopName: p["Shop Name"] || "",
+              unit: p["Unit"] || p.unit || "",
+              address: p["Shop Address"] || p.address || "",
+              identityCard: p["Pass No."] || p.passNo || "",
+              role: "offender",
+              rank: "",
+              fmn: "",
+              command: "",
+              isVehicleInvolved: false,
+              vehicleCategory: "",
+              vehicleNumber: "",
+            };
+          }
 
+          if (type === "Temporary Hired Worker") {
+            return {
+              name: p["Rider/Driver Name"] || p.name || "",
+              address: p["Place of Stay"] || p.address || "",
+              identityCard: p["Pass No."] || p.passNo || "",
+              placeOfWork: p["Place Of Work"] || "",
+              workType: p["Type of Work"] || "",
+              role: "offender",
+              rank: "",
+              unit: "",
+              fmn: "",
+              command: "",
+              isVehicleInvolved: false,
+              vehicleCategory: "",
+              vehicleNumber: "",
+            };
+          }
+
+          return {};
+        }),
+
+        witnesses: witnessList.map((p: any) => ({
+          armyNumber:
+            p.armyNumber ||
+            p.armyNo ||
+            p["Army Rider / Driver Number"] ||
+            p["Army Number"] ||
+            "",
+          rank: p.rank || p["Rank"] || "",
+          name: p.name || p["Name"] || "",
+          unit: p.unit || p["Unit"] || "",
+          fmn: p.fmn || p["FMN"] || "",
+          address: p.address || p["Address"] || "",
+          identityCard:
+            p.iCardNumber ||
+            p.icard ||
+            p["ID Card Number"] ||
+            p["Identity Card Number"] ||
+            "",
+          isVehicleInvolved: p?.vehicleInvolved === "yes",
+        })),
+
+        documents: (mp.documents || [])
+          .filter((d) => d.url)
+          .map((d) => ({
+            statement: d.statement,
+            url: d.url,
+          })),
+
+        evidences: [],
+
+        detailedOccurrenceReport: mp.detailedReport,
+        pointsFindOutDuringInvestigation: mp.investigationPoints,
+        opinion: mp.opinion,
+
+        remarks: {
+          analysis: mp.remarks.analysis,
+          recommendation: mp.remarks.recommendation,
+        },
+      };
+
+      createReport(payload, {
+        onSuccess: async (res: any) => {
+          toast.success("MP Investigation Report Created Successfully 🎉");
+
+          const reportId = res?._id;
+
+          try {
+            for (const offender of offenders) {
+              await createOffender({
+                offenceId: reportId,
+                offenderType:
+                  (offender.driverType as OffenderType) || "Civilian",
+                category: "investigation",
+                offenderDetails: [
+                  {
+                    type: "Driver",
+                    details: offender,
+                  },
+                ],
+              });
+            }
+          } catch (err) {
+            toast.error("Offender creation failed ❌");
+          }
+
+          dispatch({
+            type: "SET_PATH",
+            path: "mpReport.createdId",
+            value: reportId,
+          });
+
+          // ⭐⭐ RESET COMPLETE FORM ⭐⭐
+          dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
+          dispatch({ type: "SET_STEP", payload: 1 });
+          dispatch({
+            type: "SET_PATH",
+            path: "completedSteps",
+            value: [],
+          });
+        },
+
+        onError: (err: any) => {
+          toast.error(
+            err?.response?.data?.message || "Failed to create report"
+          );
+        },
+      });
+    } catch (err) {
+      toast.error("Invalid form data");
+    }
+  };
 
   // const onSubmitFinal = async () => {
   //   try {
   //     const mp = state.formData.mpReport;
+
+  //     // ⭐ FILTER EMPTY OFFENDERS
+  //     const offenders = (mp?.individualDetails?.offenderList || []).filter(
+  //       (p: any) =>
+  //         p && Object.values(p).some((v) => v && String(v).trim() !== "")
+  //     );
+
+  //     // ⭐ FILTER EMPTY WITNESSES (safety)
+  //     const witnessList = (mp?.witnesses || []).filter(
+  //       (p: any) =>
+  //         p && Object.values(p).some((v) => v && String(v).trim() !== "")
+  //     );
 
   //     const payload = {
   //       reportDetails: {
@@ -326,14 +442,212 @@ const onSubmitFinal = async () => {
   //       occurrenceDetails: {
   //         offenceType: mp.occurrenceDetails.offenceType,
   //         placeOfOccurrence: mp.occurrenceDetails.place,
-
   //         dateOfOccurrence: mp.occurrenceDetails.date,
   //         timeOfOccurrence: new Date(
   //           `${mp.occurrenceDetails.date}T${mp.occurrenceDetails.time}:00`
   //         ).toISOString(),
-
   //         description: mp.occurrenceDetails.description,
   //       },
+
+  //       individuals: offenders.map((p: any) => {
+  //         const type = p?.driverType || p?.offenderType || "Civilian";
+
+  //         /* ================= MILITARY ================= */
+  //         if (type === "Military Person") {
+  //           return {
+  //             armyNumber:
+  //               p["Army Rider / Driver Number"] ||
+  //               p["Army Number"] ||
+  //               p.armyNumber ||
+  //               p.armyNo ||
+  //               "",
+
+  //             name: p["Name"] || p.name || "",
+
+  //             rank: p["Rank"] || p.rank || "",
+  //             unit: p["Unit"] || p.unit || "",
+  //             fmn: p["FMN"] || p.fmn || "",
+  //             command: p["Command"] || p.command || "",
+
+  //             address: p["Address"] || p.address || "",
+
+  //             identityCard:
+  //               p["ID Card Number"] ||
+  //               p["I Card Number"] ||
+  //               p.icard ||
+  //               p.iCardNumber ||
+  //               "",
+
+  //             role: "offender",
+
+  //             isVehicleInvolved:
+  //               mp?.individualDetails?.vehicleInvolved === "yes",
+
+  //             vehicleCategory:
+  //               p?.vehicleCategory || p?.vehicleDetails?.vehicleType || "",
+
+  //             vehicleNumber:
+  //               p?.vehicleDetails?.vehicleNumber || p?.vehicleNumber || "",
+  //           };
+  //         }
+
+  //         /* ================= CIVILIAN ================= */
+  //         if (type === "Civilian") {
+  //           return {
+  //             name:
+  //               p["Full Name"] || p["FullName"] || p["Name"] || p.name || "",
+
+  //             fatherOrHusbandName:
+  //               p["Father / Husband Name"] ||
+  //               p["Father’s Name (Son of)"] ||
+  //               p["Father Name"] ||
+  //               p.fatherName ||
+  //               "",
+
+  //             address:
+  //               p["Address"] ||
+  //               p["Shop Address"] ||
+  //               p["Place of Stay"] ||
+  //               p.address ||
+  //               "",
+
+  //             identityCard:
+  //               p["Aadhar Card Number"] ||
+  //               p["Aadhaar Card Number"] ||
+  //               p["Aadhar Number"] ||
+  //               p["Aadhaar Number"] ||
+  //               p.icard ||
+  //               "",
+
+  //             rank: "",
+  //             unit: "",
+  //             fmn: "",
+  //             command: "",
+
+  //             role: "offender",
+  //             isVehicleInvolved: false,
+  //             vehicleCategory: "",
+  //             vehicleNumber: "",
+  //           };
+  //         }
+
+  //         /* ================= EMPLOYEE ================= */
+  //         if (type === "Employee") {
+  //           return {
+  //             serviceNumber: p["Service Number"] || p.serviceNumber || "",
+
+  //             name: p["Name"] || p.name || "",
+  //             rank: p["Rank"] || p.rank || "",
+  //             unit: p["Unit"] || p.unit || "",
+  //             fmn: p["FMN"] || p.fmn || "",
+  //             command: p["Command"] || p.command || "",
+
+  //             address: p["Address"] || p.address || "",
+
+  //             identityCard:
+  //               p["I Card Number"] || p["ID Card Number"] || p.icard || "",
+
+  //             role: "offender",
+  //             isVehicleInvolved: false,
+  //             vehicleCategory: "",
+  //             vehicleNumber: "",
+  //           };
+  //         }
+
+  //         /* ================= SERVANT / MAID ================= */
+  //         if (type === "Servant/Maid") {
+  //           return {
+  //             passNumber:
+  //               p["Maid/Servant Pass Number*"] || p["Pass Number"] || "",
+
+  //             fatherOrHusbandName: p["Father’s Name (Son of)"] || "",
+
+  //             identityCard: p["Pass ID"] || p["I Card Number"] || p.icard || "",
+
+  //             name: p["Name"] || p.name || "",
+  //             rank: p["C/O Rank"] || p.rank || "",
+  //             unit: p["Unit"] || p.unit || "",
+  //             fmn: p["FMN"] || p.fmn || "",
+  //             command: p["Command"] || p.command || "",
+  //             address: p["Address"] || p.address || "",
+
+  //             role: "offender",
+  //             isVehicleInvolved: false,
+  //             vehicleCategory: "",
+  //             vehicleNumber: "",
+  //           };
+  //         }
+
+  //         /* ================= SHOPKEEPER ================= */
+  //         if (type === "Shop Keeper") {
+  //           return {
+  //             name: p["Rider/Driver Name"] || p.name || "",
+  //             shopName: p["Shop Name"] || "",
+
+  //             unit: p["Unit"] || p.unit || "",
+  //             address: p["Shop Address"] || p.address || "",
+
+  //             identityCard: p["Pass No."] || p.passNo || "",
+
+  //             role: "offender",
+  //             rank: "",
+  //             fmn: "",
+  //             command: "",
+  //             isVehicleInvolved: false,
+  //             vehicleCategory: "",
+  //             vehicleNumber: "",
+  //           };
+  //         }
+
+  //         /* ================= TEMP WORKER ================= */
+  //         if (type === "Temporary Hired Worker") {
+  //           return {
+  //             name: p["Rider/Driver Name"] || p.name || "",
+
+  //             address: p["Place of Stay"] || p.address || "",
+
+  //             identityCard: p["Pass No."] || p.passNo || "",
+
+  //             placeOfWork: p["Place Of Work"] || "",
+  //             workType: p["Type of Work"] || "",
+
+  //             role: "offender",
+  //             rank: "",
+  //             unit: "",
+  //             fmn: "",
+  //             command: "",
+  //             isVehicleInvolved: false,
+  //             vehicleCategory: "",
+  //             vehicleNumber: "",
+  //           };
+  //         }
+
+  //         return {};
+  //       }),
+
+  //       witnesses: witnessList.map((p: any) => ({
+  //         armyNumber:
+  //           p.armyNumber ||
+  //           p.armyNo ||
+  //           p["Army Rider / Driver Number"] ||
+  //           p["Army Number"] ||
+  //           "",
+
+  //         rank: p.rank || p["Rank"] || "",
+  //         name: p.name || p["Name"] || "",
+  //         unit: p.unit || p["Unit"] || "",
+  //         fmn: p.fmn || p["FMN"] || "",
+  //         address: p.address || p["Address"] || "",
+
+  //         identityCard:
+  //           p.iCardNumber ||
+  //           p.icard ||
+  //           p["ID Card Number"] ||
+  //           p["Identity Card Number"] ||
+  //           "",
+
+  //         isVehicleInvolved: p?.vehicleInvolved === "yes",
+  //       })),
 
   //       documents: (mp.documents || [])
   //         .filter((d) => d.url)
@@ -354,23 +668,22 @@ const onSubmitFinal = async () => {
   //       },
   //     };
 
-  //     // 👀 Payload Console
-  //     console.log("MP REPORT PAYLOAD ===>", payload);
+  //     console.log("🔥 CLEAN FINAL OFFENDER LIST ===>", offenders);
+  //     console.log("🔥 CLEAN FINAL WITNESS LIST ===>", witnessList);
+  //     console.log("🔥 FINAL MP REPORT PAYLOAD ===>", payload);
 
   //     createReport(payload, {
   //       onSuccess: async (res: any) => {
   //         toast.success("MP Investigation Report Created Successfully 🎉");
-  //         console.log("MP REPORT CREATED SUCCESS ===>", res);
 
   //         const reportId = res?._id;
 
   //         try {
-  //           const offenderList =
-  //             state.formData.mpReport.individualDetails.offenderList;
-  //           for (const offender of offenderList) {
+  //           for (const offender of offenders) {
   //             const offenderPayload = {
   //               offenceId: reportId,
-  //               offenderType: (offender.driverType as OffenderType )|| "Civilian",
+  //               offenderType:
+  //                 (offender.driverType as OffenderType) || "Civilian",
   //               category: "investigation",
 
   //               offenderDetails: [
@@ -381,11 +694,9 @@ const onSubmitFinal = async () => {
   //               ],
   //             };
 
-  //             console.log("FINAL OFFENDER PAYLOAD ===>", offenderPayload);
+  //             console.log("🔥 FINAL OFFENDER PAYLOAD ===>", offenderPayload);
   //             await createOffender(offenderPayload);
   //           }
-
-  //           // toast.success("Offender(s) Created Successfully 🎯");
   //         } catch (err: any) {
   //           console.log("OFFENDER CREATE ERROR ===>", err?.response || err);
   //           toast.error("Offender creation failed ❌");
@@ -400,10 +711,6 @@ const onSubmitFinal = async () => {
 
   //       onError: (err: any) => {
   //         console.log(" RAW ERROR ===>", err);
-  //         console.log(" STATUS ===>", err?.response?.status);
-  //         console.log(" SERVER MESSAGE ===>", err?.response?.data?.message);
-  //         console.log(" VALIDATION ERRORS ===>", err?.response?.data?.errors);
-
   //         toast.error(
   //           err?.response?.data?.message || "Failed to create report"
   //         );
@@ -471,7 +778,10 @@ const onSubmitFinal = async () => {
             reportNo="PRO/21 CPU/00042/106/25"
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             onCreate={onSubmitFinal}
-
+            onCancel={() => {
+              dispatch({ type: "SET_STEP", payload: 1 });
+              onCancel();
+            }}
           />
 
           {/* RIGHT SIDE DYNAMIC CONTENT */}
@@ -486,7 +796,6 @@ const onSubmitFinal = async () => {
             stepsConfig={stepsConfig}
             mode="mp"
             mapMpToReport={mapMpToReport}
-            
           />
         </div>
       </div>

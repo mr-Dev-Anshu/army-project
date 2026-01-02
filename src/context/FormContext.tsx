@@ -19,7 +19,7 @@ const getByPath = (obj: any, path: string) => {
 /* ------------------------------------
    INITIAL STATE
 ------------------------------------ */
-const initialState: GlobalFormState = {
+ export const initialState: GlobalFormState = {
   currentStep: 1,
   completedSteps: [],
   preview: false,

@@ -1,4 +1,3 @@
-// lib/validators/mpReport.validator.js
 import Joi from "joi";
 
 // Common schemas
@@ -60,28 +59,35 @@ export const createMPReportSchema = Joi.object({
     customFields,
   }).required(),
 
-  individuals: Joi.array()
-    .items(
-      Joi.object({
-        armyNumber: optionalString,
-        rank: optionalString,
-        name: optionalString,
-        unit: optionalString,
-        fmn: optionalString,
-        address: optionalString,
-        identityCard: optionalString,
-        iCardNumber: optionalString,
-        command: optionalString,
-        remark: optionalString,
-        role: optionalString,
-        // Traffic fields
-        isVehicleInvolved: Joi.boolean().optional(),
-        vehicleCategory: optionalString,
-        vehicleNumber: optionalString,
-        customFields,
-      })
-    )
-    .default([]),
+ individuals: Joi.array()
+  .items(
+    Joi.object({
+      armyNumber: optionalString,
+      rank: optionalString,
+      name: optionalString,
+      unit: optionalString,
+      fmn: optionalString,
+      address: optionalString,
+
+      identityCard: optionalString,
+      iCardNumber: optionalString,
+      command: optionalString,
+      remark: optionalString,
+      role: optionalString,
+
+      // 🚀 ADD THIS NEW FIELD
+      fatherOrHusbandName: optionalString,
+
+      // Traffic fields
+      isVehicleInvolved: Joi.boolean().optional(),
+      vehicleCategory: optionalString,
+      vehicleNumber: optionalString,
+
+      customFields,
+    })
+  )
+  .default([]),
+
 
  witnesses: Joi.array()
   .items(

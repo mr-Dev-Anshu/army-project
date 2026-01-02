@@ -1,8 +1,3 @@
-
-
-
-
-
 "use client";
 import { Check, Edit2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +20,7 @@ interface LeftStepperProps {
 
   // ⭐ ADD THIS
   onCreate?: () => void;
+  onCancel?: () => void;
 }
 
 export const LeftStepper = ({
@@ -35,6 +31,7 @@ export const LeftStepper = ({
   reportNo,
   onStepClick,
   onCreate,
+  onCancel
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
@@ -171,7 +168,10 @@ export const LeftStepper = ({
 
       {/* FOOTER */}
       <div className="mt-4 flex flex-col sm:flex-row gap-2">
-        <Button className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base">
+        <Button
+          className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base"
+          onClick={() => onCancel && onCancel()}
+        >
           Cancel
         </Button>
 

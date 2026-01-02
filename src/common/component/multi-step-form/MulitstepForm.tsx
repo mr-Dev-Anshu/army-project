@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "@/context/FormContext";
+import { initialState, useForm } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
 import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
@@ -13,8 +13,9 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
-export default function MultiStepForm() {
+export default function MultiStepForm({ onCancel }: { onCancel: () => void }) {
   const { state, dispatch } = useForm();
+
 
   const { mutateAsync } = useCreateTrafficOffence();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
@@ -190,7 +191,6 @@ export default function MultiStepForm() {
       const traffic = state?.formData?.traffic || {};
       console.log("🚔 RAW TRAFFIC ===>", traffic);
 
-      /* ---------------- SAFE HELPERS ---------------- */
       const safe = (v: any, fallback = undefined) => {
         if (v === null || v === undefined) return fallback;
         if (typeof v === "string") return v.trim() || fallback;
@@ -280,16 +280,10 @@ export default function MultiStepForm() {
           offenceId,
           offenderType,
           offenderDetails: traffic.offenderPeople.map((o: any) => {
-            let rawType = o?.type || offenderType || "Driver"; // fallback safe
+            let rawType = o?.type || offenderType || "Driver";
 
-            // ⚠️ BACKEND ONLY ACCEPTS Driver / CoDriver
-            const allowed = ["Driver", "CoDriver"];
-
-            // normalize values
             if (rawType?.toLowerCase().includes("co")) rawType = "CoDriver";
             else rawType = "Driver";
-
-            if (!allowed.includes(rawType)) rawType = "Driver";
 
             return {
               type: rawType,
@@ -297,8 +291,6 @@ export default function MultiStepForm() {
             };
           }),
         };
-
-        // console.log("👮 SAFE OFFENDER PAYLOAD ===>", offenderPayload);
 
         await createOffenderMutate(offenderPayload);
         toast.success("Offenders Saved Successfully!");
@@ -327,6 +319,17 @@ export default function MultiStepForm() {
       }
 
       toast.success("🎉 Final Submit Completed Successfully!");
+
+      /* -----------------------------------
+       ⭐⭐⭐ RESET FORM + STEPPER ⭐⭐⭐
+    ------------------------------------*/
+      dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
+      dispatch({ type: "SET_STEP", payload: 1 });
+      dispatch({
+        type: "SET_PATH",
+        path: "completedSteps",
+        value: [],
+      });
     } catch (err: any) {
       console.error("❌ FINAL ERROR ===>", err?.response?.data || err);
 
@@ -338,14 +341,163 @@ export default function MultiStepForm() {
     }
   };
 
+  // const onSubmitFinal = async () => {
+  //   try {
+  //     const traffic = state?.formData?.traffic || {};
+  //     console.log("🚔 RAW TRAFFIC ===>", traffic);
+
+  //     /* ---------------- SAFE HELPERS ---------------- */
+  //     const safe = (v: any, fallback = undefined) => {
+  //       if (v === null || v === undefined) return fallback;
+  //       if (typeof v === "string") return v.trim() || fallback;
+  //       return v;
+  //     };
+
+  //     const date = safe(traffic?.onDutyDetails?.dateOfDuty);
+
+  //     const toISO = (time?: string) => {
+  //       if (!date || !time) return undefined;
+  //       try {
+  //         return new Date(`${date}T${time}`).toISOString();
+  //       } catch {
+  //         return undefined;
+  //       }
+  //     };
+
+  //     /* ---------------- MAIN PAYLOAD ---------------- */
+  //     const payload = {
+  //       isVehicleInvolved: traffic?.vehicleInvolved === "yes",
+
+  //       onDutyDetails: {
+  //         dateOfDuty: safe(traffic?.onDutyDetails?.dateOfDuty),
+  //         dutyLocation: safe(traffic?.onDutyDetails?.dutyLocation),
+  //         dutyType: safe(traffic?.onDutyDetails?.dutyType),
+  //         startTime: toISO(traffic?.onDutyDetails?.startTime),
+  //         endTime: toISO(traffic?.onDutyDetails?.endTime),
+  //       },
+
+  //       onDutyDetailsMPReporting: {
+  //         nameReportingMP: safe(
+  //           traffic?.onDutyDetailsMPReporting?.nameReportingMP
+  //         ),
+  //         rank: safe(traffic?.onDutyDetailsMPReporting?.rank),
+  //         unit: safe(traffic?.onDutyDetailsMPReporting?.unit),
+  //         armyNumber: safe(traffic?.onDutyDetailsMPReporting?.armyNumber),
+  //         contactNumber: safe(traffic?.onDutyDetailsMPReporting?.contactNumber),
+  //       },
+
+  //       offenceOccurenceDetails: {
+  //         description: safe(traffic?.offenceOccurenceDetails?.description),
+  //         description2: safe(traffic?.offenceOccurenceDetails?.description2),
+  //         incidentLocation: safe(
+  //           traffic?.offenceOccurenceDetails?.incidentLocation
+  //         ),
+  //         timeOfOffence: toISO(traffic?.offenceOccurenceDetails?.timeOfOffence),
+  //       },
+
+  //       offenceTypes:
+  //         Array.isArray(traffic?.offenceTypes) &&
+  //         traffic?.offenceTypes?.length > 0
+  //           ? traffic.offenceTypes
+  //           : ["minor"],
+
+  //       offenceTypeReference:
+  //         Array.isArray(traffic?.offenceCode) &&
+  //         traffic?.offenceCode?.length > 0
+  //           ? traffic.offenceCode
+  //           : ["Mil Tfc Offence"],
+  //     };
+
+  //     console.log("🚔 FINAL SAFE PAYLOAD ===>", payload);
+
+  //     toast.info("Creating Offence...");
+  //     const offence = await mutateAsync(payload);
+
+  //     toast.success("Offence Created Successfully!");
+
+  //     const offenceId = offence?._id;
+  //     if (!offenceId) {
+  //       toast.error("Offence ID missing from backend!");
+  //       return;
+  //     }
+
+  //     /* ---------------- OFFENDER HANDLING ---------------- */
+  //     const offenderType: OffenderType =
+  //       traffic?.vehicleInvolved === "yes"
+  //         ? (traffic?.vehicleDetails?.driverType as OffenderType) || "Civilian"
+  //         : (traffic?.offenderWithoutVehicle?.offenderType as OffenderType) ||
+  //           "Civilian";
+
+  //     if (
+  //       Array.isArray(traffic?.offenderPeople) &&
+  //       traffic?.offenderPeople.length > 0
+  //     ) {
+  //       const offenderPayload: CreateOffenderData = {
+  //         offenceId,
+  //         offenderType,
+  //         offenderDetails: traffic.offenderPeople.map((o: any) => {
+  //           let rawType = o?.type || offenderType || "Driver"; // fallback safe
+
+  //           // ⚠️ BACKEND ONLY ACCEPTS Driver / CoDriver
+  //           const allowed = ["Driver", "CoDriver"];
+
+  //           // normalize values
+  //           if (rawType?.toLowerCase().includes("co")) rawType = "CoDriver";
+  //           else rawType = "Driver";
+
+  //           if (!allowed.includes(rawType)) rawType = "Driver";
+
+  //           return {
+  //             type: rawType,
+  //             details: o?.details ? o.details : o || {},
+  //           };
+  //         }),
+  //       };
+
+  //       // console.log("👮 SAFE OFFENDER PAYLOAD ===>", offenderPayload);
+
+  //       await createOffenderMutate(offenderPayload);
+  //       toast.success("Offenders Saved Successfully!");
+  //     } else {
+  //       console.log("⚠️ No offender provided — skipping offender API");
+  //     }
+
+  //     /* ---------------- WITNESS HANDLING ---------------- */
+  //     if (Array.isArray(traffic?.witnesses) && traffic?.witnesses?.length > 0) {
+  //       const witnessPayload = traffic.witnesses.map((w) => ({
+  //         offenceId,
+  //         rank: safe(w?.reportingBlock?.rank),
+  //         unit: safe(w?.reportingBlock?.unit),
+  //         ArmyNo: safe(w?.reportingBlock?.armyNumber),
+  //         name: safe(w?.reportingBlock?.nameReportingMP),
+  //         contactNumber: safe(w?.reportingBlock?.contactNumber),
+  //       }));
+
+  //       console.log("👀 SAFE WITNESS PAYLOAD ===>", witnessPayload);
+
+  //       await Promise.all(witnessPayload.map((w) => createWitnessMutate(w)));
+
+  //       toast.success("Witness Added Successfully!");
+  //     } else {
+  //       console.log("⚠️ No witness provided — skipping witness API");
+  //     }
+
+  //     toast.success("🎉 Final Submit Completed Successfully!");
+  //   } catch (err: any) {
+  //     console.error("❌ FINAL ERROR ===>", err?.response?.data || err);
+
+  //     toast.error(
+  //       err?.response?.data?.message ||
+  //         err?.response?.data?.error ||
+  //         "Something went wrong!"
+  //     );
+  //   }
+  // };
+
   const stepsConfig = {
     1: {
       title: "1. PARTICULARS:",
-      component: (
-        <Step1Particulars
-         
-        />
-      ),
+      component: <Step1Particulars />,
     },
     2: { title: "2. STATEMENT:", component: <Step2Statement /> },
     3: { title: "3. OFFENCE:", component: <Step3Offence /> },
@@ -364,6 +516,10 @@ export default function MultiStepForm() {
             reportNo="PRO/21 CPU/00042/106/25"
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             onCreate={onSubmitFinal}
+            onCancel={() => {
+              dispatch({ type: "SET_STEP", payload: 1 });
+              onCancel();
+            }}
           />
 
           <RightPanel

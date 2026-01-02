@@ -82,8 +82,16 @@ export default function Dashboard() {
                 value={42}
                 title="Traffic Reports"
               />
-              <DynamicStatsCard icon={<Gauge />} value={42} title="Static Speed" />
-              <DynamicStatsCard icon={<BarChart3 />} value={42} title="MP Reports" />
+              <DynamicStatsCard
+                icon={<Gauge />}
+                value={42}
+                title="Static Speed"
+              />
+              <DynamicStatsCard
+                icon={<BarChart3 />}
+                value={42}
+                title="MP Reports"
+              />
               <DynamicStatsCard
                 icon={<AlertTriangle />}
                 value={42}
@@ -164,9 +172,11 @@ export default function Dashboard() {
         {/* -------- INDIVIDUAL PAGES -------- */}
         {page === "noVehicleReports" && <ReportsPage viewType="no-vehicle" />}
         {page === "viewReports" && <ReportsPage viewType="vehicle" />}
-        {page === "staticSpeed" && <StaticSpeedForm />}
-        {page === "investigation" && <MultiFormReport />}
-        {page === "multiForm" && <MultiStepForm />}
+        {page === "staticSpeed" && <StaticSpeedForm onCancel={()=>setPage("dashboard")} />}
+        {page === "investigation" && (
+          <MultiFormReport onCancel={() => setPage("dashboard")} />
+        )}
+        {page === "multiForm" && <MultiStepForm onCancel={()=>setPage("dashboard")} />}
         {page === "createRecord" && (
           <CreateNewRecordPanel setCollapsed={setCollapsed} />
         )}

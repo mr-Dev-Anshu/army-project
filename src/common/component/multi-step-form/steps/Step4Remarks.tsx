@@ -100,23 +100,7 @@ export default function Step4Remarks() {
 
   return (
     <div>
-      {/* ⭐ Offence Type Suggestion Input ⭐ */}
-      <Label className="font-bold mb-2 block">Offence Type</Label>
 
-      <SuggestionInput
-        placeholder="Enter Offence Type"
-        value={d?.offenceType || ""}
-        onChange={(v) =>
-          dispatch({
-            type: "SET_PATH",
-            path: isStatic
-              ? "formData.staticSpeed.offenceType"
-              : "formData.traffic.offenceType",
-            value: v,
-          })
-        }
-        fieldType="offenceType"
-      />
 
       {/* ⭐ Remarks */}
       <Label className="mb-4 font-bold mt-4 block">ADD REMARKS:</Label>
