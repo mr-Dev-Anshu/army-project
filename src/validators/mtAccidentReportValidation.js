@@ -52,6 +52,18 @@ const mtAccidentReportSchema = Joi.object({
 
   actionStatus: Joi.boolean().optional().default(false),
   remark: Joi.string().allow("").optional(),
+
+  unit: Joi.string().trim().allow("").optional(),
+  fmn: Joi.string().trim().allow("").optional(),
+  
+  individualDetails: Joi.object().unknown(true).optional().default({}),
+  driverDetails: Joi.object().unknown(true).optional().default({}),
+  coDriverDetails: Joi.object().unknown(true).optional().default({}),
+  
+  offenders: Joi.array()
+    .items(Joi.object().unknown(true))
+    .optional()
+    .default([]),
 });
 
 const updateMTAccidentReportSchema = mtAccidentReportSchema.fork(
@@ -73,6 +85,12 @@ const updateMTAccidentReportSchema = mtAccidentReportSchema.fork(
     "firPoliceStation",
     "actionStatus",
     "remark",
+    "unit",
+    "fmn",
+    "individualDetails",
+    "driverDetails",
+    "coDriverDetails",
+    "offenders",
   ],
   (schema) => schema.optional()
 );

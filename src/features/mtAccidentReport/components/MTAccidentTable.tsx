@@ -154,16 +154,63 @@ export default function MTAccidentTable({
       className: "align-top",
     },
     {
+      header: "Driver / Co-Driver Details",
+      cell: (item) => {
+        const offenders = item.offenders || [];
+        if (offenders.length === 0) {
+          return <span className="text-xs text-gray-400">--</span>;
+        }
+        return (
+          <div className="space-y-2 text-xs min-w-[200px]">
+            {offenders.map((offender: any, idx: number) => {
+              const details = offender.offenderDetails || {};
+              const type = offender.offenderType || offender.category || "Unknown";
+              return (
+                <div key={idx} className="border-l-2 border-blue-300 pl-2">
+                  <div className="font-semibold text-blue-700 mb-1">{type}</div>
+                  {details.name && (
+                    <div className="flex gap-1">
+                      <span className="font-semibold text-gray-700 w-12 shrink-0">Name:</span>
+                      <span className="font-medium">{details.name}</span>
+                    </div>
+                  )}
+                  {details.rank && (
+                    <div className="flex gap-1">
+                      <span className="font-semibold text-gray-700 w-12 shrink-0">Rank:</span>
+                      <span>{details.rank}</span>
+                    </div>
+                  )}
+                  {details.armyNumber && (
+                    <div className="flex gap-1">
+                      <span className="font-semibold text-gray-700 w-12 shrink-0">Army:</span>
+                      <span>{details.armyNumber}</span>
+                    </div>
+                  )}
+                  {details.unit && (
+                    <div className="flex gap-1">
+                      <span className="font-semibold text-gray-700 w-12 shrink-0">Unit:</span>
+                      <span>{details.unit}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      },
+      className: "align-top",
+    },
+    {
       header: "Unit",
       cell: (item) => (
-        <span className="text-xs">{item.individualDetails?.unit || "--"}</span>
+        <span className="text-xs">{item.unit || item.individualDetails?.unit || item.offenders?.[0]?.offenderDetails?.unit || "--"}</span>
       ),
       className: "min-w-[120px] text-xs",
     },
     {
       header: "FMN",
       cell: (item) => (
-        <span className="text-xs">{item.individualDetails?.fmn || "--"}</span>
+        <span className="text-xs">{item.fmn || item.individualDetails?.fmn || item.offenders?.[0]?.offenderDetails?.fmn || "--"}</span>
       ),
       className: "min-w-[100px] text-xs",
     },

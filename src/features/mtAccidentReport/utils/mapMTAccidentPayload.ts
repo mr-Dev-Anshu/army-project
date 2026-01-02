@@ -6,6 +6,12 @@ export function mapMTAccidentPayload(formData: any) {
   // Extract core fields
   let {
     individualType,
+    individualDetails,
+    driverType,
+    driverDetails,
+    offenders,
+    unit,
+    fmn,
     dateOfAccident,
     timeOfAccident,
     placeOfAccident,
@@ -29,9 +35,34 @@ export function mapMTAccidentPayload(formData: any) {
     individualType = "Military Personnel";
   }
 
+  // Build offenders array from driver details
+  const offendersArray = [];
+  if (driverDetails && Object.keys(driverDetails).length > 0) {
+    offendersArray.push({
+      offenderType: driverType || "Unknown",
+      offenderDetails: driverDetails,
+      category: "Driver",
+    });
+
+    // Include co-driver if present
+    if (driverDetails.coDriver && Object.keys(driverDetails.coDriver).length > 0) {
+      offendersArray.push({
+        offenderType: driverDetails.coDriver.type || "Unknown",
+        offenderDetails: driverDetails.coDriver,
+        category: "Co-Driver",
+      });
+    }
+  }
+
   return {
     // Individual Details
     individualType: individualType || null,
+    individualDetails: individualDetails || {},
+    driverDetails: driverDetails || {},
+    coDriverDetails: driverDetails?.coDriver || {},
+    offenders: offendersArray.length > 0 ? offendersArray : (Array.isArray(offenders) ? offenders : []),
+    unit: unit || "",
+    fmn: fmn || "",
 
     // Accident Details
     dateOfAccident: dateOfAccident ? new Date(dateOfAccident) : null,

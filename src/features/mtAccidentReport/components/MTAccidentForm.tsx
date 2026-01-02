@@ -2,6 +2,7 @@
 
 import IndividualVictimSection from "./IndividualVictimSection";
 import AccidentDetailsSection from "./AccidentDetailsSection";
+import DriverRiderSection from "./DriverRiderSection";
 import VehicleDetailsSection from "./VehicleDetailsSection";
 import CasualtyDetailsSection from "./CasualtyDetailsSection";
 import FirDetailsSection from "./FirDetailsSection";
@@ -112,6 +113,14 @@ export default function MTAccidentForm({
 
           <Section>
             <AccidentDetailsSection />
+          </Section>
+
+          <Section>
+            <DriverRiderSection 
+              title="Select Who was the Driver / Rider?"
+              scope="mt-accident"
+              showCoDriver
+            />
           </Section>
 
           <Section>

@@ -95,6 +95,29 @@ export default function AccidentDetailsSection() {
           className="w-full border rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
+
+      {/* Unit & FMN */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-600">Unit</label>
+          <input
+            placeholder="Enter unit"
+            value={d.unit || ""}
+            onChange={(e) => set("unit", e.target.value)}
+            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-600">FMN</label>
+          <input
+            placeholder="Enter FMN"
+            value={d.fmn || ""}
+            onChange={(e) => set("fmn", e.target.value)}
+            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
     </section>
   );
 }

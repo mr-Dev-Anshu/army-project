@@ -95,7 +95,13 @@ export default function MTAccidentListPage() {
           firPoliceStation: "",
           actionStatus: false,
           remark: "",
-          individualDetails: {} // Ensure this is reset too
+          unit: "",
+          fmn: "",
+          driverType: "",
+          driverDetails: {},
+          coDriverDetails: {},
+          individualDetails: {},
+          offenders: [],
         },
       },
     });

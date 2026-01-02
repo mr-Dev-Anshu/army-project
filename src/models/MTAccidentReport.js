@@ -9,6 +9,31 @@ const MTAccidentReportSchema = new Schema(
       required: false,
       trim: true,
     },
+    individualDetails: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+    driverDetails: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+    coDriverDetails: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+    offenders: [
+      {
+        type: Schema.Types.Mixed,
+      },
+    ],
+    unit: {
+      type: String,
+      trim: true,
+    },
+    fmn: {
+      type: String,
+      trim: true,
+    },
     dateOfAccident: {
       type: Date,
       default: null,

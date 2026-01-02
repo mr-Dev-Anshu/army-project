@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer } from "react";
+import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
 import OffenderDynamicForm from "@/common/component/multi-step-form/steps/forms/OffenderDynamicForm";
 import { offenderFormsConfig } from "@/common/component/multi-step-form/steps/Step1Particulars/config/OffenderConfig";
@@ -18,31 +18,8 @@ type ScopeType =
 interface DriverRiderSectionProps {
   title?: string;
   scope: ScopeType;
-  path: string;
   showCoDriver?: boolean;
 }
-
-interface DriverState {
-  driverType: string | null;
-}
-
-type DriverAction = 
-  | { type: "SET_DRIVER_TYPE"; payload: string }
-  | { type: "RESET" };
-
-/* ======================================
-   REDUCER
-====================================== */
-const driverReducer = (state: DriverState, action: DriverAction): DriverState => {
-  switch (action.type) {
-    case "SET_DRIVER_TYPE":
-      return { driverType: action.payload };
-    case "RESET":
-      return { driverType: null };
-    default:
-      return state;
-  }
-};
 
 /* ======================================
    DRIVER TYPES
@@ -55,10 +32,27 @@ const DRIVER_TYPES = Object.keys(offenderFormsConfig);
 export default function DriverRiderSection({
   title = "Select Who was the Driver / Rider?",
   scope,
-  path,
   showCoDriver = true,
 }: DriverRiderSectionProps) {
-  const [driverState, driverDispatch] = useReducer(driverReducer, { driverType: null });
+  const { state, dispatch } = useForm();
+
+  const driverType = state.formData.mtAccidentReport?.driverType || null;
+  const driverDetails = state.formData.mtAccidentReport?.driverDetails || {};
+
+  const selectDriverType = (type: string) => {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mtAccidentReport.driverType",
+      value: type,
+    });
+
+    // Reset driver details when type changes
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mtAccidentReport.driverDetails",
+      value: {},
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -67,13 +61,13 @@ export default function DriverRiderSection({
       {/* ===== DRIVER TYPE SELECT ===== */}
       <div className="grid sm:grid-cols-2 gap-3">
         {DRIVER_TYPES.map((type) => {
-          const active = driverState.driverType === type;
+          const active = driverType === type;
 
           return (
             <button
               key={type}
               type="button"
-              onClick={() => driverDispatch({ type: "SET_DRIVER_TYPE", payload: type })}
+              onClick={() => selectDriverType(type)}
               className={cn(
                 "border rounded-lg px-4 py-3 flex items-center gap-3 text-left transition",
                 active
@@ -99,13 +93,13 @@ export default function DriverRiderSection({
       </div>
 
       {/* ===== OFFENDER FORM ===== */}
-      {driverState.driverType && offenderFormsConfig[driverState.driverType] && (
+      {driverType && offenderFormsConfig[driverType] && (
         <OffenderDynamicForm
-          title={offenderFormsConfig[driverState.driverType].title}
-          helperText={offenderFormsConfig[driverState.driverType].helperText}
-          fields={offenderFormsConfig[driverState.driverType].fields}
+          title={offenderFormsConfig[driverType].title}
+          helperText={offenderFormsConfig[driverType].helperText}
+          fields={offenderFormsConfig[driverType].fields}
           scope={scope}
-          path={path}
+          path="formData.mtAccidentReport.driverDetails"
           showCoDriver={showCoDriver}
         />
       )}
