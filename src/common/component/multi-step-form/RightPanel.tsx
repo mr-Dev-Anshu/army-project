@@ -1,6 +1,6 @@
-
-
 "use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Eye } from "lucide-react";
 import { CiEraser } from "react-icons/ci";
@@ -11,6 +11,8 @@ import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
 import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
 import MpOccurrenceReport from "@/components/reports/MpOccurrenceReport";
 
+import ConfirmationModal from "@/components/common/ConfirmationModal";
+
 export const RightPanel = ({
   step,
   formData,
@@ -19,15 +21,17 @@ export const RightPanel = ({
   stepsConfig,
   mode,
   mapTrafficToReport,
-  mapMpToReport
+  mapMpToReport,
 }: any) => {
   const { state, dispatch } = useForm();
+
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const current = stepsConfig?.[String(step)];
   const totalSteps = Object.keys(stepsConfig || {}).length;
   const isLastStep = step === totalSteps;
 
-  /* ================= NEXT DISABLE LOGIC ================= */
   const isNextDisabled = () => {
     if (mode === "static" && step === 1)
       return !(
@@ -41,308 +45,165 @@ export const RightPanel = ({
     return false;
   };
 
- /* ================= CLEAR BUTTON ================= */
-const clearForm = () => {
-  if (mode === "traffic") {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic",
-      value: {
-        vehicleInvolved: "",
-        vehicleDetails: {
-          category: "",
-          vehicleType: "",
-          driverType: "",
-          vehicleName: "",
-          vehicleNumber: "",
-        },
-        offenderWithoutVehicle: {
-          offenderType: "",
-          military: {
-            armyNumber: "",
-            rank: "",
-            name: "",
-            unit: "",
-            fmn: "",
-            command: "",
-            address: "",
-            iCardNumber: "",
-          },
-        },
-        offenderDetails: {},
-        onDutyDetails: {
-          dateOfDuty: "",
-          startTime: "",
-          endTime: "",
-          dutyLocation: "",
-          dutyType: "",
-        },
-        onDutyDetailsMPReporting: {
-          nameReportingMP: "",
-          rank: "",
-          unit: "",
-          armyNumber: "",
-          contactNumber: "",
-        },
-        offenceOccurenceDetails: {
-          timeOfOffence: "",
-          incidentLocation: "",
-          description: "",
-          time: "",
-        },
-        offenceTypes: [],
-        offenceCode: [],
-        witnesses: [],
-        selectedWitness: null,
-        offenderPeople: [],
-        remarks: "",
-      },
-    });
-  }
-
-  else if (mode === "static") {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed",
-      value: {
-        vehicleInvolved: "",
-        vehicleDetails: {
-          category: "",
-          vehicleType: "",
-          driverType: "",
-          vehicleNumber: "",
-          vehicleName: "",
-        },
-        dutyBlock: {
-          dateOfDuty: "",
-          startTime: "",
-          endTime: "",
-          dutyLocation: "",
-          dutyType: "",
-        },
-        reportingBlock: {
-          nameReportingMP: "",
-          rank: "",
-          unit: "",
-          armyNumber: "",
-          contactNumber: "",
-        },
-        offenceBlock: {
-          timeOfOffence: "",
-          time: "",
-          incidentLocation: "",
-          description: "",
-          authSpeed: "30",
-          actualSpeedNoted: "",
-          overSpeedCalculated: "",
-        },
-        witnesses: [],
-        selectedWitness: null,
-        offenderDetails: {},
-        offenderPeople: [],
-      },
-    });
-  }
-
-  else if (mode === "mp") {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport",
-      value: {
-        reportDetails: {
-          reportNo: "",
-          command: "",
-          firNo: "",
-          firFile: null,
-        },
-        mpParticulars: {
-          armyNo: "",
-          rank: "",
-          name: "",
-          unit: "",
-          fmn: "",
-          command: "",
-          address: "",
-          icard: "",
-        },
-        occurrenceDetails: {
-          offenceType: "",
-          place: "",
-          date: "",
-          time: "",
-          description: "",
-        },
-        individualDetails: {
-          vehicleInvolved: "",
-          vehicleData: {},
-          driverType: "",
-          offenderList: [],
-          tempOffender: {},
-        },
-        witnesses: [],
-        witnessVehicleStatus: "",
-        evidence: {
-          attachEvidence: null,
-          eyeSketch: null,
-          photos: [],
-          videos: [],
-        },
-        documents: [],
-        additionalIndividual: {
-          vehicleInvolved: "",
-          vehicleData: {},
-          driverType: "",
-          tempOffender: {},
-        },
-        detailedReport: "",
-        investigationPoints: "",
-        opinion: "",
-        remarks: {
-          analysis: "",
-          recommendation: "",
-        },
-      },
-    });
-  }
-};
-
-
-  /* ================= PREVIEW COMPONENT ================= */
   const renderPreviewReport = () => {
-    if (mode === "traffic") {
+    if (mode === "traffic")
       return (
-        <MilitaryPoliceReport
-          {...mapTrafficToReport(state.formData.traffic)}
-        />
+        <MilitaryPoliceReport {...mapTrafficToReport(state.formData.traffic)} />
       );
-    }
 
-    if (mode === "static") {
+    if (mode === "static")
       return (
         <StaticSpeedReport
           {...mapTrafficToReport(state.formData.staticSpeed)}
         />
       );
-    }
-      if (mode === "mp") {
-    return (
-      <MpOccurrenceReport
-        {...mapMpToReport(state.formData.mpReport)}
-      />
-    );
-  }
 
-    return <p>No Preview Available</p>;
+    if (mode === "mp")
+      return <MpOccurrenceReport {...mapMpToReport(state.formData.mpReport)} />;
+
+    return null;
   };
 
   return (
-    <div className="flex-1 h-full p-3 sm:p-5 lg:p-8 flex flex-col w-full overflow-hidden">
-      <div className="border rounded-lg w-full h-full flex flex-col">
+    <>
+      <div className="flex-1 h-full px-4 flex flex-col w-full overflow-hidden">
+        <div className="border rounded-lg w-full flex flex-col flex-1 min-h-0">
+          {/* ================= HEADER ================= */}
+          <div className="flex justify-between px-4 py-3 border-b bg-white">
+            <h3 className="font-bold text-lg">{current?.title || "Step"}</h3>
 
-        {/* ================= HEADER ================= */}
-        <div className="flex justify-between px-4 py-3 border-b bg-white">
-          <h3 className="font-bold text-lg">{current?.title || "Step"}</h3>
+            {!state.preview && (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="text-xs bg-gray-100 text-black"
+                  onClick={() => setShowClearModal(true)}
+                >
+                  <CiEraser size={16} /> Clear Form
+                </Button>
 
-          {!state.preview && (
-            <div className="flex gap-2">
-              {/* CLEAR */}
-              <Button
-                size="sm"
-                className="text-xs bg-gray-100 cursor-pointer text-black"
-                onClick={clearForm}
-              >
-                <CiEraser size={16} /> Clear Form
-              </Button>
-
-              {/* PREVIEW */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  dispatch({ type: "SET_PREVIEW", payload: true })
-                }
-                className="bg-black text-white"
-              >
-                <Eye/>
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* ================= BODY ================= */}
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-
-          {/* ==== FORM MODE ==== */}
-          {!state.preview && (current?.component || <p>Step Coming…</p>)}
-
-          {/* ==== PREVIEW MODE ==== */}
-          {state.preview && (
-            <div className="w-full h-full flex flex-col">
-              <div className="flex justify-between mb-3">
-                <h2 className="text-xl font-bold">REPORT PREVIEW</h2>
-
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => window.print()}>
-                    🖨 Print
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    className="bg-black text-white"
-                    onClick={() =>
-                      dispatch({ type: "SET_PREVIEW", payload: false })
-                    }
-                  >
-                    Close
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    dispatch({ type: "SET_PREVIEW", payload: true })
+                  }
+                  className="bg-black text-white"
+                >
+                  <Eye />
+                </Button>
               </div>
-
-              <div className="border bg-white shadow-lg rounded-md p-4">
-                {renderPreviewReport()}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ================= FOOTER ================= */}
-        {!state.preview && (
-          <div className="border-t px-4 py-3 bg-white flex justify-between gap-2">
-            {/* BACK */}
-            <Button
-              className="bg-black text-white"
-              disabled={step === 1}
-              onClick={onPrev}
-            >
-              <FaArrowLeftLong className="mr-2" />
-              Back
-            </Button>
-
-            {/* NOT LAST STEP */}
-            {!isLastStep && (
-              <Button
-                onClick={onNext}
-                disabled={isNextDisabled()}
-                className="bg-blue-500 text-white"
-              >
-                Save & Next
-                <ChevronRight className="ml-2" />
-              </Button>
-            )}
-
-            {/* LAST STEP → OPEN PREVIEW */}
-            {isLastStep && (
-              <Button
-                className="bg-blue-500 text-white"
-                onClick={() => dispatch({ type: "SET_PREVIEW", payload: true })}
-              >
-                Preview Report
-                <ChevronRight className="ml-2" />
-              </Button>
             )}
           </div>
-        )}
+
+          {/* ================= BODY ================= */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {/* ===== FORM MODE ===== */}
+            {!state.preview && (
+              <div className="h-full overflow-y-auto px-4 py-4">
+                {current?.component || <p>Step Coming…</p>}
+              </div>
+            )}
+
+            {/* ===== PREVIEW MODE ===== */}
+            {state.preview && (
+              <div className="h-full flex flex-col ">
+                {/* PREVIEW TOP BAR */}
+                <div className="shrink-0 flex items-center justify-between px-4 py-2 bg-white border-b">
+                  <h2 className="font-semibold text-sm tracking-wide">
+                    REPORT PREVIEW
+                  </h2>
+
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={window.print}>
+                      🖨 Print
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        dispatch({ type: "SET_PREVIEW", payload: false });
+
+                        // 👇 wapas last real step pe le jao
+                        dispatch({
+                          type: "SET_STEP",
+                          payload: state.completedSteps.at(-1) ?? step,
+                        });
+                      }}
+                    >
+                      ❌
+                    </Button>
+                  </div>
+                </div>
+
+                {/* PREVIEW CONTENT */}
+                <div className="flex-1 overflow-y-auto flex justify-center  py-6">
+                  <div className="w-full max-w-[900px]">
+                    {renderPreviewReport()}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ================= FOOTER (ONLY FORM MODE) ================= */}
+          {!state.preview && (
+            <div className="border-t px-4 py-3 bg-white flex justify-between gap-2">
+              <Button disabled={step === 1} onClick={onPrev}>
+                <FaArrowLeftLong className="mr-2" /> Back
+              </Button>
+
+              {!isLastStep ? (
+                <Button onClick={onNext} disabled={isNextDisabled()}>
+                  Next <ChevronRight className="ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    dispatch({
+                      type: "SET_PATH",
+                      path: "completedSteps",
+                      value: Array.from(
+                        new Set([...state.completedSteps, step])
+                      ),
+                    });
+
+                    // 👇 IMPORTANT LINE
+                    dispatch({
+                      type: "SET_STEP",
+                      payload: step + 1,
+                    });
+
+                    dispatch({ type: "SET_PREVIEW", payload: true });
+                  }}
+                >
+                  Preview Report
+                  <ChevronRight className="ml-2" />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* ================= CONFIRM MODAL ================= */}
+      <ConfirmationModal
+        isOpen={showClearModal}
+        onClose={() => setShowClearModal(false)}
+        onConfirm={() => {
+          setIsClearing(true);
+          setTimeout(() => {
+            setIsClearing(false);
+            setShowClearModal(false);
+          }, 300);
+        }}
+        title="Clear Form?"
+        message="Kya aap sure ho ki poora form clear karna chahte ho? Ye action undo nahi hoga."
+        confirmLabel="Yes, Clear"
+        cancelLabel="Cancel"
+        isProcessing={isClearing}
+      />
+    </>
   );
 };

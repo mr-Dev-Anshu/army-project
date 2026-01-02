@@ -29,8 +29,8 @@ export default function Step3Offence() {
     <div className="space-y-10 px-6">
       <FormTextarea
         label="Brief Description of Offence (Optional)"
-        value={offence.description || ""}
-        onChange={(value) => updateOffence("description", value)}
+        value={offence.description2 || ""}
+        onChange={(value) => updateOffence("description2", value)}
       />
     </div>
   );

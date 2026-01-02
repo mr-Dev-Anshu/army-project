@@ -41,7 +41,7 @@ export const LeftStepper = ({
     return "pending";
   };
 
-  const { dispatch } = useForm();
+  const { state, dispatch } = useForm();
 
   const [editing, setEditing] = useState(false);
   const [reportValue, setReportValue] = useState(reportNo || "");
@@ -107,7 +107,12 @@ export const LeftStepper = ({
           return (
             <div key={step.id} className="relative">
               <button
-                onClick={() => onStepClick(step.id)}
+                onClick={() => {
+                  if (state.preview) {
+                    dispatch({ type: "SET_PREVIEW", payload: false });
+                  }
+                  onStepClick(step.id);
+                }}
                 className="w-full flex items-center gap-10 sm:gap-4 py-4 rounded-lg text-left transition relative z-10"
               >
                 <div
@@ -179,12 +184,14 @@ export const LeftStepper = ({
           Cancel
         </Button>
 
-        {/* ⭐ ONLY CREATE OFFENCE NOW */}
         <Button
-          className="w-full sm:flex-1 bg-blue-600 text-sm sm:text-base"
+          className={`w-full sm:flex-1 text-sm sm:text-base ${
+            state.preview ? "bg-blue-600" : "bg-gray-600 cursor-not-allowed"
+          }`}
+          disabled={!state.preview}
           onClick={() => onCreate && onCreate()}
         >
-          Save & Create Offence
+          Save Report
         </Button>
       </div>
     </div>

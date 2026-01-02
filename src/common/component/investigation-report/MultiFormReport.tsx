@@ -1,4 +1,3 @@
-
 "use client";
 
 import { initialState, useForm } from "@/context/FormContext";
@@ -31,8 +30,7 @@ export default function MultiFormReport({
 }) {
   const { state, dispatch } = useForm();
   const [mode] = useState("mp");
-const { mutateAsync: createReportAsync } = useCreateMPReport();
-
+  const { mutateAsync: createReportAsync } = useCreateMPReport();
 
   /* ================= STEPS ================= */
   const steps = [
@@ -48,6 +46,34 @@ const { mutateAsync: createReportAsync } = useCreateMPReport();
     { id: 10, label: "Opinion", icon: "10" },
     { id: 11, label: "Remarks of CO/21C Provost Unit", icon: "11" },
   ];
+
+  const pick = (...vals: any[]) =>
+    vals.find((v) => v && String(v).trim() !== "") || "";
+  const cleanObject = (obj: Record<string, any>) => {
+  return Object.fromEntries(
+    Object.entries(obj).filter(
+      ([_, v]) =>
+        v !== "" &&
+        v !== null &&
+        v !== undefined &&
+        !(typeof v === "object" && Object.keys(v).length === 0)
+    )
+  );
+};
+
+  const normalizeOffenderType = (type?: string): OffenderType => {
+    if (!type) return "Civilian";
+
+    const t = type.toLowerCase();
+
+    if (t.includes("military")) return "Military Person";
+    if (t.includes("employee")) return "Employee";
+    if (t.includes("servant") || t.includes("maid")) return "Servant/Maid";
+    if (t.includes("shop")) return "Shop Keeper";
+    if (t.includes("worker")) return "Temporary Hired Worker";
+
+    return "Civilian";
+  };
 
   const toISODateTime = (date?: string, time?: string) => {
     if (!date || !time) return null;
@@ -134,179 +160,200 @@ const { mutateAsync: createReportAsync } = useCreateMPReport();
       },
     };
   };
+  const createIndividualsAndWitnessesSequentially = async (
+    offenceId: string,
+    individuals: any[],
+    witnesses: any[]
+  ) => {
+    /* ========= INDIVIDUALS ========= */
+    for (const ind of individuals) {
+      const offenderPayload = {
+        offenceId,
 
-const createIndividualsAndWitnessesSequentially = async (
-  offenceId: string,
-  individuals: any[],
-  witnesses: any[]
-) => {
-  /* ========= INDIVIDUALS ========= */
-  for (const ind of individuals) {
-    const offenderPayload = {
-      offenceId,
-      offenderType: normalizeOffenderType(
-        ind.driverType || ind.offenderType
-      ),
-      category: "mp-reporting",
+        // ✅ DIRECT FROM FORM (NO HARD CODING)
+        offenderType: ind.offenderType || ind.driverType,
 
-      offenderDetails: {
-        type: "Individual", // 🔥 context batane ke liye
-        details: ind,
-      },
-    };
+        category: "individual",
 
-    console.log("🚨 OFFENDER PAYLOAD (INDIVIDUAL) ===>", offenderPayload);
+        offenderDetails: {
+          type: "Individual",
 
-    try {
-      const res = await createOffender(offenderPayload);
-      console.log("✅ OFFENDER CREATED ===>", res);
-      toast.success("Individual offender created ✅");
-    } catch (err: any) {
-      console.error(
-        "❌ OFFENDER CREATE ERROR ===>",
-        err?.response?.data || err
+          // ✅ PURE FORM DATA ONLY
+          ...cleanObject(ind),
+        },
+      };
+
+      console.log(
+        "🚨 MP OFFENDER PAYLOAD (INDIVIDUAL) ===>",
+        JSON.stringify(offenderPayload, null, 2)
       );
-      toast.error(
-        err?.response?.data?.message || "Individual offender failed ❌"
-      );
-      throw err; // ⛔ stop further creation
+
+      try {
+        const res = await createOffender(offenderPayload);
+        console.log("✅ MP INDIVIDUAL CREATED ===>", res);
+        toast.success("Individual offender created ✅");
+      } catch (err: any) {
+        console.error(
+          "❌ MP INDIVIDUAL CREATE ERROR ===>",
+          err?.response?.data || err
+        );
+        toast.error(
+          err?.response?.data?.message || "Individual offender failed ❌"
+        );
+        throw err;
+      }
     }
-  }
 
-  /* ========= WITNESSES ========= */
-  for (const wit of witnesses) {
-    const witnessPayload = {
-      offenceId,
-      offenderType: "Civilian",
-      category: "mp-reporting",
+    /* ========= WITNESSES ========= */
+    for (const wit of witnesses) {
+      const rb = wit.reportingBlock || {};
 
-      offenderDetails: {
-        type: "Witness",
-        details: wit,
-      },
-    };
+      const witnessDetails = cleanObject({
+        name: rb.nameReportingMP,
+        rank: rb.rank,
+        armyNumber: rb.armyNumber,
+        unit: rb.unit,
+      });
 
-    console.log("🚨 OFFENDER PAYLOAD (WITNESS) ===>", witnessPayload);
+      // ⛔ agar kuch bhara hi nahi
+      if (Object.keys(witnessDetails).length === 0) continue;
 
-    try {
-      const res = await createOffender(witnessPayload);
-      console.log("✅ WITNESS CREATED ===>", res);
-      toast.success("Witness created ✅");
-    } catch (err: any) {
-      console.error(
-        "❌ WITNESS CREATE ERROR ===>",
-        err?.response?.data || err
+      const witnessPayload = {
+        offenceId,
+
+        // ✅ FROM FORM
+        offenderType: wit.offenderType || "Witness",
+
+        category: "witnessing",
+
+        offenderDetails: {
+          type: "Witness",
+          ...witnessDetails,
+        },
+      };
+
+      console.log(
+        "🚨 MP OFFENDER PAYLOAD (WITNESS) ===>",
+        JSON.stringify(witnessPayload, null, 2)
       );
-      toast.error(
-        err?.response?.data?.message || "Witness creation failed ❌"
-      );
-      throw err;
+
+      try {
+        const res = await createOffender(witnessPayload);
+        console.log("✅ MP WITNESS CREATED ===>", res);
+        toast.success("Witness created ✅");
+      } catch (err: any) {
+        console.error(
+          "❌ MP WITNESS CREATE ERROR ===>",
+          err?.response?.data || err
+        );
+        toast.error(
+          err?.response?.data?.message || "Witness creation failed ❌"
+        );
+        throw err;
+      }
     }
-  }
-};
+  };
 
+  const onSubmitFinal = async () => {
+    try {
+      const mp = state.formData.mpReport;
 
-const onSubmitFinal = async () => {
-  try {
-    const mp = state.formData.mpReport;
+      const individuals = (mp?.individualDetails?.offenderList || []).filter(
+        (p: any) =>
+          p && Object.values(p).some((v) => v && String(v).trim() !== "")
+      );
 
-    const individuals = (mp?.individualDetails?.offenderList || []).filter(
-      (p: any) =>
-        p && Object.values(p).some((v) => v && String(v).trim() !== "")
-    );
+      const witnesses = (mp?.witnesses || []).filter(
+        (p: any) =>
+          p && Object.values(p).some((v) => v && String(v).trim() !== "")
+      );
 
-    const witnesses = (mp?.witnesses || []).filter(
-      (p: any) =>
-        p && Object.values(p).some((v) => v && String(v).trim() !== "")
-    );
+      /* ✅ DEFINE PAYLOAD FIRST */
+      const payload = {
+        reportDetails: {
+          reportNumber: mp.reportDetails.reportNo,
+          command: mp.reportDetails.command,
+          firNumber: mp.reportDetails.firNo,
+          firFileUrl: mp.reportDetails.firFile || "",
+          customFields: {},
+        },
 
-    /* ✅ DEFINE PAYLOAD FIRST */
-    const payload = {
-      reportDetails: {
-        reportNumber: mp.reportDetails.reportNo,
-        command: mp.reportDetails.command,
-        firNumber: mp.reportDetails.firNo,
-        firFileUrl: mp.reportDetails.firFile || "",
+        investigationHead: {
+          armyNumber: mp.mpParticulars.armyNo,
+          rank: mp.mpParticulars.rank,
+          name: mp.mpParticulars.name,
+          unit: mp.mpParticulars.unit,
+          fmn: mp.mpParticulars.fmn,
+          command: mp.mpParticulars.command,
+          address: mp.mpParticulars.address,
+          iCardNumber: mp.mpParticulars.icard,
+          customFields: {},
+        },
+
+        occurrenceDetails: {
+          offenceType: mp.occurrenceDetails.offenceType,
+          placeOfOccurrence: mp.occurrenceDetails.place,
+          dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
+          timeOfOccurrence: toISODateTime(
+            mp.occurrenceDetails.date,
+            mp.occurrenceDetails.time
+          ),
+          description: mp.occurrenceDetails.description,
+          customFields: {},
+        },
+
+        documents: (mp.documents || []).map((d: any) => ({
+          statement: d.statement,
+          url: d.url || "",
+          customFields: {},
+        })),
+
+        detailedOccurrenceReport: mp.detailedReport,
+        pointsFindOutDuringInvestigation: mp.investigationPoints,
+        opinion: mp.opinion,
+
+        remarks: {
+          analysis: mp.remarks.analysis,
+          recommendation: mp.remarks.recommendation,
+          customFields: {},
+        },
+
         customFields: {},
-      },
+      };
 
-      investigationHead: {
-        armyNumber: mp.mpParticulars.armyNo,
-        rank: mp.mpParticulars.rank,
-        name: mp.mpParticulars.name,
-        unit: mp.mpParticulars.unit,
-        fmn: mp.mpParticulars.fmn,
-        command: mp.mpParticulars.command,
-        address: mp.mpParticulars.address,
-        iCardNumber: mp.mpParticulars.icard,
-        customFields: {},
-      },
+      console.log("📦 MP REPORT PAYLOAD", payload);
 
-      occurrenceDetails: {
-        offenceType: mp.occurrenceDetails.offenceType,
-        placeOfOccurrence: mp.occurrenceDetails.place,
-        dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
-        timeOfOccurrence: toISODateTime(
-          mp.occurrenceDetails.date,
-          mp.occurrenceDetails.time
-        ),
-        description: mp.occurrenceDetails.description,
-        customFields: {},
-      },
+      /* 🔹 CREATE MP REPORT */
+      const res: any = await createReportAsync(payload);
 
-      documents: (mp.documents || []).map((d: any) => ({
-        statement: d.statement,
-        url: d.url || "",
-        customFields: {},
-      })),
+      toast.success("MP Investigation Report Created 🎉");
 
-      detailedOccurrenceReport: mp.detailedReport,
-      pointsFindOutDuringInvestigation: mp.investigationPoints,
-      opinion: mp.opinion,
+      const offenceId = res?._id;
+      if (!offenceId) return;
 
-      remarks: {
-        analysis: mp.remarks.analysis,
-        recommendation: mp.remarks.recommendation,
-        customFields: {},
-      },
+      console.log("🚀 MP REPORT CREATED, NOW CREATING OFFENDERS");
 
-      customFields: {},
-    };
+      /* 🔹 CREATE OFFENDERS SEQUENTIALLY */
+      await createIndividualsAndWitnessesSequentially(
+        offenceId,
+        individuals,
+        witnesses
+      );
 
-    console.log("📦 MP REPORT PAYLOAD", payload);
+      console.log("✅ ALL OFFENDERS CREATED");
 
-    /* 🔹 CREATE MP REPORT */
-    const res: any = await createReportAsync(payload);
-
-    toast.success("MP Investigation Report Created 🎉");
-
-    const offenceId = res?._id;
-    if (!offenceId) return;
-
-    console.log("🚀 MP REPORT CREATED, NOW CREATING OFFENDERS");
-
-    /* 🔹 CREATE OFFENDERS SEQUENTIALLY */
-    await createIndividualsAndWitnessesSequentially(
-      offenceId,
-      individuals,
-      witnesses
-    );
-
-    console.log("✅ ALL OFFENDERS CREATED");
-
-    dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
-    dispatch({ type: "SET_STEP", payload: 1 });
-    dispatch({
-      type: "SET_PATH",
-      path: "completedSteps",
-      value: [],
-    });
-  } catch (err: any) {
-    console.error("❌ FINAL SUBMIT ERROR", err?.response?.data || err);
-    toast.error("Failed to create report");
-  }
-};
-
+      dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
+      dispatch({ type: "SET_STEP", payload: 1 });
+      dispatch({
+        type: "SET_PATH",
+        path: "completedSteps",
+        value: [],
+      });
+    } catch (err: any) {
+      console.error("❌ FINAL SUBMIT ERROR", err?.response?.data || err);
+      toast.error("Failed to create report");
+    }
+  };
 
   /* ================= RIGHT PANEL CONFIG ================= */
   const stepsConfig = {
@@ -363,6 +410,7 @@ const onSubmitFinal = async () => {
               dispatch({ type: "SET_PATH", path, value })
             }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
+            onPrev={() => dispatch({ type: "PREV_STEP" })} 
             onSubmitFinal={onSubmitFinal}
             stepsConfig={stepsConfig}
             mode={mode}

@@ -19,7 +19,7 @@ const getByPath = (obj: any, path: string) => {
 /* ------------------------------------
    INITIAL STATE
 ------------------------------------ */
- export const initialState: GlobalFormState = {
+export const initialState: GlobalFormState = {
   currentStep: 1,
   completedSteps: [],
   preview: false,
@@ -82,7 +82,7 @@ const getByPath = (obj: any, path: string) => {
     },
 
     staticSpeed: {
-      remarks:"",
+      remarks: "",
       vehicleInvolved: "",
       vehicleDetails: {
         category: "",
@@ -112,7 +112,8 @@ const getByPath = (obj: any, path: string) => {
         timeOfOffence: "",
         time: "",
         incidentLocation: "",
-        description: "",
+       description:"",
+       description2: "",
         authSpeed: "30",
         actualSpeedNoted: "",
         overSpeedCalculated: "",

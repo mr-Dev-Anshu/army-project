@@ -165,7 +165,12 @@ const handleFinalSubmit = async () => {
       offenceOccurenceDetails: {
         time: staticData.offenceBlock?.time || "",
         incidentLocation: staticData.offenceBlock?.incidentLocation || "",
-        description: staticData.offenceBlock?.description || "",
+         description: [
+    staticData.offenceBlock?.description,
+    staticData.offenceBlock?.description2,
+  ]
+    .filter(Boolean)
+    .join("\n\n"),
 
         overSpeedCalculated:
           staticData.offenceBlock?.overSpeedCalculated ?? "",

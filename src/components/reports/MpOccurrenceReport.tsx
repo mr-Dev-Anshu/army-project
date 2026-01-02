@@ -101,7 +101,7 @@
                 <div className="hidden print:block fixed top-0 w-full text-center font-bold text-sm page-number mt-4 z-50"></div>
 
                 {/* ==================== PAGE 1 ==================== */}
-                <div className="max-w-[210mm] w-full mx-auto bg-white p-12 min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+                <div className="max-w-[210mm] w-full mx-auto bg-white p-12 min-h-[297mm] shadow-xl print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
 
                     {/* Header Page 1 */}
                     <div className="text-center font-bold text-xs underline mb-4 print:invisible">RESTRICTED</div>
