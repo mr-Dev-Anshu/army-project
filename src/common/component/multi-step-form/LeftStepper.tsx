@@ -21,6 +21,7 @@ interface LeftStepperProps {
   // ⭐ ADD THIS
   onCreate?: () => void;
   onCancel?: () => void;
+  hideReportNo?: boolean;
 }
 
 export const LeftStepper = ({
@@ -31,7 +32,8 @@ export const LeftStepper = ({
   reportNo,
   onStepClick,
   onCreate,
-  onCancel
+  onCancel,
+  hideReportNo = false,
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
@@ -58,41 +60,43 @@ export const LeftStepper = ({
         </h2>
 
         {/* Editable Report No */}
-        <div className="flex items-center gap-10 text-gray-300">
-          {!editing ? (
-            <>
-              <p className="text-[10px] sm:text-xs">
-                REPORT NO. {reportValue || "—"}
-              </p>
+        {!hideReportNo && (
+          <div className="flex items-center gap-10 text-gray-300">
+            {!editing ? (
+              <>
+                <p className="text-[10px] sm:text-xs">
+                  REPORT NO. {reportValue || "—"}
+                </p>
 
-              <button
-                onClick={() => setEditing(true)}
-                className="hover:text-white transition"
-              >
-                <Edit2 className="w-4 h-4 text-blue-500" />
-              </button>
-            </>
-          ) : (
-            <div className="flex items-center gap-2 text-gray-300 text-[10px] sm:text-xs">
-              <span>REPORT NO.</span>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="hover:text-white transition"
+                >
+                  <Edit2 className="w-4 h-4 text-blue-500" />
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 text-gray-300 text-[10px] sm:text-xs">
+                <span>REPORT NO.</span>
 
-              <input
-                autoFocus
-                value={reportValue}
-                onChange={(e) => setReportValue(e.target.value)}
-                onBlur={saveReportNo}
-                className="bg-transparent border-b border-gray-400 outline-none px-1 w-[160px]"
-              />
+                <input
+                  autoFocus
+                  value={reportValue}
+                  onChange={(e) => setReportValue(e.target.value)}
+                  onBlur={saveReportNo}
+                  className="bg-transparent border-b border-gray-400 outline-none px-1 w-[160px]"
+                />
 
-              <button
-                onClick={saveReportNo}
-                className="hover:text-white transition text-green-400 ml-2"
-              >
-                <Save className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={saveReportNo}
+                  className="hover:text-white transition text-green-400 ml-2"
+                >
+                  <Save className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* STEPS */}

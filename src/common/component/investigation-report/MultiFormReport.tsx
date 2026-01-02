@@ -776,6 +776,7 @@ export default function MultiFormReport({
             completedSteps={state.completedSteps}
             title="Create New MP Occurrence & Investigation Report"
             reportNo="PRO/21 CPU/00042/106/25"
+            hideReportNo 
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             onCreate={onSubmitFinal}
             onCancel={() => {
