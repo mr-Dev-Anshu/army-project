@@ -2,7 +2,6 @@
 
 import { useForm } from "@/context/FormContext";
 import { FormInput } from "@/common/component/FormInput";
-import DriverRiderSection from "./DriverRiderSection";
 
 export default function VehicleDetailsSection() {
   const { state, dispatch } = useForm();
@@ -10,37 +9,39 @@ export default function VehicleDetailsSection() {
   const vehicle = state.formData.mtAccidentReport;
 
   return (
-    <section className="space-y-4">
-      <h3 className="font-semibold">Vehicle Details</h3>
+    <section className="space-y-6">
+      {/* ===== SECTION TITLE ===== */}
+      <h3 className="text-lg font-semibold text-gray-900">
+        Vehicle Details
+      </h3>
 
-      <div className="grid grid-cols-2 gap-4">
-        <FormInput
-          label="Vehicle Number"
-          value={vehicle.vehicleNumber}
-          onChange={(v) =>
-            dispatch({
-              type: "SET_PATH",
-              path: "formData.mtAccidentReport.vehicleNumber",
-              value: v,
-            })
-          }
-        />
+      {/* ===== VEHICLE NUMBER ===== */}
+      <FormInput
+        label="Vehicle BA No. / Civil Vehicle Registration No."
+        placeholder="eg. UP 16 AP 1234"
+        value={vehicle.vehicleNumber}
+        onChange={(v) =>
+          dispatch({
+            type: "SET_PATH",
+            path: "formData.mtAccidentReport.vehicleNumber",
+            value: v,
+          })
+        }
+      />
 
-        <FormInput
-          label="Make & Model"
-          value={vehicle.makeAndModel}
-          onChange={(v) =>
-            dispatch({
-              type: "SET_PATH",
-              path: "formData.mtAccidentReport.makeAndModel",
-              value: v,
-            })
-          }
-        />
-      </div>
-
-     
-  
+      {/* ===== MAKE & MODEL ===== */}
+      <FormInput
+        label="Make & Take"
+        placeholder="Model / Type"
+        value={vehicle.makeAndModel}
+        onChange={(v) =>
+          dispatch({
+            type: "SET_PATH",
+            path: "formData.mtAccidentReport.makeAndModel",
+            value: v,
+          })
+        }
+      />
     </section>
   );
 }

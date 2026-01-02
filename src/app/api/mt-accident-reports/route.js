@@ -28,12 +28,14 @@ export async function POST(request) {
   try {
     await connectDB();
     const body = await request.json();
+    console.log("POST body:", JSON.stringify(body, null, 2));
 
     const { error, value } = createMTAccidentReportSchema.validate(body, {
       abortEarly: false,
     });
 
     if (error) {
+      console.error("Validation errors:", error.details);
       const errors = error.details.reduce((acc, curr) => {
         acc[curr.path.join(".")] = curr.message;
         return acc;

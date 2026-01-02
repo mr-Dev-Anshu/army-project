@@ -15,89 +15,91 @@ export default function IndividualVictimSection() {
   const selectType = (type: string) => {
     dispatch({
       type: "SET_PATH",
-      path: "formData.mtAccidentReport.individualDetails",
-      value: {},
+      path: "formData.mtAccidentReport.individualType",
+      value: type,
     });
 
     dispatch({
       type: "SET_PATH",
-      path: "formData.mtAccidentReport.individualType",
-      value: type,
+      path: "formData.mtAccidentReport.individualDetails",
+      value: {},
     });
   };
 
+  const config = selected ? offenderFormsConfig[selected] : null;
+
   return (
     <section className="space-y-6">
-      {/* ================= SELECT TYPE ================= */}
-      <div className="bg-white border rounded-xl p-6 space-y-5">
-        <div className="space-y-1">
-          <h3 className="text-lg font-semibold text-black">
+      {/* ===== SINGLE OUTER CARD (LIKE IMAGE) ===== */}
+      <div className="bg-white rounded-xl border p-6 space-y-6">
+        {/* Header */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">
             Individual / Victim Details
           </h3>
-          <p className="text-sm font-semibold text-black">
-            Select the type of individual involved in the accident
+          <p className="text-sm text-gray-600 mt-1">
+            Select Individual & Fill Details
           </p>
         </div>
 
-     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  {INDIVIDUAL_TYPES.map((type) => {
-    const active = selected === type;
+        {/* ===== RADIO OPTIONS ===== */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {INDIVIDUAL_TYPES.map((type) => {
+            const active = selected === type;
 
-    return (
-      <button
-        key={type}
-        type="button"
-        onClick={() => selectType(type)}
-        className={cn(
-          "flex items-center gap-4 w-full h-14 px-5",
-          "rounded-xl border transition-all",
-          "focus:outline-none focus:ring-2 focus:ring-blue-500",
-          active
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 bg-white hover:border-blue-400"
-        )}
-      >
-        {/* RADIO CIRCLE */}
-        <span
-          className={cn(
-            "flex h-5 w-5 items-center justify-center rounded-full border",
-            active ? "border-blue-500" : "border-gray-400"
-          )}
-        >
-          {active && (
-            <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-          )}
-        </span>
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => selectType(type)}
+                className={cn(
+                  "flex items-center gap-4 h-14 px-5 w-full",
+                  "rounded-lg border transition-all",
+                  active
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 bg-white hover:border-blue-400"
+                )}
+              >
+                {/* Radio */}
+                <span
+                  className={cn(
+                    "flex h-5 w-5 items-center justify-center rounded-full border",
+                    active ? "border-blue-500" : "border-gray-400"
+                  )}
+                >
+                  {active && (
+                    <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                  )}
+                </span>
 
-        {/* LABEL */}
-        <span
-          className={cn(
-            "text-sm font-medium",
-            active ? "text-blue-700" : "text-gray-800"
-          )}
-        >
-          {type}
-        </span>
-      </button>
-    );
-  })}
-</div>
-
-      </div>
-
-      {/* ================= DYNAMIC FORM ================= */}
-      {selected && offenderFormsConfig[selected] && (
-        <div className="bg-white border rounded-xl p-6 space-y-3">
-          <OffenderDynamicForm
-            title={offenderFormsConfig[selected].title}
-            helperText={offenderFormsConfig[selected].helperText}
-            fields={offenderFormsConfig[selected].fields}
-            scope="mt-accident"
-            path="formData.mtAccidentReport.individualDetails"
-            showCoDriver
-          />
+                {/* Label */}
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    active ? "text-blue-700" : "text-gray-800"
+                  )}
+                >
+                  {type}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      )}
+
+        {/* ===== DYNAMIC FORM (NO EXTRA BORDER) ===== */}
+        {config && (
+          <div className="pt-2">
+            <OffenderDynamicForm
+              title={config.title}
+              helperText={config.helperText}
+              fields={config.fields}
+              scope="mt-accident"
+              path="formData.mtAccidentReport.individualDetails"
+              showCoDriver
+            />
+          </div>
+        )}
+      </div>
     </section>
   );
 }
