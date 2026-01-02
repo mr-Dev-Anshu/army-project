@@ -28,8 +28,8 @@ const offenceOccurrenceSchema = mongoose.Schema({
 });
 const staticSpeedCheckRecordSchema = new mongoose.Schema(
   {
-    reportId:{
-       type:String
+    reportId: {
+      type: String
     },
     vehicleType: {
       type: String,
@@ -57,6 +57,9 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
     actionStatus: {
       type: Boolean,
       default: false,
+    },
+    actionStatusRemark: {
+      type: String,
     },
   },
   {

@@ -10,6 +10,8 @@ import {
   Trash,
   Download,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import {
@@ -44,6 +46,8 @@ export default function StaticSpeedTable({
     useUpdateStaticSpeedRecord();
   const { mutateAsync: deleteRecord, isPending: isDeleting } =
     useDeleteStaticSpeedRecord();
+  const [actionRemark, setActionRemark] = React.useState(""); // New state
+
   const [modalState, setModalState] = React.useState<{
     isOpen: boolean;
     recordId: string | null;
@@ -57,6 +61,7 @@ export default function StaticSpeedTable({
   });
 
   const handleStatusClick = (recordId: string, currentStatus: boolean) => {
+    setActionRemark(""); // Reset
     setModalState({
       isOpen: true,
       recordId,
@@ -80,7 +85,10 @@ export default function StaticSpeedTable({
       if (modalState.type === "status") {
         await updateRecord({
           id: modalState.recordId,
-          data: { actionStatus: modalState.newStatus },
+          data: {
+            actionStatus: modalState.newStatus,
+            actionStatusRemark: actionRemark // Include remark
+          },
         });
         toast.success("Action status updated successfully!");
       } else if (modalState.type === "delete") {
@@ -93,6 +101,7 @@ export default function StaticSpeedTable({
         type: "status",
         newStatus: false,
       });
+      setActionRemark(""); // Clear
     } catch (error) {
       toast.error(
         modalState.type === "status"
@@ -242,14 +251,12 @@ export default function StaticSpeedTable({
               }}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${
-                  isTaken ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
+                  }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
-                    isTaken ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
+                    }`}
                 ></div>
               </div>
               <span className="text-[10px] text-gray-500 font-medium uppercase">
@@ -341,16 +348,28 @@ export default function StaticSpeedTable({
         }
         message={
           modalState.type === "status"
-            ? `Are you sure you want to change the status to ${
-                modalState.newStatus ? "Taken" : "Pending"
-              }?`
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
+            }?`
             : "Are you sure you want to delete this report? This action cannot be undone."
         }
         confirmLabel={
           modalState.type === "status" ? "Yes, Change" : "Yes, Delete"
         }
         isProcessing={isUpdating || isDeleting}
-      />
+        variant={modalState.type === "status" ? "info" : "danger"}
+      >
+        {modalState.type === "status" && (
+          <div className="flex flex-col gap-2 mt-2">
+            <Label htmlFor="remark">Action Remark</Label>
+            <Input
+              id="remark"
+              placeholder="Enter reason for status change..."
+              value={actionRemark}
+              onChange={(e) => setActionRemark(e.target.value)}
+            />
+          </div>
+        )}
+      </ConfirmationModal>
     </>
   );
 }
