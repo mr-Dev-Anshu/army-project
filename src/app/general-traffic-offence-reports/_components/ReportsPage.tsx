@@ -303,7 +303,7 @@ export default function ReportsPage({
       <ReportPageHeader
         title={pageTitle}
         reportCount={distinctReportsCount}
-        onDownload={() => console.log("Download Clicked")}
+        onDownload={() => window.print()}
       />
 
       {/* Filters */}

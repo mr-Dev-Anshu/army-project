@@ -347,7 +347,7 @@ export default function MpOccurrenceReportsPage() {
       <ReportPageHeader
         title={pageTitle}
         reportCount={distinctReportsCount}
-        onDownload={() => console.log("Download Clicked")}
+        onDownload={() => window.print()}
       />
 
       {/* Filters */}
