@@ -22,6 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import OffenderDetailsCell from "./OffenderDetailsCell";
 
 interface DetailsTableProps {
@@ -34,6 +36,7 @@ interface DetailsTableProps {
 export default function DetailsTable({ offences, isVehicleInvolved, onView, onPrint }: DetailsTableProps) {
   const { mutateAsync: updateOffence, isPending: isUpdating } = useUpdateTrafficOffence();
   const { mutateAsync: deleteOffence, isPending: isDeleting } = useDeleteTrafficOffence();
+  const [actionRemark, setActionRemark] = React.useState(""); // New state for remark
   const [modalState, setModalState] = React.useState<{ isOpen: boolean; offenceId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
     isOpen: false,
     offenceId: null,
@@ -42,6 +45,7 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
   });
 
   const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
+    setActionRemark(""); // Reset remark
     setModalState({
       isOpen: true,
       offenceId,
@@ -65,14 +69,19 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       if (modalState.type === "status") {
         await updateOffence({
           id: modalState.offenceId,
-          data: { actionStatus: modalState.newStatus },
+          data: {
+            actionStatus: modalState.newStatus,
+            actionStatusRemark: actionRemark // Include remark
+          },
         });
         toast.success("Action status updated successfully!");
       } else if (modalState.type === "delete") {
         await deleteOffence(modalState.offenceId);
         toast.success("Report deleted successfully!");
       }
+
       setModalState({ isOpen: false, offenceId: null, type: "status", newStatus: false });
+      setActionRemark(""); // Clear remark
     } catch (error) {
       toast.error(modalState.type === "status" ? "Failed to update action status." : "Failed to delete report.");
       console.error(error);
@@ -330,7 +339,20 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
         }
         confirmLabel={modalState.type === "status" ? "Yes, Change" : "Yes, Delete"}
         isProcessing={isUpdating || isDeleting}
-      />
+        variant={modalState.type === "status" ? "info" : "danger"}
+      >
+        {modalState.type === "status" && (
+          <div className="flex flex-col gap-2 mt-2">
+            <Label htmlFor="remark">Action Remark</Label>
+            <Input
+              id="remark"
+              placeholder="Enter reason for status change..."
+              value={actionRemark}
+              onChange={(e) => setActionRemark(e.target.value)}
+            />
+          </div>
+        )}
+      </ConfirmationModal>
     </>
   );
 }

@@ -7,6 +7,7 @@ import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks"
 import { useGetStaticSpeedRecords } from "@/features/staticSpeed/hooks";
 import { useGetAllMPReports } from "@/features/mpReports/hooks";
 import { useRouter } from "next/navigation";
+import ReportPageHeader from "@/components/common/ReportPageHeader";
 
 export default function AllRegisteredReports() {
   const router = useRouter();
@@ -277,14 +278,10 @@ export default function AllRegisteredReports() {
   return (
     <div className="space-y-6">
       {/* Header / Breadcrumb substitute */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-800">
-          All Registered Reports
-        </h2>
-        <p className="text-sm text-gray-500">
-          Reports & Analysis &gt; All Registered Reports
-        </p>
-      </div>
+      <ReportPageHeader
+        title="All Registered Reports"
+        breadcrumbItems={[{ label: "Reports & Analysis", href: "/" }]}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {reportCards.map((card, index) => (

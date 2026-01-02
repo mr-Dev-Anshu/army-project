@@ -303,7 +303,7 @@ export default function ReportsPage({
       <ReportPageHeader
         title={pageTitle}
         reportCount={distinctReportsCount}
-        onDownload={() => console.log("Download Clicked")}
+        onDownload={() => window.print()}
       />
 
       {/* Filters */}
@@ -314,6 +314,8 @@ export default function ReportsPage({
         }
         offenceTypeOptions={offenceTypeOptions}
         showOffenceType={true}
+        showSort={true}
+        showFilter={true}
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({

@@ -247,7 +247,7 @@ export default function StaticSpeedCheckReportsPage() {
       <ReportPageHeader
         title={pageTitle}
         reportCount={distinctReportsCount}
-        onDownload={() => console.log("Download Clicked")}
+        onDownload={() => window.print()}
       />
 
       {/* Filters Placeholder */}
@@ -257,6 +257,8 @@ export default function StaticSpeedCheckReportsPage() {
           setFilters((prev) => ({ ...prev, [key]: value }));
         }}
         showOffenceType={false}
+        // showSort={true}
+        showFilter={true}
         placeholder="Search by report no, unit, or vehicle..."
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
