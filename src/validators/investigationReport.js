@@ -29,6 +29,7 @@ const evidenceItem = Joi.object({
 });
 
 export const createMPReportSchema = Joi.object({
+  reportId:Joi.string(),
   reportDetails: Joi.object({
     reportNumber: requiredString,
     command: requiredString,
