@@ -307,15 +307,6 @@ export default function VehicleDetailsForm({
             path={driverPath}
             showCoDriver={true}
           />
-
-          <p className="font-semibold mt-4 flex items-center gap-3">
-            <Checkbox
-              checked={civilianRelative === "yes"}
-              onCheckedChange={(c) => setCivilianRelative(c ? "yes" : "")}
-              className="w-5 h-5"
-            />
-            Kya Civilian ka koi Military Relative hai?
-          </p>
         </>
       )}
     </div>
