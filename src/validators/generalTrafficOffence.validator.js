@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const createGeneralTrafficOffenceSchema = Joi.object({
-  reportId:Joi.string().optional(),
+  reportId: Joi.string().optional(),
   isVehicleInvolved: Joi.boolean().required(),
   vehicleCategory: Joi.string().valid("2-Wheeler", "4-Wheeler").optional(),
   vehicleType: Joi.string().valid("Civilian Vehicle", "DD Vehicle").optional(),
@@ -41,6 +41,7 @@ export const createGeneralTrafficOffenceSchema = Joi.object({
   offenceTypes: Joi.array().items(Joi.string()).optional(),
   offenceTypeReference: Joi.array().items(Joi.string()).optional(),
   actionStatus: Joi.boolean().optional(),
+  actionStatusRemark: Joi.string().optional(),
 
   customFields: Joi.object()
     .unknown(true)
