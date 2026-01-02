@@ -11,6 +11,7 @@ export async function GET() {
   try {
     await connectDB();
     const reports = await getAllMTAccidentReports();
+    console.log("GET /api/mt-accident-reports - Found reports:", reports?.length || 0, reports);
     return NextResponse.json(reports);
   } catch (error) {
     console.error("GET error:", error.message, error);

@@ -36,10 +36,9 @@ export default function DriverRiderSection({
 }: DriverRiderSectionProps) {
   const { state, dispatch } = useForm();
 
-  const driverType = state.formData.mtAccidentReport?.driverType || null;
-  const driverDetails = state.formData.mtAccidentReport?.driverDetails || {};
+  const selected = state.formData.mtAccidentReport?.driverType || null;
 
-  const selectDriverType = (type: string) => {
+  const selectType = (type: string) => {
     dispatch({
       type: "SET_PATH",
       path: "formData.mtAccidentReport.driverType",
@@ -54,55 +53,80 @@ export default function DriverRiderSection({
     });
   };
 
+  const config = selected ? offenderFormsConfig[selected] : null;
+
   return (
-    <div className="space-y-6">
-      <p className="font-semibold">{title}</p>
+    <section className="space-y-6">
+      {/* ===== SINGLE OUTER CARD ===== */}
+      <div className="bg-white rounded-xl border p-6 space-y-6">
+        {/* Header */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Driver / Co-Driver Details
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">
+            {title}
+          </p>
+        </div>
 
-      {/* ===== DRIVER TYPE SELECT ===== */}
-      <div className="grid sm:grid-cols-2 gap-3">
-        {DRIVER_TYPES.map((type) => {
-          const active = driverType === type;
+        {/* ===== RADIO OPTIONS ===== */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {DRIVER_TYPES.map((type) => {
+            const active = selected === type;
 
-          return (
-            <button
-              key={type}
-              type="button"
-              onClick={() => selectDriverType(type)}
-              className={cn(
-                "border rounded-lg px-4 py-3 flex items-center gap-3 text-left transition",
-                active
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 hover:border-gray-400"
-              )}
-            >
-              <span
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => selectType(type)}
                 className={cn(
-                  "h-4 w-4 rounded-full border flex items-center justify-center",
-                  active ? "border-blue-500" : "border-gray-400"
+                  "flex items-center gap-4 h-14 px-5 w-full",
+                  "rounded-lg border transition-all",
+                  active
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 bg-white hover:border-blue-400"
                 )}
               >
-                {active && (
-                  <span className="h-2 w-2 rounded-full bg-blue-500" />
-                )}
-              </span>
+                {/* Radio */}
+                <span
+                  className={cn(
+                    "flex h-5 w-5 items-center justify-center rounded-full border",
+                    active ? "border-blue-500" : "border-gray-400"
+                  )}
+                >
+                  {active && (
+                    <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                  )}
+                </span>
 
-              <span className="text-sm font-medium">{type}</span>
-            </button>
-          );
-        })}
+                {/* Label */}
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    active ? "text-blue-700" : "text-gray-800"
+                  )}
+                >
+                  {type}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ===== DYNAMIC FORM (NO EXTRA BORDER) ===== */}
+        {config && (
+          <div className="pt-2">
+            <OffenderDynamicForm
+              title={config.title}
+              helperText={config.helperText}
+              fields={config.fields}
+              scope={scope}
+              path="formData.mtAccidentReport.driverDetails"
+              showCoDriver={showCoDriver}
+            />
+          </div>
+        )}
       </div>
-
-      {/* ===== OFFENDER FORM ===== */}
-      {driverType && offenderFormsConfig[driverType] && (
-        <OffenderDynamicForm
-          title={offenderFormsConfig[driverType].title}
-          helperText={offenderFormsConfig[driverType].helperText}
-          fields={offenderFormsConfig[driverType].fields}
-          scope={scope}
-          path="formData.mtAccidentReport.driverDetails"
-          showCoDriver={showCoDriver}
-        />
-      )}
-    </div>
+    </section>
   );
 }

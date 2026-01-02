@@ -7,11 +7,13 @@ export default function CasualtyDetailsSection() {
   const { state, dispatch } = useForm();
   const d = state.formData.mtAccidentReport;
 
-  const set = (key: string, value: number) => {
+  const set = (key: string, value: any) => {
+    // Convert to number, default to 0 if empty or NaN
+    const numValue = value === "" || isNaN(Number(value)) ? 0 : Number(value);
     dispatch({
       type: "SET_PATH",
       path: `formData.mtAccidentReport.${key}`,
-      value: value,
+      value: Math.max(0, numValue), // Ensure non-negative
     });
   };
 
@@ -23,29 +25,29 @@ export default function CasualtyDetailsSection() {
         <FormInput
           label="Injured (Civil)"
           type="number"
-          value={String(d.injuredCivil ?? "")}
-          onChange={(v) => set("injuredCivil", Number(v))}
+          value={String(d.injuredCivil ?? 0)}
+          onChange={(v) => set("injuredCivil", v)}
         />
 
         <FormInput
           label="Injured (Mil)"
           type="number"
-          value={String(d.injuredMilitary ?? "")}
-          onChange={(v) => set("injuredMilitary", Number(v))}
+          value={String(d.injuredMilitary ?? 0)}
+          onChange={(v) => set("injuredMilitary", v)}
         />
 
         <FormInput
           label="Died (Civil)"
           type="number"
-          value={String(d.diedCivil ?? "")}
-          onChange={(v) => set("diedCivil", Number(v))}
+          value={String(d.diedCivil ?? 0)}
+          onChange={(v) => set("diedCivil", v)}
         />
 
         <FormInput
           label="Died (Mil)"
           type="number"
-          value={String(d.diedMilitary ?? "")}
-          onChange={(v) => set("diedMilitary", Number(v))}
+          value={String(d.diedMilitary ?? 0)}
+          onChange={(v) => set("diedMilitary", v)}
         />
       </div>
     </section>

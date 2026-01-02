@@ -45,6 +45,10 @@ export default function MTAccidentListPage() {
   const { state, dispatch: formDispatch } = useForm();
   const [pageState, pageDispatch] = useReducer(pageReducer, initialState);
 
+  // Debug log
+  console.log("MTAccidentListPage - Fetched data:", data);
+  console.log("MTAccidentListPage - isLoading:", isLoading);
+
   // Filters State
   const [filters, setFilters] = useState({
     search: "",
@@ -115,9 +119,22 @@ export default function MTAccidentListPage() {
 
   // Process data with filtering and sorting
   const processedData = useMemo(() => {
-    if (!data) return [];
+    // Defensive: ensure we have an array even if API returns wrapped object
+    const rawData = Array.isArray(data)
+      ? data
+      : data && (data.data || data.reports)
+      ? data.data || data.reports
+      : [];
+    console.log("MTAccidentListPage - rawData length/type:", rawData.length, typeof data, Object.prototype.toString.call(data));
 
-    let filtered = [...data];
+    if (!rawData || rawData.length === 0) {
+      console.log("processedData - rawData is empty/null");
+      return [];
+    }
+
+    console.log("processedData - input rawData length:", rawData.length, "rawData:", rawData);
+
+    let filtered = [...rawData];
 
     // Filter by Date
     if (filters.date) {
@@ -151,6 +168,7 @@ export default function MTAccidentListPage() {
       return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
+    console.log("processedData - final filtered length:", filtered.length, "filtered:", filtered);
     return filtered;
   }, [data, filters]);
 

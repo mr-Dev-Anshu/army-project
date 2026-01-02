@@ -40,7 +40,7 @@ export default function OffenderDynamicForm({
   const { state, dispatch } = useForm();
 
   const preData =
-    scope === "traffic" && path ? getValueByPath(state, path) : {};
+    (scope === "traffic" || scope === "mt-accident") && path ? getValueByPath(state, path) : {};
 
   const [localData, setLocalData] = useState<any>({});
   const [hasCoDriver, setHasCoDriver] = useState(false);
@@ -52,9 +52,13 @@ export default function OffenderDynamicForm({
   const [relativeType, setRelativeType] = useState("");
 
   useEffect(() => {
-    if (scope === "traffic" && path) setLocalData(preData);
+    if ((scope === "traffic" || scope === "mt-accident") && path) {
+      console.log("🔄 OffenderDynamicForm INIT - scope:", scope, "path:", path);
+      console.log("   preData from state:", preData);
+      setLocalData(preData);
+    }
     else setLocalData({});
-  }, [scope, path]);
+  }, [scope, path, preData]);
 
   const saveField = (label: string, value: string) => {
     let targetPath = path;
@@ -64,6 +68,8 @@ export default function OffenderDynamicForm({
 
     if (!targetPath && scope === "mp-additional")
       targetPath = "formData.mpReport.additionalIndividual.tempOffender";
+
+    console.log("💾 saveField - label:", label, "value:", value, "targetPath:", targetPath);
 
     // ALWAYS UPDATE LOCAL UI FIRST 🔥
     setLocalData((prev: any) => ({
@@ -75,6 +81,8 @@ export default function OffenderDynamicForm({
     if (!targetPath) return;
 
     const prevGlobal = getValueByPath(state, targetPath) || {};
+
+    console.log("   → Saving to path, prevGlobal:", prevGlobal);
 
     dispatch({
       type: "SET_PATH",

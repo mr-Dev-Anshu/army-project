@@ -11,6 +11,12 @@ export default function IndividualVictimSection() {
   const { state, dispatch } = useForm();
 
   const selected = state.formData.mtAccidentReport.individualType;
+  const existingDetails = state.formData.mtAccidentReport.individualDetails;
+
+  console.log("IndividualVictimSection - selected type:", selected);
+  console.log("IndividualVictimSection - existing details:", existingDetails);
+  console.log("IndividualVictimSection - available types:", INDIVIDUAL_TYPES);
+  console.log("IndividualVictimSection - config keys match:", INDIVIDUAL_TYPES.includes(selected));
 
   const selectType = (type: string) => {
     dispatch({
@@ -19,11 +25,14 @@ export default function IndividualVictimSection() {
       value: type,
     });
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mtAccidentReport.individualDetails",
-      value: {},
-    });
+    // Only reset if switching to a different type, preserve data when re-selecting same type
+    if (type !== selected) {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mtAccidentReport.individualDetails",
+        value: {},
+      });
+    }
   };
 
   const config = selected ? offenderFormsConfig[selected] : null;

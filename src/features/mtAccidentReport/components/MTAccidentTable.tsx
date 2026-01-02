@@ -30,6 +30,9 @@ export default function MTAccidentTable({
   onView,
   onPrint,
 }: MTAccidentTableProps) {
+  console.log("MTAccidentTable - data received:", data);
+  console.log("MTAccidentTable - data length:", data?.length || 0);
+  
   const { mutateAsync: deleteReport, isPending: isDeleting } =
     useDeleteMTAccidentReport();
   const { mutateAsync: updateReport, isPending: isUpdating } =
@@ -105,7 +108,16 @@ export default function MTAccidentTable({
     {
       header: "Particulars of Individual/Victim",
       cell: (item) => {
-        const d = item.individualDetails || {};
+        const hasIndividualDetails = item.individualDetails && Object.keys(item.individualDetails).length > 0;
+        const d = hasIndividualDetails
+          ? item.individualDetails
+          : {
+              armyNumber: item.armyNumber,
+              aadharNumber: item.aadharNumber,
+              rank: item.rank,
+              name: item.name,
+              mpName: item.mpName,
+            };
         return (
           <div className="space-y-1 text-xs min-w-[180px]">
             {d.armyNumber && (
@@ -148,70 +160,97 @@ export default function MTAccidentTable({
                 <span>{d.mpName}</span>
               </div>
             )}
+            {!d.name && item.individualType && (
+              <div className="flex gap-1">
+                <span className="font-semibold text-gray-700 w-16 shrink-0">Type:</span>
+                <span className="font-medium">{item.individualType}</span>
+              </div>
+            )}
           </div>
         );
       },
       className: "align-top",
     },
-    {
-      header: "Driver / Co-Driver Details",
-      cell: (item) => {
-        const offenders = item.offenders || [];
-        if (offenders.length === 0) {
-          return <span className="text-xs text-gray-400">--</span>;
-        }
-        return (
-          <div className="space-y-2 text-xs min-w-[200px]">
-            {offenders.map((offender: any, idx: number) => {
-              const details = offender.offenderDetails || {};
-              const type = offender.offenderType || offender.category || "Unknown";
-              return (
-                <div key={idx} className="border-l-2 border-blue-300 pl-2">
-                  <div className="font-semibold text-blue-700 mb-1">{type}</div>
-                  {details.name && (
-                    <div className="flex gap-1">
-                      <span className="font-semibold text-gray-700 w-12 shrink-0">Name:</span>
-                      <span className="font-medium">{details.name}</span>
-                    </div>
-                  )}
-                  {details.rank && (
-                    <div className="flex gap-1">
-                      <span className="font-semibold text-gray-700 w-12 shrink-0">Rank:</span>
-                      <span>{details.rank}</span>
-                    </div>
-                  )}
-                  {details.armyNumber && (
-                    <div className="flex gap-1">
-                      <span className="font-semibold text-gray-700 w-12 shrink-0">Army:</span>
-                      <span>{details.armyNumber}</span>
-                    </div>
-                  )}
-                  {details.unit && (
-                    <div className="flex gap-1">
-                      <span className="font-semibold text-gray-700 w-12 shrink-0">Unit:</span>
-                      <span>{details.unit}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      },
-      className: "align-top",
-    },
+    // {
+    //   header: "Driver / Co-Driver Details",
+    //   cell: (item) => {
+    //     let offenders = item.offenders || [];
+
+    //     // If no offenders array, try to build from driver/co-driver top-level fields
+    //     if (!offenders || offenders.length === 0) {
+    //       const built: any[] = [];
+    //       if (item.driverDetails && Object.keys(item.driverDetails).length > 0) {
+    //         built.push({ offenderDetails: item.driverDetails, offenderType: item.driverType || "Driver", category: "Driver" });
+    //       }
+    //       if (item.coDriverDetails && Object.keys(item.coDriverDetails).length > 0) {
+    //         built.push({ offenderDetails: item.coDriverDetails, offenderType: item.coDriverDetails.type || "Co-Driver", category: "Co-Driver" });
+    //       }
+    //       // top-level driver name fallback
+    //       if (item.driverName || item.driver) {
+    //         built.push({ offenderDetails: { name: item.driverName || item.driver }, offenderType: item.driverType || "Driver", category: "Driver" });
+    //       }
+
+    //       if (built.length > 0) offenders = built;
+    //     }
+
+    //     if (!offenders || offenders.length === 0) {
+    //       return <span className="text-xs text-gray-400">--</span>;
+    //     }
+    //     return (
+    //       <div className="space-y-2 text-xs min-w-[200px]">
+    //         {offenders.map((offender: any, idx: number) => {
+    //           // Support legacy shapes where offender may be stored directly as details
+    //           const details = offender?.offenderDetails || offender || {};
+    //           const type = offender?.offenderType || offender?.category || offender?.type || "Unknown";
+    //           return (
+    //             <div key={idx} className="border-l-2 border-blue-300 pl-2">
+    //               <div className="font-semibold text-blue-700 mb-1">{type}</div>
+    //               {details.name && (
+    //                 <div className="flex gap-1">
+    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Name:</span>
+    //                   <span className="font-medium">{details.name}</span>
+    //                 </div>
+    //               )}
+    //               {details.rank && (
+    //                 <div className="flex gap-1">
+    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Rank:</span>
+    //                   <span>{details.rank}</span>
+    //                 </div>
+    //               )}
+    //               {details.armyNumber && (
+    //                 <div className="flex gap-1">
+    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Army:</span>
+    //                   <span>{details.armyNumber}</span>
+    //                 </div>
+    //               )}
+    //               {details.unit && (
+    //                 <div className="flex gap-1">
+    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Unit:</span>
+    //                   <span>{details.unit}</span>
+    //                 </div>
+    //               )}
+    //             </div>
+    //           );
+    //         })}
+    //       </div>
+    //     );
+    //   },
+    //   className: "align-top",
+    // },
     {
       header: "Unit",
-      cell: (item) => (
-        <span className="text-xs">{item.unit || item.individualDetails?.unit || item.offenders?.[0]?.offenderDetails?.unit || "--"}</span>
-      ),
+      cell: (item) => {
+        const unit = item.unit || item.individualDetails?.unit || item.offenders?.[0]?.offenderDetails?.unit || item.driverDetails?.unit || "";
+        return <span className="text-xs font-medium">{unit || "--"}</span>;
+      },
       className: "min-w-[120px] text-xs",
     },
     {
       header: "FMN",
-      cell: (item) => (
-        <span className="text-xs">{item.fmn || item.individualDetails?.fmn || item.offenders?.[0]?.offenderDetails?.fmn || "--"}</span>
-      ),
+      cell: (item) => {
+        const fmn = item.fmn || item.individualDetails?.fmn || item.offenders?.[0]?.offenderDetails?.fmn || item.driverDetails?.fmn || "";
+        return <span className="text-xs font-medium">{fmn || "--"}</span>;
+      },
       className: "min-w-[100px] text-xs",
     },
     {

@@ -5,11 +5,14 @@ import { MT_ACCIDENT_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfi
 
 export class MTAccidentReportRepository {
   async getAll() {
+    console.log("MTAccidentReportRepository.getAll() called");
     const results = await MTAccidentReport.aggregate([
       {
         $sort: { createdAt: -1 }
       }
     ]);
+    console.log("MTAccidentReportRepository.getAll() - results count:", results?.length || 0);
+    console.log("MTAccidentReportRepository.getAll() - results:", results);
     return results;
   }
 

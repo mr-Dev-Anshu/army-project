@@ -1,15 +1,57 @@
 /**
  * Map form data to backend schema structure
- * Converts form-specific format to API-compliant payload
+ * Converts UI-label-based data to API-compliant payload
+ */
+
+// 🔹 LABEL → SCHEMA KEY MAP
+const LABEL_KEY_MAP: Record<string, string> = {
+  "Army Rider / Driver Number": "armyNumber",
+  "Army Number": "armyNumber",
+  "Name": "name",
+  "Select Rank": "rank",
+  "Rank": "rank",
+  "Unit": "unit",
+  "FMN": "fmn",
+  "Command": "command",
+  "ID Card Number": "iCardNumber",
+  "I Card Number": "iCardNumber",
+  "Aadhar Card Number": "aadharNumber",
+  "Mobile Number": "phone",
+  "Employee ID": "employeeId",
+  "Department": "department",
+  "Address": "address",
+};
+
+// 🔹 Normalize object keys (LABEL → KEY)
+function normalizeDetails(details: any = {}) {
+  const normalized: any = {};
+
+  Object.entries(details).forEach(([key, value]) => {
+    if (!value) return;
+
+    if (key === "coDriver") {
+      normalized.coDriver = normalizeDetails(value);
+      return;
+    }
+
+    const mappedKey = LABEL_KEY_MAP[key] || key;
+    normalized[mappedKey] = value;
+  });
+
+  return normalized;
+}
+
+/**
+ * MAIN MAPPER
  */
 export function mapMTAccidentPayload(formData: any) {
-  // Extract core fields
+  console.log("📥 mapMTAccidentPayload input:", formData);
+
   let {
     individualType,
     individualDetails,
     driverType,
     driverDetails,
-    offenders,
     unit,
     fmn,
     dateOfAccident,
@@ -30,76 +72,91 @@ export function mapMTAccidentPayload(formData: any) {
     remark,
   } = formData;
 
-  // Normalize individualType - handle legacy "Military Person" → "Military Personnel"
+  // 🔹 Normalize legacy naming
   if (individualType === "Military Person") {
     individualType = "Military Personnel";
   }
 
-  // Build offenders array from driver details
-  const offendersArray = [];
-  if (driverDetails && Object.keys(driverDetails).length > 0) {
-    offendersArray.push({
-      offenderType: driverType || "Unknown",
-      offenderDetails: driverDetails,
+  // 🔹 Normalize details
+  const normalizedIndividualDetails = normalizeDetails(individualDetails);
+  const normalizedDriverDetails = normalizeDetails(driverDetails);
+  const normalizedCoDriver = normalizeDetails(driverDetails?.coDriver);
+
+  // 🔹 Resolve driver type SAFELY
+  const resolvedDriverType =
+    driverType || individualType || "Driver";
+
+  // 🔹 BUILD OFFENDERS ARRAY (AUTHORITATIVE SOURCE)
+  const offenders: any[] = [];
+
+  if (Object.keys(normalizedDriverDetails).length > 0) {
+    offenders.push({
+      offenderType: resolvedDriverType,
+      offenderDetails: normalizedDriverDetails,
       category: "Driver",
     });
-
-    // Include co-driver if present
-    if (driverDetails.coDriver && Object.keys(driverDetails.coDriver).length > 0) {
-      offendersArray.push({
-        offenderType: driverDetails.coDriver.type || "Unknown",
-        offenderDetails: driverDetails.coDriver,
-        category: "Co-Driver",
-      });
-    }
   }
 
+  if (Object.keys(normalizedCoDriver).length > 0) {
+    offenders.push({
+      offenderType: "Co-Driver",
+      offenderDetails: normalizedCoDriver,
+      category: "Co-Driver",
+    });
+  }
+
+  console.log("✅ FINAL offenders array:", offenders);
+
   return {
-    // Individual Details
-    individualType: individualType || null,
-    individualDetails: individualDetails || {},
-    driverDetails: driverDetails || {},
-    coDriverDetails: driverDetails?.coDriver || {},
-    offenders: offendersArray.length > 0 ? offendersArray : (Array.isArray(offenders) ? offenders : []),
+    // Individual
+    individualType,
+    individualDetails: normalizedIndividualDetails,
+
+    // Driver / Co-Driver
+    driverDetails: normalizedDriverDetails,
+    coDriverDetails: normalizedCoDriver,
+    offenders, // ✅ ALWAYS USE THIS
+
+    // Unit
     unit: unit || "",
     fmn: fmn || "",
 
-    // Accident Details
+    // Accident
     dateOfAccident: dateOfAccident ? new Date(dateOfAccident) : null,
-    timeOfAccident: (timeOfAccident && timeOfAccident.trim()) ? timeOfAccident.trim() : "",
+    timeOfAccident: timeOfAccident || "",
     placeOfAccident: placeOfAccident || "",
-    typeOfAccident: typeOfAccident || null,
+    typeOfAccident: typeOfAccident || "",
     probableCause: probableCause || "",
 
-    // Vehicle Details
+    // Vehicle
     vehicleNumber: vehicleNumber || "",
     makeAndModel: makeAndModel || "",
 
-    // Casualty Details
+    // Casualties
     injuredCivil: Number(injuredCivil) || 0,
     injuredMilitary: Number(injuredMilitary) || 0,
     diedCivil: Number(diedCivil) || 0,
     diedMilitary: Number(diedMilitary) || 0,
 
-    // FIR Details
+    // FIR
     firCaseNumber: firCaseNumber || "",
     firDate: firDate ? new Date(firDate) : null,
     firPoliceStation: firPoliceStation || "",
 
-    // Action Details
+    // Action
     actionStatus: Boolean(actionStatus),
     remark: remark || "",
   };
 }
 
 /**
- * Clean payload - removes null values (but keeps empty strings for validation)
+ * Clean payload – removes null / undefined (keeps empty strings)
  */
 export function cleanPayload(payload: any) {
-  return Object.entries(payload).reduce((acc, [key, value]) => {
+  return Object.entries(payload).reduce((acc: any, [key, value]) => {
     if (value !== null && value !== undefined) {
       acc[key] = value;
     }
     return acc;
-  }, {} as any);
+  }, {});
 }
