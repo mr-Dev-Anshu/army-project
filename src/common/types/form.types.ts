@@ -34,7 +34,7 @@ export interface VehicleDetailsState {
   vehicleType: string;
   driverType: string;
   vehicleName: string;
-  vehicleNumber?: string;
+  vehicleNumber: string;
 }
 
 /* ================= OFFENDER ================= */
@@ -90,8 +90,20 @@ export interface Witness {
 export interface TrafficState {
   vehicleInvolved: "yes" | "no" | "";
   remarks: string;
+  description?: string;
 
-  vehicleDetails: VehicleDetailsState;
+  coDriverOrPillion?: boolean;
+  coDriverType?: string;
+  offenceType?: string;
+
+  vehicleDetails: {
+    category: string;
+    vehicleType: string;
+    driverType: string;
+    vehicleNumber: string;
+    vehicleName: string;
+  };
+
   offenderWithoutVehicle: OffenderWithoutVehicleState;
 
   offenderDetails: Record<string, unknown>;
@@ -111,7 +123,16 @@ export interface TrafficState {
 /* ================= STATIC SPEED ================= */
 export interface StaticSpeedState {
   vehicleInvolved: "yes" | "no" | "";
-  vehicleDetails: VehicleDetailsState;
+  remarks: string;
+  offenceType?: string;
+  description?: string;
+  vehicleDetails: {
+    category: string;
+    vehicleType: string;
+    driverType: string;
+    vehicleNumber: string;
+    vehicleName: string;
+  };
 
   dutyBlock: OnDutyDetails;
   reportingBlock: OnDutyDetailsMPReporting;

@@ -15,8 +15,10 @@ const getByPath = (obj: any, path: string) => {
   return keys.reduce((o, k) => (o ? o[k] : undefined), obj);
 };
 
-
-const initialState: GlobalFormState = {
+/* ------------------------------------
+   INITIAL STATE
+------------------------------------ */
+export const initialState: GlobalFormState = {
   currentStep: 1,
   completedSteps: [],
   preview: false,
@@ -79,6 +81,7 @@ const initialState: GlobalFormState = {
     },
 
     staticSpeed: {
+      remarks: "",
       vehicleInvolved: "",
       vehicleDetails: {
         category: "",
@@ -192,7 +195,7 @@ const initialState: GlobalFormState = {
       placeOfAccident: "",
       typeOfAccident: "",
       probableCause: "",
-      
+
 
       vehicleNumber: "",
       makeAndModel: "",

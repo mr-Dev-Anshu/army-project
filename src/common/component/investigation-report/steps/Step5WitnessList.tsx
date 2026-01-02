@@ -25,8 +25,7 @@ export default function Step5WitnessList() {
   const add = mp.additionalIndividual;
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [extraVehicleStatus, setExtraVehicleStatus] =
-    useState<YesNo>("");
+  const [extraVehicleStatus, setExtraVehicleStatus] = useState<YesNo>("");
 
   /* ========= VEHICLE YES/NO ========= */
   const setVehicleStatus = (value: YesNo) =>
@@ -36,7 +35,6 @@ export default function Step5WitnessList() {
       value,
     });
 
-    
   /* ========= DELETE ========= */
   const handleDeleteWitness = (index: number) => {
     const updated = witnesses.filter((_, i) => i !== index);
@@ -48,7 +46,6 @@ export default function Step5WitnessList() {
     });
   };
 
-  /* ========= SAVE MAIN WITNESS ========= */
   const handleSaveMainWitness = () => {
     const person = mp.individualDetails?.tempOffender || {};
 
@@ -66,15 +63,14 @@ export default function Step5WitnessList() {
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.individualDetails.tempOffender",
-      value: {},
+      value: {}, // ⭐ ye reset hoga
     });
 
     toast.success("Witness Added!");
   };
 
-  /* ========= SAVE ADDITIONAL ========= */
   const handleSaveAdditionalWitness = () => {
-    const person = add.tempOffender || {};
+    const person = mp.additionalIndividual?.tempOffender || {};
 
     if (!Object.keys(person).length) {
       toast.error("Please fill additional witness details!");
@@ -94,7 +90,7 @@ export default function Step5WitnessList() {
         vehicleInvolved: "",
         vehicleData: {},
         driverType: "",
-        tempOffender: null,
+        tempOffender: {}, // ⭐ null nahi, empty object rakho
       },
     });
 
@@ -105,7 +101,7 @@ export default function Step5WitnessList() {
   };
 
   return (
-    <FormSection title="5. WITNESS LIST:">
+    <FormSection title="">
       {/* MAIN WITNESS */}
       <VehiclePrimaryQuestion
         title="Does this witness involve a vehicle?"
@@ -129,8 +125,7 @@ export default function Step5WitnessList() {
         </div>
       )}
 
-
-       {/* ADDITIONAL FORM */}
+      {/* ADDITIONAL FORM */}
       {showAddForm && (
         <div className="mt-6 border rounded-lg p-6 bg-gray-50">
           <VehiclePrimaryQuestion
@@ -162,18 +157,15 @@ export default function Step5WitnessList() {
         </div>
       )}
 
-    {/* ADD MORE */}
-<div className="mt-6 flex w-full justify-start">
-  <Button
-    className="bg-black text-white cursor-pointer px-4 py-2 text-sm sm:text-base"
-    onClick={() => setShowAddForm(true)}
-  >
-    + Add More Witness
-  </Button>
-</div>
-
-
-     
+      {/* ADD MORE */}
+      <div className="mt-6 flex w-full justify-start">
+        <Button
+          className="bg-black text-white cursor-pointer px-4 py-2 text-sm sm:text-base"
+          onClick={() => setShowAddForm(true)}
+        >
+          + Add More Witness
+        </Button>
+      </div>
 
       {/* LIST */}
       <DynamicOffenderList

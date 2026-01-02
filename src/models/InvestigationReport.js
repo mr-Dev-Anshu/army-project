@@ -110,6 +110,9 @@ export const evidenceSchema = new Schema({
 
 const mpReportSchema = new Schema(
   {
+    reportId:{
+       type:String
+    },
     reportDetails: { type: reportDetailsSchema },
     investigationHead: { type: investigationHeadSchema },
     occurrenceDetails: { type: occurrenceDetailsSchema },

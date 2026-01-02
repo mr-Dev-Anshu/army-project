@@ -1,6 +1,7 @@
 import Joi from "joi";
 
 export const createStaticSpeedCheckRecordSchema = Joi.object({
+  reportId:Joi.string(),
   vehicleType: Joi.string().required().trim().messages({
     "any.required": "vehicleType is required",
     "string.empty": "vehicleType cannot be empty",

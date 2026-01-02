@@ -27,7 +27,7 @@ export default function Step6Evidence() {
     });
 
   return (
-    <FormSection title="6. EVIDENCE:" onClear={clear}>
+    <FormSection title="">
       <EvidenceUploadSection
         title="Upload evidence"
         values={evidence}

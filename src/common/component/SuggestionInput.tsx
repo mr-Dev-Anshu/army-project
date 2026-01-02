@@ -51,7 +51,7 @@ export function SuggestionInput({
 
   return (
     <div className="space-y-1 w-full relative" ref={wrapperRef}>
-      {label && <Label>{label}</Label>}
+      {label && <Label className="mb-2.5 mt-2 ">{label}</Label>}
 
       {/* 🔥 BORDER ALWAYS HERE (same as vehicle form) */}
       <div

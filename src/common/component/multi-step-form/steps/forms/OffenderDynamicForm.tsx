@@ -1,5 +1,3 @@
-
-
 "use client";
 import { FormInput } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
@@ -7,6 +5,7 @@ import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
+import { Label } from "@/components/ui/label";
 
 interface FieldType {
   label: string;
@@ -20,7 +19,7 @@ interface OffenderDynamicFormProps {
   helperText?: string;
   fields: FieldType[];
   showCoDriver?: boolean;
-scope?: "traffic" | "static" | "mp-main" | "mp-additional" | "mt-accident";
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional" | "mt-accident";
   path?: string;
 }
 
@@ -57,43 +56,35 @@ export default function OffenderDynamicForm({
     else setLocalData({});
   }, [scope, path]);
 
+  const saveField = (label: string, value: string) => {
+    let targetPath = path;
 
+    if (!targetPath && scope === "mp-main")
+      targetPath = "formData.mpReport.individualDetails.tempOffender";
 
- const saveField = (label: string, value: string) => {
-  let targetPath = path;
+    if (!targetPath && scope === "mp-additional")
+      targetPath = "formData.mpReport.additionalIndividual.tempOffender";
 
-  if (!targetPath && scope === "mp-main")
-    targetPath = "formData.mpReport.individualDetails.tempOffender";
-
-  if (!targetPath && scope === "mp-additional")
-    targetPath = "formData.mpReport.additionalIndividual.tempOffender";
-
-  // ✅ ADD THIS BLOCK
-  if (!targetPath && scope === "mt-accident")
-    targetPath = "formData.mtAccidentReport.offenderDetails";
-
-  // Update local UI first
-  setLocalData((prev: any) => ({
-    ...(prev || {}),
-    [label]: value,
-  }));
-
-  if (!targetPath) return;
-
-  const prevGlobal = getValueByPath(state, targetPath) || {};
-
-  dispatch({
-    type: "SET_PATH",
-    path: targetPath,
-    value: {
-      ...prevGlobal,
+    // ALWAYS UPDATE LOCAL UI FIRST 🔥
+    setLocalData((prev: any) => ({
+      ...(prev || {}),
       [label]: value,
-    },
-  });
-};
+    }));
 
+    // If no path → bas local UI me hi rakho
+    if (!targetPath) return;
 
+    const prevGlobal = getValueByPath(state, targetPath) || {};
 
+    dispatch({
+      type: "SET_PATH",
+      path: targetPath,
+      value: {
+        ...prevGlobal,
+        [label]: value,
+      },
+    });
+  };
 
   return (
     <div className="space-y-6 mt-4 bg-white p-6 shadow-sm">
@@ -107,26 +98,34 @@ export default function OffenderDynamicForm({
           const label = f.label;
           const value = localData?.[label] || "";
 
+          // 🔹 Suggestion Input
           if ((f as any).type === "suggestion") {
             return (
-              <SuggestionInput
-                key={i}
-                placeholder={f.placeholder}
-                value={value}
-                onChange={(v) => saveField(label, v)}
-                fieldType={(f as any).fieldType}
-              />
+              <div key={i} className="flex flex-col gap-1">
+                <Label className="font-semibold">{label}</Label>
+
+                <SuggestionInput
+                  placeholder={f.placeholder}
+                  value={value}
+                  onChange={(v) => saveField(label, v)}
+                  fieldType={(f as any).fieldType}
+                />
+              </div>
             );
           }
 
+          // 🔹 Normal Input
           return (
-            <FormInput
-              key={i}
-              label={label}
-              placeholder={f.placeholder}
-              value={value}
-              onChange={(v) => saveField(label, v)}
-            />
+            <div key={i} className="flex flex-col gap-1">
+              <Label className="font-semibold">{label}</Label>
+
+              <FormInput
+                label=""
+                placeholder={f.placeholder}
+                value={value}
+                onChange={(v) => saveField(label, v)}
+              />
+            </div>
           );
         })}
       </div>
@@ -208,7 +207,8 @@ export default function OffenderDynamicForm({
                       }}
                       className="mr-2"
                     />
-                    Is this person Dependent/Relative of Millitary Personnel or Other Registered?
+                    Is this person Dependent/Relative of Millitary Personnel or
+                    Other Registered?
                   </p>
 
                   {civilianRelative && (
