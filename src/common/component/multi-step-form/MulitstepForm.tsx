@@ -188,145 +188,146 @@ export default function MultiStepForm({ onCancel }: { onCancel: () => void }) {
 
 const onSubmitFinal = async () => {
   try {
-    const traffic = state?.formData?.traffic || {};
-    console.log("🚔 RAW TRAFFIC ===>", traffic);
+    const traffic = state.formData.traffic;
+    console.log("🚔 RAW TRAFFIC STATE ===>", traffic);
 
-    const safe = (v: any, fallback = undefined) => {
-      if (v === null || v === undefined) return fallback;
-      if (typeof v === "string") return v.trim() || fallback;
-      return v;
-    };
-
-    const date = safe(traffic?.onDutyDetails?.dateOfDuty);
-
-    const toISO = (time?: string) => {
-      if (!date || !time) return undefined;
-      try {
-        return new Date(`${date}T${time}`).toISOString();
-      } catch {
-        return undefined;
-      }
-    };
-
-    /* ---------------- MAIN PAYLOAD ---------------- */
+    /* ================= CREATE OFFENCE ================= */
     const payload = {
-      isVehicleInvolved: traffic?.vehicleInvolved === "yes",
+      isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
       onDutyDetails: {
-        dateOfDuty: safe(traffic?.onDutyDetails?.dateOfDuty),
-        dutyLocation: safe(traffic?.onDutyDetails?.dutyLocation),
-        dutyType: safe(traffic?.onDutyDetails?.dutyType),
-        startTime: toISO(traffic?.onDutyDetails?.startTime),
-        endTime: toISO(traffic?.onDutyDetails?.endTime),
+        dateOfDuty: traffic.onDutyDetails.dateOfDuty,
+        dutyLocation: traffic.onDutyDetails.dutyLocation,
+        dutyType: traffic.onDutyDetails.dutyType,
+        startTime: traffic.onDutyDetails.startTime
+          ? new Date(
+              `${traffic.onDutyDetails.dateOfDuty}T${traffic.onDutyDetails.startTime}`
+            ).toISOString()
+          : "",
+        endTime: traffic.onDutyDetails.endTime
+          ? new Date(
+              `${traffic.onDutyDetails.dateOfDuty}T${traffic.onDutyDetails.endTime}`
+            ).toISOString()
+          : "",
       },
 
-      onDutyDetailsMPReporting: {
-        nameReportingMP: safe(
-          traffic?.onDutyDetailsMPReporting?.nameReportingMP
-        ),
-        rank: safe(traffic?.onDutyDetailsMPReporting?.rank),
-        unit: safe(traffic?.onDutyDetailsMPReporting?.unit),
-        armyNumber: safe(traffic?.onDutyDetailsMPReporting?.armyNumber),
-        contactNumber: safe(
-          traffic?.onDutyDetailsMPReporting?.contactNumber
-        ),
-      },
+      onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
 
       offenceOccurenceDetails: {
-        description: safe(traffic?.offenceOccurenceDetails?.description),
-        description2: safe(traffic?.offenceOccurenceDetails?.description2),
-        incidentLocation: safe(
-          traffic?.offenceOccurenceDetails?.incidentLocation
-        ),
-        timeOfOffence: toISO(
-          traffic?.offenceOccurenceDetails?.timeOfOffence
-        ),
+        description: traffic.offenceOccurenceDetails.description,
+        incidentLocation:
+          traffic.offenceOccurenceDetails.incidentLocation,
+        timeOfOffence: traffic.offenceOccurenceDetails.timeOfOffence
+          ? new Date(
+              `${traffic.onDutyDetails.dateOfDuty}T${traffic.offenceOccurenceDetails.timeOfOffence}`
+            ).toISOString()
+          : "",
       },
 
       offenceTypes:
-        Array.isArray(traffic?.offenceTypes) &&
-        traffic.offenceTypes.length > 0
+        traffic.offenceTypes?.length > 0
           ? traffic.offenceTypes
           : ["minor"],
 
       offenceTypeReference:
-        Array.isArray(traffic?.offenceCode) &&
-        traffic.offenceCode.length > 0
+        traffic.offenceCode?.length > 0
           ? traffic.offenceCode
           : ["Mil Tfc Offence"],
     };
 
-    console.log("🚔 FINAL SAFE PAYLOAD ===>", payload);
+    console.log("🚔 TRAFFIC OFFENCE PAYLOAD ===>", payload);
 
-    toast.info("Creating Offence...");
-    const offence = await mutateAsync(payload);
+    const offenceRes = await mutateAsync(payload);
+    console.log("✅ TRAFFIC OFFENCE BACKEND RESPONSE ===>", offenceRes);
 
-    toast.success("Offence Created Successfully!");
+    toast.success("Traffic Offence Created!");
 
-    const offenceId = offence?._id;
+    const offenceId = offenceRes?._id;
     if (!offenceId) {
-      toast.error("Offence ID missing from backend!");
+      toast.error("Offence ID missing!");
       return;
     }
 
-    /* ---------------- OFFENDER HANDLING ---------------- */
-    const offenderType: OffenderType =
-      traffic?.vehicleInvolved === "yes"
-        ? (traffic?.vehicleDetails?.driverType as OffenderType) || "Civilian"
-        : (traffic?.offenderWithoutVehicle?.offenderType as OffenderType) ||
-          "Civilian";
-
-    if (
-      Array.isArray(traffic?.offenderPeople) &&
-      traffic.offenderPeople.length > 0
-    ) {
+    /* ================= CREATE OFFENDERS ================= */
+    if (Array.isArray(traffic.offenderPeople) && traffic.offenderPeople.length) {
       for (const o of traffic.offenderPeople) {
-        let rawType = o?.type || offenderType || "Driver";
-
-        if (rawType?.toLowerCase().includes("co")) rawType = "CoDriver";
-        else rawType = "Driver";
-
         const offenderPayload: CreateOffenderData = {
           offenceId,
-          offenderType,
+
+          offenderType:
+            traffic.vehicleInvolved === "yes"
+              ? (traffic.vehicleDetails.driverType as OffenderType) ||
+                "Civilian"
+              : (traffic.offenderWithoutVehicle.offenderType as OffenderType) ||
+                "Civilian",
+
           offenderDetails: {
-            type: rawType,
-            details: o?.details ? o.details : o || {},
+            type: o.type || "Driver",
+
+            // 👇 DIRECT FIELDS (STATIC STYLE)
+            name: o.details?.Name || o.details?.name || "",
+            rank: o.details?.Rank || o.details?.rank || "",
+            armyNumber:
+              o.details?.["Army Rider / Driver Number"] ||
+              o.details?.armyNumber ||
+              "",
+            unit: o.details?.Unit || "",
+            command: o.details?.Command || "",
+            fmn: o.details?.FMN || "",
+            address: o.details?.Address || "",
+            iCardNumber:
+              o.details?.["ID Card Number"] || o.details?.iCardNumber || "",
           },
         };
 
-        console.log("👮 FINAL OFFENDER PAYLOAD ===>", offenderPayload);
-        await createOffenderMutate(offenderPayload);
+        console.log(
+          "👮 TRAFFIC OFFENDER PAYLOAD ===>",
+          JSON.stringify(offenderPayload, null, 2)
+        );
+
+        const offenderRes =
+          await createOffenderMutate(offenderPayload);
+
+        console.log(
+          "✅ TRAFFIC OFFENDER BACKEND RESPONSE ===>",
+          offenderRes
+        );
       }
 
       toast.success("Offenders Saved Successfully!");
     } else {
-      console.log("⚠️ No offender provided — skipping offender API");
+      console.log("⚠️ No offender found");
     }
 
-    /* ---------------- WITNESS HANDLING ---------------- */
-    if (Array.isArray(traffic?.witnesses) && traffic.witnesses.length > 0) {
-      const witnessPayload = traffic.witnesses.map((w: any) => ({
-        offenceId,
-        rank: safe(w?.reportingBlock?.rank),
-        unit: safe(w?.reportingBlock?.unit),
-        ArmyNo: safe(w?.reportingBlock?.armyNumber),
-        name: safe(w?.reportingBlock?.nameReportingMP),
-        contactNumber: safe(w?.reportingBlock?.contactNumber),
-      }));
+    /* ================= CREATE WITNESSES ================= */
+    if (Array.isArray(traffic.witnesses) && traffic.witnesses.length > 0) {
+      for (const w of traffic.witnesses) {
+        const witnessPayload = {
+          offenceId,
+          rank: w.reportingBlock.rank,
+          unit: w.reportingBlock.unit,
+          ArmyNo: w.reportingBlock.armyNumber,
+          name: w.reportingBlock.nameReportingMP,
+          contactNumber: w.reportingBlock.contactNumber,
+        };
 
-      console.log("👀 SAFE WITNESS PAYLOAD ===>", witnessPayload);
+        console.log("👀 TRAFFIC WITNESS PAYLOAD ===>", witnessPayload);
 
-      await Promise.all(witnessPayload.map((w) => createWitnessMutate(w)));
+        const witnessRes =
+          await createWitnessMutate(witnessPayload);
+
+        console.log(
+          "✅ TRAFFIC WITNESS BACKEND RESPONSE ===>",
+          witnessRes
+        );
+      }
 
       toast.success("Witness Added Successfully!");
-    } else {
-      console.log("⚠️ No witness provided — skipping witness API");
     }
 
-    toast.success("🎉 Final Submit Completed Successfully!");
+    toast.success("🎉 TRAFFIC REPORT COMPLETED!");
 
-    /* ---------------- RESET ---------------- */
+    /* ================= RESET ================= */
     dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
     dispatch({ type: "SET_STEP", payload: 1 });
     dispatch({
@@ -335,12 +336,15 @@ const onSubmitFinal = async () => {
       value: [],
     });
   } catch (err: any) {
-    console.error("❌ FINAL ERROR ===>", err?.response?.data || err);
+    console.error(
+      "❌ TRAFFIC FINAL ERROR ===>",
+      err?.response?.data || err
+    );
 
     toast.error(
       err?.response?.data?.message ||
         err?.response?.data?.error ||
-        "Something went wrong!"
+        "Traffic submit failed"
     );
   }
 };
