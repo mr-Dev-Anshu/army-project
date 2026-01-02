@@ -54,6 +54,8 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     customFields: Joi.object().unknown(true).optional(),
   }).required(),
 
+  offenders: Joi.array().items(Joi.object().unknown(true)).optional(),
+
   remark: Joi.string().trim().optional(),
   customFields: Joi.object()
     .unknown(true)

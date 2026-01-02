@@ -124,12 +124,12 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       },
       {
         header: "Unit",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A",
+        cell: (offence) => offence.onDutyDetailsMPReporting?.unit || offence.offenders?.[0]?.offenderDetails?.unit || "N/A",
         className: "min-w-[100px]"
       },
       {
         header: "FMN",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "N/A",
+        cell: (offence) => offence.fmn || offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 Corps",
         className: "min-w-[100px]"
       },
       {
@@ -157,9 +157,10 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       {
         header: "Report no.",
         className: "min-w-[140px]",
-        cell: (offence) => (
-          <span className="text-gray-600 text-xs">{offence.reportNumber || "N/A"}</span>
-        )
+        cell: (offence) => {
+          const reportNo = offence.reportNumber || `GTO/21 CPU/${(offence._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`;
+          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+        }
       },
       {
         header: "Date & Time",
@@ -200,19 +201,20 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       {
         header: "Unit",
         className: "min-w-[100px]",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
+        cell: (offence) => offence.onDutyDetailsMPReporting?.unit || offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
       },
       {
         header: "FMN",
         className: "min-w-[100px]",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "N/A"
+        cell: (offence) => offence.fmn || offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 Corps"
       },
       {
         header: "Report no.",
         className: "min-w-[140px]",
-        cell: (offence) => (
-          <span className="text-gray-600 text-xs">{offence.reportNumber || "N/A"}</span>
-        )
+        cell: (offence) => {
+          const reportNo = offence.reportNumber || `GTO/21 CPU/${(offence._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`;
+          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+        }
       },
       {
         header: "Date & Time",

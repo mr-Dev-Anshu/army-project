@@ -47,6 +47,11 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
     onDutyDetails: onDutyDetailsSchema,
     onDutyDetailsMPReporting: onDutyDetailsMPReporting,
     offenceOccurenceDetails: offenceOccurrenceSchema,
+    offenders: [
+      {
+        type: mongoose.Schema.Types.Mixed,
+      },
+    ],
     remark: {
       type: String,
     },
