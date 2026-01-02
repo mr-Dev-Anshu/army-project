@@ -836,8 +836,8 @@ export default function MultiFormReport({
 }) {
   const { state, dispatch } = useForm();
   const [mode] = useState("mp");
+const { mutateAsync: createReportAsync } = useCreateMPReport();
 
-  const { mutate: createReport } = useCreateMPReport();
 
   /* ================= STEPS ================= */
   const steps = [
@@ -853,6 +853,11 @@ export default function MultiFormReport({
     { id: 10, label: "Opinion", icon: "10" },
     { id: 11, label: "Remarks of CO/21C Provost Unit", icon: "11" },
   ];
+
+  const toISODateTime = (date?: string, time?: string) => {
+    if (!date || !time) return null;
+    return new Date(`${date}T${time}`).toISOString();
+  };
 
   /* ================= PREVIEW MAPPER ================= */
   const mapMpToReport = (mp: any) => {
@@ -935,60 +940,42 @@ export default function MultiFormReport({
     };
   };
 
-  const createMpOffenders = async (
+ const createIndividualsAndWitnessesSequentially = async (
   offenceId: string,
   individuals: any[],
   witnesses: any[]
 ) => {
-  const offenders = [
-    ...individuals.map((o) => ({
+  /* ===== INDIVIDUALS ===== */
+  for (const ind of individuals) {
+    await createOffender({
+      offenceId,
       offenderType:
-        (o.driverType as OffenderType) ||
-        (o.offenderType as OffenderType) ||
+        (ind.driverType as OffenderType) ||
+        (ind.offenderType as OffenderType) ||
         "Civilian",
       category: "mp-reporting",
       offenderDetails: {
         type: "Person",
-        details: o,
+        details: ind,
       },
-    })),
-    ...witnesses.map((w) => ({
-      offenderType: "Civilian" as OffenderType,
+    });
+  }
+
+  /* ===== WITNESSES ===== */
+  for (const wit of witnesses) {
+    await createOffender({
+      offenceId,
+      offenderType: "Civilian",
       category: "mp-reporting",
       offenderDetails: {
         type: "Person",
-        details: w,
+        details: wit,
       },
-    })),
-  ];
-
-  /* 🧾 CLEAN LOG */
-  console.group("🚨 CREATE OFFENDERS PAYLOAD");
-  console.log("🆔 Offence ID:", offenceId);
-  console.log("👤 Individuals Count:", individuals.length);
-  console.log("👥 Witnesses Count:", witnesses.length);
-  console.log("📦 Offenders Payload:", offenders);
-  console.groupEnd();
-
-  try {
-    await createOffender({
-      offenceId,
-      offenders,
     });
-
-    console.log("✅ Offenders created successfully");
-  } catch (err: any) {
-    console.group("❌ CREATE OFFENDERS ERROR");
-    console.error("Error Message:", err?.message);
-    console.error("Error Response:", err?.response?.data);
-    console.error("Full Error:", err);
-    console.groupEnd();
-
-    throw err; // ⬅️ important so parent knows
   }
 };
 
- const onSubmitFinal = async () => {
+const onSubmitFinal = async () => {
   try {
     const mp = state.formData.mpReport;
 
@@ -1002,93 +989,90 @@ export default function MultiFormReport({
         p && Object.values(p).some((v) => v && String(v).trim() !== "")
     );
 
-   const payload = {
-  reportDetails: {
-    reportNumber: mp.reportDetails.reportNo,
-    command: mp.reportDetails.command,
-    firNumber: mp.reportDetails.firNo,
-  },
-
-  investigationHead: {
-    armyNumber: mp.mpParticulars.armyNo,   // ✅ FIX
-    rank: mp.mpParticulars.rank,
-    name: mp.mpParticulars.name,
-    unit: mp.mpParticulars.unit,
-    fmn: mp.mpParticulars.fmn,
-    command: mp.mpParticulars.command,
-    address: mp.mpParticulars.address,
-    iCardNumber: mp.mpParticulars.icard,   // ✅ FIX
-  },
-
-  occurrenceDetails: {
-    offenceType: mp.occurrenceDetails.offenceType,
-    placeOfOccurrence: mp.occurrenceDetails.place,     // ✅ FIX
-    dateOfOccurrence: mp.occurrenceDetails.date,       // ✅ FIX
-    timeOfOccurrence: mp.occurrenceDetails.time,       // ✅ FIX
-    description: mp.occurrenceDetails.description,
-  },
-
-  documents: (mp.documents || []).map((d: any) => ({
-    statement: d.statement, // ✅ fileName REMOVED
-  })),
-
-  detailedOccurrenceReport: mp.detailedReport,
-  pointsFindOutDuringInvestigation: mp.investigationPoints,
-  opinion: mp.opinion,
-
-  remarks: {
-    analysis: mp.remarks?.analysis,
-    recommendation: mp.remarks?.recommendation,
-  },
-};
-
-    /* 🧾 CLEAN LOG */
-    console.group("📘 MP REPORT PAYLOAD");
-    console.log("📄 Payload:", payload);
-    console.log("👤 Individuals:", individuals);
-    console.log("👥 Witnesses:", witnesses);
-    console.groupEnd();
-
-    createReport(payload, {
-      onSuccess: async (res: any) => {
-        console.log("✅ MP REPORT CREATED RESPONSE:", res);
-
-        toast.success("MP Investigation Report Created 🎉");
-
-        const offenceId = res?._id;
-        if (!offenceId) {
-          console.warn("⚠️ offenceId missing in response");
-          return;
-        }
-
-        await createMpOffenders(offenceId, individuals, witnesses);
-
-        dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
-        dispatch({ type: "SET_STEP", payload: 1 });
-        dispatch({
-          type: "SET_PATH",
-          path: "completedSteps",
-          value: [],
-        });
+    /* ✅ DEFINE PAYLOAD FIRST */
+    const payload = {
+      reportDetails: {
+        reportNumber: mp.reportDetails.reportNo,
+        command: mp.reportDetails.command,
+        firNumber: mp.reportDetails.firNo,
+        firFileUrl: mp.reportDetails.firFile || "",
+        customFields: {},
       },
 
-      onError: (err: any) => {
-        console.group("❌ MP REPORT CREATE ERROR");
-        console.error("Error Message:", err?.message);
-        console.error("Error Response:", err?.response?.data);
-        console.error("Full Error:", err);
-        console.groupEnd();
-
-        toast.error("Failed to create report");
+      investigationHead: {
+        armyNumber: mp.mpParticulars.armyNo,
+        rank: mp.mpParticulars.rank,
+        name: mp.mpParticulars.name,
+        unit: mp.mpParticulars.unit,
+        fmn: mp.mpParticulars.fmn,
+        command: mp.mpParticulars.command,
+        address: mp.mpParticulars.address,
+        iCardNumber: mp.mpParticulars.icard,
+        customFields: {},
       },
+
+      occurrenceDetails: {
+        offenceType: mp.occurrenceDetails.offenceType,
+        placeOfOccurrence: mp.occurrenceDetails.place,
+        dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
+        timeOfOccurrence: toISODateTime(
+          mp.occurrenceDetails.date,
+          mp.occurrenceDetails.time
+        ),
+        description: mp.occurrenceDetails.description,
+        customFields: {},
+      },
+
+      documents: (mp.documents || []).map((d: any) => ({
+        statement: d.statement,
+        url: d.url || "",
+        customFields: {},
+      })),
+
+      detailedOccurrenceReport: mp.detailedReport,
+      pointsFindOutDuringInvestigation: mp.investigationPoints,
+      opinion: mp.opinion,
+
+      remarks: {
+        analysis: mp.remarks.analysis,
+        recommendation: mp.remarks.recommendation,
+        customFields: {},
+      },
+
+      customFields: {},
+    };
+
+    console.log("📦 MP REPORT PAYLOAD", payload);
+
+    /* 🔹 CREATE MP REPORT */
+    const res: any = await createReportAsync(payload);
+
+    toast.success("MP Investigation Report Created 🎉");
+
+    const offenceId = res?._id;
+    if (!offenceId) return;
+
+    console.log("🚀 MP REPORT CREATED, NOW CREATING OFFENDERS");
+
+    /* 🔹 CREATE OFFENDERS SEQUENTIALLY */
+    await createIndividualsAndWitnessesSequentially(
+      offenceId,
+      individuals,
+      witnesses
+    );
+
+    console.log("✅ ALL OFFENDERS CREATED");
+
+    dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
+    dispatch({ type: "SET_STEP", payload: 1 });
+    dispatch({
+      type: "SET_PATH",
+      path: "completedSteps",
+      value: [],
     });
   } catch (err: any) {
-    console.group("❌ FINAL SUBMIT CRASH");
-    console.error("Error Message:", err?.message);
-    console.error("Error:", err);
-    console.groupEnd();
-
-    toast.error("Invalid form data");
+    console.error("❌ FINAL SUBMIT ERROR", err?.response?.data || err);
+    toast.error("Failed to create report");
   }
 };
 
