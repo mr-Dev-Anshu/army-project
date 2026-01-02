@@ -18,18 +18,7 @@ export const createOffenderSchema = Joi.object({
     )
     .required(),
   category: Joi.string().optional(),
-  offenderDetails: Joi.array()
-    .items(
-      Joi.object({
-        type: Joi.string()
-          .valid("Driver", "CoDriver")
-          .required(),
-        details: Joi.object().unknown(true).required(),
-      })
-    )
-    .min(1)
-    .required(),
-
+  offenderDetails: Joi.object().required(),
   customFields: Joi.object()
     .unknown(true)
     .default({})

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { useGetFieldSuggestions } from "@/features/suggestions/hooks";
 import { Loader2 } from "lucide-react";
 
-interface SuggestionInputProps {
+interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onChange" | "value"> {
     label?: string;
     placeholder?: string;
     value?: string;
@@ -24,6 +24,7 @@ export function SuggestionInput({
     fieldType,
     className,
     defaultOptions = [],
+    ...props
 }: SuggestionInputProps) {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -78,6 +79,7 @@ export function SuggestionInput({
                 onFocus={() => setShowSuggestions(true)}
                 className="bg-white"
                 autoComplete="off"
+                {...props}
             />
 
             {showList && (

@@ -23,6 +23,9 @@ import { useGetStaticSpeedRecords } from "@/features/staticSpeed/hooks";
 import { useGetAllMPReports } from "@/features/mpReports/hooks";
 import ConeIcon from "@/components/icons/ConeIcon";
 import MpAlertIcon from "@/components/icons/MpAlertIcon";
+import CivilEmployeePage from "@/features/civilEmployee";
+
+import MpOffenceAnalysisMonthlyReport from "@/features/mpOffenceAnalysisMonthlyReport";
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
@@ -34,6 +37,8 @@ export default function Dashboard() {
     | "staticSpeed"
     | "investigation"
     | "viewReports"
+    | "mpOffenceAnalysis"
+    | "civilEmployees"
   >("dashboard");
 
   // Fetch Data
@@ -437,6 +442,8 @@ export default function Dashboard() {
         {page === "multiForm" && <MultiStepForm />}
         {page === "staticSpeed" && <StaticSpeedForm />}
         {page === "investigation" && <MultiFormReport />}
+        {page === "mpOffenceAnalysis" && <MpOffenceAnalysisMonthlyReport />}
+        {page === "civilEmployees" && <CivilEmployeePage />}
       </div>
     </div>
   );

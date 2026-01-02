@@ -31,5 +31,29 @@ export const INVESTIGATION_REPORT_SUGGESTION_CONFIG = {
 
     arrayFields: {},
 
+    arrayObjectFields: {
+        'individuals': {
+            'rank': 'rank',
+            'name': 'name',
+            'unit': 'unit',
+            'fmn': 'fmn',
+            'address': 'address',
+            'role': 'role',
+            'vehicleCategory': 'vehicleCategory',
+            'typeOfVehicle': 'typeOfVehicle',
+            'vehicleName': 'vehicleName',
+        },
+        'witnesses': {
+            'rank': 'rank',
+            'name': 'name',
+            'unit': 'unit',
+            'fmn': 'fmn',
+            'address': 'address',
+            'vehicleCategory': 'vehicleCategory',
+            'typeOfVehicle': 'typeOfVehicle',
+            'vehicleName': 'vehicleName',
+        },
+    },
+
     trackCustomFields: 'specific',
 };
