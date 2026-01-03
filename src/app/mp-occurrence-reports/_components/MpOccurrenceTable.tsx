@@ -63,8 +63,11 @@ export default function MpOccurrenceTable({
     newStatus: false,
   });
 
+  const [remarkError, setRemarkError] = React.useState("");
+
   const handleStatusClick = (reportId: string, currentStatus: boolean) => {
     setActionRemark("");
+    setRemarkError("");
     setModalState({
       isOpen: true,
       reportId,
@@ -86,6 +89,12 @@ export default function MpOccurrenceTable({
 
     try {
       if (modalState.type === "status") {
+        if (!actionRemark.trim()) {
+          setRemarkError("Action remark is required.");
+          toast.error("Please add action remark");
+          return;
+        }
+
         await updateReport({
           id: modalState.reportId,
           data: {
@@ -105,6 +114,7 @@ export default function MpOccurrenceTable({
         newStatus: false,
       });
       setActionRemark("");
+      setRemarkError("");
     } catch (error) {
       toast.error(
         modalState.type === "status"
@@ -343,13 +353,18 @@ export default function MpOccurrenceTable({
       >
         {modalState.type === "status" && (
           <div className="flex flex-col gap-2 mt-2">
-            <Label htmlFor="remark">Action Remark</Label>
+            <Label htmlFor="remark">Action Remark <span className="text-red-500">*</span></Label>
             <Input
               id="remark"
               placeholder="Enter reason for status change..."
               value={actionRemark}
-              onChange={(e) => setActionRemark(e.target.value)}
+              onChange={(e) => {
+                setActionRemark(e.target.value);
+                if (e.target.value.trim()) setRemarkError("");
+              }}
+              className={remarkError ? "border-red-500 focus-visible:ring-red-500" : ""}
             />
+            {remarkError && <span className="text-xs text-red-500 mt-1">{remarkError}</span>}
           </div>
         )}
       </ConfirmationModal>
