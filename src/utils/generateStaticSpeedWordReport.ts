@@ -342,7 +342,7 @@ function createParticularsTable(particulars: StaticSpeedReportProps['particulars
                         verticalAlign: VerticalAlign.TOP,
                         margins: CELL_PADDING,
                         borders: { bottom: GRAY_BORDER, right: { style: BorderStyle.NONE }, top: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE } },
-                        children: [new Paragraph({ text: "(1.1)", bold: true })],
+                        children: [new Paragraph({ children: [new TextRun({ text: "(1.1)", bold: true })] })],
                     }),
                     // Details Grid
                     new TableCell({
@@ -369,7 +369,7 @@ function createParticularsTable(particulars: StaticSpeedReportProps['particulars
                         verticalAlign: VerticalAlign.TOP,
                         margins: CELL_PADDING,
                         borders: { top: GRAY_BORDER, right: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE } },
-                        children: [new Paragraph({ text: "(1.2)", bold: true })],
+                        children: [new Paragraph({ children: [new TextRun({ text: "(1.2)", bold: true })] })],
                     }),
                     // Details Grid
                     new TableCell({

@@ -326,7 +326,7 @@ function sectionHeading(no: string, title: string) {
     });
 }
 
-function metaCell(label: string, value: string, align = AlignmentType.LEFT) {
+function metaCell(label: string, value: string, align: any = AlignmentType.LEFT) {
     return new TableCell({
         margins: CELL_PADDING,
         children: [
