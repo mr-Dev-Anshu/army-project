@@ -25,8 +25,8 @@ export default function Step10Opinion() {
     });
 
   return (
-    <FormSection title="10. OPINION :" onClear={clear}>
-      <FormTextarea label="" value={value} onChange={set} />
+    <FormSection title="" >
+      <FormTextarea label="List down Opinion  in Points " value={value} onChange={set} />
     </FormSection>
   );
 }

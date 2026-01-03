@@ -22,6 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import OffenderDetailsCell from "./OffenderDetailsCell";
 
 interface DetailsTableProps {
@@ -34,6 +36,7 @@ interface DetailsTableProps {
 export default function DetailsTable({ offences, isVehicleInvolved, onView, onPrint }: DetailsTableProps) {
   const { mutateAsync: updateOffence, isPending: isUpdating } = useUpdateTrafficOffence();
   const { mutateAsync: deleteOffence, isPending: isDeleting } = useDeleteTrafficOffence();
+  const [actionRemark, setActionRemark] = React.useState(""); // New state for remark
   const [modalState, setModalState] = React.useState<{ isOpen: boolean; offenceId: string | null; type: "status" | "delete"; newStatus?: boolean }>({
     isOpen: false,
     offenceId: null,
@@ -41,7 +44,11 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
     newStatus: false,
   });
 
+  const [remarkError, setRemarkError] = React.useState("");
+
   const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
+    setActionRemark(""); // Reset remark
+    setRemarkError("");
     setModalState({
       isOpen: true,
       offenceId,
@@ -63,16 +70,28 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
 
     try {
       if (modalState.type === "status") {
+        if (!actionRemark.trim()) {
+          setRemarkError("Action remark is required.");
+          toast.error("Please add action remark");
+          return;
+        }
+
         await updateOffence({
           id: modalState.offenceId,
-          data: { actionStatus: modalState.newStatus },
+          data: {
+            actionStatus: modalState.newStatus,
+            actionStatusRemark: actionRemark // Include remark
+          },
         });
         toast.success("Action status updated successfully!");
       } else if (modalState.type === "delete") {
         await deleteOffence(modalState.offenceId);
         toast.success("Report deleted successfully!");
       }
+
       setModalState({ isOpen: false, offenceId: null, type: "status", newStatus: false });
+      setActionRemark(""); // Clear remark
+      setRemarkError("");
     } catch (error) {
       toast.error(modalState.type === "status" ? "Failed to update action status." : "Failed to delete report.");
       console.error(error);
@@ -115,12 +134,12 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       },
       {
         header: "Unit",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A",
+        cell: (offence) => offence.onDutyDetailsMPReporting?.unit || offence.offenders?.[0]?.offenderDetails?.unit || "N/A",
         className: "min-w-[100px]"
       },
       {
         header: "FMN",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "N/A",
+        cell: (offence) => offence.fmn || offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 Corps",
         className: "min-w-[100px]"
       },
       {
@@ -148,9 +167,10 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       {
         header: "Report no.",
         className: "min-w-[140px]",
-        cell: (offence) => (
-          <span className="text-gray-600 text-xs">{offence.reportNumber || "N/A"}</span>
-        )
+        cell: (offence) => {
+          const reportNo = offence.reportNumber || `GTO/21 CPU/${(offence._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`;
+          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+        }
       },
       {
         header: "Date & Time",
@@ -191,19 +211,20 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       {
         header: "Unit",
         className: "min-w-[100px]",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
+        cell: (offence) => offence.onDutyDetailsMPReporting?.unit || offence.offenders?.[0]?.offenderDetails?.unit || "N/A"
       },
       {
         header: "FMN",
         className: "min-w-[100px]",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "N/A"
+        cell: (offence) => offence.fmn || offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 Corps"
       },
       {
         header: "Report no.",
         className: "min-w-[140px]",
-        cell: (offence) => (
-          <span className="text-gray-600 text-xs">{offence.reportNumber || "N/A"}</span>
-        )
+        cell: (offence) => {
+          const reportNo = offence.reportNumber || `GTO/21 CPU/${(offence._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`;
+          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+        }
       },
       {
         header: "Date & Time",
@@ -330,7 +351,25 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
         }
         confirmLabel={modalState.type === "status" ? "Yes, Change" : "Yes, Delete"}
         isProcessing={isUpdating || isDeleting}
-      />
+        variant={modalState.type === "status" ? "info" : "danger"}
+      >
+        {modalState.type === "status" && (
+          <div className="flex flex-col gap-2 mt-2">
+            <Label htmlFor="remark">Action Remark <span className="text-red-500">*</span></Label>
+            <Input
+              id="remark"
+              placeholder="Enter reason for status change..."
+              value={actionRemark}
+              onChange={(e) => {
+                setActionRemark(e.target.value);
+                if (e.target.value.trim()) setRemarkError("");
+              }}
+              className={remarkError ? "border-red-500 focus-visible:ring-red-500" : ""}
+            />
+            {remarkError && <span className="text-xs text-red-500 mt-1">{remarkError}</span>}
+          </div>
+        )}
+      </ConfirmationModal>
     </>
   );
 }

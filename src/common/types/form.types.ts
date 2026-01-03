@@ -1,13 +1,18 @@
 import { OffenderType } from "@/apis/offender/types";
+import { MaidServant } from "@/features/civilEmployee/maid_Servant/types";
+import { Shopkeeper } from "@/features/civilEmployee/shopkeeper/types";
+import { TemporaryHiredWorker } from "@/features/civilEmployee/temporaryHired/types";
 
+/* ================= VEHICLE ================= */
 export interface VehicleDetailsState {
   category: string;
   vehicleType: string;
   driverType: string;
   vehicleName: string;
+  vehicleNumber:string;
 }
 
-// ---------- OFFENDER ----------
+/* ================= OFFENDER ================= */
 export interface OffenderWithoutVehicleState {
   offenderType: OffenderType | "";
 
@@ -23,7 +28,7 @@ export interface OffenderWithoutVehicleState {
   };
 }
 
-// ---------- STEP-2 ----------
+/* ================= STEP-2 ================= */
 export interface OnDutyDetails {
   dateOfDuty: string;
   startTime: string;
@@ -40,25 +45,93 @@ export interface OnDutyDetailsMPReporting {
   contactNumber: string;
 }
 
+/* ================= PURE OFFENCE BLOCK ================= */
 export interface OffenceOccurenceDetails {
-  timeOfOffence: string;
+  timeOfOffence?: string;
   time?: string;
   incidentLocation: string;
   description: string;
+  description2?: string;
   authSpeed?: string;
   actualSpeed?: string;
+  actualSpeedNoted?: string;
   overSpeed?: string;
+ overSpeedCalculated?: string;
 }
 
-// ---------- WITNESS ----------
+/* ================= WITNESS (AS IT IS) ================= */
 export interface Witness {
   dutyBlock: OnDutyDetails;
   reportingBlock: OnDutyDetailsMPReporting;
   offenceBlock: OffenceOccurenceDetails;
 }
 
-// ---------- MP REPORT MASTER ----------
+export interface TrafficState {
+ vehicleInvolved: "yes" | "no" | "";
+  remarks: string;
+  description?:string;
 
+  coDriverOrPillion?: boolean;
+  coDriverType?: string;
+  offenceType?:string;
+
+  vehicleDetails: {
+    category: string;
+    vehicleType: string;
+    driverType: string;
+    vehicleNumber: string;
+    vehicleName: string;
+  };
+
+  offenderWithoutVehicle: OffenderWithoutVehicleState;
+
+  offenderDetails: Record<string, unknown>;
+  onDutyDetails: OnDutyDetails;
+  onDutyDetailsMPReporting: OnDutyDetailsMPReporting;
+
+  offenceOccurenceDetails: OffenceOccurenceDetails;
+  offenceTypes: string[];
+  offenceCode: string[];
+
+  witnesses: Witness[];
+selectedWitness: number | null;
+
+
+  offenderPeople: OffenderPerson[];
+}
+
+/* ================= STATIC SPEED (BEST STRUCTURE) ================= */
+export interface StaticSpeedState {
+ vehicleInvolved: "yes" | "no" | "";
+ remarks:string;
+ offenceType?:string; 
+ description?:string;
+  vehicleDetails: {
+    category: string;
+    vehicleType: string;
+    driverType: string;
+    vehicleNumber: string;
+    vehicleName: string;
+  };
+
+  /* Same BLOCK concept → clear separation */
+  dutyBlock: OnDutyDetails;
+  reportingBlock: OnDutyDetailsMPReporting;
+  offenceBlock: OffenceOccurenceDetails;
+
+  witnesses: Witness[];
+selectedWitness: number | null;
+
+
+  offenderDetails: Record<string, unknown>;
+  offenderPeople: OffenderPerson[];
+}
+
+/* ================= MP REPORT STATE (unchanged) ================= */
+export interface MpOffender {
+  driverType?: string;
+  [key: string]: any;
+}
 export interface MpReportState {
   reportDetails: {
     reportNo: string;
@@ -86,7 +159,6 @@ export interface MpReportState {
     description: string;
   };
 
-  /* ---------- STEP-4 ---------- */
   individualDetails: {
     vehicleInvolved: "yes" | "no" | "";
     vehicleData: Partial<VehicleDetailsState>;
@@ -105,13 +177,16 @@ export interface MpReportState {
     videos?: File[] | null;
   };
 
-  documents: any[];
+  documents: {
+    statement: string;
+    url: string;
+  }[];
 
   additionalIndividual: {
     vehicleInvolved: "yes" | "no" | "";
     vehicleData: Partial<VehicleDetailsState>;
     driverType: string;
-    tempOffender: any | null;
+    tempOffender: unknown | null;
   };
 
   detailedReport: string;
@@ -134,7 +209,9 @@ export type DependentType =
 export interface OffenderPerson {
   relation: string;
   whoIsIt: DependentType;
+  details?: Record<string, any>;
 }
+
 
 // ---------- FORM ROOT ----------
 // ---------- TRAFFIC ----------
@@ -192,18 +269,20 @@ export interface StaticSpeedFormState {
     nameReportingMP?: string;
     rank?: string;
     unit?: string;
-    armyNumber?: string;
-    time?: string;
+    relation?: string;
+    [key: string]: string | undefined;
   };
 }
 
-// ---------- FORM ROOT ----------
+/* ================= ROOT FORM ================= */
 export interface FormDataState {
-  traffic: TrafficFormState;
-  staticSpeed: StaticSpeedFormState;
+  traffic: TrafficState;
+  staticSpeed: StaticSpeedState;
   mpReport: MpReportState;
   remarks?: string;
-
+  shopkeeper:Shopkeeper,
+  maidServant:MaidServant,
+  tempWorker:TemporaryHiredWorker,
   // Keep these for backward compatibility if needed, or remove if unused
   // (Based on FormContext, they seem to be moved to 'traffic' but let's check usage)
   // For now, I will remove them to align with FormContext.tsx strictly.
@@ -211,40 +290,20 @@ export interface FormDataState {
   coDriverType?: string;
 }
 
-// ---------- GLOBAL ----------
+/* ================= GLOBAL ================= */
 export interface GlobalFormState {
   currentStep: number;
   completedSteps: number[];
   formData: FormDataState;
+  preview: boolean; 
 }
-// ---------- ACTIONS ----------
+/* ================= ACTIONS ================= */
 export type Action =
   | { type: "NEXT_STEP" }
   | { type: "SET_STEP"; payload: number }
-  | { type: "SET_FORM_DATA"; payload: Partial<FormDataState> }
-  | { type: "SET_VEHICLE_DETAILS"; payload: Partial<VehicleDetailsState> }
-  | { type: "SET_OFFENDER_TYPE"; payload: string }
-  | {
-      type: "SET_OFFENDER_WITHOUT_VEHICLE_DETAILS";
-      payload: Partial<OffenderWithoutVehicleState>;
-    }
-  | { type: "SET_OFFENDER_PEOPLE"; payload: OffenderPerson[] }
-  | { type: "SET_WITNESSES"; payload: Witness[] }
-
-  /* ========= STATIC SPEED ========= */
-  | { type: "SET_STATIC_WITNESSES"; payload: Witness[] }
-  | { type: "SET_STATIC_SPEED_DATA"; payload: any }
-  | { type: "ADD_STATIC_OFFENDER"; payload: any }
-
-  /* ========= MP REPORT MASTER ========= */
-  | {
-      type: "SET_MP_DATA";
-      payload: Partial<MpReportState>;
-    }
-
-  /* ========= MP SECTION WISE UPDATE ========= */
-  | {
-      type: "SET_MP_SECTION";
-      section: keyof MpReportState;
-      payload: any;
-    };
+  | { type: "SET_PATH"; path: string; value: unknown }
+  | { type: "PUSH_PATH"; path: string; value: unknown }
+  | { type: "REMOVE_PATH"; path: string; index: number }
+  | { type: "SET_FORM_DATA"; payload: FormDataState }   
+  | { type: "CLEAR_MP_ADDITIONAL" }                      
+  | { type: "SET_PREVIEW"; payload: boolean };           

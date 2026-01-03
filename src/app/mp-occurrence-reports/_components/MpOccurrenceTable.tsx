@@ -24,6 +24,8 @@ import {
 } from "@/features/mpReports/hooks";
 import MpDetailsCell from "./MpDetailsCell";
 import { toast } from "react-toastify";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
@@ -46,6 +48,9 @@ export default function MpOccurrenceTable({
     useUpdateMPReport();
   const { mutateAsync: deleteReport, isPending: isDeleting } =
     useDeleteMPReport();
+
+  const [actionRemark, setActionRemark] = React.useState("");
+
   const [modalState, setModalState] = React.useState<{
     isOpen: boolean;
     reportId: string | null;
@@ -58,7 +63,11 @@ export default function MpOccurrenceTable({
     newStatus: false,
   });
 
+  const [remarkError, setRemarkError] = React.useState("");
+
   const handleStatusClick = (reportId: string, currentStatus: boolean) => {
+    setActionRemark("");
+    setRemarkError("");
     setModalState({
       isOpen: true,
       reportId,
@@ -80,9 +89,18 @@ export default function MpOccurrenceTable({
 
     try {
       if (modalState.type === "status") {
+        if (!actionRemark.trim()) {
+          setRemarkError("Action remark is required.");
+          toast.error("Please add action remark");
+          return;
+        }
+
         await updateReport({
           id: modalState.reportId,
-          data: { actionStatus: modalState.newStatus },
+          data: {
+            actionStatus: modalState.newStatus,
+            actionStatusRemark: actionRemark
+          },
         });
         toast.success("Action status updated successfully!");
       } else if (modalState.type === "delete") {
@@ -95,6 +113,8 @@ export default function MpOccurrenceTable({
         type: "status",
         newStatus: false,
       });
+      setActionRemark("");
+      setRemarkError("");
     } catch (error) {
       toast.error(
         modalState.type === "status"
@@ -224,14 +244,12 @@ export default function MpOccurrenceTable({
               }}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${
-                  isTaken ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
+                  }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
-                    isTaken ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
+                    }`}
                 ></div>
               </div>
               <span className="text-[10px] text-gray-500 font-medium uppercase">
@@ -323,16 +341,33 @@ export default function MpOccurrenceTable({
         }
         message={
           modalState.type === "status"
-            ? `Are you sure you want to change the status to ${
-                modalState.newStatus ? "Taken" : "Pending"
-              }?`
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
+            }?`
             : "Are you sure you want to delete this report? This action cannot be undone."
         }
         confirmLabel={
           modalState.type === "status" ? "Yes, Change" : "Yes, Delete"
         }
         isProcessing={isUpdating || isDeleting}
-      />
+        variant={modalState.type === "status" ? "info" : "danger"}
+      >
+        {modalState.type === "status" && (
+          <div className="flex flex-col gap-2 mt-2">
+            <Label htmlFor="remark">Action Remark <span className="text-red-500">*</span></Label>
+            <Input
+              id="remark"
+              placeholder="Enter reason for status change..."
+              value={actionRemark}
+              onChange={(e) => {
+                setActionRemark(e.target.value);
+                if (e.target.value.trim()) setRemarkError("");
+              }}
+              className={remarkError ? "border-red-500 focus-visible:ring-red-500" : ""}
+            />
+            {remarkError && <span className="text-xs text-red-500 mt-1">{remarkError}</span>}
+          </div>
+        )}
+      </ConfirmationModal>
     </>
   );
 }
