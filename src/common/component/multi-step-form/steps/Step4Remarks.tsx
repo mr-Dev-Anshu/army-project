@@ -1,6 +1,4 @@
 
-
-
 // "use client";
 
 // import { useForm } from "@/context/FormContext";
@@ -11,54 +9,83 @@
 
 // export default function Step4Remarks() {
 //   const { state, dispatch } = useForm();
-
-//   const isStatic = !!state?.formData?.staticSpeed;
-//   const d = isStatic
-//     ? state.formData.staticSpeed
-//     : state.formData.traffic;
+//   const d = state.formData;
 
 //   const remarkOptions = [
-//     "The indl committed offence as enumerated under para 3 above. Suitable disciplinary action be initiated and intimated to this office within 15 days.",
-//     "The indl violated rules as stated above. Necessary action may please be taken.",
-//     "The indl is liable for disciplinary action as mentioned.",
+//     "The indl committed offence as enumerated under Para 3 above...",
+//     "Suitable disciplinary action be taken as deemed appropriate...",
+//     "Unit should ensure strict compliance of traffic rules...",
 //   ];
 
 //   const [selected, setSelected] = useState<number | null>(0);
 
-//   const set = (value: string) =>
+//   const updateRemarks = (text: string) => {
 //     dispatch({
-//       type: "SET_PATH",
-//       path: isStatic
-//         ? "formData.staticSpeed.remarks"
-//         : "formData.traffic.remarks",
-//       value,
+//       type: "SET_FORM_DATA",
+//       payload: { remarks: text },
 //     });
+//   };
 
 //   return (
-//     <div>
-//       <Label className="mb-4 font-bold">ADD REMARKS:</Label>
+//     <div
+//       className="
+//         space-y-6 
+//         px-4
+//         w-full
+//         overflow-y-auto
+//       "
+//     >
+//       {/* ADD REMARKS */}
+//       <div className="w-full">
+//         <h3 className="text-lg sm:text-xl font-semibold">
+//           ADD REMARKS
+//         </h3>
 
-//       <Textarea
-//         value={d.remarks || ""}
-//         onChange={(e) => set(e.target.value)}
-//         className="min-h-[140px]"
-//       />
+//         <Textarea
+//           value={d.remarks || ""}
+//           onChange={(e) => updateRemarks(e.target.value)}
+//           className="
+//             mt-2 
+//             min-h-[120px] 
+//             sm:min-h-[130px] 
+//             md:min-h-[150px]
+//           "
+//         />
+//       </div>
 
-//       <p className="text-gray-400 mt-4 mb-3">Pre Written Remarks</p>
+//       {/* PRE WRITTEN REMARKS */}
+//       <div className="space-y-3">
+//         <Label className="text-sm sm:text-base font-semibold">
+//           Pre Written Remarks
+//         </Label>
 
-//       {remarkOptions.map((text, i) => (
-//         <label key={i} className="flex gap-2 mt-4">
-//           <Checkbox
-//             checked={selected === i}
-//             onCheckedChange={() => {
-//               setSelected(i);
-//               set(text);
-//             }}
-//             className="mt-2"
-//           />
-//           {text}
-//         </label>
-//       ))}
+//         <div className="space-y-3">
+//           {remarkOptions.map((text, index) => (
+//             <label
+//               key={index}
+//               className="
+//                 flex gap-2 
+//                 items-start 
+//                 text-sm sm:text-base 
+//                 cursor-pointer
+//                 leading-snug
+//               "
+//             >
+//               <Checkbox
+//                 checked={selected === index}
+//                 onCheckedChange={() => {
+//                   setSelected(index);
+//                   updateRemarks(text);
+//                 }}
+//               />
+
+//               <span className="block">
+//                 {text}
+//               </span>
+//             </label>
+//           ))}
+//         </div>
+//       </div>
 //     </div>
 //   );
 // }
@@ -71,57 +98,42 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export default function Step4Remarks() {
   const { state, dispatch } = useForm();
-
-  const isStatic = !!state?.formData?.staticSpeed;
-  const d = isStatic
-    ? state.formData.staticSpeed
-    : state.formData.traffic;
+  const d = state.formData;
 
   const remarkOptions = [
-    "The indl committed offence as enumerated under para 3 above. Suitable disciplinary action be initiated and intimated to this office within 15 days.",
-    "The indl violated rules as stated above. Necessary action may please be taken.",
-    "The indl is liable for disciplinary action as mentioned.",
+    "The indl committed offence...",
+    "Suitable disciplinary action...",
+    "Unit should ensure traffic compliance...",
   ];
 
   const [selected, setSelected] = useState<number | null>(0);
 
-  const setRemarks = (value: string) =>
+  const set = (value: string) =>
     dispatch({
       type: "SET_PATH",
-      path: isStatic
-        ? "formData.staticSpeed.remarks"
-        : "formData.traffic.remarks",
+      path: "formData.remarks",
       value,
     });
 
   return (
-    <div>
-
-
-      {/* ⭐ Remarks */}
-      <Label className="mb-4 font-bold mt-4 block">ADD REMARKS:</Label>
-
+    <div className="space-y-6 px-4">
       <Textarea
-        value={d.remarks || ""}      
-        onChange={(e) => setRemarks(e.target.value)}
+        value={d.remarks || ""}
+        onChange={(e) => set(e.target.value)}
         className="min-h-[140px]"
       />
 
-      <p className="text-gray-400 mt-4 mb-3">Pre Written Remarks</p>
-
       {remarkOptions.map((text, i) => (
-        <label key={i} className="flex gap-2 mt-4">
+        <label key={i} className="flex gap-2">
           <Checkbox
             checked={selected === i}
             onCheckedChange={() => {
               setSelected(i);
-              setRemarks(text);
+              set(text);
             }}
-            className="mt-2"
           />
           {text}
         </label>

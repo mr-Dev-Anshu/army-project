@@ -1,6 +1,4 @@
-"use client";
-
-import { initialState, useForm } from "@/context/FormContext";
+import { useForm } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
 import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
@@ -13,7 +11,7 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
-export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
+export default function MultiStepForm() {
   const { state, dispatch } = useForm();
 
   const { mutateAsync } = useCreateTrafficOffence();
@@ -346,14 +344,38 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     }
   };
 
+  // ================== STEP CONFIG ==================
   const stepsConfig = {
     1: {
       title: "1. PARTICULARS:",
-      component: <Step1Particulars />,
+      component: (
+        <Step1Particulars
+          value={state.formData.traffic.vehicleInvolved}
+          onChange={(v: string) =>
+            dispatch({
+              type: "SET_PATH",
+              path: "formData.traffic.vehicleInvolved",
+              value: v,
+            })
+          }
+        />
+      ),
     },
-    2: { title: "2. STATEMENT:", component: <Step2Statement /> },
-    3: { title: "3. OFFENCE:", component: <Step3Offence /> },
-    4: { title: "4. REMARKS:", component: <Step4Remarks /> },
+
+    2: {
+      title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
+      component: <Step2Statement />,
+    },
+
+    3: {
+      title: "3. OFFENCE COMMITTED / ORDERS CONTRAVENED:",
+      component: <Step3Offence />,
+    },
+
+    4: {
+      title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
+      component: <Step4Remarks />,
+    },
   };
 
   return (
@@ -367,21 +389,18 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             title="Create New General & Traffic Offence Record"
             reportNo="PRO/21 CPU/00042/106/25"
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
-            onCreate={onSubmitFinal}
-            onCancel={() => {
-              dispatch({ type: "SET_STEP", payload: 1 });
-              onCancel?.();
-            }}
           />
 
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
+            setFormData={(data) =>
+              dispatch({ type: "SET_FORM_DATA", payload: data })
+            }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onPrev={() => dispatch({ type: "PREV_STEP" })}
+            onSubmitFinal={onSubmitFinal} // <<=== IMPORTANT!!!
             stepsConfig={stepsConfig}
             mode="traffic"
-            mapTrafficToReport={mapTrafficToReport}
           />
         </div>
       </div>

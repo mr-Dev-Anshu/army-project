@@ -1,6 +1,6 @@
 "use client";
 
-import { initialState, useForm } from "@/context/FormContext";
+import { useForm } from "@/context/FormContext";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
 import { RightPanel } from "../multi-step-form/RightPanel";
 import Step4Remarks from "../multi-step-form/steps/Step4Remarks";
@@ -8,18 +8,15 @@ import Step4Remarks from "../multi-step-form/steps/Step4Remarks";
 import StaticSpeedStep1Particulars from "./steps/Step1";
 import Step2Statement from "./steps/step2";
 import Step3Offence from "./steps/step3";
+
 import { toast } from "react-toastify";
+
 import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
-import { StaticSpeedState } from "@/common/types/form.types";
 
-export default function StaticSpeedForm({
-  onCancel,
-}: {
-  onCancel: () => void;
-}) {
+export default function StaticSpeedForm() {
   const { state, dispatch } = useForm();
 
   const staticData = state.formData.staticSpeed;
@@ -27,108 +24,6 @@ export default function StaticSpeedForm({
   const createStaticRecord = useCreateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
-
-  const mapStaticToReport = (data: any) => {
-    const riderDetails = data?.offenderPeople?.[0]?.details || {};
-
-    const rider = {
-      armyNo:
-        riderDetails["DD veh rider no."] || riderDetails["Army No."] || "N/A",
-
-      name: riderDetails["Name"] || riderDetails["Driver Name"] || "N/A",
-
-      rank: riderDetails["Select Rank"] || riderDetails["Rank"] || "N/A",
-
-      unit: riderDetails["Unit"] || "N/A",
-
-      fmn: riderDetails["FMN"] || "N/A",
-
-      command: riderDetails["Command"] || "N/A",
-
-      address:
-        riderDetails["Address"] || riderDetails["Place of Stay"] || "N/A",
-
-      iCardNo: riderDetails["I Card No."] || riderDetails["ICard"] || "N/A",
-    };
-
-    const witness =
-      data.selectedWitness !== null
-        ? data.witnesses?.[data.selectedWitness]
-        : null;
-
-    return {
-      reportNo: "TEMP/STATIC/001",
-      reportDate: new Date().toLocaleDateString("en-GB"),
-
-      unitName: rider?.unit || "N/A",
-
-      /* -------- 1️⃣ PARTICULARS -------- */
-      particulars: {
-        rider: {
-          armyNo: rider?.armyNo || rider?.armyNo || "N/A",
-          name: rider?.name || "N/A",
-          fmn: rider?.fmn || "N/A",
-          address: rider?.address || "N/A",
-          rank: rider?.rank || "N/A",
-          unit: rider?.unit || "N/A",
-          command: rider?.command || "N/A",
-          iCardNo: rider?.iCardNo || "N/A",
-        },
-
-        vehicle: {
-          baNo: data?.vehicleDetails?.vehicleNumber || "N/A",
-          makeAndTake: data?.vehicleDetails?.vehicleName || "N/A",
-        },
-      },
-
-      /* -------- 2️⃣ OCCURRENCE -------- */
-      occurrence: {
-        statement: data?.offenceBlock?.description || "No statement available",
-      },
-
-      /* -------- 3️⃣ OFFENCE -------- */
-      offence: {
-        actualSpeed:
-          data?.offenceBlock?.actualSpeedNoted ||
-          data?.offenceBlock?.actualSpeed ||
-          "N/A",
-
-        authSpeed: data?.offenceBlock?.authSpeed || "N/A",
-
-        overSpeed:
-          data?.offenceBlock?.overSpeedCalculated ||
-          data?.offenceBlock?.overSpeed ||
-          "N/A",
-      },
-
-      /* -------- 4️ WITNESS SIGN -------- */
-      witnessSig: {
-        armyNo:
-          witness?.reportingBlock?.armyNumber ||
-          witness?.reportingBlock?.ArmyNo ||
-          "N/A",
-        rank: witness?.reportingBlock?.rank || "N/A",
-        name: witness?.reportingBlock?.nameReportingMP || "N/A",
-        unit: witness?.reportingBlock?.unit || "N/A",
-      },
-
-      /* -------- MP SIGN -------- */
-      mpSig: {
-        armyNo: data?.reportingBlock?.armyNumber || "N/A",
-        rank: data?.reportingBlock?.rank || "N/A",
-        name: data?.reportingBlock?.nameReportingMP || "N/A",
-        unit: data?.reportingBlock?.unit || "N/A",
-      },
-
-      /* -------- REMARKS -------- */
-      remarks: {
-        text:
-          data?.remarks || "Suitable disciplinary action may please be taken.",
-        station: data?.dutyBlock?.dutyLocation || "N/A",
-        dated: new Date().toLocaleDateString("en-GB"),
-      },
-    };
-  };
 
   const steps = [
     { id: 1, label: "Particulars", icon: "1" },
@@ -138,15 +33,21 @@ export default function StaticSpeedForm({
   ];
 
   const stepsConfig = {
-    1: { title: "1. PARTICULARS:", component: <StaticSpeedStep1Particulars /> },
+    1: {
+      title: "1. PARTICULARS:",
+      component: <StaticSpeedStep1Particulars />,
+    },
+
     2: {
       title: "2. STATEMENT OF EVIDENCE / OCCURRENCE:",
       component: <Step2Statement />,
     },
+
     3: {
       title: "3. OFFENCE COMMITTED / ORDERS CONTRAVENED:",
       component: <Step3Offence />,
     },
+
     4: {
       title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
       component: <Step4Remarks />,
@@ -294,35 +195,19 @@ export default function StaticSpeedForm({
             completedSteps={state.completedSteps}
             title="Create New Static Speed Check Record"
             reportNo="PRO/21 CPU/00042/106/25"
-            onCreate={handleFinalSubmit}
-            onCancel={() => {
-              dispatch({ type: "SET_STEP", payload: 1 });
-              onCancel();
-            }}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            setFormData={(data: StaticSpeedState) => {
-              Object.keys(data).forEach((key) => {
-                dispatch({
-                  type: "SET_PATH",
-                  path: `formData.${key}`,
-                  value: (data as any)[key],
-                });
-              });
-            }}
+            setFormData={(data) =>
+              dispatch({ type: "SET_FORM_DATA", payload: data })
+            }
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onPrev={() => dispatch({ type: "PREV_STEP" })}
+            onSubmitFinal={handleFinalSubmit}
             stepsConfig={stepsConfig}
             mode="static"
-            mapTrafficToReport={mapStaticToReport}
-            onCancel={() => {
-              dispatch({ type: "SET_STEP", payload: 1 });
-              onCancel();
-            }}
           />
         </div>
       </div>

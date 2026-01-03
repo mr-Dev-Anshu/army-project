@@ -38,7 +38,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         </div>
       </div>
 
-      <span className="text-lg font-medium leading-tight">{title}</span>
+      <span className="text-sm font-medium leading-tight">{title}</span>
     </button>
   );
 };

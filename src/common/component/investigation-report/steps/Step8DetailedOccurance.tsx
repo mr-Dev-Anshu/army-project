@@ -24,8 +24,8 @@ export default function Step8DetailedOccurrence() {
     });
 
   return (
-    <FormSection title="">
-      <FormTextarea label="Fill Detailed Description of Offence" value={value} onChange={set} />
+    <FormSection title="8. DETAILED OCCURRENCE REPORT :" onClear={clear}>
+      <FormTextarea label="" value={value} onChange={set} />
     </FormSection>
   );
 }
