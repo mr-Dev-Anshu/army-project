@@ -1,10 +1,7 @@
-
 import { Trash2 } from "lucide-react";
 
-type GenericObject = Record<string, unknown>;
-
 interface DynamicOffenderListProps {
-  data?: GenericObject[];
+  data?: any[];
   title?: string;
   onDelete?: (index: number) => void;
 }
@@ -12,13 +9,13 @@ interface DynamicOffenderListProps {
 export default function DynamicOffenderList({
   data = [],
   title = "Victim / Offender List",
-  onDelete = () => {},
+  onDelete = (index: number) => {},
 }: DynamicOffenderListProps) {
   const offenders = data;
   if (!offenders.length) return null;
 
   // convert any key into pretty label
-  const formatFieldName = (key: string): string => {
+  const formatFieldName = (key: string) => {
     return key
       ?.replace(/_/g, " ")
       ?.replace(/\s+/g, " ")
@@ -28,13 +25,11 @@ export default function DynamicOffenderList({
   };
 
   // helper -> get keys belonging to a column (by fuzzy match)
-  const pickMatching = (
-    obj: GenericObject,
-    keywords: string[] = []
-  ): { key: string; value: unknown }[] => {
+  const pickMatching = (obj: any, keywords: string[] = []) => {
     return Object.entries(obj)
       .filter(([k, v]) => {
         if (!v) return false;
+
         return keywords.some((word) =>
           k.toLowerCase().includes(word.toLowerCase())
         );
@@ -105,6 +100,7 @@ export default function DynamicOffenderList({
                 >
                   <td className="px-4 py-3 font-medium border-r">{i + 1}.</td>
 
+                  {/* Column 1 */}
                   <td className="px-4 py-3 text-sm border-r align-top">
                     {col1.length ? (
                       col1.map((f) => (
@@ -117,16 +113,16 @@ export default function DynamicOffenderList({
                     )}
                   </td>
 
+                  {/* Column 2 */}
                   <td className="px-4 py-3 text-sm border-r align-top">
                     {col2.length ? (
-                      col2.map((f) => (
-                        <div key={f.key}>{String(f.value)}</div>
-                      ))
+                      col2.map((f) => <div key={f.key}>{String(f.value)}</div>)
                     ) : (
                       <span className="text-gray-400">--</span>
                     )}
                   </td>
 
+                  {/* Column 3 */}
                   <td className="px-4 py-3 text-sm border-r align-top">
                     {col3.length ? (
                       col3.map((f) => (
@@ -139,6 +135,7 @@ export default function DynamicOffenderList({
                     )}
                   </td>
 
+                  {/* Remark */}
                   <td className="px-4 py-3 text-sm">
                     <div className="flex items-center gap-3">
                       <span className="text-gray-600">--</span>

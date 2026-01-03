@@ -25,8 +25,8 @@ export default function Step9InvestigationPoints() {
     });
 
   return (
-    <FormSection title="" >
-      <FormTextarea label="List down all the Findings in points " value={value} onChange={set} />
+    <FormSection title="9. POINTS FIND OUT DURING INVESTIGATION :" onClear={clear}>
+      <FormTextarea label="" value={value} onChange={set} />
     </FormSection>
   );
 }
