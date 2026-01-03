@@ -1,4 +1,5 @@
 import { MPReport } from "@/models/InvestigationReport";
+import mongoose from "mongoose";
 import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
 import { INVESTIGATION_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/investigationReport";
 
@@ -16,15 +17,107 @@ export class MPReportRepository {
   }
 
   async findById(id) {
-    return await MPReport.findById(id);
+    const results = await MPReport.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id)
+        }
+      },
+      {
+        $lookup: {
+          from: "offenders",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "offenders"
+        }
+      },
+      {
+        $lookup: {
+          from: "ondutywitnessingmps",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "onDutyWitnessingMps"
+        }
+      },
+      {
+        $addFields: {
+          offendersCount: { $size: "$offenders" },
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" }
+        }
+      },
+      {
+        $limit: 1
+      }
+    ]);
+
+    return results.length > 0 ? results[0] : null;
   }
 
   async findByReportNumber(reportNumber) {
-    return await MPReport.findOne({ "reportDetails.reportNumber": reportNumber });
+    const results = await MPReport.aggregate([
+      {
+        $match: {
+          "reportDetails.reportNumber": reportNumber
+        }
+      },
+      {
+        $lookup: {
+          from: "offenders",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "offenders"
+        }
+      },
+      {
+        $lookup: {
+          from: "ondutywitnessingmps",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "onDutyWitnessingMps"
+        }
+      },
+      {
+        $addFields: {
+          offendersCount: { $size: "$offenders" },
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" }
+        }
+      },
+      {
+        $limit: 1
+      }
+    ]);
+
+    return results.length > 0 ? results[0] : null;
   }
 
   async findAll(query = {}) {
-    return await MPReport.find(query)
+    const pipeline = [
+      { $match: query },
+      {
+        $lookup: {
+          from: "offenders",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "offenders"
+        }
+      },
+      {
+        $lookup: {
+          from: "ondutywitnessingmps",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "onDutyWitnessingMps"
+        }
+      },
+      {
+        $addFields: {
+          offendersCount: { $size: "$offenders" },
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" }
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ];
+    return await MPReport.aggregate(pipeline);
   }
 
   async updateById(id, data) {
