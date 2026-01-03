@@ -338,6 +338,8 @@ export default function OffenderDynamicForm({
     scope === "traffic" && path ? getValueByPath(state, path) : {};
 
   const [localData, setLocalData] = useState<any>({});
+  const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
+
   const [hasCoDriver, setHasCoDriver] = useState(false);
   const [coDriverType, setCoDriverType] = useState("");
 
@@ -549,22 +551,40 @@ export default function OffenderDynamicForm({
                       name="coDriver"
                       value={item}
                       checked={coDriverType === item}
-                      onChange={() => setCoDriverType(item)}
+                      onChange={() => {
+                        const index =
+                          state.formData.traffic.offenderPeople.length;
+
+                        setCoDriverType(item);
+                        setCoDriverIndex(index);
+
+                        dispatch({
+                          type: "PUSH_PATH",
+                          path: "formData.traffic.offenderPeople",
+                          value: {
+                            type: item,
+                            whoIsIt: "Co-Driver",
+                            details: {},
+                          },
+                        });
+                      }}
                     />
                     {item}
                   </label>
                 ))}
               </div>
 
-              {coDriverType && offenderFormsConfig[coDriverType] && (
-                <OffenderDynamicForm
-                  title={`${coDriverType} Details`}
-                  fields={offenderFormsConfig[coDriverType].fields}
-                  scope="traffic"
-                  path="formData.traffic.offenderPeople[1].details"
-                  showCoDriver={false}
-                />
-              )}
+              {coDriverType &&
+                offenderFormsConfig[coDriverType] &&
+                coDriverIndex !== null && (
+                  <OffenderDynamicForm
+                    title={`${coDriverType} Details`}
+                    fields={offenderFormsConfig[coDriverType].fields}
+                    scope="traffic"
+                    path={`formData.traffic.offenderPeople[${coDriverIndex}].details`}
+                    showCoDriver={false}
+                  />
+                )}
             </>
           )}
         </>

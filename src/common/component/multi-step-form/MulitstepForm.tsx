@@ -51,6 +51,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         {}
       );
     };
+    
 
     // 2️⃣ NORMALIZE FOR ALL 6 FORMS
     const normalizeOffender = (o: any) => ({
