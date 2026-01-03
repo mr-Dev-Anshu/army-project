@@ -1,124 +1,239 @@
 "use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Eye } from "lucide-react";
 import { CiEraser } from "react-icons/ci";
+import { FaArrowLeftLong } from "react-icons/fa6";
+import { IoMdClose } from "react-icons/io";
 
-import { FormDataState } from "@/common/types/form.types";
+import { useForm } from "@/context/FormContext";
 
-interface StepConfig {
-  title: string;
-  component: React.ReactNode;
-}
+import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
+import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
+import MpOccurrenceReport from "@/components/reports/MpOccurrenceReport";
 
-interface Props {
+import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { TrafficFormState, StaticSpeedFormState, MpReportState } from "@/common/types/form.types";
+
+/* ================= TYPES ================= */
+interface RightPanelProps {
   step: number;
-  formData: FormDataState;
-  setFormData: (d: Partial<FormDataState>) => void;
+  formData: any;
   onNext: () => void;
-  onSubmitFinal: () => void;
-  stepsConfig: Record<string, StepConfig>;
-  mode?: "traffic" | "static" | "mp";
+  onPrev: () => void;
+  stepsConfig: Record<string, any>;
+  mode: "traffic" | "static" | "mp";
+
+  mapTrafficToReport?: (
+    data: TrafficFormState | StaticSpeedFormState
+  ) => any;
+
+  mapMpToReport?: (data: MpReportState) => any;
 }
 
 export const RightPanel = ({
   step,
   formData,
   onNext,
-  onSubmitFinal,
+  onPrev,
   stepsConfig,
   mode,
-}: Props) => {
-  const current = stepsConfig?.[String(step)];
+  mapTrafficToReport,
+  mapMpToReport,
+}: RightPanelProps) => {
+  const { state, dispatch } = useForm();
 
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+
+  const current = stepsConfig?.[String(step)];
   const totalSteps = Object.keys(stepsConfig || {}).length;
   const isLastStep = step === totalSteps;
 
+  /* ================= NEXT DISABLE ================= */
   const isNextDisabled = () => {
-    // STATIC SPEED
-    if (mode === "static" && step === 1) {
-      const vd = formData.staticSpeed?.vehicleDetails;
-      return !(vd?.vehicleType && vd?.category);
-    }
+    if (mode === "static" && step === 1)
+      return !(
+        formData.staticSpeed?.vehicleDetails?.vehicleType &&
+        formData.staticSpeed?.vehicleDetails?.category
+      );
 
-    // TRAFFIC
-    if (mode === "traffic" && step === 1) {
+    if (mode === "traffic" && step === 1)
       return !formData.traffic?.vehicleInvolved;
-    }
 
     return false;
   };
 
+  /* ================= PREVIEW ================= */
+  const renderPreviewReport = () => {
+    if (mode === "traffic") {
+      if (typeof mapTrafficToReport !== "function") {
+        console.error("❌ mapTrafficToReport missing");
+        return <p className="text-red-500">Preview not available</p>;
+      }
+
+      return (
+        <MilitaryPoliceReport
+          {...mapTrafficToReport(state.formData.traffic)}
+        />
+      );
+    }
+
+    if (mode === "static") {
+      if (!mapTrafficToReport) return null;
+
+      return (
+        <StaticSpeedReport
+          {...mapTrafficToReport(state.formData.staticSpeed)}
+        />
+      );
+    }
+
+    if (mode === "mp") {
+      if (!mapMpToReport) return null;
+
+      return (
+        <MpOccurrenceReport
+          {...mapMpToReport(state.formData.mpReport)}
+        />
+      );
+    }
+
+    return null;
+  };
+
   return (
-    <div
-      className="
-        flex-1 
-        h-full 
-        p-4 sm:p-6 lg:p-8 
-        flex flex-col 
-        w-full
-        overflow-hidden
-      "
-    >
-      {/* ---------- HEADER ---------- */}
-      <div
-        className="
-          flex flex-col 
-          sm:flex-row sm:items-center 
-          justify-between 
-          mb-4 sm:mb-6 
-          gap-3
-        "
-      >
-        <h3 className="font-bold leading-tight text-lg sm:text-xl lg:text-2xl">
-          {current?.title || "Step"}
-        </h3>
+    <>
+      <div className="flex-1 h-full px-4 flex flex-col w-full overflow-hidden">
+        <div className="border rounded-lg w-full flex flex-col flex-1 min-h-0">
+          {/* ================= HEADER ================= */}
+          <div className="flex justify-between px-4 py-3 border-b bg-white">
+            <h3 className="font-bold text-lg">
+              {current?.title || "Step"}
+            </h3>
 
-        <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" size="sm">
-            <CiEraser size={16} /> Clear
-          </Button>
+            {!state.preview && (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="text-xs bg-gray-100 text-black"
+                  onClick={() => setShowClearModal(true)}
+                >
+                  <CiEraser size={16} /> Clear Form
+                </Button>
 
-          <Button className="bg-black text-white" variant="outline" size="sm">
-            <Eye size={16} />
-          </Button>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    dispatch({ type: "SET_PREVIEW", payload: true })
+                  }
+                  className="bg-black text-white"
+                >
+                  <Eye />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* ================= BODY ================= */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {!state.preview && (
+              <div className="h-full overflow-y-auto px-4 py-4">
+                {current?.component || <p>Step Coming…</p>}
+              </div>
+            )}
+
+            {state.preview && (
+              <div className="h-full flex flex-col">
+                <div className="flex items-center justify-between px-4 py-2 bg-white border-b">
+                  <h2 className="font-semibold text-sm">
+                    REPORT PREVIEW
+                  </h2>
+
+                  <div className="flex gap-2">
+                    <Button onClick={window.print}>🖨</Button>
+
+                    <Button
+                      onClick={() => {
+                        dispatch({ type: "SET_PREVIEW", payload: false });
+                        dispatch({
+                          type: "SET_STEP",
+                          payload:
+                            state.completedSteps.at(-1) ?? step,
+                        });
+                      }}
+                    >
+                      <IoMdClose />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto flex justify-center py-6">
+                  <div className="w-full max-w-[900px]">
+                    {renderPreviewReport()}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ================= FOOTER ================= */}
+          {!state.preview && (
+            <div className="border-t px-4 py-3 bg-white flex justify-between">
+              <Button
+                disabled={step === 1}
+                onClick={() => {
+                  dispatch({ type: "SET_PREVIEW", payload: false });
+                  onPrev();
+                }}
+              >
+                <FaArrowLeftLong className="mr-2" /> Back
+              </Button>
+
+              {!isLastStep ? (
+                <Button onClick={onNext} disabled={isNextDisabled()}>
+                  Next <ChevronRight className="ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    dispatch({
+                      type: "SET_PATH",
+                      path: "completedSteps",
+                      value: Array.from(
+                        new Set([...state.completedSteps, step])
+                      ),
+                    });
+                    dispatch({ type: "SET_PREVIEW", payload: true });
+                  }}
+                >
+                  Preview Report
+                  <ChevronRight className="ml-2" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ---------- CONTENT ---------- */}
-      <div
-        className="
-          border rounded-lg 
-          p-4  sm:p-5 lg:px-6
-          mb-4 sm:mb-6 
-          overflow-y-auto
-          max-h-[60vh] sm:max-h-[70vh] lg:max-h-none
-        "
-      >
-        {current?.component || <p>Step Content Coming Soon...</p>}
-      </div>
-
-      {/* ---------- FOOTER ---------- */}
-      <div className="mt-auto flex flex-col sm:flex-row justify-end gap-2">
-        {!isLastStep && (
-          <Button
-            onClick={onNext}
-            disabled={isNextDisabled()}
-            className="bg-blue-600 disabled:bg-gray-400 w-full sm:w-auto"
-          >
-            Save & Next
-            <ChevronRight size={16} className="ml-2" />
-          </Button>
-        )}
-
-        {isLastStep && (
-          <Button
-            className="bg-blue-600 w-full sm:w-auto"
-            onClick={onSubmitFinal}
-          >
-            Submit & Create Offence
-          </Button>
-        )}
-      </div>
-    </div>
+      {/* ================= CLEAR MODAL ================= */}
+      <ConfirmationModal
+        isOpen={showClearModal}
+        onClose={() => setShowClearModal(false)}
+        onConfirm={() => {
+          setIsClearing(true);
+          setTimeout(() => {
+            setIsClearing(false);
+            setShowClearModal(false);
+          }, 300);
+        }}
+        title="Clear Form?"
+        message="Kya aap sure ho ki poora form clear karna chahte ho?"
+        confirmLabel="Yes, Clear"
+        cancelLabel="Cancel"
+        isProcessing={isClearing}
+      />
+    </>
   );
 };

@@ -1,27 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FormInput } from "@/common/component/FormInput";
+import { FormInput, FormSelect } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
 
 /* ================= TYPES ================= */
-interface FieldType {
-  label: string;
-  placeholder?: string;
-  type?: "input" | "suggestion";
-  fieldType?: string;
-}
-
 interface OffenderDynamicFormProps {
   title: string;
   helperText?: string;
-  fields: FieldType[];
+  fields: any[];
   showCoDriver?: boolean;
   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
   path?: string;
@@ -34,19 +27,24 @@ const getValueByPath = (obj: any, path?: string) => {
   return keys.reduce((o, k) => (o ? o[k] : undefined), obj) || {};
 };
 
+/* ⭐ SINGLE SOURCE OF TRUTH FOR KEYS */
 const labelKeyMap: Record<string, string> = {
   "Full Name": "name",
   Name: "name",
   Rank: "rank",
+  "Select Rank": "rank",
   "Army Rider / Driver Number": "armyNumber",
   "Army Number": "armyNumber",
   Unit: "unit",
   Command: "command",
   FMN: "fmn",
   Address: "address",
+  "Place of Stay": "address",
+  "Place of Work": "address",
+  "Shop Address": "address",
   "ID Card Number": "iCardNumber",
-  "Aadhar Card Number": "iCardNumber",
   "I Card Number": "iCardNumber",
+  "Aadhar Card Number": "iCardNumber",
 };
 
 /* ================= COMPONENT ================= */
@@ -69,21 +67,22 @@ export default function OffenderDynamicForm({
   const [hasCoDriver, setHasCoDriver] = useState(false);
   const [coDriverType, setCoDriverType] = useState("");
 
-  /* ================= SYNC LOCAL DATA ================= */
+  /* ================= SYNC LOCAL ↔ GLOBAL ================= */
   useEffect(() => {
     setLocalData(preData || {});
   }, [path]);
 
-  /* ================= SAVE FIELD ================= */
+  /* ================= SAVE FIELD (🔥 FIXED) ================= */
   const saveField = (label: string, value: string) => {
     const key = labelKeyMap[label] || label;
 
+    // 1️⃣ local state
     setLocalData((prev: any) => ({
       ...(prev || {}),
       [key]: value,
     }));
 
-    /* ===== MP FLOW ===== */
+    // 2️⃣ MP FLOW
     if (scope.startsWith("mp")) {
       const section =
         scope === "mp-additional"
@@ -94,25 +93,24 @@ export default function OffenderDynamicForm({
         type: "SET_PATH",
         path: `formData.mpReport.${section}.tempOffender`,
         value: {
-          ...getValueByPath(
+          ...(getValueByPath(
             state,
             `formData.mpReport.${section}.tempOffender`
-          ),
+          ) || {}),
           [key]: value,
         },
       });
       return;
     }
 
-    /* ===== TRAFFIC / STATIC ===== */
+    // 3️⃣ TRAFFIC / STATIC
     if (!path) return;
 
-    const prev = getValueByPath(state, path) || {};
     dispatch({
       type: "SET_PATH",
       path,
       value: {
-        ...prev,
+        ...(getValueByPath(state, path) || {}),
         [key]: value,
       },
     });
@@ -129,12 +127,26 @@ export default function OffenderDynamicForm({
 
       {/* ================= MAIN FIELDS ================= */}
       <div className="grid grid-cols-2 gap-4">
-        {fields.map((f, i) => {
+        {fields.map((f: any, i: number) => {
           const label = f.label;
           const key = labelKeyMap[label] || label;
           const value = localData?.[key] || "";
 
-          if (f.type === "suggestion") {
+          const isSuggestion =
+            f.type === "suggestion" ||
+            [
+              "Unit",
+              "FMN",
+              "Command",
+              "Rank",
+              "Select Rank",
+              "Place of Stay",
+              "Place of Work",
+              "Shop Address",
+              "Address",
+            ].includes(label);
+
+          if (isSuggestion) {
             return (
               <div key={i} className="flex flex-col gap-1">
                 <Label className="font-semibold">{label}</Label>
@@ -142,9 +154,22 @@ export default function OffenderDynamicForm({
                   placeholder={f.placeholder}
                   value={value}
                   onChange={(v) => saveField(label, v)}
-                  fieldType={f.fieldType}
+                  fieldType={f.fieldType || key}
                 />
               </div>
+            );
+          }
+
+          if (f.type === "select") {
+            return (
+              <FormSelect
+                key={i}
+                label={label}
+                placeholder={f.placeholder}
+                value={value}
+                options={f.options || []}
+                onChange={(v) => saveField(label, v)}
+              />
             );
           }
 
@@ -221,12 +246,7 @@ export default function OffenderDynamicForm({
                         : "border-gray-300"
                     )}
                   >
-                    <input
-                      type="radio"
-                      value={item}
-                      checked={coDriverType === item}
-                      readOnly
-                    />
+                    <RadioGroupItem value={item} />
                     {item}
                   </label>
                 ))}
