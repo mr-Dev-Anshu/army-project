@@ -1,7 +1,12 @@
+
+
+
 "use client";
-import { useRef } from "react";
+
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
+import { uploadFile } from "@/lib/uploadFile";
 
 export interface EvidenceField {
   label: string;
@@ -18,8 +23,44 @@ export default function EvidenceUploadSection({
   title: string;
   fields: EvidenceField[];
   values?: Record<string, any>;
-  onChange: (key: string, file: File | File[] | null) => void;
+  onChange: (key: string, value: any) => void;
 }) {
+  const [loadingKey, setLoadingKey] = useState<string | null>(null);
+
+  const handleUpload = async (
+    field: EvidenceField,
+    files: FileList | null
+  ) => {
+    if (!files || files.length === 0) return;
+
+    setLoadingKey(field.key);
+
+    try {
+      const uploaded: any[] = [];
+
+      for (const file of Array.from(files)) {
+        const { url } = await uploadFile(file);
+
+        uploaded.push({
+          type: field.label,   // 🔥 LABEL = TYPE
+          url,
+          description: file.name,
+        });
+      }
+
+      if (field.multiple) {
+        onChange(field.key, [...(values[field.key] || []), ...uploaded]);
+      } else {
+        onChange(field.key, uploaded[0]);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Upload failed");
+    } finally {
+      setLoadingKey(null);
+    }
+  };
+
   return (
     <div className="space-y-5 max-w-sm">
       {title && <h3 className="font-semibold">{title}</h3>}
@@ -31,39 +72,36 @@ export default function EvidenceUploadSection({
           <div key={field.key} className="flex flex-col gap-1">
             <p className="text-sm font-medium">{field.label}</p>
 
-            {/* Hidden Input */}
+            {/* Hidden input */}
             <input
               ref={inputRef}
               type="file"
               multiple={field.multiple}
               className="hidden"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (!files) return;
-
-                onChange(
-                  field.key,
-                  field.multiple ? Array.from(files) : files[0]
-                );
-              }}
+              onChange={(e) => handleUpload(field, e.target.files)}
             />
 
-            {/* Upload Button */}
+            {/* Upload button */}
             <Button
               size="sm"
               className="bg-black text-white flex gap-2 w-28 justify-center"
               onClick={() => inputRef.current?.click()}
+              disabled={loadingKey === field.key}
             >
-              <Upload size={14} />
+              {loadingKey === field.key ? (
+                <Loader2 className="animate-spin" size={14} />
+              ) : (
+                <Upload size={14} />
+              )}
               Upload
             </Button>
 
-            {/* Selected File Preview */}
+            {/* Preview */}
             {values?.[field.key] && (
               <p className="text-xs text-gray-500">
-                {field.multiple
-                  ? `${values[field.key]?.length} file(s) selected`
-                  : values[field.key]?.name}
+                {Array.isArray(values[field.key])
+                  ? `${values[field.key].length} file(s) uploaded`
+                  : values[field.key]?.description}
               </p>
             )}
           </div>
