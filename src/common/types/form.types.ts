@@ -209,7 +209,9 @@ export type DependentType =
 export interface OffenderPerson {
   relation: string;
   whoIsIt: DependentType;
+  details?: Record<string, any>;
 }
+
 
 // ---------- FORM ROOT ----------
 // ---------- TRAFFIC ----------

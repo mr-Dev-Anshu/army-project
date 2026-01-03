@@ -293,10 +293,6 @@
 //   );
 // }
 
-
-
-
-
 "use client";
 import { FormInput } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
@@ -498,7 +494,8 @@ export default function OffenderDynamicForm({
                     relativeRelation ? `Relation: ${relativeRelation}` : ""
                   }
                   fields={offenderFormsConfig[relativeType].fields}
-                  scope={scope}
+                  scope="traffic"
+                  path="formData.traffic.offenderPeople[2].details"
                   showCoDriver={false}
                 />
               )}
@@ -559,15 +556,15 @@ export default function OffenderDynamicForm({
                 ))}
               </div>
 
-              {coDriverType &&
-                offenderFormsConfig[coDriverType] && (
-                  <OffenderDynamicForm
-                    title={`${coDriverType} Details`}
-                    fields={offenderFormsConfig[coDriverType].fields}
-                    scope={scope}
-                    showCoDriver={false}
-                  />
-                )}
+              {coDriverType && offenderFormsConfig[coDriverType] && (
+                <OffenderDynamicForm
+                  title={`${coDriverType} Details`}
+                  fields={offenderFormsConfig[coDriverType].fields}
+                  scope="traffic"
+                  path="formData.traffic.offenderPeople[1].details"
+                  showCoDriver={false}
+                />
+              )}
             </>
           )}
         </>
