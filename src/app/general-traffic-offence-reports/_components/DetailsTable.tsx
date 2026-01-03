@@ -44,8 +44,11 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
     newStatus: false,
   });
 
+  const [remarkError, setRemarkError] = React.useState("");
+
   const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
     setActionRemark(""); // Reset remark
+    setRemarkError("");
     setModalState({
       isOpen: true,
       offenceId,
@@ -67,6 +70,12 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
 
     try {
       if (modalState.type === "status") {
+        if (!actionRemark.trim()) {
+          setRemarkError("Action remark is required.");
+          toast.error("Please add action remark");
+          return;
+        }
+
         await updateOffence({
           id: modalState.offenceId,
           data: {
@@ -82,6 +91,7 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
 
       setModalState({ isOpen: false, offenceId: null, type: "status", newStatus: false });
       setActionRemark(""); // Clear remark
+      setRemarkError("");
     } catch (error) {
       toast.error(modalState.type === "status" ? "Failed to update action status." : "Failed to delete report.");
       console.error(error);
@@ -345,13 +355,18 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       >
         {modalState.type === "status" && (
           <div className="flex flex-col gap-2 mt-2">
-            <Label htmlFor="remark">Action Remark</Label>
+            <Label htmlFor="remark">Action Remark <span className="text-red-500">*</span></Label>
             <Input
               id="remark"
               placeholder="Enter reason for status change..."
               value={actionRemark}
-              onChange={(e) => setActionRemark(e.target.value)}
+              onChange={(e) => {
+                setActionRemark(e.target.value);
+                if (e.target.value.trim()) setRemarkError("");
+              }}
+              className={remarkError ? "border-red-500 focus-visible:ring-red-500" : ""}
             />
+            {remarkError && <span className="text-xs text-red-500 mt-1">{remarkError}</span>}
           </div>
         )}
       </ConfirmationModal>
