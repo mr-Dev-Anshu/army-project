@@ -80,7 +80,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
     className
 }) => {
     return (
-        <div className={`font-[Arial] text-[#0A0A0A] bg-gray-500/10 p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 print:bg-white text-[14px] ${className || ''}`}>
+        <div className={`font-[Arial] text-[#0A0A0A] bg-gray-500/10 p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 print:bg-white text-[12px] ${className || ''}`}>
             <style type="text/css" media="print">
                 {`
                   @page {
@@ -98,17 +98,17 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             <div className="hidden print:block fixed top-0 w-full text-center font-bold text-sm page-number mt-4 z-50"></div>
 
             {/* ==================== PAGE 1 ==================== */}
-            <div className="w-[794px] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 1 */}
-                <div className="text-center font-bold text-[14px] underline mb-4 print:invisible">RESTRICTED</div>
-                <div className="text-right font-bold text-[14px] mb-8 print:mt-12 underline">IAFP-1479 (Revised)</div>
+                <div className="text-center font-bold text-[12px] underline mb-4 print:invisible">RESTRICTED</div>
+                <div className="text-right font-bold text-[12px] mb-8 print:mt-12 underline">IAFP-1479 (Revised)</div>
 
-                <h1 className="text-center font-bold text-[18px] underline mb-8">
+                <h1 className="text-center font-bold text-[16px] underline mb-8">
                     MP OCCURRENCE & INVESTIGATION REPORT
                 </h1>
 
-                <div className="grid grid-cols-3 items-start mb-8 text-[14px]">
+                <div className="grid grid-cols-3 items-start mb-8 text-[12px]">
                     <div className="text-left">
                         <span className="font-bold">Report No-</span> {reportNo}<br />
                         <span>(Fill in Desk Room)</span>
@@ -125,8 +125,8 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 1. MP DETAILS */}
                 <div className="mb-6 break-inside-avoid">
-                    <div className="font-bold mb-2 text-[14px]">1. &nbsp;&nbsp; MP DETAILS:</div>
-                    <div className="border border-gray-300 p-6 rounded-sm text-[14px] mb-2">
+                    <div className="font-bold mb-2 text-[12px]">1. &nbsp;&nbsp; MP DETAILS:</div>
+                    <div className="border border-gray-300 p-6 rounded-sm text-[12px] mb-2">
                         <div className="grid grid-cols-2 gap-x-12 gap-y-2">
                             <div className="grid grid-cols-[100px_1fr]">
                                 <span className="font-bold">Army no.</span>
@@ -156,17 +156,17 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             </div>
                         </div>
                     </div>
-                    <div className="text-[14px] text-gray-600 pl-1">
+                    <div className="text-[12px] text-gray-600 pl-1">
                         (MP must caution witness and ensure presence of independent witness if possible)
                     </div>
                 </div>
 
                 {/* 2. OCCURRENCE DETAILS */}
                 <div className="mb-6 break-inside-avoid">
-                    <div className="font-bold mb-2 text-[14px]">
+                    <div className="font-bold mb-2 text-[12px]">
                         2. &nbsp;&nbsp; <span className="underline">OCCURRENCE DETAILS:</span>
                     </div>
-                    <div className="pl-4 space-y-2 text-[14px] ">
+                    <div className="pl-4 space-y-2 text-[12px] ">
                         <div className="flex">
                             <span className="w-8 ">2.1</span>
                             <div className="flex-1">
@@ -196,10 +196,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 3. DETAILS OF VICTIMS/OFFENDERS */}
                 <div className="mb-6">
-                    <div className="font-bold mb-2 text-[14px]">
-                        3. &nbsp;&nbsp; <span className="underline">DETAILS OF VICTIMS/OFFENDERS:</span> <span className="font-normal text-[14px] ml-2">(MP must verify personal particulars)</span>
+                    <div className="font-bold mb-2 text-[12px]">
+                        3. &nbsp;&nbsp; <span className="underline">DETAILS OF VICTIMS/OFFENDERS:</span> <span className="font-normal text-[12px] ml-2">(MP must verify personal particulars)</span>
                     </div>
-                    <table className="w-full border-collapse border border-gray-300 text-[14px] mb-2 break-inside-auto">
+                    <table className="w-full border-collapse border border-gray-300 text-[12px] mb-2 break-inside-auto">
                         <thead>
                             <tr className="bg-white">
                                 <th className="border border-gray-300 p-2 w-16 text-center align-middle">Sr no.</th>
@@ -248,21 +248,21 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             )}
                         </tbody>
                     </table>
-                    <div className="text-[14px] text-gray-700 leading-tight text-justify">
+                    <div className="text-[12px] text-gray-700 leading-tight text-justify">
                         (To be read out to the Offender(s) by the MP 'above recorded personal particulars have been given by me voluntarily and I certify and sign them as correct. If found otherwise. I am liable for disciplinary action under the Army Act').
                     </div>
                 </div>
 
                 {/* 4. BRIEF OF OCCURRENCE */}
                 <div className="flex-1">
-                    <div className="flex items-baseline mb-2 text-[14px]">
+                    <div className="flex items-baseline mb-2 text-[12px]">
                         <span className="font-bold w-8">4.</span>
                         <div>
                             <span className="font-bold underline">BRIEF OF OCCURRENCE</span> <span className="ml-1">(Details on Reverse) offence:</span>
                         </div>
                     </div>
                     <div className="pl-8">
-                        <p className="text-justify text-[14px] leading-relaxed whitespace-pre-line text-wrap">
+                        <p className="text-justify text-[12px] leading-relaxed whitespace-pre-line text-wrap">
                             {briefOfOccurrence}
                         </p>
                     </div>
@@ -270,13 +270,13 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* Page 1 Footer */}
                 <div className="mt-8 text-center font-bold">
-                    <div className="text-[14px] underline mt-2">RESTRICTED</div>
+                    <div className="text-[12px] underline mt-2">RESTRICTED</div>
                 </div>
             </div>
 
 
             {/* ==================== PAGE 2 ==================== */}
-            <div className="w-[794px] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 2 */}
                 <div className="text-center font-bold mb-8">
@@ -286,10 +286,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 5. WITNESS */}
                 <div className="mb-6">
-                    <div className="font-bold mb-2 text-[14px]">
-                        5. &nbsp;&nbsp; <span className="underline">WITNESS:</span> <span className="font-normal text-[14px] ml-2">(Witness must record statement in own hand where possible)</span>
+                    <div className="font-bold mb-2 text-[12px]">
+                        5. &nbsp;&nbsp; <span className="underline">WITNESS:</span> <span className="font-normal text-[12px] ml-2">(Witness must record statement in own hand where possible)</span>
                     </div>
-                    <table className="w-full border-collapse border border-gray-300 text-[14px] mb-2 break-inside-auto">
+                    <table className="w-full border-collapse border border-gray-300 text-[12px] mb-2 break-inside-auto">
                         <thead>
                             <tr className="bg-white">
                                 <th className="border border-gray-300 p-2 w-16 text-center align-middle">Sr no.</th>
@@ -339,10 +339,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 6. EVIDENCE */}
                 <div className="mb-6 break-inside-avoid">
-                    <div className="font-bold mb-4 text-[14px]">
-                        6. &nbsp;&nbsp; <span className="underline">EVIDENCE:</span> <span className="font-normal text-[14px] ml-2">(Collect and record evidence carefully)</span>
+                    <div className="font-bold mb-4 text-[12px]">
+                        6. &nbsp;&nbsp; <span className="underline">EVIDENCE:</span> <span className="font-normal text-[12px] ml-2">(Collect and record evidence carefully)</span>
                     </div>
-                    <div className="flex justify-between items-end px-4 text-[14px] mt-8 gap-8">
+                    <div className="flex justify-between items-end px-4 text-[12px] mt-8 gap-8">
                         <div className="border-b border-gray-400 flex-1 pb-1">
                             <span className="font-bold mr-2">6.1 Eye Sketch-</span> {evidence.eyeSketch || "Nil"}
                         </div>
@@ -357,10 +357,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 7. DOCUMENTS ATTACHED */}
                 <div className="flex-1">
-                    <div className="font-bold mb-4 text-[14px]">
+                    <div className="font-bold mb-4 text-[12px]">
                         7. &nbsp;&nbsp; <span className="underline">DOCUMENTS ATTACHED</span>
                     </div>
-                    <div className="pl-4 space-y-4 text-[14px]">
+                    <div className="pl-4 space-y-4 text-[12px]">
                         {documents.length > 0 ? documents.map((doc, i) => (
                             <div key={i} className="flex items-start">
                                 <span className="w-8 shrink-0">7.{i + 1}</span>
@@ -377,23 +377,23 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 3 ==================== */}
-            <div className="w-[794px] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 3 */}
                 <div className="text-center font-bold mb-4">
                     <div className="text-sm print:hidden">-3-</div>
-                    <div className="text-[14px] underline">RESTRICTED</div>
+                    <div className="text-[12px] underline">RESTRICTED</div>
                 </div>
 
                 {/* 8. DETAILED OCCURRENCE REPORT */}
                 <div className="mb-6">
-                    <div className="font-bold mb-4 text-[14px]">
+                    <div className="font-bold mb-4 text-[12px]">
                         8. &nbsp;&nbsp; <span className="underline">DETAILED OCCURRENCE REPORT</span>
                     </div>
 
-                    <p className="mb-4 text-[14px] pl-4">Sir,</p>
+                    <p className="mb-4 text-[12px] pl-4">Sir,</p>
 
-                    <div className="pl-4 space-y-4 text-[14px]">
+                    <div className="pl-4 space-y-4 text-[12px]">
                         {detailedReport.statement ? (
                             detailedReport.statement.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
                                 <div key={index} className="flex items-start">
@@ -415,7 +415,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 4 ==================== */}
-            <div className="w-[794px] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 4 */}
                 <div className="text-center font-bold mb-4">
@@ -425,11 +425,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 9. POINTS FIND OUT DURING THE INVESTIGATION */}
                 <div className="mb-6">
-                    <div className="font-bold mb-4 text-[14px]">
+                    <div className="font-bold mb-4 text-[12px]">
                         9. &nbsp;&nbsp; <span className="underline uppercase">POINTS FIND OUT DURING THE INVESTIGATION</span>
                     </div>
 
-                    <div className="pl-4 space-y-4 text-[14px]">
+                    <div className="pl-4 space-y-4 text-[12px]">
                         {detailedReport.findings.length > 0 ? detailedReport.findings.map((point, i) => (
                             <div key={i} className="flex items-start">
                                 <span className="w-10 shrink-0">9.{i + 1}</span>
@@ -442,12 +442,12 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 </div>
 
                 {/* Page 4 Footer */}
-                <div className="mt-8 pt-8 text-center font-bold text-[14px] underline">RESTRICTED</div>
+                <div className="mt-8 pt-8 text-center font-bold text-[12px] underline">RESTRICTED</div>
 
             </div>
 
             {/* ==================== PAGE 5 ==================== */}
-            <div className="w-[794px] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
 
                 {/* Header Page 5 */}
                 <div className="text-center font-bold mb-4">
@@ -457,8 +457,8 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 10. OPINION */}
                 <div className="mb-6">
-                    <div className="font-bold text-[14px] mb-4">10. &nbsp;&nbsp; <span className="underline">OPINION:</span></div>
-                    <div className="pl-4 space-y-4 text-[14px]">
+                    <div className="font-bold text-[12px] mb-4">10. &nbsp;&nbsp; <span className="underline">OPINION:</span></div>
+                    <div className="pl-4 space-y-4 text-[12px]">
                         {detailedReport.opinion ? (
                             detailedReport.opinion.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
                                 <div key={index} className="flex items-start">
@@ -472,21 +472,21 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                     </div>
                 </div>
 
-                <div className="pt-8 flex justify-between items-end text-[14px] font-bold mb-32">
+                <div className="pt-8 flex justify-between items-end text-[12px] mb-32">
                     <div>
-                        Dated : {reportDate}
+                        <span className="font-bold">Dated :</span> <span>{reportDate}</span>
                     </div>
                     <div className="text-center">
                         (Signature of MP JCO/NCO)
                     </div>
                 </div>
 
-                <div className="text-center font-bold text-[14px] underline">RESTRICTED</div>
+                <div className="text-center font-bold text-[12px] underline">RESTRICTED</div>
 
             </div>
 
             {/* ==================== PAGE 6 ==================== */}
-            <div className="w-[794px] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
 
                 {/* Header Page 6 */}
                 <div className="text-center font-bold mb-4">
@@ -496,21 +496,21 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* 11. REMARKS CO/2IC PROVOST UNIT */}
                 <div className="mb-6">
-                    <div className="flex items-baseline mb-1 text-[14px]">
+                    <div className="flex items-baseline mb-1 text-[12px]">
                         <span className="font-bold w-8 shrink-0">11.</span>
                         <span className="font-bold underline">REMARKS CO/2IC PROVOST UNIT</span>
                     </div>
-                    <div className="text-[14px] mb-6 pl-8">
+                    <div className="text-[12px] mb-6 pl-8">
                         Check evidence gives analysis and recommendation and fill IAFD-901 if required
                     </div>
 
                     {/* 11.1 ANALYSIS */}
                     <div className="mb-6">
-                        <div className="flex items-baseline mb-4 text-[14px] pl-8">
+                        <div className="flex items-baseline mb-4 text-[12px] pl-8">
                             <span className="font-bold w-10 shrink-0">11.1</span>
                             <span className="font-bold underline">ANALYSIS-</span>
                         </div>
-                        <div className="pl-8 space-y-4 text-[14px]">
+                        <div className="pl-8 space-y-4 text-[12px]">
                             {remarks.analysis ? (
                                 remarks.analysis.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
                                     <div key={index} className="flex items-start">
@@ -526,11 +526,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                     {/* 11.2 RECOMMENDATION */}
                     <div className="mb-6">
-                        <div className="flex items-baseline mb-4 text-[14px] pl-8">
+                        <div className="flex items-baseline mb-4 text-[12px] pl-8">
                             <span className="font-bold w-10 shrink-0">11.2</span>
                             <span className="font-bold underline">RECOMMENDATION-</span>
                         </div>
-                        <div className="pl-8 space-y-4 text-[14px]">
+                        <div className="pl-8 space-y-4 text-[12px]">
                             {remarks.recommendation ? (
                                 remarks.recommendation.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
                                     <div key={index} className="flex items-start">
@@ -545,17 +545,21 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                     </div>
                 </div>
 
-                <div className="mt-auto pt-16 flex justify-between items-end text-[14px] font-bold mb-32">
+                <div className="mt-auto pt-16 flex justify-between items-end text-[12px] mb-32">
                     <div className="space-y-1">
-                        <div>Station : {station}</div>
-                        <div>Dated : {reportDate}</div>
+                        <div>
+                            <span className="font-bold">Station :</span> <span>{station}</span>
+                        </div>
+                        <div>
+                            <span className="font-bold">Dated :</span> <span>{reportDate}</span>
+                        </div>
                     </div>
                     <div className="text-center">
                         (Signature of CO/2IC with unit seal)
                     </div>
                 </div>
 
-                <div className="text-center font-bold text-[14px] underline">RESTRICTED</div>
+                <div className="text-center font-bold text-[12px] underline">RESTRICTED</div>
             </div>
 
         </div>
