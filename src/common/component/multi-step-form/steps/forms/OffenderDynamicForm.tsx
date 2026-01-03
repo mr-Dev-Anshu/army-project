@@ -52,6 +52,8 @@ export default function OffenderDynamicForm({
     people.find((p: any) => p.type === "Driver")?.details || {};
 
   const driver = scope.startsWith("mp") ? mpTempDriver : normalDriver;
+  const coDriver =
+    people.find((p: any) => p.type === "CoDriver")?.details || {};
 
   /* ========= UNIVERSAL MP SAVE ========= */
   const saveToMp = (label: string, value: string) => {
@@ -151,8 +153,8 @@ export default function OffenderDynamicForm({
                 key={i}
                 label={f.label}
                 placeholder={f.placeholder}
-                value={driver[f.label] || ""}
-                onChange={(value) => saveField(f.label, value)}
+                value={driver[f.key || f.label] || ""}
+                onChange={(value) => saveField(f.key || f.label, value)}
                 fieldType={
                   f.label === "Select Rank" ? "rank" :
                     f.label.toLowerCase()
@@ -170,7 +172,7 @@ export default function OffenderDynamicForm({
                 }
                 className={cn(
                   "transition-all",
-                  driver[f.label]
+                  driver[f.key || f.label]
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300"
                 )}
@@ -183,17 +185,17 @@ export default function OffenderDynamicForm({
               key={i}
               label={f.label}
               placeholder={f.placeholder}
-              value={driver[f.label] || ""}
-              onChange={(value) => saveField(f.label, value)}
+              value={driver[f.key || f.label] || ""}
+              onChange={(value) => saveField(f.key || f.label, value)}
             />
           ) : (
             <FormSelect
               key={i}
               label={f.label}
               placeholder={f.placeholder}
-              value={driver[f.label] || ""}
+              value={driver[f.key || f.label] || ""}
               options={f.options || []}
-              onChange={(value) => saveField(f.label, value)}
+              onChange={(value) => saveField(f.key || f.label, value)}
             />
           );
         })}
@@ -252,6 +254,100 @@ export default function OffenderDynamicForm({
                 </RadioGroup>
               </div>
             )}
+
+            {/* CO-DRIVER DYNAMIC FORM */}
+            {state.formData.coDriverOrPillion &&
+              state.formData.coDriverType &&
+              offenderFormsConfig[state.formData.coDriverType] && (
+                <div className="mt-4 border rounded-xl bg-gray-50 p-6 space-y-4">
+                  <p className="font-semibold text-md">
+                    Fill {state.formData.coDriverType} Details (Co-Driver)
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {offenderFormsConfig[state.formData.coDriverType].fields.map(
+                      (f: any, i: number) => {
+                        const isSuggestion = [
+                          "Unit",
+                          "FMN",
+                          "Command",
+                          "Select Rank",
+                          "Trade",
+                          "Place of QTR.",
+                          "Place of Work",
+                          "Place of Stay",
+                          "Address",
+                          "Department",
+                        ].includes(f.label);
+
+                        if (isSuggestion) {
+                          return (
+                            <SuggestionInput
+                              key={i}
+                              label={f.label}
+                              placeholder={f.placeholder}
+                              value={coDriver[f.key || f.label] || ""}
+                              onChange={(value) =>
+                                saveField(`CoDriver_${f.key || f.label}`, value)
+                              }
+                              fieldType={
+                                f.label === "Select Rank"
+                                  ? "rank"
+                                  : f.label.toLowerCase()
+                              }
+                              defaultOptions={
+                                f.label.includes("Rank")
+                                  ? ["Pvt", "L/Nk", "Nk", "Hav", "Subedar"]
+                                  : f.label === "Unit"
+                                    ? ["11 Engr Regt", "MP 12", "HQ Unit"]
+                                    : f.label === "FMN"
+                                      ? [
+                                        "Central Command",
+                                        "Western Command",
+                                        "Northern Command",
+                                      ]
+                                      : f.label === "Command"
+                                        ? ["Command A", "Command B", "Command C"]
+                                        : []
+                              }
+                              className={cn(
+                                "transition-all",
+                                coDriver[f.key || f.label]
+                                  ? "border-blue-500 bg-blue-50"
+                                  : "bg-white border-gray-300"
+                              )}
+                            />
+                          );
+                        }
+
+                        return f.type === "input" ? (
+                          <FormInput
+                            key={i}
+                            label={f.label}
+                            placeholder={f.placeholder}
+                            value={coDriver[f.key || f.label] || ""}
+                            onChange={(value) =>
+                              saveField(`CoDriver_${f.key || f.label}`, value)
+                            }
+                            className="bg-white"
+                          />
+                        ) : (
+                          <FormSelect
+                            key={i}
+                            label={f.label}
+                            placeholder={f.placeholder}
+                            value={coDriver[f.key || f.label] || ""}
+                            options={f.options || []}
+                            onChange={(value) =>
+                              saveField(`CoDriver_${f.key || f.label}`, value)
+                            }
+                            className="bg-white"
+                          />
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+              )}
           </>
         )
       }

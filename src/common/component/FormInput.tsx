@@ -15,6 +15,7 @@ interface FormSelectProps {
   options: { label: string; value: string }[];
   value?: string;
   onChange?: (v: string) => void;
+  className?: string;
 }
 
 export function FormSelect({
@@ -23,13 +24,14 @@ export function FormSelect({
   options,
   value,
   onChange,
+  className,
 }: FormSelectProps) {
   return (
-    <div className="space-y-1  w-full">
+    <div className={`space-y-1 w-full`}>
       <Label>{label}</Label>
 
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className={`w-full ${className || ''}`}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 
@@ -56,6 +58,7 @@ interface FormInputProps {
   value?: string;
   onChange?: (v: string) => void;
   type?: string;
+  className?: string;
 }
 
 export function FormInput({
@@ -64,6 +67,7 @@ export function FormInput({
   value,
   onChange,
   type = "text",
+  className,
 }: FormInputProps) {
   return (
     <div className="space-y-1">
@@ -73,6 +77,7 @@ export function FormInput({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
+        className={className}
       />
     </div>
   );

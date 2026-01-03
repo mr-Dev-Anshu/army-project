@@ -86,22 +86,35 @@ export default function StaticSpeedForm() {
         return;
       }
 
-      // ========= 2️⃣ OFFENDER =========
-      const offenderPayload: CreateOffenderData = {
-        offenceId: staticRes._id,
-        offenderType:
-          (staticData.vehicleDetails.driverType as OffenderType) || "Civilian",
+      // ========= 2️⃣ OFFENDERS =========
+      const people = staticData.offenderPeople || [];
 
-        offenderDetails:
-          staticData.offenderPeople?.length > 0
-            ? (staticData.offenderPeople as any)
-            : ([] as any),
-      };
+      // 2.1 Driver
+      const driver = people.find((p: any) => p.type === "Driver");
+      if (driver && driver.details && Object.keys(driver.details).length > 0) {
+        const driverPayload: CreateOffenderData = {
+          offenceId: staticRes._id,
+          offenderType:
+            (staticData.vehicleDetails.driverType as OffenderType) || "Civilian",
+          offenderDetails: driver.details,
+        };
+        console.log("👮 REQ DRIVER ==>", driverPayload);
+        await createOffenderMutation.mutateAsync(driverPayload);
+      }
 
-      console.log("👮 STATIC OFFENDER PAYLOAD ===>", offenderPayload);
+      // 2.2 Co-Driver
+      const coDriver = people.find((p: any) => p.type === "CoDriver");
+      if (coDriver && coDriver.details && Object.keys(coDriver.details).length > 0) {
+        const coDriverPayload: CreateOffenderData = {
+          offenceId: staticRes._id,
+          offenderType: (state.formData.coDriverType as OffenderType) || "Civilian",
+          offenderDetails: coDriver.details,
+        };
+        console.log("👮 REQ CO-DRIVER ==>", coDriverPayload);
+        await createOffenderMutation.mutateAsync(coDriverPayload);
+      }
 
-      await createOffenderMutation.mutateAsync(offenderPayload);
-      toast.success("Offender Saved!");
+      toast.success("Offenders Saved!");
 
       // ========= 3️⃣ WITNESSES =========
       if (staticData.witnesses?.length > 0) {
