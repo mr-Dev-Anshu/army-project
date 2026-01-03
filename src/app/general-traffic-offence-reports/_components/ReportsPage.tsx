@@ -8,7 +8,8 @@ import GroupedList from "./GroupedList";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
-import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
+import { MilitaryPoliceReport, MilitaryPoliceReportProps }
+from "@/components/reports/MilitaryPoliceReport";
 import { generateWordReport } from "@/utils/generateWordReport";
 
 const TableSection = ({

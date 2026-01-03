@@ -293,7 +293,7 @@ export default function MpOccurrenceReportsPage() {
 
   if (isCreating) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen flex flex-col">
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports

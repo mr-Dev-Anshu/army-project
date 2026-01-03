@@ -1,12 +1,16 @@
 
+
+
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
-import { FormInput, FormSelect } from "@/common/component/FormInput";
+import { FormInput } from "@/common/component/FormInput";
 import { useForm } from "@/context/FormContext";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";   // ⭐ ADD THIS
 
 export default function Step1ReportDetails() {
   const { state, dispatch } = useForm();
@@ -19,20 +23,10 @@ export default function Step1ReportDetails() {
       value,
     });
 
-  const clearForm = () =>
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.reportDetails",
-      value: {
-        reportNo: "",
-        command: "",
-        firNo: "",
-        firFile: null,
-      },
-    });
+ 
 
   return (
-    <FormSection title="1. REPORT DETAILS:" onClear={clearForm}>
+    <FormSection title="">
       <FormInput
         label="Report No : PRO/21 CPU/"
         placeholder="PRO/21CPU/00082/106/25"
@@ -54,12 +48,12 @@ export default function Step1ReportDetails() {
         ]}
       />
 
-      <div>
-        <label className="text-sm font-medium">FIR Number</label>
+      {/* ⭐ FIR NUMBER FIXED TO MATCH UI ⭐ */}
+      <div className="mt-4">
+        <Label className="text-sm font-medium">FIR Number</Label>
 
-        <div className="flex gap-2 mt-1">
-          <input
-            className="border rounded-lg px-3 py-2 w-full outline-none focus:ring-2 focus:ring-blue-400"
+        <div className="flex gap-2 mt-2">
+          <Input
             placeholder="Enter FIR Number"
             value={mp.firNo}
             onChange={(e) => set("firNo", e.target.value)}

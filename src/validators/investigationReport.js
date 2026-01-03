@@ -1,4 +1,3 @@
-// lib/validators/mpReport.validator.js
 import Joi from "joi";
 
 // Common schemas
@@ -61,7 +60,8 @@ export const createMPReportSchema = Joi.object({
     customFields,
   }).required(),
 
-  individuals: Joi.array().items(
+ individuals: Joi.array()
+  .items(
     Joi.object({
       armyNumber: optionalString,
       rank: optionalString,
@@ -69,18 +69,29 @@ export const createMPReportSchema = Joi.object({
       unit: optionalString,
       fmn: optionalString,
       address: optionalString,
+
       identityCard: optionalString,
+      iCardNumber: optionalString,
+      command: optionalString,
       remark: optionalString,
       role: optionalString,
+
+      // 🚀 ADD THIS NEW FIELD
+      fatherOrHusbandName: optionalString,
+
       // Traffic fields
       isVehicleInvolved: Joi.boolean().optional(),
       vehicleCategory: optionalString,
       vehicleNumber: optionalString,
+
       customFields,
     })
-  ).default([]),
+  )
+  .default([]),
 
-  witnesses: Joi.array().items(
+
+ witnesses: Joi.array()
+  .items(
     Joi.object({
       armyNumber: optionalString,
       rank: optionalString,
@@ -88,11 +99,25 @@ export const createMPReportSchema = Joi.object({
       unit: optionalString,
       fmn: optionalString,
       address: optionalString,
+
+      // 👇 Backend ke liye standard field
       identityCard: optionalString,
+
+      // 👇 Tumhare UI ke fields bhi allow
+      iCardNumber: optionalString,
+      command: optionalString,
       remark: optionalString,
+
+      // 👇 Vehicle support add kar diya 🙂
+      isVehicleInvolved: Joi.boolean().optional(),
+      vehicleCategory: optionalString,
+      vehicleNumber: optionalString,
+
       customFields,
     })
-  ).default([]),
+  )
+  .default([]),
+
 
   documents: Joi.array().items(documentItem).default([]),
   evidences: Joi.array().items(evidenceItem).default([]),
