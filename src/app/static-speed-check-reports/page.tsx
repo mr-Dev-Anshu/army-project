@@ -159,6 +159,13 @@ export default function StaticSpeedCheckReportsPage() {
         }
       },
       occurrence: {
+        dateOfDuty: dateOfDuty,
+        dutyTime: `${startTime} Hrs - ${endTime} Hrs`,
+        dutyLocation: location,
+        nameOfWitnessingOfficial1: "V Balaji",
+        rankOfWitnessingOfficial1: "Hav (MP)",
+        nameOfWitnessingOfficial2: "Sanjay Khatri",
+        rankOfWitnessingOfficial2: "Hav (MP)",
         statement: statement
       },
       offence: {
