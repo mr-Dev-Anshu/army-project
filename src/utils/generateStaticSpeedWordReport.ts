@@ -545,6 +545,23 @@ function createOccurrenceTable(occ: StaticSpeedReportProps['occurrence']) {
 }
 
 function createOffenceTable(offence: StaticSpeedReportProps['offence']) {
+    const createOffenceRow = (label: string, value: string) => {
+        return new TableRow({
+            children: [
+                new TableCell({
+                    width: { size: 40, type: WidthType.PERCENTAGE },
+                    margins: { top: 60, bottom: 60, right: 60, left: 0 },
+                    children: [new Paragraph({ children: [new TextRun({ text: label, bold: true, size: 24 })] })]
+                }),
+                new TableCell({
+                    width: { size: 60, type: WidthType.PERCENTAGE },
+                    margins: { top: 60, bottom: 60, right: 60, left: 0 },
+                    children: [new Paragraph({ children: [new TextRun({ text: value, size: 24 })] })]
+                })
+            ]
+        });
+    };
+
     return new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         borders: NO_BORDERS,
@@ -554,16 +571,21 @@ function createOffenceTable(offence: StaticSpeedReportProps['offence']) {
                     new TableCell({
                         width: { size: 8, type: WidthType.PERCENTAGE },
                         verticalAlign: VerticalAlign.TOP,
-                        children: [new Paragraph({ children: [new TextRun({ text: "(3.1)", bold: true })] })]
+                        margins: { top: 60, bottom: 60, right: 60, left: 60 },
+                        children: [new Paragraph({ children: [new TextRun({ text: "      (3.1)", bold: true, size: 24 })] })]
                     }),
                     new TableCell({
                         width: { size: 92, type: WidthType.PERCENTAGE },
                         children: [
-                            createDetailGrid([
-                                { label: "Actual Speed Noted", value: offence.actualSpeed },
-                                { label: "Auth Speed", value: offence.authSpeed },
-                                { label: "Over Speed Calculated", value: offence.overSpeed },
-                            ])
+                            new Table({
+                                width: { size: 100, type: WidthType.PERCENTAGE },
+                                borders: NO_BORDERS,
+                                rows: [
+                                    createOffenceRow("Actual Speed Noted", offence.actualSpeed),
+                                    createOffenceRow("Auth Speed", offence.authSpeed),
+                                    createOffenceRow("Over Speed Calculated", offence.overSpeed),
+                                ]
+                            })
                         ]
                     })
                 ]
