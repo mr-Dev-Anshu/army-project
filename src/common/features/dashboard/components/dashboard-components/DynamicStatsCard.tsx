@@ -8,7 +8,7 @@ interface StatCardProps {
   trend?: {
     value?: string;
     label?: string;
-    direction?: "up" | "down";
+    direction?: "up" | "down" | string;
   };
   iconBgColor?: string;
   iconColor?: string;

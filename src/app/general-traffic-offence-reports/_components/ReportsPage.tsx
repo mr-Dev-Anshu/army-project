@@ -8,7 +8,8 @@ import GroupedList from "./GroupedList";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
-import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
+import { MilitaryPoliceReport, MilitaryPoliceReportProps }
+from "@/components/reports/MilitaryPoliceReport";
 import { generateWordReport } from "@/utils/generateWordReport";
 
 const TableSection = ({
@@ -198,7 +199,7 @@ export default function ReportsPage({
         } : undefined,
         vehicle: offence.vehicleNumber ? {
           baNo: offence.vehicleNumber,
-          makeAndTake: offence.vehicleName || "Unknown"
+          makeAndTake: offence.vehicleName || ""
         } : undefined,
       },
       occurrence: {
@@ -219,10 +220,10 @@ export default function ReportsPage({
         description: occDetails.description || "No description provided.",
       },
       witnessSig: {
-        armyNo: witness.armyNo || "N/A",
-        rank: witness.rank || "N/A",
-        name: witness.name || "N/A",
-        unit: witness.unit || "N/A",
+        armyNo: witness.armyNo || "",
+        rank: witness.rank || "",
+        name: witness.name || "",
+        unit: witness.unit || "",
       },
       mpSig: {
         armyNo: mpDetails.armyNumber || mpDetails.armyNoReportingMP || "N/A",
@@ -231,8 +232,8 @@ export default function ReportsPage({
         unit: mpDetails.unit || "N/A",
       },
       remarks: {
-        text: offence.remarks || "The indl committed offence as enumerated under Para 3 above. Suitable discp action be initiated against the indl by the unit, and inform to this office within 15 days from issue of this report.",
-        station: offence.station || "C/O 56 APO",
+        text: offence.remarks || "",
+        station: offence.station || "",
         dated: new Date(offence.createdAt).toLocaleDateString("en-GB"),
       },
     };

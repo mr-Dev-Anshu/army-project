@@ -3,6 +3,7 @@ import { CreateMPReportPayload, MPReport, UpdateMPReportPayload } from "./types"
 
 export * from "./types";
 
+
 export const getAllMPReports = async (): Promise<MPReport[]> => {
   const res = await api.get("/api/mp-reports");
   return res.data.data;
