@@ -24,7 +24,22 @@ export class MPReportRepository {
   }
 
   async findAll(query = {}) {
-    return await MPReport.find(query)
+    const pipeline = [
+      { $match: query },
+      {
+        $addFields: {
+          offenders: {
+            $filter: {
+              input: { $ifNull: ["$individuals", []] },
+              as: "individual",
+              cond: { $eq: ["$$individual.role", "Offender"] }
+            }
+          }
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ];
+    return await MPReport.aggregate(pipeline);
   }
 
   async updateById(id, data) {
