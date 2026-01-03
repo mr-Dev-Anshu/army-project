@@ -15,7 +15,7 @@ import {
     ArrowLeft,
     RotateCcw
 } from "lucide-react";
-import {MilitaryPoliceReport,  MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
+import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
 import { useGetAllTrafficOffences, useUpdateTrafficOffence, useDeleteTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import { Button } from "@/components/ui/button";

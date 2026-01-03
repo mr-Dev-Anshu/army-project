@@ -1,11 +1,17 @@
 
-
 "use client";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSection } from "../../FormSection";
 import { useForm } from "@/context/FormContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 
@@ -14,26 +20,10 @@ export default function StaticSpeedStep2() {
 
   const staticData = state.formData.staticSpeed;
 
-  const duty = staticData.dutyBlock || {};
-  const report = staticData.reportingBlock || {};
-  const offence = staticData.offenceBlock || {};
+  const witnesses = staticData.witnesses || [];
+  const offence = staticData.offenceOccurenceDetails || {};
 
-  // ALWAYS SHOW AT LEAST 1 WITNESS
-  const witnesses =
-    staticData.witnesses?.length > 0
-      ? staticData.witnesses
-      : [
-          {
-            reportingBlock: {
-              nameReportingMP: "",
-              rank: "",
-              unit: "",
-              armyNumber: "",
-              contactNumber: "",
-            },
-          },
-        ];
-
+  // ---------- UNIVERSAL PATH SETTER ----------
   const set = (path: string, value: any) =>
     dispatch({
       type: "SET_PATH",
@@ -41,382 +31,219 @@ export default function StaticSpeedStep2() {
       value,
     });
 
-  const updateDuty = (k: string, v: any) =>
-    set(`formData.staticSpeed.dutyBlock.${k}`, v);
-  const updateReport = (k: string, v: any) =>
-    set(`formData.staticSpeed.reportingBlock.${k}`, v);
-  const updateOffence = (k: string, v: any) =>
-    set(`formData.staticSpeed.offenceBlock.${k}`, v);
+  // ---------- OFFENCE UPDATER ----------
+  const updateOffence = (key: string, value: any) =>
+    set(`formData.staticSpeed.offenceOccurenceDetails.${key}`, value);
 
   return (
     <div className="space-y-10">
       {/* ================== ON DUTY DETAILS ================== */}
       <FormSection title="On-Duty Details">
-        <p className="text-gray-500 -mt-8 mb-3">
+        <p className="text-gray-500 mb-3">
           Enter when and where the witness was on duty while reporting the
           offence.
         </p>
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <Label className="mb-2 font-semibold">Date of Duty</Label>
+            <Label>Date of Duty</Label>
             <Input
               type="date"
-              value={duty.dateOfDuty || ""}
-              onChange={(e) => updateDuty("dateOfDuty", e.target.value)}
+              value={offence.dateOfDuty || ""}
+              onChange={(e) => updateOffence("dateOfDuty", e.target.value)}
             />
           </div>
 
           <div>
-            <Label className="mb-2 font-semibold">Start Time</Label>
+            <Label>Start Time</Label>
             <Input
               type="time"
-              value={duty.startTime || ""}
-              onChange={(e) => updateDuty("startTime", e.target.value)}
+              value={offence.startTime || ""}
+              onChange={(e) => updateOffence("startTime", e.target.value)}
             />
           </div>
 
           <div>
-            <Label className="mb-2 font-semibold">End Time</Label>
+            <Label>End Time</Label>
             <Input
               type="time"
-              value={duty.endTime || ""}
-              onChange={(e) => updateDuty("endTime", e.target.value)}
+              value={offence.endTime || ""}
+              onChange={(e) => updateOffence("endTime", e.target.value)}
             />
           </div>
         </div>
 
-        <Label className="mt-4 mb-2 font-semibold">Duty Location</Label>
-        <SuggestionInput
-          placeholder="Duty Location"
-          value={duty.dutyLocation || ""}
-          onChange={(v) => updateDuty("dutyLocation", v)}
-          fieldType="dutyLocation"
-        />
+        <div>
+          <SuggestionInput
+            label="Duty Location"
+            value={offence.dutyLocation || ""}
+            onChange={(v) => updateOffence("dutyLocation", v)}
+            fieldType="Duty Location"
+          />
+        </div>
 
-        <Label className="mt-3 mb-2 font-semibold">Duty Type</Label>
-        <SuggestionInput
-          placeholder="Duty Type"
-          value={duty.dutyType || ""}
-          onChange={(v) => updateDuty("dutyType", v)}
-          fieldType="dutyType"
-        />
+        <div>
+          <SuggestionInput
+            label="Duty Type"
+            value={offence.dutyType || ""}
+            onChange={(v) => updateOffence("dutyType", v)}
+            fieldType="Duty Type"
+          />
+        </div>
       </FormSection>
 
       {/* ================== MP REPORTING ================== */}
-      <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Reporting</span>
-          </>
-        }
-      >
+      <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label className="mb-2 font-semibold">Reporting MP Name</Label>
-            <Input
-              placeholder="Reporting MP Name"
-              value={report.nameReportingMP || ""}
-              onChange={(e) => updateReport("nameReportingMP", e.target.value)}
-            />
-          </div>
+          <Input
+            placeholder="Name of Reporting MP"
+            value={offence.nameReportingMP || ""}
+            onChange={(e) => updateOffence("nameReportingMP", e.target.value)}
+          />
 
-          {/* ⭐ Rank converted to Suggestion Input ⭐ */}
-          <div>
-            <Label className="mb-2 font-semibold">Rank</Label>
-            <SuggestionInput
-              placeholder="Enter Rank"
-              value={report.rank || ""}
-              onChange={(v) => updateReport("rank", v)}
-              fieldType="rank"
-            />
-          </div>
+          <SuggestionInput
+            placeholder="Select rank"
+            value={offence.rank || ""}
+            onChange={(v) => updateOffence("rank", v)}
+            fieldType="Rank"
+            defaultOptions={["L/Nk", "Nk", "Hav", "Subedar"]}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
-          {/* ⭐ Unit converted to Suggestion Input ⭐ */}
-          <div>
-            <Label className="mb-2 font-semibold">Unit</Label>
-            <SuggestionInput
-              placeholder="Enter Unit"
-              value={report.unit || ""}
-              onChange={(v) => updateReport("unit", v)}
-              fieldType="unit"
-            />
-          </div>
+          <SuggestionInput
+            placeholder="Select unit"
+            value={offence.unit || ""}
+            onChange={(v) => updateOffence("unit", v)}
+            fieldType="Unit"
+            defaultOptions={["11 Engr Regt", "MP 12", "HQ Unit"]}
+          />
 
-          <div>
-            <Label className="mb-2 font-semibold">Army Number</Label>
-            <Input
-              placeholder="Army Number"
-              value={report.armyNumber || ""}
-              onChange={(e) => updateReport("armyNumber", e.target.value)}
-            />
-          </div>
+          <Input
+            placeholder="Army Number"
+            value={offence.armyNumber || ""}
+            onChange={(e) => updateOffence("armyNumber", e.target.value)}
+          />
         </div>
       </FormSection>
 
       {/* ================== WITNESSING MP ================== */}
-      <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Witnessing</span>
-          </>
-        }
-      >
-        {witnesses.map((w, i) => (
-          <div
-            key={i}
-            className=" grid grid-cols-2 space-x-4 p-4 rounded-lg space-y-4 mb-6"
-          >
-            <div>
-              <Label className="mb-2 font-semibold">Witnessing MP Name</Label>
-              <Input
-                placeholder="Name of Witnessing MP"
-                value={w.reportingBlock.nameReportingMP}
-                onChange={(e) => {
-                  const copy = structuredClone(witnesses);
-                  copy[i].reportingBlock.nameReportingMP = e.target.value;
-                  set("formData.staticSpeed.witnesses", copy);
-                }}
-              />
-            </div>
-
-            {/* ⭐ Rank Suggestion ⭐ */}
-            <div>
-              <Label className="mb-2 font-semibold">Rank</Label>
-              <SuggestionInput
-                placeholder="Enter Rank"
-                value={w.reportingBlock.rank}
-                onChange={(v) => {
-                  const copy = structuredClone(witnesses);
-                  copy[i].reportingBlock.rank = v;
-                  set("formData.staticSpeed.witnesses", copy);
-                }}
-                fieldType="rank"
-              />
-            </div>
-
-            {/* ⭐ Unit Suggestion ⭐ */}
-            <div>
-              <Label className="mb-2 font-semibold">Unit</Label>
-              <SuggestionInput
-                placeholder="Enter Unit"
-                value={w.reportingBlock.unit}
-                onChange={(v) => {
-                  const copy = structuredClone(witnesses);
-                  copy[i].reportingBlock.unit = v;
-                  set("formData.staticSpeed.witnesses", copy);
-                }}
-                fieldType="unit"
-              />
-            </div>
-
-            <div>
-              <Label className="mb-2 font-semibold">Army Number</Label>
-              <Input
-                placeholder="Army No."
-                value={w.reportingBlock.armyNumber}
-                onChange={(e) => {
-                  const copy = structuredClone(witnesses);
-                  copy[i].reportingBlock.armyNumber = e.target.value;
-                  set("formData.staticSpeed.witnesses", copy);
-                }}
-              />
-            </div>
-
-            <div>
-              <Label className="mb-2 font-semibold">Contact Number</Label>
-              <Input
-                placeholder="Contact Number"
-                value={w.reportingBlock.contactNumber || ""}
-                onChange={(e) => {
-                  const copy = structuredClone(witnesses);
-                  copy[i].reportingBlock.contactNumber = e.target.value;
-                  set("formData.staticSpeed.witnesses", copy);
-                }}
-              />
-            </div>
-          </div>
-        ))}
-
-        <div className="w-full flex justify-end mt-2">
-          <button
-            className="text-blue-600 text-sm sm:text-base"
-            onClick={() =>
-              set("formData.staticSpeed.witnesses", [
-                ...witnesses,
-                {
-                  reportingBlock: {
-                    nameReportingMP: "",
-                    rank: "",
-                    unit: "",
-                    armyNumber: "",
-                    contactNumber: "",
-                  },
-                },
-              ])
-            }
-          >
-            + Add More Witness
-          </button>
-        </div>
-      </FormSection>
-
-      {/* ================== LIVE WITNESS LIST ================== */}
-      {witnesses.some(
-        (w) =>
-          w.reportingBlock?.nameReportingMP ||
-          w.reportingBlock?.rank ||
-          w.reportingBlock?.unit ||
-          w.reportingBlock?.armyNumber
-      ) && (
-        <FormSection title="List of On-Duty Details of Witnessing MP - Select One for Signature">
-          <div className="text-sm text-gray-500 mb-2">
-            List of Witnesses, choose one for Signature Proof
-          </div>
-
-          <div>
-            {witnesses
-              .filter(
-                (w) =>
-                  w.reportingBlock?.nameReportingMP ||
-                  w.reportingBlock?.rank ||
-                  w.reportingBlock?.unit ||
-                  w.reportingBlock?.armyNumber
-              )
-              .map((w, index) => {
-                const data = w.reportingBlock;
-
-                return (
-                  <label
-                    key={index}
-                    className="border rounded-md p-4 flex gap-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="selectedWitness"
-                      checked={staticData.selectedWitness === index}
-                      onChange={() =>
-                        set("formData.staticSpeed.selectedWitness", index)
-                      }
-                    />
-
-                    <div className="w-full grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <p>
-                          <span className="font-semibold">Name:</span>{" "}
-                          {data.nameReportingMP || "—"}
-                        </p>
-                        <p>
-                          <span className="font-semibold">Unit:</span>{" "}
-                          {data.unit || "—"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p>
-                          <span className="font-semibold">Rank:</span>{" "}
-                          {data.rank || "—"}
-                        </p>
-                        <p>
-                          <span className="font-semibold">Army no.:</span>{" "}
-                          {data.armyNumber || "—"}
-                        </p>
-                      </div>
-                    </div>
-                  </label>
-                );
-              })}
-          </div>
-        </FormSection>
-      )}
-
-      {/* ================== OFFENCE DETAILS ================== */}
-      <FormSection title="Offence Occurrence Details">
-        <p className="text-gray-500 mb-3">
-          Enter the exact date and time when the incident occurred.
-        </p>
-
-        <div className="grid grid-cols-2 gap-4">
-          {/* TIME OF OFFENCE */}
-          <div>
-            <Label className="mb-2 font-semibold">Time of Offence</Label>
+      <FormSection title="On-Duty Details of Witnessing MP">
+        {witnesses.map((w, index) => (
+          <div key={index} className="border p-4 rounded-lg space-y-4 mb-6">
             <Input
-              type="time"
-              value={offence.timeOfOffence || ""}
+              placeholder="Name of Witnessing MP"
+              value={w.reportingBlock?.nameReportingMP || ""}
               onChange={(e) => {
-                const t = e.target.value;
-                const today = new Date().toISOString().split("T")[0];
-                const iso = `${today}T${t}:00.000Z`;
+                const copy = structuredClone(witnesses);
+                copy[index].reportingBlock.nameReportingMP = e.target.value;
+                set("formData.staticSpeed.witnesses", copy);
+              }}
+            />
 
-                updateOffence("timeOfOffence", t);
-                updateOffence("time", iso);
+            <SuggestionInput
+              placeholder="Select Rank"
+              value={w.reportingBlock?.rank || ""}
+              onChange={(v) => {
+                const copy = structuredClone(witnesses);
+                copy[index].reportingBlock.rank = v;
+                set("formData.staticSpeed.witnesses", copy);
+              }}
+              fieldType="Rank"
+              defaultOptions={["L/Nk", "Nk", "Hav", "Subedar"]}
+            />
+
+            <SuggestionInput
+              placeholder="Select Unit"
+              value={w.reportingBlock?.unit || ""}
+              onChange={(v) => {
+                const copy = structuredClone(witnesses);
+                copy[index].reportingBlock.unit = v;
+                set("formData.staticSpeed.witnesses", copy);
+              }}
+              fieldType="Unit"
+              defaultOptions={["11 Engr Regt", "MP 12", "HQ Unit"]}
+            />
+
+            <Input
+              placeholder="Army No."
+              value={w.reportingBlock?.armyNumber || ""}
+              onChange={(e) => {
+                const copy = structuredClone(witnesses);
+                copy[index].reportingBlock.armyNumber = e.target.value;
+                set("formData.staticSpeed.witnesses", copy);
+              }}
+            />
+
+            <Input
+              placeholder="Contact"
+              value={w.reportingBlock?.contactNumber || ""}
+              onChange={(e) => {
+                const copy = structuredClone(witnesses);
+                copy[index].reportingBlock.contactNumber = e.target.value;
+                set("formData.staticSpeed.witnesses", copy);
               }}
             />
           </div>
+        ))}
 
-          {/* INCIDENT LOCATION */}
-          <div>
-            <Label className="mb-2 font-semibold">Incident Location</Label>
-            <SuggestionInput
-              placeholder="Location"
-              value={offence.incidentLocation || ""}
-              onChange={(v) => updateOffence("incidentLocation", v)}
-              fieldType="incidentLocation"
-            />
-          </div>
-        </div>
+        <button
+          className="text-blue-600 text-sm"
+          onClick={() =>
+            set("formData.staticSpeed.witnesses", [
+              ...witnesses,
+              {
+                reportingBlock: {
+                  nameReportingMP: "",
+                  rank: "",
+                  unit: "",
+                  armyNumber: "",
+                  contactNumber: "",
+                },
+              },
+            ])
+          }
+        >
+          + Add More Witness
+        </button>
+      </FormSection>
 
-        {/* AUTH SPEED */}
-        <div className="mt-4">
-          <Label className="mb-2 font-semibold">Auth Speed</Label>
+      {/* ================== OFFENCE DETAILS ================== */}
+      <FormSection title="Offence Occurrence Details">
+        <Input
+          type="time"
+          value={offence.timeOfOffence || ""}
+          onChange={(e) => {
+            const t = e.target.value; // 17:30
+            const today = new Date().toISOString().split("T")[0];
+            const iso = `${today}T${t}:00.000Z`;
 
-          <SuggestionInput
-            placeholder="Select / Enter Auth Speed"
-            value={offence.authSpeed || "30 KMPH"}
-            onChange={(v) => updateOffence("authSpeed", v)}
-            fieldType="authSpeed"
-          />
+            updateOffence("timeOfOffence", t);
+            updateOffence("time", iso);
+          }}
+        />
 
-          <p className="text-xs text-gray-500 mt-1">
-            STN Cdr ke adesh ke anusar...
-          </p>
-        </div>
+        <SuggestionInput
+          placeholder="Incident Location"
+          value={offence.incidentLocation || ""}
+          onChange={(v) => updateOffence("incidentLocation", v)}
+          fieldType="Incident Location"
+        />
 
-        {/* SPEED BOXES */}
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div>
-            <Label className="mb-2 font-semibold">Actual Speed Noted</Label>
-            <Input
-              placeholder="00"
-              value={offence.actualSpeedNoted || ""}
-              onChange={(e) =>
-                updateOffence("actualSpeedNoted", e.target.value)
-              }
-            />
-          </div>
+        <Input
+          placeholder="Actual Speed"
+          value={offence.actualSpeedNoted || ""}
+          onChange={(e) => updateOffence("actualSpeedNoted", e.target.value)}
+        />
 
-          <div>
-            <Label className="mb-2 font-semibold">Over Speed Calculated</Label>
-            <Input
-              placeholder="00"
-              value={offence.overSpeedCalculated || ""}
-              onChange={(e) =>
-                updateOffence("overSpeedCalculated", e.target.value)
-              }
-            />
-          </div>
-        </div>
+        <Input
+          placeholder="Over Speed"
+          value={offence.overSpeedCalculated || ""}
+          onChange={(e) => updateOffence("overSpeedCalculated", e.target.value)}
+        />
 
-        {/* DESCRIPTION */}
-        <Label className="mb-2 font-semibold mt-4">
-          Full Description of Offence
-        </Label>
         <Textarea
-          placeholder="Provide detailed description of the offence , including what happened and how it occured."
+          placeholder="Full Description"
           value={offence.description || ""}
           onChange={(e) => updateOffence("description", e.target.value)}
         />

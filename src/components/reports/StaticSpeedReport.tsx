@@ -68,7 +68,7 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
     className,
 }) => {
     return (
-        <div className={`font-[Arial] text-[#0A0A0A]  p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 ${className || ''}`}>
+        <div className={`font-[Arial] text-[#0A0A0A] bg-gray-500/10 p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 ${className || ''}`}>
             <style type="text/css" media="print">
                 {`
                   @page {

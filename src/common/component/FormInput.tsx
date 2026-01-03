@@ -12,7 +12,7 @@ import {
 interface FormSelectProps {
   label: string;
   placeholder?: string;
-  options: any[];
+  options: { label: string; value: string }[];
   value?: string;
   onChange?: (v: string) => void;
 }
@@ -24,41 +24,26 @@ export function FormSelect({
   value,
   onChange,
 }: FormSelectProps) {
-  const normalizedOptions = options.map((op, index) => {
-    if (typeof op === "string") {
-      return { label: op, value: op };
-    }
-
-    return {
-      label:
-        typeof op?.label === "object"
-          ? String(op?.label?.label ?? op?.label?.value ?? `Option ${index}`)
-          : String(op?.label ?? op?.value ?? `Option ${index}`),
-
-      value: String(op?.value ?? op?.label ?? index),
-    };
-  });
-
   return (
-    <div className="space-y-1 w-full">
+    <div className="space-y-1  w-full">
       <Label>{label}</Label>
+
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger
-          className={`w-full ${
-            value
-              ? "!border-blue-500 focus-visible:ring-blue-500 focus-visible:ring-offset-0"
-              : ""
-          }`}
-        >
+        <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 
         <SelectContent>
-          {normalizedOptions.map((op, index) => (
-            <SelectItem key={`${op.value}-${index}`} value={op.value}>
-              {op.label}
-            </SelectItem>
-          ))}
+          {options.map((op: any) => {
+            const value = typeof op === "string" ? op : op.value;
+            const label = typeof op === "string" ? op : op.label;
+
+            return (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
     </div>
@@ -71,7 +56,6 @@ interface FormInputProps {
   value?: string;
   onChange?: (v: string) => void;
   type?: string;
-  inputClassName?: string;
 }
 
 export function FormInput({
@@ -83,15 +67,12 @@ export function FormInput({
 }: FormInputProps) {
   return (
     <div className="space-y-1">
-      <Label className="mb-3">{label}</Label>
+      <Label>{label}</Label>
       <Input
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className={
-          value && value.toString().trim() !== "" ? "!border-blue-500 " : ""
-        }
       />
     </div>
   );
