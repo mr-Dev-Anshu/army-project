@@ -27,6 +27,8 @@ export default function VehicleDetailsForm({
     { id: number; type: string | null }[]
   >([]);
 
+  const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
+
   if (scope === "traffic" && traffic.vehicleInvolved !== "yes") return null;
 
   const vehicleState =
@@ -283,30 +285,41 @@ export default function VehicleDetailsForm({
               />
             </div>
           ))}
-
-          {/* {offenders.map((o, index) => (
-            <div key={o.id} className="border rounded-xl p-4 mt-4">
-              <OffenderDynamicForm
-                scope={scope}
-                title={`${o.type} Details`}
-                fields={offenderFormsConfig[o.type!].fields}
-                path={`${driverPath}[${index}].details`}
-                showCoDriver={index === 0}
-              />
-            </div>
-          ))} */}
         </>
       )}
 
       {driverType === "Civilian" && (
         <>
-          <OffenderDynamicForm
-            scope={scope}
-            title="Civilian Details"
-            fields={offenderFormsConfig["Civilian"].fields}
-            path={driverPath}
-            showCoDriver={true}
-          />
+          {(() => {
+            let index = coDriverIndex;
+
+            // ✅ ensure offender array me entry ho
+            if (index === null) {
+              index = state.formData.traffic.offenderPeople.length;
+              setCoDriverIndex(index);
+
+           dispatch({
+  type: "PUSH_PATH",
+  path: "formData.traffic.offenderPeople",
+  value: {
+    offenderType: "Civilian",
+    role: "Co-Driver",
+    details: {},
+  },
+});
+
+            }
+
+            return (
+              <OffenderDynamicForm
+                title="Civilian Co-Driver Details"
+                fields={offenderFormsConfig["Civilian"].fields}
+                scope="traffic"
+                path={`formData.traffic.offenderPeople[${index}].details`}
+                showCoDriver={false}
+              />
+            );
+          })()}
         </>
       )}
     </div>

@@ -355,7 +355,23 @@ export default function OffenderDynamicForm({
     if (scope === "traffic" && path) setLocalData(preData);
     else setLocalData({});
   }, [scope, path]);
+  /* ================= LABEL → KEY MAP ================= */
+  const labelKeyMap: Record<string, string> = {
+    "Full Name": "name",
+    Name: "name",
+    Rank: "rank",
+    "Army Rider / Driver Number": "armyNumber",
+    "Army Number": "armyNumber",
+    Unit: "unit",
+    Command: "command",
+    FMN: "fmn",
+    Address: "address",
+    "ID Card Number": "iCardNumber",
+    "Aadhar Card Number": "iCardNumber",
+    "I Card Number": "iCardNumber",
+  };
 
+  /* ================= SAVE FIELD (FIXED) ================= */
   const saveField = (label: string, value: string) => {
     let targetPath = path;
 
@@ -365,9 +381,11 @@ export default function OffenderDynamicForm({
     if (!targetPath && scope === "mp-additional")
       targetPath = "formData.mpReport.additionalIndividual.tempOffender";
 
+    const key = labelKeyMap[label] || label; // ⭐ FIX
+
     setLocalData((prev: any) => ({
       ...(prev || {}),
-      [label]: value,
+      [key]: value,
     }));
 
     if (!targetPath) return;
@@ -379,7 +397,7 @@ export default function OffenderDynamicForm({
       path: targetPath,
       value: {
         ...prevGlobal,
-        [label]: value,
+        [key]: value,
       },
     });
   };
@@ -394,13 +412,13 @@ export default function OffenderDynamicForm({
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f, i) => {
           const label = f.label;
-          const value = localData?.[label] || "";
+          const key = labelKeyMap[label] || label;
+          const value = localData?.[key] || "";
 
           if ((f as any).type === "suggestion") {
             return (
               <div key={i} className="flex flex-col gap-1">
                 <Label className="font-semibold">{label}</Label>
-
                 <SuggestionInput
                   placeholder={f.placeholder}
                   value={value}
@@ -414,7 +432,6 @@ export default function OffenderDynamicForm({
           return (
             <div key={i} className="flex flex-col gap-1">
               <Label className="font-semibold">{label}</Label>
-
               <FormInput
                 label=""
                 placeholder={f.placeholder}
@@ -574,17 +591,17 @@ export default function OffenderDynamicForm({
                 ))}
               </div>
 
-              {coDriverType &&
-                offenderFormsConfig[coDriverType] &&
-                coDriverIndex !== null && (
-                  <OffenderDynamicForm
-                    title={`${coDriverType} Details`}
-                    fields={offenderFormsConfig[coDriverType].fields}
-                    scope="traffic"
-                    path={`formData.traffic.offenderPeople[${coDriverIndex}].details`}
-                    showCoDriver={false}
-                  />
-                )}
+              {coDriverType && offenderFormsConfig[coDriverType] && (
+                <OffenderDynamicForm
+                  title={`${coDriverType} Details`}
+                  fields={offenderFormsConfig[coDriverType].fields}
+                  scope="traffic"
+                  path={`formData.traffic.offenderPeople[${
+                    state.formData.traffic.offenderPeople.length - 1
+                  }].details`}
+                  showCoDriver={false}
+                />
+              )}
             </>
           )}
         </>
