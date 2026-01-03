@@ -153,156 +153,136 @@ export default function StaticSpeedForm({
     },
   };
 
-const handleFinalSubmit = async () => {
-  try {
-    /* ================= STATIC SPEED PAYLOAD ================= */
-    const payload = {
-      vehicleType: staticData.vehicleDetails.vehicleType,
-      vehicleCategory: staticData.vehicleDetails.category,
-      vehicleNumber: staticData.vehicleDetails.vehicleNumber,
-      vehicleName: staticData.vehicleDetails.vehicleName,
-
-      offenceOccurenceDetails: {
-        time: staticData.offenceBlock?.time || "",
-        incidentLocation: staticData.offenceBlock?.incidentLocation || "",
-         description: [
-    staticData.offenceBlock?.description,
-    staticData.offenceBlock?.description2,
-  ]
-    .filter(Boolean)
-    .join("\n\n"),
-
-        overSpeedCalculated:
-          staticData.offenceBlock?.overSpeedCalculated ?? "",
-        actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
-        authSpeed: staticData.offenceBlock?.authSpeed ?? "",
-      },
-    };
-
-    console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
-
-    /* ================= CREATE STATIC RECORD ================= */
-    const staticRes = await createStaticRecord.mutateAsync(payload);
-    console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
-
-    toast.success("Static Record Created Successfully!");
-
-    if (!staticRes?._id) {
-      toast.error("Static Record ID Missing!");
-      return;
-    }
-
-    /* ================= OFFENDER PAYLOAD ================= */
-    const offenderPayload: CreateOffenderData = {
-      offenceId: staticRes._id,
-      offenderType: "Military Person",
-
-      offenderDetails: {
-        type: "Driver",
-        name: staticData.offenderPeople?.[0]?.details?.Name || "",
-        rank: staticData.offenderPeople?.[0]?.details?.Rank || "",
-        armyNumber:
-          staticData.offenderPeople?.[0]?.details?.[
-            "Army Rider / Driver Number"
-          ] || "",
-        unit: staticData.offenderPeople?.[0]?.details?.Unit || "",
-        command: staticData.offenderPeople?.[0]?.details?.Command || "",
-        fmn: staticData.offenderPeople?.[0]?.details?.FMN || "",
-        address: staticData.offenderPeople?.[0]?.details?.Address || "",
-        iCardNumber:
-          staticData.offenderPeople?.[0]?.details?.["ID Card Number"] || "",
-      },
-    };
-
-    console.log(
-      "👮 OFFENDER PAYLOAD SENT ===>",
-      JSON.stringify(offenderPayload, null, 2)
-    );
-
-    /* ================= CREATE OFFENDER ================= */
+  const handleFinalSubmit = async () => {
     try {
-      const offenderRes = await createOffenderMutation.mutateAsync(
-        offenderPayload
-      );
-      console.log("✅ OFFENDER BACKEND RESPONSE ===>", offenderRes);
-      toast.success("Offender Created Successfully!");
-    } catch (err: any) {
-      console.error(
-        "❌ OFFENDER BACKEND ERROR ===>",
-        err?.response?.data || err
-      );
-      throw err;
-    }
+      /* ================= STATIC SPEED PAYLOAD ================= */
+      const payload = {
+        vehicleType: staticData.vehicleDetails.vehicleType,
+        vehicleCategory: staticData.vehicleDetails.category,
+        vehicleNumber: staticData.vehicleDetails.vehicleNumber,
+        vehicleName: staticData.vehicleDetails.vehicleName,
 
-    /* ================= CREATE WITNESS ================= */
-    if (staticData.witnesses?.length > 0) {
-      const witnessPayload = staticData.witnesses.map((w) => ({
-        offenceId: staticRes._id,
-        rank: w.reportingBlock.rank,
-        unit: w.reportingBlock.unit,
-        ArmyNo: w.reportingBlock.armyNumber,
-        name: w.reportingBlock.nameReportingMP || "",
-        contactNumber: w.reportingBlock.contactNumber || "",
-      }));
+        offenceOccurenceDetails: {
+          time: staticData.offenceBlock?.time || "",
+          incidentLocation: staticData.offenceBlock?.incidentLocation || "",
+          description: [
+            staticData.offenceBlock?.description,
+            staticData.offenceBlock?.description2,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
 
-      console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
+          overSpeedCalculated:
+            staticData.offenceBlock?.overSpeedCalculated ?? "",
+          actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
+          authSpeed: staticData.offenceBlock?.authSpeed ?? "",
+        },
+      };
 
-      try {
-        const witnessResponses = await Promise.all(
-          witnessPayload.map((w) =>
-            createWitnessMutation.mutateAsync(w)
-          )
-        );
+      console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
+
+      /* ================= CREATE STATIC RECORD ================= */
+      const staticRes = await createStaticRecord.mutateAsync(payload);
+      console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
+
+      toast.success("Static Record Created Successfully!");
+
+      if (!staticRes?._id) {
+        toast.error("Static Record ID Missing!");
+        return;
+      }
+
+      /* ================= CREATE ALL OFFENDERS ================= */
+      const offenders = staticData.offenderPeople || [];
+
+      for (const offender of offenders) {
+        if (!offender?.details) continue;
+
+        const d = offender.details;
+
+        // 🚫 Skip empty offender blocks
+        if (!d.name && !d.rank && !d.armyNumber && !d.address) {
+          console.log("⏭️ Skipping empty offender");
+          continue;
+        }
+
+        const offenderPayload: CreateOffenderData = {
+          offenceId: staticRes._id,
+          offenderType: offender.type as OffenderType, // 🔥 DYNAMIC
+
+          offenderDetails: {
+            type: offender.type === "Military Person" ? "Driver" : "Co-Driver",
+
+            name: d.name || "",
+            rank: d.rank || "",
+            armyNumber: d.armyNumber || "",
+            unit: d.unit || "",
+            command: d.command || "",
+            fmn: d.fmn || "",
+            address: d.address || "",
+            iCardNumber: d.iCardNumber || "",
+          },
+        };
 
         console.log(
-          "✅ WITNESS BACKEND RESPONSES ===>",
-          witnessResponses
+          "👮 OFFENDER PAYLOAD SENT ===>",
+          JSON.stringify(offenderPayload, null, 2)
         );
 
-        toast.success("Witness Added Successfully!");
-      } catch (err: any) {
-        console.error(
-          "❌ WITNESS BACKEND ERROR ===>",
-          err?.response?.data || err
-        );
-        throw err;
+        await createOffenderMutation.mutateAsync(offenderPayload);
       }
+
+      toast.success("All Offenders Created Successfully!");
+
+      /* ================= CREATE WITNESSES ================= */
+      if (staticData.witnesses?.length > 0) {
+        const witnessPayload = staticData.witnesses.map((w) => ({
+          offenceId: staticRes._id,
+          rank: w.reportingBlock.rank,
+          unit: w.reportingBlock.unit,
+          ArmyNo: w.reportingBlock.armyNumber,
+          name: w.reportingBlock.nameReportingMP || "",
+          contactNumber: w.reportingBlock.contactNumber || "",
+        }));
+
+        console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
+
+        await Promise.all(
+          witnessPayload.map((w) => createWitnessMutation.mutateAsync(w))
+        );
+
+        toast.success("Witnesses Added Successfully!");
+      }
+
+      toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
+
+      /* ================= RESET FORM ================= */
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.staticSpeed",
+        value: initialState.formData.staticSpeed,
+      });
+
+      dispatch({ type: "SET_STEP", payload: 1 });
+      dispatch({
+        type: "SET_PATH",
+        path: "completedSteps",
+        value: [],
+      });
+    } catch (error: any) {
+      console.error(
+        "❌ FINAL STATIC SPEED ERROR ===>",
+        error?.response?.data || error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Failed to submit record"
+      );
     }
-
-    toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
-
-    /* ================= RESET FORM ================= */
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed",
-      value: initialState.formData.staticSpeed,
-    });
-
-    dispatch({ type: "SET_STEP", payload: 1 });
-    dispatch({
-      type: "SET_PATH",
-      path: "completedSteps",
-      value: [],
-    });
-  } catch (error: any) {
-    console.error(
-      "❌ FINAL STATIC SPEED ERROR ===>",
-      error?.response?.data || error
-    );
-
-    const msg =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Failed to submit record";
-
-    toast.error(msg);
-  }
-};
-
-
-
-
+  };
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
