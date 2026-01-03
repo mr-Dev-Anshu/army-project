@@ -31,15 +31,15 @@ type OffenceGroup = {
 
 type TableColumn = {
   key:
-    | 'srNo'
-    | 'offenceType'
-    | 'dateTime'
-    | 'location'
-    | 'vehicleNumber'
-    | 'reportingMP'
-    | 'description'
-    | 'offenders'
-    | 'actionStatus';
+  | 'srNo'
+  | 'offenceType'
+  | 'dateTime'
+  | 'location'
+  | 'vehicleNumber'
+  | 'reportingMP'
+  | 'description'
+  | 'offenders'
+  | 'actionStatus';
   header: string;
   align?: 'left' | 'center' | 'right';
   width?: string;
@@ -47,7 +47,7 @@ type TableColumn = {
 
 interface CollapsibleOffenceTableProps {
   data: OffenceGroup[];
-  columns?: TableColumn[]; 
+  columns?: TableColumn[];
 }
 
 const defaultColumns: TableColumn[] = [
@@ -87,7 +87,7 @@ export default function CollapsibleOffenceTable({
   const colCount = columns.length;
 
   return (
-    <div className="w-full overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="w-full overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <table className="w-full text-sm text-left">
         {/* Dynamic Headers from props */}
         <thead className="text-xs uppercase bg-gray-50 border-b border-gray-200">
@@ -143,9 +143,8 @@ export default function CollapsibleOffenceTable({
                 <tr>
                   <td colSpan={colCount} className="p-0">
                     <div
-                      className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                        isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-                      }`}
+                      className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                        }`}
                     >
                       <div className="border-t border-gray-200">
                         {group.details.map((detail) => (
@@ -205,18 +204,16 @@ export default function CollapsibleOffenceTable({
                                       <div key={col.key} className="text-center">
                                         <div className="flex items-center justify-center gap-2">
                                           <Circle
-                                            className={`w-3 h-3 fill-current ${
-                                              detail.actionStatus === 'Pending'
-                                                ? 'text-red-500'
-                                                : 'text-green-500'
-                                            }`}
+                                            className={`w-3 h-3 fill-current ${detail.actionStatus === 'Pending'
+                                              ? 'text-red-500'
+                                              : 'text-green-500'
+                                              }`}
                                           />
                                           <span
-                                            className={`font-medium ${
-                                              detail.actionStatus === 'Pending'
-                                                ? 'text-red-600'
-                                                : 'text-green-600'
-                                            }`}
+                                            className={`font-medium ${detail.actionStatus === 'Pending'
+                                              ? 'text-red-600'
+                                              : 'text-green-600'
+                                              }`}
                                           >
                                             {detail.actionStatus}
                                           </span>

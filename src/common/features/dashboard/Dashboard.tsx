@@ -367,7 +367,7 @@ export default function Dashboard() {
       </div>
 
       {/* RIGHT CONTENT */}
-      <div className="flex-1 p-4  sm:p-5 md:p-6 space-y-8 overflow-y-auto no-scrollbar">
+      <div className="flex-1 p-4  sm:p-5 md:p-6 space-y-8 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {/* ================== DASHBOARD PAGE ================== */}
         {page === "dashboard" && (
           <>

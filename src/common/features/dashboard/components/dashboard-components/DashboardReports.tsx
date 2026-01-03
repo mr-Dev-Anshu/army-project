@@ -330,7 +330,7 @@ export default function DashboardReports() {
                         Print Report
                     </Button>
                 </div>
-                <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-50/50 print:p-0 print:bg-white print:overflow-visible no-scrollbar">
+                <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-50/50 print:p-0 print:bg-white print:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <div className="w-full max-w-[210mm] print:max-w-none">
                         <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
                     </div>
@@ -434,7 +434,7 @@ export default function DashboardReports() {
 
             {/* Table */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <DynamicTable columns={columns} data={filteredData} className="w-full no-scrollbar" />
+                <DynamicTable columns={columns} data={filteredData} className="w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" />
 
                 {filteredData.length === 0 && !isLoading && (
                     <div className="p-8 text-center text-gray-500">
