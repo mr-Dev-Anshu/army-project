@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Eye } from "lucide-react";
+import { ChevronRight, Cross, Eye } from "lucide-react";
 import { CiEraser } from "react-icons/ci";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useForm } from "@/context/FormContext";
+import { IoMdClose } from "react-icons/io";
 
 import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
 import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
@@ -115,13 +116,14 @@ export const RightPanel = ({
                   </h2>
 
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={window.print}>
-                      🖨 Print
+                    <Button className="bg-black text-white text-xl"   onClick={window.print}>
+                      🖨 
                     </Button>
 
                     <Button
-                      size="sm"
-                      variant="ghost"
+                    className="bg-black text-xl text-white"
+                   
+                   
                       onClick={() => {
                         dispatch({ type: "SET_PREVIEW", payload: false });
 
@@ -132,7 +134,7 @@ export const RightPanel = ({
                         });
                       }}
                     >
-                      ❌
+                      <IoMdClose />
                     </Button>
                   </div>
                 </div>
