@@ -300,12 +300,17 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
-                                    "pm.test(\"Check for offenders virtual property\", function () {",
+                                    "pm.test(\"Check for expanded properties\", function () {",
                                     "    const response = pm.response.json();",
                                     "    pm.response.to.have.status(200);",
                                     "    if (response.data && response.data.length > 0) {",
-                                    "        pm.expect(response.data[0]).to.have.property('offenders');",
-                                    "        // pm.expect(response.data[0].offenders).to.be.an('array'); // Optional: check if it's an array",
+                                    "        const report = response.data[0];",
+                                    "        pm.expect(report).to.have.property('offenders');",
+                                    "        pm.expect(report.offenders).to.be.an('array');",
+                                    "        pm.expect(report).to.have.property('onDutyWitnessingMps');",
+                                    "        pm.expect(report.onDutyWitnessingMps).to.be.an('array');",
+                                    "        pm.expect(report).to.have.property('offendersCount');",
+                                    "        pm.expect(report).to.have.property('witnessingMpsCount');",
                                     "    }",
                                     "});"
                                 ],
@@ -317,6 +322,27 @@
                 },
                 {
                     "name": "Get Report by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Check for expanded properties\", function () {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const report = response.data || response;",
+                                    "    if (report) {",
+                                    "        pm.expect(report).to.have.property('offenders');",
+                                    "        pm.expect(report).to.have.property('onDutyWitnessingMps');",
+                                    "        pm.expect(report).to.have.property('offendersCount');",
+                                    "        pm.expect(report).to.have.property('witnessingMpsCount');",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "GET",
                         "header": [],
