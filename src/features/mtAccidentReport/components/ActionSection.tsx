@@ -26,7 +26,7 @@ export default function ActionSection() {
 
       {/* Action Status */}
    <div className="space-y-2">
-  <label className="text-sm text-gray-600">Action Status</label>
+  <label className="text-sm font-medium text-gray-900">Action Status</label>
 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
     {ACTION_OPTIONS.map((item) => {
@@ -48,16 +48,16 @@ export default function ActionSection() {
           className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition
             ${
               active
-                ? "border-blue-600 bg-blue-50 text-blue-700"
-                : "border-gray-300 text-gray-700 hover:border-blue-400"
+                ? "border-gray-600 bg-gray-100 text-gray-700"
+                : "border-gray-300 text-gray-700 hover:border-gray-400"
             }`}
         >
           <span
             className={`h-4 w-4 rounded-full border flex items-center justify-center
-              ${active ? "border-blue-600" : "border-gray-400"}`}
+              ${active ? "border-gray-600" : "border-gray-400"}`}
           >
             {active && (
-              <span className="h-2 w-2 rounded-full bg-blue-600" />
+              <span className="h-2 w-2 rounded-full bg-gray-600" />
             )}
           </span>
 
@@ -70,7 +70,7 @@ export default function ActionSection() {
 
       {/* Remark */}
       <div className="space-y-1">
-        <label className="text-sm text-gray-600">Add Remark</label>
+        <label className="text-sm font-medium text-gray-900">Add Remark</label>
 
         <textarea
           rows={3}

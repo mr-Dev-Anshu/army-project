@@ -15,18 +15,12 @@ import {
   useUpdateMTAccidentReport,
 } from "../hooks/useMTAccidentReport";
 
-
-
 import {
   mapMTAccidentPayload,
   cleanPayload,
 } from "../utils/mapMTAccidentPayload";
 
-export default function MTAccidentForm({
-  onClose,
-}: {
-  onClose?: () => void;
-}) {
+export default function MTAccidentForm({ onClose }: { onClose?: () => void }) {
   const { state } = useForm();
 
   const { mutate: create, isPending: isCreating } =
@@ -39,121 +33,83 @@ export default function MTAccidentForm({
   const isPending = isCreating || isUpdating;
 
   const handleSave = () => {
-    const mappedPayload = mapMTAccidentPayload(formData);
-    const cleanedPayload = cleanPayload(mappedPayload);
+    const cleanedPayload = cleanPayload(
+      mapMTAccidentPayload(formData)
+    );
 
-    console.log("sending payload:", cleanedPayload);
-
-    if (isEdit) {
-      update(
-        {
-          id: formData._id,
-          data: cleanedPayload,
-        },
-        {
-          onSuccess: () => {
-            console.log(" Update successful");
-            onClose?.();
-          },
-          onError: (error: any) => {
-            console.error(
-              " Update failed:",
-              error?.response?.data || error
-            );
-          },
-        }
-      );
-    } else {
-      create(cleanedPayload, {
-        onSuccess: () => {
-          console.log(" Create successful");
-          onClose?.();
-        },
-        onError: (error: any) => {
-          console.error(" Create failed:", {
-            status: error?.response?.status,
-            data: error?.response?.data,
-            message: error?.message,
-            fullError: error,
-          });
-        },
-      });
-    }
+    isEdit
+      ? update({ id: formData._id, data: cleanedPayload }, { onSuccess: () => onClose?.() })
+      : create(cleanedPayload, { onSuccess: () => onClose?.() });
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex justify-center items-start overflow-y-auto z-50">
-      <div className="bg-white w-full max-w-3xl my-10 rounded-xl shadow-lg">
-       {/* header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/10">
+      <div className="bg-white w-full max-w-3xl h-full shadow-xl flex flex-col">
+        
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-6 py-4 ">
           <div>
             <h2 className="text-lg font-semibold">
-              {isEdit
-                ? "Edit MT Accident Report"
-                : "Add MT Accident Report"}
+              {isEdit ? "Edit MT Accident Report" : "Add MT Accident Report"}
             </h2>
             <p className="text-sm text-gray-500">
-              {isEdit
-                ? "Update accident report details"
-                : "Fill details to create accident report"}
+              Fill details to issue temporary hired worker security pass
             </p>
           </div>
-
           <button onClick={onClose}>
             <X className="w-5 h-5 text-gray-500 hover:text-black" />
           </button>
         </div>
 
-        {/* bodyyy */}
-        <div className="px-6 py-6 space-y-6">
-          <Section>
-            <IndividualVictimSection />
-          </Section>
+        {/* BODY */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+          <IndividualVictimSection />
+          {/* <Divider /> */}
 
-          <Section>
-            <AccidentDetailsSection />
-          </Section>
+          <AccidentDetailsSection />
+          {/* <Divider /> */}
 
-          <Section>
-            <VehicleDetailsSection />
-          </Section>
+          <VehicleDetailsSection />
+          {/* <Divider /> */}
 
-          <Section>
-            <CasualtyDetailsSection />
-          </Section>
+          <CasualtyDetailsSection />
+          {/* <Divider /> */}
 
-          <Section>
-            <FirDetailsSection />
-          </Section>
+          <FirDetailsSection />
+          {/* <Divider /> */}
 
-          <Section>
-            <ActionSection />
-          </Section>
+          <ActionSection />
         </div>
 
-        {/* footer */}
-        <div className="flex justify-between items-center px-6 py-4 border-t bg-gray-50 rounded-b-xl">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
+        {/* FOOTER */}
+       <div className="flex justify-between items-center px-6 py-4 border-t">
+  <Button
+    variant="outline"
+    onClick={onClose}
+    className="border-gray-300 text-gray-700 hover:bg-gray-100"
+  >
+    Cancel
+  </Button>
 
-          <Button onClick={handleSave} disabled={isPending}>
-            {isPending
-              ? "Saving..."
-              : isEdit
-              ? "Update Report"
-              : "Save Accident Report"}
-          </Button>
-        </div>
+  <Button
+    onClick={handleSave}
+    disabled={isPending}
+    className="bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+  >
+    {isPending
+      ? "Saving..."
+      : isEdit
+      ? "Update Report"
+      : "Save & Add Another"}
+  </Button>
+</div>
+
       </div>
     </div>
   );
 }
-//section area
-function Section({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="border rounded-lg p-4 bg-white">
-      {children}
-    </div>
-  );
+
+/* ===== SINGLE LINE DIVIDER ===== */
+function Divider() {
+  return <div className="border-t border-gray-200" />;
 }

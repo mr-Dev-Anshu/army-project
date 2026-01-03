@@ -232,7 +232,7 @@ export default function MultiStepForm({ onCancel }: { onCancel: () => void }) {
 
         offenceOccurenceDetails: {
           description: safe(traffic?.offenceOccurenceDetails?.description),
-          description2: safe(traffic?.offenceOccurenceDetails?.description2),
+          // description2: safe(traffic?.offenceOccurenceDetails?.description2),
           incidentLocation: safe(
             traffic?.offenceOccurenceDetails?.incidentLocation
           ),

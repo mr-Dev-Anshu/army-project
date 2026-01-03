@@ -20,7 +20,7 @@ export default function Step5WitnessList() {
   const mp = state.formData.mpReport;
 
   const witnesses = mp.witnesses || [];
-  const witnessVehicleStatus: YesNo = mp.witnessVehicleStatus || "";
+  // const witnessVehicleStatus: YesNo = mp.witnessVehicleStatus || "";
 
   const add = mp.additionalIndividual;
 
@@ -103,7 +103,7 @@ export default function Step5WitnessList() {
   return (
     <FormSection title="">
       {/* MAIN WITNESS */}
-      <VehiclePrimaryQuestion
+      {/* <VehiclePrimaryQuestion
         title="Does this witness involve a vehicle?"
         vehicleStatus={witnessVehicleStatus}
         setVehicleStatus={setVehicleStatus}
@@ -132,7 +132,7 @@ export default function Step5WitnessList() {
             title="Does this additional witness involve vehicle?"
             vehicleStatus={extraVehicleStatus}
             setVehicleStatus={setExtraVehicleStatus}
-          />
+          /> */
 
           {extraVehicleStatus === "yes" && (
             <VehicleDetailsForm scope="mp-additional" />
@@ -170,7 +170,7 @@ export default function Step5WitnessList() {
       {/* LIST */}
       <DynamicOffenderList
         onDelete={handleDeleteWitness}
-        data={witnesses}
+        // data={witnesses}
         title="Witness List"
       />
     </FormSection>

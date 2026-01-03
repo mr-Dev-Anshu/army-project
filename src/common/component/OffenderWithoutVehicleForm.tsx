@@ -145,7 +145,7 @@ export default function OffenderWithoutVehicleForm({
       {offenderType === "Civilian" && (
         <>
           <OffenderDynamicForm
-            scope={scope}
+            // scope={scope}
             title="Civilian Details"
             fields={offenderFormsConfig["Civilian"].fields}
             showCoDriver={false}
@@ -230,7 +230,7 @@ export default function OffenderWithoutVehicleForm({
 
               {relativeType && (
                 <OffenderDynamicForm
-                  scope={scope}
+                  // scope={scope}
                   title={`${
                     relativeRelation || "Relative"
                   } (${relativeType}) Details`}
@@ -248,7 +248,7 @@ export default function OffenderWithoutVehicleForm({
         offenderType !== "Civilian" &&
         offenderConfig[offenderType] && (
           <OffenderDynamicForm
-            scope={scope}
+            // scope={scope}
             title={offenderConfig[offenderType].title}
             helperText={offenderConfig[offenderType].helperText}
             fields={offenderFormsConfig[offenderType].fields.slice(1)}

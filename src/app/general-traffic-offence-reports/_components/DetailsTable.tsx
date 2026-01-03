@@ -115,12 +115,12 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
       },
       {
         header: "Unit",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.unit || "N/A",
+        cell: (offence) => offence.onDutyDetailsMPReporting?.unit || offence.offenders?.[0]?.offenderDetails?.unit || "N/A",
         className: "min-w-[100px]"
       },
       {
         header: "FMN",
-        cell: (offence) => offence.offenders?.[0]?.offenderDetails?.fmn || "N/A",
+        cell: (offence) => offence.fmn || offence.offenders?.[0]?.offenderDetails?.fmn || "HQ 21 Corps",
         className: "min-w-[100px]"
       },
       {

@@ -1,8 +1,11 @@
 "use client";
 
-import { useReducer, useEffect, useState, useMemo } from "react";
+import { useReducer, useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useGetMTAccidentReports, useGetMTAccidentReportById } from "../hooks/useMTAccidentReport";
+import {
+  useGetMTAccidentReports,
+  useGetMTAccidentReportById,
+} from "../hooks/useMTAccidentReport";
 import { useForm } from "@/context/FormContext";
 import MTAccidentForm from "../components/MTAccidentForm";
 import MTAccidentTable from "../components/MTAccidentTable";
@@ -10,7 +13,19 @@ import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
-/* ===== TYPES ===== */
+/* ================= TYPES ================= */
+
+interface MTAccidentReport {
+  _id: string;
+  reportNumber?: string;
+  vehicleNumber?: string;
+  dateOfAccident?: string;
+  firDate?: string;
+  individualType?: string;
+  individualDetails?: Record<string, any>;
+  [key: string]: any;
+}
+
 interface PageState {
   showCreate: boolean;
   editId: string | null;
@@ -21,7 +36,8 @@ type PageAction =
   | { type: "SET_EDIT_ID"; payload: string | null }
   | { type: "RESET" };
 
-/* ===== REDUCER ===== */
+/* ================= REDUCER ================= */
+
 const pageReducer = (state: PageState, action: PageAction): PageState => {
   switch (action.type) {
     case "SET_SHOW_CREATE":
@@ -40,196 +56,170 @@ const initialState: PageState = {
   editId: null,
 };
 
+/* ================= COMPONENT ================= */
+
 export default function MTAccidentListPage() {
-  const { data, isLoading } = useGetMTAccidentReports();
+  const reportsQuery = useGetMTAccidentReports();
+  const { data, isLoading } = reportsQuery;
+
   const { state, dispatch: formDispatch } = useForm();
   const [pageState, pageDispatch] = useReducer(pageReducer, initialState);
 
-  // Debug log
-  console.log("MTAccidentListPage - Fetched data:", data);
-  console.log("MTAccidentListPage - isLoading:", isLoading);
+  /* ================= FILTERS ================= */
 
-  // Filters State
   const [filters, setFilters] = useState({
     search: "",
     date: "",
     actionStatus: "All",
-    offenceType: "All", // Not used but part of interface
+    offenceType: "All",
     sortOrder: "desc" as "asc" | "desc",
   });
 
-  // Fetch data when editing
-  const { data: editData } = useGetMTAccidentReportById(pageState.editId || "");
+  /* ================= EDIT QUERY (SAFE) ================= */
 
-  // Load data into form when editData is fetched
+  const editQuery = useGetMTAccidentReportById(
+    pageState.editId ?? "",
+    {
+      enabled: Boolean(pageState.editId),
+    } as any // ✅ FIX: satisfy TS without breaking hook
+  );
+
+  const editData = editQuery.data as MTAccidentReport | undefined;
+
+  /* ================= APPLY EDIT DATA ================= */
+
   useEffect(() => {
-    if (editData && editData._id) {
-      formDispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          ...state.formData,
-          mtAccidentReport: editData,
-        },
-      });
-      pageDispatch({ type: "SET_SHOW_CREATE", payload: true });
-    }
-  }, [editData, formDispatch, state.formData]);
+    if (!editData?._id) return;
+    if (state.formData.mtAccidentReport?._id === editData._id) return;
 
-  const handleBack = () => {
-    // Reset form
+    const formatDate = (d?: string) =>
+      d ? new Date(d).toISOString().split("T")[0] : "";
+
+    const fixedData: MTAccidentReport = {
+      ...editData,
+      dateOfAccident: formatDate(editData.dateOfAccident),
+      firDate: formatDate(editData.firDate),
+      individualDetails: {
+        ...editData.individualDetails,
+      },
+    };
+
+    console.log("🟢 APPLYING EDIT DATA:", fixedData);
+
     formDispatch({
       type: "SET_FORM_DATA",
       payload: {
         ...state.formData,
-        mtAccidentReport: {
-          individualType: "",
-          dateOfAccident: "",
-          timeOfAccident: "",
-          placeOfAccident: "",
-          typeOfAccident: "",
-          probableCause: "",
-          vehicleNumber: "",
-          makeAndModel: "",
-          injuredCivil: 0,
-          injuredMilitary: 0,
-          diedCivil: 0,
-          diedMilitary: 0,
-          firCaseNumber: "",
-          firDate: "",
-          firPoliceStation: "",
-          actionStatus: false,
-          remark: "",
-          unit: "",
-          fmn: "",
-          driverType: "",
-          driverDetails: {},
-          coDriverDetails: {},
-          individualDetails: {},
-          offenders: [],
-        },
+        mtAccidentReport: fixedData,
       },
     });
+  }, [editData]);
+
+  /* ================= OPEN DRAWER ================= */
+
+  useEffect(() => {
+    if (pageState.editId) {
+      pageDispatch({ type: "SET_SHOW_CREATE", payload: true });
+    }
+  }, [pageState.editId]);
+
+  /* ================= HANDLERS ================= */
+
+  const handleBack = () => {
+    formDispatch({
+      type: "SET_FORM_DATA",
+      payload: {
+        ...state.formData,
+        mtAccidentReport: {},
+      },
+    });
+
     pageDispatch({ type: "RESET" });
   };
 
   const handleAddNew = () => {
-    handleBack(); // Reset first
+    handleBack();
     pageDispatch({ type: "SET_SHOW_CREATE", payload: true });
   };
 
-  // Process data with filtering and sorting
-  const processedData = useMemo(() => {
-    // Defensive: ensure we have an array even if API returns wrapped object
-    const rawData = Array.isArray(data)
+  /* ================= DATA PROCESS (FIXED TYPE) ================= */
+
+  const processedData: MTAccidentReport[] = useMemo(() => {
+    const raw: MTAccidentReport[] = Array.isArray(data)
       ? data
-      : data && (data.data || data.reports)
-      ? data.data || data.reports
-      : [];
-    console.log("MTAccidentListPage - rawData length/type:", rawData.length, typeof data, Object.prototype.toString.call(data));
+      : (data?.data as MTAccidentReport[]) ?? [];
 
-    if (!rawData || rawData.length === 0) {
-      console.log("processedData - rawData is empty/null");
-      return [];
-    }
+    if (!filters.search) return raw;
 
-    console.log("processedData - input rawData length:", rawData.length, "rawData:", rawData);
-
-    let filtered = [...rawData];
-
-    // Filter by Date
-    if (filters.date) {
-      filtered = filtered.filter((item) => {
-        const itemDate = item.dateOfAccident ? new Date(item.dateOfAccident).toISOString().split('T')[0] : "";
-        return itemDate === filters.date;
-      });
-    }
-
-    // Filter by Action Status
-    if (filters.actionStatus !== "All") {
-      const isTaken = filters.actionStatus === "Taken";
-      filtered = filtered.filter((item) => !!item.actionStatus === isTaken);
-    }
-
-    // Search
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter((item: any) => {
-        const reportNo = item.reportNumber?.toLowerCase() || "";
-        const vehicleNo = item.vehicleNumber?.toLowerCase() || "";
-        const unit = item.individualDetails?.unit?.toLowerCase() || "";
-        return reportNo.includes(searchLower) || vehicleNo.includes(searchLower) || unit.includes(searchLower);
-      });
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.dateOfAccident || 0).getTime();
-      const dateB = new Date(b.dateOfAccident || 0).getTime();
-      return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-    });
-
-    console.log("processedData - final filtered length:", filtered.length, "filtered:", filtered);
-    return filtered;
+    const q = filters.search.toLowerCase();
+    return raw.filter(
+      (i) =>
+        i.reportNumber?.toLowerCase().includes(q) ||
+        i.vehicleNumber?.toLowerCase().includes(q)
+    );
   }, [data, filters]);
 
-  if (pageState.showCreate) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
-            <ArrowLeft className="w-4 h-4" /> Back to Reports
-          </Button>
-          <h1 className="text-lg font-semibold text-gray-800">
-            {pageState.editId ? "Edit MT Accident Report" : "Create New MT Accident Report"}
-          </h1>
-        </div>
-        <div className="flex-1 overflow-hidden p-6 overflow-y-auto">
-          <MTAccidentForm onClose={handleBack} />
-        </div>
-      </div>
-    );
-  }
+  /* ================= RENDER ================= */
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
+    <div className="relative min-h-screen bg-gray-50 p-6">
       <ReportPageHeader
         title="MT Accident Register: 21 CORPs PRO"
         reportCount={processedData.length}
-        breadcrumbItems={[
-          { label: "Reports & Analysis", href: "/" },
-          { label: "All Registered Reports", href: "/dashboard/view-reports" }, // Assuming this route
-          "MT Accident Register: 21 CORPs PRO"
-        ]}
-        onDownload={() => console.log("Download")}
       />
-
-      <div className="flex items-center justify-between mb-2 px-1">
-        <h2 className="text-xl font-bold text-gray-800 tracking-tight">
-          MT Accident Register: 21 CORPs PRO
-        </h2>
-        <span className="text-sm font-bold text-gray-900">
-          {processedData.length} Reports
-        </span>
-      </div>
 
       <ReportFilterBar
         filters={filters}
-        onFilterChange={(key, value) => setFilters(prev => ({ ...prev, [key]: value }))}
+        onFilterChange={(k, v) =>
+          setFilters((p) => ({ ...p, [k]: v }))
+        }
         onAddNew={handleAddNew}
-        onReset={() => setFilters({ search: "", date: "", actionStatus: "All", offenceType: "All", sortOrder: "desc" })}
+        onReset={() =>
+          setFilters({
+            search: "",
+            date: "",
+            actionStatus: "All",
+            offenceType: "All",
+            sortOrder: "desc",
+          })
+        }
         showOffenceType={false}
-        placeholder="Search by report no, unit, offence type..."
       />
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-64">
+        <div className="flex justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       ) : (
         <MTAccidentTable
           data={processedData}
-          onEdit={(id) => pageDispatch({ type: "SET_EDIT_ID", payload: id })}
+          onEdit={(id) => {
+            console.log("🟢 EDIT CLICKED:", id);
+            pageDispatch({ type: "SET_EDIT_ID", payload: id });
+          }}
         />
+      )}
+
+      {pageState.showCreate && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/10" />
+          <div className="w-full sm:max-w-xl bg-white h-full shadow-2xl overflow-y-auto">
+            <div className="border-b px-5 py-3 flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={handleBack}>
+                <ArrowLeft className="w-4 h-4" /> Back
+              </Button>
+              <h1 className="font-semibold text-lg">
+                {pageState.editId
+                  ? "Edit MT Accident Report"
+                  : "Create MT Accident Report"}
+              </h1>
+            </div>
+
+            <div className="p-6">
+              <MTAccidentForm onClose={handleBack} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

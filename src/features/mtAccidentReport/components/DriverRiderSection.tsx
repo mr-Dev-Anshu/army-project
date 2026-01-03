@@ -7,7 +7,41 @@ import { offenderFormsConfig } from "@/common/component/multi-step-form/steps/St
 
 /* ======================================
    TYPES
+
+   
 ====================================== */
+
+export interface MTAccidentReportState {
+  individualType: string;
+
+  dateOfAccident: string;
+  timeOfAccident: string;
+  placeOfAccident: string;
+  typeOfAccident: string;
+  probableCause: string;
+
+  vehicleNumber: string;
+  makeAndModel: string;
+
+  injuredCivil: number;
+  injuredMilitary: number;
+  diedCivil: number;
+  diedMilitary: number;
+
+  firCaseNumber: string;
+  firDate: string;
+  firPoliceStation: string;
+
+  actionStatus: boolean;
+  remark: string;
+
+  // ✅ ADD THESE (used in UI)
+  driverType?: string;
+  driverDetails?: Record<string, any>;
+  individualDetails?: Record<string, any>;
+  offenders?: any[];
+}
+
 type ScopeType =
   | "traffic"
   | "static"

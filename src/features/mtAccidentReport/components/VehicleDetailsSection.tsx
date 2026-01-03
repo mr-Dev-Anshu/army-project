@@ -9,7 +9,7 @@ export default function VehicleDetailsSection() {
   const vehicle = state.formData.mtAccidentReport;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 font font-semibold">
       {/* ===== SECTION TITLE ===== */}
       <h3 className="text-lg font-semibold text-gray-900">
         Vehicle Details

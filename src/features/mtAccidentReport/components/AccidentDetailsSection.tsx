@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "@/context/FormContext";
+import { Calendar, Clock, MapPin } from "lucide-react";
 
 export default function AccidentDetailsSection() {
   const { state, dispatch } = useForm();
@@ -13,53 +14,76 @@ export default function AccidentDetailsSection() {
       value: v,
     });
 
+    const toDateInputValue = (value?: string) => {
+  if (!value) return "";
+  return value.split("T")[0];
+};
+
   return (
-    <section className="border rounded-xl p-6 space-y-6 bg-white">
-      <h3 className="text-lg font-semibold text-gray-800">
+    <section className="space-y-6">
+      {/* Title */}
+      <h3 className="text-lg font-semibold text-gray-900">
         Accident Details
       </h3>
 
       {/* Date & Time */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Date */}
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-600">Date of Accident</label>
-          <input
-            type="date"
-            value={d.dateOfAccident}
-            onChange={(e) => set("dateOfAccident", e.target.value)}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <label className="text-sm font-medium text-gray-900">
+            Date of Accident
+          </label>
+          <div className="relative">
+            <input
+          type="date"
+          value={toDateInputValue(d.dateOfAccident)}
+          onChange={(e) => set("dateOfAccident", e.target.value)}
+          className="border rounded px-3 py-2"
+        />
+            
+          </div>
         </div>
 
+        {/* Time */}
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-600">
+          <label className="text-sm font-medium text-gray-900">
             Time of Accident (24hr format)
           </label>
-          <input
-            type="time"
-            value={d.timeOfAccident}
-            onChange={(e) => set("timeOfAccident", e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="relative">
+            <input
+              type="time"
+              value={d.timeOfAccident}
+              onChange={(e) => set("timeOfAccident", e.target.value)}
+              className="w-full h-11 text-gray-500 rounded-xl border border-gray-300 px-4 pr-10 text-sm focus:outline-none"
+            />
+          
+          </div>
         </div>
       </div>
 
       {/* Place */}
       <div className="space-y-1">
-        <label className="text-sm font-semibold text-gray-600">Place of Accident</label>
-        <input
-          placeholder="Enter address"
-          value={d.placeOfAccident}
-          onChange={(e) => set("placeOfAccident", e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <label className="text-sm font-medium text-gray-900">
+          Place of Accident
+        </label>
+        <div className="relative">
+          <input
+            placeholder="Enter Address"
+            value={d.placeOfAccident}
+            onChange={(e) => set("placeOfAccident", e.target.value)}
+            className="w-full h-11 rounded-xl border border-gray-300 px-4 pr-10 text-sm focus:outline-none"
+          />
+          <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        </div>
       </div>
 
       {/* Type of Accident */}
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-600">Type of Accident</label>
+        <label className="text-sm font-semibold text-gray-900">
+          Type of Accident
+        </label>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {["Normal", "Serious", "Fatal", "Very Serious"].map((t) => {
             const active = d.typeOfAccident === t;
 
@@ -68,13 +92,24 @@ export default function AccidentDetailsSection() {
                 key={t}
                 type="button"
                 onClick={() => set("typeOfAccident", t)}
-                className={`rounded-lg border px-3 py-2 text-sm font-medium transition
+                className={`
+                  h-11 rounded-xl border text-sm font-semibold transition
+                  flex items-center justify-center gap-2
                   ${
                     active
-                      ? "border-blue-600 bg-blue-50 text-blue-700"
-                      : "border-gray-300 text-gray-700 hover:border-blue-400"
-                  }`}
+                      ? "border-gray-400 text-gray-900"
+                      : "border-gray-300 text-gray-700 hover:border-gray-400"
+                  }
+                `}
               >
+                <span
+                  className={`h-4 w-4 rounded-full border flex items-center justify-center
+                    ${active ? "border-gray-900" : "border-gray-400"}`}
+                >
+                  {active && (
+                    <span className="h-2 w-2 rounded-full bg-gray-700" />
+                  )}
+                </span>
                 {t}
               </button>
             );
@@ -84,7 +119,7 @@ export default function AccidentDetailsSection() {
 
       {/* Probable Cause */}
       <div className="space-y-1">
-        <label className="text-sm font-semibold text-gray-600">
+        <label className="text-sm  font-semibold  text-gray-900">
           Probable Cause of Accident
         </label>
         <textarea
@@ -92,31 +127,8 @@ export default function AccidentDetailsSection() {
           placeholder="Briefly explain cause"
           value={d.probableCause}
           onChange={(e) => set("probableCause", e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm resize-none focus:outline-none"
         />
-      </div>
-
-      {/* Unit & FMN */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-600">Unit</label>
-          <input
-            placeholder="Enter unit"
-            value={d.unit || ""}
-            onChange={(e) => set("unit", e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-600">FMN</label>
-          <input
-            placeholder="Enter FMN"
-            value={d.fmn || ""}
-            onChange={(e) => set("fmn", e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
       </div>
     </section>
   );

@@ -362,7 +362,7 @@ export default function MultiFormReport({
                 offenceId: reportId,
                 offenderType:
                   (offender.driverType as OffenderType) || "Civilian",
-                category: "investigation",
+                // category: "investigation",
                 offenderDetails: [
                   {
                     type: "Driver",

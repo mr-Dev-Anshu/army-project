@@ -1,5 +1,19 @@
 import { OffenderType } from "@/apis/offender/types";
 
+/* ================= OFFENDER PERSON (FIX) ================= */
+export interface OffenderPerson {
+  offenderType: string;
+  name: string;
+  rank?: string;
+  armyNumber?: string;
+  unit?: string;
+  fmn?: string;
+  address?: string;
+  aadharNumber?: string;
+  iCardNumber?: string;
+}
+
+
 /* ================= MT ACCIDENT REPORT ================= */
 export interface MTAccidentReportState {
   individualType: string;

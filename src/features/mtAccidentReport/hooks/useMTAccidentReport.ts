@@ -6,7 +6,14 @@ import {
   deleteMTAccidentReport,
 } from "@/apis";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+
+
 
 /* ================= GET ALL ================= */
 export const useGetAllMTAccidentReports = () => {
@@ -20,13 +27,17 @@ export const useGetAllMTAccidentReports = () => {
 // Alias for consistency
 export const useGetMTAccidentReports = useGetAllMTAccidentReports;
 
-/* ================= GET BY ID ================= */
-export const useGetMTAccidentReportById = (id: string) => {
+/* ================= GET BY ID (✅ FIXED) ================= */
+export const useGetMTAccidentReportById = (
+  id: string,
+  options?: UseQueryOptions<any>
+) => {
   return useQuery({
     queryKey: ["mt-accident-reports", id],
     queryFn: () => getMTAccidentReportById(id),
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
     retry: 1,
+    ...options, // 👈 allows onSuccess, onError, etc.
   });
 };
 

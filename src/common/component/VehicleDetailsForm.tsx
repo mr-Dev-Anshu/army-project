@@ -271,7 +271,7 @@ export default function VehicleDetailsForm({
           {offenders.map((o, index) => (
             <div key={o.id} className="border rounded-xl p-4 mt-4">
               <OffenderDynamicForm
-                scope={scope}
+                // scope={scope}
                 title={`${o.type} Details`}
                 fields={offenderFormsConfig[o.type!].fields}
                 path={
@@ -301,7 +301,7 @@ export default function VehicleDetailsForm({
       {driverType === "Civilian" && (
         <>
           <OffenderDynamicForm
-            scope={scope}
+            // scope={scope}
             title="Civilian Details"
             fields={offenderFormsConfig["Civilian"].fields}
             path={driverPath}

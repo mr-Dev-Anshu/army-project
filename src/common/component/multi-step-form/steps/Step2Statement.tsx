@@ -373,7 +373,7 @@ export default function Step2Statement() {
           <FormTextarea
             label="Full Description of Offence"
             description="Provide a detailed description of the offence."
-            value={d.offenceOccurenceDetails.description2}
+            // value={d.offenceOccurenceDetails.description2}
             onChange={(v) =>
               set("formData.traffic.offenceOccurenceDetails.description2", v)
             }

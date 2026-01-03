@@ -436,13 +436,19 @@ export default function MTAccidentTable({
               <Printer className="w-4 h-4" />
               Print
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={() => onEdit(item._id)}
-            >
-              <Edit className="w-4 h-4" />
-              Edit
-            </DropdownMenuItem>
+       <DropdownMenuItem
+  className="gap-2 cursor-pointer"
+  onClick={() => {
+    if (item._id) {
+      onEdit(item._id);
+    }
+  }}
+>
+  <Edit className="w-4 h-4" />
+  Edit
+</DropdownMenuItem>
+
+
             <DropdownMenuItem
               className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
               onClick={() => {

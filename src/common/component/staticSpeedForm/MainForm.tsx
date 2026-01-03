@@ -166,7 +166,7 @@ export default function StaticSpeedForm({
       vehicleName: staticData.vehicleDetails.vehicleName,
 
       offenceOccurenceDetails: {
-        time: staticData.offenceBlock?.time || "",
+        // time: staticData.offenceBlock?.time || "",
         incidentLocation: staticData.offenceBlock?.incidentLocation || "",
         description: staticData.offenceBlock?.description || "",
 
