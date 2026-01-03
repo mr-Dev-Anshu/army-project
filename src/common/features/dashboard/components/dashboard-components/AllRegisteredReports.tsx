@@ -6,6 +6,8 @@ import ReportsCard from "@/common/component/cards/ReportsCard";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 import { useGetStaticSpeedRecords } from "@/features/staticSpeed/hooks";
 import { useGetAllMPReports } from "@/features/mpReports/hooks";
+import { useRouter } from "next/navigation";
+import ReportPageHeader from "@/components/common/ReportPageHeader";
 
 export default function AllRegisteredReports({
   onNoVehicleReports,
@@ -65,6 +67,11 @@ export default function AllRegisteredReports({
           Reports & Analysis › All Registered Reports
         </p>
       </div>
+      {/* Header / Breadcrumb substitute */}
+      <ReportPageHeader
+        title="All Registered Reports"
+        breadcrumbItems={[{ label: "Reports & Analysis", href: "/" }]}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <ReportsCard

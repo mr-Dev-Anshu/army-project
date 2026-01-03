@@ -102,15 +102,15 @@ export default function StaticSpeedCheckReportsPage() {
           rank: primaryOffender.rank,
         },
         mpName: mpName,
-        unit: primaryOffender.unit || "N/A",
-        fmn: primaryOffender.fmn || "HQ 21 CORPs", // Fallback
+        unit: item.onDutyDetailsMPReporting?.unit || "MP Unit",
+        fmn: item.fmn || primaryOffender.fmn || "HQ 21 Corps",
         offenceBrief: offenceDetails.description || "Speeding",
         vehicleNo: item.vehicleNumber || "N/A",
         vehicleModel: item.vehicleName || "Unknown Vehicle",
-        reportNo: item.reportNumber || "PRO/21 CPU/00042/102/25", // Fallback or real field
+        reportNo: item.reportNumber || `SSC/21 CPU/${(item._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`,
         authSpeed: offenceDetails.authSpeed || "30",
-        actualSpeed: offenceDetails.actualSpeed || "0",
-        overSpeed: offenceDetails.overSpeed || "0",
+        actualSpeed: offenceDetails.actualSpeedNoted || offenceDetails.actualSpeed || "0",
+        overSpeed: offenceDetails.overSpeedCalculated || offenceDetails.overSpeed || "0",
         coDriverDetails: coDriver ? {
           aadharNumber: coDriver.aadharNumber,
           name: coDriver.name,
@@ -128,28 +128,28 @@ export default function StaticSpeedCheckReportsPage() {
     const offence = raw.offenceOccurenceDetails || {};
     const offender = raw.offenders?.[0]?.offenderDetails || {};
     const mpDetails = raw.onDutyDetailsMPReporting || {};
-    const witness = raw.witness || {}; // Assuming witness structure exists or we mock it
+    const witness = raw.witness || {};
 
-    // Construct Statement (Narrative)
     const dateOfDuty = offence.timeOfOffence ? new Date(offence.timeOfOffence).toLocaleDateString("en-GB") : "Unknown Date";
-    const startTime = "06:00"; // Placeholder or field if exists
-    const endTime = "18:00"; // Placeholder
+    const startTime = "06:00";
+    const endTime = "18:00";
     const location = offence.placeOfOffence || "Unknown Location";
-    // We construct a narrative similar to the image
     const statement = `On ${dateOfDuty}, from ${startTime} hours to ${endTime} hours, I was detailed for static speed check duty at ${location} along with ${mpDetails.rank || "Hav(MP)"} ${mpDetails.nameReportingMP || "Unknown"} and other MP personnel. At approximately ${offence.timeOfOffence ? new Date(offence.timeOfOffence).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }) : "Unknown Time"} hours, near the ${offence.incidentLocation || "Check Post"}, the speed of a vehicle was measured using a Static Speed Check Gun and was found to be ${offence.actualSpeed || 0} KMPH. As per the orders of the Station Commander and in accordance with Letter No. 599/2025 dated 26 August 2025, the prescribed speed limit for this type of vehicle within Bhopal Military Station is ${offence.authSpeed || 30} KMPH. The vehicle was therefore exceeding the laid-down speed limit by ${offence.overSpeed || 0} KMPH.`;
 
+    const generatedReportNo = raw.reportNumber || `SSC/21 CPU/${(raw._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`;
+
     return {
-      reportNo: raw.reportNumber || "N/A",
+      reportNo: generatedReportNo,
       reportDate: new Date(raw.createdAt).toLocaleDateString("en-GB"),
       unitName: "21 Corps Provost Unit (CMP Control Room)",
       particulars: {
         rider: {
           armyNo: offender.armyNumber || "N/A",
           name: offender.name || "Unknown",
-          fmn: offender.fmn || "HQ 21 Corps",
+          fmn: raw.fmn || offender.fmn || "HQ 21 Corps",
           address: offender.address || "C/O 56 APO",
           rank: offender.rank || "N/A",
-          unit: offender.unit || "N/A",
+          unit: mpDetails.unit || offender.unit || "MP Unit",
           command: offender.command || "Southern Comd",
           iCardNo: offender.iCardNumber || "N/A",
         },
@@ -159,12 +159,19 @@ export default function StaticSpeedCheckReportsPage() {
         }
       },
       occurrence: {
+        dateOfDuty: dateOfDuty,
+        dutyTime: `${startTime} Hrs - ${endTime} Hrs`,
+        dutyLocation: location,
+        nameOfWitnessingOfficial1: "V Balaji",
+        rankOfWitnessingOfficial1: "Hav (MP)",
+        nameOfWitnessingOfficial2: "Sanjay Khatri",
+        rankOfWitnessingOfficial2: "Hav (MP)",
         statement: statement
       },
       offence: {
-        actualSpeed: `${offence.actualSpeed || 0} KMPH`,
+        actualSpeed: `${offence.actualSpeedNoted || offence.actualSpeed || 0} KMPH`,
         authSpeed: `${offence.authSpeed || 0} KMPH`,
-        overSpeed: `${offence.overSpeed || 0} KMPH`
+        overSpeed: `${offence.overSpeedCalculated || offence.overSpeed || 0} KMPH`
       },
       witnessSig: {
         armyNo: witness.armyNumber || "1122334A",
@@ -173,13 +180,13 @@ export default function StaticSpeedCheckReportsPage() {
         unit: witness.unit || "21 Corps Pro Unit"
       },
       mpSig: {
-        armyNo: mpDetails.armyNo || "7788991B",
+        armyNo: mpDetails.armyNumber || mpDetails.armyNo || "7788991B",
         rank: mpDetails.rank || "Hav (MP)",
         name: mpDetails.nameReportingMP || "Robert Robert",
         unit: mpDetails.unit || "21 Corps Pro Unit"
       },
       remarks: {
-        text: `The case of over speeding by ${offence.actualSpeed || 0} KMPH, which is contrary to the order of the FMN. Suitable discp action be initiated against the indl by the unit, and inform to this office within 15 days from issue of this report.`,
+        text: `The case of over speeding by ${offence.overSpeedCalculated || offence.overSpeed || 0} KMPH, which is contrary to the order of the FMN. Suitable discp action be initiated against the indl by the unit, and inform to this office within 15 days from issue of this report.`,
         station: "C/O 56 APO",
         dated: new Date().toLocaleDateString("en-GB")
       }
@@ -247,7 +254,7 @@ export default function StaticSpeedCheckReportsPage() {
       <ReportPageHeader
         title={pageTitle}
         reportCount={distinctReportsCount}
-        onDownload={() => console.log("Download Clicked")}
+        onDownload={() => window.print()}
       />
 
       {/* Filters Placeholder */}
@@ -257,6 +264,8 @@ export default function StaticSpeedCheckReportsPage() {
           setFilters((prev) => ({ ...prev, [key]: value }));
         }}
         showOffenceType={false}
+        // showSort={true}
+        showFilter={true}
         placeholder="Search by report no, unit, or vehicle..."
         onAddNew={() => setIsCreating(true)}
         onReset={() =>

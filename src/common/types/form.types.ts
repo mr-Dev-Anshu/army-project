@@ -1,4 +1,7 @@
 import { OffenderType } from "@/apis/offender/types";
+import { MaidServant } from "@/features/civilEmployee/maid_Servant/types";
+import { Shopkeeper } from "@/features/civilEmployee/shopkeeper/types";
+import { TemporaryHiredWorker } from "@/features/civilEmployee/temporaryHired/types";
 
 /* ================= VEHICLE ================= */
 export interface VehicleDetailsState {
@@ -275,7 +278,9 @@ export interface FormDataState {
   staticSpeed: StaticSpeedState;
   mpReport: MpReportState;
   remarks?: string;
-
+  shopkeeper:Shopkeeper,
+  maidServant:MaidServant,
+  tempWorker:TemporaryHiredWorker,
   // Keep these for backward compatibility if needed, or remove if unused
   // (Based on FormContext, they seem to be moved to 'traffic' but let's check usage)
   // For now, I will remove them to align with FormContext.tsx strictly.

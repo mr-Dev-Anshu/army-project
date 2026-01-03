@@ -114,10 +114,26 @@ const Sidebar: React.FC<SidebarProps> = ({
     <button
       key={item.label}
       onClick={() => {
+        if (item.label === "Dashboard") {
+          onMenuSelect("dashboard");
+          setCollapsed(true);
+        }
+        if (item.label === "All Reports") {
+          onMenuSelect("viewReports");
+          setCollapsed(true);
+        }
+        if (item.label === "MP Offence Analysis Monthly Report") {
+          onMenuSelect("mpOffenceAnalysis");
+          setCollapsed(true);
+        }
+
         if (item.label === "Dashboard") onMenuSelect("dashboard");
         if (item.label === "All Reports") onMenuSelect("viewReports");
 
         setCollapsed(true);
+        if (item.label === "Civil Employees Management")
+          onMenuSelect("civilEmployees");
+
       }}
       className={cn(
         "w-full relative flex items-center transition-all group",

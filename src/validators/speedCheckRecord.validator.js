@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const createStaticSpeedCheckRecordSchema = Joi.object({
-  reportId:Joi.string(),
+  reportId: Joi.string(),
   vehicleType: Joi.string().required().trim().messages({
     "any.required": "vehicleType is required",
     "string.empty": "vehicleType cannot be empty",
@@ -54,11 +54,14 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     customFields: Joi.object().unknown(true).optional(),
   }).required(),
 
+  offenders: Joi.array().items(Joi.object().unknown(true)).optional(),
+
   remark: Joi.string().trim().optional(),
   customFields: Joi.object()
     .unknown(true)
     .optional(),
   actionStatus: Joi.boolean().optional(),
+  actionStatusRemark: Joi.string().optional(),
 });
 
 export const updateStaticSpeedCheckRecordSchema = createStaticSpeedCheckRecordSchema.fork(

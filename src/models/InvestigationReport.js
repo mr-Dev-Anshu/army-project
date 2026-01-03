@@ -110,8 +110,8 @@ export const evidenceSchema = new Schema({
 
 const mpReportSchema = new Schema(
   {
-    reportId:{
-       type:String
+    reportId: {
+      type: String
     },
     reportDetails: { type: reportDetailsSchema },
     investigationHead: { type: investigationHeadSchema },
@@ -127,6 +127,9 @@ const mpReportSchema = new Schema(
     actionStatus: {
       type: Boolean,
       default: false,
+    },
+    actionStatusRemark: {
+      type: String,
     },
     remarks: {
       analysis: { type: String },

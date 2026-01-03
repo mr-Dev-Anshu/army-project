@@ -7,7 +7,7 @@ import { CiEraser } from "react-icons/ci";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useForm } from "@/context/FormContext";
 
-import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
+import {MilitaryPoliceReport} from "@/components/reports/MilitaryPoliceReport";
 import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
 import MpOccurrenceReport from "@/components/reports/MpOccurrenceReport";
 
