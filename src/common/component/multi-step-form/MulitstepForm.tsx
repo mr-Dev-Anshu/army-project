@@ -615,7 +615,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             formData={state.formData}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onPrev={() => dispatch({ type: "PREV_STEP" })}
-          mapMpToReport={mapTrafficToReport}
+          mapReport={mapTrafficToReport}
             stepsConfig={stepsConfig}
             mode="traffic"
           />

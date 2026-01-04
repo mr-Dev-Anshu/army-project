@@ -24,11 +24,7 @@ interface RightPanelProps {
   stepsConfig: Record<string, any>;
   mode: "traffic" | "static" | "mp";
 
-  mapTrafficToReport?: (
-    data: TrafficFormState | StaticSpeedFormState
-  ) => any;
-
-  mapMpToReport?: (data: MpReportState) => any;
+  mapReport?: (data: any) => any;
 }
 
 export const RightPanel = ({
@@ -38,8 +34,7 @@ export const RightPanel = ({
   onPrev,
   stepsConfig,
   mode,
-  mapTrafficToReport,
-  mapMpToReport,
+ mapReport,
 }: RightPanelProps) => {
   const { state, dispatch } = useForm();
 
@@ -65,43 +60,38 @@ export const RightPanel = ({
     return false;
   };
 
-  /* ================= PREVIEW ================= */
-  const renderPreviewReport = () => {
-    if (mode === "traffic") {
-      if (typeof mapTrafficToReport !== "function") {
-        console.error("❌ mapTrafficToReport missing");
-        return <p className="text-red-500">Preview not available</p>;
-      }
+ const renderPreviewReport = () => {
+  if (!mapReport) {
+    console.error("❌ mapReport missing");
+    return <p className="text-red-500">Preview not available</p>;
+  }
 
-      return (
-        <MilitaryPoliceReport
-          {...mapTrafficToReport(state.formData.traffic)}
-        />
-      );
-    }
+  if (mode === "traffic") {
+    return (
+      <MilitaryPoliceReport
+        {...mapReport(state.formData.traffic)}
+      />
+    );
+  }
 
-    if (mode === "static") {
-      if (!mapTrafficToReport) return null;
+  if (mode === "static") {
+    return (
+      <StaticSpeedReport
+        {...mapReport(state.formData.staticSpeed)}
+      />
+    );
+  }
 
-      return (
-        <StaticSpeedReport
-          {...mapTrafficToReport(state.formData.staticSpeed)}
-        />
-      );
-    }
+  if (mode === "mp") {
+    return (
+      <MpOccurrenceReport
+        {...mapReport(state.formData.mpReport)}
+      />
+    );
+  }
 
-    if (mode === "mp") {
-      if (!mapMpToReport) return null;
-
-      return (
-        <MpOccurrenceReport
-          {...mapMpToReport(state.formData.mpReport)}
-        />
-      );
-    }
-
-    return null;
-  };
+  return null;
+};
 
   return (
     <>
