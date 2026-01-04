@@ -258,7 +258,7 @@ import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
 
-type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional";
+type ScopeType = "traffic" | "static";
 
 interface VehicleDetailsFormProps {
   scope?: ScopeType;
@@ -318,6 +318,23 @@ export default function VehicleDetailsForm({ scope = "traffic" }: VehicleDetails
       type: "SET_PATH",
       path: vehiclePath,
       value: { ...vehicleState, ...data },
+    });
+  };
+
+  /* ================= DRIVER SELECT ================= */
+  const handleDriverSelect = (type: string) => {
+    updateVehicle({ driverType: type });
+
+    dispatch({
+      type: "SET_PATH",
+      path: offenderPeoplePath,
+      value: [
+        {
+          role: "Driver",
+          type,
+          details: {},
+        },
+      ],
     });
   };
 

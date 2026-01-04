@@ -8,8 +8,6 @@ export * from "@/apis/generalTraficOffence/update"
 
 
 
-
-
 export * from "@/apis/MpWitenessing/create"
 export * from "@/apis/MpWitenessing/delete"
 export * from "@/apis/MpWitenessing/getAll"

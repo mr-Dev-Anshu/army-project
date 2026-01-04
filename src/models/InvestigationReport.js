@@ -148,8 +148,14 @@ const mpReportSchema = new Schema(
   {
     timestamps: true,
     strict: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+mpReportSchema.virtual("offenders").get(function () {
+  return this.individuals ? this.individuals.filter((ind) => ind.role === "Offender") : [];
+});
 
 mpReportSchema.index({ "reportDetails.reportNumber": 1 }, { unique: true });
 mpReportSchema.index({ "investigationHead.armyNumber": 1 });

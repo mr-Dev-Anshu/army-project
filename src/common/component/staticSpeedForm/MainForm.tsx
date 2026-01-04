@@ -22,7 +22,7 @@ export default function StaticSpeedForm({
 }) {
   const { state, dispatch } = useForm();
 
-  const staticData = state.formData.staticSpeed;
+  const staticData = state.formData.staticSpeed as any;
 
   const createStaticRecord = useCreateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
@@ -162,8 +162,25 @@ export default function StaticSpeedForm({
         vehicleNumber: staticData.vehicleDetails.vehicleNumber,
         vehicleName: staticData.vehicleDetails.vehicleName,
 
+        onDutyDetails: {
+          dateOfDuty: staticData.dutyBlock?.dateOfDuty || undefined,
+          dutyLocation: staticData.dutyBlock?.dutyLocation || undefined,
+          dutyType: staticData.dutyBlock?.dutyType || undefined,
+          startTime: staticData.dutyBlock?.startTime
+            ? new Date(
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+            ).toISOString()
+            : undefined,
+          endTime: staticData.dutyBlock?.endTime
+            ? new Date(
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+            ).toISOString()
+            : undefined,
+        },
+        onDutyDetailsMPReporting: staticData.reportingBlock,
+
         offenceOccurenceDetails: {
-          time: staticData.offenceBlock?.time || "",
+          time: staticData.offenceBlock?.time || undefined,
           incidentLocation: staticData.offenceBlock?.incidentLocation || "",
           description: [
             staticData.offenceBlock?.description,
@@ -192,49 +209,89 @@ export default function StaticSpeedForm({
         return;
       }
 
-      /* ================= CREATE ALL OFFENDERS ================= */
-      const offenders = staticData.offenderPeople || [];
+      /* ================= CREATE OFFENDER ================= */
+      // Checking ID validity
+      const _idString = staticRes?._id ? String(staticRes._id) : "";
+      console.log("🆔 Static Res ID:", _idString);
 
-      for (const offender of offenders) {
-        if (!offender?.details) continue;
-
-        const d = offender.details;
-
-        // 🚫 Skip empty offender blocks
-        if (!d.name && !d.rank && !d.armyNumber && !d.address) {
-          console.log("⏭️ Skipping empty offender");
-          continue;
-        }
-
-        const offenderPayload: CreateOffenderData = {
-          offenceId: staticRes._id,
-          offenderType: offender.type as OffenderType, // 🔥 DYNAMIC
-
-          offenderDetails: {
-            type: offender.type === "Military Person" ? "Driver" : "Co-Driver",
-
-            name: d.name || "",
-            rank: d.rank || "",
-            armyNumber: d.armyNumber || "",
-            unit: d.unit || "",
-            command: d.command || "",
-            fmn: d.fmn || "",
-            address: d.address || "",
-            iCardNumber: d.iCardNumber || "",
-          },
-        };
-
-        console.log(
-          "👮 OFFENDER PAYLOAD SENT ===>",
-          JSON.stringify(offenderPayload, null, 2)
-        );
-
-        await createOffenderMutation.mutateAsync(offenderPayload);
+      if (!_idString) {
+        console.error("❌ CRTICAL: No Static Record ID returned");
+        toast.error("Error: Record ID missing. Offenders cannot be linked.");
+        return;
       }
 
-      toast.success("All Offenders Created Successfully!");
+      // ========= 2️⃣ OFFENDERS =========
+      const people = staticData.offenderPeople || [];
+      console.log("👥 Offender People Array:", JSON.stringify(people, null, 2));
 
-      /* ================= CREATE WITNESSES ================= */
+      // 2.1 Driver
+      const driverType = staticData.vehicleDetails.driverType;
+      console.log("🚙 Selected Driver Type:", driverType);
+
+      if (driverType && driverType !== "") {
+        // Find by ROLE "Driver"
+        const driverEntry = people.find((p: any) => p.role === "Driver");
+        console.log("👤 Driver Entry Found:", driverEntry);
+
+        // Ensure details object exists
+        const driverDetails = {
+          ...(driverEntry?.details || {}),
+          type: "Driver"
+        };
+
+        const driverPayload: CreateOffenderData = {
+          offenceId: _idString,
+          offenderType: driverType as OffenderType,
+          offenderDetails: driverDetails,
+        };
+        console.log("👮 REQ DRIVER PAYLOAD:", JSON.stringify(driverPayload, null, 2));
+
+        try {
+          const res = await createOffenderMutation.mutateAsync(driverPayload);
+          console.log("✅ Driver Created:", res);
+        } catch (e: any) {
+          console.error("❌ Driver Creation Failed:", e);
+          console.error("❌ Error Response:", e?.response?.data);
+          toast.error(`Driver Creation Failed: ${e?.message}`);
+        }
+      } else {
+        console.warn("⚠️ No Driver Type selected. Skipping Driver creation.");
+      }
+
+      // 2.2 Co-Driver
+      const coDriverType = state.formData.coDriverType;
+      const coDriverOrPillion = state.formData.coDriverOrPillion;
+      console.log("🏍️ Co-Driver Logic:", { coDriverOrPillion, coDriverType });
+
+      if (coDriverOrPillion && coDriverType && coDriverType !== "") {
+        // Find by ROLE "CoDriver"
+        const coDriverEntry = people.find((p: any) => p.role === "CoDriver");
+        console.log("👤 Co-Driver Entry Found:", coDriverEntry);
+
+        const coDriverDetails = {
+          ...(coDriverEntry?.details || {}),
+          type: "CoDriver"
+        };
+
+        const coDriverPayload: CreateOffenderData = {
+          offenceId: _idString,
+          offenderType: coDriverType as OffenderType,
+          offenderDetails: coDriverDetails,
+        };
+        console.log("👮 REQ CO-DRIVER PAYLOAD:", JSON.stringify(coDriverPayload, null, 2));
+
+        try {
+          const res = await createOffenderMutation.mutateAsync(coDriverPayload);
+          console.log("✅ Co-Driver Created:", res);
+        } catch (e: any) {
+          console.error("❌ Co-Driver Creation Failed:", e);
+          toast.error(`Co-Driver Creation Failed: ${e?.message}`);
+        }
+      }
+
+      toast.success("Offenders Saved!");
+
+      /* ================= CREATE WITNESS ================= */
       if (staticData.witnesses?.length > 0) {
         const witnessPayload = staticData.witnesses.map((w) => ({
           offenceId: staticRes._id,
@@ -247,11 +304,26 @@ export default function StaticSpeedForm({
 
         console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
 
-        await Promise.all(
-          witnessPayload.map((w) => createWitnessMutation.mutateAsync(w))
-        );
+        try {
+          const witnessResponses = await Promise.all(
+            witnessPayload.map((w) =>
+              createWitnessMutation.mutateAsync(w)
+            )
+          );
 
-        toast.success("Witnesses Added Successfully!");
+          console.log(
+            "✅ WITNESS BACKEND RESPONSES ===>",
+            witnessResponses
+          );
+
+          toast.success("Witness Added Successfully!");
+        } catch (err: any) {
+          console.error(
+            "❌ WITNESS BACKEND ERROR ===>",
+            err?.response?.data || err
+          );
+          throw err;
+        }
       }
 
       toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
@@ -275,14 +347,19 @@ export default function StaticSpeedForm({
         error?.response?.data || error
       );
 
-      toast.error(
+      const msg =
         error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Failed to submit record"
-      );
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to submit record";
+
+      toast.error(msg);
     }
   };
+
+
+
+
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">

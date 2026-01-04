@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { initialState, useForm } from "@/context/FormContext";
 import { toast } from "react-toastify";
-import { useState } from "react";
 
 import Step1ReportDetails from "./steps/Step1ReportingDetails";
 import Step2 from "./steps/Step2Particulars";
@@ -21,6 +21,7 @@ import { RightPanel } from "../multi-step-form/RightPanel";
 
 import { useCreateMPReport } from "@/features/mpReports/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
+
 
 /* ================= EVIDENCE BUILDER ================= */
 const buildEvidences = (ev: any) => {
@@ -400,6 +401,7 @@ export default function MultiFormReport({
     }
   };
 
+  // ================= RIGHT PANEL STEP CONFIG =================
   const stepsConfig = {
     1: {
       title: "1. REPORT DETAILS",
@@ -451,29 +453,25 @@ export default function MultiFormReport({
     <div className="h-[calc(100vh-40px)] bg-gray-100 w-full px-6">
       <div className="w-full bg-white rounded-lg overflow-hidden h-full">
         <div className="flex h-full">
+          {/* LEFT SIDE STEPPER */}
           <LeftStepper
             steps={steps}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
             title="Create New MP Occurrence & Investigation Report"
-            hideReportNo
+            reportNo="PRO/21 CPU/00042/106/25"
+            onCancel={onCancel}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
-            onCreate={onSubmitFinal}
-            onCancel={() => {
-              dispatch({ type: "SET_STEP", payload: 1 });
-              onCancel();
-            }}
           />
 
+          {/* RIGHT SIDE DYNAMIC CONTENT */}
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onPrev={() => dispatch({ type: "PREV_STEP" })}
             onSubmitFinal={onSubmitFinal}
             stepsConfig={stepsConfig}
-            mode={mode}
-            mapMpToReport={mapMpToReport}
+            mode="mp"
           />
         </div>
       </div>

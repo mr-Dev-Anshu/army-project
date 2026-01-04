@@ -13,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import DynamicOffenderList from "../../DynamicOffenderLIst";
 
-type YesNo = "yes" | "no" | "";
-
 export default function Step5WitnessList() {
   const { state, dispatch } = useForm();
 
@@ -83,12 +81,25 @@ const handleSaveMainWitness = () => {
 
 
 
+  /* ========= CLEAR ========= */
+  const clearForm = () =>
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport",
+      value: {
+        ...mp,
+        witnessVehicleStatus: "",
+        witnesses: [],
+      },
+    });
+
   return (
     <FormSection title="">
       <VehiclePrimaryQuestion
-        title="Does this witness involve a vehicle?"
+        title="Does this witness have vehicles?"
         vehicleStatus={witnessVehicleStatus}
         setVehicleStatus={setVehicleStatus}
+        onChange={setVehicleStatus}
       />
 
       {witnessVehicleStatus === "yes" && <VehicleDetailsForm scope="mp-main" />}

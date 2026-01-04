@@ -1,9 +1,7 @@
 import { Trash2 } from "lucide-react";
 
-type GenericObject = Record<string, unknown>;
-
 interface DynamicOffenderListProps {
-  data?: GenericObject[];
+  data?: any[];
   title?: string;
   onDelete?: (index: number) => void;
 }
@@ -11,7 +9,7 @@ interface DynamicOffenderListProps {
 export default function DynamicOffenderList({
   data = [],
   title = "Victim / Offender List",
-  onDelete = () => {},
+  onDelete = (index: number) => {},
 }: DynamicOffenderListProps) {
   if (!data.length) return null;
 

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -21,12 +20,21 @@ export default function Step4IndividualDetails() {
     state.formData.mpReport.individualDetails.offenderList || [];
 
   const [showAddForm, setShowAddForm] = useState(false);
+  const [extraVehicleStatus, setExtraVehicleStatus] = useState("");
 
-  const setVehicleInvolved = (value: "yes" | "no" | "") => {
+  /* ========= VEHICLE STATUS ========= */
+  const setVehicleInvolved = (value: any) => {
+    const normalized =
+      value === "vehicle" || value === "yes"
+        ? "yes"
+        : value === "noVehicle" || value === "no"
+        ? "no"
+        : "";
+
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.individualDetails.vehicleInvolved",
-      value,
+      value: normalized,
     });
 
     if (value === "yes") {
@@ -38,6 +46,7 @@ export default function Step4IndividualDetails() {
     }
   };
 
+  /* ========= DELETE OFFENDER ========= */
   const handleDeleteOffender = (index: number) => {
     const updated = offenders.filter((_, i) => i !== index);
 
@@ -87,17 +96,12 @@ const handleSaveMain = () => {
     });
 
     dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.additionalIndividual",
-      value: {
-        vehicleInvolved: "",
-        vehicleData: {},
-        driverType: "",
-        tempOffender: {},
-      },
+      type: "CLEAR_MP_ADDITIONAL",
     });
 
+    setExtraVehicleStatus("");
     setShowAddForm(false);
+
     toast.success("Additional Person Added!");
   };
 
@@ -108,7 +112,7 @@ const handleSaveMain = () => {
     <FormSection title="">
       <VehiclePrimaryQuestion
         title="Does this occurrence involve vehicles?"
-        vehicleStatus={mp.vehicleInvolved as any}
+        vehicleStatus={mp.vehicleInvolved}
         setVehicleStatus={setVehicleInvolved}
       />
 
@@ -127,17 +131,11 @@ const handleSaveMain = () => {
         <div className="mt-6 border rounded-lg p-6 bg-gray-50">
           <VehiclePrimaryQuestion
             title="Does this additional person involve vehicle?"
-            vehicleStatus={add.vehicleInvolved as any}
-            setVehicleStatus={(v) =>
-              dispatch({
-                type: "SET_PATH",
-                path: "formData.mpReport.additionalIndividual.vehicleInvolved",
-                value: v,
-              })
-            }
+            vehicleStatus={extraVehicleStatus}
+            setVehicleStatus={setExtraVehicleStatus}
           />
 
-          {add.vehicleInvolved === "yes" && (
+          {extraVehicleStatus === "yes" && (
             <VehicleDetailsForm scope="mp-additional" />
           )}
           {add.vehicleInvolved === "no" && (

@@ -74,6 +74,7 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: "staticspeedcheckrecords",
   }
 
 );
