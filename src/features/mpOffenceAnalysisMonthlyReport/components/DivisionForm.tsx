@@ -26,7 +26,7 @@ import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { toast } from "react-toastify";
 import { useGetDivisionAnalysis, useCreateDivisionAnalysis, useDeleteDivisionAnalysis, useUpdateDivisionAnalysis } from "../hooks/useDivisionAnalysis";
 
-interface Hq36RapidDivisionFormProps {
+interface DivisionFormProps {
     onClose: () => void;
     formation: {
         groupKey: string;
@@ -42,7 +42,7 @@ interface Hq36RapidDivisionFormProps {
     } | null;
 }
 
-export default function Hq36RapidDivisionForm({ onClose, formation, initialData }: Hq36RapidDivisionFormProps) {
+export default function DivisionForm({ onClose, formation, initialData }: DivisionFormProps) {
     // State
     const [selectedDate, setSelectedDate] = useState<Date>(initialData?.monthYear ? new Date(initialData.monthYear) : new Date());
     const dateInputRef = React.useRef<HTMLInputElement>(null);
@@ -54,6 +54,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
     const [remark, setRemark] = useState(initialData?.remark || "");
     const [sessionAddedIds, setSessionAddedIds] = useState<string[]>([]);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(initialData?._id || null);
 
     // Calculated Field
     const totalCases = useMemo(() => {
@@ -89,11 +90,21 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
             remark: remark,
         };
 
-        if (initialData && initialData._id) {
-            updateEntry({ id: initialData._id, data: payload }, {
+        if (editingId) {
+            updateEntry({ id: editingId, data: payload }, {
                 onSuccess: () => {
                     toast.success("Entry updated successfully");
-                    onClose();
+                    if (initialData) {
+                        // If we are in "Edit Mode" (initialData present), closing is expected
+                        onClose();
+                    } else {
+                        // If we are in "Add Mode" but editing a drafted item
+                        setEditingId(null);
+                        setOffenceType("");
+                        setActionTaken("00");
+                        setActionPending("00");
+                        setRemark("");
+                    }
                 },
                 onError: (err) => {
                     toast.error("Failed to update entry");
@@ -121,6 +132,16 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
         }
     };
 
+    const handleEditRow = (row: any) => {
+        setOffenceType(row.offenceType);
+        setActionTaken(row.actionTaken.toString());
+        setActionPending(row.actionPending.toString());
+        setRemark(row.remark);
+        setEditingId(row._id);
+        // Maybe scroll to top?
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const handleDeleteClick = (id: string) => {
         setDeleteId(id);
     };
@@ -132,6 +153,13 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                 toast.success("Entry deleted");
                 setSessionAddedIds(prev => prev.filter(sid => sid !== deleteId));
                 setDeleteId(null);
+                if (editingId === deleteId) {
+                    setEditingId(null);
+                    setOffenceType("");
+                    setActionTaken("00");
+                    setActionPending("00");
+                    setRemark("");
+                }
             },
             onError: () => toast.error("Failed to delete entry")
         });
@@ -140,25 +168,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
     // Table Data Mapping
     const tableData = useMemo(() => {
         if (!analysisData || !Array.isArray(analysisData)) return [];
-        // Map backend data to table format
-        // Backend returns standard array. We need to map it.
-        // Wait, useGetDivisionAnalysis calls existing API. Let's see what it returns.
-        // It returns `DivisionAnalysis.find()`. So array of objects.
 
-        // Filter by date is happening in API or frontend?
-        // My hook calls GET /api/division-analysis with params.
-        // But the service `getGroupedByDivision` uses aggregation.
-        // `getAllDivisionAnalysisRepo` returns ALL.
-        // I should probably ensure the API supports filtering by `divisionName` and `monthYear` in the standard GET.
-        // Looking at `src/services/divisionAnalysis.js`, `getAll` calls `getAllDivisionAnalysisRepo` which is `find().sort()`. It receives no params!
-        // This is a BACKEND GAP. The default GET doesn't filter.
-        // I need to fix the backend service/repo to support filters first?
-        // OR I filter client side if data is small. 
-        // Better: Fix backend. But user asked for UI and integration.
-        // I will assume for now I receive all and filter client side, but I should fix the backend if I can.
-        // Actually, `getGroupedByDivisionService` supports filters. Maybe I should use THAT endpoint?
-        // But that groups data. I want individual entries.
-        // I'll stick to client side filtering if the dataset isn't huge, or ideally add filters to `getAll`.
 
         return analysisData.filter((item: any) => {
             if (!item.monthYear) return false;
@@ -232,7 +242,10 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem className="gap-2 cursor-pointer">
+                        <DropdownMenuItem
+                            className="gap-2 cursor-pointer"
+                            onClick={() => handleEditRow(row)}
+                        >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -300,10 +313,13 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <h2 className="text-lg font-bold text-[#0A0A0A]">
-                            {initialData ? "Edit Offence Entry" : "Add Offence Entry One By One"}
+                            {(initialData || editingId) ? "Edit Offence Entry" : "Add Offence Entry One By One"}
                         </h2>
-                        {!initialData && (
+                        {(!initialData && !editingId) && (
                             <p className="text-gray-500 text-sm mt-1">Each submission adds one row to the table below</p>
+                        )}
+                        {(editingId && !initialData) && (
+                            <p className="text-blue-500 text-sm mt-1">Currently editing a drafted entry below</p>
                         )}
                     </div>
                     <div className="relative">
@@ -385,13 +401,32 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                         />
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-3">
+                        {(initialData || editingId) && (
+                            <Button
+                                variant="outline"
+                                className="h-11 px-6 rounded-md"
+                                onClick={() => {
+                                    if (initialData) {
+                                        onClose();
+                                    } else {
+                                        setEditingId(null);
+                                        setOffenceType("");
+                                        setActionTaken("00");
+                                        setActionPending("00");
+                                        setRemark("");
+                                    }
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                        )}
                         <Button
                             className="bg-[#0A0A0A] hover:bg-gray-800 text-white font-medium gap-2 px-6 h-11 rounded-md"
                             onClick={handleAddEntry}
                             disabled={isCreating || isUpdating}
                         >
-                            {initialData ? (
+                            {(initialData || editingId) ? (
                                 <>
                                     <Save className="w-4 h-4" />
                                     Update Entry

@@ -9,7 +9,7 @@ import { useGetDomesticAnalytics } from "./domesticAnalysis/hooks";
 import { useGetDivisionAnalysis } from "./hooks/useDivisionAnalysis";
 import { useMemo, useState } from "react";
 import FormationAnalysisTable from "./components/FormationAnalysisTable";
-import Hq36RapidDivisionTable from "./components/Hq36RapidDivisionTable";
+import Hq36RapidDivisionTable from "./components/DivisionTable";
 
 export default function MpOffenceAnalysisMonthlyReport() {
     const [selectedFormation, setSelectedFormation] = useState<{
@@ -103,6 +103,14 @@ export default function MpOffenceAnalysisMonthlyReport() {
     if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
     if (selectedFormation) {
+        if (selectedFormation.groupKey === "HQ 21 CORPS") {
+            return (
+                <FormationAnalysisTable
+                    formation={selectedFormation}
+                    onBack={() => setSelectedFormation(null)}
+                />
+            );
+        }
         return (
             <Hq36RapidDivisionTable
                 formation={selectedFormation}

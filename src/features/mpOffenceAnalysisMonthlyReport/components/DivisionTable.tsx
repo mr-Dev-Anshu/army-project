@@ -31,9 +31,9 @@ import { toast } from "react-toastify";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
-import Hq36RapidDivisionForm from "./Hq36RapidDivisionForm";
+import DivisionForm from "./DivisionForm";
 
-interface Hq36RapidDivisionTableProps {
+interface DivisionTableProps {
     formation: {
         groupKey: string;
         subtitle: string;
@@ -41,10 +41,10 @@ interface Hq36RapidDivisionTableProps {
     onBack: () => void;
 }
 
-export default function Hq36RapidDivisionTable({
+export default function DivisionTable({
     formation,
     onBack,
-}: Hq36RapidDivisionTableProps) {
+}: DivisionTableProps) {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editingEntry, setEditingEntry] = React.useState<any>(null);
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
@@ -356,7 +356,7 @@ export default function Hq36RapidDivisionTable({
 
     if (isEditing) {
         return (
-            <Hq36RapidDivisionForm
+            <DivisionForm
                 formation={formation}
                 onClose={() => {
                     setIsEditing(false);
