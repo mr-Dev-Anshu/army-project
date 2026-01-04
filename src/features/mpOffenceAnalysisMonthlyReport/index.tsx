@@ -46,8 +46,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
 
     // Fetch Division Analysis (Grouped) for Other Formations
     const { data: divisionData, isLoading: isDivisionLoading } = useGetDivisionAnalysis({
-        groupBy: "division",
-        monthYear: firstDayOfMonth
+        groupBy: "all"
     });
 
     /* Static Data for UI matching - merged with dynamic data */
@@ -83,8 +82,9 @@ export default function MpOffenceAnalysisMonthlyReport() {
 
         return FORMATIONS_LIST.map(f => {
             const match = divisionData.find((d: any) => d.divisionName === f.groupKey);
-            const total = match ? match.totalNumberOfCases : 0;
-            const pending = match ? match.totalActionPending : 0;
+            // Use offenceCount as "Total Offence" as requested to show count of entries/offences
+            const total = match ? (match.offenceCount || 0) : 0;
+            const pending = match ? (match.totalActionPending || 0) : 0;
             let risk = "Low Risk";
             if (pending > 20) risk = "High Risk";
             else if (pending > 10) risk = "Medium Risk";

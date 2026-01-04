@@ -45,6 +45,21 @@ export async function GET(request) {
       return NextResponse.json(groupedData);
     }
 
+    if (groupBy === "all") {
+      const queryParams = {
+        offence: searchParams.get("offence"),
+        divisionName: searchParams.get("divisionName"),
+        monthYear: searchParams.get("monthYear"),
+      };
+
+      Object.keys(queryParams).forEach((key) => {
+        if (!queryParams[key]) delete queryParams[key];
+      });
+
+      const allData = await divisionAnalysisService.getAllDivisionAnalysis(queryParams);
+      return NextResponse.json(allData);
+    }
+
     /* ===================== DEFAULT GET ALL ===================== */
     const filters = {};
     const divisionName = searchParams.get("divisionName");

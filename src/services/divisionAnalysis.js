@@ -114,6 +114,8 @@ export const getGlobalDivisionAnalysisService = async (filters = {}) => {
         totalActionTaken: { $sum: "$offenceActionTaken" },
         totalActionPending: { $sum: "$offenceActionPending" },
         totalNumberOfCases: { $sum: "$offenceTotalCases" },
+        totalRecords: { $sum: "$count" },
+        offenceCount: { $sum: 1 },
         offencesStats: {
           $push: {
             offenceName: "$_id.offence",
