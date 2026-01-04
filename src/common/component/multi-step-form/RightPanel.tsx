@@ -186,7 +186,7 @@ export const RightPanel = ({
               </Button>
 
               {!isLastStep ? (
-                <Button onClick={onNext} disabled={isNextDisabled()}>
+                <Button className="bg-[#0088FF] p-6 px-10" onClick={onNext} disabled={isNextDisabled()}>
                   Next <ChevronRight className="ml-2" />
                 </Button>
               ) : (

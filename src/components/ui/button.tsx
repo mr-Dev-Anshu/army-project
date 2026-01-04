@@ -23,7 +23,7 @@ const buttonVariants = cva(
           "bg-[#F5F5F5] text-[#171717] border border-gray-300 hover:bg-gray-100 hover:border-gray-400 focus-visible:ring-blue-500/30 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        default: "h-9 px-4 py-2 has-[>svg]:px-6",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
