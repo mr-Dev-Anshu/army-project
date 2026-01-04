@@ -387,7 +387,7 @@ export default function Hq36RapidDivisionTable({
                         MP Offence Analysis Monthly Report
                     </span>
                     <span className="mx-2 text-gray-400">›</span>
-                    <span className="font-bold text-[#0A0A0A]">HQ 36 RAPID Division</span>
+                    <span className="font-bold text-[#0A0A0A]">{formation.groupKey}</span>
                 </div>
                 <Button
                     className="bg-[#0088FF] text-white font-medium hover:bg-blue-600 gap-2 px-6 cursor-pointer rounded-md"

@@ -4,8 +4,8 @@ export const createDivisionAnalysisRepo = (payload) => {
   return DivisionAnalysis.create(payload);
 };
 
-export const getAllDivisionAnalysisRepo = () => {
-  return DivisionAnalysis.find().sort({ monthYear: -1 });
+export const getAllDivisionAnalysisRepo = (filters = {}) => {
+  return DivisionAnalysis.find(filters).sort({ monthYear: -1 });
 };
 
 export const getDivisionAnalysisByIdRepo = (id) => {

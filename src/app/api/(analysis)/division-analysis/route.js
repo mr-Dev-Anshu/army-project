@@ -46,7 +46,14 @@ export async function GET(request) {
     }
 
     /* ===================== DEFAULT GET ALL ===================== */
-    const data = await divisionAnalysisService.getAll();
+    const filters = {};
+    const divisionName = searchParams.get("divisionName");
+    const monthYear = searchParams.get("monthYear");
+
+    if (divisionName) filters.divisionName = divisionName;
+    if (monthYear) filters.monthYear = monthYear; // Note: exact match on string or date object might be needed depending on DB schema
+
+    const data = await divisionAnalysisService.getAll(filters);
     return NextResponse.json(data);
 
   } catch (error) {

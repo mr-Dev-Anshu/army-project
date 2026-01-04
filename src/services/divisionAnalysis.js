@@ -11,7 +11,7 @@ import { DivisionAnalysis } from "@/models/DivisionAnalysis";
 export const createDivisionAnalysisService = (payload) =>
   createDivisionAnalysisRepo(payload);
 
-export const getAllDivisionAnalysisService = () => getAllDivisionAnalysisRepo();
+export const getAllDivisionAnalysisService = (filters = {}) => getAllDivisionAnalysisRepo(filters);
 
 export const getDivisionAnalysisByIdService = (id) =>
   getDivisionAnalysisByIdRepo(id);
@@ -77,12 +77,12 @@ export const getGroupedByOffenceService = async (filters = {}) => {
 export const getGlobalDivisionAnalysisService = async (filters = {}) => {
 
 
-    console.log(await DivisionAnalysis.find().populate('divisionName'))  
+  console.log(await DivisionAnalysis.find().populate('divisionName'))
   const match = {};
 
   // REMOVE filters.divisionName from here to get all divisions
   if (filters.offence) match.offence = filters.offence;
-  
+
   if (filters.monthYear) {
     const d = new Date(filters.monthYear);
     if (!isNaN(d)) match.monthYear = d;
@@ -143,5 +143,5 @@ export const divisionAnalysisService = {
   delete: deleteDivisionAnalysisService,
   getGroupedByDivision: getGroupedByDivisionService,
   getGroupedByOffence: getGroupedByOffenceService,
-  getAllDivisionAnalysis:getGlobalDivisionAnalysisService
+  getAllDivisionAnalysis: getGlobalDivisionAnalysisService
 };

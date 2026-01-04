@@ -265,7 +265,7 @@ export default function Hq36RapidDivisionForm({ onClose, formation, initialData 
                     <span className="mx-2 text-gray-400">›</span>
                     <span className="text-[#404040]">MP Offence Analysis Monthly Report</span>
                     <span className="mx-2 text-gray-400">›</span>
-                    <span className="text-[#404040]">HQ 36 RAPID Division</span>
+                    <span className="text-[#404040]">{formation.groupKey}</span>
                     <span className="mx-2 text-gray-400">›</span>
                     <span className="font-bold text-[#0A0A0A]">Fill New Analysis Data</span>
                 </div>
