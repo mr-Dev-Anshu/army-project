@@ -1,272 +1,3 @@
-// "use client";
-
-// import { useState } from "react";
-// import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
-// import { useForm } from "@/context/FormContext";
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-// import { Checkbox } from "@/components/ui/checkbox";
-// import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
-
-// type OffenderKey = keyof typeof offenderFormsConfig & string;
-
-// interface OffenderWithoutVehicleFormProps {
-//   offenderType?: OffenderKey;
-//   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
-// }
-
-// export default function OffenderWithoutVehicleForm({
-//   offenderType: externalType = "",
-//   scope = "traffic",
-// }: OffenderWithoutVehicleFormProps) {
-//   const offenderConfig = offenderFormsConfig;
-
-//   const [offenderType, setOffenderType] = useState<OffenderKey | "">(
-//     externalType as OffenderKey
-//   );
-
-//   const [hasMilitaryRelative, setHasMilitaryRelative] = useState(false);
-//   const [relativeRelation, setRelativeRelation] = useState("");
-//   const [relativeType, setRelativeType] = useState("");
-
-//   const { dispatch } = useForm();
-
-//   if (!offenderConfig) return null;
-
-//   /* ---------------- PRIMARY SELECT HANDLER ---------------- */
-//   const storeTraffic = (value: any) => {
-//     dispatch({
-//       type: "SET_PATH",
-//       path: "formData.traffic.offenderWithoutVehicle",
-//       value,
-//     });
-
-//     dispatch({
-//       type: "SET_PATH",
-//       path: "formData.traffic.vehicleInvolved",
-//       value: "no",
-//     });
-
-//     dispatch({
-//       type: "SET_PATH",
-//       path: "formData.traffic.vehicleDetails",
-//       value: {
-//         category: "",
-//         vehicleType: "",
-//         driverType: "",
-//       },
-//     });
-//   };
-
-//   const storeMpMain = (value: any) =>
-//     dispatch({
-//       type: "SET_PATH",
-//       path: "formData.mpReport.individualDetails.tempOffender",
-//       value,
-//     });
-
-//   const storeMpAdditional = (value: any) =>
-//     dispatch({
-//       type: "SET_PATH",
-//       path: "formData.mpReport.additionalIndividual.tempOffender",
-//       value,
-//     });
-
-//   const saveToContext = (payload: any) => {
-//     if (scope === "traffic") storeTraffic(payload);
-//     if (scope === "mp-main") storeMpMain(payload);
-//     if (scope === "mp-additional") storeMpAdditional(payload);
-//   };
-
-//   const handleOffenderSelect = (value: OffenderKey) => {
-//     setOffenderType(value);
-//     setHasMilitaryRelative(false);
-//     setRelativeRelation("");
-//     setRelativeType("");
-
-//     saveToContext({
-//       offenderType: value,
-//       hasMilitaryRelative: false,
-//       relativeRelation: "",
-//       relativeType: "",
-//     });
-//   };
-
-//   /* ===================================================== */
-
-//   return (
-//     <div className="border rounded-lg p-6 space-y-6">
-//       <p className="font-semibold text-lg mb-2">Who was the Offender ?</p>
-
-//       {/* PRIMARY OFFENDER SELECT */}
-//       <RadioGroup
-//         value={offenderType}
-//         onValueChange={(value) => {
-//           setOffenderType(value);
-
-//           // 1️ STORE OFFENDER
-//           dispatch({
-//             type: "SET_PATH",
-//             path: "formData.traffic.offenderWithoutVehicle.offenderType",
-//             value,
-//           });
-
-//           // 2️ FIX: FORCE NO VEHICLE MODE
-//           dispatch({
-//             type: "SET_PATH",
-//             path: "formData.traffic.vehicleInvolved",
-//             value: "no",
-//           });
-
-//           //  OPTIONAL: CLEAR VEHICLE DETAILS SAFELY
-//           dispatch({
-//             type: "SET_PATH",
-//             path: "formData.traffic.vehicleDetails",
-//             value: {
-//               category: "",
-//               vehicleType: "",
-//               driverType: "",
-//             },
-//           });
-//         }}
-//         className="grid grid-cols-2 gap-3"
-//       >
-//         {Object.keys(offenderConfig).map((item) => (
-//           <label
-//             key={item}
-//             className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-//           >
-//             <RadioGroupItem value={item} />
-//             {item}
-//           </label>
-//         ))}
-//       </RadioGroup>
-
-//       {/* ================= CIVILIAN FLOW ================= */}
-//       {offenderType === "Civilian" && (
-//         <>
-//           <OffenderDynamicForm
-//             scope={scope}
-//             title="Civilian Details"
-//             fields={offenderFormsConfig["Civilian"].fields}
-//             showCoDriver={false}
-//           />
-
-//           {/* Checkbox */}
-//           <div className="flex gap-2 items-center mt-4">
-//             <Checkbox
-//               checked={hasMilitaryRelative}
-//               onCheckedChange={(v) => {
-//                 const val = !!v;
-//                 setHasMilitaryRelative(val);
-//                 setRelativeRelation("");
-//                 setRelativeType("");
-
-//                 saveToContext({
-//                   offenderType,
-//                   hasMilitaryRelative: val,
-//                   relativeRelation: "",
-//                   relativeType: "",
-//                 });
-//               }}
-//             />
-//             <p className="font-semibold">
-//               Is this person Dependent /Relative of Millitary Personnel or Other Registered?
-//             </p>
-//           </div>
-
-//           {/* Relation Input */}
-//           {hasMilitaryRelative && (
-//             <>
-//               <p className="font-semibold mt-4">
-//                 Enter Relation of Military Person
-//               </p>
-
-//               <input
-//                 type="text"
-//                 className="border rounded-lg px-4 py-2 w-full outline-none focus:border-blue-500"
-//                 placeholder="Father / Brother / Husband..."
-//                 value={relativeRelation}
-//                 onChange={(e) => {
-//                   setRelativeRelation(e.target.value);
-//                   saveToContext({
-//                     offenderType,
-//                     hasMilitaryRelative,
-//                     relativeRelation: e.target.value,
-//                     relativeType,
-//                   });
-//                 }}
-//               />
-
-//               {/* Always show options right below input */}
-//               <p className="font-semibold mt-4">
-//                 Select Military Relative Type
-//               </p>
-
-//               <RadioGroup
-//                 value={relativeType}
-//                 onValueChange={(v) => {
-//                   setRelativeType(v);
-//                   saveToContext({
-//                     offenderType,
-//                     hasMilitaryRelative,
-//                     relativeRelation,
-//                     relativeType: v,
-//                   });
-//                 }}
-//                 className="grid grid-cols-2 gap-3"
-//               >
-//                 {Object.keys(offenderConfig)
-//                   .filter((i) => i !== "Civilian")
-//                   .map((item) => (
-//                     <label
-//                       key={item}
-//                       className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-//                     >
-//                       <RadioGroupItem value={item} />
-//                       {item}
-//                     </label>
-//                   ))}
-//               </RadioGroup>
-
-//               {relativeType && (
-//                 <OffenderDynamicForm
-//                   scope={scope}
-//                   title={`${
-//                     relativeRelation || "Relative"
-//                   } (${relativeType}) Details`}
-//                   fields={offenderFormsConfig[relativeType].fields}
-//                   showCoDriver={false}
-//                 />
-//               )}
-//             </>
-//           )}
-//         </>
-//       )}
-
-//       {/* ================= OTHER NORMAL FLOW ================= */}
-//       {offenderType &&
-//         offenderType !== "Civilian" &&
-//         offenderConfig[offenderType] && (
-//           <OffenderDynamicForm
-//             scope={scope}
-//             title={offenderConfig[offenderType].title}
-//             helperText={offenderConfig[offenderType].helperText}
-//             fields={offenderFormsConfig[offenderType].fields.slice(1)}
-//             showCoDriver={false}
-//           />
-//         )}
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -288,54 +19,31 @@ export default function OffenderWithoutVehicleForm({
   scope = "traffic",
 }: OffenderWithoutVehicleFormProps) {
   const offenderConfig = offenderFormsConfig;
+  const { dispatch } = useForm();
 
   const [offenderType, setOffenderType] = useState<OffenderKey | "">(
     externalType as OffenderKey
   );
-
   const [hasMilitaryRelative, setHasMilitaryRelative] = useState(false);
   const [relativeRelation, setRelativeRelation] = useState("");
   const [relativeType, setRelativeType] = useState("");
 
-  const { dispatch } = useForm();
-
   if (!offenderConfig) return null;
 
-  /* ================== HELPERS ================== */
+  /* ================= PATH RESOLVER (🔥 MOST IMPORTANT) ================= */
 
-  const forceNoVehicleMode = () => {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic.vehicleInvolved",
-      value: "no",
-    });
+  const getPath = () => {
+    if (scope === "mp-main")
+      return "formData.mpReport.individualDetails.tempOffender";
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic.vehicleDetails",
-      value: {
-        category: "",
-        vehicleType: "",
-        driverType: "",
-      },
-    });
+    if (scope === "mp-additional")
+      return "formData.mpReport.additionalIndividual.tempOffender";
+
+    // traffic / static
+    return "formData.traffic.offenderPeople[0].details";
   };
 
-  const initPrimaryOffender = (type: OffenderKey) => {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic.offenderPeople",
-      value: [
-        {
-          type,
-          role: "Offender",
-          details: {},
-        },
-      ],
-    });
-  };
-
-  /* ================== SELECT HANDLER ================== */
+  /* ================= SELECT HANDLER ================= */
 
   const handleOffenderSelect = (value: OffenderKey) => {
     setOffenderType(value);
@@ -343,20 +51,55 @@ export default function OffenderWithoutVehicleForm({
     setRelativeRelation("");
     setRelativeType("");
 
-    forceNoVehicleMode();
-    initPrimaryOffender(value);
+    // traffic/static init
+    if (scope === "traffic" || scope === "static") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.traffic.offenderPeople",
+        value: [
+          {
+            type: value,
+            role: "Offender",
+            details: {},
+          },
+        ],
+      });
+
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.traffic.vehicleInvolved",
+        value: "no",
+      });
+    }
+
+    // mp init
+    if (scope === "mp-main") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mpReport.individualDetails.tempOffender",
+        value: { offenderType: value, details: {} },
+      });
+    }
+
+    if (scope === "mp-additional") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mpReport.additionalIndividual.tempOffender",
+        value: { offenderType: value, details: {} },
+      });
+    }
   };
 
-  /* =================================================== */
+  /* ================================================= */
 
   return (
     <div className="border rounded-lg p-6 space-y-6">
-      <p className="font-semibold text-lg mb-2">Who was the Offender ?</p>
+      <p className="font-semibold text-lg">Who was the Offender?</p>
 
-      {/* ================= PRIMARY OFFENDER SELECT ================= */}
+      {/* ================= PRIMARY SELECT ================= */}
       <RadioGroup
         value={offenderType}
-        onValueChange={(value) => handleOffenderSelect(value as OffenderKey)}
+        onValueChange={(v) => handleOffenderSelect(v as OffenderKey)}
         className="grid grid-cols-2 gap-3"
       >
         {Object.keys(offenderConfig).map((item) => (
@@ -376,18 +119,16 @@ export default function OffenderWithoutVehicleForm({
           <OffenderDynamicForm
             scope={scope}
             title="Civilian Details"
-            fields={offenderFormsConfig["Civilian"].fields}
-            path="formData.traffic.offenderPeople[0].details"
+            fields={offenderFormsConfig.Civilian.fields}
+            path={getPath()}
             showCoDriver={false}
           />
 
-          {/* RELATIVE CHECKBOX */}
           <div className="flex gap-2 items-center mt-4">
             <Checkbox
               checked={hasMilitaryRelative}
               onCheckedChange={(v) => {
-                const val = !!v;
-                setHasMilitaryRelative(val);
+                setHasMilitaryRelative(!!v);
                 setRelativeRelation("");
                 setRelativeType("");
               }}
@@ -399,25 +140,16 @@ export default function OffenderWithoutVehicleForm({
 
           {hasMilitaryRelative && (
             <>
-              <p className="font-semibold mt-4">
-                Enter Relation of Military Person
-              </p>
-
               <input
-                type="text"
-                className="border rounded-lg px-4 py-2 w-full outline-none focus:border-blue-500"
-                placeholder="Father / Brother / Husband..."
+                className="border rounded-lg px-4 py-2 w-full"
+                placeholder="Relation (Father / Brother / Husband)"
                 value={relativeRelation}
                 onChange={(e) => setRelativeRelation(e.target.value)}
               />
 
-              <p className="font-semibold mt-4">
-                Select Military Relative Type
-              </p>
-
               <RadioGroup
                 value={relativeType}
-                onValueChange={(v) => setRelativeType(v)}
+                onValueChange={setRelativeType}
                 className="grid grid-cols-2 gap-3"
               >
                 {Object.keys(offenderConfig)
@@ -438,7 +170,7 @@ export default function OffenderWithoutVehicleForm({
                   scope={scope}
                   title={`${relativeRelation || "Relative"} (${relativeType}) Details`}
                   fields={offenderFormsConfig[relativeType].fields}
-                  path="formData.traffic.offenderPeople[0].details"
+                  path={getPath()}
                   showCoDriver={false}
                 />
               )}
@@ -456,7 +188,7 @@ export default function OffenderWithoutVehicleForm({
             title={offenderConfig[offenderType].title}
             helperText={offenderConfig[offenderType].helperText}
             fields={offenderFormsConfig[offenderType].fields}
-            path="formData.traffic.offenderPeople[0].details"
+            path={getPath()}
             showCoDriver={false}
           />
         )}

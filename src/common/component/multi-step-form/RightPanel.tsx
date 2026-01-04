@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight, Cross, Eye } from "lucide-react";
 import { CiEraser } from "react-icons/ci";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { useForm } from "@/context/FormContext";
+import { initialState, useForm } from "@/context/FormContext";
 import { IoMdClose } from "react-icons/io";
 
-import {MilitaryPoliceReport} from "@/components/reports/MilitaryPoliceReport";
+import { MilitaryPoliceReport } from "@/components/reports/MilitaryPoliceReport";
 import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
 import MpOccurrenceReport from "@/components/reports/MpOccurrenceReport";
 
@@ -116,14 +116,15 @@ export const RightPanel = ({
                   </h2>
 
                   <div className="flex items-center gap-2">
-                    <Button className="bg-black text-white text-xl"   onClick={window.print}>
-                      🖨 
+                    <Button
+                      className="bg-black text-white text-xl"
+                      onClick={window.print}
+                    >
+                      🖨
                     </Button>
 
                     <Button
-                    className="bg-black text-xl text-white"
-                   
-                   
+                      className="bg-black text-xl text-white"
                       onClick={() => {
                         dispatch({ type: "SET_PREVIEW", payload: false });
 
@@ -152,7 +153,11 @@ export const RightPanel = ({
           {/* ================= FOOTER (ONLY FORM MODE) ================= */}
           {!state.preview && (
             <div className="border-t px-4 py-3 bg-white flex justify-between gap-2">
-              <Button className="py-6 px-14 text-white" disabled={step === 1} onClick={onPrev}>
+              <Button
+                className="py-6 px-14 text-white"
+                disabled={step === 1}
+                onClick={onPrev}
+              >
                 <FaArrowLeftLong className="mr-2 " /> Back
               </Button>
 
@@ -162,7 +167,7 @@ export const RightPanel = ({
                 </Button>
               ) : (
                 <Button
-                className="bg-[#34C759] text-white py-6 px-14 rounded-md"
+                  className="bg-[#34C759] text-white py-6 px-14 rounded-md"
                   onClick={() => {
                     dispatch({
                       type: "SET_PATH",
@@ -182,7 +187,7 @@ export const RightPanel = ({
                   }}
                 >
                   Preview Report
-               <Eye/>
+                  <Eye />
                 </Button>
               )}
             </div>
@@ -196,7 +201,20 @@ export const RightPanel = ({
         onClose={() => setShowClearModal(false)}
         onConfirm={() => {
           setIsClearing(true);
+
           setTimeout(() => {
+            // 🔥 PURE FORM RESET
+            dispatch({
+              type: "SET_FORM_DATA",
+              payload: initialState.formData,
+            });
+
+            // 🔥 STEP RESET
+            dispatch({ type: "SET_STEP", payload: 1 });
+
+            // 🔥 PREVIEW OFF
+            dispatch({ type: "SET_PREVIEW", payload: false });
+
             setIsClearing(false);
             setShowClearModal(false);
           }, 300);

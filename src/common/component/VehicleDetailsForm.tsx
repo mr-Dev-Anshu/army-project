@@ -1,4 +1,6 @@
+
 // "use client";
+
 // import { useState } from "react";
 // import { Label } from "@/components/ui/label";
 // import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -7,7 +9,6 @@
 // import { useForm } from "@/context/FormContext";
 // import { SuggestionInput } from "@/common/component/SuggestionInput";
 // import { cn } from "@/lib/utils";
-// import { Checkbox } from "@/components/ui/checkbox";
 
 // type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional";
 
@@ -24,48 +25,44 @@
 //   const staticSpeed = state.formData.staticSpeed;
 
 //   const [offenders, setOffenders] = useState<
-//     { id: number; type: string | null }[]
+//     { id: number; type: string }[]
 //   >([]);
 
-//   const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
-
+//   /* ================= GUARD ================= */
 //   if (scope === "traffic" && traffic.vehicleInvolved !== "yes") return null;
 
+//   /* ================= VEHICLE STATE (🔥 FIXED) ================= */
 //   const vehicleState =
 //     scope === "traffic"
-//       ? traffic?.vehicleDetails || {}
+//       ? traffic.vehicleDetails
 //       : scope === "static"
-//       ? staticSpeed?.vehicleDetails || {}
+//       ? staticSpeed.vehicleDetails
 //       : scope === "mp-main"
-//       ? state.formData?.mpReport?.individualDetails?.vehicleData || {}
+//       ? state.formData.mpReport.individualDetails.vehicleData
+//       : state.formData.mpReport.additionalIndividual.vehicleData;
+
+//   const category = vehicleState?.category || "";
+//   const vehicleType = vehicleState?.vehicleType || "";
+
+//   /* ================= DRIVER TYPE ================= */
+//   const driverType =
+//     scope === "mp-main"
+//       ? state.formData.mpReport.individualDetails.driverType
 //       : scope === "mp-additional"
-//       ? state.formData?.mpReport?.additionalIndividual?.vehicleData || {}
-//       : {};
+//       ? state.formData.mpReport.additionalIndividual.driverType
+//       : vehicleState?.driverType || "";
 
-//   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
+//   /* ================= PATHS ================= */
+//   const vehiclePath =
+//     scope === "traffic"
+//       ? "formData.traffic.vehicleDetails"
+//       : scope === "static"
+//       ? "formData.staticSpeed.vehicleDetails"
+//       : scope === "mp-main"
+//       ? "formData.mpReport.individualDetails.vehicleData"
+//       : "formData.mpReport.additionalIndividual.vehicleData";
 
-//   const updateVehicle = (data: any) => {
-//     const updated = { ...vehicleState, ...data };
-
-//     dispatch({
-//       type: "SET_PATH",
-//       path:
-//         scope === "traffic"
-//           ? "formData.traffic.vehicleDetails"
-//           : scope === "static"
-//           ? "formData.staticSpeed.vehicleDetails"
-//           : scope === "mp-main"
-//           ? "formData.mpReport.individualDetails.vehicleData"
-//           : "formData.mpReport.additionalIndividual.vehicleData",
-//       value: updated,
-//     });
-//   };
-
-//   const [hasCoDriver, setHasCoDriver] = useState("");
-//   const [coDriverType, setCoDriverType] = useState("");
-//   const [civilianRelative, setCivilianRelative] = useState("");
-
-//   const driverPath =
+//   const offenderPeoplePath =
 //     scope === "traffic"
 //       ? "formData.traffic.offenderPeople"
 //       : scope === "static"
@@ -74,54 +71,47 @@
 //       ? "formData.mpReport.individualDetails.tempOffender"
 //       : "formData.mpReport.additionalIndividual.tempOffender";
 
-//   const coDriverPath =
-//     scope === "traffic"
-//       ? "formData.traffic.vehicleDetails.coDriver"
-//       : scope === "static"
-//       ? "formData.staticSpeed.vehicleDetails.coDriver"
-//       : scope === "mp-main"
-//       ? "formData.mpReport.individualDetails.tempOffender"
-//       : "formData.mpReport.additionalIndividual.tempOffender";
+//   /* ================= UPDATE VEHICLE (🔥 WORKS FOR ALL) ================= */
+//   const updateVehicle = (data: any) => {
+//     dispatch({
+//       type: "SET_PATH",
+//       path: vehiclePath,
+//       value: { ...vehicleState, ...data },
+//     });
+//   };
 
 //   return (
 //     <div className="bg-white p-4 space-y-6">
+//       {/* ================= VEHICLE CATEGORY ================= */}
 //       <div>
 //         <p className="font-semibold mb-2">Select Vehicle Category</p>
-
 //         <RadioGroup
 //           value={category}
 //           onValueChange={(v) => updateVehicle({ category: v })}
 //           className="grid sm:grid-cols-2 gap-3"
 //         >
-//           <label
-//             className={cn(
-//               "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-//               category === "2w"
-//                 ? "border-blue-500 bg-blue-50"
-//                 : "border-gray-300"
-//             )}
-//           >
-//             <RadioGroupItem value="2w" /> 2-Wheeler
-//           </label>
-
-//           <label
-//             className={cn(
-//               "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-//               category === "4w"
-//                 ? "border-blue-500 bg-blue-50"
-//                 : "border-gray-300"
-//             )}
-//           >
-//             <RadioGroupItem value="4w" /> 4-Wheeler
-//           </label>
+//           {["2w", "4w"].map((v) => (
+//             <label
+//               key={v}
+//               className={cn(
+//                 "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
+//                 category === v
+//                   ? "border-blue-500 bg-blue-50"
+//                   : "border-gray-300"
+//               )}
+//             >
+//               <RadioGroupItem value={v} />
+//               {v === "2w" ? "2-Wheeler" : "4-Wheeler"}
+//             </label>
+//           ))}
 //         </RadioGroup>
 //       </div>
 
+//       {/* ================= VEHICLE TYPE ================= */}
 //       <div>
 //         <p className="font-semibold mb-2">
 //           Which Type Of Vehicle Was Involved?
 //         </p>
-
 //         <RadioGroup
 //           value={vehicleType}
 //           onValueChange={(v) =>
@@ -133,112 +123,79 @@
 //           }
 //           className="grid sm:grid-cols-2 gap-3"
 //         >
-//           <label
-//             className={cn(
-//               "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-//               vehicleType === "civilian"
-//                 ? "border-blue-500 bg-blue-50"
-//                 : "border-gray-300"
-//             )}
-//           >
-//             <RadioGroupItem value="civilian" /> Civilian Vehicle
-//           </label>
-
-//           <label
-//             className={cn(
-//               "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-//               vehicleType === "dd"
-//                 ? "border-blue-500 bg-blue-50"
-//                 : "border-gray-300"
-//             )}
-//           >
-//             <RadioGroupItem value="dd" /> DD Vehicle
-//           </label>
+//           {["civilian", "dd"].map((v) => (
+//             <label
+//               key={v}
+//               className={cn(
+//                 "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
+//                 vehicleType === v
+//                   ? "border-blue-500 bg-blue-50"
+//                   : "border-gray-300"
+//               )}
+//             >
+//               <RadioGroupItem value={v} />
+//               {v === "civilian" ? "Civilian Vehicle" : "DD Vehicle"}
+//             </label>
+//           ))}
 //         </RadioGroup>
 //       </div>
 
-//       {vehicleType === "civilian" && (
-//         <div>
-//           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
+//       {/* ================= VEHICLE DETAILS ================= */}
+//       {vehicleType && (
+//         <div className="grid sm:grid-cols-2 gap-4">
+//           <div>
+//             <Label>Vehicle Number</Label>
+//             <SuggestionInput
+//               value={vehicleState.vehicleNumber || ""}
+//               onChange={(v) => updateVehicle({ vehicleNumber: v })}
+//               fieldType="vehicleNumber"
+//             />
+//           </div>
 
-//           <div className="grid sm:grid-cols-2 gap-4">
-//             <div>
-//               <Label className="mb-3 ">Civil Vehicle Registration Number</Label>
-//               <SuggestionInput
-//                 placeholder="e.g. MP04 AB 1234"
-//                 value={vehicleState.vehicleNumber || ""}
-//                 onChange={(v) => updateVehicle({ vehicleNumber: v })}
-//                 fieldType="vehicleNumber"
-//               />
-//             </div>
-
-//             <div>
-//               <Label className="mb-3">Make & Type (Vehicle Name)</Label>
-//               <SuggestionInput
-//                 placeholder="e.g. Honda CB Hornet"
-//                 value={vehicleState.vehicleName || ""}
-//                 onChange={(v) => updateVehicle({ vehicleName: v })}
-//                 fieldType="vehicleName"
-//               />
-//             </div>
+//           <div>
+//             <Label>Make & Type</Label>
+//             <SuggestionInput
+//               value={vehicleState.vehicleName || ""}
+//               onChange={(v) => updateVehicle({ vehicleName: v })}
+//               fieldType="vehicleName"
+//             />
 //           </div>
 //         </div>
 //       )}
 
-//       {vehicleType === "dd" && (
-//         <div>
-//           <p className="font-semibold mb-2">Fill Vehicle Identification</p>
-
-//           <div className="grid sm:grid-cols-2 gap-4">
-//             <div>
-//               <Label>DD Vehicle BA Number</Label>
-//               <SuggestionInput
-//                 placeholder="e.g. 12A 345678Z"
-//                 value={vehicleState.vehicleNumber || ""}
-//                 onChange={(v) => updateVehicle({ vehicleNumber: v })}
-//                 fieldType="vehicleNumber"
-//               />
-//             </div>
-
-//             <div>
-//               <Label>Make & Type (Vehicle Name)</Label>
-//               <SuggestionInput
-//                 placeholder="e.g. ALS W/B"
-//                 value={vehicleState.vehicleName || ""}
-//                 onChange={(v) => updateVehicle({ vehicleName: v })}
-//                 fieldType="vehicleName"
-//               />
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
+//       {/* ================= DRIVER ================= */}
 //       <div>
 //         <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
 
 //         <RadioGroup
 //           value={driverType}
 //           onValueChange={(v) => {
-//             updateVehicle({ driverType: v });
+//             /* SAVE DRIVER TYPE */
+//             dispatch({
+//               type: "SET_PATH",
+//               path:
+//                 scope === "mp-main"
+//                   ? "formData.mpReport.individualDetails.driverType"
+//                   : scope === "mp-additional"
+//                   ? "formData.mpReport.additionalIndividual.driverType"
+//                   : `${vehiclePath}.driverType`,
+//               value: v,
+//             });
 
-//             setHasCoDriver("");
-//             setCoDriverType("");
-//             setCivilianRelative("");
+//             if (scope === "traffic" || scope === "static") {
+//               const id = Date.now();
+//               setOffenders([{ id, type: v }]);
 
-//             const id = Date.now();
-//             setOffenders([{ id, type: v }]);
-
-//             if (scope === "traffic") {
+//               dispatch({
+//                 type: "PUSH_PATH",
+//                 path: offenderPeoplePath,
+//                 value: { id, type: v, details: {} },
+//               });
+//             } else {
 //               dispatch({
 //                 type: "SET_PATH",
-//                 path: "formData.traffic.offenderPeople",
-//                 value: [
-//                   {
-//                     id,
-//                     type: v,
-//                     details: {},
-//                   },
-//                 ],
+//                 path: offenderPeoplePath,
+//                 value: { offenderType: v, details: {} },
 //               });
 //             }
 //           }}
@@ -268,64 +225,30 @@
 //         </RadioGroup>
 //       </div>
 
-//       {driverType && driverType !== "Civilian" && (
-//         <>
-//           {offenders.map((o, index) => (
-//             <div key={o.id} className="border rounded-xl p-4 mt-4">
-//               <OffenderDynamicForm
-//                 scope={scope}
-//                 title={`${o.type} Details`}
-//                 fields={offenderFormsConfig[o.type!].fields}
-//                 path={
-//                   scope === "mp-main" || scope === "mp-additional"
-//                     ? driverPath
-//                     : `${driverPath}[${index}].details`
-//                 }
-//                 showCoDriver={index === 0}
-//               />
-//             </div>
-//           ))}
-//         </>
-//       )}
-
-//       {driverType === "Civilian" && (
-//         <>
-//           {(() => {
-//             let index = coDriverIndex;
-
-//             // ✅ ensure offender array me entry ho
-//             if (index === null) {
-//               index = state.formData.traffic.offenderPeople.length;
-//               setCoDriverIndex(index);
-
-//               dispatch({
-//                 type: "PUSH_PATH",
-//                 path: "formData.traffic.offenderPeople",
-//                 value: {
-//                   offenderType: "Civilian",
-//                   role: "Co-Driver",
-//                   details: {},
-//                 },
-//               });
+//       {/* ================= DRIVER FORM ================= */}
+//       {driverType && (
+//         <div className="border rounded-xl p-4 mt-4">
+//           <OffenderDynamicForm
+//             scope={scope}
+//             title={`${driverType} Details`}
+//             fields={offenderFormsConfig[driverType].fields}
+//             path={
+//               scope === "traffic" || scope === "static"
+//                 ? `${offenderPeoplePath}[0].details`
+//                 : `${offenderPeoplePath}.details`
 //             }
-
-//             return (
-//               <OffenderDynamicForm
-//                 title="Civilian Co-Driver Details"
-//                 fields={offenderFormsConfig["Civilian"].fields}
-//                 scope="traffic"
-//                 path={`formData.traffic.offenderPeople[${index}].details`}
-//                 showCoDriver={false}
-//               />
-//             );
-//           })()}
-//         </>
+//             showCoDriver={false}
+//           />
+//         </div>
 //       )}
 //     </div>
 //   );
 // }
 
+
+
 "use client";
+
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -341,53 +264,66 @@ interface VehicleDetailsFormProps {
   scope?: ScopeType;
 }
 
-export default function VehicleDetailsForm({
-  scope = "traffic",
-}: VehicleDetailsFormProps) {
+export default function VehicleDetailsForm({ scope = "traffic" }: VehicleDetailsFormProps) {
   const { state, dispatch } = useForm();
 
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
 
-  const [offenders, setOffenders] = useState<
-    { id: number; type: string | null }[]
-  >([]);
+  const [offenders, setOffenders] = useState<{ id: number; type: string }[]>([]);
 
-  const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
-
-  if (scope === "traffic" && traffic.vehicleInvolved !== "yes") return null;
-
+  /* ================= VEHICLE STATE (SAME AS STATIC LOGIC) ================= */
   const vehicleState =
     scope === "traffic"
-      ? traffic?.vehicleDetails || {}
+      ? traffic.vehicleDetails
       : scope === "static"
-      ? staticSpeed?.vehicleDetails || {}
-      : {};
+      ? staticSpeed.vehicleDetails
+      : scope === "mp-main"
+      ? state.formData.mpReport.individualDetails.vehicleData
+      : state.formData.mpReport.additionalIndividual.vehicleData;
 
-  const { category = "", vehicleType = "", driverType = "" } = vehicleState;
+  const category = vehicleState?.category || "";
+  const vehicleType = vehicleState?.vehicleType || "";
 
-  /* ---------------- PATH RESOLVER ---------------- */
+  /* ================= DRIVER TYPE ================= */
+  const driverType =
+    scope === "mp-main"
+      ? state.formData.mpReport.individualDetails.driverType
+      : scope === "mp-additional"
+      ? state.formData.mpReport.additionalIndividual.driverType
+      : vehicleState?.driverType || "";
+
+  /* ================= PATHS ================= */
+  const vehiclePath =
+    scope === "traffic"
+      ? "formData.traffic.vehicleDetails"
+      : scope === "static"
+      ? "formData.staticSpeed.vehicleDetails"
+      : scope === "mp-main"
+      ? "formData.mpReport.individualDetails.vehicleData"
+      : "formData.mpReport.additionalIndividual.vehicleData";
+
   const offenderPeoplePath =
     scope === "traffic"
       ? "formData.traffic.offenderPeople"
       : scope === "static"
       ? "formData.staticSpeed.offenderPeople"
-      : "";
+      : scope === "mp-main"
+      ? "formData.mpReport.individualDetails.tempOffender"
+      : "formData.mpReport.additionalIndividual.tempOffender";
 
+  /* ================= UPDATE VEHICLE ================= */
   const updateVehicle = (data: any) => {
     dispatch({
       type: "SET_PATH",
-      path:
-        scope === "traffic"
-          ? "formData.traffic.vehicleDetails"
-          : "formData.staticSpeed.vehicleDetails",
+      path: vehiclePath,
       value: { ...vehicleState, ...data },
     });
   };
 
   return (
     <div className="bg-white p-4 space-y-6">
-      {/* ================= VEHICLE CATEGORY ================= */}
+      {/* VEHICLE CATEGORY */}
       <div>
         <p className="font-semibold mb-2">Select Vehicle Category</p>
         <RadioGroup
@@ -400,31 +336,23 @@ export default function VehicleDetailsForm({
               key={v}
               className={cn(
                 "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-                category === v
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300"
+                category === v ? "border-blue-500 bg-blue-50" : "border-gray-300"
               )}
             >
-              <RadioGroupItem value={v} />{" "}
+              <RadioGroupItem value={v} />
               {v === "2w" ? "2-Wheeler" : "4-Wheeler"}
             </label>
           ))}
         </RadioGroup>
       </div>
 
-      {/* ================= VEHICLE TYPE ================= */}
+      {/* VEHICLE TYPE */}
       <div>
-        <p className="font-semibold mb-2">
-          Which Type Of Vehicle Was Involved?
-        </p>
+        <p className="font-semibold mb-2">Which Type Of Vehicle Was Involved?</p>
         <RadioGroup
           value={vehicleType}
           onValueChange={(v) =>
-            updateVehicle({
-              vehicleType: v,
-              vehicleNumber: "",
-              vehicleName: "",
-            })
+            updateVehicle({ vehicleType: v, vehicleNumber: "", vehicleName: "" })
           }
           className="grid sm:grid-cols-2 gap-3"
         >
@@ -433,9 +361,7 @@ export default function VehicleDetailsForm({
               key={v}
               className={cn(
                 "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-                vehicleType === v
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300"
+                vehicleType === v ? "border-blue-500 bg-blue-50" : "border-gray-300"
               )}
             >
               <RadioGroupItem value={v} />
@@ -445,7 +371,7 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* ================= VEHICLE DETAILS ================= */}
+      {/* VEHICLE DETAILS */}
       {vehicleType && (
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
@@ -468,26 +394,37 @@ export default function VehicleDetailsForm({
         </div>
       )}
 
-      {/* ================= DRIVER ================= */}
+      {/* DRIVER */}
       <div>
         <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
         <RadioGroup
           value={driverType}
           onValueChange={(v) => {
-            updateVehicle({ driverType: v });
+            dispatch({
+              type: "SET_PATH",
+              path:
+                scope === "mp-main"
+                  ? "formData.mpReport.individualDetails.driverType"
+                  : scope === "mp-additional"
+                  ? "formData.mpReport.additionalIndividual.driverType"
+                  : `${vehiclePath}.driverType`,
+              value: v,
+            });
 
-            const id = Date.now();
-            setOffenders([{ id, type: v }]);
+            if (scope === "traffic" || scope === "static") {
+              const id = Date.now();
+              setOffenders([{ id, type: v }]);
 
-            if (offenderPeoplePath) {
               dispatch({
                 type: "PUSH_PATH",
                 path: offenderPeoplePath,
-                value: {
-                  id,
-                  type: v,
-                  details: {},
-                },
+                value: { id, type: v, details: {} },
+              });
+            } else {
+              dispatch({
+                type: "SET_PATH",
+                path: offenderPeoplePath,
+                value: { offenderType: v, details: {} },
               });
             }
           }}
@@ -510,25 +447,29 @@ export default function VehicleDetailsForm({
                   : "border-gray-300"
               )}
             >
-              <RadioGroupItem value={item} /> {item}
+              <RadioGroupItem value={item} />
+              {item}
             </label>
           ))}
         </RadioGroup>
       </div>
 
-      {/* ================= DRIVER DETAILS FORM ================= */}
-      {driverType &&
-        offenders.map((o, index) => (
-          <div key={o.id} className="border rounded-xl p-4 mt-4">
-            <OffenderDynamicForm
-              scope={scope}
-              title={`${o.type} Details`}
-              fields={offenderFormsConfig[o.type!].fields}
-              path={`${offenderPeoplePath}[${index}].details`}
-              showCoDriver={index === 0}
-            />
-          </div>
-        ))}
+      {/* DRIVER FORM */}
+      {driverType && (
+        <div className="border rounded-xl p-4 mt-4">
+          <OffenderDynamicForm
+            scope={scope}
+            title={`${driverType} Details`}
+            fields={offenderFormsConfig[driverType].fields}
+            path={
+              scope === "traffic" || scope === "static"
+                ? `${offenderPeoplePath}[0].details`
+                : `${offenderPeoplePath}.details`
+            }
+            showCoDriver={false}
+          />
+        </div>
+      )}
     </div>
   );
 }
