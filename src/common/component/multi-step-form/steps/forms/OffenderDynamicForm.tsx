@@ -395,6 +395,9 @@ export default function OffenderDynamicForm({
     "I Card Number": "iCardNumber",
   };
 
+
+
+
 const saveField = (label: string, value: string) => {
   let targetPath = path;
 
@@ -404,7 +407,6 @@ const saveField = (label: string, value: string) => {
 
   const key = labelKeyMap[label] || label;
 
-  // UI update
   setLocalData((prev: any) => ({
     ...(prev || {}),
     [key]: value,
@@ -418,16 +420,12 @@ const saveField = (label: string, value: string) => {
     type: "SET_PATH",
     path: targetPath,
     value: {
+      ...prevGlobal,
       offenderType: title.replace(" Details", ""),
-      details: {
-        ...(prevGlobal.details || {}),
-        [key]: value,
-      },
+      [key]: value,
     },
   });
 };
-
-
 
 
   /* ================= HELPER: ENSURE OFFENDER SLOT ================= */

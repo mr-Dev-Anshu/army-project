@@ -47,7 +47,9 @@ export default function Step5WitnessList() {
       value: witnesses.filter((_, i) => i !== index),
     });
   };
- const handleSaveMainWitness = () => {
+
+
+const handleSaveMainWitness = () => {
   const temp = state.formData.mpReport.individualDetails.tempOffender;
 
   if (!temp || Object.keys(temp).length === 0) {
@@ -55,9 +57,13 @@ export default function Step5WitnessList() {
     return;
   }
 
+  // 🔥 FLATTEN DETAILS
+  const flat = temp.details ? { ...temp.details } : { ...temp };
+
   const witnessPayload = {
-    ...temp,
-    role: "witness",
+    ...flat,
+    role: "Witness",
+    offenderType: "Witness",
   };
 
   dispatch({
@@ -66,7 +72,6 @@ export default function Step5WitnessList() {
     value: [...witnesses, witnessPayload],
   });
 
-  // 🔥 RESET FORM
   dispatch({
     type: "SET_PATH",
     path: "formData.mpReport.individualDetails.tempOffender",
@@ -75,6 +80,7 @@ export default function Step5WitnessList() {
 
   toast.success("Witness Added!");
 };
+
 
 
   return (

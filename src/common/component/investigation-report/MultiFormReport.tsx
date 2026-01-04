@@ -85,205 +85,275 @@ export default function MultiFormReport({
   const toISODateTime = (date?: string, time?: string) =>
     date && time ? new Date(`${date}T${time}`).toISOString() : null;
 
-  const mapMpToReport = (mp: any) => {
-    const individuals = mp?.individualDetails?.offenderList || [];
-    const rawWitnesses = mp?.witnesses || [];
-    const ev = mp?.evidence || {};
+const mapMpToReport = (mp: any) => {
+  /* ================= RAW LISTS ================= */
+  const individuals = mp?.individualDetails?.offenderList || [];
+  const witnessList = mp?.witnesses || [];
 
-    return {
-      /* ✅ ADD THIS (THIS IS THE FIX) */
-      mpDetails: {
-        armyNo: mp?.mpParticulars?.armyNo || "",
-        rank: mp?.mpParticulars?.rank || "",
-        name: mp?.mpParticulars?.name || "",
-        unit: mp?.mpParticulars?.unit || "",
-        fmn: mp?.mpParticulars?.fmn || "",
-        command: mp?.mpParticulars?.command || "",
-      },
+  /* ================= PEOPLE ================= */
+  const people = individuals.map((p: any, i: number) => ({
+    sno: i + 1,
+    armyNo: p.armyNumber || "Nil",
+    rank: p.rank || "Nil",
+    name: p.name || "Nil",
+    identityCard: p.iCardNumber || "Nil",
+    unitName: p.unit || "Nil",
+    fmn: p.fmn || "Nil",
+    address: p.address || "Nil",
+    remark: p.remark || "--",
+    role:
+      p.offenderType === "Victim"
+        ? "Victim"
+        : p.offenderType === "Offender"
+        ? "Offender"
+        : "Unknown",
+  }));
 
-      /* 🔹 KEEP YOUR EXISTING STRUCTURE */
-      reportNo: mp?.reportDetails?.reportNo || "",
-      command: mp?.reportDetails?.command || "",
-      firNo: mp?.reportDetails?.firNo || "",
-      reportDate: new Date().toLocaleDateString("en-GB"),
-      station: mp?.remarks?.station || "",
+  /* ================= WITNESSES ================= */
+  const witnesses = witnessList.map((w: any, i: number) => ({
+    sno: i + 1,
+    armyNo: w.armyNumber || "Nil",
+    rank: w.rank || "Nil",
+    name: w.name || "Nil",
+    identityCard: w.iCardNumber || "Nil",
+    unitName: w.unit || "Nil",
+    fmn: w.fmn || "Nil",
+    address: w.address || "Nil",
+    remark: w.remark || "--",
+  }));
 
-      occurrence: {
-        offenceType: mp?.occurrenceDetails?.offenceType || "",
-        place: mp?.occurrenceDetails?.place || "",
-        date: mp?.occurrenceDetails?.date || "",
-        time: mp?.occurrenceDetails?.time || "",
-      },
+  /* ================= INVESTIGATION ================= */
+  const findings = Array.isArray(mp?.investigationPoints)
+    ? mp.investigationPoints
+    : typeof mp?.investigationPoints === "string" &&
+      mp.investigationPoints.trim()
+    ? mp.investigationPoints.split("\n")
+    : [];
 
-      people: individuals.map((p: any, i: number) => ({
-        sno: i + 1,
-        armyNo: p.armyNumber || "",
-        rank: p.rank || "",
-        name: p.name || "",
-        identityCard: p.iCardNumber || "",
-        unitName: p.unit || "",
-        fmn: p.fmn || "",
-        address: p.address || "",
-        remark: p.remark || "--",
-        role: "Offender",
-      })),
+  return {
+    /* ================= HEADER ================= */
+    reportNo: mp?.reportDetails?.reportNo || "Nil",
+    command: mp?.reportDetails?.command || "Nil",
+    firNo: mp?.reportDetails?.firNo || "Nil",
 
-      witnesses: rawWitnesses.map((w: any, i: number) => ({
-        sno: i + 1,
-        armyNo: w.armyNumber || "",
-        rank: w.rank || "",
-        name: w.name || "",
-        identityCard: w.iCardNumber || "",
-        unitName: w.unit || "",
-        fmn: w.fmn || "",
-        address: w.address || "",
-        remark: w.remark || "--",
-      })),
+    /* ================= MP DETAILS ================= */
+    mpDetails: {
+      armyNo: mp?.mpParticulars?.armyNo || "Nil",
+      rank: mp?.mpParticulars?.rank || "Nil",
+      name: mp?.mpParticulars?.name || "Nil",
+      unit: mp?.mpParticulars?.unit || "Nil",
+      fmn: mp?.mpParticulars?.fmn || "Nil",
+      command: mp?.mpParticulars?.command || "Nil",
+    },
 
-      briefOfOccurrence: mp?.occurrenceDetails?.description || "",
+    /* ================= OCCURRENCE ================= */
+    occurrence: {
+      offenceType: mp?.occurrenceDetails?.offenceType || "Nil",
+      place: mp?.occurrenceDetails?.place || "Nil",
+      date: mp?.occurrenceDetails?.date || "Nil",
+      time: mp?.occurrenceDetails?.time || "Nil",
+    },
 
-      evidence: {
-        eyeSketch: ev?.eyeSketch?.url ? "Attached" : "Nil",
-        photos: ev?.photos?.length ? "Attached" : "Nil",
-        videos: ev?.videos?.length ? "Attached" : "Nil",
-      },
-      documents: (mp.documents || []).map((d: any) => ({
-        statement: d.statement || "",
-        url: d.url || "",
-        customFields: {},
-      })),
+    /* ================= PEOPLE & WITNESSES ================= */
+    people,
+    witnesses,
 
-      detailedReport: {
-        statement:
-          mp?.detailedReport?.statement ||
-          mp?.detailedOccurrenceReport?.statement ||
-          "",
-        findings: Array.isArray(mp?.investigationPoints)
-          ? mp.investigationPoints
-          : mp?.investigationPoints
-          ? [mp.investigationPoints]
-          : [],
-        opinion: mp?.opinion || "",
-      },
+    /* ================= BRIEF ================= */
+    briefOfOccurrence:
+      mp?.occurrenceDetails?.description ||
+      mp?.briefOfOccurrence ||
+      "Nil",
 
-      remarks: {
-        analysis: mp?.remarks?.analysis || "",
-        recommendation: mp?.remarks?.recommendation || "",
-      },
-    };
+    /* ================= EVIDENCE ================= */
+    evidence: {
+      eyeSketch: mp?.evidence?.eyeSketch?.url ? "Available" : "Nil",
+      photos:
+        mp?.evidence?.photos?.length > 0
+          ? `${mp.evidence.photos.length} Photos`
+          : "Nil",
+      videos:
+        mp?.evidence?.videos?.length > 0
+          ? `${mp.evidence.videos.length} Videos`
+          : "Nil",
+    },
+
+    /* ================= DOCUMENTS ================= */
+    documents: (mp?.documents || []).map(
+      (d: any) => d?.statement || "Nil"
+    ),
+
+    /* ================= DETAILED REPORT ================= */
+    detailedReport: {
+      statement:
+        mp?.detailedOccurrenceReport?.statement ||
+        mp?.detailedOccurrenceReport ||
+        "Nil",
+      findings,
+      opinion:
+        mp?.opinion?.statement ||
+        mp?.opinion ||
+        "Nil",
+    },
+
+    /* ================= REMARKS ================= */
+    remarks: {
+      analysis: mp?.remarks?.analysis || "Nil",
+      recommendation: mp?.remarks?.recommendation || "Nil",
+    },
+
+    /* ================= FOOTER ================= */
+    station: mp?.station || "Nil",
+    reportDate:
+      mp?.reportDate ||
+      new Date().toLocaleDateString("en-GB"),
   };
+};
 
-  /* ================= FINAL SUBMIT ================= */
-  const onSubmitFinal = async () => {
-    try {
-      const mp = state.formData.mpReport;
+const onSubmitFinal = async () => {
+  try {
+    const mp = state.formData.mpReport;
 
-      const offenders = (mp?.individualDetails?.offenderList || []).map(
-        (p: any) => ({
-          offenderType: p.offenderType || "Unknown",
-          armyNumber: p.armyNumber || "",
-          rank: p.rank || "",
-          name: p.name || "",
-          unit: p.unit || "",
-          fmn: p.fmn || "",
-          address: p.address || "",
-          iCardNumber: p.iCardNumber || "",
-          remark: p.remark || "",
-          customFields: {},
-        })
-      );
+    const payload = {
+      reportDetails: {
+        reportNumber: mp.reportDetails.reportNo || "NA",
+        command: mp.reportDetails.command || "NA",
+        firNumber: mp.reportDetails.firNo || "NA",
+        firFileUrl: mp.reportDetails.firFile || "",
+        customFields: {},
+      },
 
-      const witnesses = (mp?.witnesses || []).map((w: any) => ({
-        armyNumber: w.armyNumber || "",
-        rank: w.rank || "",
-        name: w.name || "",
-        unit: w.unit || "",
-        fmn: w.fmn || "",
-        address: w.address || "",
-        iCardNumber: w.iCardNumber || "",
+      investigationHead: {
+        armyNumber: mp.mpParticulars.armyNo || "NA",
+        rank: mp.mpParticulars.rank || "NA",
+        name: mp.mpParticulars.name || "NA",
+        unit: mp.mpParticulars.unit || "NA",
+        fmn: mp.mpParticulars.fmn || "NA",
+        command: mp.mpParticulars.command || "NA",
+        address: mp.mpParticulars.address || "NA",
+        iCardNumber: mp.mpParticulars.icard || "NA",
+        customFields: {},
+      },
+
+      occurrenceDetails: {
+        offenceType: mp.occurrenceDetails.offenceType || "NA",
+        placeOfOccurrence: mp.occurrenceDetails.place || "NA",
+        dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
+        timeOfOccurrence: toISODateTime(
+          mp.occurrenceDetails.date,
+          mp.occurrenceDetails.time
+        ),
+        description: mp.occurrenceDetails.description || "Nil",
+        customFields: {},
+      },
+
+      witnesses: (mp.witnesses || []).map((w: any) => ({
+        armyNumber: w.armyNumber || "NA",
+        rank: w.rank || "NA",
+        name: w.name || "NA",
+        unit: w.unit || "NA",
+        fmn: w.fmn || "NA",
+        address: w.address || "NA",
+        iCardNumber: w.iCardNumber || "NA",
         remark: w.remark || "",
         customFields: {},
-      }));
+      })),
 
-      const payload = {
-        reportDetails: {
-          reportNumber: mp.reportDetails.reportNo,
-          command: mp.reportDetails.command,
-          firNumber: mp.reportDetails.firNo,
-          firFileUrl: mp.reportDetails.firFile || "",
-          customFields: {},
-        },
+      /* ✅ DOCUMENTS — url REQUIRED */
+      documents: (mp.documents || []).map((d: any) => ({
+        statement: d.statement || "Nil",
+        url: d.url || "NA",
+      })),
 
-        investigationHead: {
-          armyNumber: mp.mpParticulars.armyNo,
-          rank: mp.mpParticulars.rank,
-          name: mp.mpParticulars.name,
-          unit: mp.mpParticulars.unit,
-          fmn: mp.mpParticulars.fmn,
-          command: mp.mpParticulars.command,
-          address: mp.mpParticulars.address,
-          iCardNumber: mp.mpParticulars.icard,
-          customFields: {},
-        },
+      evidences: buildEvidences(mp.evidence),
 
-        occurrenceDetails: {
-          offenceType: mp.occurrenceDetails.offenceType,
-          placeOfOccurrence: mp.occurrenceDetails.place,
-          dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
-          timeOfOccurrence: toISODateTime(
-            mp.occurrenceDetails.date,
-            mp.occurrenceDetails.time
-          ),
-          description: mp.occurrenceDetails.description,
-          customFields: {},
-        },
+      /* ✅ STRING ONLY */
+      detailedOccurrenceReport:
+        mp.detailedReport?.statement ||
+        mp.detailedReport ||
+        "Nil",
 
-        offenders,
-        witnesses,
-        documents: mp.documents || [],
-        evidences: buildEvidences(mp.evidence),
+      /* ✅ STRING ONLY */
+      pointsFindOutDuringInvestigation: Array.isArray(mp.investigationPoints)
+        ? mp.investigationPoints.join("\n")
+        : mp.investigationPoints || "Nil",
 
-        /* ✅ CORRECT STEP MAPPING */
-        detailedOccurrenceReport: mp.detailedOccurrenceReport,
-        pointsFindOutDuringInvestigation: mp.investigationPoints,
-        opinion: mp.opinion,
+      /* ✅ STRING ONLY */
+      opinion:
+        mp.opinion?.statement ||
+        mp.opinion ||
+        "Nil",
 
-        remarks: {
-          analysis: mp.remarks.analysis,
-          recommendation: mp.remarks.recommendation,
-          customFields: {},
-        },
-
+      remarks: {
+        analysis: mp.remarks.analysis || "Nil",
+        recommendation: mp.remarks.recommendation || "Nil",
         customFields: {},
-      };
+      },
 
-      console.log("🚀 FINAL MP PAYLOAD", payload);
+      customFields: {},
+    };
 
-      await createReportAsync(payload);
-      toast.success("MP Investigation Report Created 🎉");
+    console.log("🚀 FINAL MP PAYLOAD", payload);
 
-      dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
-      dispatch({ type: "SET_STEP", payload: 1 });
-      dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to create report");
-    }
-  };
+    await createReportAsync(payload);
+    toast.success("MP Investigation Report Created 🎉");
 
-  const stepsConfig = {
-    1: { component: <Step1ReportDetails /> },
-    2: { component: <Step2 /> },
-    3: { component: <Step3OccurrenceDetails /> },
-    4: { component: <Step4IndividualDetails /> },
-    5: { component: <Step5WitnessList /> },
-    6: { component: <Step6Evidence /> },
-    7: { component: <Step7Documents /> },
-    8: { component: <Step8DetailedOccurrence /> },
-    9: { component: <Step9InvestigationPoints /> },
-    10: { component: <Step10Opinion /> },
-    11: { component: <Step11Remarks /> },
-  };
+    dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
+    dispatch({ type: "SET_STEP", payload: 1 });
+    dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to create report");
+  }
+};
+
+
+
+const stepsConfig = {
+  1: {
+    title: "1. REPORT DETAILS",
+    component: <Step1ReportDetails />,
+  },
+  2: {
+    title: "2. MP PARTICULARS",
+    component: <Step2 />,
+  },
+  3: {
+    title: "3. OFFENCE",
+    component: <Step3OccurrenceDetails />,
+  },
+  4: {
+    title: "4. DETAILS OF INDIVIDUAL",
+    component: <Step4IndividualDetails />,
+  },
+  5: {
+    title: "5. WITNESS",
+    component: <Step5WitnessList />,
+  },
+  6: {
+    title: "6. EVIDENCE",
+    component: <Step6Evidence />,
+  },
+  7: {
+    title: "7. DOCUMENTS",
+    component: <Step7Documents />,
+  },
+  8: {
+    title: "8. DETAILED OCCURRENCE REPORT",
+    component: <Step8DetailedOccurrence />,
+  },
+  9: {
+    title: "9. INVESTIGATION POINTS",
+    component: <Step9InvestigationPoints />,
+  },
+  10: {
+    title: "10. OPINION",
+    component: <Step10Opinion />,
+  },
+  11: {
+    title: "11. REMARKS",
+    component: <Step11Remarks />,
+  },
+};
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 w-full px-6">

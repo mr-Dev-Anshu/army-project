@@ -15,6 +15,7 @@ export default function DynamicOffenderList({
 }: DynamicOffenderListProps) {
   if (!data.length) return null;
 
+  /* ================= FORMAT LABEL ================= */
   const formatFieldName = (key: string): string =>
     key
       .replace(/_/g, " ")
@@ -23,18 +24,22 @@ export default function DynamicOffenderList({
       .replace(/\b\w/g, (c) => c.toUpperCase())
       .trim();
 
+  /* ================= PICK BY KEYWORDS ================= */
   const pickMatching = (
     obj: GenericObject,
     keywords: string[]
-  ): { key: string; value: unknown }[] => {
-    return Object.entries(obj).filter(
-      ([k, v]) =>
-        v &&
-        keywords.some((word) =>
-          k.toLowerCase().includes(word.toLowerCase())
-        )
-    ).map(([k, v]) => ({ key: k, value: v }));
-  };
+  ): { key: string; value: unknown }[] =>
+    Object.entries(obj)
+      .filter(
+        ([k, v]) =>
+          v !== undefined &&
+          v !== null &&
+          v !== "" &&
+          keywords.some((word) =>
+            k.toLowerCase().includes(word.toLowerCase())
+          )
+      )
+      .map(([k, v]) => ({ key: k, value: v }));
 
   return (
     <div className="mt-6 border border-gray-300 rounded-lg overflow-hidden bg-white">
@@ -50,27 +55,44 @@ export default function DynamicOffenderList({
           <thead>
             <tr className="bg-gray-50 border-b">
               <th className="px-4 py-3 w-14 border-r">Sno.</th>
-              <th className="px-4 py-3 border-r">Army No / Rank / Name</th>
+              <th className="px-4 py-3 border-r">
+                Army No / Rank / Name
+              </th>
               <th className="px-4 py-3 border-r">Identity Card</th>
-              <th className="px-4 py-3 border-r">Unit / FMN / Address</th>
+              <th className="px-4 py-3 border-r">
+                Unit / FMN / Address
+              </th>
               <th className="px-4 py-3">Remark</th>
             </tr>
           </thead>
 
           <tbody>
             {data.map((off, i) => {
-              // 🔥 KEY FIX
-              const source = (off as any).details ?? off;
+              /* 🔥 SUPPORT BOTH SHAPES */
+              const source: GenericObject =
+                (off as any).details ?? off;
+
+              /* 🔥 ROLE / TYPE LABEL */
+              const roleLabel =
+                (off as any).role ||
+                (off as any).offenderType ||
+                "Unknown";
 
               const col1 = pickMatching(source, [
                 "army",
+                "armynumber",
                 "rank",
-                "rider",
-                "driver",
                 "name",
+                "driver",
+                "rider",
               ]);
 
-              const col2 = pickMatching(source, ["id", "card"]);
+              const col2 = pickMatching(source, [
+                "id",
+                "card",
+                "icard",
+                "icardnumber",
+              ]);
 
               const col3 = pickMatching(source, [
                 "unit",
@@ -81,9 +103,13 @@ export default function DynamicOffenderList({
 
               return (
                 <tr key={i} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3 border-r">{i + 1}.</td>
+                  <td className="px-4 py-3 border-r">
+                    {i + 1}.
+                  </td>
 
+                  {/* ===== COLUMN 1 ===== */}
                   <td className="px-4 py-3 border-r align-top">
+                    
                     {col1.length ? (
                       col1.map((f) => (
                         <div key={f.key}>
@@ -96,16 +122,20 @@ export default function DynamicOffenderList({
                     )}
                   </td>
 
+                  {/* ===== COLUMN 2 ===== */}
                   <td className="px-4 py-3 border-r align-top">
                     {col2.length ? (
                       col2.map((f) => (
-                        <div key={f.key}>{String(f.value)}</div>
+                        <div key={f.key}>
+                          {String(f.value)}
+                        </div>
                       ))
                     ) : (
                       <span className="text-gray-400">--</span>
                     )}
                   </td>
 
+                  {/* ===== COLUMN 3 ===== */}
                   <td className="px-4 py-3 border-r align-top">
                     {col3.length ? (
                       col3.map((f) => (
@@ -119,7 +149,8 @@ export default function DynamicOffenderList({
                     )}
                   </td>
 
-                  <td className="px-4 py-3">
+                  {/* ===== DELETE ===== */}
+                  <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => onDelete(i)}
                       className="text-gray-400 hover:text-red-600"

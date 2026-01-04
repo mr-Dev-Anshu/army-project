@@ -50,21 +50,15 @@ export default function Step4IndividualDetails() {
 const handleSaveMain = () => {
   const temp = state.formData.mpReport.individualDetails.tempOffender;
 
-  if (!temp || !temp.details || Object.keys(temp.details).length === 0) {
+  if (!temp || Object.keys(temp).length === 0) {
     toast.error("Please fill main offender details!");
     return;
   }
 
-  // 🔥 FLATTEN DATA FOR LIST
-  const flattened = {
-    offenderType: temp.offenderType,
-    ...temp.details,
-  };
-
   dispatch({
     type: "SET_PATH",
     path: "formData.mpReport.individualDetails.offenderList",
-    value: [...offenders, flattened],
+    value: [...offenders, temp],
   });
 
   dispatch({

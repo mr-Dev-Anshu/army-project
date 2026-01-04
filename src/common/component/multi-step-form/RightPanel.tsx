@@ -28,8 +28,9 @@ export const RightPanel = ({
 
   const [showClearModal, setShowClearModal] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const safeStep = Number(step);
+  const current = stepsConfig?.[safeStep];
 
-  const current = stepsConfig?.[String(step)];
   const totalSteps = Object.keys(stepsConfig || {}).length;
   const isLastStep = step === totalSteps;
 
