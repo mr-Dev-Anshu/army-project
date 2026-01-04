@@ -7,7 +7,7 @@ export * from "@/apis/generalTraficOffence/update"
 
 
 
-
+export * from "@/apis/mtAccident-report/index"
 
 
 export * from "@/apis/MpWitenessing/create"

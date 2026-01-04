@@ -1,27 +1,25 @@
-import Joi from "joi";
+export const mtAccidentSchema = Joi.object({
+  station: Joi.string().required(),
+  date: Joi.date().required(),
+  time: Joi.string().required(),
+  place: Joi.string().required(),
 
-export const createMTAccidentReportSchema = Joi.object({
-    station: Joi.string().optional(),
-    date: Joi.date().optional(),
-    time: Joi.string().optional(),
-    place: Joi.string().optional(),
+  vehicleNo: Joi.string().required(),
+  vehicleType: Joi.string().optional(),
+  vehicleMake: Joi.string().optional(),
 
-    vehicleNo: Joi.string().optional(),
-    vehicleType: Joi.string().optional(),
-    vehicleMake: Joi.string().optional(),
+  driverName: Joi.string().required(),
+  driverRank: Joi.string().optional(),
+  driverUnit: Joi.string().optional(),
+  driverArmyNo: Joi.string().optional(),
 
-    driverName: Joi.string().optional(),
-    driverRank: Joi.string().optional(),
-    driverUnit: Joi.string().optional(),
-    driverArmyNo: Joi.string().optional(),
+  casualties: Joi.object({
+    fatal: Joi.number().required(),
+    nonFatal: Joi.number().required(),
+  }).required(),
 
-    casualties: Joi.object({
-        fatal: Joi.number().optional(),
-        nonFatal: Joi.number().optional()
-    }).optional(),
+  brief: Joi.string().required(),
 
-    brief: Joi.string().optional(),
-
-    actionStatus: Joi.boolean().optional(),
-    actionStatusRemark: Joi.string().optional(),
-}).unknown(true);
+  actionStatus: Joi.boolean().required(),
+  actionStatusRemark: Joi.string().optional(),
+}).options({ allowUnknown: true });

@@ -1,46 +1,52 @@
 import mongoose from "mongoose";
 
 const mtAccidentReportSchema = new mongoose.Schema(
-    {
-        station: { type: String },
-        date: { type: Date },
-        time: { type: String },
-        place: { type: String },
+  {
+    /* ===== ACCIDENT DATE & TIME ===== */
+    accidentDateTime: { type: Date }, // ✅ Date & Time of Accident
 
-        // Vehicle Details
-        vehicleNo: { type: String },
-        vehicleType: { type: String },
-        vehicleMake: { type: String },
+    /* ===== PLACE ===== */
+    placeOfAccident: { type: String }, // ✅ Place of Accident
 
-        // Driver Details
-        driverName: { type: String },
-        driverRank: { type: String },
-        driverUnit: { type: String },
-        driverArmyNo: { type: String },
+    /* ===== VEHICLE ===== */
+    vehicleBA: { type: String },       // ✅ Veh. BA No.
+    vehicleMake: { type: String },     // ✅ Make & Take
 
-        // Casualties
-        casualties: {
-            fatal: { type: Number, default: 0 },
-            nonFatal: { type: Number, default: 0 }
-        },
+    /* ===== DRIVER ===== */
+    driverFMN: { type: String },       // ✅ FMN
 
-        // Occurrence Brief
-        brief: { type: String },
+    /* ===== OTHER EXISTING FIELDS ===== */
+    station: String,
+    vehicleType: String,
 
-        actionStatus: {
-            type: Boolean,
-            default: false,
-        },
-        actionStatusRemark: {
-            type: String,
-        },
-    },
-    {
-        timestamps: true,
-        strict: false
-    }
+    driverName: String,
+    driverRank: String,
+    driverUnit: String,
+    driverArmyNo: String,
+
+    injuredCivil: { type: Number, default: 0 },
+    injuredMilitary: { type: Number, default: 0 },
+    diedCivil: { type: Number, default: 0 },
+    diedMilitary: { type: Number, default: 0 },
+
+    probableCause: String,
+    firMactStatus: String,
+
+    actionStatus: Boolean,
+    actionStatusRemark: String,
+
+    individualType: String,
+    individualDetails: Object,
+
+    coDriverType: String,
+    coDriverDetails: Object,
+  },
+  {
+    timestamps: true,
+    strict: false,
+  }
 );
 
 export const MTAccidentReport =
-    mongoose.models.MTAccidentReport ||
-    mongoose.model("MTAccidentReport", mtAccidentReportSchema);
+  mongoose.models.MTAccidentReport ||
+  mongoose.model("MTAccidentReport", mtAccidentReportSchema);

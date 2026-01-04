@@ -1,57 +1,45 @@
-// app/api/mt-accident-reports/route.js
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
-import { createMTAccidentReportSchema } from "@/validators/mtAccidentReportValidation";
 import {
   createMTAccidentReport,
   getAllMTAccidentReports,
 } from "@/services/mtAccidentReportService";
 
+/* ================= GET ================= */
 export async function GET() {
   try {
+    console.log("🟢 GET /api/mt-accident-reports");
+
     await connectDB();
+
     const reports = await getAllMTAccidentReports();
-    return NextResponse.json(reports);
+
+    return NextResponse.json(reports, { status: 200 });
   } catch (error) {
-    console.error("GET error:", error.message, error);
+    console.error("🔥 GET ERROR:", error);
     return NextResponse.json(
-      { 
-        error: "Failed to fetch accident reports",
-        details: error.message 
-      },
+      { error: "Failed to fetch MT accident reports" },
       { status: 500 }
     );
   }
 }
 
+/* ================= POST ================= */
 export async function POST(request) {
   try {
+    console.log("🟢 POST /api/mt-accident-reports");
+
     await connectDB();
+
     const body = await request.json();
-    console.log("POST body:", JSON.stringify(body, null, 2));
 
-    const { error, value } = createMTAccidentReportSchema.validate(body, {
-      abortEarly: false,
-    });
+    const report = await createMTAccidentReport(body);
 
-    if (error) {
-      console.error("Validation errors:", error.details);
-      const errors = error.details.reduce((acc, curr) => {
-        acc[curr.path.join(".")] = curr.message;
-        return acc;
-      }, {});
-      return NextResponse.json({ error: errors }, { status: 400 });
-    }
-
-    const report = await createMTAccidentReport(value);
     return NextResponse.json(report, { status: 201 });
   } catch (error) {
-    console.error("POST error:", error.message, error);
+    console.error("🔥 POST ERROR:", error);
     return NextResponse.json(
-      { 
-        error: "Failed to create accident report",
-        details: error.message 
-      },
+      { error: "Failed to create MT accident report" },
       { status: 500 }
     );
   }
