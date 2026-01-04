@@ -56,6 +56,18 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(initialData?._id || null);
 
+    // Date Change Confirmation State
+    const [isDateConfirmOpen, setIsDateConfirmOpen] = useState(false);
+    const [pendingDate, setPendingDate] = useState<Date | null>(null);
+
+    const handleConfirmDateChange = () => {
+        if (pendingDate) {
+            setSelectedDate(pendingDate);
+            setPendingDate(null);
+            setIsDateConfirmOpen(false);
+        }
+    };
+
     // Calculated Field
     const totalCases = useMemo(() => {
         const taken = parseInt(actionTaken) || 0;
@@ -341,7 +353,8 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                                 if (e.target.value) {
                                     const [year, month] = e.target.value.split('-').map(Number);
                                     const newDate = new Date(year, month - 1, 1);
-                                    setSelectedDate(newDate);
+                                    setPendingDate(newDate);
+                                    setIsDateConfirmOpen(true);
                                 }
                             }}
                         />
@@ -490,6 +503,16 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                 confirmLabel="Delete"
                 variant="danger"
                 isProcessing={isDeleting}
+            />
+
+            <ConfirmationModal
+                isOpen={isDateConfirmOpen}
+                onClose={() => setIsDateConfirmOpen(false)}
+                onConfirm={handleConfirmDateChange}
+                title="Change Reporting Period"
+                message="Changing the reporting period may clear your current form data or change the view. Are you sure you want to proceed?"
+                confirmLabel="Change Period"
+                variant="info"
             />
         </div >
     );
