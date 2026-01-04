@@ -22,7 +22,7 @@ export default function StaticSpeedForm({
 }) {
   const { state, dispatch } = useForm();
 
-  const staticData = state.formData.staticSpeed;
+  const staticData = state.formData.staticSpeed as any;
 
   const createStaticRecord = useCreateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
@@ -153,152 +153,209 @@ export default function StaticSpeedForm({
     },
   };
 
-const handleFinalSubmit = async () => {
-  try {
-    /* ================= STATIC SPEED PAYLOAD ================= */
-    const payload = {
-      vehicleType: staticData.vehicleDetails.vehicleType,
-      vehicleCategory: staticData.vehicleDetails.category,
-      vehicleNumber: staticData.vehicleDetails.vehicleNumber,
-      vehicleName: staticData.vehicleDetails.vehicleName,
-
-      offenceOccurenceDetails: {
-        time: staticData.offenceBlock?.time || "",
-        incidentLocation: staticData.offenceBlock?.incidentLocation || "",
-         description: [
-    staticData.offenceBlock?.description,
-    staticData.offenceBlock?.description2,
-  ]
-    .filter(Boolean)
-    .join("\n\n"),
-
-        overSpeedCalculated:
-          staticData.offenceBlock?.overSpeedCalculated ?? "",
-        actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
-        authSpeed: staticData.offenceBlock?.authSpeed ?? "",
-      },
-    };
-
-    console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
-
-    /* ================= CREATE STATIC RECORD ================= */
-    const staticRes = await createStaticRecord.mutateAsync(payload);
-    console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
-
-    toast.success("Static Record Created Successfully!");
-
-    if (!staticRes?._id) {
-      toast.error("Static Record ID Missing!");
-      return;
-    }
-
-    /* ================= OFFENDER PAYLOAD ================= */
-    const offenderPayload: CreateOffenderData = {
-      offenceId: staticRes._id,
-      offenderType: "Military Person",
-
-      offenderDetails: {
-        type: "Driver",
-        name: staticData.offenderPeople?.[0]?.details?.Name || "",
-        rank: staticData.offenderPeople?.[0]?.details?.Rank || "",
-        armyNumber:
-          staticData.offenderPeople?.[0]?.details?.[
-            "Army Rider / Driver Number"
-          ] || "",
-        unit: staticData.offenderPeople?.[0]?.details?.Unit || "",
-        command: staticData.offenderPeople?.[0]?.details?.Command || "",
-        fmn: staticData.offenderPeople?.[0]?.details?.FMN || "",
-        address: staticData.offenderPeople?.[0]?.details?.Address || "",
-        iCardNumber:
-          staticData.offenderPeople?.[0]?.details?.["ID Card Number"] || "",
-      },
-    };
-
-    console.log(
-      "👮 OFFENDER PAYLOAD SENT ===>",
-      JSON.stringify(offenderPayload, null, 2)
-    );
-
-    /* ================= CREATE OFFENDER ================= */
+  const handleFinalSubmit = async () => {
     try {
-      const offenderRes = await createOffenderMutation.mutateAsync(
-        offenderPayload
-      );
-      console.log("✅ OFFENDER BACKEND RESPONSE ===>", offenderRes);
-      toast.success("Offender Created Successfully!");
-    } catch (err: any) {
-      console.error(
-        "❌ OFFENDER BACKEND ERROR ===>",
-        err?.response?.data || err
-      );
-      throw err;
-    }
+      /* ================= STATIC SPEED PAYLOAD ================= */
+      const payload = {
+        vehicleType: staticData.vehicleDetails.vehicleType,
+        vehicleCategory: staticData.vehicleDetails.category,
+        vehicleNumber: staticData.vehicleDetails.vehicleNumber,
+        vehicleName: staticData.vehicleDetails.vehicleName,
 
-    /* ================= CREATE WITNESS ================= */
-    if (staticData.witnesses?.length > 0) {
-      const witnessPayload = staticData.witnesses.map((w) => ({
-        offenceId: staticRes._id,
-        rank: w.reportingBlock.rank,
-        unit: w.reportingBlock.unit,
-        ArmyNo: w.reportingBlock.armyNumber,
-        name: w.reportingBlock.nameReportingMP || "",
-        contactNumber: w.reportingBlock.contactNumber || "",
-      }));
+        onDutyDetails: {
+          dateOfDuty: staticData.dutyBlock?.dateOfDuty || undefined,
+          dutyLocation: staticData.dutyBlock?.dutyLocation || undefined,
+          dutyType: staticData.dutyBlock?.dutyType || undefined,
+          startTime: staticData.dutyBlock?.startTime
+            ? new Date(
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+            ).toISOString()
+            : undefined,
+          endTime: staticData.dutyBlock?.endTime
+            ? new Date(
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+            ).toISOString()
+            : undefined,
+        },
+        onDutyDetailsMPReporting: staticData.reportingBlock,
 
-      console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
+        offenceOccurenceDetails: {
+          time: staticData.offenceBlock?.time || undefined,
+          incidentLocation: staticData.offenceBlock?.incidentLocation || "",
+          description: [
+            staticData.offenceBlock?.description,
+            staticData.offenceBlock?.description2,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
 
-      try {
-        const witnessResponses = await Promise.all(
-          witnessPayload.map((w) =>
-            createWitnessMutation.mutateAsync(w)
-          )
-        );
+          overSpeedCalculated:
+            staticData.offenceBlock?.overSpeedCalculated ?? "",
+          actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
+          authSpeed: staticData.offenceBlock?.authSpeed ?? "",
+        },
+      };
 
-        console.log(
-          "✅ WITNESS BACKEND RESPONSES ===>",
-          witnessResponses
-        );
+      console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
 
-        toast.success("Witness Added Successfully!");
-      } catch (err: any) {
-        console.error(
-          "❌ WITNESS BACKEND ERROR ===>",
-          err?.response?.data || err
-        );
-        throw err;
+      /* ================= CREATE STATIC RECORD ================= */
+      const staticRes = await createStaticRecord.mutateAsync(payload);
+      console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
+
+      toast.success("Static Record Created Successfully!");
+
+      if (!staticRes?._id) {
+        toast.error("Static Record ID Missing!");
+        return;
       }
+
+      /* ================= CREATE OFFENDER ================= */
+      // Checking ID validity
+      const _idString = staticRes?._id ? String(staticRes._id) : "";
+      console.log("🆔 Static Res ID:", _idString);
+
+      if (!_idString) {
+        console.error("❌ CRTICAL: No Static Record ID returned");
+        toast.error("Error: Record ID missing. Offenders cannot be linked.");
+        return;
+      }
+
+      // ========= 2️⃣ OFFENDERS =========
+      const people = staticData.offenderPeople || [];
+      console.log("👥 Offender People Array:", JSON.stringify(people, null, 2));
+
+      // 2.1 Driver
+      const driverType = staticData.vehicleDetails.driverType;
+      console.log("🚙 Selected Driver Type:", driverType);
+
+      if (driverType && driverType !== "") {
+        // Find by ROLE "Driver"
+        const driverEntry = people.find((p: any) => p.role === "Driver");
+        console.log("👤 Driver Entry Found:", driverEntry);
+
+        // Ensure details object exists
+        const driverDetails = {
+          ...(driverEntry?.details || {}),
+          type: "Driver"
+        };
+
+        const driverPayload: CreateOffenderData = {
+          offenceId: _idString,
+          offenderType: driverType as OffenderType,
+          offenderDetails: driverDetails,
+        };
+        console.log("👮 REQ DRIVER PAYLOAD:", JSON.stringify(driverPayload, null, 2));
+
+        try {
+          const res = await createOffenderMutation.mutateAsync(driverPayload);
+          console.log("✅ Driver Created:", res);
+        } catch (e: any) {
+          console.error("❌ Driver Creation Failed:", e);
+          console.error("❌ Error Response:", e?.response?.data);
+          toast.error(`Driver Creation Failed: ${e?.message}`);
+        }
+      } else {
+        console.warn("⚠️ No Driver Type selected. Skipping Driver creation.");
+      }
+
+      // 2.2 Co-Driver
+      const coDriverType = state.formData.coDriverType;
+      const coDriverOrPillion = state.formData.coDriverOrPillion;
+      console.log("🏍️ Co-Driver Logic:", { coDriverOrPillion, coDriverType });
+
+      if (coDriverOrPillion && coDriverType && coDriverType !== "") {
+        // Find by ROLE "CoDriver"
+        const coDriverEntry = people.find((p: any) => p.role === "CoDriver");
+        console.log("👤 Co-Driver Entry Found:", coDriverEntry);
+
+        const coDriverDetails = {
+          ...(coDriverEntry?.details || {}),
+          type: "CoDriver"
+        };
+
+        const coDriverPayload: CreateOffenderData = {
+          offenceId: _idString,
+          offenderType: coDriverType as OffenderType,
+          offenderDetails: coDriverDetails,
+        };
+        console.log("👮 REQ CO-DRIVER PAYLOAD:", JSON.stringify(coDriverPayload, null, 2));
+
+        try {
+          const res = await createOffenderMutation.mutateAsync(coDriverPayload);
+          console.log("✅ Co-Driver Created:", res);
+        } catch (e: any) {
+          console.error("❌ Co-Driver Creation Failed:", e);
+          toast.error(`Co-Driver Creation Failed: ${e?.message}`);
+        }
+      }
+
+      toast.success("Offenders Saved!");
+
+      /* ================= CREATE WITNESS ================= */
+      if (staticData.witnesses?.length > 0) {
+        const witnessPayload = staticData.witnesses.map((w) => ({
+          offenceId: staticRes._id,
+          rank: w.reportingBlock.rank,
+          unit: w.reportingBlock.unit,
+          ArmyNo: w.reportingBlock.armyNumber,
+          name: w.reportingBlock.nameReportingMP || "",
+          contactNumber: w.reportingBlock.contactNumber || "",
+        }));
+
+        console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
+
+        try {
+          const witnessResponses = await Promise.all(
+            witnessPayload.map((w) =>
+              createWitnessMutation.mutateAsync(w)
+            )
+          );
+
+          console.log(
+            "✅ WITNESS BACKEND RESPONSES ===>",
+            witnessResponses
+          );
+
+          toast.success("Witness Added Successfully!");
+        } catch (err: any) {
+          console.error(
+            "❌ WITNESS BACKEND ERROR ===>",
+            err?.response?.data || err
+          );
+          throw err;
+        }
+      }
+
+      toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
+
+      /* ================= RESET FORM ================= */
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.staticSpeed",
+        value: initialState.formData.staticSpeed,
+      });
+
+      dispatch({ type: "SET_STEP", payload: 1 });
+      dispatch({
+        type: "SET_PATH",
+        path: "completedSteps",
+        value: [],
+      });
+    } catch (error: any) {
+      console.error(
+        "❌ FINAL STATIC SPEED ERROR ===>",
+        error?.response?.data || error
+      );
+
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to submit record";
+
+      toast.error(msg);
     }
-
-    toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
-
-    /* ================= RESET FORM ================= */
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed",
-      value: initialState.formData.staticSpeed,
-    });
-
-    dispatch({ type: "SET_STEP", payload: 1 });
-    dispatch({
-      type: "SET_PATH",
-      path: "completedSteps",
-      value: [],
-    });
-  } catch (error: any) {
-    console.error(
-      "❌ FINAL STATIC SPEED ERROR ===>",
-      error?.response?.data || error
-    );
-
-    const msg =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Failed to submit record";
-
-    toast.error(msg);
-  }
-};
+  };
 
 
 

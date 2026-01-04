@@ -21,30 +21,10 @@ interface OffenderDynamicFormProps {
 }
 
 /* ================= HELPERS ================= */
-const getValueByPath = (obj: any, path?: string) => {
-  if (!path) return {};
-  const keys = path.match(/[^[.\]]+/g) || [];
-  return keys.reduce((o, k) => (o ? o[k] : undefined), obj) || {};
-};
-
-/* ⭐ SINGLE SOURCE OF TRUTH FOR KEYS */
-const labelKeyMap: Record<string, string> = {
-  "Full Name": "name",
-  Name: "name",
-  Rank: "rank",
-  "Select Rank": "rank",
-  "Army Rider / Driver Number": "armyNumber",
-  "Army Number": "armyNumber",
-  Unit: "unit",
-  Command: "command",
-  FMN: "fmn",
-  Address: "address",
-  "Place of Stay": "address",
-  "Place of Work": "address",
-  "Shop Address": "address",
-  "ID Card Number": "iCardNumber",
-  "I Card Number": "iCardNumber",
-  "Aadhar Card Number": "iCardNumber",
+const getByPath = (obj: any, path: string) => {
+  if (!obj || !path) return undefined;
+  const keys = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+  return keys.reduce((o, k) => (o ? o[k] : undefined), obj);
 };
 
 /* ================= COMPONENT ================= */
@@ -54,69 +34,67 @@ export default function OffenderDynamicForm({
   fields,
   showCoDriver = false,
   scope = "traffic",
-  path,
+  path = "", // Default to empty string if undefined
 }: OffenderDynamicFormProps) {
   const { state, dispatch } = useForm();
 
-  const preData =
-    (scope === "traffic" || scope === "static") && path
-      ? getValueByPath(state, path)
-      : {};
+  // Get details from strict path
+  const details = getByPath(state, path) || {};
 
-  const [localData, setLocalData] = useState<any>({});
-  const [hasCoDriver, setHasCoDriver] = useState(false);
-  const [coDriverType, setCoDriverType] = useState("");
-
-  /* ================= SYNC LOCAL ↔ GLOBAL ================= */
-  useEffect(() => {
-    setLocalData(preData || {});
-  }, [path]);
-
-  /* ================= SAVE FIELD (🔥 FIXED) ================= */
+  /* ========= SAVE FIELD ========= */
   const saveField = (label: string, value: string) => {
-    const key = labelKeyMap[label] || label;
-
-    // 1️⃣ local state
-    setLocalData((prev: any) => ({
-      ...(prev || {}),
-      [key]: value,
-    }));
-
-    // 2️⃣ MP FLOW
-    if (scope.startsWith("mp")) {
-      const section =
-        scope === "mp-additional"
-          ? "additionalIndividual"
-          : "individualDetails";
-
-      dispatch({
-        type: "SET_PATH",
-        path: `formData.mpReport.${section}.tempOffender`,
-        value: {
-          ...(getValueByPath(
-            state,
-            `formData.mpReport.${section}.tempOffender`
-          ) || {}),
-          [key]: value,
-        },
-      });
+    // If no path is provided, we can't save. 
+    // This handles the case where VehicleDetailsForm might pass bad props, avoiding crashes.
+    if (!path) {
+      console.warn("OffenderDynamicForm: No path provided for saving field:", label);
       return;
     }
 
-    // 3️⃣ TRAFFIC / STATIC
-    if (!path) return;
+    // Merge with existing details
+    const newDetails = { ...details, [label]: value };
 
     dispatch({
       type: "SET_PATH",
-      path,
-      value: {
-        ...(getValueByPath(state, path) || {}),
-        [key]: value,
-      },
+      path: path,
+      value: newDetails,
     });
   };
 
-  /* ================= RENDER ================= */
+  /* ========= CO-DRIVER LOGIC ========= */
+  const handleCoDriverTypeChange = (type: string) => {
+    // 1. Update Global CoDriver Type State
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.coDriverType",
+      value: type
+    });
+
+    // 2. Manage People Array
+    const peoplePath = scope === "static"
+      ? "formData.staticSpeed.offenderPeople"
+      : "formData.traffic.offenderPeople";
+
+    const people = getByPath(state, peoplePath) || [];
+
+    // Check if CoDriver exists
+    const coDriverIndex = people.findIndex((p: any) => p.role === "CoDriver");
+
+    let newPeople = [...people];
+    if (coDriverIndex >= 0) {
+      // Update Type
+      newPeople[coDriverIndex] = { ...newPeople[coDriverIndex], type };
+    } else {
+      // Add New
+      newPeople.push({ role: "CoDriver", type, details: {} });
+    }
+
+    dispatch({
+      type: "SET_PATH",
+      path: peoplePath,
+      value: newPeople
+    });
+  };
+
   return (
     <div className="space-y-6 mt-4 border border-gray-200 rounded-xl bg-white p-6 shadow-sm">
       <p className="font-semibold text-lg">{title}</p>
@@ -125,154 +103,120 @@ export default function OffenderDynamicForm({
         <p className="text-sm text-gray-500">{helperText}</p>
       )}
 
-      {/* ================= MAIN FIELDS ================= */}
+      {/* DRIVER FORM */}
       <div className="grid grid-cols-2 gap-4">
-        {fields.map((f: any, i: number) => {
-          const label = f.label;
-          const key = labelKeyMap[label] || label;
-          const value = localData?.[key] || "";
-
-          const isSuggestion =
-            f.type === "suggestion" ||
-            [
-              "Unit",
-              "FMN",
-              "Command",
-              "Rank",
-              "Select Rank",
-              "Place of Stay",
-              "Place of Work",
-              "Shop Address",
-              "Address",
-            ].includes(label);
+        {fields && fields.map((f: any, i: number) => {
+          const isSuggestion = [
+            "Unit", "FMN", "Command", "Select Rank", "Trade",
+            "Place of QTR.", "Place of Work", "Place of Stay", "Address", "Department"
+          ].includes(f.label);
 
           if (isSuggestion) {
             return (
-              <div key={i} className="flex flex-col gap-1">
-                <Label className="font-semibold">{label}</Label>
-                <SuggestionInput
-                  placeholder={f.placeholder}
-                  value={value}
-                  onChange={(v) => saveField(label, v)}
-                  fieldType={f.fieldType || key}
-                />
-              </div>
-            );
-          }
-
-          if (f.type === "select") {
-            return (
-              <FormSelect
+              <SuggestionInput
                 key={i}
-                label={label}
+                label={f.label}
                 placeholder={f.placeholder}
-                value={value}
-                options={f.options || []}
-                onChange={(v) => saveField(label, v)}
+                value={details[f.key || f.label] || ""}
+                onChange={(value) => saveField(f.key || f.label, value)}
+                fieldType={
+                  f.label === "Select Rank" ? "rank" :
+                    f.label.toLowerCase()
+                }
+                defaultOptions={
+                  f.label.includes("Rank")
+                    ? ["Pvt", "L/Nk", "Nk", "Hav", "Subedar"]
+                    : f.label === "Unit"
+                      ? ["11 Engr Regt", "MP 12", "HQ Unit"]
+                      : f.label === "FMN"
+                        ? ["Central Command", "Western Command", "Northern Command"]
+                        : f.label === "Command"
+                          ? ["Command A", "Command B", "Command C"]
+                          : []
+                }
+                className={cn(
+                  "transition-all",
+                  details[f.key || f.label]
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                )}
               />
             );
           }
 
-          return (
-            <div key={i} className="flex flex-col gap-1">
-              <Label className="font-semibold">{label}</Label>
-              <FormInput
-                label=""
-                placeholder={f.placeholder}
-                value={value}
-                onChange={(v) => saveField(label, v)}
-              />
-            </div>
+          return f.type === "input" ? (
+            <FormInput
+              key={i}
+              label={f.label}
+              placeholder={f.placeholder}
+              value={details[f.key || f.label] || ""}
+              onChange={(value) => saveField(f.key || f.label, value)}
+            />
+          ) : (
+            <FormSelect
+              key={i}
+              label={f.label}
+              placeholder={f.placeholder}
+              value={details[f.key || f.label] || ""}
+              options={f.options || []}
+              onChange={(value) => saveField(f.key || f.label, value)}
+            />
           );
         })}
       </div>
 
-      {/* ================= CO-DRIVER FLOW ================= */}
-      {showCoDriver && (
-        <>
-          <div className="mt-6 flex items-start gap-2">
-            <Checkbox
-              checked={hasCoDriver}
-              onCheckedChange={(v) => {
-                setHasCoDriver(Boolean(v));
-                setCoDriverType("");
-              }}
-            />
-            <p className="text-sm">
-              Was there a <b>Co-Driver / Pillion Rider</b>?
-            </p>
-          </div>
 
-          {hasCoDriver && (
-            <>
-              <p className="font-semibold mt-4">
-                Select Who was Co-Driver / Rider
-              </p>
-
-              <RadioGroup
-                className="grid sm:grid-cols-2 gap-3"
-                value={coDriverType}
-                onValueChange={(v) => {
-                  setCoDriverType(v);
-
+      {/* CO DRIVER SELECTION (Only for Driver Form) */}
+      {
+        showCoDriver && (
+          <>
+            <div className="mt-6 flex items-start gap-2">
+              <Checkbox
+                checked={Boolean(state.formData.coDriverOrPillion)}
+                onCheckedChange={(v) =>
                   dispatch({
-                    type: "PUSH_PATH",
-                    path:
-                      scope === "static"
-                        ? "formData.staticSpeed.offenderPeople"
-                        : "formData.traffic.offenderPeople",
-                    value: {
-                      type: v,
-                      role: "Co-Driver",
-                      details: {},
-                    },
-                  });
-                }}
-              >
-                {[
-                  "Military Person",
-                  "Civilian",
-                  "Employee",
-                  "Servant/Maid",
-                  "Shop Keeper",
-                  "Temporary Hired Worker",
-                ].map((item) => (
-                  <label
-                    key={item}
-                    className={cn(
-                      "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-                      coDriverType === item
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
-                    )}
-                  >
-                    <RadioGroupItem value={item} />
-                    {item}
-                  </label>
-                ))}
-              </RadioGroup>
+                    type: "SET_PATH",
+                    path: "formData.coDriverOrPillion",
+                    value: Boolean(v),
+                  })
+                }
+              />
+              <p className="text-sm">
+                Was there a <b>Co-Driver / Pillion Rider</b>?
+              </p>
+            </div>
 
-              {coDriverType && offenderFormsConfig[coDriverType] && (
-                <OffenderDynamicForm
-                  title={`${coDriverType} Details`}
-                  fields={offenderFormsConfig[coDriverType].fields}
-                  scope={scope}
-                  path={
-                    scope === "static"
-                      ? `formData.staticSpeed.offenderPeople[${
-                          state.formData.staticSpeed.offenderPeople.length - 1
-                        }].details`
-                      : `formData.traffic.offenderPeople[${
-                          state.formData.traffic.offenderPeople.length - 1
-                        }].details`
-                  }
-                  showCoDriver={false}
-                />
-              )}
-            </>
-          )}
-        </>
-      )}
-    </div>
+            {state.formData.coDriverOrPillion && (
+              <div className="mt-6 border rounded-xl bg-gray-50 p-6 space-y-5">
+                <RadioGroup
+                  className="grid grid-cols-2 gap-3"
+                  value={state.formData.coDriverType || ""}
+                  onValueChange={handleCoDriverTypeChange}
+                >
+                  {[
+                    "Military Person",
+                    "Civilian",
+                    "Employee",
+                    "Servant/Maid",
+                    "Shop Keeper",
+                    "Temporary Hired Worker",
+                  ].map((x) => (
+                    <label
+                      key={x}
+                      className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer bg-white"
+                    >
+                      <RadioGroupItem value={x} />
+                      {x}
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+
+            {/* NO DUPLICATE FORM RENDERING HERE. VehicleDetailsForm handles it. */}
+          </>
+        )
+      }
+    </div >
   );
 }

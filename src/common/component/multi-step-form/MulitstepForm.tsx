@@ -1,4 +1,4 @@
-import { useForm } from "@/context/FormContext";
+import { useForm, initialState } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
 import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
@@ -107,9 +107,9 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         vehicle:
           traffic.vehicleInvolved === "yes"
             ? {
-                baNo: traffic.vehicleDetails?.vehicleNumber || "N/A",
-                makeAndTake: traffic.vehicleDetails?.vehicleName || "N/A",
-              }
+              baNo: traffic.vehicleDetails?.vehicleNumber || "N/A",
+              makeAndTake: traffic.vehicleDetails?.vehicleName || "N/A",
+            }
             : undefined,
       },
 
@@ -336,18 +336,18 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
         onDutyDetails: {
-          dateOfDuty: traffic.onDutyDetails.dateOfDuty,
           dutyLocation: traffic.onDutyDetails.dutyLocation,
           dutyType: traffic.onDutyDetails.dutyType,
+          dateOfDuty: traffic.onDutyDetails.dateOfDuty || undefined,
           startTime: traffic.onDutyDetails.startTime
             ? new Date(
-                `${traffic.onDutyDetails.dateOfDuty}T${traffic.onDutyDetails.startTime}`
-              ).toISOString()
+              `${traffic.onDutyDetails.dateOfDuty}T${traffic.onDutyDetails.startTime}`
+            ).toISOString()
             : "",
           endTime: traffic.onDutyDetails.endTime
             ? new Date(
-                `${traffic.onDutyDetails.dateOfDuty}T${traffic.onDutyDetails.endTime}`
-              ).toISOString()
+              `${traffic.onDutyDetails.dateOfDuty}T${traffic.onDutyDetails.endTime}`
+            ).toISOString()
             : "",
         },
 
@@ -358,8 +358,8 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
           incidentLocation: traffic.offenceOccurenceDetails.incidentLocation,
           timeOfOffence: traffic.offenceOccurenceDetails.timeOfOffence
             ? new Date(
-                `${traffic.onDutyDetails.dateOfDuty}T${traffic.offenceOccurenceDetails.timeOfOffence}`
-              ).toISOString()
+              `${traffic.onDutyDetails.dateOfDuty}T${traffic.offenceOccurenceDetails.timeOfOffence}`
+            ).toISOString()
             : "",
         },
 
@@ -387,12 +387,26 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         const details = o.details || {};
 
         // 🚫 skip empty offender blocks
-        if (
-          !details.name &&
-          !details.Name &&
-          !details.address &&
-          !details.Address
-        ) {
+        const hasName =
+          details.name ||
+          details.Name ||
+          details["Full Name"] ||
+          details["Rider/Driver Name"] ||
+          details["Civil/DD Vehicle Rider/Driver Name"];
+
+        const hasAddress =
+          details.address ||
+          details.Address ||
+          details["Shop Address"] ||
+          details["Place of Stay"];
+
+        const hasArmyNo =
+          details.armyNumber ||
+          details["Army Rider / Driver Number"] ||
+          details["Maid/Servant Pass Number*"] ||
+          details["Pass No."]; // Include pass number as ID
+
+        if (!hasName && !hasAddress && !hasArmyNo) {
           console.log("⏭️ Skipping empty offender");
           continue;
         }
@@ -407,15 +421,18 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
           offenderDetails: {
             type: o.role || o.whoIsIt || "Offender",
 
-            name: details.name || details.Name || "",
-            rank: details.rank || details.Rank || "",
-            armyNumber:
-              details.armyNumber || details["Army Rider / Driver Number"] || "",
+            name: hasName || "",
+            rank: details.rank || details.Rank || details["Select Rank"] || "",
+            armyNumber: hasArmyNo || "",
             unit: details.unit || details.Unit || "",
             command: details.command || details.Command || "",
             fmn: details.fmn || details.FMN || "",
-            address: details.address || details.Address || "",
-            iCardNumber: details.iCardNumber || details["ID Card Number"] || "",
+            address: hasAddress || "",
+            iCardNumber:
+              details.iCardNumber ||
+              details["ID Card Number"] ||
+              details["I Card Number"] ||
+              "",
           },
         };
 
@@ -454,8 +471,8 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       console.error("❌ TRAFFIC FINAL ERROR ===>", err);
       toast.error(
         err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          "Traffic submit failed"
+        err?.response?.data?.error ||
+        "Traffic submit failed"
       );
     }
   };
@@ -665,6 +682,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             title="Create New General & Traffic Offence Record"
             reportNo="PRO/21 CPU/00042/106/25"
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
+            onCreate={onSubmitFinal}
             onCancel={onCancel}
           />
 
