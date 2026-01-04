@@ -5,7 +5,6 @@ import { FormInput, FormSelect } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
@@ -59,6 +58,7 @@ export default function OffenderDynamicForm({
 
   const [hasCoDriver, setHasCoDriver] = useState(false);
   const [coDriverType, setCoDriverType] = useState("");
+  const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
 
   const isMainCivilian =
     title.toLowerCase().includes("civilian") &&
@@ -102,6 +102,7 @@ export default function OffenderDynamicForm({
     );
 
     let newList = [...list];
+    let index = existingIndex;
 
     if (existingIndex >= 0) {
       newList[existingIndex] = {
@@ -109,6 +110,7 @@ export default function OffenderDynamicForm({
         type,
       };
     } else {
+      index = list.length;
       newList.push({
         type,
         whoIsIt: "Co-Driver",
@@ -121,6 +123,8 @@ export default function OffenderDynamicForm({
       path: peoplePath,
       value: newList,
     });
+
+    return index;
   };
 
   return (
@@ -196,6 +200,7 @@ export default function OffenderDynamicForm({
               onCheckedChange={(v) => {
                 setHasCoDriver(Boolean(v));
                 setCoDriverType("");
+                setCoDriverIndex(null);
               }}
             />
             <p className="text-sm">
@@ -210,7 +215,8 @@ export default function OffenderDynamicForm({
                 value={coDriverType}
                 onValueChange={(v) => {
                   setCoDriverType(v);
-                  ensureCoDriverSlot(v);
+                  const idx = ensureCoDriverSlot(v);
+                  setCoDriverIndex(idx);
                 }}
               >
                 {Object.keys(offenderFormsConfig).map((item) => (
@@ -223,6 +229,21 @@ export default function OffenderDynamicForm({
                   </label>
                 ))}
               </RadioGroup>
+
+              {/* 🔥 CO-DRIVER FORM */}
+              {coDriverType && coDriverIndex !== null && (
+                <OffenderDynamicForm
+                  title={`${coDriverType} Details`}
+                  fields={offenderFormsConfig[coDriverType].fields}
+                  scope={scope}
+                  path={
+                    scope === "static"
+                      ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
+                      : `formData.traffic.offenderPeople[${coDriverIndex}].details`
+                  }
+                  showCoDriver={false}
+                />
+              )}
             </div>
           )}
         </>
