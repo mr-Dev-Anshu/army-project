@@ -1,33 +1,26 @@
-
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { FormSection } from "../../FormSection";
-import { useForm } from "@/context/FormContext";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@radix-ui/react-label";
-import { FormTextarea } from "../../FormTextarea";
-import { FormInput } from "../../FormInput";
+import { FormTextareaRHF } from "../../FormTextarea";
+import { FormInputRHF } from "../../FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
+import { GeneralTrafficOffenceFormValues } from "@/validators/generalTrafficOffence.schema";
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2 } from "lucide-react";
 
 export default function Step2Statement() {
-  const { state, dispatch } = useForm();
-  const d = state.formData.traffic;
+  const { control, watch, setValue, formState: { errors } } = useFormContext<GeneralTrafficOffenceFormValues>();
 
-  const set = (path: string, value: any) =>
-    dispatch({
-      type: "SET_PATH",
-      path,
-      value,
-    });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "witnesses",
+  });
 
-  const hasFilledWitness = d.witnesses.some((w) => {
+  const witnesses = watch("witnesses");
+  const selectedWitness = watch("selectedWitness");
+
+  const hasFilledWitness = witnesses?.some((w) => {
     const r = w.reportingBlock;
     return r.nameReportingMP || r.rank || r.unit || r.armyNumber;
   });
@@ -37,169 +30,186 @@ export default function Step2Statement() {
       {/* ---------------- ON DUTY DETAILS ---------------- */}
       <FormSection title="On-Duty Details">
         <div className="grid grid-cols-3 gap-4">
-          <Input
+          <FormInputRHF
             type="date"
-            value={d.onDutyDetails.dateOfDuty}
-            onChange={(e) =>
-              set("formData.traffic.onDutyDetails.dateOfDuty", e.target.value)
-            }
+            label="Date of Duty"
+            {...control.register("onDutyDetails.dateOfDuty")}
+            error={errors.onDutyDetails?.dateOfDuty?.message}
           />
-
-          <Input
+          <FormInputRHF
             type="time"
-            value={d.onDutyDetails.startTime}
-            onChange={(e) =>
-              set("formData.traffic.onDutyDetails.startTime", e.target.value)
-            }
+            label="Start Time"
+            {...control.register("onDutyDetails.startTime")}
+            error={errors.onDutyDetails?.startTime?.message}
           />
-
-          <Input
+          <FormInputRHF
             type="time"
-            value={d.onDutyDetails.endTime}
-            onChange={(e) =>
-              set("formData.traffic.onDutyDetails.endTime", e.target.value)
-            }
+            label="End Time"
+            {...control.register("onDutyDetails.endTime")}
+            error={errors.onDutyDetails?.endTime?.message}
           />
         </div>
 
-        <SuggestionInput
-          placeholder="Duty Location"
-          value={d.onDutyDetails.dutyLocation}
-          onChange={(v) =>
-            set(
-              "formData.traffic.onDutyDetails.dutyLocation",
-              v
-            )
-          }
-          fieldType="dutyLocation"
-        />
+        <div className="grid gap-4 mt-4">
+          <Controller
+            control={control}
+            name="onDutyDetails.dutyLocation"
+            render={({ field }) => (
+              <SuggestionInput
+                placeholder="Duty Location"
+                value={field.value}
+                onChange={field.onChange}
+                fieldType="dutyLocation"
+              />
+            )}
+          />
+          {errors.onDutyDetails?.dutyLocation && <p className="text-red-500 text-sm">{errors.onDutyDetails.dutyLocation.message}</p>}
 
-        <SuggestionInput
-          placeholder="Duty Type"
-          value={d.onDutyDetails.dutyType}
-          onChange={(v) =>
-            set("formData.traffic.onDutyDetails.dutyType", v)
-          }
-          fieldType="dutyType"
-        />
+          <Controller
+            control={control}
+            name="onDutyDetails.dutyType"
+            render={({ field }) => (
+              <SuggestionInput
+                placeholder="Duty Type"
+                value={field.value}
+                onChange={field.onChange}
+                fieldType="dutyType"
+              />
+            )}
+          />
+          {errors.onDutyDetails?.dutyType && <p className="text-red-500 text-sm">{errors.onDutyDetails.dutyType.message}</p>}
+        </div>
       </FormSection>
 
       {/* ---------------- REPORTING MP ---------------- */}
       <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
-          <Input
+          <FormInputRHF
             placeholder="Reporting MP Name"
-            value={d.onDutyDetailsMPReporting.nameReportingMP}
-            onChange={(e) =>
-              set(
-                "formData.traffic.onDutyDetailsMPReporting.nameReportingMP",
-                e.target.value
-              )
-            }
+            {...control.register("onDutyDetailsMPReporting.nameReportingMP")}
+            error={errors.onDutyDetailsMPReporting?.nameReportingMP?.message}
           />
 
-          <SuggestionInput
-            placeholder="Select Rank"
-            value={d.onDutyDetailsMPReporting.rank}
-            onChange={(v) =>
-              set("formData.traffic.onDutyDetailsMPReporting.rank", v)
-            }
-            fieldType="rank"
-            defaultOptions={["Lieutenant", "Captain", "Major", "Colonel"]}
+          <Controller
+            control={control}
+            name="onDutyDetailsMPReporting.rank"
+            render={({ field }) => (
+              <SuggestionInput
+                placeholder="Select Rank"
+                value={field.value}
+                onChange={field.onChange}
+                fieldType="rank"
+                defaultOptions={["Lieutenant", "Captain", "Major", "Colonel"]}
+              />
+            )}
           />
+          {errors.onDutyDetailsMPReporting?.rank && <p className="text-red-500 text-sm">{errors.onDutyDetailsMPReporting.rank.message}</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <SuggestionInput
-            placeholder="Select Unit"
-            value={d.onDutyDetailsMPReporting.unit}
-            onChange={(v) =>
-              set("formData.traffic.onDutyDetailsMPReporting.unit", v)
-            }
-            fieldType="unit"
-            defaultOptions={["MP Unit 12", "Unit 2", "Unit 3"]}
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <Controller
+            control={control}
+            name="onDutyDetailsMPReporting.unit"
+            render={({ field }) => (
+              <SuggestionInput
+                placeholder="Select Unit"
+                value={field.value}
+                onChange={field.onChange}
+                fieldType="unit"
+                defaultOptions={["MP Unit 12", "Unit 2", "Unit 3"]}
+              />
+            )}
           />
+          {errors.onDutyDetailsMPReporting?.unit && <p className="text-red-500 text-sm">{errors.onDutyDetailsMPReporting.unit.message}</p>}
 
-          <Input
+          <FormInputRHF
             placeholder="Army No."
-            value={d.onDutyDetailsMPReporting.armyNumber}
-            onChange={(e) =>
-              set(
-                "formData.traffic.onDutyDetailsMPReporting.armyNumber",
-                e.target.value
-              )
-            }
+            {...control.register("onDutyDetailsMPReporting.armyNumber")}
+            error={errors.onDutyDetailsMPReporting?.armyNumber?.message}
           />
         </div>
       </FormSection>
 
       {/* ---------------- WITNESSING MP ---------------- */}
       <FormSection title="On-Duty Details of Witnessing MP">
-        {d.witnesses.map((w, i) => (
-          <div key={i} className="border p-4 rounded-lg space-y-4 mb-6">
+        {fields.map((field, i) => (
+          <div key={field.id} className="border p-4 rounded-lg space-y-4 mb-6 relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+              onClick={() => remove(i)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
 
             {/* Name */}
-            <Input
+            <FormInputRHF
               placeholder="Name of Witnessing MP"
-              value={w.reportingBlock.nameReportingMP}
-              onChange={(e) => {
-                const clone = structuredClone(d.witnesses);
-                clone[i].reportingBlock.nameReportingMP = e.target.value;
-                set("formData.traffic.witnesses", clone);
-              }}
+              {...control.register(`witnesses.${i}.reportingBlock.nameReportingMP`)}
             />
 
             {/* Rank */}
-            <SuggestionInput
-              placeholder="Select Rank"
-              value={w.reportingBlock.rank}
-              onChange={(v) => {
-                const clone = structuredClone(d.witnesses);
-                clone[i].reportingBlock.rank = v;
-                set("formData.traffic.witnesses", clone);
-              }}
-              fieldType="rank"
-              defaultOptions={["L/Nk", "Nk", "Hav", "Subedar"]}
+            <Controller
+              control={control}
+              name={`witnesses.${i}.reportingBlock.rank`}
+              render={({ field }) => (
+                <SuggestionInput
+                  placeholder="Select Rank"
+                  value={field.value}
+                  onChange={field.onChange}
+                  fieldType="rank"
+                  defaultOptions={["L/Nk", "Nk", "Hav", "Subedar"]}
+                />
+              )}
             />
 
-            {/* ✅ REQUIRED FIELD — UNIT */}
-            <SuggestionInput
-              placeholder="Select Unit"
-              value={w.reportingBlock.unit}
-              onChange={(v) => {
-                const clone = structuredClone(d.witnesses);
-                clone[i].reportingBlock.unit = v;
-                set("formData.traffic.witnesses", clone);
-              }}
-              fieldType="unit"
-              defaultOptions={["11 Engr Regt", "MP 12", "HQ Unit"]}
+            {/* Unit */}
+            <Controller
+              control={control}
+              name={`witnesses.${i}.reportingBlock.unit`}
+              render={({ field }) => (
+                <SuggestionInput
+                  placeholder="Select Unit"
+                  value={field.value}
+                  onChange={field.onChange}
+                  fieldType="unit"
+                  defaultOptions={["11 Engr Regt", "MP 12", "HQ Unit"]}
+                />
+              )}
             />
 
             {/* Army Number */}
-            <Input
+            <FormInputRHF
               placeholder="Army No."
-              value={w.reportingBlock.armyNumber}
-              onChange={(e) => {
-                const clone = structuredClone(d.witnesses);
-                clone[i].reportingBlock.armyNumber = e.target.value;
-                set("formData.traffic.witnesses", clone);
-              }}
+              {...control.register(`witnesses.${i}.reportingBlock.armyNumber`)}
             />
 
             {/* Contact */}
-            <Input
+            <FormInputRHF
               placeholder="Contact Number"
-              value={w.reportingBlock.contactNumber || ""}
-              onChange={(e) => {
-                const clone = structuredClone(d.witnesses);
-                clone[i].reportingBlock.contactNumber = e.target.value;
-                set("formData.traffic.witnesses", clone);
-              }}
+              {...control.register(`witnesses.${i}.reportingBlock.contactNumber` as any)}
             />
           </div>
         ))}
-      </FormSection>
 
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => append({
+            reportingBlock: {
+              nameReportingMP: "",
+              rank: "",
+              unit: "",
+              armyNumber: "",
+            },
+            contactNumber: ""
+          })}
+          className="flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" /> Add Witness
+        </Button>
+      </FormSection>
 
       {/* ================= WITNESS SELECTION LIST ================= */}
       {hasFilledWitness && (
@@ -209,26 +219,27 @@ export default function Step2Statement() {
           </p>
 
           <div className="bg-white rounded-lg p-5 space-y-4">
-            {d.witnesses.map((w, index) => {
+            {witnesses?.map((w, index) => {
               const r = w.reportingBlock;
 
               if (!r.nameReportingMP && !r.rank && !r.unit && !r.armyNumber)
                 return null;
 
               const isSelected =
-                d.selectedWitness?.armyNumber === r.armyNumber;
+                selectedWitness?.armyNumber === r.armyNumber;
 
               return (
-                <div
+                <label
                   key={index}
-                  className="flex gap-4 items-start border rounded-lg p-4"
+                  className="flex gap-4 items-start border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition"
                 >
                   <input
                     type="radio"
                     checked={isSelected}
                     onChange={() =>
-                      set("formData.traffic.selectedWitness", r)
+                      setValue("selectedWitness", r)
                     }
+                    className="mt-1"
                   />
 
                   <div className="w-full flex justify-between">
@@ -250,7 +261,7 @@ export default function Step2Statement() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </label>
               );
             })}
           </div>
@@ -264,43 +275,35 @@ export default function Step2Statement() {
         </p>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <FormInput
+          <FormInputRHF
             label="Time of Offence"
             type="time"
-            value={d.offenceOccurenceDetails.timeOfOffence}
-            onChange={(v) =>
-              set(
-                "formData.traffic.offenceOccurenceDetails.timeOfOffence",
-                v
-              )
-            }
+            {...control.register("offenceOccurenceDetails.timeOfOffence")}
+            error={errors.offenceOccurenceDetails?.timeOfOffence?.message}
           />
 
-          <SuggestionInput
-            label="Place Of Offence"
-            placeholder="Location"
-            value={d.offenceOccurenceDetails.incidentLocation}
-            onChange={(v) =>
-              set(
-                "formData.traffic.offenceOccurenceDetails.incidentLocation",
-                v
-              )
-            }
-            fieldType="incidentLocation"
+          <Controller
+            control={control}
+            name="offenceOccurenceDetails.incidentLocation"
+            render={({ field }) => (
+              <SuggestionInput
+                label="Place Of Offence"
+                placeholder="Location"
+                value={field.value}
+                onChange={field.onChange}
+                fieldType="incidentLocation"
+              />
+            )}
           />
+          {errors.offenceOccurenceDetails?.incidentLocation && <p className="text-red-500 text-sm">{errors.offenceOccurenceDetails.incidentLocation.message}</p>}
         </div>
 
         <div className="mt-4">
-          <FormTextarea
+          <FormTextareaRHF
             label="Full Description of Offence"
             description="Provide a detailed description of the offence."
-            value={d.offenceOccurenceDetails.description}
-            onChange={(v) =>
-              set(
-                "formData.traffic.offenceOccurenceDetails.description",
-                v
-              )
-            }
+            {...control.register("offenceOccurenceDetails.description")}
+            error={errors.offenceOccurenceDetails?.description?.message}
           />
         </div>
       </FormSection>

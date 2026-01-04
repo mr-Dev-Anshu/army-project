@@ -40,9 +40,9 @@ export const RightPanel = ({
       return !(vd?.vehicleType && vd?.category);
     }
 
-    // TRAFFIC
-    if (mode === "traffic" && step === 1) {
-      return !formData.traffic?.vehicleInvolved;
+    // TRAFFIC - Handled by RHF validation in onNext
+    if (mode === "traffic") {
+      return false;
     }
 
     return false;

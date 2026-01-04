@@ -1,5 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 import {
   Select,
@@ -8,6 +10,8 @@ import {
   SelectItem,
   SelectContent,
 } from "@/components/ui/select";
+
+/* ================== OLDER COMPONENTS (CUSTOM ONCHANGE) ================== */
 
 interface FormSelectProps {
   label: string;
@@ -77,3 +81,23 @@ export function FormInput({
     </div>
   );
 }
+
+/* ================== RHF COMPATIBLE COMPONENTS ================== */
+
+interface FormInputRHFProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+}
+
+export const FormInputRHF = React.forwardRef<HTMLInputElement, FormInputRHFProps>(
+  ({ label, error, className, ...props }, ref) => {
+    return (
+      <div className="space-y-1 w-full">
+        {label && <Label>{label}</Label>}
+        <Input ref={ref} className={cn(error && "border-red-500", className)} {...props} />
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      </div>
+    );
+  }
+);
+FormInputRHF.displayName = "FormInputRHF";
