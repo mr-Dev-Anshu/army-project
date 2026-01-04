@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -15,91 +16,64 @@ import DynamicOffenderList from "../../DynamicOffenderLIst";
 export default function Step5WitnessList() {
   const { state, dispatch } = useForm();
 
-  const mp = state.formData.mpReport;
-  const witnesses = mp.witnesses || [];
+  const witnesses = state.formData.mpReport.witnesses || [];
+  const witnessVehicleStatus =
+    state.formData.mpReport.witnessVehicleStatus || "";
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [extraVehicleStatus, setExtraVehicleStatus] = useState("");
 
-  const witnessVehicleStatus = mp.witnessVehicleStatus || "";
-
-  /* ========= VEHICLE STATUS ========= */
-  const setVehicleStatus = (value: string) =>
+  const setVehicleStatus = (value: YesNo) => {
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.witnessVehicleStatus",
       value,
     });
 
-  /* ========= DELETE ========= */
-  const handleDeleteWitness = (index: number) => {
-    const updated = witnesses.filter((_, i) => i !== index);
+    if (value === "yes") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mpReport.individualDetails.vehicleData",
+        value: {},
+      });
+    }
+  };
 
+  const handleDeleteWitness = (index: number) => {
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.witnesses",
-      value: updated,
+      value: witnesses.filter((_, i) => i !== index),
     });
   };
-
-  /* ========= SAVE MAIN ========= */
   const handleSaveMainWitness = () => {
-    const vehicle = mp.individualDetails?.vehicleData || {};
-    const person = mp.individualDetails?.tempOffender || {};
+    const temp = state.formData.mpReport.individualDetails.tempOffender;
 
-    const finalData = { ...vehicle, ...person, type: "witness" };
-
-    if (!Object.keys(finalData).length) {
+    if (!temp || Object.keys(temp).length === 0) {
       toast.error("Please fill witness details!");
       return;
     }
 
+    const witnessPayload = {
+      ...temp,
+      role: "witness",
+    };
+
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.witnesses",
-      value: [...witnesses, finalData],
+      value: [...witnesses, witnessPayload],
     });
 
+    // 🔥 RESET FORM
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.individualDetails.tempOffender",
-      value: null,
-    });
-
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.vehicleData",
       value: {},
     });
 
     toast.success("Witness Added!");
   };
 
-  /* ========= SAVE ADDITIONAL ========= */
-  const handleSaveAdditionalWitness = () => {
-    const vehicle = mp.additionalIndividual?.vehicleData || {};
-    const person = mp.additionalIndividual?.tempOffender || {};
-
-    const finalData = { ...vehicle, ...person, type: "witness" };
-
-    if (!Object.keys(finalData).length) {
-      toast.error("Please fill additional witness details!");
-      return;
-    }
-
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.witnesses",
-      value: [...witnesses, finalData],
-    });
-
-    dispatch({ type: "CLEAR_MP_ADDITIONAL" });
-
-    setExtraVehicleStatus("");
-    setShowAddForm(false);
-
-    toast.success("Additional Witness Added!");
-  };
 
   /* ========= CLEAR ========= */
   const clearForm = () =>
@@ -114,7 +88,7 @@ export default function Step5WitnessList() {
     });
 
   return (
-    <FormSection title="5. WITNESS LIST:" onClear={clearForm}>
+    <FormSection title="">
       <VehiclePrimaryQuestion
         title="Does this witness have vehicles?"
         vehicleStatus={witnessVehicleStatus}
@@ -129,52 +103,7 @@ export default function Step5WitnessList() {
 
       {witnessVehicleStatus && (
         <div className="mt-4 flex justify-end">
-          <Button
-            className="bg-green-600 hover:bg-green-700"
-            onClick={handleSaveMainWitness}
-          >
-            Save Witness
-          </Button>
-        </div>
-      )}
-
-      <div className="mt-6">
-        <Button
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => setShowAddForm(true)}
-          disabled={showAddForm}
-        >
-          + Add More Witness
-        </Button>
-      </div>
-
-      {showAddForm && (
-        <div className="mt-6 border rounded-lg p-6 bg-gray-50">
-          <VehiclePrimaryQuestion
-            title="Does this additional witness involve vehicle?"
-            vehicleStatus={extraVehicleStatus}
-            setVehicleStatus={setExtraVehicleStatus}
-          />
-
-          {extraVehicleStatus === "yes" && (
-            <VehicleDetailsForm scope="mp-additional" />
-          )}
-          {extraVehicleStatus === "no" && (
-            <OffenderWithoutVehicleForm scope="mp-additional" />
-          )}
-
-          <div className="mt-4 flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setShowAddForm(false)}>
-              Cancel
-            </Button>
-
-            <Button
-              className="bg-green-600 hover:bg-green-700"
-              onClick={handleSaveAdditionalWitness}
-            >
-              Save Witness
-            </Button>
-          </div>
+          <Button onClick={handleSaveMainWitness}>Save Witness</Button>
         </div>
       )}
 
