@@ -30,32 +30,81 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     { id: 4, label: "Remarks of CO / 2IC Provost Unit", icon: "4" },
   ];
 
-  /* ================= PREVIEW MAPPER (NO LOGIC) ================= */
-  const mapTrafficToReport = (traffic: any) => {
-    const occ = traffic?.offenceOccurenceDetails || {};
-    const duty = traffic?.onDutyDetails || {};
+const mapTrafficToReport = (traffic: any) => {
+  const occ = traffic?.offenceOccurenceDetails || {};
+  const duty = traffic?.onDutyDetails || {};
 
-    return {
-      reportNo: "TEMP/REPORT/001",
-      reportDate: new Date().toLocaleDateString("en-GB"),
+  return {
+    reportNo: "TEMP/REPORT/001",
+    reportDate: new Date().toLocaleDateString("en-GB"),
 
-      occurrence: {
-        dateOfDuty: duty?.dateOfDuty || "N/A",
-        dutyLocation: duty?.dutyLocation || "N/A",
-        timeOfOffence: occ?.timeOfOffence || "N/A",
-        locationOfOffence: occ?.incidentLocation || "N/A",
-        statement: occ?.description || "N/A",
+    /* ✅ REQUIRED BY MilitaryPoliceReport */
+    particulars: {
+      primary: {
+        aadharCardNo: "",
+        name: "",
+        so: "",
+        relation: "",
+        armyNo: "",
+        rank: "",
+        unit: "",
+        command: "",
+        fmn: "",
+        address: "",
+        iCardNo: "",
       },
+      secondary: undefined,
+      vehicle: undefined,
+    },
 
-      remarks: {
-        text:
-          traffic?.remarks ||
-          "Suitable disciplinary action may be taken and intimated.",
-        station: duty?.dutyLocation || "N/A",
-        dated: new Date().toLocaleDateString("en-GB"),
-      },
-    };
+    occurrence: {
+      dateOfDuty: duty?.dateOfDuty || "",
+      dutyTime:
+        duty?.startTime && duty?.endTime
+          ? `${duty.startTime} - ${duty.endTime}`
+          : "",
+      dutyLocation: duty?.dutyLocation || "",
+      nameOfWitnessingOfficial1: "",
+      nameOfWitnessingOfficial2: "",
+      nameOfWitnessingOfficial3: "",
+      timeOfOffence: occ?.timeOfOffence || "",
+      locationOfOffence: occ?.incidentLocation || "",
+      statement: occ?.description || "",
+    },
+
+    offence: {
+      type: traffic?.offenceTypes?.[0] || "",
+      ref1: traffic?.offenceCode?.[0] || "",
+      ref2: traffic?.offenceCode?.[1] || "",
+      description: occ?.description || "",
+    },
+
+    witnessSig: {
+      armyNo: "",
+      rank: "",
+      name: "",
+      unit: "",
+    },
+
+    mpSig: {
+      armyNo: "",
+      rank: "",
+      name: "",
+      unit: "",
+    },
+
+    remarks: {
+      text:
+        traffic?.remarks ||
+        "Suitable disciplinary action may be taken and intimated.",
+      station: duty?.dutyLocation || "",
+      dated: new Date().toLocaleDateString("en-GB"),
+    },
   };
+};
+
+
+
 
   /* ================= FINAL SUBMIT ================= */
   const onSubmitFinal = async () => {
