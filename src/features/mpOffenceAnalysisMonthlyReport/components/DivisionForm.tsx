@@ -288,9 +288,19 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                     <div className="h-4 w-px bg-[#E5E5E5] mr-3"></div>
                     <span className="text-[#404040]">Reports & Analysis</span>
                     <span className="mx-2 text-gray-400">›</span>
-                    <span className="text-[#404040]">MP Offence Analysis Monthly Report</span>
+                    <span
+                        className="text-[#404040] hover:text-gray-700 cursor-pointer transition-colors"
+                        onClick={onClose}
+                    >
+                        MP Offence Analysis Monthly Report
+                    </span>
                     <span className="mx-2 text-gray-400">›</span>
-                    <span className="text-[#404040]">{formation.groupKey}</span>
+                    <span
+                        className="text-[#404040] hover:text-gray-700 cursor-pointer transition-colors"
+                        onClick={onClose}
+                    >
+                        {formation.groupKey}
+                    </span>
                     <span className="mx-2 text-gray-400">›</span>
                     <span className="font-bold text-[#0A0A0A]">Fill New Analysis Data</span>
                 </div>
