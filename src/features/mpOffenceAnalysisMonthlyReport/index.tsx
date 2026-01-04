@@ -10,12 +10,15 @@ import { useGetDivisionAnalysis } from "./hooks/useDivisionAnalysis";
 import { useMemo, useState } from "react";
 import FormationAnalysisTable from "./components/FormationAnalysisTable";
 import Hq36RapidDivisionTable from "./components/DivisionTable";
+import OverallFormationAnalysisTable from "./components/OverallFormationAnalysisTable";
 
 export default function MpOffenceAnalysisMonthlyReport() {
     const [selectedFormation, setSelectedFormation] = useState<{
         groupKey: string;
         subtitle: string;
     } | null>(null);
+
+    const [showOverallAnalysis, setShowOverallAnalysis] = useState(false);
 
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
@@ -102,6 +105,10 @@ export default function MpOffenceAnalysisMonthlyReport() {
 
     if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
+    if (showOverallAnalysis) {
+        return <OverallFormationAnalysisTable onBack={() => setShowOverallAnalysis(false)} />;
+    }
+
     if (selectedFormation) {
         if (selectedFormation.groupKey === "HQ 21 CORPS") {
             return (
@@ -135,7 +142,10 @@ export default function MpOffenceAnalysisMonthlyReport() {
                         MP Offence Analysis Monthly Report
                     </span>
                 </div>
-                <Button className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer">
+                <Button
+                    className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer"
+                    onClick={() => setShowOverallAnalysis(true)}
+                >
                     View Overall Formation Analysis
                     <BarChart3 className="w-4 h-4 ml-1" />
                 </Button>

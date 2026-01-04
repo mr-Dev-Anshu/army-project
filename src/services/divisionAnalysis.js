@@ -85,7 +85,15 @@ export const getGlobalDivisionAnalysisService = async (filters = {}) => {
 
   if (filters.monthYear) {
     const d = new Date(filters.monthYear);
-    if (!isNaN(d)) match.monthYear = d;
+    if (!isNaN(d)) {
+      const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 1); // First day of next month
+
+      match.monthYear = {
+        $gte: startOfMonth,
+        $lt: endOfMonth
+      };
+    }
   }
 
   const pipeline = [
