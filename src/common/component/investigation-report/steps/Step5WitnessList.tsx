@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -13,14 +12,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import DynamicOffenderList from "../../DynamicOffenderLIst";
 
+type YesNo = "yes" | "no" | "";
+
 export default function Step5WitnessList() {
   const { state, dispatch } = useForm();
 
-  const witnesses = state.formData.mpReport.witnesses || [];
-  const witnessVehicleStatus =
-    state.formData.mpReport.witnessVehicleStatus || "";
-
-  const [showAddForm, setShowAddForm] = useState(false);
+  const mp = state.formData.mpReport;
+  const witnesses = mp.witnesses || [];
+  const witnessVehicleStatus: YesNo = mp.witnessVehicleStatus || "";
 
   const setVehicleStatus = (value: YesNo) => {
     dispatch({
@@ -36,6 +35,14 @@ export default function Step5WitnessList() {
         value: {},
       });
     }
+
+    if (value === "no") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mpReport.individualDetails.tempOffender",
+        value: {},
+      });
+    }
   };
 
   const handleDeleteWitness = (index: number) => {
@@ -46,52 +53,65 @@ export default function Step5WitnessList() {
     });
   };
 
+  /* ================= SAVE WITNESS ================= */
+  const handleSaveMainWitness = () => {
+    let temp: any = null;
 
-const handleSaveMainWitness = () => {
-  const temp = state.formData.mpReport.individualDetails.tempOffender;
+    if (witnessVehicleStatus === "yes") {
+      const vehicleData = mp.individualDetails.vehicleData;
 
-  if (!temp || Object.keys(temp).length === 0) {
-    toast.error("Please fill witness details!");
-    return;
-  }
+      if (!vehicleData || !vehicleData.driverType) {
+        toast.error("Please fill witness details!");
+        return;
+      }
 
-  // 🔥 FLATTEN DETAILS
-  const flat = temp.details ? { ...temp.details } : { ...temp };
+      temp = {
+        offenderType: "Witness",
+        details: vehicleData,
+      };
+    }
 
-  const witnessPayload = {
-    ...flat,
-    role: "Witness",
-    offenderType: "Witness",
-  };
+    if (witnessVehicleStatus === "no") {
+      temp = mp.individualDetails.tempOffender;
+    }
 
-  dispatch({
-    type: "SET_PATH",
-    path: "formData.mpReport.witnesses",
-    value: [...witnesses, witnessPayload],
-  });
+    if (!temp || !temp.details || !Object.keys(temp.details).length) {
+      toast.error("Please fill witness details!");
+      return;
+    }
 
-  dispatch({
-    type: "SET_PATH",
-    path: "formData.mpReport.individualDetails.tempOffender",
-    value: {},
-  });
+    const witnessPayload = {
+      ...temp.details,
+      role: "Witness",
+      offenderType: "Witness",
+    };
 
-  toast.success("Witness Added!");
-};
-
-
-
-  /* ========= CLEAR ========= */
-  const clearForm = () =>
     dispatch({
       type: "SET_PATH",
-      path: "formData.mpReport",
-      value: {
-        ...mp,
-        witnessVehicleStatus: "",
-        witnesses: [],
-      },
+      path: "formData.mpReport.witnesses",
+      value: [...witnesses, witnessPayload],
     });
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.tempOffender",
+      value: {},
+    });
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.vehicleData",
+      value: {},
+    });
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.witnessVehicleStatus",
+      value: "",
+    });
+
+    toast.success("Witness Added!");
+  };
 
   return (
     <FormSection title="">
@@ -99,10 +119,12 @@ const handleSaveMainWitness = () => {
         title="Does this witness have vehicles?"
         vehicleStatus={witnessVehicleStatus}
         setVehicleStatus={setVehicleStatus}
-        onChange={setVehicleStatus}
       />
 
-      {witnessVehicleStatus === "yes" && <VehicleDetailsForm scope="mp-main" />}
+      {witnessVehicleStatus === "yes" && (
+        <VehicleDetailsForm scope="mp-main" />
+      )}
+
       {witnessVehicleStatus === "no" && (
         <OffenderWithoutVehicleForm scope="mp-main" />
       )}

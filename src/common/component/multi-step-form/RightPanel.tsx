@@ -114,10 +114,10 @@ export const RightPanel = ({
             </h3>
 
             {!state.preview && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 ">
                 <Button
                   size="sm"
-                  className="text-xs bg-gray-100 text-black"
+                  className="text-xs bg-gray-100 cursor-pointer text-black"
                   onClick={() => setShowClearModal(true)}
                 >
                   <CiEraser size={16} /> Clear Form

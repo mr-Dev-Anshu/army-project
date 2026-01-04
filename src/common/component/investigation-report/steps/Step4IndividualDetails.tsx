@@ -76,28 +76,43 @@ export default function Step4IndividualDetails() {
     toast.success("Main Person Added!");
   };
 
-  /* ================= SAVE ADDITIONAL ================= */
-  const handleSaveAdditional = () => {
-    const temp = add.tempOffender;
+ const handleSaveAdditional = () => {
+  let temp = add.tempOffender;
 
-    if (!temp || !temp.details || !Object.keys(temp.details).length) {
+  /* 🔥 VEHICLE FLOW FIX (SAME AS MAIN) */
+  if (add.vehicleInvolved === "yes") {
+    const vehicleData = add.vehicleData;
+
+    if (!vehicleData?.driverType) {
       toast.error("Please fill additional person details!");
       return;
     }
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.offenderList",
-      value: [...offenders, temp],
-    });
+    temp = {
+      offenderType: vehicleData.driverType,
+      details: vehicleData,
+    };
+  }
 
-    dispatch({ type: "CLEAR_MP_ADDITIONAL" });
+  if (!temp || !temp.details || !Object.keys(temp.details).length) {
+    toast.error("Please fill additional person details!");
+    return;
+  }
 
-    setExtraVehicleStatus("");
-    setShowAddForm(false);
+  dispatch({
+    type: "SET_PATH",
+    path: "formData.mpReport.individualDetails.offenderList",
+    value: [...offenders, temp],
+  });
 
-    toast.success("Additional Person Added!");
-  };
+  dispatch({ type: "CLEAR_MP_ADDITIONAL" });
+
+  setExtraVehicleStatus("");
+  setShowAddForm(false);
+
+  toast.success("Additional Person Added!");
+};
+
 
   return (
     <FormSection title="">

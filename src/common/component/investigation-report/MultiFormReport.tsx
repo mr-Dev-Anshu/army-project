@@ -22,7 +22,6 @@ import { RightPanel } from "../multi-step-form/RightPanel";
 import { useCreateMPReport } from "@/features/mpReports/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 
-
 /* ================= EVIDENCE BUILDER ================= */
 const buildEvidences = (ev: any) => {
   const evidences: any[] = [];
@@ -461,6 +460,7 @@ export default function MultiFormReport({
             title="Create New MP Occurrence & Investigation Report"
             reportNo="PRO/21 CPU/00042/106/25"
             onCancel={onCancel}
+            onCreate={onSubmitFinal}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
@@ -468,10 +468,17 @@ export default function MultiFormReport({
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            onNext={() => dispatch({ type: "NEXT_STEP" })}
-            onSubmitFinal={onSubmitFinal}
+            onNext={() => {
+              if (state.currentStep === Object.keys(stepsConfig).length) {
+                dispatch({ type: "SET_PREVIEW", payload: true });
+              } else {
+                dispatch({ type: "NEXT_STEP" });
+              }
+            }}
+            onPrev={() => dispatch({ type: "PREV_STEP" })} 
             stepsConfig={stepsConfig}
             mode="mp"
+            mapMpToReport={mapMpToReport} 
           />
         </div>
       </div>

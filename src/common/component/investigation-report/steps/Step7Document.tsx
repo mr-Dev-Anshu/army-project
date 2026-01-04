@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
@@ -55,31 +54,37 @@ export default function Step7Documents() {
   };
 
   return (
-    <FormSection title="7. DOCUMENTS:" onClear={clearForm}>
+    <FormSection title="">
       <p className="font-semibold mb-2">Attach Documents</p>
 
       {/* Statement */}
       <div className="space-y-1">
         <label className="text-sm font-medium">Enter Statement</label>
+
         <Textarea
           placeholder="Write here..."
           value={statement}
           onChange={(e) => setStatement(e.target.value)}
+          className="w-full"
         />
       </div>
 
-      {/* Upload + URL */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-        <div>
-          <p className="text-sm mb-1">Attach Related Document (Optional)</p>
+      {/* Upload Section */}
+      <div className="mt-6">
+        <label className="text-sm font-medium">
+          Attach Related Document{" "}
+          <span className="text-gray-500">(Optional)</span>
+        </label>
 
-          <input
-            ref={fileRef}
-            type="file"
-            className="hidden"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-          />
+        <input
+          ref={fileRef}
+          type="file"
+          className="hidden"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
+        />
 
+        {/* ⭐ SAME LINE LIKE YOUR DESIGN */}
+        <div className="flex items-center gap-3 mt-2">
           <Button
             className="bg-black text-white flex gap-2"
             onClick={() => fileRef.current?.click()}
@@ -88,26 +93,26 @@ export default function Step7Documents() {
             Upload Document
           </Button>
 
-          {file && <p className="text-xs text-gray-500 mt-1">{file.name}</p>}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium">Enter URL</label>
           <Input
             placeholder="Enter URL"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
         </div>
+
+        {file && <p className="text-xs text-gray-500 mt-1">{file.name}</p>}
       </div>
 
-      <Button className="bg-blue-600 text-white mt-4" onClick={saveDocument}>
-        Save Document
-      </Button>
+      {/* Save Button Right Aligned */}
+      <div className="flex justify-end mt-6">
+        <Button className="bg-black text-white" onClick={saveDocument}>
+          Save Document
+        </Button>
+      </div>
 
-      {/* LIST UI */}
+      {/* ================= LIST UI ================= */}
       {documents.length > 0 && (
-        <div className="mt-8 border rounded-lg p-4">
+        <div className="mt-8  p-4">
           <div className="flex justify-between items-center">
             <p className="font-semibold">Document List:</p>
             <span className="text-blue-600 font-semibold">
@@ -145,8 +150,6 @@ export default function Step7Documents() {
                       >
                         {d.fileName ? (
                           <FileIcon size={18} />
-                        ) : d.url ? (
-                          <Download size={18} />
                         ) : (
                           <Upload size={18} />
                         )}
