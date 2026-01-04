@@ -1,494 +1,258 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { MoreVertical, Eye, Printer, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Eye, Printer, MoreVertical, Trash } from "lucide-react";
-import { DynamicTable, Column } from "@/components/common/DynamicTable";
-import {
-  useDeleteMTAccidentReport,
-  useUpdateMTAccidentReport,
-} from "../hooks/useMTAccidentReport";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  useUpdateMTAccidentReport,
+  useDeleteMTAccidentReport,
+} from "../hooks/useMTAccidentReport";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { toast } from "react-toastify";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface MTAccidentTableProps {
   data: any[];
-  onEdit: (id: string) => void;
   onView?: (item: any) => void;
   onPrint?: (item: any) => void;
+  onEdit?: (item: any) => void;
 }
 
 export default function MTAccidentTable({
   data,
-  onEdit,
   onView,
   onPrint,
+  onEdit,
 }: MTAccidentTableProps) {
-  console.log("MTAccidentTable - data received:", data);
-  console.log("MTAccidentTable - data length:", data?.length || 0);
-  
-  const { mutateAsync: deleteReport, isPending: isDeleting } =
-    useDeleteMTAccidentReport();
   const { mutateAsync: updateReport, isPending: isUpdating } =
     useUpdateMTAccidentReport();
+  const { mutateAsync: deleteReport, isPending: isDeleting } =
+    useDeleteMTAccidentReport();
+
+  const [actionRemark, setActionRemark] = useState("");
+  const [remarkError, setRemarkError] = useState("");
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
-    recordId: string | null;
+    reportId: string | null;
     type: "status" | "delete";
     newStatus?: boolean;
   }>({
     isOpen: false,
-    recordId: null,
+    reportId: null,
     type: "status",
-    newStatus: false,
   });
 
-  const handleStatusClick = (recordId: string, currentStatus: boolean) => {
-    setModalState({
-      isOpen: true,
-      recordId,
-      type: "status",
-      newStatus: !currentStatus,
-    });
-  };
-
-  const handleDeleteClick = (recordId: string) => {
-    setModalState({
-      isOpen: true,
-      recordId,
-      type: "delete",
-    });
-  };
+  const processedData = useMemo(
+    () => data.map((d, i) => ({ ...d, sr: i + 1 })),
+    [data]
+  );
 
   const handleConfirm = async () => {
-    if (!modalState.recordId) return;
+    if (!modalState.reportId) return;
 
     try {
       if (modalState.type === "status") {
+        if (!actionRemark.trim()) {
+          setRemarkError("Action remark is required");
+          return;
+        }
+
         await updateReport({
-          id: modalState.recordId,
-          data: { actionStatus: modalState.newStatus },
+          id: modalState.reportId,
+          data: {
+            actionStatus: modalState.newStatus,
+            actionStatusRemark: actionRemark,
+          },
         });
-        toast.success("Action status updated successfully!");
-      } else if (modalState.type === "delete") {
-        await deleteReport(modalState.recordId);
-        toast.success("Report deleted successfully!");
+
+        toast.success("Action status updated");
+      } else {
+        await deleteReport(modalState.reportId);
+        toast.success("Report deleted");
       }
-      setModalState({
-        isOpen: false,
-        recordId: null,
-        type: "status",
-        newStatus: false,
-      });
-    } catch (error) {
-      toast.error(
-        modalState.type === "status"
-          ? "Failed to update action status."
-          : "Failed to delete report."
-      );
-      console.error(error);
+
+      setModalState({ isOpen: false, reportId: null, type: "status" });
+      setActionRemark("");
+    } catch {
+      toast.error("Operation failed");
     }
   };
 
-  const columns: Column<any>[] = [
-    {
-      header: "Sr no.",
-      cell: (_, index) => (
-        <span className="font-medium text-gray-900">{index + 1}</span>
-      ),
-      className: "w-16 text-center bg-gray-50/50",
-    },
-    {
-      header: "Particulars of Individual/Victim",
-      cell: (item) => {
-        const hasIndividualDetails = item.individualDetails && Object.keys(item.individualDetails).length > 0;
-        const d = hasIndividualDetails
-          ? item.individualDetails
-          : {
-              armyNumber: item.armyNumber,
-              aadharNumber: item.aadharNumber,
-              rank: item.rank,
-              name: item.name,
-              mpName: item.mpName,
-            };
-        return (
-          <div className="space-y-1 text-xs min-w-[180px]">
-            {d.armyNumber && (
-              <div className="flex gap-1">
-                <span className="font-semibold text-gray-700 w-16 shrink-0">
-                  Army no.:
-                </span>
-                <span>{d.armyNumber}</span>
-              </div>
-            )}
-            {d.aadharNumber && (
-              <div className="flex gap-1">
-                <span className="font-semibold text-gray-700 w-16 shrink-0">
-                  Aadhar No.:
-                </span>
-                <span>{d.aadharNumber}</span>
-              </div>
-            )}
-            {d.rank && (
-              <div className="flex gap-1">
-                <span className="font-semibold text-gray-700 w-16 shrink-0">
-                  Rank:
-                </span>
-                <span>{d.rank}</span>
-              </div>
-            )}
-            {d.name && (
-              <div className="flex gap-1">
-                <span className="font-semibold text-gray-700 w-16 shrink-0">
-                  Name:
-                </span>
-                <span className="font-medium">{d.name}</span>
-              </div>
-            )}
-            {d.mpName && (
-              <div className="flex gap-1">
-                <span className="font-semibold text-gray-700 w-16 shrink-0">
-                  MP Name:
-                </span>
-                <span>{d.mpName}</span>
-              </div>
-            )}
-            {!d.name && item.individualType && (
-              <div className="flex gap-1">
-                <span className="font-semibold text-gray-700 w-16 shrink-0">Type:</span>
-                <span className="font-medium">{item.individualType}</span>
-              </div>
-            )}
-          </div>
-        );
-      },
-      className: "align-top",
-    },
-    // {
-    //   header: "Driver / Co-Driver Details",
-    //   cell: (item) => {
-    //     let offenders = item.offenders || [];
-
-    //     // If no offenders array, try to build from driver/co-driver top-level fields
-    //     if (!offenders || offenders.length === 0) {
-    //       const built: any[] = [];
-    //       if (item.driverDetails && Object.keys(item.driverDetails).length > 0) {
-    //         built.push({ offenderDetails: item.driverDetails, offenderType: item.driverType || "Driver", category: "Driver" });
-    //       }
-    //       if (item.coDriverDetails && Object.keys(item.coDriverDetails).length > 0) {
-    //         built.push({ offenderDetails: item.coDriverDetails, offenderType: item.coDriverDetails.type || "Co-Driver", category: "Co-Driver" });
-    //       }
-    //       // top-level driver name fallback
-    //       if (item.driverName || item.driver) {
-    //         built.push({ offenderDetails: { name: item.driverName || item.driver }, offenderType: item.driverType || "Driver", category: "Driver" });
-    //       }
-
-    //       if (built.length > 0) offenders = built;
-    //     }
-
-    //     if (!offenders || offenders.length === 0) {
-    //       return <span className="text-xs text-gray-400">--</span>;
-    //     }
-    //     return (
-    //       <div className="space-y-2 text-xs min-w-[200px]">
-    //         {offenders.map((offender: any, idx: number) => {
-    //           // Support legacy shapes where offender may be stored directly as details
-    //           const details = offender?.offenderDetails || offender || {};
-    //           const type = offender?.offenderType || offender?.category || offender?.type || "Unknown";
-    //           return (
-    //             <div key={idx} className="border-l-2 border-blue-300 pl-2">
-    //               <div className="font-semibold text-blue-700 mb-1">{type}</div>
-    //               {details.name && (
-    //                 <div className="flex gap-1">
-    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Name:</span>
-    //                   <span className="font-medium">{details.name}</span>
-    //                 </div>
-    //               )}
-    //               {details.rank && (
-    //                 <div className="flex gap-1">
-    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Rank:</span>
-    //                   <span>{details.rank}</span>
-    //                 </div>
-    //               )}
-    //               {details.armyNumber && (
-    //                 <div className="flex gap-1">
-    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Army:</span>
-    //                   <span>{details.armyNumber}</span>
-    //                 </div>
-    //               )}
-    //               {details.unit && (
-    //                 <div className="flex gap-1">
-    //                   <span className="font-semibold text-gray-700 w-12 shrink-0">Unit:</span>
-    //                   <span>{details.unit}</span>
-    //                 </div>
-    //               )}
-    //             </div>
-    //           );
-    //         })}
-    //       </div>
-    //     );
-    //   },
-    //   className: "align-top",
-    // },
-    {
-      header: "Unit",
-      cell: (item) => {
-        const unit = item.unit || item.individualDetails?.unit || item.offenders?.[0]?.offenderDetails?.unit || item.driverDetails?.unit || "";
-        return <span className="text-xs font-medium">{unit || "--"}</span>;
-      },
-      className: "min-w-[120px] text-xs",
-    },
-    {
-      header: "FMN",
-      cell: (item) => {
-        const fmn = item.fmn || item.individualDetails?.fmn || item.offenders?.[0]?.offenderDetails?.fmn || item.driverDetails?.fmn || "";
-        return <span className="text-xs font-medium">{fmn || "--"}</span>;
-      },
-      className: "min-w-[100px] text-xs",
-    },
-    {
-      header: "Date & Time of Accident",
-      cell: (item) => (
-        <div className="flex flex-col text-xs">
-          <span className="font-medium">
-            {item.dateOfAccident
-              ? new Date(item.dateOfAccident).toLocaleDateString("en-GB")
-              : "-"}
-          </span>
-          <span className="text-gray-500">
-            {item.timeOfAccident || "--:--"}
-          </span>
-        </div>
-      ),
-      className: "min-w-[130px]",
-    },
-    {
-      header: "Place of Accident",
-      accessorKey: "placeOfAccident",
-      className: "text-xs min-w-[150px]",
-    },
-    {
-      header: "Veh. BA No. / Make & Take",
-      cell: (item) => (
-        <div className="flex flex-col text-xs space-y-0.5">
-          <span className="font-medium">{item.vehicleNumber || "N/A"}</span>
-          <span className="text-gray-500">{item.makeAndModel || "-"}</span>
-        </div>
-      ),
-      className: "text-xs min-w-[140px]",
-    },
-    {
-      header: "Type of Accident",
-      cell: (item) => (
-        <span
-          className={`px-2 py-1 rounded text-[10px] uppercase font-semibold tracking-wide ${item.typeOfAccident === "Fatal" ||
-              item.typeOfAccident === "Very Serious"
-              ? "bg-red-50 text-red-700 border border-red-100"
-              : item.typeOfAccident === "Serious"
-                ? "bg-orange-50 text-orange-700 border border-orange-100"
-                : "bg-green-50 text-green-700 border border-green-100"
-            }`}
-        >
-          {item.typeOfAccident || "-"}
-        </span>
-      ),
-      className: "min-w-[110px]",
-    },
-    // Casualties - Flattened for DynamicTable
-    {
-      header: (
-        <div className="flex flex-col items-center leading-tight">
-          <span>Injured</span>
-          <span className="text-[10px]">(Civ)</span>
-        </div>
-      ),
-      accessorKey: "injuredCivil",
-      className: "text-center text-xs min-w-[80px]",
-      headerGroup: "No. of Casualty",
-    },
-    {
-      header: (
-        <div className="flex flex-col items-center leading-tight">
-          <span>Injured</span>
-          <span className="text-[10px]">(Mil)</span>
-        </div>
-      ),
-      accessorKey: "injuredMilitary",
-      className: "text-center text-xs min-w-[80px]",
-      headerGroup: "No. of Casualty",
-    },
-    {
-      header: (
-        <div className="flex flex-col items-center leading-tight">
-          <span>Died</span>
-          <span className="text-[10px]">(Civ)</span>
-        </div>
-      ),
-      accessorKey: "diedCivil",
-      className: "text-center text-xs min-w-[80px]",
-      headerGroup: "No. of Casualty",
-    },
-    {
-      header: (
-        <div className="flex flex-col items-center leading-tight">
-          <span>Died</span>
-          <span className="text-[10px]">(Mil)</span>
-        </div>
-      ),
-      accessorKey: "diedMilitary",
-      className: "text-center text-xs min-w-[80px]",
-      headerGroup: "No. of Casualty",
-    },
-    {
-      header: "Probable Cause of Accident",
-      accessorKey: "probableCause",
-      className: "text-xs min-w-[180px]",
-      cell: (item) => (
-        <div className="line-clamp-2" title={item.probableCause}>
-          {item.probableCause || "-"}
-        </div>
-      ),
-    },
-    {
-      header: "FIR/MACT Status",
-      cell: (item) => (
-        <span className="text-xs">{item.firCaseNumber || "--"}</span>
-      ),
-      className: "min-w-[100px]",
-    },
-    {
-      header: "Report no.",
-      cell: (item) => (
-        <span className="text-xs font-mono text-gray-600">
-          {item.reportNumber || "PRO/21 CPU/..."}
-        </span>
-      ),
-      className: "min-w-[140px]",
-    },
-    {
-      header: "Action Status",
-      className:
-        "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
-      headerClassName:
-        "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
-      cell: (item) => {
-        const isTaken = item.actionStatus === true;
-        return (
-          <div
-            className="flex flex-col items-center gap-1 cursor-pointer"
-            onClick={() => {
-              if (item._id) {
-                handleStatusClick(item._id, isTaken);
-              }
-            }}
-          >
-            <div
-              className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
-                }`}
-            >
-              <div
-                className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
-                  }`}
-              ></div>
-            </div>
-            <span className="text-[10px] text-gray-500 font-medium uppercase">
-              {isTaken ? "Taken" : "Pending"}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      header: "",
-      className:
-        "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
-      headerClassName: "w-12 sticky right-0 z-20 bg-gray-50",
-      cell: (item) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:bg-gray-100"
-            >
-              <MoreVertical className="w-4 h-4 text-gray-400" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={() => onView && onView(item)}
-            >
-              <Eye className="w-4 h-4" />
-              View
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={() => onPrint && onPrint(item)}
-            >
-              <Printer className="w-4 h-4" />
-              Print
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={() => onEdit(item._id)}
-            >
-              <Edit className="w-4 h-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-              onClick={() => {
-                if (item._id) {
-                  handleDeleteClick(item._id);
-                }
-              }}
-            >
-              <Trash className="w-4 h-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
-
   return (
-    <div className="w-full">
-      <DynamicTable
-        data={data}
-        columns={columns}
-        emptyMessage="No MT Accident reports found"
-        className="min-h-[500px]"
-        bordered={true}
-      />
+    <div className="h-[600px] overflow-auto">
+      <table className="min-w-full border border-gray-300 text-sm">
+        {/* ================= HEADER ================= */}
+        <thead className="bg-gray-100 sticky top-0 z-10">
+          <tr>
+            <th rowSpan={2} className="border px-3 py-2">Sr No.</th>
+            <th rowSpan={2} className="border px-3 py-2">
+              Particulars of Individual / Victim
+            </th>
+            <th rowSpan={2} className="border px-3 py-2">Unit</th>
+            <th rowSpan={2} className="border px-3 py-2">FMN</th>
+            <th rowSpan={2} className="border px-3 py-2">
+              Date & Time of Accident
+            </th>
+            <th rowSpan={2} className="border px-3 py-2">
+              Place of Accident
+            </th>
+            <th rowSpan={2} className="border px-3 py-2">
+              Veh. BA No. / Make & Type
+            </th>
+            <th rowSpan={2} className="border px-3 py-2">
+              Type of Accident
+            </th>
+
+            <th colSpan={4} className="border px-3 py-2 text-center">
+              No. of Casualty
+            </th>
+
+            <th rowSpan={2} className="border px-3 py-2">
+              Probable Cause
+            </th>
+            <th rowSpan={2} className="border px-3 py-2">
+              FIR / MACT Status
+            </th>
+            <th rowSpan={2} className="border px-3 py-2">
+              Report No.
+            </th>
+            <th rowSpan={2} className="border px-3 py-2">
+              Action Status
+            </th>
+            <th rowSpan={2} className="border px-3 py-2"></th>
+          </tr>
+
+          <tr>
+            <th className="border px-2">Inj (Civ)</th>
+            <th className="border px-2">Inj (Mil)</th>
+            <th className="border px-2">Died (Civ)</th>
+            <th className="border px-2">Died (Mil)</th>
+          </tr>
+        </thead>
+
+        {/* ================= BODY ================= */}
+        <tbody>
+          {processedData.map((item) => (
+            <tr key={item._id} className="hover:bg-gray-50">
+              <td className="border px-2 text-center">{item.sr}</td>
+
+              <td className="border px-2 text-xs">
+                <div><b>Army:</b> {item.driverArmyNo || "--"}</div>
+                <div><b>Rank:</b> {item.driverRank || "--"}</div>
+                <div><b>Name:</b> {item.driverName || "--"}</div>
+              </td>
+
+              <td className="border px-2">{item.driverUnit || "--"}</td>
+              <td className="border px-2">{item.fmn || "--"}</td>
+
+              <td className="border px-2 text-xs">
+                <div>{item.date}</div>
+                <div className="text-gray-500">{item.time}</div>
+              </td>
+
+              <td className="border px-2">{item.place || "--"}</td>
+
+              <td className="border px-2 text-xs">
+                <div>{item.vehicleNo}</div>
+                <div className="text-gray-500">{item.vehicleMake}</div>
+              </td>
+
+              <td className="border px-2 text-center">
+                {item.typeOfAccident || "--"}
+              </td>
+
+              <td className="border px-2 text-center">
+                {item.casualties?.injuredCivil ?? 0}
+              </td>
+              <td className="border px-2 text-center">
+                {item.casualties?.injuredMilitary ?? 0}
+              </td>
+              <td className="border px-2 text-center">
+                {item.casualties?.diedCivil ?? 0}
+              </td>
+              <td className="border px-2 text-center">
+                {item.casualties?.diedMilitary ?? 0}
+              </td>
+
+              <td className="border px-2">{item.brief || "--"}</td>
+              <td className="border px-2">{item.firMactNumber || "--"}</td>
+              <td className="border px-2 font-mono">
+                {item.reportNumber || "--"}
+              </td>
+
+              <td className="border px-2 text-center">
+                {item.actionStatus ? "Taken" : "Pending"}
+              </td>
+
+              <td className="border px-2 text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onView?.(item)}>
+                      <Eye className="w-4 h-4 mr-2" /> View
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onPrint?.(item)}>
+                      <Printer className="w-4 h-4 mr-2" /> Print
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEdit?.(item)}>
+                      <Edit className="w-4 h-4 mr-2" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() =>
+                        setModalState({
+                          isOpen: true,
+                          reportId: item._id,
+                          type: "delete",
+                        })
+                      }
+                    >
+                      <Trash className="w-4 h-4 mr-2" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* ================= MODAL ================= */}
       <ConfirmationModal
         isOpen={modalState.isOpen}
-        onClose={() => setModalState((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() => setModalState((p) => ({ ...p, isOpen: false }))}
         onConfirm={handleConfirm}
         title={
           modalState.type === "status"
             ? "Change Action Status"
             : "Delete Report"
         }
-        message={
-          modalState.type === "status"
-            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
-            }?`
-            : "Are you sure you want to delete this report? This action cannot be undone."
-        }
-        confirmLabel={
-          modalState.type === "status" ? "Yes, Change" : "Yes, Delete"
-        }
+        message="Are you sure?"
+        confirmLabel="Confirm"
         isProcessing={isUpdating || isDeleting}
-      />
+      >
+        {modalState.type === "status" && (
+          <div className="mt-2">
+            <Label>Action Remark *</Label>
+            <Input
+              value={actionRemark}
+              onChange={(e) => setActionRemark(e.target.value)}
+            />
+          </div>
+        )}
+      </ConfirmationModal>
     </div>
   );
 }
