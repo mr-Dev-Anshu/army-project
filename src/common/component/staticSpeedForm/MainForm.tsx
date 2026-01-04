@@ -154,6 +154,8 @@ export default function StaticSpeedForm({
   };
 
   const handleFinalSubmit = async () => {
+    const { contactNumber, ...mpReportingSafe } =
+      staticData.reportingBlock || {};
     try {
       /* ================= STATIC SPEED PAYLOAD ================= */
       const payload = {
@@ -168,16 +170,18 @@ export default function StaticSpeedForm({
           dutyType: staticData.dutyBlock?.dutyType || undefined,
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
-            ).toISOString()
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+              ).toISOString()
             : undefined,
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
-            ).toISOString()
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+              ).toISOString()
             : undefined,
         },
-        onDutyDetailsMPReporting: staticData.reportingBlock,
+
+        // 🔥 FIXED HERE
+        onDutyDetailsMPReporting: mpReportingSafe,
 
         offenceOccurenceDetails: {
           time: staticData.offenceBlock?.time || undefined,
@@ -219,44 +223,51 @@ export default function StaticSpeedForm({
         toast.error("Error: Record ID missing. Offenders cannot be linked.");
         return;
       }
+      /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
 
-      // ========= 2️⃣ OFFENDERS =========
       const people = staticData.offenderPeople || [];
       console.log("👥 Offender People Array:", JSON.stringify(people, null, 2));
 
-      // 2.1 Driver
-      const driverType = staticData.vehicleDetails.driverType;
-      console.log("🚙 Selected Driver Type:", driverType);
+      for (const person of people) {
+        const details = person.details || {};
 
-      if (driverType && driverType !== "") {
-        // Find by ROLE "Driver"
-        const driverEntry = people.find((p: any) => p.role === "Driver");
-        console.log("👤 Driver Entry Found:", driverEntry);
+        // 🔥 skip empty offender blocks
+        const hasValidData = Object.values(details).some(
+          (v) => v !== "" && v !== null && v !== undefined
+        );
 
-        // Ensure details object exists
-        const driverDetails = {
-          ...(driverEntry?.details || {}),
-          type: "Driver"
-        };
+        if (!hasValidData) {
+          console.warn("⚠️ Skipping empty offender:", person);
+          continue;
+        }
 
-        const driverPayload: CreateOffenderData = {
+        const offenderPayload: CreateOffenderData = {
           offenceId: _idString,
-          offenderType: driverType as OffenderType,
-          offenderDetails: driverDetails,
+          offenderType: person.type as OffenderType, // Military / Civilian / etc
+          offenderDetails: {
+            ...details,
+            type: person.whoIsIt || "Offender", // Driver / Co-Driver
+          },
         };
-        console.log("👮 REQ DRIVER PAYLOAD:", JSON.stringify(driverPayload, null, 2));
+
+        console.log(
+          "👮 Creating Offender Payload ===>",
+          JSON.stringify(offenderPayload, null, 2)
+        );
 
         try {
-          const res = await createOffenderMutation.mutateAsync(driverPayload);
-          console.log("✅ Driver Created:", res);
-        } catch (e: any) {
-          console.error("❌ Driver Creation Failed:", e);
-          console.error("❌ Error Response:", e?.response?.data);
-          toast.error(`Driver Creation Failed: ${e?.message}`);
+          const res = await createOffenderMutation.mutateAsync(offenderPayload);
+          console.log("✅ Offender Created Successfully:", res);
+        } catch (err: any) {
+          console.error(
+            "❌ Offender Creation Failed ===>",
+            err?.response?.data || err
+          );
+          toast.error("One offender failed to save");
         }
-      } else {
-        console.warn("⚠️ No Driver Type selected. Skipping Driver creation.");
       }
+
+      toast.success("✅ All offenders created successfully");
 
       // 2.2 Co-Driver
       const coDriverType = state.formData.coDriverType;
@@ -270,7 +281,7 @@ export default function StaticSpeedForm({
 
         const coDriverDetails = {
           ...(coDriverEntry?.details || {}),
-          type: "CoDriver"
+          type: "CoDriver",
         };
 
         const coDriverPayload: CreateOffenderData = {
@@ -278,7 +289,10 @@ export default function StaticSpeedForm({
           offenderType: coDriverType as OffenderType,
           offenderDetails: coDriverDetails,
         };
-        console.log("👮 REQ CO-DRIVER PAYLOAD:", JSON.stringify(coDriverPayload, null, 2));
+        console.log(
+          "👮 REQ CO-DRIVER PAYLOAD:",
+          JSON.stringify(coDriverPayload, null, 2)
+        );
 
         try {
           const res = await createOffenderMutation.mutateAsync(coDriverPayload);
@@ -306,15 +320,10 @@ export default function StaticSpeedForm({
 
         try {
           const witnessResponses = await Promise.all(
-            witnessPayload.map((w) =>
-              createWitnessMutation.mutateAsync(w)
-            )
+            witnessPayload.map((w) => createWitnessMutation.mutateAsync(w))
           );
 
-          console.log(
-            "✅ WITNESS BACKEND RESPONSES ===>",
-            witnessResponses
-          );
+          console.log("✅ WITNESS BACKEND RESPONSES ===>", witnessResponses);
 
           toast.success("Witness Added Successfully!");
         } catch (err: any) {
@@ -357,10 +366,6 @@ export default function StaticSpeedForm({
     }
   };
 
-
-
-
-
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
       <div className="w-full bg-white rounded-lg overflow-hidden h-full">
@@ -382,20 +387,11 @@ export default function StaticSpeedForm({
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            setFormData={(data: StaticSpeedState) => {
-              Object.keys(data).forEach((key) => {
-                dispatch({
-                  type: "SET_PATH",
-                  path: `formData.${key}`,
-                  value: (data as any)[key],
-                });
-              });
-            }}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onPrev={() => dispatch({ type: "PREV_STEP" })}
             stepsConfig={stepsConfig}
             mode="static"
-            mapTrafficToReport={mapStaticToReport}
+            mapReport={mapStaticToReport}
             onCancel={() => {
               dispatch({ type: "SET_STEP", payload: 1 });
               onCancel();
