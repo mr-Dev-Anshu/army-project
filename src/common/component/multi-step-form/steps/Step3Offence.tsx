@@ -130,36 +130,30 @@ export default function Step3Offence() {
   ];
 
   return (
-    <FormSection title="Offence Details">
-      <Label>Select Offence Type</Label>
+    <div>
+      <Label className="text-xl text-gray-600">Select Offence Type</Label>
 
       <Select
-        value={d.offenceTypes?.[0] ?? ""}
-        onValueChange={(v) =>
-          set("formData.traffic.offenceTypes", [v])
-        }
+        value={d.offenceTypes?.[0] ?? undefined}
+        onValueChange={(v) => set("formData.traffic.offenceTypes", [v])}
       >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Offence" />
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select Offence Type" />
         </SelectTrigger>
 
         <SelectContent>
           <SelectItem value="minor">Minor Offence</SelectItem>
           <SelectItem value="major">Major Offence</SelectItem>
-          <SelectItem value="disciplinary">
-            Disciplinary Offence
-          </SelectItem>
+          <SelectItem value="disciplinary">Disciplinary Offence</SelectItem>
         </SelectContent>
       </Select>
 
-      <Label className="mt-4">Reference:</Label>
+      <Label className="mt-4 mb-3">Reference:</Label>
 
       <CheckboxGroup
         options={referenceOptions}
         selected={d.offenceCode}
-        onChange={(v) =>
-          set("formData.traffic.offenceCode", v)
-        }
+        onChange={(v) => set("formData.traffic.offenceCode", v)}
       />
 
       <Label className="mt-6">Brief Description</Label>
@@ -174,6 +168,6 @@ export default function Step3Offence() {
         }
         className="min-h-[140px]"
       />
-    </FormSection>
+    </div>
   );
 }

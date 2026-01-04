@@ -439,9 +439,16 @@ export default function Dashboard() {
         {page === "viewReports" && <AllRegisteredReports />}
 
         {/* ================== MULTI STEP FORM ================== */}
-        {page === "multiForm" && <MultiStepForm />}
-        {page === "staticSpeed" && <StaticSpeedForm />}
-        {page === "investigation" && <MultiFormReport />}
+        {page === "multiForm" && (
+          <MultiStepForm
+            onCancel={() => {
+              setPage("dashboard");
+            }}
+          />
+        )}
+
+        {page === "staticSpeed" && <StaticSpeedForm onCancel={()=>setPage("dashboard")} />}
+        {page === "investigation" && <MultiFormReport onCancel={()=>setPage("dashboard")} />}
         {page === "mpOffenceAnalysis" && <MpOffenceAnalysisMonthlyReport />}
         {page === "civilEmployees" && <CivilEmployeePage />}
       </div>

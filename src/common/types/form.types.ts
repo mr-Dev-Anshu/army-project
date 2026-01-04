@@ -129,15 +129,41 @@ export interface MpReportState {
 
 // ---------- DEPENDENTS ----------
 export type DependentType =
+  | "Civilian"
   | "Military Person"
   | "Servant/Maid"
   | "Shopkeeper & Worker"
   | "Temporary Hired Worker";
 
+
+// export interface OffenderPerson {
+//   relation: string;
+//   whoIsIt: DependentType;
+//   details?: Record<string, any>;
+// }
+
+
+
+
 export interface OffenderPerson {
-  relation: string;
-  whoIsIt: DependentType;
+  offenderType: string;           // "Civilian" | "Military Person" | etc
+  role: "Offender" | "Co-Driver"; // backend `offenderDetails.type`
+  relation?: string;
+
+  details: {
+    name?: string;
+    rank?: string;
+    armyNumber?: string;
+    unit?: string;
+    command?: string;
+    fmn?: string;
+    address?: string;
+    iCardNumber?: string;
+    [key: string]: any;
+  };
 }
+
+
 
 // ---------- FORM ROOT ----------
 // ---------- TRAFFIC ----------

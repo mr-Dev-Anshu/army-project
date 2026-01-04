@@ -1,5 +1,6 @@
 "use client";
-import { Input } from "@/components/ui/input";
+
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
@@ -8,164 +9,158 @@ import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
 
+type ScopeType = "traffic" | "static";
+
+interface VehicleDetailsFormProps {
+  scope?: ScopeType;
+}
+
 export default function VehicleDetailsForm({
   scope = "traffic",
-}: {
-  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
-}) {
+}: VehicleDetailsFormProps) {
   const { state, dispatch } = useForm();
 
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
-  const mp = state.formData.mpReport;
 
-  /* ================= VISIBILITY FIX ================= */
+  if (scope === "traffic" && traffic.vehicleInvolved !== "yes") return null;
 
-  // Traffic + MP-main shared visibility
-  if (
-    scope === "traffic" &&
-    traffic.vehicleInvolved !== "yes" &&
-    mp.individualDetails?.vehicleInvolved !== "yes"
-  ) {
-    return null;
-  }
-
-  // MP MAIN FORM visibility (❌ pehle yaha additional check ho raha tha)
-  if (scope === "mp-main" && mp.individualDetails.vehicleInvolved !== "yes") {
-    return null;
-  }
-
-  /* ================= STATE SOURCE FIX ================= */
-
+  /* ================= VEHICLE STATE ================= */
   const vehicleState =
     scope === "traffic"
       ? traffic.vehicleDetails
-      : scope === "mp-main"
-      ? mp.individualDetails.vehicleData || {}
       : staticSpeed.vehicleDetails;
 
   const { category = "", vehicleType = "", driverType = "" } = vehicleState;
 
-  const updateVehicle = (data: any) => {
-    const updated = {
-      ...vehicleState,
-      ...data,
-    };
+  const offenderPeoplePath =
+    scope === "traffic"
+      ? "formData.traffic.offenderPeople"
+      : "formData.staticSpeed.offenderPeople";
 
-    if (scope === "traffic") {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.traffic.vehicleDetails",
-        value: updated,
-      });
-    } else if (scope === "mp-main") {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.mpReport.individualDetails.vehicleData",
-        value: updated,
-      });
-    } else {
-      dispatch({
-        type: "SET_PATH",
-        path: "formData.staticSpeed.vehicleDetails",
-        value: updated,
-      });
-    }
+  const offenderPeople =
+    scope === "traffic"
+      ? state.formData.traffic.offenderPeople
+      : state.formData.staticSpeed.offenderPeople;
+
+  /* ================= UPDATE VEHICLE ================= */
+  const updateVehicle = (data: any) => {
+    dispatch({
+      type: "SET_PATH",
+      path:
+        scope === "traffic"
+          ? "formData.traffic.vehicleDetails"
+          : "formData.staticSpeed.vehicleDetails",
+      value: { ...vehicleState, ...data },
+    });
+  };
+
+  /* ================= DRIVER SELECT ================= */
+  const handleDriverSelect = (type: string) => {
+    updateVehicle({ driverType: type });
+
+    dispatch({
+      type: "SET_PATH",
+      path: offenderPeoplePath,
+      value: [
+        {
+          role: "Driver",
+          type,
+          details: {},
+        },
+      ],
+    });
   };
 
   return (
-    <div className="border rounded-lg bg-white p-4 space-y-6 max-h-[75vh] overflow-y-auto">
-      {/* VEHICLE CATEGORY */}
+    <div className="bg-white p-4 space-y-6">
+      {/* ================= VEHICLE CATEGORY ================= */}
       <div>
         <p className="font-semibold mb-2">Select Vehicle Category</p>
-
         <RadioGroup
           value={category}
           onValueChange={(v) => updateVehicle({ category: v })}
           className="grid sm:grid-cols-2 gap-3"
         >
-          <label
-            className={cn(
-              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-              category === "2w"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300"
-            )}
-          >
-            <RadioGroupItem value="2w" /> 2-Wheeler
-          </label>
-
-          <label
-            className={cn(
-              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-              category === "4w"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300"
-            )}
-          >
-            <RadioGroupItem value="4w" /> 4-Wheeler
-          </label>
+          {["2w", "4w"].map((v) => (
+            <label
+              key={v}
+              className={cn(
+                "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
+                category === v
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-300"
+              )}
+            >
+              <RadioGroupItem value={v} />
+              {v === "2w" ? "2-Wheeler" : "4-Wheeler"}
+            </label>
+          ))}
         </RadioGroup>
       </div>
 
-      {/* VEHICLE TYPE */}
+      {/* ================= VEHICLE TYPE ================= */}
       <div>
         <p className="font-semibold mb-2">
           Which Type Of Vehicle Was Involved?
         </p>
-
         <RadioGroup
           value={vehicleType}
-          onValueChange={(v) => updateVehicle({ vehicleType: v })}
+          onValueChange={(v) =>
+            updateVehicle({
+              vehicleType: v,
+              vehicleNumber: "",
+              vehicleName: "",
+            })
+          }
           className="grid sm:grid-cols-2 gap-3"
         >
-          <label
-            className={cn(
-              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-              vehicleType === "civilian"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300"
-            )}
-          >
-            <RadioGroupItem value="civilian" /> Civilian Vehicle
-          </label>
-
-          <label
-            className={cn(
-              "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
-              vehicleType === "dd"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300"
-            )}
-          >
-            <RadioGroupItem value="dd" /> DD Vehicle
-          </label>
+          {["civilian", "dd"].map((v) => (
+            <label
+              key={v}
+              className={cn(
+                "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
+                vehicleType === v
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-300"
+              )}
+            >
+              <RadioGroupItem value={v} />
+              {v === "civilian" ? "Civilian Vehicle" : "DD Vehicle"}
+            </label>
+          ))}
         </RadioGroup>
       </div>
 
-      {/* CIVILIAN VEHICLE */}
-      {vehicleType === "civilian" && (
-        <CivilianVehicleBlock
-          vehicleState={vehicleState}
-          updateVehicle={updateVehicle}
-        />
+      {/* ================= VEHICLE DETAILS ================= */}
+      {vehicleType && (
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <Label>Vehicle Number</Label>
+            <SuggestionInput
+              value={vehicleState.vehicleNumber || ""}
+              onChange={(v) => updateVehicle({ vehicleNumber: v })}
+              fieldType="vehicleNumber"
+            />
+          </div>
+
+          <div>
+            <Label>Make & Type</Label>
+            <SuggestionInput
+              value={vehicleState.vehicleName || ""}
+              onChange={(v) => updateVehicle({ vehicleName: v })}
+              fieldType="vehicleName"
+            />
+          </div>
+        </div>
       )}
 
-      {/* DD VEHICLE */}
-      {vehicleType === "dd" && (
-        <DDVehicleBlock
-          vehicleState={vehicleState}
-          updateVehicle={updateVehicle}
-        />
-      )}
-
-      {/* DRIVER TYPE */}
+      {/* ================= DRIVER ================= */}
       <div>
         <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
-
         <RadioGroup
           value={driverType}
-          onValueChange={(v) => updateVehicle({ driverType: v })}
+          onValueChange={handleDriverSelect}
           className="grid sm:grid-cols-2 gap-3"
         >
           {[
@@ -179,7 +174,7 @@ export default function VehicleDetailsForm({
             <label
               key={item}
               className={cn(
-                "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition-all",
+                "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
                 driverType === item
                   ? "border-blue-500 bg-blue-50"
                   : "border-gray-300"
@@ -192,82 +187,18 @@ export default function VehicleDetailsForm({
         </RadioGroup>
       </div>
 
-      {/* DYNAMIC FORM */}
-      {driverType && offenderFormsConfig[driverType] && (
-        <OffenderDynamicForm
-          scope={scope}
-          title={offenderFormsConfig[driverType].title}
-          helperText={offenderFormsConfig[driverType].helperText}
-          fields={offenderFormsConfig[driverType].fields}
-          showCoDriver={true}
-        />
-      )}
-    </div>
-  );
-}
-
-/* ------------ SUB COMPONENTS ------------- */
-
-function CivilianVehicleBlock({ vehicleState, updateVehicle }: any) {
-  return (
-    <div>
-      <p className="font-semibold mb-2">Fill Vehicle Identification</p>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <Label className="mb-3">Civil Vehicle Registration Number</Label>
-          <SuggestionInput
-            placeholder="e.g. MP04 AB 1234"
-            value={vehicleState.vehicleNumber || ""}
-            onChange={(v) => updateVehicle({ vehicleNumber: v })}
-            fieldType="vehicleNumber"
+      {/* ================= OFFENDER FORMS ================= */}
+      {offenderPeople.map((person: any, index: number) => (
+        <div key={index} className="border rounded-xl p-4 mt-4">
+          <OffenderDynamicForm
+            scope={scope}
+            title={`${person.type} ${person.role} Details`}
+            fields={offenderFormsConfig[person.type].fields}
+            path={`${offenderPeoplePath}[${index}].details`}
+            showCoDriver={index === 0}
           />
         </div>
-
-        <div>
-          <Label className="mb-3">
-            Make & Type <span className="text-gray-500">(Vehicle Name)</span>
-          </Label>
-          <SuggestionInput
-            placeholder="e.g. Honda CB Hornet"
-            value={vehicleState.vehicleName || ""}
-            onChange={(v) => updateVehicle({ vehicleName: v })}
-            fieldType="vehicleName"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DDVehicleBlock({ vehicleState, updateVehicle }: any) {
-  return (
-    <div>
-      <p className="font-semibold mb-2">Fill Vehicle Identification</p>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <Label className="mb-3">DD Vehicle BA Number</Label>
-          <SuggestionInput
-            placeholder="e.g. 12A 345678Z"
-            value={vehicleState.vehicleNumber || ""}
-            onChange={(v) => updateVehicle({ vehicleNumber: v })}
-            fieldType="vehicleNumber"
-          />
-        </div>
-
-        <div>
-          <Label className="mb-3">
-            Make & Type <span className="text-gray-500">(Vehicle Name)</span>
-          </Label>
-          <SuggestionInput
-            placeholder="e.g. ALS W/B"
-            value={vehicleState.vehicleName || ""}
-            onChange={(v) => updateVehicle({ vehicleName: v })}
-            fieldType="vehicleName"
-          />
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

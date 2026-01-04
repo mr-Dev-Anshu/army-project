@@ -6,24 +6,25 @@ import { GlobalFormState } from "@/common/types/form.types";
    UNIVERSAL HELPERS
 ------------------------------------ */
 const setByPath = (obj: any, path: string, value: any) => {
-  const keys = path.split(".");
+  const keys = path.match(/[^[.\]]+/g) || [];
   const last = keys.pop()!;
-  const ref = keys.reduce((o, k) => (o[k] ??= {}), obj);
+  const ref = keys.reduce((o, k) => (o[k] ??= isNaN(Number(k)) ? {} : []), obj);
   ref[last] = value;
 };
-
-const getByPath = (obj: any, path: string) =>
-  path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj);
+const getByPath = (obj: any, path: string) => {
+  const keys = path.match(/[^[.\]]+/g) || [];
+  return keys.reduce((o, k) => (o ? o[k] : undefined), obj);
+};
 
 /* ------------------------------------
    INITIAL STATE
 ------------------------------------ */
-const initialState: GlobalFormState = {
+export const initialState: GlobalFormState = {
   currentStep: 1,
   completedSteps: [],
+  preview: false,
 
   formData: {
-    /* ================= TRAFFIC ================= */
     traffic: {
       vehicleInvolved: "",
       vehicleDetails: {
@@ -31,6 +32,7 @@ const initialState: GlobalFormState = {
         vehicleType: "",
         driverType: "",
         vehicleName: "",
+        vehicleNumber: "",
       },
 
       offenderWithoutVehicle: {
@@ -76,10 +78,12 @@ const initialState: GlobalFormState = {
       witnesses: [],
       selectedWitness: null,
       offenderPeople: [],
+      remarks: "",
     },
 
-    /* ================= STATIC SPEED ================= */
     staticSpeed: {
+      remarks: "",
+      vehicleInvolved: "",
       vehicleDetails: {
         category: "",
         vehicleType: "",
@@ -88,23 +92,40 @@ const initialState: GlobalFormState = {
         vehicleName: "",
       },
 
+      dutyBlock: {
+        dateOfDuty: "",
+        startTime: "",
+        endTime: "",
+        dutyLocation: "",
+        dutyType: "",
+      },
+
+      reportingBlock: {
+        nameReportingMP: "",
+        rank: "",
+        unit: "",
+        armyNumber: "",
+        contactNumber: "",
+      },
+
+      offenceBlock: {
+        timeOfOffence: "",
+        time: "",
+        incidentLocation: "",
+       description:"",
+       description2: "",
+        authSpeed: "30",
+        actualSpeedNoted: "",
+        overSpeedCalculated: "",
+      },
+
       witnesses: [],
       selectedWitness: null,
 
       offenderDetails: {},
       offenderPeople: [],
-
-      offenceOccurenceDetails: {
-        timeOfOffence: "",
-        incidentLocation: "",
-        description: "",
-        authSpeed: "30",
-        actualSpeedNoted: "",
-        overSpeedCalculated: "",
-      },
     },
 
-    /* ================= MP REPORT ================= */
     mpReport: {
       reportDetails: {
         reportNo: "",
@@ -137,9 +158,11 @@ const initialState: GlobalFormState = {
         vehicleData: {},
         driverType: "",
         offenderList: [],
+        tempOffender: {},
       },
 
       witnesses: [],
+      witnessVehicleStatus: "",
       evidence: {
         attachEvidence: null,
         eyeSketch: null,
@@ -153,7 +176,7 @@ const initialState: GlobalFormState = {
         vehicleInvolved: "",
         vehicleData: {},
         driverType: "",
-        tempOffender: null,
+        tempOffender: {},
       },
 
       detailedReport: "",
@@ -165,53 +188,6 @@ const initialState: GlobalFormState = {
         recommendation: "",
       },
     },
-
-    shopkeeper: {
-      shopName: "",
-      shopAddress: "",
-      unit: "",
-      ownerName: "",
-      ownerMobile: "",
-      ownerAadhar: "",
-      passNumber: "",
-      priceListApproved: false,
-      priceListEffectiveFrom: null,
-      workers: [],
-      validFrom: null,
-      validTill: null,
-    },
-    maidServant: {
-      qtrNumber: "",
-      ownerName: "",
-      ownerRank: "",
-      ownerUnit: "",
-      servantName: "",
-      servantMobile: "",
-      servantAadhar: "",
-      permanentAddressLine: "",
-      permanentCityDistrict: "",
-      permanentState: "",
-      permanentPincode: "",
-      passNumber: "",
-      validFrom: null,
-      validTill: null,
-      familyMembers: [],
-    },
-    tempWorker: {
-      workerName: "",
-      workerMobile: "",
-      workerAadhar: "",
-      permanentAddressLine: "",
-      permanentCityDistrict: "",
-      permanentState: "",
-      permanentPincode: "",
-      placeOfStay: "",
-      placeOfDuty: "",
-      passNumber: "",
-      validFrom: null,
-      validTill: null,
-      subWorkers: [],
-    },
   },
 };
 
@@ -220,15 +196,17 @@ const initialState: GlobalFormState = {
 ------------------------------------ */
 type Action =
   | { type: "NEXT_STEP" }
+  | { type: "PREV_STEP" } // <-- NEW
   | { type: "SET_STEP"; payload: number }
   | { type: "SET_PATH"; path: string; value: any }
   | { type: "PUSH_PATH"; path: string; value: any }
   | { type: "REMOVE_PATH"; path: string; index: number }
+  | { type: "SET_PREVIEW"; payload: boolean }
   | { type: "SET_FORM_DATA"; payload: any }
   | { type: "CLEAR_MP_ADDITIONAL" };
 
 /* ------------------------------------
-   UNIVERSAL REDUCER
+   REDUCER
 ------------------------------------ */
 function reducer(state: GlobalFormState, action: Action): GlobalFormState {
   switch (action.type) {
@@ -239,6 +217,13 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
           ? state.completedSteps
           : [...state.completedSteps, state.currentStep],
         currentStep: state.currentStep + 1,
+      };
+
+    case "PREV_STEP":
+      console.log("REDUCER PREV HIT — New Step:", state.currentStep - 1);
+      return {
+        ...state,
+        currentStep: Math.max(1, state.currentStep - 1),
       };
 
     case "SET_STEP":
@@ -265,12 +250,11 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
       return newState;
     }
 
-    case "SET_FORM_DATA": {
-      return {
-        ...state,
-        formData: action.payload,
-      };
-    }
+    case "SET_PREVIEW":
+      return { ...state, preview: action.payload };
+
+    case "SET_FORM_DATA":
+      return { ...state, formData: action.payload };
 
     case "CLEAR_MP_ADDITIONAL": {
       const newState = structuredClone(state);
@@ -293,7 +277,7 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
 }
 
 /* ------------------------------------
-   CONTEXT PROVIDER
+   CONTEXT
 ------------------------------------ */
 const FormContext = createContext<{
   state: GlobalFormState;

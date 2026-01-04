@@ -16,7 +16,11 @@ import Step9InvestigationPoints from "./steps/Step9InvestigationPoints";
 import Step10Opinion from "./steps/Step10Opinion";
 import Step11Remarks from "./steps/Step11Remarks";
 
-export default function MultiFormReport() {
+export default function MultiFormReport({
+  onCancel,
+}: {
+  onCancel?: () => void;
+}) {
   const { state, dispatch } = useForm();
   // ================= MP STEPPER STEPS =================
   const steps = [
@@ -93,6 +97,7 @@ export default function MultiFormReport() {
             completedSteps={state.completedSteps}
             title="Create New MP Occurrence & Investigation Report"
             reportNo="PRO/21 CPU/00042/106/25"
+            onCancel={onCancel}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
           />
 
