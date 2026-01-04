@@ -39,9 +39,22 @@ export default function Step4IndividualDetails() {
 
   /* ================= SAVE MAIN ================= */
   const handleSaveMain = () => {
-    let temp = mp.tempOffender;
+    let temp: any = null;
 
-    /* 🔥 VEHICLE FLOW FIX */
+    // 🔥 NON-VEHICLE FLOW — FIXED
+    if (mp.vehicleInvolved === "no") {
+      if (!mp.tempOffender?.details) {
+        toast.error("Please fill main offender details!");
+        return;
+      }
+
+      temp = {
+        offenderType: mp.tempOffender.offenderType,
+        details: structuredClone(mp.tempOffender.details), // ✅ CLONE
+      };
+    }
+
+    // 🔥 VEHICLE FLOW
     if (mp.vehicleInvolved === "yes") {
       const vehicleData = mp.vehicleData;
 
@@ -52,11 +65,11 @@ export default function Step4IndividualDetails() {
 
       temp = {
         offenderType: vehicleData.driverType,
-        details: vehicleData,
+        details: structuredClone(vehicleData), // ✅ CLONE
       };
     }
 
-    if (!temp || !temp.details || !Object.keys(temp.details).length) {
+    if (!temp || !Object.keys(temp.details).length) {
       toast.error("Please fill main offender details!");
       return;
     }
@@ -76,43 +89,67 @@ export default function Step4IndividualDetails() {
     toast.success("Main Person Added!");
   };
 
- const handleSaveAdditional = () => {
-  let temp = add.tempOffender;
+  /* ================= DELETE ================= */
+  const handleDeleteOffender = (index: number) => {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.offenderList",
+      value: offenders.filter((_, i) => i !== index),
+    });
 
-  /* 🔥 VEHICLE FLOW FIX (SAME AS MAIN) */
-  if (add.vehicleInvolved === "yes") {
-    const vehicleData = add.vehicleData;
+    toast.success("Person removed");
+  };
 
-    if (!vehicleData?.driverType) {
+  /* ================= SAVE ADDITIONAL ================= */
+  const handleSaveAdditional = () => {
+    let temp: any = null;
+
+    // 🔥 NON-VEHICLE FLOW — FIXED
+    if (add.vehicleInvolved === "no") {
+      if (!add.tempOffender?.details) {
+        toast.error("Please fill additional person details!");
+        return;
+      }
+
+      temp = {
+        offenderType: add.tempOffender.offenderType,
+        details: structuredClone(add.tempOffender.details), // ✅ CLONE
+      };
+    }
+
+    // 🔥 VEHICLE FLOW — FIXED
+    if (add.vehicleInvolved === "yes") {
+      const vehicleData = add.vehicleData;
+
+      if (!vehicleData?.driverType) {
+        toast.error("Please fill additional person details!");
+        return;
+      }
+
+      temp = {
+        offenderType: vehicleData.driverType,
+        details: structuredClone(vehicleData), // ✅ CLONE
+      };
+    }
+
+    if (!temp || !Object.keys(temp.details).length) {
       toast.error("Please fill additional person details!");
       return;
     }
 
-    temp = {
-      offenderType: vehicleData.driverType,
-      details: vehicleData,
-    };
-  }
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.offenderList",
+      value: [...offenders, temp],
+    });
 
-  if (!temp || !temp.details || !Object.keys(temp.details).length) {
-    toast.error("Please fill additional person details!");
-    return;
-  }
+    dispatch({ type: "CLEAR_MP_ADDITIONAL" });
 
-  dispatch({
-    type: "SET_PATH",
-    path: "formData.mpReport.individualDetails.offenderList",
-    value: [...offenders, temp],
-  });
+    setExtraVehicleStatus("");
+    setShowAddForm(false);
 
-  dispatch({ type: "CLEAR_MP_ADDITIONAL" });
-
-  setExtraVehicleStatus("");
-  setShowAddForm(false);
-
-  toast.success("Additional Person Added!");
-};
-
+    toast.success("Additional Person Added!");
+  };
 
   return (
     <FormSection title="">
@@ -141,7 +178,6 @@ export default function Step4IndividualDetails() {
             vehicleStatus={extraVehicleStatus}
             setVehicleStatus={(v) => {
               setExtraVehicleStatus(v);
-
               dispatch({
                 type: "SET_PATH",
                 path: "formData.mpReport.additionalIndividual.vehicleInvolved",
@@ -178,7 +214,10 @@ export default function Step4IndividualDetails() {
         </Button>
       </div>
 
-      <DynamicOffenderList data={offenders} />
+      <DynamicOffenderList
+        onDelete={handleDeleteOffender}
+        data={offenders}
+      />
     </FormSection>
   );
 }

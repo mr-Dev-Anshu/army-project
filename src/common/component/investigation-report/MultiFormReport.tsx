@@ -280,18 +280,6 @@ export default function MultiFormReport({
           customFields: {},
         },
 
-        witnesses: (mp.witnesses || []).map((w: any) => ({
-          armyNumber: w.armyNumber || "NA",
-          rank: w.rank || "NA",
-          name: w.name || "NA",
-          unit: w.unit || "NA",
-          fmn: w.fmn || "NA",
-          address: w.address || "NA",
-          iCardNumber: w.iCardNumber || "NA",
-          remark: w.remark || "",
-          customFields: {},
-        })),
-
         documents: (mp.documents || []).map((d: any) => ({
           statement: d.statement || "Nil",
           url: d.url || "NA",
@@ -330,12 +318,20 @@ export default function MultiFormReport({
         return;
       }
 
-      /* ================= CREATE INDIVIDUAL OFFENDERS ================= */
+      /* ================= CREATE ALL OFFENDERS & WITNESSES ================= */
+
+      const offendersToCreate: any[] = [];
+
+      /* 1️⃣ MAIN INDIVIDUAL OFFENDERS */
       for (const o of mp?.individualDetails?.offenderList || []) {
         const d = o.details ?? o;
-        if (!d?.name && !d?.address) continue;
 
-        const offenderPayload = {
+        const hasData = Object.values(d || {}).some(
+          (v) => v !== "" && v !== null && v !== undefined
+        );
+        if (!hasData) continue;
+
+        offendersToCreate.push({
           offenceId,
           offenderType: mapOffenderType(o.offenderType),
           offenderDetails: {
@@ -350,21 +346,44 @@ export default function MultiFormReport({
             address: d.address || "",
             iCardNumber: d.iCardNumber || "",
           },
-        };
-
-        console.log("👤 INDIVIDUAL OFFENDER PAYLOAD ===>", offenderPayload);
-
-        const offenderRes = await createOffenderMutate(offenderPayload);
-
-        console.log("✅ INDIVIDUAL OFFENDER RESPONSE ===>", offenderRes);
+        });
       }
 
-      /* ================= CREATE WITNESSES ================= */
+      /* 2️⃣ ADDITIONAL INDIVIDUAL (Add More People flow) */
+      const add = mp?.additionalIndividual?.tempOffender;
+      if (add?.details) {
+        const d = add.details;
+
+        const hasData = Object.values(d).some(
+          (v) => v !== "" && v !== null && v !== undefined
+        );
+
+        if (hasData) {
+          offendersToCreate.push({
+            offenceId,
+            offenderType: mapOffenderType(add.offenderType),
+            offenderDetails: {
+              type: "Additional Individual",
+              category: "individual",
+              name: d.name || "",
+              rank: d.rank || "",
+              armyNumber: d.armyNumber || "",
+              unit: d.unit || "",
+              command: d.command || "",
+              fmn: d.fmn || "",
+              address: d.address || "",
+              iCardNumber: d.iCardNumber || "",
+            },
+          });
+        }
+      }
+
+      /* 3️⃣ WITNESSES (SAME OFFENDER API) */
       for (const w of mp.witnesses || []) {
         const d = w.details ?? w;
         if (!d?.name) continue;
 
-        const witnessPayload = {
+        offendersToCreate.push({
           offenceId,
           offenderType: "Civilian",
           offenderDetails: {
@@ -378,16 +397,17 @@ export default function MultiFormReport({
             address: d.address || "",
             iCardNumber: d.iCardNumber || "",
           },
-        };
-
-        console.log("👁️ WITNESS PAYLOAD ===>", witnessPayload);
-
-        const witnessRes = await createOffenderMutate(witnessPayload);
-
-        console.log("✅ WITNESS RESPONSE ===>", witnessRes);
+        });
       }
 
-      console.log("🎯 FINAL STATUS: MP REPORT + ALL OFFENDERS CREATED");
+      /* ================= ONE BY ONE API CALL ================= */
+
+      for (const payload of offendersToCreate) {
+        console.log("🚨 OFFENDER API PAYLOAD ===>", payload);
+        await createOffenderMutate(payload);
+      }
+
+      console.log("🎯 ALL OFFENDERS + WITNESSES CREATED");
 
       toast.success("MP Investigation Report Created 🎉");
 
@@ -475,10 +495,10 @@ export default function MultiFormReport({
                 dispatch({ type: "NEXT_STEP" });
               }
             }}
-            onPrev={() => dispatch({ type: "PREV_STEP" })} 
+            onPrev={() => dispatch({ type: "PREV_STEP" })}
             stepsConfig={stepsConfig}
             mode="mp"
-            mapMpToReport={mapMpToReport} 
+            mapReport={mapMpToReport}
           />
         </div>
       </div>
