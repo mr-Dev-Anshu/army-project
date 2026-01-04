@@ -1,119 +1,47 @@
-// "use client";
+"use client";
 
 import { useState } from "react";
 import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-// import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
-// import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
+/* ================= TYPES ================= */
 
-// import { useState } from "react";
-// import { useForm } from "@/context/FormContext";
+type OffenderKey = keyof typeof offenderFormsConfig;
 
-// interface OffenderWithoutVehicleFormProps {
-//   scope?: string;
-// }
+interface OffenderWithoutVehicleFormProps {
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+  externalType?: OffenderKey;
+}
 
-// export default function OffenderWithoutVehicleForm({
-//   scope,
-// }: OffenderWithoutVehicleFormProps = {}) {
-//   const offenderConfig = offenderFormsConfig;
+/* ================= COMPONENT ================= */
 
-//   const [offenderType, setOffenderType] = useState("");
-
-//   const { dispatch } = useForm();
-
-//   if (!offenderConfig) return null;
-
-//   return (
-//     <div className="border rounded-lg p-6 space-y-6">
-//       <p className="font-semibold">Who was the Offender ?</p>
-
-//       <RadioGroup
-//         value={offenderType}
-//         onValueChange={(value) => {
-//           setOffenderType(value);
-
-//           // 1️⃣ STORE OFFENDER
-//           dispatch({
-//             type: "SET_PATH",
-//             path: "formData.traffic.offenderWithoutVehicle.offenderType",
-//             value,
-//           });
-
-//           // 2️⃣ FIX: FORCE NO VEHICLE MODE
-//           dispatch({
-//             type: "SET_PATH",
-//             path: "formData.traffic.vehicleInvolved",
-//             value: "no",
-//           });
-
-//           // 3️⃣ OPTIONAL: CLEAR VEHICLE DETAILS SAFELY
-//           dispatch({
-//             type: "SET_PATH",
-//             path: "formData.traffic.vehicleDetails",
-//             value: {
-//               category: "",
-//               vehicleType: "",
-//               driverType: "",
-//             },
-//           });
-//         }}
-//         className="grid grid-cols-2 gap-3"
-//       >
-//         {Object.keys(offenderConfig).map((item) => (
-//           <label
-//             key={item}
-//             className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-//           >
-//             <RadioGroupItem value={item} />
-//             {item}
-//           </label>
-//         ))}
-//       </RadioGroup>
-
-//       {offenderType && offenderConfig[offenderType] && (
-//         <OffenderDynamicForm
-//           scope="traffic"
-//           title={offenderConfig[offenderType].title}
-//           helperText={offenderConfig[offenderType].helperText}
-//           fields={offenderConfig[offenderType].fields.slice(1)}
-//           showCoDriver={false}
-//         />
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-export default function OffenderWithoutVehicleForm() {
+export default function OffenderWithoutVehicleForm({
+  scope = "traffic",
+  externalType,
+}: OffenderWithoutVehicleFormProps) {
   const offenderConfig = offenderFormsConfig;
   const { dispatch } = useForm();
 
   const [offenderType, setOffenderType] = useState<OffenderKey | "">(
-    externalType as OffenderKey
+    externalType ?? ""
   );
   const [hasMilitaryRelative, setHasMilitaryRelative] = useState(false);
   const [relativeRelation, setRelativeRelation] = useState("");
-  const [relativeType, setRelativeType] = useState("");
+  const [relativeType, setRelativeType] = useState<OffenderKey | "">("");
 
   if (!offenderConfig) return null;
 
-  /* ================= PATH RESOLVER (🔥 MOST IMPORTANT) ================= */
+  /* ================= PATH RESOLVER ================= */
 
   const getPath = () => {
     if (scope === "mp-main")
-      return "formData.mpReport.individualDetails.tempOffender";
+      return "formData.mpReport.individualDetails.tempOffender.details";
 
     if (scope === "mp-additional")
-      return "formData.mpReport.additionalIndividual.tempOffender";
+      return "formData.mpReport.additionalIndividual.tempOffender.details";
 
     // traffic / static
     return "formData.traffic.offenderPeople[0].details";
@@ -127,7 +55,7 @@ export default function OffenderWithoutVehicleForm() {
     setRelativeRelation("");
     setRelativeType("");
 
-    // traffic/static init
+    /* traffic / static */
     if (scope === "traffic" || scope === "static") {
       dispatch({
         type: "SET_PATH",
@@ -148,7 +76,7 @@ export default function OffenderWithoutVehicleForm() {
       });
     }
 
-    // mp init
+    /* mp-main */
     if (scope === "mp-main") {
       dispatch({
         type: "SET_PATH",
@@ -157,6 +85,7 @@ export default function OffenderWithoutVehicleForm() {
       });
     }
 
+    /* mp-additional */
     if (scope === "mp-additional") {
       dispatch({
         type: "SET_PATH",
@@ -166,13 +95,13 @@ export default function OffenderWithoutVehicleForm() {
     }
   };
 
-  /* ================================================= */
+  /* ================= UI ================= */
 
   return (
     <div className="border rounded-lg p-6 space-y-6">
       <p className="font-semibold text-lg">Who was the Offender?</p>
 
-      {/* ================= PRIMARY SELECT ================= */}
+      {/* PRIMARY SELECT */}
       <RadioGroup
         value={offenderType}
         onValueChange={(v) => handleOffenderSelect(v as OffenderKey)}
@@ -186,7 +115,7 @@ export default function OffenderWithoutVehicleForm() {
         ))}
       </RadioGroup>
 
-      {/* ================= CIVILIAN FLOW ================= */}
+      {/* CIVILIAN FLOW */}
       {offenderType === "Civilian" && (
         <>
           <OffenderDynamicForm
@@ -201,7 +130,7 @@ export default function OffenderWithoutVehicleForm() {
             <Checkbox
               checked={hasMilitaryRelative}
               onCheckedChange={(v) => {
-                setHasMilitaryRelative(!!v);
+                setHasMilitaryRelative(Boolean(v));
                 setRelativeRelation("");
                 setRelativeType("");
               }}
@@ -222,7 +151,9 @@ export default function OffenderWithoutVehicleForm() {
 
               <RadioGroup
                 value={relativeType}
-                onValueChange={setRelativeType}
+                onValueChange={(v) =>
+                  setRelativeType(v as OffenderKey)
+                }
                 className="grid grid-cols-2 gap-3"
               >
                 {Object.keys(offenderConfig)
@@ -252,7 +183,7 @@ export default function OffenderWithoutVehicleForm() {
         </>
       )}
 
-      {/* ================= OTHER OFFENDERS ================= */}
+      {/* OTHER OFFENDERS */}
       {offenderType &&
         offenderType !== "Civilian" &&
         offenderConfig[offenderType] && (
