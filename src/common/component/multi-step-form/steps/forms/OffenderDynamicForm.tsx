@@ -9,7 +9,6 @@ import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
 
-/* ================= TYPES ================= */
 interface OffenderDynamicFormProps {
   title: string;
   helperText?: string;
@@ -19,14 +18,12 @@ interface OffenderDynamicFormProps {
   path?: string;
 }
 
-/* ================= HELPERS ================= */
 const getByPath = (obj: any, path?: string) => {
   if (!obj || !path) return {};
   const keys = path.replace(/\[(\d+)\]/g, ".$1").split(".");
   return keys.reduce((o, k) => (o ? o[k] : undefined), obj) || {};
 };
 
-/* ================= LABEL → KEY MAP ================= */
 const labelKeyMap: Record<string, string> = {
   "Full Name": "name",
   Name: "name",
@@ -42,7 +39,6 @@ const labelKeyMap: Record<string, string> = {
   "I Card Number": "iCardNumber",
 };
 
-/* ================= COMPONENT ================= */
 export default function OffenderDynamicForm({
   title,
   helperText,
@@ -64,22 +60,15 @@ export default function OffenderDynamicForm({
     title.toLowerCase().includes("civilian") &&
     !title.toLowerCase().includes("co-driver");
 
-  /* sync local state */
   useEffect(() => {
     setLocalData(globalData || {});
   }, [path]);
 
-  /* ================= SAVE FIELD ================= */
   const saveField = (label: string, value: string) => {
     if (!path) return;
-
     const key = labelKeyMap[label] || label;
 
-    const updated = {
-      ...(globalData || {}),
-      [key]: value,
-    };
-
+    const updated = { ...(globalData || {}), [key]: value };
     setLocalData(updated);
 
     dispatch({
@@ -89,7 +78,6 @@ export default function OffenderDynamicForm({
     });
   };
 
-  /* ================= ENSURE CO-DRIVER SLOT ================= */
   const ensureCoDriverSlot = (type: string) => {
     const peoplePath =
       scope === "static"
@@ -105,17 +93,10 @@ export default function OffenderDynamicForm({
     let index = existingIndex;
 
     if (existingIndex >= 0) {
-      newList[existingIndex] = {
-        ...newList[existingIndex],
-        type,
-      };
+      newList[existingIndex] = { ...newList[existingIndex], type };
     } else {
       index = list.length;
-      newList.push({
-        type,
-        whoIsIt: "Co-Driver",
-        details: {},
-      });
+      newList.push({ type, whoIsIt: "Co-Driver", details: {} });
     }
 
     dispatch({
@@ -132,7 +113,7 @@ export default function OffenderDynamicForm({
       <p className="font-semibold text-lg">{title}</p>
       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
-      {/* ================= MAIN FORM ================= */}
+      {/* MAIN FORM */}
       <div className="grid grid-cols-2 gap-4">
         {fields?.map((f: any, i: number) => {
           const key = f.key || labelKeyMap[f.label] || f.label;
@@ -160,9 +141,7 @@ export default function OffenderDynamicForm({
                 value={value}
                 onChange={(v) => saveField(f.label, v)}
                 fieldType={
-                  f.label === "Select Rank"
-                    ? "rank"
-                    : f.label.toLowerCase()
+                  f.label === "Select Rank" ? "rank" : f.label.toLowerCase()
                 }
                 className={cn(
                   value ? "border-blue-500 bg-blue-50" : "border-gray-300"
@@ -191,63 +170,64 @@ export default function OffenderDynamicForm({
         })}
       </div>
 
-      {/* ================= CO-DRIVER FLOW ================= */}
-      {showCoDriver && !isMainCivilian && (
-        <>
-          <div className="mt-6 flex items-start gap-2">
-            <Checkbox
-              checked={hasCoDriver}
-              onCheckedChange={(v) => {
-                setHasCoDriver(Boolean(v));
-                setCoDriverType("");
-                setCoDriverIndex(null);
-              }}
-            />
-            <p className="text-sm">
-              Was there a <b>Co-Driver / Pillion Rider</b>?
-            </p>
-          </div>
-
-          {hasCoDriver && (
-            <div className="mt-4 space-y-4">
-              <RadioGroup
-                className="grid grid-cols-2 gap-3"
-                value={coDriverType}
-                onValueChange={(v) => {
-                  setCoDriverType(v);
-                  const idx = ensureCoDriverSlot(v);
-                  setCoDriverIndex(idx);
+      {/* 🔥 CO-DRIVER — ONLY FOR TRAFFIC / STATIC */}
+      {showCoDriver &&
+        !isMainCivilian &&
+        (scope === "traffic" || scope === "static") && (
+          <>
+            <div className="mt-6 flex items-start gap-2">
+              <Checkbox
+                checked={hasCoDriver}
+                onCheckedChange={(v) => {
+                  setHasCoDriver(Boolean(v));
+                  setCoDriverType("");
+                  setCoDriverIndex(null);
                 }}
-              >
-                {Object.keys(offenderFormsConfig).map((item) => (
-                  <label
-                    key={item}
-                    className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer bg-white"
-                  >
-                    <RadioGroupItem value={item} />
-                    {item}
-                  </label>
-                ))}
-              </RadioGroup>
-
-              {/* 🔥 CO-DRIVER FORM */}
-              {coDriverType && coDriverIndex !== null && (
-                <OffenderDynamicForm
-                  title={`${coDriverType} Details`}
-                  fields={offenderFormsConfig[coDriverType].fields}
-                  scope={scope}
-                  path={
-                    scope === "static"
-                      ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
-                      : `formData.traffic.offenderPeople[${coDriverIndex}].details`
-                  }
-                  showCoDriver={false}
-                />
-              )}
+              />
+              <p className="text-sm">
+                Was there a <b>Co-Driver / Pillion Rider</b>?
+              </p>
             </div>
-          )}
-        </>
-      )}
+
+            {hasCoDriver && (
+              <div className="mt-4 space-y-4">
+                <RadioGroup
+                  className="grid grid-cols-2 gap-3"
+                  value={coDriverType}
+                  onValueChange={(v) => {
+                    setCoDriverType(v);
+                    const idx = ensureCoDriverSlot(v);
+                    setCoDriverIndex(idx);
+                  }}
+                >
+                  {Object.keys(offenderFormsConfig).map((item) => (
+                    <label
+                      key={item}
+                      className="border rounded-lg px-4 py-2 flex gap-2"
+                    >
+                      <RadioGroupItem value={item} />
+                      {item}
+                    </label>
+                  ))}
+                </RadioGroup>
+
+                {coDriverType && coDriverIndex !== null && (
+                  <OffenderDynamicForm
+                    title={`${coDriverType} Details`}
+                    fields={offenderFormsConfig[coDriverType].fields}
+                    scope={scope}
+                    path={
+                      scope === "static"
+                        ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
+                        : `formData.traffic.offenderPeople[${coDriverIndex}].details`
+                    }
+                    showCoDriver={false}
+                  />
+                )}
+              </div>
+            )}
+          </>
+        )}
     </div>
   );
 }
