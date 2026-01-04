@@ -6,7 +6,8 @@ import ReportFilterBar from "@/components/common/ReportFilterBar";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 import GroupedList from "@/app/general-traffic-offence-reports/_components/GroupedList";
 
-import MilitaryPoliceReport, {
+import {
+  MilitaryPoliceReport,
   MilitaryPoliceReportProps,
 } from "@/components/reports/MilitaryPoliceReport";
 

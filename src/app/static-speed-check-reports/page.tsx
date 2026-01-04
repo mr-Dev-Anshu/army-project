@@ -217,7 +217,7 @@ export default function StaticSpeedCheckReportsPage() {
           <h1 className="text-lg font-semibold text-gray-800">Create New Static Speed Check Report</h1>
         </div>
         <div className="flex-1 overflow-hidden">
-          <StaticSpeedForm />
+          <StaticSpeedForm onCancel={() => setIsCreating(false)} />
         </div>
       </div>
     )

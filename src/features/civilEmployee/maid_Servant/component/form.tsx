@@ -388,7 +388,6 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
                   v.replace(/\D/g, "").slice(0, 12)
                 )
               }
-              maxLength={12}
               fieldType="servantAadhar"
             />
           </div>
@@ -440,7 +439,6 @@ export default function MaidServantSecurityPassForm({ onCancel, onSuccess, initi
                     v.replace(/\D/g, "").slice(0, 6)
                   )
                 }
-                maxLength={6}
                 fieldType="permanentPincode"
               />
             </div>
