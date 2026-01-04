@@ -23,6 +23,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useState } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import ConeIcon from "@/components/icons/ConeIcon";
 import Tooltip from "./Tooltip";
 
@@ -31,24 +32,103 @@ const cn = (...classes: (string | boolean | undefined)[]) =>
   classes.filter(Boolean).join(" ");
 
 interface MenuItem {
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   label: string;
   badge?: string;
   submenu?: MenuItem[];
+  action?: string;
 }
 
 interface SidebarProps {
   collapsed: boolean;
-  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  setCollapsed: Dispatch<SetStateAction<boolean>>;
   onMenuSelect: (page: string) => void;
+  activeAction?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  collapsed,
-  setCollapsed,
-  onMenuSelect,
-}) => {
+const MENU_ITEMS: MenuItem[] = [
+  { icon: <PieChart className="w-5 h-5" />, label: "Dashboard", action: "dashboard" },
+];
+
+const FORMS_AND_CERTIFICATES: MenuItem = {
+  icon: <FileCheck className="w-5 h-5" />,
+  label: "Forms & Certificates",
+  submenu: [
+    { label: "Compromise Certificate" },
+    { label: "Confiscation Certificate" },
+    { label: "Handing/Taking Certificate" },
+    { label: "MP Report Form" },
+    { label: "Contact Numbers" },
+    { label: "Letters" },
+  ],
+};
+
+const REPORTS_AND_ANALYSIS: MenuItem[] = [
+  { icon: <Files className="w-5 h-5" />, label: "All Reports", action: "viewReports" },
+  { icon: <BookOpen className="w-5 h-5" />, label: "Registers/Books" },
+  {
+    icon: <LineChart className="w-5 h-5" />,
+    label: "MP Offence Analysis Monthly Report",
+    action: "mpOffenceAnalysis",
+  },
+];
+
+const SYSTEM_SETUP: MenuItem[] = [
+  {
+    icon: <Database className="w-5 h-5" />,
+    label: "Basic Information",
+    submenu: [
+      { label: "Offence Types" },
+      { label: "Civil Employees Management", action: "civilEmployees" },
+      { label: "Vehicles (Make & Take)" },
+      { label: "Ranks" },
+      { label: "Units" },
+      { label: "Installation" },
+    ],
+  },
+  {
+    icon: <Network className="w-5 h-5" />,
+    label: "Military Structure Data",
+    submenu: [
+      { label: "Brigade" },
+      { label: "Division" },
+      { label: "Corps / Sub-Area" },
+      { label: "Command / Area" },
+    ],
+  },
+  { icon: <UserIcon className="w-5 h-5" />, label: "User Access Management" },
+];
+
+const QUICK_ACTIONS: MenuItem[] = [
+  {
+    icon: <ConeIcon className="w-5 h-5" color="currentColor" />,
+    label: "General & Traffic Offence Report",
+    action: "multiForm",
+  },
+  {
+    icon: <Gauge className="w-5 h-5" />,
+    label: "Static Speed Check Report",
+    action: "staticSpeed",
+  },
+  {
+    icon: <ClipboardList className="w-5 h-5" />,
+    label: "MP Occurrence & Investigation Report",
+    action: "investigation",
+  },
+];
+
+function Sidebar({ collapsed, setCollapsed, onMenuSelect, activeAction }: SidebarProps) {
   const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const [localActive, setLocalActive] = useState<string | undefined>();
+
+  const currentAction = activeAction ?? localActive;
+
+  const handleMenuSelect = (action?: string) => {
+    if (!action) return;
+    setLocalActive(action);
+    onMenuSelect(action);
+    setCollapsed(true);
+  };
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) =>
@@ -58,98 +138,33 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  const menuItems: MenuItem[] = [
-    { icon: <PieChart className="w-5 h-5" />, label: "Dashboard", badge: "1" },
-  ];
-
-  const formsAndCertificates: MenuItem = {
-    icon: <FileCheck className="w-5 h-5" />,
-    label: "Forms & Certificates",
-    submenu: [
-      { label: "Compromise Certificate" },
-      { label: "Confiscation Certificate" },
-      { label: "Handing/Taking Certificate" },
-      { label: "MP Report Form" },
-      { label: "Contact Numbers" },
-      { label: "Letters" },
-    ],
-  };
-
-  const reportsAndAnalysis: MenuItem[] = [
-    { icon: <Files className="w-5 h-5" />, label: "All Reports" },
-    { icon: <BookOpen className="w-5 h-5" />, label: "Registers/Books" },
-    {
-      icon: <LineChart className="w-5 h-5" />,
-      label: "MP Offence Analysis Monthly Report",
-    },
-  ];
-
-  const systemSetup: MenuItem[] = [
-    {
-      icon: <Database className="w-5 h-5" />,
-      label: "Basic Information",
-      submenu: [
-        { label: "Offence Types" },
-        { label: "Civil Employees Management" },
-        { label: "Vehicles (Make & Take)" },
-        { label: "Ranks" },
-        { label: "Units" },
-        { label: "Installation" },
-      ],
-    },
-    {
-      icon: <Network className="w-5 h-5" />,
-      label: "Military Structure Data",
-      submenu: [
-        { label: "Brigade" },
-        { label: "Division" },
-        { label: "Corps / Sub-Area" },
-        { label: "Command / Area" },
-      ],
-    },
-    { icon: <UserIcon className="w-5 h-5" />, label: "User Access Management" },
-  ];
-
   const renderMenuItem = (item: MenuItem, isSubmenu = false) => (
     <button
       key={item.label}
-      onClick={() => {
-        if (item.label === "Dashboard") {
-          onMenuSelect("dashboard");
-          setCollapsed(true);
-        }
-        if (item.label === "All Reports") {
-          onMenuSelect("viewReports");
-          setCollapsed(true);
-        }
-        if (item.label === "MP Offence Analysis Monthly Report") {
-          onMenuSelect("mpOffenceAnalysis");
-          setCollapsed(true);
-        }
-
-        if (item.label === "Dashboard") onMenuSelect("dashboard");
-        if (item.label === "All Reports") onMenuSelect("viewReports");
-
-        setCollapsed(true);
-        if (item.label === "Civil Employees Management")
-          onMenuSelect("civilEmployees");
-
-      }}
+      onClick={() => handleMenuSelect(item.action)}
+      aria-pressed={item.action === currentAction}
       className={cn(
         "w-full relative flex items-center transition-all group",
+        item.action === currentAction && "bg-gray-100 text-gray-900",
         collapsed
           ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
           : cn(
-              "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg text-left",
-              isSubmenu && "py-1.5"
-            )
+            "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg text-left",
+            isSubmenu && "py-1.5"
+          )
       )}
     >
       {!isSubmenu && (
-        <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0 relative">
+        <span
+          className={cn(
+            "flex-shrink-0 relative",
+            item.action === currentAction
+              ? "text-gray-900"
+              : "text-gray-500 group-hover:text-gray-900"
+          )}
+        >
           {item.icon}
 
-          {/* Tooltip only when collapsed */}
           {collapsed && <Tooltip label={item.label} />}
         </span>
       )}
@@ -159,7 +174,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           <span
             className={cn(
               "flex-1 text-gray-600 group-hover:text-gray-900 whitespace-normal break-words leading-snug",
-              isSubmenu ? "text-sm" : "text-base"
+              isSubmenu ? "text-sm" : "text-base",
+              item.action === currentAction && "text-gray-900 font-medium"
             )}
           >
             {item.label}
@@ -196,7 +212,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0 relative">
             {item.icon}
 
-            {/* Tooltip for collapsible headers */}
             {collapsed && <Tooltip label={item.label} />}
           </span>
 
@@ -258,12 +273,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <nav
         className={cn(
-          "flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']",
+          "flex-1 ",
           collapsed ? "px-2 pt-4" : "p-4 space-y-1"
         )}
       >
         {/* Dashboard */}
-        <div className="mb-2">{menuItems.map((item) => renderMenuItem(item))}</div>
+        <div className="mb-2">{MENU_ITEMS.map((item) => renderMenuItem(item))}</div>
 
         <div className="w-full h-px bg-gray-300 my-2" />
 
@@ -276,92 +291,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
 
           <div className="space-y-1">
-            {/* General Traffic */}
-            <button
-              onClick={() => {
-                onMenuSelect("multiForm");
-                setCollapsed(true);
-              }}
-              className={cn(
-                "w-full flex items-center transition-all group",
-                collapsed
-                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
-              )}
-            >
-              <span
-                className={cn(
-                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
-                  !collapsed && "pt-0.5"
-                )}
-              >
-                <ConeIcon className="w-5 h-5" color="currentColor" />
-              </span>
-
-              {!collapsed && (
-                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 flex-1">
-                  General & Traffic Offence Report
-                </span>
-              )}
-            </button>
-
-            {/* Static Speed */}
-            <button
-              onClick={() => {
-                onMenuSelect("staticSpeed");
-                setCollapsed(true);
-              }}
-              className={cn(
-                "w-full flex items-center transition-all group",
-                collapsed
-                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
-              )}
-            >
-              <span
-                className={cn(
-                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
-                  !collapsed && "pt-0.5"
-                )}
-              >
-                <Gauge className="w-5 h-5" />
-              </span>
-
-              {!collapsed && (
-                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 flex-1">
-                  Static Speed Check Report
-                </span>
-              )}
-            </button>
-
-            {/* MP Report */}
-            <button
-              onClick={() => {
-                onMenuSelect("investigation");
-                setCollapsed(true);
-              }}
-              className={cn(
-                "w-full flex items-center transition-all group",
-                collapsed
-                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
-              )}
-            >
-              <span
-                className={cn(
-                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
-                  !collapsed && "pt-0.5"
-                )}
-              >
-                <ClipboardList className="w-5 h-5" />
-              </span>
-
-              {!collapsed && (
-                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 flex-1">
-                  MP Occurrence & Investigation Report
-                </span>
-              )}
-            </button>
+            {QUICK_ACTIONS.map((item) => renderMenuItem(item))}
           </div>
         </div>
 
@@ -373,11 +303,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             Reports & Analysis
           </h2>
         )}
-        {reportsAndAnalysis.map((item) => renderMenuItem(item))}
+        {REPORTS_AND_ANALYSIS.map((item) => renderMenuItem(item))}
 
         <div className="w-full h-px bg-gray-300 my-2" />
 
-        {renderCollapsibleSection(formsAndCertificates)}
+        {renderCollapsibleSection(FORMS_AND_CERTIFICATES)}
 
         <div className="w-full h-px bg-gray-300 my-2" />
 
@@ -386,10 +316,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             System Setup
           </h2>
         )}
-        {systemSetup.map((item) => renderCollapsibleSection(item))}
+        {SYSTEM_SETUP.map((item) => renderCollapsibleSection(item))}
       </nav>
     </div>
   );
-};
+}
 
 export default Sidebar;

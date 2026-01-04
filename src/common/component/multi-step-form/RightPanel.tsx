@@ -152,8 +152,8 @@ export const RightPanel = ({
           {/* ================= FOOTER (ONLY FORM MODE) ================= */}
           {!state.preview && (
             <div className="border-t px-4 py-3 bg-white flex justify-between gap-2">
-              <Button className="py-6 px-14 text-white" disabled={step === 1} onClick={onPrev}>
-                <FaArrowLeftLong className="mr-2 " /> Back
+              <Button className=" px-14 text-white" disabled={step === 1} onClick={onPrev}>
+                <FaArrowLeftLong />
               </Button>
 
               {!isLastStep ? (
@@ -162,7 +162,7 @@ export const RightPanel = ({
                 </Button>
               ) : (
                 <Button
-                className="bg-[#34C759] text-white py-6 px-14 rounded-md"
+                className="bg-[#34C759] text-white  px-14 rounded-md"
                   onClick={() => {
                     dispatch({
                       type: "SET_PATH",
