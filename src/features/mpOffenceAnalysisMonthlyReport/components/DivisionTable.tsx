@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,12 +45,33 @@ export default function DivisionTable({
 }: DivisionTableProps) {
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [selectedOffenceType, setSelectedOffenceType] = React.useState("All");
-    const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
+
+    // Initialize date from URL or default to current date
+    const [selectedDate, setSelectedDate] = React.useState<Date>(() => {
+        const dateParam = searchParams.get("monthYear");
+        if (dateParam) {
+            const [year, month] = dateParam.split("-").map(Number);
+            if (!isNaN(year) && !isNaN(month)) return new Date(year, month - 1, 1);
+        }
+        return new Date();
+    });
+
     const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
     const dateInputRef = React.useRef<HTMLInputElement>(null);
+
+    // Update URL when date changes
+    const updateDate = (newDate: Date) => {
+        setSelectedDate(newDate);
+        const params = new URLSearchParams(searchParams.toString());
+        const dateStr = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}`;
+        params.set("monthYear", dateStr);
+        router.replace(`${pathname}?${params.toString()}`);
+    };
 
     const currentMonth = selectedDate.getMonth() + 1;
     const currentYear = selectedDate.getFullYear();
@@ -347,7 +368,7 @@ export default function DivisionTable({
         setSearchQuery("");
         setSelectedOffenceType("All");
         setSortOrder("desc");
-        setSelectedDate(new Date());
+        updateDate(new Date());
     };
 
     return (
@@ -453,7 +474,7 @@ export default function DivisionTable({
                                 if (e.target.value) {
                                     const [year, month] = e.target.value.split('-').map(Number);
                                     const newDate = new Date(year, month - 1, 1);
-                                    setSelectedDate(newDate);
+                                    updateDate(newDate);
                                 }
                             }}
                         />
