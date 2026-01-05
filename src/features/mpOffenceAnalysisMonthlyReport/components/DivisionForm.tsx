@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +35,8 @@ interface DivisionFormProps {
     };
     initialData?: {
         _id: string;
-        offenceType: string;
+        offence?: string; // Correct field from DB
+        offenceType?: string; // Legacy/frontend prop name
         actionTaken: number;
         actionPending: number;
         remark: string;
@@ -43,12 +45,16 @@ interface DivisionFormProps {
 }
 
 export default function DivisionForm({ onClose, formation, initialData }: DivisionFormProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     // State
     const [selectedDate, setSelectedDate] = useState<Date>(initialData?.monthYear ? new Date(initialData.monthYear) : new Date());
     const dateInputRef = React.useRef<HTMLInputElement>(null);
 
     // Form State
-    const [offenceType, setOffenceType] = useState(initialData?.offenceType || "");
+    const [offenceType, setOffenceType] = useState(initialData?.offence || initialData?.offenceType || "");
     const [actionTaken, setActionTaken] = useState<string>(initialData?.actionTaken?.toString() || "00");
     const [actionPending, setActionPending] = useState<string>(initialData?.actionPending?.toString() || "00");
     const [remark, setRemark] = useState(initialData?.remark || "");
@@ -68,7 +74,7 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
         }
     };
 
-    // Calculated Field
+    // Calculate sum for total cases
     const totalCases = useMemo(() => {
         const taken = parseInt(actionTaken) || 0;
         const pending = parseInt(actionPending) || 0;
@@ -85,7 +91,24 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
     const { mutate: updateEntry, isPending: isUpdating } = useUpdateDivisionAnalysis();
     const { mutate: deleteEntry, isPending: isDeleting } = useDeleteDivisionAnalysis();
 
-    // Handlers
+    // Sync state with initialData changes (e.g. when data loads)
+    useEffect(() => {
+        if (initialData) {
+            setOffenceType(initialData.offence || initialData.offenceType || "");
+            setActionTaken(initialData.actionTaken?.toString() || "00");
+            setActionPending(initialData.actionPending?.toString() || "00");
+            setRemark(initialData.remark || "");
+            setEditingId(initialData._id);
+            if (initialData.monthYear) {
+                setSelectedDate(new Date(initialData.monthYear));
+            }
+        } else {
+            // Optional: Reset if initialData becomes null? 
+            // Usually we don't want to wipe if user is typing, but if ID param is removed, we might.
+            // For now, let's strictly sync if initialData is present.
+        }
+    }, [initialData]);
+
     const handleAddEntry = () => {
         if (!offenceType.trim()) {
             toast.error("Please enter an offence type");
@@ -116,6 +139,13 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                         setActionTaken("00");
                         setActionPending("00");
                         setRemark("");
+
+                        // Clear URL param if exists
+                        const params = new URLSearchParams(searchParams.toString());
+                        if (params.has("id")) {
+                            params.delete("id");
+                            router.replace(`${pathname}?${params.toString()}`);
+                        }
                     }
                 },
                 onError: (err) => {
@@ -144,14 +174,30 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
         }
     };
 
+    // Use URL for editing logic
     const handleEditRow = (row: any) => {
-        setOffenceType(row.offenceType);
-        setActionTaken(row.actionTaken.toString());
-        setActionPending(row.actionPending.toString());
-        setRemark(row.remark);
-        setEditingId(row._id);
-        // Maybe scroll to top?
+        // Update URL to reflect editing state, this will trigger the parent to pass new initialData
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("id", row._id);
+        router.replace(`${pathname}?${params.toString()}`);
+        // Visual feedback immediate update (optional as useEffect will handle it)
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Update onClose to handle clearing edit mode if we are editing
+    const handleCancelEdit = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (params.has("id")) {
+            params.delete("id");
+            router.replace(`${pathname}?${params.toString()}`);
+        }
+
+        // Always reset local state
+        setEditingId(null);
+        setOffenceType("");
+        setActionTaken("00");
+        setActionPending("00");
+        setRemark("");
     };
 
     const handleDeleteClick = (id: string) => {
@@ -429,17 +475,7 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                             <Button
                                 variant="outline"
                                 className="h-11 px-6 rounded-md"
-                                onClick={() => {
-                                    if (initialData) {
-                                        onClose();
-                                    } else {
-                                        setEditingId(null);
-                                        setOffenceType("");
-                                        setActionTaken("00");
-                                        setActionPending("00");
-                                        setRemark("");
-                                    }
-                                }}
+                                onClick={handleCancelEdit}
                             >
                                 Cancel
                             </Button>

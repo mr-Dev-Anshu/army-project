@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,7 +16,6 @@ import {
     Calendar,
     Printer,
     Edit,
-    Plus,
     MoreVertical,
     Trash2,
     ArrowUpDown,
@@ -31,8 +31,6 @@ import { toast } from "react-toastify";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
-import DivisionForm from "./DivisionForm";
-
 interface DivisionTableProps {
     formation: {
         groupKey: string;
@@ -45,8 +43,8 @@ export default function DivisionTable({
     formation,
     onBack,
 }: DivisionTableProps) {
-    const [isEditing, setIsEditing] = React.useState(false);
-    const [editingEntry, setEditingEntry] = React.useState<any>(null);
+    const router = useRouter();
+    const pathname = usePathname();
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [selectedOffenceType, setSelectedOffenceType] = React.useState("All");
@@ -78,6 +76,10 @@ export default function DivisionTable({
             },
             onError: () => toast.error("Failed to delete entry")
         });
+    };
+
+    const handleEditEntry = (row: any) => {
+        router.push(`${pathname}/entry?id=${row._id}`);
     };
 
     // Mock data for specific MT Accident fields
@@ -223,10 +225,7 @@ export default function DivisionTable({
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer"
-                            onClick={() => {
-                                setEditingEntry(row);
-                                setIsEditing(true);
-                            }}
+                            onClick={() => handleEditEntry(row)}
                         >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
@@ -326,10 +325,7 @@ export default function DivisionTable({
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer"
-                            onClick={() => {
-                                setEditingEntry(row);
-                                setIsEditing(true);
-                            }}
+                            onClick={() => handleEditEntry(row)}
                         >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
@@ -353,19 +349,6 @@ export default function DivisionTable({
         setSortOrder("desc");
         setSelectedDate(new Date());
     };
-
-    if (isEditing) {
-        return (
-            <DivisionForm
-                formation={formation}
-                onClose={() => {
-                    setIsEditing(false);
-                    setEditingEntry(null);
-                }}
-                initialData={editingEntry}
-            />
-        );
-    }
 
     return (
         <div className="space-y-6 min-h-screen">
@@ -391,7 +374,7 @@ export default function DivisionTable({
                 </div>
                 <Button
                     className="bg-[#0088FF] text-white font-medium hover:bg-blue-600 gap-2 px-6 cursor-pointer rounded-md"
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => router.push(`${pathname}/entry`)}
                 >
                     Fill New Analysis Data
                     <Edit className="w-4 h-4 ml-1" />
