@@ -9,70 +9,82 @@ import {
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// ================= GET ALL =================
+/* ================= GET ALL ================= */
+
 export const useGetAllMTAccidentReports = () => {
   return useQuery({
     queryKey: ["mt-accident-reports"],
-    queryFn: getAllMTAccidentReports,
+    queryFn: async () => {
+      const res = await getAllMTAccidentReports();
+      return res ?? [];
+    },
     retry: 1,
-    staleTime: 5 * 60 * 1000, // Optional: 5 minutes stale time
   });
 };
 
-// Alias for backward compatibility or readability
-export const useGetMTAccidentReports = useGetAllMTAccidentReports;
+/* ================= GET BY ID ================= */
 
-// ================= GET BY ID =================
-export const useGetMTAccidentReportById = (id: string | undefined) => {
+export const useGetMTAccidentReportById = (id?: string) => {
   return useQuery({
     queryKey: ["mt-accident-reports", id],
     queryFn: () => getMTAccidentReportById(id!),
-    enabled: !!id, // Only run if id exists
+    enabled: !!id,
     retry: 1,
-    staleTime: 5 * 60 * 1000,
   });
 };
 
-// ================= CREATE =================
+/* ================= CREATE ================= */
+
 export const useCreateMTAccidentReport = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createMTAccidentReport,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mt-accident-reports"] });
+      // 🔥 table auto refresh
+      queryClient.invalidateQueries({
+        queryKey: ["mt-accident-reports"],
+      });
     },
   });
 };
 
-// ================= UPDATE =================
+/* ================= UPDATE ================= */
+
 export const useUpdateMTAccidentReport = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       updateMTAccidentReport(id, data),
-    onSuccess: (data, variables) => {
-      // Invalidate list
-      queryClient.invalidateQueries({ queryKey: ["mt-accident-reports"] });
-      // Invalidate single
+
+    onSuccess: (_, variables) => {
+      // 🔥 refresh list
+      queryClient.invalidateQueries({
+        queryKey: ["mt-accident-reports"],
+      });
+
+      // 🔥 refresh single
       queryClient.invalidateQueries({
         queryKey: ["mt-accident-reports", variables.id],
       });
-      // Optional: optimistically update cache
-      // queryClient.setQueryData(["mt-accident-reports", variables.id], data);
     },
   });
 };
 
-// ================= DELETE =================
+/* ================= DELETE ================= */
+
 export const useDeleteMTAccidentReport = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteMTAccidentReport,
+    mutationFn: (id: string) => deleteMTAccidentReport(id),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mt-accident-reports"] });
+      // 🔥 table refresh after delete
+      queryClient.invalidateQueries({
+        queryKey: ["mt-accident-reports"],
+      });
     },
   });
 };

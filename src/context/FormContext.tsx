@@ -1,9 +1,11 @@
-// context/FormContext.tsx
 "use client";
 
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
 import { GlobalFormState } from "@/common/types/form.types";
 
+/* ------------------------------------
+   HELPERS
+------------------------------------ */
 const setByPath = (obj: any, path: string, value: any) => {
   const keys = path.match(/[^[.\]]+/g) || [];
   const last = keys.pop()!;
@@ -34,7 +36,6 @@ export const initialState: GlobalFormState = {
         vehicleName: "",
         vehicleNumber: "",
       },
-
       offenderWithoutVehicle: {
         offenderType: "",
         military: {
@@ -48,7 +49,6 @@ export const initialState: GlobalFormState = {
           iCardNumber: "",
         },
       },
-
       offenderDetails: {},
       onDutyDetails: {
         dateOfDuty: "",
@@ -57,7 +57,6 @@ export const initialState: GlobalFormState = {
         dutyLocation: "",
         dutyType: "",
       },
-
       onDutyDetailsMPReporting: {
         nameReportingMP: "",
         rank: "",
@@ -65,14 +64,12 @@ export const initialState: GlobalFormState = {
         armyNumber: "",
         contactNumber: "",
       },
-
       offenceOccurenceDetails: {
         timeOfOffence: "",
         incidentLocation: "",
         description: "",
         time: "",
       },
-
       offenceTypes: [],
       offenceCode: [],
       witnesses: [],
@@ -91,7 +88,6 @@ export const initialState: GlobalFormState = {
         vehicleNumber: "",
         vehicleName: "",
       },
-
       dutyBlock: {
         dateOfDuty: "",
         startTime: "",
@@ -99,7 +95,6 @@ export const initialState: GlobalFormState = {
         dutyLocation: "",
         dutyType: "",
       },
-
       reportingBlock: {
         nameReportingMP: "",
         rank: "",
@@ -107,7 +102,6 @@ export const initialState: GlobalFormState = {
         armyNumber: "",
         contactNumber: "",
       },
-
       offenceBlock: {
         timeOfOffence: "",
         time: "",
@@ -117,10 +111,8 @@ export const initialState: GlobalFormState = {
         actualSpeedNoted: "",
         overSpeedCalculated: "",
       },
-
       witnesses: [],
       selectedWitness: null,
-
       offenderDetails: {},
       offenderPeople: [],
     },
@@ -132,7 +124,6 @@ export const initialState: GlobalFormState = {
         firNo: "",
         firFile: null,
       },
-
       mpParticulars: {
         armyNo: "",
         rank: "",
@@ -143,7 +134,6 @@ export const initialState: GlobalFormState = {
         address: "",
         icard: "",
       },
-
       occurrenceDetails: {
         offenceType: "",
         place: "",
@@ -151,7 +141,6 @@ export const initialState: GlobalFormState = {
         time: "",
         description: "",
       },
-
       individualDetails: {
         vehicleInvolved: "",
         vehicleData: {},
@@ -159,7 +148,6 @@ export const initialState: GlobalFormState = {
         offenderList: [],
         tempOffender: {},
       },
-
       witnesses: [],
       evidence: {
         attachEvidence: null,
@@ -167,20 +155,16 @@ export const initialState: GlobalFormState = {
         photos: [],
         videos: [],
       },
-
       documents: [],
-
       additionalIndividual: {
         vehicleInvolved: "",
         vehicleData: {},
         driverType: "",
         tempOffender: {},
       },
-
       detailedReport: "",
       investigationPoints: "",
       opinion: "",
-
       remarks: {
         analysis: "",
         recommendation: "",
@@ -189,13 +173,11 @@ export const initialState: GlobalFormState = {
 
     /* ================= MT ACCIDENT REPORT ================= */
     mtAccidentReport: {
-       individualType: "",               // MILITARY | CIVILIAN | EMPLOYEE | etc
-  individualDetails: {},            // dynamic form data
-
-  /* ===== CO-DRIVER ===== */
-  coDriverType: "",                 // MILITARY | CIVILIAN | EMPLOYEE | etc
-  coDriverDetails: {},
-      dateOfAccident: null as string | null,
+      individualType: "",
+      individualDetails: {},
+      coDriverType: "",
+      coDriverDetails: {},
+      dateOfAccident: null,
       timeOfAccident: "",
       placeOfAccident: "",
       typeOfAccident: "",
@@ -207,7 +189,7 @@ export const initialState: GlobalFormState = {
       diedCivil: 0,
       diedMilitary: 0,
       firMactNumber: "",
-      firDate: null as string | null,
+      firDate: null,
       firPoliceStation: "",
       actionStatus: false,
       remark: "",
@@ -227,62 +209,42 @@ type Action =
   | { type: "REMOVE_PATH"; path: string; index: number }
   | { type: "SET_PREVIEW"; payload: boolean }
   | { type: "SET_FORM_DATA"; payload: any }
-  | { type: "CLEAR_MP_ADDITIONAL" };
+  | { type: "CLEAR_MP_ADDITIONAL" }
+  | { type: "RESET_MT_ACCIDENT_FORM" }; // 🔥 NEW
 
 /* ------------------------------------
    REDUCER
 ------------------------------------ */
 function reducer(state: GlobalFormState, action: Action): GlobalFormState {
   switch (action.type) {
-    case "NEXT_STEP":
-      return {
-        ...state,
-        completedSteps: state.completedSteps.includes(state.currentStep)
-          ? state.completedSteps
-          : [...state.completedSteps, state.currentStep],
-        currentStep: state.currentStep + 1,
-      };
-
-    case "PREV_STEP":
-      return {
-        ...state,
-        currentStep: Math.max(1, state.currentStep - 1),
-      };
-
-    case "SET_STEP":
-      return { ...state, currentStep: action.payload };
-
     case "SET_PATH": {
       const newState = structuredClone(state);
       setByPath(newState, action.path, action.value);
       return newState;
     }
 
-    case "PUSH_PATH": {
-      const newState = structuredClone(state);
-      const arr = getByPath(newState, action.path) || [];
-      setByPath(newState, action.path, [...arr, action.value]);
-      return newState;
-    }
-
-    case "REMOVE_PATH": {
-      const newState = structuredClone(state);
-      const arr = getByPath(newState, action.path) || [];
-      arr.splice(action.index, 1);
-      setByPath(newState, action.path, arr);
-      return newState;
-    }
-
-    case "SET_PREVIEW":
-      return { ...state, preview: action.payload };
-
     case "SET_FORM_DATA":
       return { ...state, formData: action.payload };
 
+    case "RESET_MT_ACCIDENT_FORM": {
+      const newState = structuredClone(state);
+      newState.formData.mtAccidentReport =
+        structuredClone(initialState.formData.mtAccidentReport);
+      return newState;
+    }
+
     case "CLEAR_MP_ADDITIONAL": {
       const newState = structuredClone(state);
-      setByPath(newState, "formData.mpReport.individualDetails.tempOffender", null);
-      setByPath(newState, "formData.mpReport.individualDetails.vehicleData", {});
+      setByPath(
+        newState,
+        "formData.mpReport.individualDetails.tempOffender",
+        null
+      );
+      setByPath(
+        newState,
+        "formData.mpReport.individualDetails.vehicleData",
+        {}
+      );
       return newState;
     }
 
@@ -301,7 +263,6 @@ const FormContext = createContext<{
 
 export function FormProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-
   return (
     <FormContext.Provider value={{ state, dispatch }}>
       {children}

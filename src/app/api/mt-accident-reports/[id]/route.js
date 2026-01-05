@@ -1,7 +1,7 @@
 // app/api/mt-accident-reports/[id]/route.js
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
-import { updateMTAccidentReportSchema } from "@/validations/mtAccidentReportValidation";
+ import { mtAccidentSchema } from "@/validators/mtAccidentReportValidation";
 import {
   getMTAccidentReportById,
   updateMTAccidentReport,
