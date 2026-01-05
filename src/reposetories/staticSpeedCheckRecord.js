@@ -5,7 +5,7 @@ import { STATIC_SPEED_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConf
 
 export class StaticSpeedCheckRecordRepository {
 
-  /* ========================= GET ALL ========================= */
+  /* ========================= GET ALL (UNCHANGED) ========================= */
 
   async getAll() {
     return await StaticSpeedCheckRecord.aggregate([
@@ -35,13 +35,11 @@ export class StaticSpeedCheckRecordRepository {
     ]);
   }
 
-  /* ========================= GET BY ID ========================= */
+  /* ========================= GET BY ID (UNCHANGED) ========================= */
 
   async getById(id) {
     const results = await StaticSpeedCheckRecord.aggregate([
-      {
-        $match: { _id: new mongoose.Types.ObjectId(id) },
-      },
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
       {
         $lookup: {
           from: "offenders",
@@ -70,12 +68,12 @@ export class StaticSpeedCheckRecordRepository {
     return results.length > 0 ? results[0] : null;
   }
 
-  /* ========================= DATE RANGE FILTER (NEW) ========================= */
+  /* ========================= FILTERED QUERY (NEW – SAFE) ========================= */
 
-  async getByDateRange(filters = {}) {
+  async getFilteredRecords(filters = {}) {
     const matchStage = {};
 
-    // ✅ Start → End Date filter
+    /* ---------- DATE RANGE (PRIORITY) ---------- */
     if (filters.fromDate || filters.toDate) {
       matchStage.createdAt = {};
 
@@ -88,6 +86,43 @@ export class StaticSpeedCheckRecordRepository {
           filters.toDate + "T23:59:59.999Z"
         );
       }
+    }
+
+    /* ---------- SINGLE DATE (FALLBACK) ---------- */
+    else if (filters.date) {
+      const dateStr = filters.date.split("T")[0];
+
+      const startDate = new Date(dateStr);
+      startDate.setUTCHours(0, 0, 0, 0);
+
+      const endDate = new Date(dateStr);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      matchStage.$or = [
+        { createdAt: { $gte: startDate, $lte: endDate } },
+        {
+          "offenceOccurenceDetails.timeOfOffence": {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      ];
+    }
+
+    /* ---------- UNIT FILTER ---------- */
+    if (filters.unit) {
+      matchStage.$or = [
+        { "onDutyDetailsMPReporting.unit": filters.unit },
+        { "offenders.offenderDetails.unit": filters.unit },
+      ];
+    }
+
+    /* ---------- FMN FILTER ---------- */
+    if (filters.fmn) {
+      matchStage.$or = [
+        { fmn: filters.fmn },
+        { "offenders.offenderDetails.fmn": filters.fmn },
+      ];
     }
 
     const pipeline = [
@@ -121,7 +156,7 @@ export class StaticSpeedCheckRecordRepository {
     return await StaticSpeedCheckRecord.aggregate(pipeline);
   }
 
-  /* ========================= CREATE ========================= */
+  /* ========================= CREATE (UNCHANGED) ========================= */
 
   async create(data) {
     const record = new StaticSpeedCheckRecord(data);
