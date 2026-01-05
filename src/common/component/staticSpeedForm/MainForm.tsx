@@ -13,7 +13,6 @@ import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
-import { StaticSpeedState } from "@/common/types/form.types";
 
 export default function StaticSpeedForm({
   onCancel,
@@ -225,28 +224,30 @@ export default function StaticSpeedForm({
       }
       /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
 
+      /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
+
       const people = staticData.offenderPeople || [];
       console.log("👥 Offender People Array:", JSON.stringify(people, null, 2));
 
       for (const person of people) {
         const details = person.details || {};
 
-        // 🔥 skip empty offender blocks
-        const hasValidData = Object.values(details).some(
-          (v) => v !== "" && v !== null && v !== undefined
-        );
-
-        if (!hasValidData) {
+        // 🔥 skip only when absolutely empty
+        if (!Object.keys(details).length) {
           console.warn("⚠️ Skipping empty offender:", person);
           continue;
         }
 
         const offenderPayload: CreateOffenderData = {
           offenceId: _idString,
-          offenderType: person.type as OffenderType, // Military / Civilian / etc
+          offenderType: person.type as OffenderType,
+
           offenderDetails: {
+            // 🔥🔥🔥 KEY FIX
             ...details,
-            type: person.whoIsIt || "Offender", // Driver / Co-Driver
+
+            // role = Driver / Co-Driver / Offender
+            type: person.whoIsIt || "Offender",
           },
         };
 
@@ -256,8 +257,7 @@ export default function StaticSpeedForm({
         );
 
         try {
-          const res = await createOffenderMutation.mutateAsync(offenderPayload);
-          console.log("✅ Offender Created Successfully:", res);
+          await createOffenderMutation.mutateAsync(offenderPayload);
         } catch (err: any) {
           console.error(
             "❌ Offender Creation Failed ===>",

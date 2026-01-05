@@ -46,19 +46,54 @@ export const RightPanel = ({
   const totalSteps = Object.keys(stepsConfig || {}).length;
   const isLastStep = step === totalSteps;
 
-  /* ================= NEXT DISABLE ================= */
+
+
   const isNextDisabled = () => {
-    if (mode === "static" && step === 1)
+  /* ===== STATIC ===== */
+  if (mode === "static" && step === 1) {
+    const v = formData.staticSpeed?.vehicleInvolved;
+
+    // 🚗 vehicle involved → vehicle details required
+    if (v === "yes") {
       return !(
         formData.staticSpeed?.vehicleDetails?.vehicleType &&
         formData.staticSpeed?.vehicleDetails?.category
       );
+    }
 
-    if (mode === "traffic" && step === 1)
-      return !formData.traffic?.vehicleInvolved;
+    // 🚶 no vehicle → at least one offender required
+    if (v === "no") {
+      return !(
+        Array.isArray(formData.staticSpeed?.offenderPeople) &&
+        formData.staticSpeed.offenderPeople.length > 0
+      );
+    }
 
-    return false;
-  };
+    // nothing selected yet
+    return true;
+  }
+
+  /* ===== TRAFFIC ===== */
+  if (mode === "traffic" && step === 1)
+    return !formData.traffic?.vehicleInvolved;
+
+  return false;
+};
+
+
+  // /* ================= NEXT DISABLE ================= */
+  // const isNextDisabled = () => {
+  //   if (mode === "static" && step === 1)
+  //     return !(
+  //       formData.staticSpeed?.vehicleDetails?.vehicleType &&
+  //       formData.staticSpeed?.vehicleDetails?.category
+  //     );
+
+  //   if (mode === "traffic" && step === 1)
+  //     return !formData.traffic?.vehicleInvolved;
+
+  //   return false;
+  // };
 
  const renderPreviewReport = () => {
   if (!mapReport) {
