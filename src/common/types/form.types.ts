@@ -168,6 +168,7 @@ export interface OffenderPerson {
 // ---------- FORM ROOT ----------
 // ---------- TRAFFIC ----------
 export interface TrafficFormState {
+    reportNo: string;
   vehicleInvolved: string;
   vehicleDetails: VehicleDetailsState;
   offenderWithoutVehicle: OffenderWithoutVehicleState;

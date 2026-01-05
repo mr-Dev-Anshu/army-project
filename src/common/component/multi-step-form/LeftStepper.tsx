@@ -34,6 +34,7 @@ export const LeftStepper = ({
   onCreate,
   onCancel,
   hideReportNo = false,
+  
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";

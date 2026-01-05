@@ -333,10 +333,25 @@ export default function OffenderDynamicForm({
     return () => clearTimeout(t);
   }, [path]);
 
-  const saveField = (label: string, value: string) => {
-    const key = labelKeyMap[label] || label;
-    setLocalData((prev: any) => ({ ...prev, [key]: value }));
+const saveField = (label: string, value: string) => {
+  if (!path) return;
+
+  const key = labelKeyMap[label] || label;
+
+  const updated = {
+    ...(globalData || {}),
+    [key]: value,
   };
+
+  setLocalData(updated);
+
+  dispatch({
+    type: "SET_PATH",
+    path,
+    value: updated,
+  });
+};
+
 
   const ensureCoDriverSlot = (type: string) => {
     const peoplePath =
