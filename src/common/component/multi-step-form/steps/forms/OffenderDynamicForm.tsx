@@ -1,7 +1,6 @@
-
 // "use client";
 
-// import { useState, useEffect } from "react";
+// import { useState, useEffect, useRef } from "react";
 // import { FormInput, FormSelect } from "@/common/component/FormInput";
 // import { SuggestionInput } from "@/common/component/SuggestionInput";
 // import { Checkbox } from "@/components/ui/checkbox";
@@ -57,35 +56,53 @@
 //   const [coDriverType, setCoDriverType] = useState("");
 //   const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
 
+//   const containerRef = useRef<HTMLDivElement | null>(null);
+//   const firstInputRef = useRef<HTMLInputElement | null>(null);
+
 //   const isMainCivilian =
 //     title.toLowerCase().includes("civilian") &&
 //     !title.toLowerCase().includes("co-driver");
 
-// useEffect(() => {
+//   useEffect(() => {
 //   setLocalData(structuredClone(globalData || {}));
-// }, [JSON.stringify(globalData), path]);
+//   // eslint-disable-next-line react-hooks/exhaustive-deps
+// }, [path]);
 
+//   /* 🔥 AUTO SCROLL + AUTO FOCUS */
+//   useEffect(() => {
+//     if (!containerRef.current) return;
 
+//     containerRef.current.scrollIntoView({
+//       behavior: "smooth",
+//       block: "start",
+//     });
+
+//     const t = setTimeout(() => {
+//       firstInputRef.current?.focus();
+//     }, 200);
+
+//     return () => clearTimeout(t);
+//   }, [path]);
 
 // const saveField = (label: string, value: string) => {
+//   if (!path) return;
+
 //   const key = labelKeyMap[label] || label;
-//   setLocalData((prev: any) => ({ ...prev, [key]: value }));
+
+//   // ✅ ONLY localData is used
+//   const updated = {
+//     ...(localData || {}),
+//     [key]: value,
+//   };
+
+//   setLocalData(updated);
+
+//   dispatch({
+//     type: "SET_PATH",
+//     path,
+//     value: updated,
+//   });
 // };
-
-
-//   // const saveField = (label: string, value: string) => {
-//   //   if (!path) return;
-//   //   const key = labelKeyMap[label] || label;
-
-//   //   const updated = { ...(globalData || {}), [key]: value };
-//   //   setLocalData(updated);
-
-//   //   dispatch({
-//   //     type: "SET_PATH",
-//   //     path,
-//   //     value: updated,
-//   //   });
-//   // };
 
 //   const ensureCoDriverSlot = (type: string) => {
 //     const peoplePath =
@@ -118,7 +135,10 @@
 //   };
 
 //   return (
-//     <div className="space-y-6 mt-4 bg-white p-6 shadow-sm">
+//     <div
+//       ref={containerRef}
+//       className="space-y-6 mt-4 bg-white p-6 shadow-sm"
+//     >
 //       <p className="font-semibold text-lg">{title}</p>
 //       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
@@ -171,6 +191,7 @@
 //             />
 //           ) : (
 //             <FormInput
+//               ref={i === 0 ? firstInputRef : undefined}
 //               key={i}
 //               label={f.label}
 //               placeholder={f.placeholder}
@@ -246,7 +267,6 @@
 
 
 
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -298,7 +318,9 @@ export default function OffenderDynamicForm({
 }: OffenderDynamicFormProps) {
   const { state, dispatch } = useForm();
 
+  const offenderTypeKey = title.replace(" Details", "").trim();
   const globalData = getByPath(state, path);
+
   const [localData, setLocalData] = useState<any>({});
 
   const [hasCoDriver, setHasCoDriver] = useState(false);
@@ -312,10 +334,14 @@ export default function OffenderDynamicForm({
     title.toLowerCase().includes("civilian") &&
     !title.toLowerCase().includes("co-driver");
 
-  /* sync local state */
+  /* ================= SYNC PER OFFENDER TYPE ================= */
   useEffect(() => {
-    setLocalData(structuredClone(globalData || {}));
-  }, [JSON.stringify(globalData), path]);
+    setLocalData(
+      structuredClone(
+        globalData?.detailsByType?.[offenderTypeKey] || {}
+      )
+    );
+  }, [path, offenderTypeKey]);
 
   /* 🔥 AUTO SCROLL + AUTO FOCUS */
   useEffect(() => {
@@ -333,26 +359,33 @@ export default function OffenderDynamicForm({
     return () => clearTimeout(t);
   }, [path]);
 
-const saveField = (label: string, value: string) => {
-  if (!path) return;
+  /* ================= SAVE FIELD (ISOLATED) ================= */
+  const saveField = (label: string, value: string) => {
+    if (!path) return;
 
-  const key = labelKeyMap[label] || label;
+    const key = labelKeyMap[label] || label;
 
-  const updated = {
-    ...(globalData || {}),
-    [key]: value,
+    const updated = {
+      ...(globalData || {}),
+      detailsByType: {
+        ...(globalData?.detailsByType || {}),
+        [offenderTypeKey]: {
+          ...(globalData?.detailsByType?.[offenderTypeKey] || {}),
+          [key]: value,
+        },
+      },
+    };
+
+    setLocalData(updated.detailsByType[offenderTypeKey]);
+
+    dispatch({
+      type: "SET_PATH",
+      path,
+      value: updated,
+    });
   };
 
-  setLocalData(updated);
-
-  dispatch({
-    type: "SET_PATH",
-    path,
-    value: updated,
-  });
-};
-
-
+  /* ================= CO DRIVER ================= */
   const ensureCoDriverSlot = (type: string) => {
     const peoplePath =
       scope === "static"
@@ -371,7 +404,11 @@ const saveField = (label: string, value: string) => {
       newList[existingIndex] = { ...newList[existingIndex], type };
     } else {
       index = list.length;
-      newList.push({ type, whoIsIt: "Co-Driver", details: {} });
+      newList.push({
+        whoIsIt: "Co-Driver",
+        type,
+        detailsByType: {},
+      });
     }
 
     dispatch({
@@ -384,10 +421,7 @@ const saveField = (label: string, value: string) => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="space-y-6 mt-4 bg-white p-6 shadow-sm"
-    >
+    <div ref={containerRef} className="space-y-6 mt-4 bg-white p-6 shadow-sm">
       <p className="font-semibold text-lg">{title}</p>
       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
@@ -419,12 +453,11 @@ const saveField = (label: string, value: string) => {
                 value={value}
                 onChange={(v) => saveField(f.label, v)}
                 fieldType={
-                  f.label === "Select Rank"
-                    ? "rank"
-                    : f.label.toLowerCase()
+                  f.label === "Select Rank" ? "rank" : f.label.toLowerCase()
                 }
                 className={cn(
-                  value ? "border-blue-500 bg-blue-50" : "border-gray-300"
+                  "bg-white",
+                  value ? "border-blue-500" : "border-gray-300"
                 )}
               />
             );
@@ -499,8 +532,8 @@ const saveField = (label: string, value: string) => {
                     scope={scope}
                     path={
                       scope === "static"
-                        ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
-                        : `formData.traffic.offenderPeople[${coDriverIndex}].details`
+                        ? `formData.staticSpeed.offenderPeople[${coDriverIndex}]`
+                        : `formData.traffic.offenderPeople[${coDriverIndex}]`
                     }
                     showCoDriver={false}
                   />

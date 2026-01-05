@@ -27,7 +27,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
 
-  const mapTrafficToReport = (traffic: any) => {
+const mapTrafficToReport = (traffic: any) => {
   const occ = traffic?.offenceOccurenceDetails || {};
   const duty = traffic?.onDutyDetails || {};
   const v = traffic?.vehicleDetails || {};
@@ -38,31 +38,32 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       ? traffic.offenderPeople[0]?.details || {}
       : {};
 
-  const mpWitness = traffic?.onDutyDetailsMPReporting || {};
+  // ✅ MP WITNESSING FIX
+  const mpWitness =
+    Array.isArray(traffic?.witnesses) && traffic.witnesses.length > 0
+      ? traffic.witnesses[0]
+      : null;
+
+  const reporting = mpWitness?.reportingBlock || {};
+  const dutyBlock = mpWitness?.dutyBlock || {};
 
   return {
-    reportNo: "TEMP/REPORT/001",
+    reportNo: traffic?.reportNo || reportNo,
     reportDate: new Date().toLocaleDateString("en-GB"),
 
     particulars: {
       primary: {
         aadharCardNo: driver.aadharCardNo || "Nil",
-        name: driver.name || driver.Name || "Nil",
+        name: driver.name || "Nil",
         so: driver.so || "Nil",
         relation: driver.relation || "Nil",
-        armyNo:
-          driver.armyNumber ||
-          driver["Army Rider / Driver Number"] ||
-          "Nil",
+        armyNo: driver.armyNumber || "Nil",
         rank: driver.rank || "Nil",
         unit: driver.unit || "Nil",
         command: driver.command || "Nil",
         fmn: driver.fmn || "Nil",
         address: driver.address || "Nil",
-        iCardNo:
-          driver.iCardNumber ||
-          driver["ID Card Number"] ||
-          "Nil",
+        iCardNo: driver.iCardNumber || "Nil",
       },
 
       secondary: null,
@@ -79,14 +80,16 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     },
 
     occurrence: {
-      dateOfDuty: duty?.dateOfDuty || "Nil",
+      dateOfDuty: dutyBlock?.dateOfDuty || "Nil",
       dutyTime:
-        duty?.startTime && duty?.endTime
-          ? `${duty.startTime} - ${duty.endTime}`
+        dutyBlock?.startTime && dutyBlock?.endTime
+          ? `${dutyBlock.startTime} - ${dutyBlock.endTime}`
           : "Nil",
-      dutyLocation: duty?.dutyLocation || "Nil",
-      nameOfWitnessingOfficial1:
-        mpWitness?.nameReportingMP || "Nil",
+      dutyLocation: dutyBlock?.dutyLocation || "Nil",
+
+      // ✅ MP WITNESS NAME (NOT MP REPORTING)
+      nameOfWitnessingOfficial1: reporting?.nameReportingMP || "Nil",
+
       timeOfOffence: occ?.timeOfOffence || "Nil",
       locationOfOffence: occ?.incidentLocation || "Nil",
       statement: occ?.description || "Nil",
@@ -99,29 +102,32 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       description: occ?.description || "Nil",
     },
 
+    // ✅ MP WITNESS SIGNATURE
     witnessSig: {
-      armyNo: mpWitness?.armyNumber || "Nil",
-      rank: mpWitness?.rank || "Nil",
-      name: mpWitness?.nameReportingMP || "Nil",
-      unit: mpWitness?.unit || "Nil",
+      armyNo: reporting?.armyNumber || "Nil",
+      rank: reporting?.rank || "Nil",
+      name: reporting?.nameReportingMP || "Nil",
+      unit: reporting?.unit || "Nil",
     },
 
+    // ✅ MP SIGNATURE
     mpSig: {
-      armyNo: mpWitness?.armyNumber || "Nil",
-      rank: mpWitness?.rank || "Nil",
-      name: mpWitness?.nameReportingMP || "Nil",
-      unit: mpWitness?.unit || "Nil",
+      armyNo: reporting?.armyNumber || "Nil",
+      rank: reporting?.rank || "Nil",
+      name: reporting?.nameReportingMP || "Nil",
+      unit: reporting?.unit || "Nil",
     },
 
     remarks: {
       text:
         traffic?.remarks ||
         "Suitable disciplinary action may be taken and intimated.",
-      station: duty?.dutyLocation || "Nil",
+      station: dutyBlock?.dutyLocation || "Nil",
       dated: new Date().toLocaleDateString("en-GB"),
     },
   };
 };
+
 
 
   const toISO = (date?: string, time?: string) => {
@@ -138,7 +144,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
 
     /* ================= CREATE OFFENCE ================= */
     const offenceRes = await createOffence({
-      reportNumber: reportNo,
+      reportNo: reportNo,
       isVehicleInvolved: traffic.vehicleInvolved === "yes",
       onDutyDetails: {
         ...traffic.onDutyDetails,

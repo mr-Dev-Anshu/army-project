@@ -112,8 +112,8 @@ export const initialState: GlobalFormState = {
         timeOfOffence: "",
         time: "",
         incidentLocation: "",
-       description:"",
-       description2: "",
+        description: "",
+        description2: "",
         authSpeed: "30",
         actualSpeedNoted: "",
         overSpeedCalculated: "",
@@ -203,7 +203,9 @@ type Action =
   | { type: "REMOVE_PATH"; path: string; index: number }
   | { type: "SET_PREVIEW"; payload: boolean }
   | { type: "SET_FORM_DATA"; payload: any }
-  | { type: "CLEAR_MP_ADDITIONAL" };
+  | { type: "CLEAR_MP_ADDITIONAL" }
+  | { type: "RESET_FORM" };
+
 
 /* ------------------------------------
    REDUCER
@@ -255,6 +257,9 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
 
     case "SET_FORM_DATA":
       return { ...state, formData: action.payload };
+
+    case "RESET_FORM":
+      return initialState;
 
     case "CLEAR_MP_ADDITIONAL": {
       const newState = structuredClone(state);

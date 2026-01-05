@@ -8,6 +8,7 @@ export interface VehicleDetailsState {
   vehicleType: string;
   driverType: string;
   vehicleName: string;
+  vehicleNumber:string;
 }
 
 // ---------- OFFENDER ----------

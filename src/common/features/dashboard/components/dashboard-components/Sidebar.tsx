@@ -1,7 +1,4 @@
 "use client";
-
-"use client";
-
 import {
   PieChart,
   Users,
@@ -35,6 +32,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import ConeIcon from "@/components/icons/ConeIcon";
+import { useForm } from "@/context/FormContext";
 
 const cn = (...classes: (string | boolean | undefined)[]) =>
   classes.filter(Boolean).join(" ");
@@ -58,6 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onMenuSelect,
 }) => {
   const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const { dispatch } = useForm();
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) =>
@@ -146,16 +145,15 @@ const Sidebar: React.FC<SidebarProps> = ({
         if (item.label === "All Reports") onMenuSelect("viewReports");
         if (item.label === "Civil Employees Management")
           onMenuSelect("civilEmployees");
-
       }}
       className={cn(
         "w-full relative flex items-center transition-all group",
         collapsed
           ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
           : cn(
-            "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg text-left",
-            isSubmenu && "py-1.5"
-          )
+              "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg text-left",
+              isSubmenu && "py-1.5"
+            )
       )}
     >
       {/* ICON (Only for main items) */}
@@ -205,11 +203,15 @@ const Sidebar: React.FC<SidebarProps> = ({
               : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100 rounded-lg"
           )}
         >
-          <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0">{item.icon}</span>
+          <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0">
+            {item.icon}
+          </span>
 
           {!collapsed && (
             <>
-              <span className="flex-1 text-base text-gray-600 group-hover:text-gray-900 leading-snug">{item.label}</span>
+              <span className="flex-1 text-base text-gray-600 group-hover:text-gray-900 leading-snug">
+                {item.label}
+              </span>
               {openMenus.includes(item.label) ? (
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               ) : (
@@ -286,6 +288,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* 1️⃣ GENERAL & TRAFFIC */}
             <button
               onClick={() => {
+                dispatch({ type: "RESET_FORM" }); // ✅ ADD THIS
                 onMenuSelect("multiForm");
                 setCollapsed(true);
               }}
@@ -296,7 +299,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
               )}
             >
-              <span className={cn("text-gray-500 group-hover:text-gray-900 flex-shrink-0", !collapsed && "pt-0.5")}>
+              <span
+                className={cn(
+                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
+                  !collapsed && "pt-0.5"
+                )}
+              >
                 <ConeIcon className="w-5 h-5" color="currentColor" />
               </span>
 
@@ -310,6 +318,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* 2️⃣ STATIC SPEED */}
             <button
               onClick={() => {
+                dispatch({ type: "RESET_FORM" }); // ✅ ADD THIS
                 onMenuSelect("staticSpeed");
                 setCollapsed(true);
               }}
@@ -320,7 +329,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
               )}
             >
-              <span className={cn("text-gray-500 group-hover:text-gray-900 flex-shrink-0", !collapsed && "pt-0.5")}>
+              <span
+                className={cn(
+                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
+                  !collapsed && "pt-0.5"
+                )}
+              >
                 <Gauge className="w-5 h-5" />
               </span>
 
@@ -336,6 +350,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => {
                 onMenuSelect("investigation");
                 setCollapsed(true);
+                dispatch({ type: "RESET_FORM" });
               }}
               className={cn(
                 "w-full flex items-center transition-all group",
@@ -344,7 +359,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
               )}
             >
-              <span className={cn("text-gray-500 group-hover:text-gray-900 flex-shrink-0", !collapsed && "pt-0.5")}>
+              <span
+                className={cn(
+                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
+                  !collapsed && "pt-0.5"
+                )}
+              >
                 <ClipboardList className="w-5 h-5" />
               </span>
 

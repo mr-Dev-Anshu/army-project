@@ -17,30 +17,44 @@ interface FormSelectProps {
   onChange?: (v: string) => void;
 }
 
+
+interface FormSelectProps {
+  label: string;
+  placeholder?: string;
+  options: { label: string; value: string }[];
+  value?: string;
+  onChange?: (v: string) => void;
+}
+
 export function FormSelect({
   label,
-  placeholder,
+  placeholder = "Select option",
   options,
   value,
   onChange,
 }: FormSelectProps) {
   return (
-    <div className="space-y-1  w-full">
+    <div className="space-y-1 w-full">
       <Label>{label}</Label>
 
-      <Select value={value} onValueChange={onChange}>
+      {/* 🔥 KEY + CONDITIONAL VALUE = FIX */}
+      <Select
+        key={value || "empty"}               // force remount
+        value={value ? value : undefined}    // 👈 IMPORTANT
+        onValueChange={onChange}
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 
         <SelectContent>
           {options.map((op: any) => {
-            const value = typeof op === "string" ? op : op.value;
-            const label = typeof op === "string" ? op : op.label;
+            const val = typeof op === "string" ? op : op.value;
+            const lab = typeof op === "string" ? op : op.label;
 
             return (
-              <SelectItem key={value} value={value}>
-                {label}
+              <SelectItem key={val} value={val}>
+                {lab}
               </SelectItem>
             );
           })}
@@ -72,7 +86,7 @@ export function FormInput({
       <Input
         type={type}
         placeholder={placeholder}
-        value={value}
+        value={value ?? ""}
         onChange={(e) => onChange?.(e.target.value)}
         className={`
           ${value ? "border-blue-500 bg-blue-50" : "border-gray-300"}
