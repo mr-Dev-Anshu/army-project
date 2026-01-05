@@ -3,14 +3,33 @@ import { connectDB } from "@/lib/db/mongodb";
 import { staticSpeedCheckRecordService } from "@/services/speedCheckRecord.service";
 import { createStaticSpeedCheckRecordSchema } from "@/validators/speedCheckRecord.validator";
 
+/* ========================= GET ========================= */
 
-export async function GET() {
+export async function GET(request) {
   try {
     await connectDB();
-    const records = await staticSpeedCheckRecordService.getAll();
+
+    const { searchParams } = new URL(request.url);
+
+    const fromDate = searchParams.get("fromDate");
+    const toDate = searchParams.get("toDate");
+
+    let records;
+
+    // ✅ Date range filter
+    if (fromDate || toDate) {
+      records = await staticSpeedCheckRecordService.getByDateRange({
+        fromDate,
+        toDate,
+      });
+    } else {
+      records = await staticSpeedCheckRecordService.getAll();
+    }
+
     return NextResponse.json(records);
+
   } catch (error) {
-    console.error("GET static speed checks error:", error);
+    console.error("GET speed check error:", error);
     return NextResponse.json(
       { error: "Failed to fetch records" },
       { status: 500 }
@@ -18,9 +37,12 @@ export async function GET() {
   }
 }
 
+/* ========================= POST ========================= */
+
 export async function POST(request) {
   try {
     await connectDB();
+
     const body = await request.json();
 
     const { error, value } = createStaticSpeedCheckRecordSchema.validate(body, {
@@ -36,8 +58,9 @@ export async function POST(request) {
 
     const newRecord = await staticSpeedCheckRecordService.create(value);
     return NextResponse.json(newRecord, { status: 201 });
+
   } catch (error) {
-    console.error("POST static speed check error:", error);
+    console.error("POST speed check error:", error);
     return NextResponse.json(
       { error: "Failed to create record" },
       { status: 500 }

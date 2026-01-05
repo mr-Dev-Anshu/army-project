@@ -13,6 +13,11 @@ export class StaticSpeedCheckRecordService {
     return record;
   }
 
+async getByDateRange(filters) {
+  return await staticSpeedCheckRecordRepo.getByDateRange(filters);
+}
+
+
   async create(data) {
     return await staticSpeedCheckRecordRepo.create(data);
   }
