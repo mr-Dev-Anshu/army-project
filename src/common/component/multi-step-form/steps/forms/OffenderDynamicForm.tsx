@@ -265,14 +265,11 @@
 // }
 
 
-
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FormInput, FormSelect } from "@/common/component/FormInput";
+import { FormInput } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
-import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
@@ -282,7 +279,6 @@ interface OffenderDynamicFormProps {
   title: string;
   helperText?: string;
   fields: any[];
-  showCoDriver?: boolean;
   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
   path?: string;
 }
@@ -304,15 +300,12 @@ const labelKeyMap: Record<string, string> = {
   FMN: "fmn",
   Address: "address",
   "ID Card Number": "iCardNumber",
-  "Aadhar Card Number": "iCardNumber",
-  "I Card Number": "iCardNumber",
 };
 
 export default function OffenderDynamicForm({
   title,
   helperText,
   fields,
-  showCoDriver = false,
   scope = "traffic",
   path = "",
 }: OffenderDynamicFormProps) {
@@ -320,160 +313,93 @@ export default function OffenderDynamicForm({
 
   const offenderTypeKey = title.replace(" Details", "").trim();
   const globalData = getByPath(state, path);
-
   const [localData, setLocalData] = useState<any>({});
+  const [showAddMore, setShowAddMore] = useState(false);
 
-  const [hasCoDriver, setHasCoDriver] = useState(false);
-  const [coDriverType, setCoDriverType] = useState("");
-  const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const firstInputRef = useRef<HTMLInputElement | null>(null);
-
-  const isMainCivilian =
-    title.toLowerCase().includes("civilian") &&
-    !title.toLowerCase().includes("co-driver");
-
-  /* ================= SYNC PER OFFENDER TYPE ================= */
+  /* ================= SYNC ================= */
   useEffect(() => {
     setLocalData(
-      structuredClone(
-        globalData?.detailsByType?.[offenderTypeKey] || {}
-      )
+      structuredClone(globalData?.detailsByType?.[offenderTypeKey] || {})
     );
   }, [path, offenderTypeKey]);
 
-  /* 🔥 AUTO SCROLL + AUTO FOCUS */
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    containerRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-
-    const t = setTimeout(() => {
-      firstInputRef.current?.focus();
-    }, 200);
-
-    return () => clearTimeout(t);
-  }, [path]);
-
-  /* ================= SAVE FIELD (ISOLATED) ================= */
+  /* ================= SAVE FIELD ================= */
   const saveField = (label: string, value: string) => {
     if (!path) return;
 
     const key = labelKeyMap[label] || label;
 
-    const updated = {
-      ...(globalData || {}),
-      detailsByType: {
-        ...(globalData?.detailsByType || {}),
-        [offenderTypeKey]: {
-          ...(globalData?.detailsByType?.[offenderTypeKey] || {}),
-          [key]: value,
-        },
-      },
-    };
-
-    setLocalData(updated.detailsByType[offenderTypeKey]);
-
     dispatch({
       type: "SET_PATH",
       path,
-      value: updated,
+      value: {
+        ...(globalData || {}),
+        detailsByType: {
+          ...(globalData?.detailsByType || {}),
+          [offenderTypeKey]: {
+            ...(globalData?.detailsByType?.[offenderTypeKey] || {}),
+            [key]: value,
+          },
+        },
+      },
     });
   };
 
-  /* ================= CO DRIVER ================= */
-  const ensureCoDriverSlot = (type: string) => {
+  /* ================= ADD MORE ================= */
+  const handleAddMoreSelect = (type: string) => {
     const peoplePath =
       scope === "static"
         ? "formData.staticSpeed.offenderPeople"
         : "formData.traffic.offenderPeople";
 
     const list = getByPath(state, peoplePath) || [];
-    const existingIndex = list.findIndex(
-      (p: any) => p.whoIsIt === "Co-Driver"
-    );
-
-    let newList = [...list];
-    let index = existingIndex;
-
-    if (existingIndex >= 0) {
-      newList[existingIndex] = { ...newList[existingIndex], type };
-    } else {
-      index = list.length;
-      newList.push({
-        whoIsIt: "Co-Driver",
-        type,
-        detailsByType: {},
-      });
-    }
 
     dispatch({
       type: "SET_PATH",
       path: peoplePath,
-      value: newList,
+      value: [
+        ...list,
+        {
+          whoIsIt: "Offender",
+          type,
+          detailsByType: { [type]: {} },
+        },
+      ],
     });
 
-    return index;
+    setShowAddMore(false);
   };
 
   return (
-    <div ref={containerRef} className="space-y-6 mt-4 bg-white p-6 shadow-sm">
+    <div className="space-y-6 mt-4 bg-white p-6 shadow-sm">
       <p className="font-semibold text-lg">{title}</p>
       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
-      {/* ================= MAIN FORM ================= */}
+      {/* MAIN FORM */}
       <div className="grid grid-cols-2 gap-4">
-        {fields?.map((f: any, i: number) => {
-          const key = f.key || labelKeyMap[f.label] || f.label;
-          const value = localData?.[key] || "";
+        {fields.map((f: any, i: number) => {
+          const value = localData?.[labelKeyMap[f.label]] || "";
 
           const isSuggestion = [
             "Unit",
             "FMN",
             "Command",
             "Select Rank",
-            "Trade",
-            "Place of QTR.",
-            "Place of Work",
-            "Place of Stay",
             "Address",
-            "Department",
           ].includes(f.label);
 
-          if (isSuggestion) {
-            return (
-              <SuggestionInput
-                key={i}
-                label={f.label}
-                placeholder={f.placeholder}
-                value={value}
-                onChange={(v) => saveField(f.label, v)}
-                fieldType={
-                  f.label === "Select Rank" ? "rank" : f.label.toLowerCase()
-                }
-                className={cn(
-                  "bg-white",
-                  value ? "border-blue-500" : "border-gray-300"
-                )}
-              />
-            );
-          }
-
-          return f.type === "select" ? (
-            <FormSelect
+          return isSuggestion ? (
+            <SuggestionInput
               key={i}
               label={f.label}
-              options={f.options || []}
+              placeholder={f.placeholder}
               value={value}
               onChange={(v) => saveField(f.label, v)}
+              fieldType={f.label.toLowerCase()}
+              className={cn(value ? "border-blue-500" : "border-gray-300")}
             />
           ) : (
             <FormInput
-              ref={i === 0 ? firstInputRef : undefined}
               key={i}
               label={f.label}
               placeholder={f.placeholder}
@@ -484,64 +410,39 @@ export default function OffenderDynamicForm({
         })}
       </div>
 
-      {/* 🔥 CO-DRIVER — ONLY FOR TRAFFIC / STATIC */}
-      {showCoDriver &&
-        !isMainCivilian &&
-        (scope === "traffic" || scope === "static") && (
-          <>
-            <div className="mt-6 flex items-start gap-2">
-              <Checkbox
-                checked={hasCoDriver}
-                onCheckedChange={(v) => {
-                  setHasCoDriver(Boolean(v));
-                  setCoDriverType("");
-                  setCoDriverIndex(null);
-                }}
-              />
-              <p className="text-sm">
-                Was there a <b>Co-Driver / Pillion Rider</b>?
-              </p>
-            </div>
+      {/* ADD MORE OPTIONS */}
+      {showAddMore && (
+        <div className="border rounded-lg p-4">
+          <p className="font-semibold mb-2">Select Who was the Offender?</p>
+          <RadioGroup
+            onValueChange={(v) => handleAddMoreSelect(v)}
+            className="grid grid-cols-2 gap-3"
+          >
+            {Object.keys(offenderFormsConfig).map((item) => (
+              <label
+                key={item}
+                className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+              >
+                <RadioGroupItem value={item} />
+                {item}
+              </label>
+            ))}
+          </RadioGroup>
+        </div>
+      )}
 
-            {hasCoDriver && (
-              <div className="mt-4 space-y-4">
-                <RadioGroup
-                  className="grid grid-cols-2 gap-3"
-                  value={coDriverType}
-                  onValueChange={(v) => {
-                    setCoDriverType(v);
-                    const idx = ensureCoDriverSlot(v);
-                    setCoDriverIndex(idx);
-                  }}
-                >
-                  {Object.keys(offenderFormsConfig).map((item) => (
-                    <label
-                      key={item}
-                      className="border rounded-lg px-4 py-2 flex gap-2"
-                    >
-                      <RadioGroupItem value={item} />
-                      {item}
-                    </label>
-                  ))}
-                </RadioGroup>
-
-                {coDriverType && coDriverIndex !== null && (
-                  <OffenderDynamicForm
-                    title={`${coDriverType} Details`}
-                    fields={offenderFormsConfig[coDriverType].fields}
-                    scope={scope}
-                    path={
-                      scope === "static"
-                        ? `formData.staticSpeed.offenderPeople[${coDriverIndex}]`
-                        : `formData.traffic.offenderPeople[${coDriverIndex}]`
-                    }
-                    showCoDriver={false}
-                  />
-                )}
-              </div>
-            )}
-          </>
-        )}
+      {/* ADD MORE BUTTON (ONLY ONCE) */}
+      {scope === "traffic" && !showAddMore && (
+        <div className="pt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowAddMore(true)}
+            className="bg-black text-white px-4 py-2 rounded-md text-sm"
+          >
+            + Add More People
+          </button>
+        </div>
+      )}
     </div>
   );
 }
