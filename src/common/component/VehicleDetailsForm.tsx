@@ -252,6 +252,7 @@ export default function VehicleDetailsForm({
                 : "formData.mpReport.additionalIndividual.tempOffender.details"
             }
             showCoDriver={scope === "traffic" || scope === "static"}
+            isRoot={true}
           />
         </div>
       )}

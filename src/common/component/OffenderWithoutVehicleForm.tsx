@@ -657,6 +657,7 @@ export default function OffenderWithoutVehicleForm({
             fields={offenderFormsConfig[offenderType].fields}
             path={getPath()}
             showCoDriver={false}
+            isRooti={true}
           />
         )}
     </div>

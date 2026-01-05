@@ -264,10 +264,9 @@
 //   );
 // }
 
-
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { FormInput } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -279,9 +278,16 @@ interface OffenderDynamicFormProps {
   title: string;
   helperText?: string;
   fields: any[];
-  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+  scope?: "traffic" | "static";
   path?: string;
+  isRoot?: boolean;
 }
+
+type Step = {
+  id: number;
+  type?: string;
+  index?: number;
+};
 
 const getByPath = (obj: any, path?: string) => {
   if (!obj || !path) return {};
@@ -308,13 +314,15 @@ export default function OffenderDynamicForm({
   fields,
   scope = "traffic",
   path = "",
+  isRoot = false,
 }: OffenderDynamicFormProps) {
   const { state, dispatch } = useForm();
 
   const offenderTypeKey = title.replace(" Details", "").trim();
   const globalData = getByPath(state, path);
+
   const [localData, setLocalData] = useState<any>({});
-  const [showAddMore, setShowAddMore] = useState(false);
+  const [steps, setSteps] = useState<Step[]>([]);
 
   /* ================= SYNC ================= */
   useEffect(() => {
@@ -346,13 +354,19 @@ export default function OffenderDynamicForm({
   };
 
   /* ================= ADD MORE ================= */
-  const handleAddMoreSelect = (type: string) => {
+  const addMore = () => {
+    setSteps((prev) => [...prev, { id: Date.now() }]);
+  };
+
+  /* ================= SELECT OFFENDER ================= */
+  const handleSelect = (stepId: number, type: string) => {
     const peoplePath =
       scope === "static"
         ? "formData.staticSpeed.offenderPeople"
         : "formData.traffic.offenderPeople";
 
     const list = getByPath(state, peoplePath) || [];
+    const newIndex = list.length;
 
     dispatch({
       type: "SET_PATH",
@@ -367,7 +381,11 @@ export default function OffenderDynamicForm({
       ],
     });
 
-    setShowAddMore(false);
+    setSteps((prev) =>
+      prev.map((s) =>
+        s.id === stepId ? { ...s, type, index: newIndex } : s
+      )
+    );
   };
 
   return (
@@ -375,11 +393,10 @@ export default function OffenderDynamicForm({
       <p className="font-semibold text-lg">{title}</p>
       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
-      {/* MAIN FORM */}
+      {/* ================= MAIN FORM ================= */}
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f: any, i: number) => {
           const value = localData?.[labelKeyMap[f.label]] || "";
-
           const isSuggestion = [
             "Unit",
             "FMN",
@@ -410,33 +427,51 @@ export default function OffenderDynamicForm({
         })}
       </div>
 
-      {/* ADD MORE OPTIONS */}
-      {showAddMore && (
-        <div className="border rounded-lg p-4">
-          <p className="font-semibold mb-2">Select Who was the Offender?</p>
-          <RadioGroup
-            onValueChange={(v) => handleAddMoreSelect(v)}
-            className="grid grid-cols-2 gap-3"
-          >
-            {Object.keys(offenderFormsConfig).map((item) => (
-              <label
-                key={item}
-                className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-              >
-                <RadioGroupItem value={item} />
-                {item}
-              </label>
-            ))}
-          </RadioGroup>
-        </div>
-      )}
+      {/* ================= STEPS ================= */}
+      {steps.map((step) => (
+        <div key={step.id} className="space-y-4">
+          {/* 🔹 OPTIONS — NEVER HIDDEN */}
+          <div className="border rounded-lg p-4">
+            <p className="font-semibold mb-2">
+              Select Who was the Offender?
+            </p>
 
-      {/* ADD MORE BUTTON (ONLY ONCE) */}
-      {scope === "traffic" && !showAddMore && (
+            <RadioGroup
+              value={step.type}
+              onValueChange={(v) => handleSelect(step.id, v)}
+              className="grid grid-cols-2 gap-3"
+            >
+              {Object.keys(offenderFormsConfig).map((item) => (
+                <label
+                  key={item}
+                  className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+                >
+                  <RadioGroupItem value={item} />
+                  {item}
+                </label>
+              ))}
+            </RadioGroup>
+          </div>
+
+          {/* 🔹 FORM — COMES BELOW OPTIONS */}
+          {step.type && step.index !== undefined && (
+            <OffenderDynamicForm
+              title={`${step.type} Details`}
+              fields={offenderFormsConfig[step.type].fields}
+              scope={scope}
+              path={`formData.traffic.offenderPeople[${step.index}].details`}
+              isRoot={false}
+            />
+          )}
+        </div>
+      ))}
+
+      {/* ================= ADD MORE BUTTON ================= */}
+      {isRoot && scope === "traffic" && (
         <div className="pt-4 flex justify-end">
           <button
             type="button"
-            onClick={() => setShowAddMore(true)}
+            onClick={addMore}
             className="bg-black text-white px-4 py-2 rounded-md text-sm"
           >
             + Add More People
