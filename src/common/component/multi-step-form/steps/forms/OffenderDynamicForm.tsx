@@ -262,6 +262,42 @@ export default function OffenderDynamicForm({
           </>
         )}
 
+      {/* ================= EXTRA PEOPLE (STEPS) ================= */}
+      {steps.map((step) => (
+        <div key={step.id} className="mt-8 border-t pt-6">
+          <p className="font-semibold mb-3">Additional Person Details</p>
+
+          {!step.type ? (
+            <RadioGroup
+              onValueChange={(v) => handleSelect(step.id, v)}
+              className="grid sm:grid-cols-2 gap-3"
+            >
+              {Object.keys(offenderFormsConfig).map((item) => (
+                <label
+                  key={item}
+                  className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+                >
+                  <RadioGroupItem value={item} />
+                  {item}
+                </label>
+              ))}
+            </RadioGroup>
+          ) : (
+            <OffenderDynamicForm
+              title={`${step.type} Details`}
+              fields={offenderFormsConfig[step.type].fields}
+              scope={scope}
+              path={
+                scope === "static"
+                  ? `formData.staticSpeed.offenderPeople[${step.index}].details`
+                  : `formData.traffic.offenderPeople[${step.index}].details`
+              }
+              isRoot={false}
+            />
+          )}
+        </div>
+      ))}
+
       {/* ================= ADD MORE ================= */}
       {isRoot && (scope === "traffic" || scope === "static") && (
         <div className="pt-4 flex justify-end">
