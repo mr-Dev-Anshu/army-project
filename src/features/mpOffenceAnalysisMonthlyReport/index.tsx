@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 
 
 import { Button } from "@/components/ui/button";
@@ -7,14 +7,11 @@ import { ArrowRight, BarChart3, ChevronRight } from "lucide-react";
 
 import { useGetDomesticAnalytics } from "./domesticAnalysis/hooks";
 import { useGetDivisionAnalysis } from "./hooks/useDivisionAnalysis";
-import { useMemo, useState } from "react";
-import OverallFormationAnalysisTable from "./components/OverallFormationAnalysisTable";
 import { useRouter } from "next/navigation";
 import { FORMATIONS_LIST, MAIN_FORMATION } from "./constants";
 
 export default function MpOffenceAnalysisMonthlyReport() {
     const router = useRouter();
-    const [showOverallAnalysis, setShowOverallAnalysis] = useState(false);
 
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
@@ -81,9 +78,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
 
     if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
-    if (showOverallAnalysis) {
-        return <OverallFormationAnalysisTable onBack={() => setShowOverallAnalysis(false)} />;
-    }
+    if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
     const handleFormationClick = (slug: string) => {
         router.push(`/analysis/mp-offence-monthly/${slug}`);
@@ -107,7 +102,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                 </div>
                 <Button
                     className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer"
-                    onClick={() => setShowOverallAnalysis(true)}
+                    onClick={() => router.push("/analysis/mp-offence-monthly/overall-analysis")}
                 >
                     View Overall Formation Analysis
                     <BarChart3 className="w-4 h-4 ml-1" />
