@@ -263,7 +263,6 @@
 //     </div>
 //   );
 // }
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -430,7 +429,7 @@ export default function OffenderDynamicForm({
       {/* ================= STEPS ================= */}
       {steps.map((step) => (
         <div key={step.id} className="space-y-4">
-          {/* 🔹 OPTIONS — NEVER HIDDEN */}
+          {/* OPTIONS */}
           <div className="border rounded-lg p-4">
             <p className="font-semibold mb-2">
               Select Who was the Offender?
@@ -453,21 +452,25 @@ export default function OffenderDynamicForm({
             </RadioGroup>
           </div>
 
-          {/* 🔹 FORM — COMES BELOW OPTIONS */}
+          {/* FORM — FIXED PATH */}
           {step.type && step.index !== undefined && (
             <OffenderDynamicForm
               title={`${step.type} Details`}
               fields={offenderFormsConfig[step.type].fields}
               scope={scope}
-              path={`formData.traffic.offenderPeople[${step.index}].details`}
+              path={
+                scope === "static"
+                  ? `formData.staticSpeed.offenderPeople[${step.index}].details`
+                  : `formData.traffic.offenderPeople[${step.index}].details`
+              }
               isRoot={false}
             />
           )}
         </div>
       ))}
 
-      {/* ================= ADD MORE BUTTON ================= */}
-      {isRoot && scope === "traffic" && (
+      {/* ================= ADD MORE BUTTON (STATIC + TRAFFIC) ================= */}
+      {isRoot && (scope === "traffic" || scope === "static") && (
         <div className="pt-4 flex justify-end">
           <button
             type="button"
