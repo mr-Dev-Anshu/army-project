@@ -331,13 +331,13 @@ export default function OverallFormationAnalysisTable({ onBack }: OverallFormati
                                         return (
                                             <React.Fragment key={`${index}-${formation}`}>
                                                 <td className="px-2 py-3 border-r border-gray-300 text-center font-semibold">
-                                                    {String(data.total || 0).padStart(2, '0')}
+                                                    {data.total > 0 ? String(data.total).padStart(2, '0') : "--"}
                                                 </td>
                                                 <td className="px-2 py-3 border-r border-gray-300 text-center font-medium text-[#0A0A0A]">
-                                                    {String(data.taken || 0).padStart(2, '0')}
+                                                    {data.taken > 0 ? String(data.taken).padStart(2, '0') : "--"}
                                                 </td>
                                                 <td className="px-2 py-3 border-r-[1.5px]  border-gray-800  text-center font-medium text-[#0A0A0A]">
-                                                    {String(data.pending || 0).padStart(2, '0')}
+                                                    {data.pending > 0 ? String(data.pending).padStart(2, '0') : "--"}
                                                 </td>
                                             </React.Fragment>
                                         );
