@@ -188,12 +188,8 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
     // Update onClose to handle clearing edit mode if we are editing
     const handleCancelEdit = () => {
         if (initialData) {
-            // Go back
-            const params = new URLSearchParams(searchParams.toString());
-            if (params.has("id")) {
-                params.delete("id");
-                router.replace(`${pathname}?${params.toString()}`);
-            }
+            // For backend edits, Cancel means go back to the list
+            onClose();
         } else {
             // Local cancel
             setEditingId(null);
