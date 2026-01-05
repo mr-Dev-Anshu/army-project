@@ -68,12 +68,19 @@ export function FormInput({
   return (
     <div className="space-y-1">
       <Label>{label}</Label>
+
       <Input
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
+        className={`
+          ${value ? "border-blue-500 bg-blue-50" : "border-gray-300"}
+          focus-visible:ring-0
+          focus-visible:ring-offset-0
+        `}
       />
     </div>
   );
 }
+
