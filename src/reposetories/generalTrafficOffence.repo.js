@@ -92,6 +92,16 @@ async getGroupedByOffenceType(filters = {}) {
     }
   }
 
+//  unit and fmn
+
+   if (filters.unit) {
+    matchStage["customFields.unit"] = filters.unit;
+  }
+
+  if (filters.fmn) {
+    matchStage["customFields.fmn"] = filters.fmn;
+  }
+
   if (filters.vehicleType) {
     matchStage.vehicleType = filters.vehicleType;
   }
