@@ -170,7 +170,7 @@ export default function Step5WitnessList() {
       {/* LIST */}
       <DynamicOffenderList
         onDelete={handleDeleteWitness}
-        data={witnesses}
+        data={witnesses as any}
         title="Witness List"
       />
     </FormSection>

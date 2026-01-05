@@ -214,13 +214,13 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                     /* 1. PARTICULARS */
                     sectionHeading("1.", "PARTICULARS:"),
 
-                    createParticularsBox("1.1", data.particulars.primary, "1.1.1", "Driver Name"),
+                    ...(data.particulars ? [createParticularsBox("1.1", data.particulars.primary, "1.1.1", "Driver Name")] : []),
 
-                    ...(data.particulars.secondary
+                    ...(data.particulars?.secondary
                         ? [spacer(100), createParticularsBox("1.2", data.particulars.secondary, "1.2.1", "Co-Driver Name")]
                         : []),
 
-                    ...(data.particulars.vehicle
+                    ...(data.particulars?.vehicle
                         ? [spacer(100), createVehicleBox(data.particulars.vehicle)]
                         : []),
 
@@ -242,7 +242,7 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                     new Paragraph({
                         children: [
                             new TextRun({ text: "(2.7)  ", size: 24 }),
-                            new TextRun({ text: data.occurrence.statement, size: 24 }),
+                            new TextRun({ text: data.occurrence?.statement || "", size: 24 }),
                         ],
                         alignment: AlignmentType.JUSTIFIED,
                     }),
@@ -252,10 +252,10 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                     /* 3. OFFENCE */
                     sectionHeading("3.", "OFFENCE COMMITTED/ORDERS CONTRAVENED:"),
 
-                    offenceParagraph("(3.1)", "Offence Type", data.offence.type),
-                    offenceRef("(i.)", data.offence.ref1),
-                    offenceRef("(ii.)", data.offence.ref2),
-                    offenceDescription(data.offence.description),
+                    offenceParagraph("(3.1)", "Offence Type", data.offence?.type || ""),
+                    offenceRef("(i.)", data.offence?.ref1 || ""),
+                    offenceRef("(ii.)", data.offence?.ref2 || ""),
+                    offenceDescription(data.offence?.description || ""),
 
                     spacer(),
 
@@ -280,14 +280,14 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                     spacer(150),
 
                     new Paragraph({
-                        children: [new TextRun({ text: data.remarks.text, size: 24 })],
+                        children: [new TextRun({ text: data.remarks?.text || "", size: 24 })],
                         alignment: AlignmentType.JUSTIFIED,
                     }),
 
                     spacer(100),
 
-                    footerLine("Station :", data.remarks.station),
-                    footerLine("Dated :", data.remarks.dated),
+                    footerLine("Station :", data.remarks?.station || ""),
+                    footerLine("Dated :", data.remarks?.dated || ""),
                 ],
             },
         ],

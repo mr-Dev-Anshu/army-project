@@ -354,7 +354,6 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
                     v.replace(/\D/g, "").slice(0, 12)
                   )
                 }
-                maxLength={12}
                 fieldType="ownerAadhar"
               />
             </div>
@@ -444,7 +443,6 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
                         aadhar: v.replace(/\D/g, "").slice(0, 12),
                       }))
                     }
-                    maxLength={12}
                     fieldType="workerAadhar"
                   />
                 </div>

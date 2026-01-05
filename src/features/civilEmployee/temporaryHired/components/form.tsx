@@ -322,7 +322,6 @@ export default function TemporaryHiredWorkerPassForm({
               onChange={(v) =>
                 setField("workerAadhar", v.replace(/\D/g, "").slice(0, 12))
               }
-              maxLength={12}
               fieldType="workerAadhar"
             />
           </div>
@@ -367,7 +366,6 @@ export default function TemporaryHiredWorkerPassForm({
                 onChange={(v) =>
                   setField("permanentPincode", v.replace(/\D/g, "").slice(0, 6))
                 }
-                maxLength={6}
                 fieldType="permanentPincode"
               />
             </div>
@@ -488,7 +486,6 @@ export default function TemporaryHiredWorkerPassForm({
                     aadhar: v.replace(/\D/g, "").slice(0, 12),
                   }))
                 }
-                maxLength={12}
                 fieldType="subWorkerAadhar"
               />
             </div>

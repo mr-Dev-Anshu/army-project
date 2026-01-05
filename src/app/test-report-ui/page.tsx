@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
+import { MilitaryPoliceReport, MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { generateWordReport } from "@/utils/generateWordReport";
