@@ -6,15 +6,19 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart3, ChevronRight } from "lucide-react";
 
 import { useGetDomesticAnalytics } from "./domesticAnalysis/hooks";
+import { useGetDivisionAnalysis } from "./hooks/useDivisionAnalysis";
 import { useMemo, useState } from "react";
 import FormationAnalysisTable from "./components/FormationAnalysisTable";
-import Hq36RapidDivisionTable from "./components/Hq36RapidDivisionTable";
+import Hq36RapidDivisionTable from "./components/DivisionTable";
+import OverallFormationAnalysisTable from "./components/OverallFormationAnalysisTable";
 
 export default function MpOffenceAnalysisMonthlyReport() {
     const [selectedFormation, setSelectedFormation] = useState<{
         groupKey: string;
         subtitle: string;
     } | null>(null);
+
+    const [showOverallAnalysis, setShowOverallAnalysis] = useState(false);
 
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
@@ -41,51 +45,81 @@ export default function MpOffenceAnalysisMonthlyReport() {
         return { totalOffences: total, totalPending: pending, severity: risk };
     }, [analyticsData]);
 
-    /* Static Data for UI matching */
-    const STATIC_OTHER_FORMATIONS = [
+    const firstDayOfMonth = new Date(currentYear, currentDate.getMonth(), 1).toISOString();
+
+    // Fetch Division Analysis (Grouped) for Other Formations
+    const { data: divisionData, isLoading: isDivisionLoading } = useGetDivisionAnalysis({
+        groupBy: "all"
+    });
+
+    /* Static Data for UI matching - merged with dynamic data */
+    const FORMATIONS_LIST = [
         {
             groupKey: "HQ 36 RAPID Division",
             subtitle: "36 RAPID PRO UNIT",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
         },
         {
             groupKey: "HQ 31 ARRMD DIVISION",
             subtitle: "31 ARMD Division PRO Unit",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
         },
         {
             groupKey: "HQ 41 Arty Division",
             subtitle: "41 Arty Division PRO unit",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
         },
         {
             groupKey: "HQ 54 Inf Division",
             subtitle: "54 Inf Division PRO unit",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
         },
     ];
 
+    const formationsWithData = useMemo(() => {
+        if (!divisionData || !Array.isArray(divisionData)) {
+            // Return static list with 0s if no data
+            return FORMATIONS_LIST.map(f => ({
+                ...f,
+                total: 0,
+                actionPending: 0,
+                severity: "Low Risk"
+            }));
+        }
+
+        return FORMATIONS_LIST.map(f => {
+            const match = divisionData.find((d: any) => d.divisionName === f.groupKey);
+            // Use offenceCount as "Total Offence" as requested to show count of entries/offences
+            const total = match ? (match.offenceCount || 0) : 0;
+            const pending = match ? (match.totalActionPending || 0) : 0;
+            let risk = "Low Risk";
+            if (pending > 20) risk = "High Risk";
+            else if (pending > 10) risk = "Medium Risk";
+
+            return {
+                ...f,
+                total,
+                actionPending: pending,
+                severity: risk
+            };
+        });
+    }, [divisionData]);
+
+
+
     if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
+    if (showOverallAnalysis) {
+        return <OverallFormationAnalysisTable onBack={() => setShowOverallAnalysis(false)} />;
+    }
+
     if (selectedFormation) {
-        if (selectedFormation.groupKey === "HQ 36 RAPID Division") {
+        if (selectedFormation.groupKey === "HQ 21 CORPS") {
             return (
-                <Hq36RapidDivisionTable
+                <FormationAnalysisTable
                     formation={selectedFormation}
                     onBack={() => setSelectedFormation(null)}
                 />
             );
         }
         return (
-            <FormationAnalysisTable
+            <Hq36RapidDivisionTable
                 formation={selectedFormation}
                 onBack={() => setSelectedFormation(null)}
             />
@@ -108,7 +142,10 @@ export default function MpOffenceAnalysisMonthlyReport() {
                         MP Offence Analysis Monthly Report
                     </span>
                 </div>
-                <Button className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer">
+                <Button
+                    className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer"
+                    onClick={() => setShowOverallAnalysis(true)}
+                >
                     View Overall Formation Analysis
                     <BarChart3 className="w-4 h-4 ml-1" />
                 </Button>
@@ -200,7 +237,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {STATIC_OTHER_FORMATIONS.map((formation: any, index: number) => (
+                    {formationsWithData.map((formation: any, index: number) => (
                         <FormationCard
                             key={index}
                             title={formation.groupKey}

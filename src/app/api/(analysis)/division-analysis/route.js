@@ -45,8 +45,30 @@ export async function GET(request) {
       return NextResponse.json(groupedData);
     }
 
+    if (groupBy === "all") {
+      const queryParams = {
+        offence: searchParams.get("offence"),
+        divisionName: searchParams.get("divisionName"),
+        monthYear: searchParams.get("monthYear"),
+      };
+
+      Object.keys(queryParams).forEach((key) => {
+        if (!queryParams[key]) delete queryParams[key];
+      });
+
+      const allData = await divisionAnalysisService.getAllDivisionAnalysis(queryParams);
+      return NextResponse.json(allData);
+    }
+
     /* ===================== DEFAULT GET ALL ===================== */
-    const data = await divisionAnalysisService.getAll();
+    const filters = {};
+    const divisionName = searchParams.get("divisionName");
+    const monthYear = searchParams.get("monthYear");
+
+    if (divisionName) filters.divisionName = divisionName;
+    if (monthYear) filters.monthYear = monthYear; // Note: exact match on string or date object might be needed depending on DB schema
+
+    const data = await divisionAnalysisService.getAll(filters);
     return NextResponse.json(data);
 
   } catch (error) {
