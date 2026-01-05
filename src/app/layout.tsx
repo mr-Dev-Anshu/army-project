@@ -4,6 +4,7 @@ import "./globals.css";
 import { FormProvider } from "@/context/FormContext";
 import Wrapper from "@/common/hoc/Wrapper";
 import { ToastContainer } from "react-toastify";
+import Sidebar from "@/common/features/dashboard/components/dashboard-components/Sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,24 +13,33 @@ export const metadata: Metadata = {
   description: "Awesome app with breadcrumbs",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body suppressHydrationWarning className={inter.className}>
+// app/layout.tsx
+import { SidebarProvider } from "@/context/SidebarContext";
+// ... other imports
 
-        {/* Main Content */}
-        <Wrapper>
-          <FormProvider>
-            <main className="min-h-screen bg-gray-50">
-              {children}
-              <ToastContainer position="top-right" autoClose={3000} />
-            </main>
-          </FormProvider>
-        </Wrapper>
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} h-full bg-[#f5f5f7]`} suppressHydrationWarning>
+        <FormProvider>
+          <Wrapper>
+            <SidebarProvider>          
+              <div className="flex h-screen overflow-hidden">
+                <Sidebar />
+
+                <main className="flex-1 flex flex-col overflow-hidden">
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="p-4 sm:p-6 md:p-8">
+                      {children}
+                    </div>
+                  </div>
+                </main>
+              </div>
+
+              <ToastContainer /* ... */ />
+            </SidebarProvider>
+          </Wrapper>
+        </FormProvider>
       </body>
     </html>
   );
