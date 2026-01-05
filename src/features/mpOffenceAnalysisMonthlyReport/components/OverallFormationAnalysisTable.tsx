@@ -297,11 +297,11 @@ export default function OverallFormationAnalysisTable({ onBack }: OverallFormati
                             <th scope="col" className="px-4 py-3 border border-gray-300 w-16 text-center sticky left-0 z-20 bg-[#E5E5E5]" rowSpan={2}>
                                 Sr no.
                             </th>
-                            <th scope="col" className="px-4 py-3 border border-gray-300 sticky left-16 z-20 bg-[#E5E5E5] w-60" rowSpan={2}>
+                            <th scope="col" className="px-4 py-3 border border-gray-300 text-center  bg-[#E5E5E5] w-60" rowSpan={2}>
                                 Offence Type
                             </th>
                             {FORMATION_ORDER.map((formation) => (
-                                <th key={formation} scope="col" className="px-4 py-2 border border-gray-300 text-center" colSpan={3}>
+                                <th key={formation} scope="col" className="px-4 py-2 border border-l border-gray-300 text-center" colSpan={3}>
                                     {formation}
                                 </th>
                             ))}
@@ -309,9 +309,9 @@ export default function OverallFormationAnalysisTable({ onBack }: OverallFormati
                         <tr>
                             {FORMATION_ORDER.map((formation) => (
                                 <React.Fragment key={`${formation}-subs`}>
-                                    <th className="px-2 py-2 border border-gray-300 text-center w-20 bg-[#F5F5F5] font-semibold text-[10px] leading-tight text-gray-700">Total Cases</th>
-                                    <th className="px-2 py-2 border border-gray-300 text-center w-20 bg-[#F5F5F5] font-semibold text-[10px] leading-tight text-gray-700">Action Taken</th>
-                                    <th className="px-2 py-2 border border-gray-300 text-center w-20 bg-[#F5F5F5] font-semibold text-[10px] leading-tight text-gray-700">Action Pending</th>
+                                    <th className="px-2 py-2 border border-gray-300 text-center w-20 bg-[#e5e5e5] font-semibold text-[10px] leading-tight text-[#0A0A0A]">Total Cases</th>
+                                    <th className="px-2 py-2 border border-gray-300 text-center w-20 bg-[#e5e5e5] font-semibold text-[10px] leading-tight text-[#0A0A0A]">Action Taken</th>
+                                    <th className="px-2 py-2 border border-gray-300 text-center w-20 bg-[#e5e5e5] font-semibold text-[10px] leading-tight text-[#0A0A0A]">Action Pending</th>
                                 </React.Fragment>
                             ))}
                         </tr>
@@ -319,24 +319,24 @@ export default function OverallFormationAnalysisTable({ onBack }: OverallFormati
                     <tbody className="bg-white">
                         {filteredData.length > 0 ? (
                             filteredData.map((row, index) => (
-                                <tr key={index} className="hover:bg-gray-50 border-b border-gray-200 text-gray-700">
-                                    <td className="px-4 py-3 border-r border-gray-200 text-center font-medium sticky left-0 bg-white z-10 w-16">
+                                <tr key={index} className="hover:bg-gray-50 border-b border-gray-300 text-[#0A0A0A]">
+                                    <td className="px-4 py-3 border border-gray-300 text-center font-medium bg-white  w-16">
                                         {String(index + 1).padStart(2, '0')}
                                     </td>
-                                    <td className="px-4 py-3 border-r border-gray-200 font-medium sticky left-16 bg-white z-10 w-60 truncate" title={row.offenceType}>
+                                    <td className="px-4 py-3 border border-gray-300 font-medium bg-white w-60 truncate" title={row.offenceType}>
                                         {row.offenceType}
                                     </td>
                                     {FORMATION_ORDER.map((formation) => {
                                         const data = row[formation] || { total: 0, taken: 0, pending: 0 };
                                         return (
                                             <React.Fragment key={`${index}-${formation}`}>
-                                                <td className="px-2 py-3 border-r border-gray-100 text-center font-semibold">
+                                                <td className="px-2 py-3 border-r border-gray-300 text-center font-semibold">
                                                     {String(data.total || 0).padStart(2, '0')}
                                                 </td>
-                                                <td className="px-2 py-3 border-r border-gray-100 text-center font-medium text-gray-600">
+                                                <td className="px-2 py-3 border-r border-gray-300 text-center font-medium text-[#0A0A0A]">
                                                     {String(data.taken || 0).padStart(2, '0')}
                                                 </td>
-                                                <td className="px-2 py-3 border-r border-gray-200 text-center font-medium text-gray-600">
+                                                <td className="px-2 py-3 border-r-[1.5px]  border-gray-800  text-center font-medium text-[#0A0A0A]">
                                                     {String(data.pending || 0).padStart(2, '0')}
                                                 </td>
                                             </React.Fragment>
