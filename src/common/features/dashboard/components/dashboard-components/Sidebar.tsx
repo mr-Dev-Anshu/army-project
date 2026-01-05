@@ -99,7 +99,7 @@ const Sidebar = () => {
     {
       icon: <PieChart className="w-5 h-5" />,
       label: "Dashboard",
-      href: "/dashboard",
+      href: "/",
       badge: "1",
     },
   ];
@@ -196,10 +196,10 @@ const Sidebar = () => {
           isCollapsed
             ? "h-10 justify-center hover:bg-gray-100"
             : cn(
-                "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
-                isSubmenu && "py-1.5",
-                active && "bg-blue-50 text-blue-700 hover:bg-blue-50"
-              )
+              "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
+              isSubmenu && "py-1.5",
+              active && "bg-blue-50 text-blue-700 hover:bg-blue-50"
+            )
         )}
       >
         {!isSubmenu && (
