@@ -42,6 +42,7 @@ const labelKeyMap: Record<string, string> = {
   FMN: "fmn",
   Address: "address",
   "ID Card Number": "iCardNumber",
+  "Army Official Name": "armyOfficialName",
 };
 
 export default function OffenderDynamicForm({
@@ -198,6 +199,7 @@ export default function OffenderDynamicForm({
               placeholder={f.placeholder}
               value={value}
               onChange={(v) => saveField(f.label, v)}
+              type={f.type === "input" ? "text" : f.type}
             />
           );
         })}

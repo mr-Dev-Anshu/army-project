@@ -36,7 +36,7 @@ export const offenderFormsConfig: any = {
     fields: [
       { type: "input", label: "Full Name", placeholder: "Enter Name" },
       { type: "input", label: "Address", placeholder: "Enter Address" },
-      {type:"input",label:"Father's / Husband's Name" , placeholder:"Enter Father's / Husband's Name"},
+      { type: "input", label: "Father's / Husband's Name", placeholder: "Enter Father's / Husband's Name" },
 
       { type: "input", label: "I Card Number", placeholder: "Enter ID" },
     ],
@@ -89,7 +89,7 @@ export const offenderFormsConfig: any = {
         options: [],
       },
 
-      { type: "input", label: "Name", placeholder: "Army Official Name" },
+      { type: "input", label: "Army Official Name", placeholder: "Army Official Name" },
 
       { type: "input", label: "Place of QTR.", placeholder: "Enter Location" },
       { type: "input", label: "Unit", placeholder: "Select Unit" },
@@ -115,12 +115,12 @@ export const offenderFormsConfig: any = {
 
       { type: "input", label: "Pass No.", placeholder: "Enter Pass Number" },
       {
-        type: "input",
+        type: "date",
         label: "Pass Issue Date",
         placeholder: "Pick a date",
       },
       {
-        type: "input",
+        type: "date",
         label: "Pass Expire Date",
         placeholder: "Pick a date",
       },
