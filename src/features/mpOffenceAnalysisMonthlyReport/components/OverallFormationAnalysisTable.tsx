@@ -290,7 +290,7 @@ export default function OverallFormationAnalysisTable({ onBack }: OverallFormati
             </div>
 
             {/* Custom Table Implementation */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto shadow-sm">
+            <div className="bg-white border border-gray-300 rounded-lg overflow-x-auto shadow-sm">
                 <table className="w-full text-sm text-left border-collapse">
                     <thead className="text-xs text-[#0A0A0A] uppercase bg-[#E5E5E5] font-bold">
                         <tr>
@@ -336,7 +336,7 @@ export default function OverallFormationAnalysisTable({ onBack }: OverallFormati
                                                 <td className="px-2 py-3 border-r border-gray-300 text-center font-medium text-[#0A0A0A]">
                                                     {data.taken > 0 ? String(data.taken).padStart(2, '0') : "--"}
                                                 </td>
-                                                <td className="px-2 py-3 border-r-[1.5px]  border-gray-800  text-center font-medium text-[#0A0A0A]">
+                                                <td className="px-2 py-3 border-r-[1.5px]  border-gray-400  text-center font-medium text-[#0A0A0A]">
                                                     {data.pending > 0 ? String(data.pending).padStart(2, '0') : "--"}
                                                 </td>
                                             </React.Fragment>
