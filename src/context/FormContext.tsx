@@ -188,6 +188,24 @@ export const initialState: GlobalFormState = {
         recommendation: "",
       },
     },
+
+    shopkeeper: {
+      shopName: "",
+      shopAddress: "",
+      unit: "",
+      ownerName: "",
+      ownerMobile: "",
+      ownerAadhar: "",
+      passNumber: "",
+      priceListApproved: false,
+      priceListEffectiveFrom: null,
+      workers: [],
+      validFrom: null,
+      validTill: null,
+    },
+
+    maidServant: {} as any, // Placeholder until fully defined
+    tempWorker: {} as any,   // Placeholder until fully defined
   },
 };
 

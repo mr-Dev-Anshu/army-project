@@ -118,7 +118,7 @@ const Sidebar = () => {
     {
       icon: <ClipboardList className="w-5 h-5" />,
       label: "MP Occurrence & Investigation Report",
-      href: "/create-record/mp-report",
+      href: "/create-record/mp-investigation",
     },
   ];
 
