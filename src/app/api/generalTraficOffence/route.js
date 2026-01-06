@@ -19,6 +19,11 @@ export async function GET(request) {
         vehicleType: searchParams.get('vehicleType'),
         vehicleCategory: searchParams.get('vehicleCategory'),
         isVehicleInvolved: searchParams.get('isVehicleInvolved'),
+
+
+          fromDate: searchParams.get("fromDate"),
+        toDate: searchParams.get("toDate"),
+
         date: searchParams.get('date'),
       };
 

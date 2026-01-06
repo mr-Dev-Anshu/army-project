@@ -20,15 +20,35 @@ import ConeIcon from "@/components/icons/ConeIcon";
 import MpAlertIcon from "@/components/icons/MpAlertIcon";
 import Link from "next/link";
 
+
+const StatsCardSkeleton = () => {
+  return (
+    <div className="animate-pulse rounded-xl border bg-white p-5 space-y-4">
+      <div className="h-10 w-10 bg-gray-200 rounded-lg" />
+      <div className="h-4 w-40 bg-gray-200 rounded" />
+      <div className="h-8 w-24 bg-gray-300 rounded" />
+      <div className="h-3 w-20 bg-gray-200 rounded" />
+    </div>
+  );
+};
+
+
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
 
   // Fetch Data
-  const { data: trafficOffences } = useGetAllTrafficOffences({
-    groupBy: "offenceType",
-  });
-  const { data: staticSpeedRecords } = useGetStaticSpeedRecords();
-  const { data: mpReports } = useGetAllMPReports();
+ const { data: trafficOffences, isLoading: trafficLoading } =
+  useGetAllTrafficOffences({ groupBy: "offenceType" });
+
+const { data: staticSpeedRecords, isLoading: speedLoading } =
+  useGetStaticSpeedRecords();
+
+const { data: mpReports, isLoading: mpLoading } =
+  useGetAllMPReports();
+
+
+  const isStatsLoading = trafficLoading || speedLoading || mpLoading;
+
 
   // Process Traffic Offences
   const allTrafficOffences = useMemo(() => {
@@ -357,11 +377,16 @@ export default function Dashboard() {
         </div>
 
         {/* STATS GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 print:hidden">
-          {statsData.map((card, i) => (
-            <DynamicStatsCard key={i} {...card} />
-          ))}
-        </div>
+       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 print:hidden">
+  {isStatsLoading
+    ? Array.from({ length: 4 }).map((_, i) => (
+        <StatsCardSkeleton key={i} />
+      ))
+    : statsData.map((card, i) => (
+        <DynamicStatsCard key={i} {...card} />
+      ))}
+</div>
+
 
         {/* QUICK ACTIONS */}
         <div className="space-y-4 print:hidden">

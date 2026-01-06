@@ -1,15 +1,23 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Loader2, ArrowLeft, Download } from "lucide-react";
+
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
+
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
-import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
+
+import MilitaryPoliceReport, {
+  MilitaryPoliceReportProps,
+} from "@/components/reports/MilitaryPoliceReport";
+
 import { generateWordReport } from "@/utils/generateWordReport";
+
+/* ================= TABLE SECTION ================= */
 
 const TableSection = ({
   groups,
@@ -22,24 +30,25 @@ const TableSection = ({
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
 }) => {
-  const uniqueOffenceTypesCount = groups.length;
-
   return (
-    <div className="bg-white rounded-lg shadow border border-gray-200 mt-6 overflow-hidden">
-      {/* Main List Header */}
-      <div className="flex items-center bg-white px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-        <div className="flex-1">
-          Type of Offence ({uniqueOffenceTypesCount} OFFENCES)
-        </div>
+    <div className="bg-white rounded-lg shadow border mt-6 overflow-hidden">
+      <div className="flex items-center px-6 py-3 border-b text-xs font-semibold text-gray-500 uppercase">
+        <div className="flex-1">Type of Offence ({groups.length})</div>
         <div className="w-64 text-center">Action Status</div>
-        <div className="w-32 text-right">No. of Records</div>
+        <div className="w-32 text-right">Records</div>
       </div>
 
-      {/* Content */}
-      <GroupedList data={groups} isVehicleInvolved={isVehicleInvolved} onView={onView} onPrint={onPrint} />
+      <GroupedList
+        data={groups}
+        isVehicleInvolved={isVehicleInvolved}
+        onView={onView}
+        onPrint={onPrint}
+      />
     </div>
   );
 };
+
+/* ================= MAIN PAGE ================= */
 
 export default function ReportsPage({
   viewType = "vehicle",
@@ -50,193 +59,108 @@ export default function ReportsPage({
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
-  // Auto-print effect
-  React.useEffect(() => {
-    if (viewingReport && shouldAutoPrint) {
-      // Small timeout to allow render
-      const timer = setTimeout(() => {
-        window.print();
-        setShouldAutoPrint(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [viewingReport, shouldAutoPrint]);
+  /* ================= FILTER STATE ================= */
 
-  // State for filters
   const [filters, setFilters] = useState({
     search: "",
     offenceType: "All",
-    date: "",
+    fromDate: "",
+    toDate: "",
+    unit: "",
+    fmn: "",
     actionStatus: "All",
-    sortOrder: "desc" as "asc" | "desc", // Default
+    sortOrder: "desc" as "asc" | "desc",
   });
 
-  // Prepare params for backend
+  /* ================= AUTO PRINT ================= */
+
+  useEffect(() => {
+    if (viewingReport && shouldAutoPrint) {
+      const t = setTimeout(() => {
+        window.print();
+        setShouldAutoPrint(false);
+      }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [viewingReport, shouldAutoPrint]);
+
+  /* ================= API PARAMS ================= */
+
   const apiParams = useMemo(() => {
-    const params: any = { groupBy: "offenceType" };
+    const params: any = {
+      groupBy: "offenceType",
+      isVehicleInvolved: viewType === "vehicle",
+    };
 
-    if (filters.offenceType && filters.offenceType !== "All") {
-      params.offenceType = filters.offenceType;
-    }
-
-    if (filters.actionStatus && filters.actionStatus !== "All") {
-      params.status = filters.actionStatus; // Backend accepts "Taken" / "Pending"
-    }
-
-    if (filters.date) {
-      params.date = filters.date.split('T')[0];
-    }
+    if (filters.offenceType !== "All") params.offenceType = filters.offenceType;
+    if (filters.actionStatus !== "All") params.status = filters.actionStatus;
+    if (filters.fromDate) params.fromDate = filters.fromDate;
+    if (filters.toDate) params.toDate = filters.toDate;
+    if (filters.unit) params.unit = filters.unit;
+    if (filters.fmn) params.fmn = filters.fmn;
 
     return params;
-  }, [filters.offenceType, filters.actionStatus, filters.date]);
+  }, [filters, viewType]);
 
   const { data, isLoading, isError } = useGetAllTrafficOffences(apiParams);
 
-  const optionsParams = useMemo(() => ({
-    groupBy: "offenceType",
-    isVehicleInvolved: viewType === "vehicle"
-  }), [viewType]);
+  /* ================= CLIENT SIDE FILTERING ================= */
 
-  const { data: optionsData } = useGetAllTrafficOffences(optionsParams);
-
-  // Process data into two sets: Vehicle Involved vs No Vehicle Involved
   const { vehicleGroups, noVehicleGroups } = useMemo(() => {
     if (!data) return { vehicleGroups: [], noVehicleGroups: [] };
 
-    const vGroups: any[] = [];
-    const nvGroups: any[] = [];
+    const filterRecord = (o: any) => {
+      // Search
+      if (filters.search) {
+        const s = filters.search.toLowerCase();
+        if (
+          !o.reportNumber?.toLowerCase().includes(s) &&
+          !o.currentOffenceType?.toLowerCase().includes(s)
+        ) {
+          return false;
+        }
+      }
+
+      // Unit
+      if (filters.unit) {
+        const unit =
+          o.customFields?.unit ||
+          o.onDutyDetailsMPReporting?.unit ||
+          o.offenders?.[0]?.offenderDetails?.unit;
+
+        if (!unit || unit !== filters.unit) return false;
+      }
+
+      // FMN
+      if (filters.fmn) {
+        const fmn =
+          o.customFields?.fmn ||
+          o.offenders?.[0]?.offenderDetails?.fmn;
+
+        if (!fmn || fmn !== filters.fmn) return false;
+      }
+
+      return true;
+    };
+
+    const vg: any[] = [];
+    const nvg: any[] = [];
 
     data.forEach((group: any) => {
+      const v = group.offences
+        ?.filter((o: any) => o.isVehicleInvolved && filterRecord(o)) || [];
 
-      const matchesFilter = (o: any) => {
-        // Date Check
-        if (filters.date) {
-          const rawDate = o.offenceOccurenceDetails?.timeOfOffence || o.createdAt;
-          if (rawDate) {
-            const recordDate = new Date(rawDate).toISOString().split('T')[0];
-            if (recordDate !== filters.date) return false;
-          }
-        }
+      const nv = group.offences
+        ?.filter((o: any) => !o.isVehicleInvolved && filterRecord(o)) || [];
 
-        if (filters.search) {
-          const searchLower = filters.search.toLowerCase();
-          const reportNo = o.reportNumber?.toLowerCase() || "";
-          const offenceType = o.currentOffenceType?.toLowerCase() || "";
-          if (!reportNo.includes(searchLower) && !offenceType.includes(searchLower)) return false;
-        }
-
-        return true;
-      };
-
-
-      let vOffences = group.offences?.filter((o: any) => o.isVehicleInvolved && matchesFilter(o)) || [];
-      let nvOffences = group.offences?.filter((o: any) => !o.isVehicleInvolved && matchesFilter(o)) || [];
-
-      // Sort
-      if (filters.sortOrder) {
-        const sorter = (a: any, b: any) => {
-          const dateA = new Date(a.offenceOccurenceDetails?.timeOfOffence || a.createdAt).getTime();
-          const dateB = new Date(b.offenceOccurenceDetails?.timeOfOffence || b.createdAt).getTime();
-          return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-        };
-        vOffences.sort(sorter);
-        nvOffences.sort(sorter);
-      }
-
-      if (vOffences.length > 0) {
-        vGroups.push({ ...group, offences: vOffences });
-      }
-
-      if (nvOffences.length > 0) {
-        nvGroups.push({ ...group, offences: nvOffences });
-      }
+      if (v.length) vg.push({ ...group, offences: v });
+      if (nv.length) nvg.push({ ...group, offences: nv });
     });
 
-    return { vehicleGroups: vGroups, noVehicleGroups: nvGroups };
+    return { vehicleGroups: vg, noVehicleGroups: nvg };
   }, [data, filters]);
 
-  const mapToReportProps = (offence: any): MilitaryPoliceReportProps => {
-    const primary = offence.offenders?.[0]?.offenderDetails || {};
-    const secondary = offence.offenders?.[1]?.offenderDetails;
-    const mpDetails = offence.onDutyDetailsMPReporting || {};
-    const occDetails = offence.offenceOccurenceDetails || {};
-    const witness = offence.witnessDetails?.[0] || {};
-    const date = new Date(occDetails.timeOfOffence || offence.createdAt);
-
-    // Generate report number if not provided
-    const generatedReportNo = offence.reportNumber || `GTO/21 CPU/${(offence._id?.slice(-4) || "0000").toUpperCase()}/${new Date().getFullYear()}`;
-
-    return {
-      reportNo: generatedReportNo,
-      reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
-      particulars: {
-        primary: {
-          aadharCardNo: primary.aadharCardNo || "N/A",
-          name: primary.name || "N/A",
-          so: primary.so || "N/A",
-          relation: primary.relation || "N/A",
-          armyNo: primary.armyNo || "N/A",
-          rank: primary.rank || "N/A",
-          unit: mpDetails.unit || primary.unit || "MP Unit",
-          fmn: offence.fmn || primary.fmn || "HQ 21 Corps",
-          command: primary.command || "N/A",
-          address: primary.address || "N/A",
-          iCardNo: primary.iCardNo || "N/A",
-        },
-        secondary: secondary ? {
-          aadharCardNo: secondary.aadharCardNo || "N/A",
-          name: secondary.name || "N/A",
-          so: secondary.so || "N/A",
-          relation: secondary.relation || "N/A",
-          armyNo: secondary.armyNo || "N/A",
-          rank: secondary.rank || "N/A",
-          unit: mpDetails.unit || secondary.unit || "MP Unit",
-          fmn: offence.fmn || secondary.fmn || "HQ 21 Corps",
-          command: secondary.command || "N/A",
-          address: secondary.address || "N/A",
-          iCardNo: secondary.iCardNo || "N/A",
-        } : undefined,
-        vehicle: offence.vehicleNumber ? {
-          baNo: offence.vehicleNumber,
-          makeAndTake: offence.vehicleName || ""
-        } : undefined,
-      },
-      occurrence: {
-        dateOfDuty: mpDetails.dateOfDuty ? new Date(mpDetails.dateOfDuty).toLocaleDateString("en-GB") : date.toLocaleDateString("en-GB"),
-        dutyTime: mpDetails.dutyTime || "N/A",
-        dutyLocation: mpDetails.dutyLocation || mpDetails.placeOfDuty || "N/A",
-        nameOfWitnessingOfficial1: witness.name || "N/A",
-        nameOfWitnessingOfficial2: offence.witnessDetails?.[1]?.name || "",
-        nameOfWitnessingOfficial3: offence.witnessDetails?.[2]?.name || "",
-        timeOfOffence: date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }),
-        locationOfOffence: occDetails.incidentLocation || "N/A",
-        statement: occDetails.statement || occDetails.description || "No statement provided.",
-      },
-      offence: {
-        type: offence.currentOffenceType || offence.offenceTypes?.[0] || "Traffic Offence",
-        ref1: offence.offenceTypeReference?.[0] || "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
-        ref2: offence.offenceTypeReference?.[1] || "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order.",
-        description: occDetails.description || "No description provided.",
-      },
-      witnessSig: {
-        armyNo: witness.armyNo || "",
-        rank: witness.rank || "",
-        name: witness.name || "",
-        unit: witness.unit || "",
-      },
-      mpSig: {
-        armyNo: mpDetails.armyNumber || mpDetails.armyNoReportingMP || "N/A",
-        rank: mpDetails.rank || "N/A",
-        name: mpDetails.nameReportingMP || "N/A",
-        unit: mpDetails.unit || "N/A",
-      },
-      remarks: {
-        text: offence.remarks || "",
-        station: offence.station || "",
-        dated: new Date(offence.createdAt).toLocaleDateString("en-GB"),
-      },
-    };
-  };
+  /* ================= REPORT HELPERS ================= */
 
   const handleDownloadReport = (offence: any) => {
     const props = mapToReportProps(offence);
@@ -248,126 +172,110 @@ export default function ReportsPage({
     setShouldAutoPrint(true);
   };
 
+  /* ================= RENDER STATES ================= */
+
   if (isCreating) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
-            <ArrowLeft className="w-4 h-4" /> Back to Reports
-          </Button>
-          <h1 className="text-lg font-semibold text-gray-800">Create New General & Traffic Offence Report</h1>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <MultiStepForm />
-        </div>
-      </div>
-    )
-  }
-
-  if (viewingReport) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
-          <Button variant="ghost" size="sm" onClick={() => setViewingReport(null)} className="gap-2">
-            <ArrowLeft className="w-4 h-4" /> Back to Reports
-          </Button>
-          <h1 className="text-lg font-semibold text-gray-800">View General Traffic Offence Report</h1>
-          <div className="ml-auto">
-            <Button onClick={() => handleDownloadReport(viewingReport)} variant="outline" size="sm" className="gap-2">
-              <Download className="w-4 h-4" />
-              Download Word Report
-            </Button>
-          </div>
-        </div>
-        <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
-          <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
-        </div>
+      <div className="min-h-screen bg-gray-100">
+        <Button onClick={() => setIsCreating(false)} className="m-4">
+          <ArrowLeft /> Back
+        </Button>
+        <MultiStepForm />
       </div>
     );
   }
 
-  const isVehicleView = viewType === "vehicle";
-  const pageTitle = isVehicleView
-    ? "General & Traffic Offence Reports- Vehicle Involved"
-    : "General & Traffic Offence Reports- No Vehicle Involved";
+  if (viewingReport) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Button onClick={() => setViewingReport(null)} className="m-4">
+          <ArrowLeft /> Back
+        </Button>
+        <Button
+          onClick={() => handleDownloadReport(viewingReport)}
+          className="m-4"
+        >
+          <Download /> Download
+        </Button>
+        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+      </div>
+    );
+  }
 
-  // Calculate total count
-  const activeGroups = isVehicleView ? vehicleGroups : noVehicleGroups;
-  const distinctReportsCount = activeGroups.reduce((acc: number, group: any) => acc + (group.offences?.length || 0), 0);
-
-  // Calculate options from the SEPARATE optionsData query
-  const fetchedOptions = optionsData?.map((g: any) => g.offenceType).filter(Boolean) || [];
-  const offenceTypeOptions = fetchedOptions.length > 0
-    ? fetchedOptions
-    : ["Intoxication", "Over Speeding", "Wrong Parking", "No Helmet"];
+  const activeGroups =
+    viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
+    <div className="min-h-screen bg-gray-50 p-6">
       <ReportPageHeader
-        title={pageTitle}
-        reportCount={distinctReportsCount}
-        onDownload={() => window.print()}
+        title="General & Traffic Offence Reports"
+        reportCount={activeGroups.reduce(
+          (a: number, g: any) => a + g.offences.length,
+          0
+        )}
       />
 
-      {/* Filters */}
+      {/* FILTER BAR */}
       <ReportFilterBar
         filters={filters}
-        onFilterChange={(key, value) =>
-          setFilters((prev) => ({ ...prev, [key]: value }))
+        onFilterChange={(k, v) =>
+          setFilters((p) => ({ ...p, [k]: v }))
         }
-        offenceTypeOptions={offenceTypeOptions}
-        showOffenceType={true}
-        showSort={true}
-        showFilter={true}
+        showOffenceType
+        showDateRange
+        showActionStatus
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({
             search: "",
             offenceType: "All",
-            date: "",
+            fromDate: "",
+            toDate: "",
+            unit: "",
+            fmn: "",
             actionStatus: "All",
             sortOrder: "desc",
           })
         }
       />
 
-      {/* Content Area: Loader, Error, or Data */}
       {isLoading ? (
-        <div className="flex items-center justify-center p-12 bg-white rounded-lg shadow border border-gray-200 mt-6 min-h-[200px]">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <div className="flex justify-center p-10">
+          <Loader2 className="animate-spin w-8 h-8" />
         </div>
       ) : isError ? (
-        <div className="p-8 text-red-500 bg-white rounded-lg shadow border border-gray-200 mt-6 text-center">
-          Failed to load reports.
-        </div>
+        <div className="text-red-500 p-6">Failed to load data</div>
+      ) : activeGroups.length ? (
+        <TableSection
+          groups={activeGroups}
+          isVehicleInvolved={viewType === "vehicle"}
+          onView={setViewingReport}
+          onPrint={handlePrintReport}
+        />
       ) : (
-        /* Conditional Table Rendering */
-        isVehicleView ? (
-          vehicleGroups.length > 0 ? (
-            <TableSection
-              groups={vehicleGroups}
-              isVehicleInvolved={true}
-              onView={setViewingReport}
-              onPrint={handlePrintReport}
-            />
-          ) : (
-            <div className="mt-12 text-center text-gray-500">
-              No "Vehicle Involved" offences found.
-            </div>
-          )
-        ) : noVehicleGroups.length > 0 ? (
-          <TableSection
-            groups={noVehicleGroups}
-            isVehicleInvolved={false}
-            onView={setViewingReport}
-            onPrint={handlePrintReport}
-          />
-        ) : (
-          <div className="mt-12 text-center text-gray-500">
-            No "No Vehicle Involved" offences found.
-          </div>
-        )
+        <div className="text-center text-gray-500 mt-10">
+          No records found
+        </div>
       )}
     </div>
   );
+}
+
+/* ================= REPORT MAPPER ================= */
+
+function mapToReportProps(offence: any): MilitaryPoliceReportProps {
+  return {
+    reportNo: offence.reportNumber || "N/A",
+    reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
+    particulars: {},
+    occurrence: {},
+    offence: {
+      type: offence.currentOffenceType || "Traffic Offence",
+      description: offence.offenceOccurenceDetails?.description || "",
+    },
+    remarks: {
+      text: offence.remarks || "",
+      dated: new Date().toLocaleDateString("en-GB"),
+    },
+  };
 }
