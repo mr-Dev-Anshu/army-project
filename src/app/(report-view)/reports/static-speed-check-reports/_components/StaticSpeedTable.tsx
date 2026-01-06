@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
+import OffenderDetailsCell from "@/app/(report-view)/reports/general-traffic-offence-reports/_components/OffenderDetailsCell";
 import {
   useUpdateStaticSpeedRecord,
   useDeleteStaticSpeedRecord,

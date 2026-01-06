@@ -1,4 +1,5 @@
-// components/common/ReportFilterBar.tsx
+"use client";
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,25 +11,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useGetFieldSuggestions } from "../../features/suggestions/hooks/index";
 
 /* ================= TYPES ================= */
 
 export interface FilterState {
   search: string;
   offenceType?: string;
-
-  // DATE RANGE (NEW)
   fromDate?: string;
   toDate?: string;
-
   actionStatus?: string;
   unit?: string;
   fmn?: string;
-
-  priceListStatus?: string;
   sortOrder?: "asc" | "desc";
-  [key: string]: any;
 }
 
 interface ReportFilterBarProps {
@@ -45,34 +40,6 @@ interface ReportFilterBarProps {
   onReset?: () => void;
 }
 
-/* ================= STATIC OPTIONS ================= */
-
-const UNIT_OPTIONS = [
-  "hq 21 corps",
-  "21 corps signal regt",
-  "unit 3",
-  "5221 asc bn",
-  "11 engr regt",
-  "12 jak li",
-  "rakhi",
-  "21 corps",
-  "104 infantry brigade",
-  "mp unit fallback",
-];
-
-const FMN_OPTIONS = [
-  "hq 21 corps",
-  "fmn-21",
-  "21 mountain division",
-  "central command",
-  "western command",
-  "hq western command",
-  "hq 21 corps pro",
-  "rakhi",
-  "123",
-  "northern command",
-];
-
 /* ================= COMPONENT ================= */
 
 export default function ReportFilterBar({
@@ -88,10 +55,24 @@ export default function ReportFilterBar({
   onAddNew,
   onReset,
 }: ReportFilterBarProps) {
+
+  /* ================= API DATA ================= */
+
+  const { data: unitRes, isLoading: unitLoading } =
+    useGetFieldSuggestions("unit", "");
+
+  const { data: fmnRes, isLoading: fmnLoading } =
+    useGetFieldSuggestions("fmn", "");
+
+  const unitOptions = unitRes?.data ?? [];
+  const fmnOptions = fmnRes?.data ?? [];
+
+  /* ================= UI ================= */
+
   return (
     <div className="flex gap-4 items-end justify-between flex-wrap bg-white p-5 rounded-lg border shadow-sm">
 
-      {/* ================= LEFT SIDE FILTERS ================= */}
+      {/* LEFT FILTERS */}
       <div className="flex flex-wrap gap-4 items-end">
 
         {/* SEARCH */}
@@ -127,50 +108,45 @@ export default function ReportFilterBar({
           </Select>
         )}
 
-        {/* ================= DATE RANGE (NEW) ================= */}
+        {/* DATE RANGE */}
         {showDateRange && (
           <>
-            <div className="flex flex-col">
-              <label className="text-xs text-gray-500 mb-1">From Date</label>
-              <Input
-                type="date"
-                className="w-[150px]"
-                value={filters.fromDate || ""}
-                onChange={(e) =>
-                  onFilterChange("fromDate", e.target.value)
-                }
-              />
-            </div>
+            <Input
+              type="date"
+              className="w-[150px]"
+              value={filters.fromDate || ""}
+              onChange={(e) =>
+                onFilterChange("fromDate", e.target.value)
+              }
+            />
 
-            <div className="flex flex-col">
-              <label className="text-xs text-gray-500 mb-1">To Date</label>
-              <Input
-                type="date"
-                className="w-[150px]"
-                value={filters.toDate || ""}
-                onChange={(e) =>
-                  onFilterChange("toDate", e.target.value)
-                }
-              />
-            </div>
+            <Input
+              type="date"
+              className="w-[150px]"
+              value={filters.toDate || ""}
+              onChange={(e) =>
+                onFilterChange("toDate", e.target.value)
+              }
+            />
           </>
         )}
 
         {/* UNIT DROPDOWN */}
         <Select
+          disabled={unitLoading}
           value={filters.unit || "All"}
           onValueChange={(v) =>
             onFilterChange("unit", v === "All" ? "" : v)
           }
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[170px]">
             <SelectValue placeholder="All Units" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="All">All Units</SelectItem>
-            {UNIT_OPTIONS.map((unit) => (
-              <SelectItem key={unit} value={unit}>
-                {unit}
+            {unitOptions.map((u: any) => (
+              <SelectItem key={u._id} value={u.value}>
+                {u.value}
               </SelectItem>
             ))}
           </SelectContent>
@@ -178,19 +154,20 @@ export default function ReportFilterBar({
 
         {/* FMN DROPDOWN */}
         <Select
+          disabled={fmnLoading}
           value={filters.fmn || "All"}
           onValueChange={(v) =>
             onFilterChange("fmn", v === "All" ? "" : v)
           }
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[170px]">
             <SelectValue placeholder="All FMNs" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="All">All FMNs</SelectItem>
-            {FMN_OPTIONS.map((fmn) => (
-              <SelectItem key={fmn} value={fmn}>
-                {fmn}
+            {fmnOptions.map((f: any) => (
+              <SelectItem key={f._id} value={f.value}>
+                {f.value}
               </SelectItem>
             ))}
           </SelectContent>
@@ -229,7 +206,7 @@ export default function ReportFilterBar({
         )}
       </div>
 
-      {/* ================= RIGHT SIDE ================= */}
+      {/* RIGHT */}
       {onAddNew && (
         <Button
           onClick={onAddNew}

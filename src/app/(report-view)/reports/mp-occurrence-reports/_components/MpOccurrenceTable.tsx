@@ -29,7 +29,7 @@ import { Label } from "@/components/ui/label";
 
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
-import OffenderDetailsCell from "@/app/general-traffic-offence-reports/_components/OffenderDetailsCell";
+import OffenderDetailsCell from "@/app/(report-view)/reports/general-traffic-offence-reports/_components/OffenderDetailsCell";
 
 interface MpOccurrenceTableProps {
   data: any[];

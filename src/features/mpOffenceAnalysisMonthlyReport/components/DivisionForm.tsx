@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +35,8 @@ interface DivisionFormProps {
     };
     initialData?: {
         _id: string;
-        offenceType: string;
+        offence?: string; // Correct field from DB
+        offenceType?: string; // Legacy/frontend prop name
         actionTaken: number;
         actionPending: number;
         remark: string;
@@ -43,16 +45,23 @@ interface DivisionFormProps {
 }
 
 export default function DivisionForm({ onClose, formation, initialData }: DivisionFormProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     // State
     const [selectedDate, setSelectedDate] = useState<Date>(initialData?.monthYear ? new Date(initialData.monthYear) : new Date());
     const dateInputRef = React.useRef<HTMLInputElement>(null);
 
     // Form State
-    const [offenceType, setOffenceType] = useState(initialData?.offenceType || "");
+    const [offenceType, setOffenceType] = useState(initialData?.offence || initialData?.offenceType || "");
     const [actionTaken, setActionTaken] = useState<string>(initialData?.actionTaken?.toString() || "00");
     const [actionPending, setActionPending] = useState<string>(initialData?.actionPending?.toString() || "00");
     const [remark, setRemark] = useState(initialData?.remark || "");
-    const [sessionAddedIds, setSessionAddedIds] = useState<string[]>([]);
+
+    // Local Accumulation State
+    const [localEntries, setLocalEntries] = useState<any[]>([]); // To store { _id: tempId, ... }
+
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(initialData?._id || null);
 
@@ -65,14 +74,15 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
             setSelectedDate(pendingDate);
             setPendingDate(null);
             setIsDateConfirmOpen(false);
+            // Do NOT clear entries here, so data persists across month changes
         }
     };
 
-    // Calculated Field
+    // Calculate sum for total cases
     const totalCases = useMemo(() => {
         const taken = parseInt(actionTaken) || 0;
         const pending = parseInt(actionPending) || 0;
-        return taken + pending; // Or can be manually entered if logic differs, but design says "Auto calculated"
+        return taken + pending;
     }, [actionTaken, actionPending]);
 
     // Hooks
@@ -85,7 +95,20 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
     const { mutate: updateEntry, isPending: isUpdating } = useUpdateDivisionAnalysis();
     const { mutate: deleteEntry, isPending: isDeleting } = useDeleteDivisionAnalysis();
 
-    // Handlers
+    // Sync state with initialData changes (e.g. when data loads)
+    useEffect(() => {
+        if (initialData) {
+            setOffenceType(initialData.offence || initialData.offenceType || "");
+            setActionTaken(initialData.actionTaken?.toString() || "00");
+            setActionPending(initialData.actionPending?.toString() || "00");
+            setRemark(initialData.remark || "");
+            setEditingId(initialData._id);
+            if (initialData.monthYear) {
+                setSelectedDate(new Date(initialData.monthYear));
+            }
+        }
+    }, [initialData]);
+
     const handleAddEntry = () => {
         if (!offenceType.trim()) {
             toast.error("Please enter an offence type");
@@ -102,56 +125,79 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
             remark: remark,
         };
 
-        if (editingId) {
-            updateEntry({ id: editingId, data: payload }, {
-                onSuccess: () => {
-                    toast.success("Entry updated successfully");
-                    if (initialData) {
-                        // If we are in "Edit Mode" (initialData present), closing is expected
+        if (initialData) {
+            // EDIT MODE (Backend)
+            if (editingId) {
+                updateEntry({ id: editingId, data: payload }, {
+                    onSuccess: () => {
+                        toast.success("Entry updated successfully");
                         onClose();
-                    } else {
-                        // If we are in "Add Mode" but editing a drafted item
-                        setEditingId(null);
-                        setOffenceType("");
-                        setActionTaken("00");
-                        setActionPending("00");
-                        setRemark("");
+                    },
+                    onError: (err) => {
+                        toast.error("Failed to update entry");
+                        console.error(err);
                     }
-                },
-                onError: (err) => {
-                    toast.error("Failed to update entry");
-                    console.error(err);
-                }
-            });
+                });
+            }
         } else {
-            createEntry(payload, {
-                onSuccess: (data: any) => {
-                    toast.success("Entry added successfully");
-                    // Reset form
-                    setOffenceType("");
-                    setActionTaken("00");
-                    setActionPending("00");
-                    setRemark("");
-                    if (data && data._id) {
-                        setSessionAddedIds(prev => [...prev, data._id]);
-                    }
-                },
-                onError: (err) => {
-                    toast.error("Failed to add entry");
-                    console.error(err);
-                }
-            });
+            // ADD MODE (Local Accumulation)
+            if (editingId) {
+                // Editing a local entry
+                setLocalEntries(prev => prev.map(item =>
+                    item._id === editingId ? { ...item, ...payload, _id: editingId } : item
+                ));
+                toast.success("Entry updated in list");
+                setEditingId(null);
+            } else {
+                // Adding new local entry
+                const newEntry = {
+                    ...payload,
+                    _id: generateTempId(), // Temporary ID
+                    createdAt: new Date().toISOString()
+                };
+                setLocalEntries(prev => [...prev, newEntry]);
+                toast.success("Added to list");
+            }
+
+            // Reset form
+            setOffenceType("");
+            setActionTaken("00");
+            setActionPending("00");
+            setRemark("");
         }
     };
 
+    // Use URL for editing logic
     const handleEditRow = (row: any) => {
-        setOffenceType(row.offenceType);
-        setActionTaken(row.actionTaken.toString());
-        setActionPending(row.actionPending.toString());
-        setRemark(row.remark);
-        setEditingId(row._id);
-        // Maybe scroll to top?
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (initialData) {
+            // If already in backend edit mode
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("id", row._id);
+            router.replace(`${pathname}?${params.toString()}`);
+        } else {
+            // Local Edit Mode
+            setOffenceType(row.offence);
+            setActionTaken(row.actionTaken.toString());
+            setActionPending(row.actionPending.toString());
+            setRemark(row.remark);
+            setEditingId(row._id);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    // Update onClose to handle clearing edit mode if we are editing
+    const handleCancelEdit = () => {
+        if (initialData) {
+            // For backend edits, Cancel means go back to the list
+            onClose();
+        } else {
+            // Local cancel
+            setEditingId(null);
+            setOffenceType("");
+            setActionTaken("00");
+            setActionPending("00");
+            setRemark("");
+        }
     };
 
     const handleDeleteClick = (id: string) => {
@@ -160,38 +206,60 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
 
     const handleConfirmDelete = () => {
         if (!deleteId) return;
-        deleteEntry(deleteId, {
+
+        if (initialData) {
+            deleteEntry(deleteId, {
+                onSuccess: () => {
+                    toast.success("Entry deleted");
+                    setDeleteId(null);
+                },
+                onError: () => toast.error("Failed to delete entry")
+            });
+        } else {
+            // Local delete
+            setLocalEntries(prev => prev.filter(item => item._id !== deleteId));
+            setDeleteId(null);
+            if (editingId === deleteId) {
+                handleCancelEdit();
+            }
+        }
+    };
+
+    const handleSubmitReport = () => {
+        if (localEntries.length === 0) {
+            toast.error("No entries to submit");
+            return;
+        }
+
+        // Clean up data
+        const entriesToSubmit = localEntries.map(({ _id, ...rest }) => rest);
+
+        createEntry(entriesToSubmit, {
             onSuccess: () => {
-                toast.success("Entry deleted");
-                setSessionAddedIds(prev => prev.filter(sid => sid !== deleteId));
-                setDeleteId(null);
-                if (editingId === deleteId) {
-                    setEditingId(null);
-                    setOffenceType("");
-                    setActionTaken("00");
-                    setActionPending("00");
-                    setRemark("");
-                }
+                toast.success("All Reports Submitted Successfully");
+                setLocalEntries([]);
+                onClose();
             },
-            onError: () => toast.error("Failed to delete entry")
+            onError: (err) => {
+                toast.error("Failed to submit report");
+                console.error(err);
+            }
         });
     };
 
     // Table Data Mapping
     const tableData = useMemo(() => {
-        if (!analysisData || !Array.isArray(analysisData)) return [];
+        if (initialData) return []; // Hide table in single-edit mode
 
-
-        return analysisData.filter((item: any) => {
-            if (!item.monthYear) return false;
-            // Only show items added in this session
-            if (!sessionAddedIds.includes(item._id)) return false;
-
+        // Filter by selected date
+        const visibleEntries = localEntries.filter(item => {
             const d = new Date(item.monthYear);
             return d.getMonth() === selectedDate.getMonth() &&
-                d.getFullYear() === selectedDate.getFullYear() &&
-                item.divisionName === formation.groupKey;
-        }).map((item: any, index: number) => ({
+                d.getFullYear() === selectedDate.getFullYear();
+        });
+
+        // Show LOCAL entries
+        return visibleEntries.map((item: any, index: number) => ({
             id: index + 1,
             _id: item._id,
             offenceType: item.offence,
@@ -199,8 +267,9 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
             actionTaken: item.actionTaken,
             actionPending: item.actionPending,
             remark: item.remark || "--",
+            raw: item
         }));
-    }, [analysisData, selectedDate, formation.groupKey, sessionAddedIds]);
+    }, [localEntries, initialData, selectedDate]);
 
     const columns: Column<any>[] = [
         {
@@ -256,7 +325,7 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer"
-                            onClick={() => handleEditRow(row)}
+                            onClick={() => handleEditRow(row.raw)}
                         >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
@@ -429,17 +498,7 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                             <Button
                                 variant="outline"
                                 className="h-11 px-6 rounded-md"
-                                onClick={() => {
-                                    if (initialData) {
-                                        onClose();
-                                    } else {
-                                        setEditingId(null);
-                                        setOffenceType("");
-                                        setActionTaken("00");
-                                        setActionPending("00");
-                                        setRemark("");
-                                    }
-                                }}
+                                onClick={handleCancelEdit}
                             >
                                 Cancel
                             </Button>
@@ -487,10 +546,8 @@ export default function DivisionForm({ onClose, formation, initialData }: Divisi
                             </Button>
                             <Button
                                 className="bg-[#0088FF] hover:bg-blue-600 text-white font-medium gap-2 px-6"
-                                onClick={() => {
-                                    toast.success("Monthly Report Submitted Successfully");
-                                    onClose();
-                                }}
+                                onClick={handleSubmitReport}
+                                disabled={isCreating}
                             >
                                 <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M13.626 4.58423C14.0164 4.19384 14.6495 4.19412 15.04 4.58423C15.4306 4.97475 15.4306 5.60777 15.04 5.99829L10.04 10.9983C9.64951 11.3888 9.0165 11.3888 8.62598 10.9983L7.62598 9.99829C7.23587 9.60773 7.23559 8.97462 7.62598 8.58423C8.01636 8.19384 8.64948 8.19412 9.04004 8.58423L9.33301 8.8772L13.626 4.58423ZM10.96 1.91821C11.3505 1.52785 11.9836 1.52774 12.374 1.91821C12.7643 2.3087 12.7643 2.94182 12.374 3.33228L5.04004 10.6653C4.64953 11.0556 4.01645 11.0557 3.62598 10.6653L0.292969 7.33228C-0.0975012 6.94181 -0.0973928 6.30875 0.292969 5.91821C0.683493 5.52769 1.31651 5.52769 1.70703 5.91821L4.33301 8.54419L10.96 1.91821Z" fill="white" />
@@ -546,4 +603,8 @@ function PlusIcon(props: any) {
             <path d="M12 5v14" />
         </svg>
     )
+}
+
+function generateTempId() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
