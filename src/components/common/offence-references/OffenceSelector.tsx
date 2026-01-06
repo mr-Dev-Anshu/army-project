@@ -3,24 +3,33 @@
 import { useEffect, useState } from "react";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import OffenceItem from "./OffenceItem";
+import { OffenceData } from "../../../apis/offence-references/types";
 
-interface OffenceData {
-  offenceType: string;
-  references: string[];
+interface Props {
+  onChange?: (data: OffenceData[]) => void;
+  initialData?: OffenceData[];
 }
 
 export default function OffenceSelector({
   onChange,
-}: {
-  onChange?: (data: OffenceData[]) => void;
-}) {
-  const [offences, setOffences] = useState<string[]>([]);
+  initialData = [],
+}: Props) {
+  const [offences, setOffences] = useState<string[]>(
+    initialData.map((d) => d.offenceType)
+  );
   const [refsMap, setRefsMap] = useState<Record<string, string[]>>({});
+  const [input, setInput] = useState("");
 
-  const addOffence = (name: string) => {
-    if (!offences.includes(name)) {
+  const addOffence = (value: any) => {
+    const name =
+      typeof value === "string"
+        ? value
+        : value?.label || value?.value || "";
+
+    if (name && !offences.includes(name)) {
       setOffences((p) => [...p, name]);
     }
+    setInput("");
   };
 
   const removeOffence = (name: string) => {
@@ -31,10 +40,11 @@ export default function OffenceSelector({
     });
   };
 
-  const updateRefs = (name: string, refs: string[]) => {
+  const handleRefs = (name: string, refs: string[]) => {
     setRefsMap((p) => ({ ...p, [name]: refs }));
   };
 
+  /* ===== EMIT FINAL DATA ===== */
   useEffect(() => {
     onChange?.(
       offences.map((o) => ({
@@ -42,55 +52,30 @@ export default function OffenceSelector({
         references: refsMap[o] || [],
       }))
     );
-  }, [offences, refsMap]);
+  }, [offences, refsMap, onChange]);
 
   return (
-    <section className="bg-white rounded-lg p-6 border">
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold">
-          3. OFFENCE COMMITTED/ORDERS CONTRAVENED:
-        </h3>
+    <div className="space-y-6">
+      {/* ADD OFFENCE */}
+      <SuggestionInput
+        fieldType="offenceType"
+        placeholder="Select or add offence"
+        value={input}
+        onChange={setInput}
+        onSelect={addOffence}
+      />
 
-        <button className="text-sm text-gray-600 border px-3 py-1 rounded hover:bg-gray-50">
-          Clear Form
-        </button>
+      {/* LIST */}
+      <div className="space-y-4">
+        {offences.map((o) => (
+          <OffenceItem
+            key={o}
+            offenceType={o}
+            onRemove={removeOffence}
+            onReferencesChange={handleRefs}
+          />
+        ))}
       </div>
-
-      {/* SELECT OFFENCE */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-1">
-          Select Offence Type
-        </label>
-
-        <SuggestionInput
-          fieldType="offenceType"
-          placeholder="Select Offences"
-          onSelect={(val: string) => addOffence(val)}
-        />
-      </div>
-
-      {/* SELECTED OFFENCES */}
-      <div>
-        <p className="text-sm font-medium text-gray-700 mb-3">
-          List of Offence Selected
-        </p>
-
-        {offences.length === 0 ? (
-          <p className="text-sm text-gray-400">No offence selected</p>
-        ) : (
-          <div className="space-y-4">
-            {offences.map((offence) => (
-              <OffenceItem
-                key={offence}
-                offenceName={offence}
-                onRemove={removeOffence}
-                onReferencesChange={updateRefs}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+    </div>
   );
 }
