@@ -45,7 +45,7 @@ const divisionAnalysisSchema = new Schema(
   },
   {
     timestamps: true,
-    strict: false, // ✅ important
+    strict: false, 
   }
 );
 

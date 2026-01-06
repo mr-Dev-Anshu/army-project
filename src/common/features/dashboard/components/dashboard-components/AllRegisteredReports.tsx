@@ -104,7 +104,7 @@ export default function AllRegisteredReports() {
       ),
       iconBgColor: "bg-[#1C2E4A]",
       onClick: () =>
-        router.push("/general-traffic-offence-reports/no-vehicle-involved"), // Adjust route as needed or use query param
+        router.push("/reports/general-traffic-offence-reports/no-vehicle-involved"), // Adjust route as needed or use query param
     },
     {
       title: "General & Traffic Offence Reports- Vehicle Involved",
@@ -143,7 +143,7 @@ export default function AllRegisteredReports() {
       ),
       iconBgColor: "bg-[#1C2E4A]",
       onClick: () =>
-        router.push("/general-traffic-offence-reports/vehicle-involved"), // Adjust route
+        router.push("/reports/general-traffic-offence-reports/vehicle-involved"), // Adjust route
     },
     {
       title: "Static Speed Check Reports",
@@ -174,7 +174,7 @@ export default function AllRegisteredReports() {
         </svg>
       ),
       iconBgColor: "bg-[#4B5320]",
-      onClick: () => router.push("/static-speed-check-reports"),
+      onClick: () => router.push("/reports/static-speed-check-reports"),
     },
     {
       title: "MP Occurrence & Investigation Reports",
@@ -233,7 +233,7 @@ export default function AllRegisteredReports() {
         </svg>
       ),
       iconBgColor: "bg-[#7B1E1E]",
-      onClick: () => router.push("/mp-occurrence-reports"),
+      onClick: () => router.push("/reports/mp-occurrence-reports"),
     },
     {
       title: "MT Accident Register: 21 Corps Pro",
@@ -277,7 +277,7 @@ export default function AllRegisteredReports() {
 
   return (
     <div className="space-y-6">
-      {/* Header / Breadcrumb substitute */}
+    
       <ReportPageHeader
         title="All Registered Reports"
         breadcrumbItems={[{ label: "Reports & Analysis", href: "/" }]}

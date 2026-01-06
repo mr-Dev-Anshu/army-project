@@ -21,3 +21,32 @@ export const ANALYSIS_OFFENCE_TYPES = [
     "Intoxication",
     "Over Speeding",
 ];
+
+export const MAIN_FORMATION = {
+    groupKey: "HQ 21 CORPS",
+    slug: "hq-21-corps",
+    subtitle: "21 Corps Provost Unit",
+};
+
+export const FORMATIONS_LIST = [
+    {
+        groupKey: "HQ 36 RAPID Division",
+        slug: "hq-36-rapid-division",
+        subtitle: "36 RAPID PRO UNIT",
+    },
+    {
+        groupKey: "HQ 31 ARRMD DIVISION",
+        slug: "hq-31-arrmd-division",
+        subtitle: "31 ARMD Division PRO Unit",
+    },
+    {
+        groupKey: "HQ 41 Arty Division",
+        slug: "hq-41-arty-division",
+        subtitle: "41 Arty Division PRO unit",
+    },
+    {
+        groupKey: "HQ 54 Inf Division",
+        slug: "hq-54-inf-division",
+        subtitle: "54 Inf Division PRO unit",
+    },
+];
