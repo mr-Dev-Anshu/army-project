@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "@/common/ui/Modal";
 import { FiPlus, FiX } from "react-icons/fi";
-import { SuggestionInput } from "../../common/component/SuggestionInput";
+import { SuggestionInput } from "@/common/component/SuggestionInput"; // Adjust path if needed
 import {
   useGetOffenceReferences,
   useCreateOffenceReference,
@@ -20,8 +20,8 @@ interface OffenceData {
 }
 
 const OffenceItem: React.FC<{
-  offenceName: string; // stored in lowercase
-  displayName: string; // capitalized for UI
+  offenceName: string;
+  displayName: string;
   onRemove: (name: string) => void;
   onReferencesChange: (name: string, refIds: string[]) => void;
 }> = ({ offenceName, displayName, onRemove, onReferencesChange }) => {
@@ -30,10 +30,10 @@ const OffenceItem: React.FC<{
   const [newRefText, setNewRefText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const {
-    data: availableRefs = [],
-    isLoading,
-  } = useGetOffenceReferences(offenceName, searchQuery);
+  const { data: availableRefs = [], isLoading } = useGetOffenceReferences(
+    offenceName,
+    searchQuery
+  );
 
   const createMutation = useCreateOffenceReference();
 
@@ -106,15 +106,15 @@ const OffenceItem: React.FC<{
               {availableRefs.map((ref: Reference) => (
                 <label
                   key={ref._id}
-                  className="flex items-start gap-2 text-[20px] cursor-pointer hover:bg-gray-100 p-2 rounded"
+                  className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-2 rounded"
                 >
                   <input
                     type="checkbox"
                     checked={selectedRefIds.includes(ref._id)}
                     onChange={(e) => toggleReference(ref, e.target.checked)}
-                    className="mt-2.5 mr-2 w-4 h-4 accent-black rounded"
+                    className="mt-1 mr-3 w-4 h-4 accent-black rounded"
                   />
-                  <span className="text-gray-900">{ref.reference}</span>
+                  <span className="text-gray-900 text-base">{ref.reference}</span>
                 </label>
               ))}
             </div>
@@ -201,7 +201,7 @@ const OffencesSection: React.FC<{
     const trimmedLower = value.trim().toLowerCase();
     if (trimmedLower && !selectedOffences.includes(trimmedLower)) {
       setSelectedOffences((prev) => [...prev, trimmedLower]);
-      setInputValue("");
+      setInputValue(""); // Clear input immediately after adding
     }
   };
 
@@ -242,7 +242,7 @@ const OffencesSection: React.FC<{
             placeholder="Type to search or add new offence..."
             value={inputValue}
             onChange={setInputValue}
-            onSelect={handleAddOffence}
+            onSelect={handleAddOffence} // This triggers when user selects from dropdown
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter" && inputValue.trim()) {
                 e.preventDefault();
@@ -251,7 +251,7 @@ const OffencesSection: React.FC<{
             }}
           />
           <p className="text-sm text-gray-500 mt-2">
-            Type to search existing or add a new offence type
+            Type to search existing or press Enter to add new offence
           </p>
         </div>
       </div>
