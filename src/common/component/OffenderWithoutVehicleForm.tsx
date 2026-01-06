@@ -429,7 +429,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -454,13 +454,58 @@ interface Props {
 
 export default function OffenderWithoutVehicleForm({
   scope = "traffic",
-}: Props) {
+}: {
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+}) {
   const { state, dispatch } = useForm();
 
   // ✅ default first block
   const [blocks, setBlocks] = useState<Block[]>([
     { id: Date.now() },
   ]);
+
+  /* ================= HYDRATE FROM STATE ================= */
+  useEffect(() => {
+    // 1. Traffic / Static (Array)
+    if (scope === "traffic" || scope === "static") {
+      const list =
+        scope === "static"
+          ? state.formData.staticSpeed?.offenderPeople || []
+          : state.formData.traffic?.offenderPeople || [];
+
+      if (list.length > 0) {
+        const restored = list.map((p: any, i: number) => ({
+          id: Date.now() + i,
+          type: p.type,
+          index: i,
+        }));
+        setBlocks(restored);
+      }
+    }
+
+    // 2. MP (Single Object)
+    if (scope === "mp-main" || scope === "mp-additional") {
+      const tempPath =
+        scope === "mp-main"
+          ? "formData.mpReport.individualDetails.tempOffender"
+          : "formData.mpReport.additionalIndividual.tempOffender";
+
+      // Helper to access deep path
+      const getValue = (obj: any, path: string) =>
+        path.split('.').reduce((o, k) => (o || {})[k], obj);
+
+      const temp = getValue(state, tempPath);
+
+      if (temp?.offenderType) {
+        setBlocks([{
+          id: Date.now(),
+          type: temp.offenderType,
+          index: 0
+        }]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount
 
   /* ================= ADD MORE ================= */
   const addMore = () => {
@@ -469,59 +514,121 @@ export default function OffenderWithoutVehicleForm({
 
   /* ================= SELECT HANDLER ================= */
   const handleSelect = (blockId: number, type: OffenderKey) => {
-    const peoplePath =
-      scope === "static"
-        ? "formData.staticSpeed.offenderPeople"
-        : "formData.traffic.offenderPeople";
+    /* --- CASE 1: TRAFFIC / STATIC (ARRAY) --- */
+    if (scope === "traffic" || scope === "static") {
+      const peoplePath =
+        scope === "static"
+          ? "formData.staticSpeed.offenderPeople"
+          : "formData.traffic.offenderPeople";
 
-    const existing =
-      scope === "static"
-        ? state.formData.staticSpeed?.offenderPeople || []
-        : state.formData.traffic?.offenderPeople || [];
+      const existing =
+        scope === "static"
+          ? state.formData.staticSpeed?.offenderPeople || []
+          : state.formData.traffic?.offenderPeople || [];
 
-    const newIndex = existing.length;
+      const newIndex = existing.length;
 
-    dispatch({
-      type: "SET_PATH",
-      path: peoplePath,
-      value: [
-        ...existing,
-        {
+      // Update existing if re-selecting same block? 
+      // Current logic appends new entry. 
+      // BUT for hydration to work bi-directionally, we should probably update if index exists.
+      // However, simplified logic: just append new for now as per original code, 
+      // but UI state tracks index.
+
+      // Original code always appended. This might duplicate if user changes selection?
+      // "handleSelect" is called on Radio change. 
+      // If user changes type, we probably want to replace the entry at index?
+      // Original code: `value: [...existing, { ... }]` -> always APPENDS. 
+      // This implies 1 block = 1 new entry?
+      // But if I change type, it appends AGAIN? That seems buggy in original code too.
+      // Let's fix that: specific index update if block has index.
+
+      const currentBlock = blocks.find(b => b.id === blockId);
+      let newList = [...existing];
+      let finalIndex = newIndex;
+
+      if (currentBlock?.index !== undefined && currentBlock.index < existing.length) {
+        // Update existing
+        finalIndex = currentBlock.index;
+        newList[finalIndex] = {
           whoIsIt: "Offender",
           type,
-          detailsByType: { [type]: {} },
-        },
-      ],
-    });
+          details: {}, // Reset details on type change? Usually yes.
+        };
+      } else {
+        // Append new
+        newList.push({
+          whoIsIt: "Offender",
+          type,
+          details: {},
+        });
+      }
 
-    if (scope === "traffic") {
       dispatch({
         type: "SET_PATH",
-        path: "formData.traffic.vehicleInvolved",
-        value: "no",
+        path: peoplePath,
+        value: newList,
       });
+
+      if (scope === "traffic") {
+        dispatch({
+          type: "SET_PATH",
+          path: "formData.traffic.vehicleInvolved",
+          value: "no",
+        });
+      }
+
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === blockId ? { ...b, type, index: finalIndex } : b
+        )
+      );
     }
 
-    // ✅ mark block as selected (options stay visible)
-    setBlocks((prev) =>
-      prev.map((b) =>
-        b.id === blockId ? { ...b, type, index: newIndex } : b
-      )
-    );
+    /* --- CASE 2: MP (SINGLE OBJECT) --- */
+    else {
+      const tempPath =
+        scope === "mp-main"
+          ? "formData.mpReport.individualDetails.tempOffender"
+          : "formData.mpReport.additionalIndividual.tempOffender";
+
+      dispatch({
+        type: "SET_PATH",
+        path: tempPath,
+        value: { offenderType: type, details: {} },
+      });
+
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === blockId ? { ...b, type, index: 0 } : b
+        )
+      );
+    }
+  };
+
+  /* ================= PATH HELPER FOR RENDER ================= */
+  const getRenderPath = (block: Block) => {
+    if (scope === "traffic")
+      return `formData.traffic.offenderPeople[${block.index}].details`;
+    if (scope === "static")
+      return `formData.staticSpeed.offenderPeople[${block.index}].details`;
+    if (scope === "mp-main")
+      return "formData.mpReport.individualDetails.tempOffender.details";
+    if (scope === "mp-additional")
+      return "formData.mpReport.additionalIndividual.tempOffender.details";
+    return "";
   };
 
   return (
     <div className="space-y-6 border rounded-lg p-6 bg-white">
-      {/* ✅ SINGLE HEADING (ONLY ONCE) */}
       <p className="font-semibold text-lg">Who was the Offender?</p>
 
       {/* ================= BLOCKS ================= */}
       {blocks.map((block) => (
         <div key={block.id} className="space-y-4">
-          {/* 🔹 OPTIONS (NO EXTRA HEADING HERE) */}
+          {/* 🔹 OPTIONS */}
           <div className="border rounded-lg p-4">
             <RadioGroup
-              value={block.type}
+              value={(block.type as string) || ""}
               onValueChange={(v) =>
                 handleSelect(block.id, v as OffenderKey)
               }
@@ -544,29 +651,31 @@ export default function OffenderWithoutVehicleForm({
             </RadioGroup>
           </div>
 
-          {/* 🔹 FORM — OPENS BELOW OPTIONS */}
+          {/* 🔹 FORM */}
           {block.type && block.index !== undefined && (
             <OffenderDynamicForm
               title={`${block.type} Details`}
               fields={offenderFormsConfig[block.type].fields}
-              scope={scope}
-              path={`formData.traffic.offenderPeople[${block.index}].details`}
+              scope={scope as any}
+              path={getRenderPath(block)}
               isRoot={false}
             />
           )}
         </div>
       ))}
 
-      {/* ================= ADD MORE BUTTON ================= */}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={addMore}
-          className="bg-black text-white px-4 py-2 rounded-md text-sm"
-        >
-          + Add More People
-        </button>
-      </div>
+      {/* ================= ADD MORE BUTTON (Only Traffic/Static) ================= */}
+      {(scope === "traffic" || scope === "static") && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={addMore}
+            className="bg-black text-white px-4 py-2 rounded-md text-sm"
+          >
+            + Add More People
+          </button>
+        </div>
+      )}
     </div>
   );
 }

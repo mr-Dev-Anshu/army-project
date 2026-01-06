@@ -72,10 +72,52 @@ export default function OffenderDynamicForm({
     title.toLowerCase().includes("civilian") &&
     !title.toLowerCase().includes("co-driver");
 
-  /* ================= SYNC ================= */
+  /* ================= SYNC LOCAL DATA ================= */
   useEffect(() => {
     setLocalData(structuredClone(globalData || {}));
   }, [path, globalData]);
+
+  /* ================= HYDRATE UI STATE (Fix Back Navigation) ================= */
+  useEffect(() => {
+    if (!isRoot) return;
+
+    const peoplePath =
+      scope === "static"
+        ? "formData.staticSpeed.offenderPeople"
+        : "formData.traffic.offenderPeople";
+
+    const list = getByPath(state, peoplePath);
+
+    if (Array.isArray(list) && list.length > 0) {
+      // 1. Hydrate Co-Driver
+      const coDriverIdx = list.findIndex((p: any) => p.whoIsIt === "Co-Driver");
+      if (coDriverIdx !== -1) {
+        setHasCoDriver(true);
+        setCoDriverType(list[coDriverIdx].type);
+        setCoDriverIndex(coDriverIdx);
+      }
+
+      // 2. Hydrate Additional People
+      const newSteps: Step[] = [];
+      list.forEach((p: any, idx: number) => {
+        // Skip Main Driver (Index 0) and Co-Driver
+        if (idx === 0) return;
+        if (idx === coDriverIdx) return;
+
+        newSteps.push({
+          id: Date.now() + idx, // Generate unique ID
+          type: p.type,
+          index: idx,
+        });
+      });
+
+      if (newSteps.length > 0) {
+        setSteps(newSteps);
+      }
+    }
+    // Run only once on mount to restore UI
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ================= SAVE FIELD ================= */
   const saveField = (label: string, value: string) => {

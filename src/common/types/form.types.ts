@@ -8,7 +8,7 @@ export interface VehicleDetailsState {
   vehicleType: string;
   driverType: string;
   vehicleName: string;
-  vehicleNumber:string;
+  vehicleNumber: string;
 }
 
 // ---------- OFFENDER ----------
@@ -169,7 +169,7 @@ export interface OffenderPerson {
 // ---------- FORM ROOT ----------
 // ---------- TRAFFIC ----------
 export interface TrafficFormState {
-    reportNo: string;
+  reportNo: string;
   vehicleInvolved: string;
   vehicleDetails: VehicleDetailsState;
   offenderWithoutVehicle: OffenderWithoutVehicleState;
@@ -234,9 +234,9 @@ export interface FormDataState {
   staticSpeed: StaticSpeedFormState;
   mpReport: MpReportState;
   remarks?: string;
-  shopkeeper:Shopkeeper,
-  maidServant:MaidServant,
-  tempWorker:TemporaryHiredWorker,
+  shopkeeper: Shopkeeper,
+  maidServant: MaidServant,
+  tempWorker: TemporaryHiredWorker,
   // Keep these for backward compatibility if needed, or remove if unused
   // (Based on FormContext, they seem to be moved to 'traffic' but let's check usage)
   // For now, I will remove them to align with FormContext.tsx strictly.
@@ -248,21 +248,29 @@ export interface FormDataState {
 export interface GlobalFormState {
   currentStep: number;
   completedSteps: number[];
+  preview: boolean;
   formData: FormDataState;
 }
 // ---------- ACTIONS ----------
 export type Action =
   | { type: "NEXT_STEP" }
+  | { type: "PREV_STEP" }
   | { type: "SET_STEP"; payload: number }
+  | { type: "SET_PATH"; path: string; value: any }
+  | { type: "PUSH_PATH"; path: string; value: any }
+  | { type: "REMOVE_PATH"; path: string; index: number }
+  | { type: "SET_PREVIEW"; payload: boolean }
   | { type: "SET_FORM_DATA"; payload: Partial<FormDataState> }
   | { type: "SET_VEHICLE_DETAILS"; payload: Partial<VehicleDetailsState> }
   | { type: "SET_OFFENDER_TYPE"; payload: string }
   | {
-      type: "SET_OFFENDER_WITHOUT_VEHICLE_DETAILS";
-      payload: Partial<OffenderWithoutVehicleState>;
-    }
+    type: "SET_OFFENDER_WITHOUT_VEHICLE_DETAILS";
+    payload: Partial<OffenderWithoutVehicleState>;
+  }
   | { type: "SET_OFFENDER_PEOPLE"; payload: OffenderPerson[] }
   | { type: "SET_WITNESSES"; payload: Witness[] }
+  | { type: "CLEAR_MP_ADDITIONAL" }
+  | { type: "RESET_FORM" }
 
   /* ========= STATIC SPEED ========= */
   | { type: "SET_STATIC_WITNESSES"; payload: Witness[] }
@@ -271,13 +279,13 @@ export type Action =
 
   /* ========= MP REPORT MASTER ========= */
   | {
-      type: "SET_MP_DATA";
-      payload: Partial<MpReportState>;
-    }
+    type: "SET_MP_DATA";
+    payload: Partial<MpReportState>;
+  }
 
   /* ========= MP SECTION WISE UPDATE ========= */
   | {
-      type: "SET_MP_SECTION";
-      section: keyof MpReportState;
-      payload: any;
-    };
+    type: "SET_MP_SECTION";
+    section: keyof MpReportState;
+    payload: any;
+  };
