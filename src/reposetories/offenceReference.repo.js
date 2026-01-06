@@ -1,4 +1,4 @@
-import OffenceReference from "@/models/OffenceReference";
+import OffenceReference from "@/models/";
 
 export class OffenceReferenceRepository {
   async findByQuery({ offenceType, search }) {

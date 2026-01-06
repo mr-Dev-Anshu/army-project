@@ -328,3 +328,84 @@
 // };
 
 // export default OffencesSection;
+
+"use client";
+
+import { useState, useMemo } from "react";
+import OffenceSelector from "@/components/common/offence-references/OffenceSelector";
+
+interface OffenceData {
+  offenceType: string;
+  references: string[];
+}
+
+export default function SampleOffenceFormPage() {
+  const [offenceData, setOffenceData] = useState<OffenceData[]>([]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("FINAL SUBMIT DATA:", offenceData);
+    alert("Check console for submitted offence data ✅");
+  };
+
+  /* =====================
+     SAFE DEBUG PREVIEW
+     (CRITICAL FIX)
+  ===================== */
+  const safePreview = useMemo(() => {
+    return offenceData.map((item) => ({
+      offenceType: typeof item.offenceType === "string"
+        ? item.offenceType
+        : String(item.offenceType),
+
+      references: Array.isArray(item.references)
+        ? item.references.map((r) => String(r))
+        : [],
+    }));
+  }, [offenceData]);
+
+  return (
+    <div className="max-w-4xl mx-auto p-8">
+      <h1 className="text-2xl font-bold mb-6">
+        Sample Offence Form (Test Page)
+      </h1>
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Offence Selector */}
+        <OffenceSelector
+          onChange={(data) => {
+            // IMPORTANT: accept only plain data
+            setOffenceData(
+              Array.isArray(data)
+                ? data.map((d) => ({
+                    offenceType: String(d.offenceType),
+                    references: Array.isArray(d.references)
+                      ? d.references.map(String)
+                      : [],
+                  }))
+                : []
+            );
+          }}
+        />
+
+        {/* Debug Preview (SAFE) */}
+        <div className="bg-gray-50 border rounded p-4">
+          <h2 className="font-semibold mb-2">Live Form Data (Debug)</h2>
+          <pre className="text-sm text-gray-700 overflow-auto">
+            {JSON.stringify(safePreview, null, 2)}
+          </pre>
+        </div>
+
+        {/* Submit */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Submit Form
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
