@@ -42,7 +42,11 @@ const labelKeyMap: Record<string, string> = {
   FMN: "fmn",
   Address: "address",
   "ID Card Number": "iCardNumber",
+  "Father's Name (Son of)": "so",
+  "Father's / Husband's Name": "so",
   "Army Official Name": "armyOfficialName",
+  "Pass No.": "passNo",
+  "Maid/Servant Pass Number": "passNo",
 };
 
 export default function OffenderDynamicForm({
