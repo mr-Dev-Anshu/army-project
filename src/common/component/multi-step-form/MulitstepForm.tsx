@@ -2,6 +2,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { useForm, initialState } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
@@ -19,6 +20,7 @@ import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
 export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
   const { state, dispatch } = useForm();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutateAsync: createOffence } = useCreateTrafficOffence();
   const { mutateAsync: createOffender } = useCreateOffender();
@@ -26,6 +28,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
   const reportNo =
     state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
+  // ... (existing code: mapTrafficToReport function) ...
 
   const mapTrafficToReport = (traffic: any) => {
     const occ = traffic?.offenceOccurenceDetails || {};
@@ -152,16 +155,14 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     };
   };
 
-
-
   const toISO = (date?: string, time?: string) => {
     if (!date || !time) return null;
     return new Date(`${date}T${time}`).toISOString();
   };
 
 
-
   const onSubmitFinal = async () => {
+    setIsSubmitting(true);
     try {
       const traffic = state.formData.traffic;
       console.log("🚔 RAW TRAFFIC ===>", traffic);
@@ -276,10 +277,10 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     } catch (err) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
       toast.error("Submit failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-
 
   /* ================= STEPS CONFIG ================= */
   const stepsConfig = {
@@ -332,7 +333,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             }
             onCreate={onSubmitFinal}
             onCancel={onCancel}
-
+            isSubmitting={isSubmitting} // Passed prop
           />
 
           <RightPanel

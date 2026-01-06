@@ -1,4 +1,5 @@
 "use client";
+import React, { useState } from "react";
 
 import { initialState, useForm } from "@/context/FormContext";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
@@ -20,12 +21,15 @@ export default function StaticSpeedForm({
   onCancel: () => void;
 }) {
   const { state, dispatch } = useForm();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const staticData = state.formData.staticSpeed as any;
 
   const createStaticRecord = useCreateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
+
+  // ... (existing mapStaticToReport code) ...
 
   const mapStaticToReport = (data: any) => {
     const riderDetails = data?.offenderPeople?.[0]?.details || {};
@@ -153,6 +157,7 @@ export default function StaticSpeedForm({
   };
 
   const handleFinalSubmit = async () => {
+    setIsSubmitting(true);
     const { contactNumber, ...mpReportingSafe } =
       staticData.reportingBlock || {};
     try {
@@ -169,13 +174,13 @@ export default function StaticSpeedForm({
           dutyType: staticData.dutyBlock?.dutyType || undefined,
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+            ).toISOString()
             : undefined,
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+            ).toISOString()
             : undefined,
         },
 
@@ -363,6 +368,8 @@ export default function StaticSpeedForm({
         "Failed to submit record";
 
       toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -382,6 +389,7 @@ export default function StaticSpeedForm({
               onCancel();
             }}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
+            isSubmitting={isSubmitting} // Passed prop
           />
 
           <RightPanel

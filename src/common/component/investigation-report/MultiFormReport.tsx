@@ -66,6 +66,7 @@ export default function MultiFormReport({
 }) {
   const { state, dispatch } = useForm();
   const [mode] = useState("mp");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createReportAsync } = useCreateMPReport();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
 
@@ -83,6 +84,8 @@ export default function MultiFormReport({
     { id: 10, label: "Opinion", icon: "10" },
     { id: 11, label: "Remarks", icon: "11" },
   ];
+
+  // ... (existing helper functions) ...
 
   const toISODateTime = (date?: string, time?: string) =>
     date && time ? new Date(`${date}T${time}`).toISOString() : null;
@@ -109,8 +112,8 @@ export default function MultiFormReport({
           p.offenderType === "Victim"
             ? "Victim"
             : p.offenderType === "Offender"
-            ? "Offender"
-            : "Unknown",
+              ? "Offender"
+              : "Unknown",
       };
     });
 
@@ -136,8 +139,8 @@ export default function MultiFormReport({
       ? mp.investigationPoints
       : typeof mp?.investigationPoints === "string" &&
         mp.investigationPoints.trim()
-      ? mp.investigationPoints.split("\n")
-      : [];
+        ? mp.investigationPoints.split("\n")
+        : [];
 
     return {
       /* ================= HEADER ================= */
@@ -196,8 +199,8 @@ export default function MultiFormReport({
           ? mp.investigationPoints
           : typeof mp?.investigationPoints === "string" &&
             mp.investigationPoints.trim()
-          ? mp.investigationPoints.split("\n")
-          : [],
+            ? mp.investigationPoints.split("\n")
+            : [],
 
         opinion: mp?.opinion?.statement || mp?.opinion || "Nil",
       },
@@ -242,171 +245,174 @@ export default function MultiFormReport({
     }
   };
 
- const onSubmitFinal = async () => {
-  try {
-    const mp = state.formData.mpReport;
+  const onSubmitFinal = async () => {
+    setIsSubmitting(true);
+    try {
+      const mp = state.formData.mpReport;
 
-    /* ================= MP REPORT PAYLOAD ================= */
-    const payload = {
-      reportDetails: {
-        reportNumber: mp.reportDetails.reportNo || "NA",
-        command: mp.reportDetails.command || "NA",
-        firNumber: mp.reportDetails.firNo || "NA",
-        firFileUrl: mp.reportDetails.firFile || "",
-        customFields: {},
-      },
-
-      investigationHead: {
-        armyNumber: mp.mpParticulars.armyNo || "NA",
-        rank: mp.mpParticulars.rank || "NA",
-        name: mp.mpParticulars.name || "NA",
-        unit: mp.mpParticulars.unit || "NA",
-        fmn: mp.mpParticulars.fmn || "NA",
-        command: mp.mpParticulars.command || "NA",
-        address: mp.mpParticulars.address || "NA",
-        iCardNumber: mp.mpParticulars.icard || "NA",
-        customFields: {},
-      },
-
-      occurrenceDetails: {
-        offenceType: mp.occurrenceDetails.offenceType || "NA",
-        placeOfOccurrence: mp.occurrenceDetails.place || "NA",
-        dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
-        timeOfOccurrence: toISODateTime(
-          mp.occurrenceDetails.date,
-          mp.occurrenceDetails.time
-        ),
-        description: mp.occurrenceDetails.description || "Nil",
-        customFields: {},
-      },
-
-      documents: (mp.documents || []).map((d: any) => ({
-        statement: d.statement || "Nil",
-        url: d.url || "NA",
-      })),
-
-      evidences: buildEvidences(mp.evidence),
-
-      detailedOccurrenceReport:
-        mp.detailedReport?.statement || mp.detailedReport || "Nil",
-
-      pointsFindOutDuringInvestigation: Array.isArray(mp.investigationPoints)
-        ? mp.investigationPoints.join("\n")
-        : mp.investigationPoints || "Nil",
-
-      opinion: mp.opinion?.statement || mp.opinion || "Nil",
-
-      remarks: {
-        analysis: mp.remarks.analysis || "Nil",
-        recommendation: mp.remarks.recommendation || "Nil",
-        customFields: {},
-      },
-
-      customFields: {},
-    };
-
-    console.log("🚀 MP REPORT PAYLOAD ===>", payload);
-
-    /* ================= CREATE MP REPORT ================= */
-    const reportRes = await createReportAsync(payload);
-    console.log("✅ MP REPORT RESPONSE ===>", reportRes);
-
-    const offenceId = reportRes?._id;
-    if (!offenceId) {
-      toast.error("Offence ID missing");
-      return;
-    }
-
-    /* ================= CREATE ALL OFFENDERS & WITNESSES ================= */
-    const offendersToCreate: any[] = [];
-
-    /* 1️⃣ MAIN INDIVIDUAL OFFENDERS */
-    for (const o of mp?.individualDetails?.offenderList || []) {
-      const d = o.details ?? o;
-
-      const hasData = Object.values(d || {}).some(
-        (v) => v !== "" && v !== null && v !== undefined
-      );
-      if (!hasData) continue;
-
-      offendersToCreate.push({
-        offenceId,
-        offenderType: mapOffenderType(o.offenderType),
-        offenderDetails: {
-          type: o.role || "Offender",
-          category: "individual",
-
-          // 🔥 CORE FIX — SEND ALL DYNAMIC FIELDS
-          ...d,
+      /* ================= MP REPORT PAYLOAD ================= */
+      const payload = {
+        reportDetails: {
+          reportNumber: mp.reportDetails.reportNo || "NA",
+          command: mp.reportDetails.command || "NA",
+          firNumber: mp.reportDetails.firNo || "NA",
+          firFileUrl: mp.reportDetails.firFile || "",
+          customFields: {},
         },
-      });
-    }
 
-    /* 2️⃣ ADDITIONAL INDIVIDUAL */
-    const add = mp?.additionalIndividual?.tempOffender;
-    if (add?.details) {
-      const d = add.details;
+        investigationHead: {
+          armyNumber: mp.mpParticulars.armyNo || "NA",
+          rank: mp.mpParticulars.rank || "NA",
+          name: mp.mpParticulars.name || "NA",
+          unit: mp.mpParticulars.unit || "NA",
+          fmn: mp.mpParticulars.fmn || "NA",
+          command: mp.mpParticulars.command || "NA",
+          address: mp.mpParticulars.address || "NA",
+          iCardNumber: mp.mpParticulars.icard || "NA",
+          customFields: {},
+        },
 
-      const hasData = Object.values(d).some(
-        (v) => v !== "" && v !== null && v !== undefined
-      );
+        occurrenceDetails: {
+          offenceType: mp.occurrenceDetails.offenceType || "NA",
+          placeOfOccurrence: mp.occurrenceDetails.place || "NA",
+          dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
+          timeOfOccurrence: toISODateTime(
+            mp.occurrenceDetails.date,
+            mp.occurrenceDetails.time
+          ),
+          description: mp.occurrenceDetails.description || "Nil",
+          customFields: {},
+        },
 
-      if (hasData) {
+        documents: (mp.documents || []).map((d: any) => ({
+          statement: d.statement || "Nil",
+          url: d.url || "NA",
+        })),
+
+        evidences: buildEvidences(mp.evidence),
+
+        detailedOccurrenceReport:
+          mp.detailedReport?.statement || mp.detailedReport || "Nil",
+
+        pointsFindOutDuringInvestigation: Array.isArray(mp.investigationPoints)
+          ? mp.investigationPoints.join("\n")
+          : mp.investigationPoints || "Nil",
+
+        opinion: mp.opinion?.statement || mp.opinion || "Nil",
+
+        remarks: {
+          analysis: mp.remarks.analysis || "Nil",
+          recommendation: mp.remarks.recommendation || "Nil",
+          customFields: {},
+        },
+
+        customFields: {},
+      };
+
+      console.log("🚀 MP REPORT PAYLOAD ===>", payload);
+
+      /* ================= CREATE MP REPORT ================= */
+      const reportRes = await createReportAsync(payload);
+      console.log("✅ MP REPORT RESPONSE ===>", reportRes);
+
+      const offenceId = reportRes?._id;
+      if (!offenceId) {
+        toast.error("Offence ID missing");
+        return;
+      }
+
+      /* ================= CREATE ALL OFFENDERS & WITNESSES ================= */
+      const offendersToCreate: any[] = [];
+
+      /* 1️⃣ MAIN INDIVIDUAL OFFENDERS */
+      for (const o of mp?.individualDetails?.offenderList || []) {
+        const d = o.details ?? o;
+
+        const hasData = Object.values(d || {}).some(
+          (v) => v !== "" && v !== null && v !== undefined
+        );
+        if (!hasData) continue;
+
         offendersToCreate.push({
           offenceId,
-          offenderType: mapOffenderType(add.offenderType),
+          offenderType: mapOffenderType(o.offenderType),
           offenderDetails: {
-            type: "Additional Individual",
+            type: o.role || "Offender",
             category: "individual",
 
-            // 🔥 dynamic again
+            // 🔥 CORE FIX — SEND ALL DYNAMIC FIELDS
             ...d,
           },
         });
       }
+
+      /* 2️⃣ ADDITIONAL INDIVIDUAL */
+      const add = mp?.additionalIndividual?.tempOffender;
+      if (add?.details) {
+        const d = add.details;
+
+        const hasData = Object.values(d).some(
+          (v) => v !== "" && v !== null && v !== undefined
+        );
+
+        if (hasData) {
+          offendersToCreate.push({
+            offenceId,
+            offenderType: mapOffenderType(add.offenderType),
+            offenderDetails: {
+              type: "Additional Individual",
+              category: "individual",
+
+              // 🔥 dynamic again
+              ...d,
+            },
+          });
+        }
+      }
+
+      /* 3️⃣ WITNESSES (USING SAME OFFENDER API) */
+      for (const w of mp.witnesses || []) {
+        const d = w.details ?? w;
+
+        const hasData = Object.values(d || {}).some(
+          (v) => v !== "" && v !== null && v !== undefined
+        );
+        if (!hasData) continue;
+
+        offendersToCreate.push({
+          offenceId,
+          offenderType: "Civilian",
+          offenderDetails: {
+            type: "Witness",
+            category: "witness",
+
+            // 🔥 witness dynamic fields
+            ...d,
+          },
+        });
+      }
+
+      /* ================= ONE BY ONE API CALL ================= */
+      for (const offenderPayload of offendersToCreate) {
+        console.log("🚨 OFFENDER API PAYLOAD ===>", offenderPayload);
+        await createOffenderMutate(offenderPayload);
+      }
+
+      console.log("🎯 ALL OFFENDERS + WITNESSES CREATED");
+      toast.success("MP Investigation Report Created 🎉");
+
+      /* ================= RESET FORM ================= */
+      dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
+      dispatch({ type: "SET_STEP", payload: 1 });
+      dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
+
+    } catch (err) {
+      console.error("❌ FINAL SUBMIT ERROR ===>", err);
+      toast.error("Failed to create report");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    /* 3️⃣ WITNESSES (USING SAME OFFENDER API) */
-    for (const w of mp.witnesses || []) {
-      const d = w.details ?? w;
-
-      const hasData = Object.values(d || {}).some(
-        (v) => v !== "" && v !== null && v !== undefined
-      );
-      if (!hasData) continue;
-
-      offendersToCreate.push({
-        offenceId,
-        offenderType: "Civilian",
-        offenderDetails: {
-          type: "Witness",
-          category: "witness",
-
-          // 🔥 witness dynamic fields
-          ...d,
-        },
-      });
-    }
-
-    /* ================= ONE BY ONE API CALL ================= */
-    for (const offenderPayload of offendersToCreate) {
-      console.log("🚨 OFFENDER API PAYLOAD ===>", offenderPayload);
-      await createOffenderMutate(offenderPayload);
-    }
-
-    console.log("🎯 ALL OFFENDERS + WITNESSES CREATED");
-    toast.success("MP Investigation Report Created 🎉");
-
-    /* ================= RESET FORM ================= */
-    dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
-    dispatch({ type: "SET_STEP", payload: 1 });
-    dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
-
-  } catch (err) {
-    console.error("❌ FINAL SUBMIT ERROR ===>", err);
-    toast.error("Failed to create report");
-  }
-};
+  };
 
 
   // ================= RIGHT PANEL STEP CONFIG =================
@@ -471,6 +477,7 @@ export default function MultiFormReport({
             onCancel={onCancel}
             onCreate={onSubmitFinal}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
+            isSubmitting={isSubmitting} // Passed prop
           />
 
           {/* RIGHT SIDE DYNAMIC CONTENT */}

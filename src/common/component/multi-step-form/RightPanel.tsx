@@ -34,7 +34,7 @@ export const RightPanel = ({
   onPrev,
   stepsConfig,
   mode,
- mapReport,
+  mapReport,
 }: RightPanelProps) => {
   const { state, dispatch } = useForm();
 
@@ -49,36 +49,36 @@ export const RightPanel = ({
 
 
   const isNextDisabled = () => {
-  /* ===== STATIC ===== */
-  if (mode === "static" && step === 1) {
-    const v = formData.staticSpeed?.vehicleInvolved;
+    /* ===== STATIC ===== */
+    if (mode === "static" && step === 1) {
+      const v = formData.staticSpeed?.vehicleInvolved;
 
-    // 🚗 vehicle involved → vehicle details required
-    if (v === "yes") {
-      return !(
-        formData.staticSpeed?.vehicleDetails?.vehicleType &&
-        formData.staticSpeed?.vehicleDetails?.category
-      );
+      // 🚗 vehicle involved → vehicle details required
+      if (v === "yes") {
+        return !(
+          formData.staticSpeed?.vehicleDetails?.vehicleType &&
+          formData.staticSpeed?.vehicleDetails?.category
+        );
+      }
+
+      // 🚶 no vehicle → at least one offender required
+      if (v === "no") {
+        return !(
+          Array.isArray(formData.staticSpeed?.offenderPeople) &&
+          formData.staticSpeed.offenderPeople.length > 0
+        );
+      }
+
+      // nothing selected yet
+      return true;
     }
 
-    // 🚶 no vehicle → at least one offender required
-    if (v === "no") {
-      return !(
-        Array.isArray(formData.staticSpeed?.offenderPeople) &&
-        formData.staticSpeed.offenderPeople.length > 0
-      );
-    }
+    /* ===== TRAFFIC ===== */
+    if (mode === "traffic" && step === 1)
+      return !formData.traffic?.vehicleInvolved;
 
-    // nothing selected yet
-    return true;
-  }
-
-  /* ===== TRAFFIC ===== */
-  if (mode === "traffic" && step === 1)
-    return !formData.traffic?.vehicleInvolved;
-
-  return false;
-};
+    return false;
+  };
 
 
   // /* ================= NEXT DISABLE ================= */
@@ -95,38 +95,38 @@ export const RightPanel = ({
   //   return false;
   // };
 
- const renderPreviewReport = () => {
-  if (!mapReport) {
-    console.error("❌ mapReport missing");
-    return <p className="text-red-500">Preview not available</p>;
-  }
+  const renderPreviewReport = () => {
+    if (!mapReport) {
+      console.error("❌ mapReport missing");
+      return <p className="text-red-500">Preview not available</p>;
+    }
 
-  if (mode === "traffic") {
-    return (
-      <MilitaryPoliceReport
-        {...mapReport(state.formData.traffic)}
-      />
-    );
-  }
+    if (mode === "traffic") {
+      return (
+        <MilitaryPoliceReport
+          {...mapReport(state.formData.traffic)}
+        />
+      );
+    }
 
-  if (mode === "static") {
-    return (
-      <StaticSpeedReport
-        {...mapReport(state.formData.staticSpeed)}
-      />
-    );
-  }
+    if (mode === "static") {
+      return (
+        <StaticSpeedReport
+          {...mapReport(state.formData.staticSpeed)}
+        />
+      );
+    }
 
-  if (mode === "mp") {
-    return (
-      <MpOccurrenceReport
-        {...mapReport(state.formData.mpReport)}
-      />
-    );
-  }
+    if (mode === "mp") {
+      return (
+        <MpOccurrenceReport
+          {...mapReport(state.formData.mpReport)}
+        />
+      );
+    }
 
-  return null;
-};
+    return null;
+  };
 
   return (
     <>
@@ -271,8 +271,9 @@ export const RightPanel = ({
             setShowClearModal(false);
           }, 300);
         }}
+
         title="Clear Form?"
-        message="Kya aap sure ho ki poora form clear karna chahte ho?"
+        message="Are you sure you want to clear the entire form?"
         confirmLabel="Yes, Clear"
         cancelLabel="Cancel"
         isProcessing={isClearing}
