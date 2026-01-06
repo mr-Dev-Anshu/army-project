@@ -57,6 +57,9 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     vehicleName: {
       type: String
     },
+    driverType: {
+      type: String
+    },
     onDutyDetails: onDutyDetailsSchema,
     onDutyDetailsMPReporting: onDutyDetailsMPReporting,
     offenceOccurenceDetails: offenceOccurenceDetails,

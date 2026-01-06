@@ -6,6 +6,8 @@ export const createGeneralTrafficOffenceSchema = Joi.object({
   vehicleCategory: Joi.string().valid("2-Wheeler", "4-Wheeler").optional(),
   vehicleType: Joi.string().valid("Civilian Vehicle", "DD Vehicle").optional(),
   vehicleNumber: Joi.string().optional(),
+  vehicleName: Joi.string().optional(),
+  driverType: Joi.string().optional(),
 
   onDutyDetails: Joi.object({
     dateOfDuty: Joi.date().optional(),

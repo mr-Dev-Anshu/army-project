@@ -171,6 +171,16 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       const offenceRes = await createOffence({
         reportNo: reportNo,
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
+
+        // Mapped Vehicle Details
+        ...(traffic.vehicleInvolved === "yes" && {
+          vehicleCategory: traffic.vehicleDetails.category === "2w" ? "2-Wheeler" : "4-Wheeler",
+          vehicleType: traffic.vehicleDetails.vehicleType === "civilian" ? "Civilian Vehicle" : "DD Vehicle",
+          vehicleName: traffic.vehicleDetails.vehicleName,
+          vehicleNumber: traffic.vehicleDetails.vehicleNumber,
+          driverType: traffic.vehicleDetails.driverType,
+        }),
+
         onDutyDetails: {
           ...traffic.onDutyDetails,
           startTime: toISO(
