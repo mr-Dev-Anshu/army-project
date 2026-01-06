@@ -139,12 +139,12 @@ export const offenderFormsConfig: any = {
 
       { type: "input", label: "Pass No.", placeholder: "Enter Pass Number" },
       {
-        type: "input",
+        type: "date",
         label: "Pass Issue Date",
         placeholder: "Pick a date",
       },
       {
-        type: "input",
+        type: "date",
         label: "Pass Expire Date",
         placeholder: "Pick a date",
       },

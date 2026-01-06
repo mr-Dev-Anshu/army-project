@@ -47,6 +47,8 @@ const labelKeyMap: Record<string, string> = {
   "Army Official Name": "armyOfficialName",
   "Pass No.": "passNo",
   "Maid/Servant Pass Number": "passNo",
+  "Pass Issue Date": "passIssueDate",
+  "Pass Expire Date": "passExpireDate",
 };
 
 export default function OffenderDynamicForm({
@@ -62,6 +64,7 @@ export default function OffenderDynamicForm({
   const globalData = getByPath(state, path);
   const [localData, setLocalData] = useState<any>({});
   const [steps, setSteps] = useState<Step[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   /* ===== CO-DRIVER STATES ===== */
   const [hasCoDriver, setHasCoDriver] = useState(false);
@@ -75,6 +78,7 @@ export default function OffenderDynamicForm({
   /* ================= SYNC LOCAL DATA ================= */
   useEffect(() => {
     setLocalData(structuredClone(globalData || {}));
+    setErrors({}); // ✅ Clear errors on form switch
   }, [path, globalData]);
 
   /* ================= HYDRATE UI STATE (Fix Back Navigation) ================= */
@@ -137,6 +141,28 @@ export default function OffenderDynamicForm({
       path,
       value: updated,
     });
+
+    // Validate Dates
+    let issueDate = updated["passIssueDate"];
+    let expireDate = updated["passExpireDate"];
+
+    if (issueDate && expireDate) {
+      const i = new Date(issueDate);
+      const e = new Date(expireDate);
+
+      if (e <= i) {
+        setErrors((prev) => ({
+          ...prev,
+          "Pass Expire Date": "Expire date must be greater than Issue date",
+        }));
+      } else {
+        setErrors((prev) => {
+          const newErr = { ...prev };
+          delete newErr["Pass Expire Date"];
+          return newErr;
+        });
+      }
+    }
   };
 
   /* ================= ADD MORE ================= */
@@ -246,6 +272,7 @@ export default function OffenderDynamicForm({
               value={value}
               onChange={(v) => saveField(f.label, v)}
               type={f.type === "input" ? "text" : f.type}
+              error={errors[f.label]}
             />
           );
         })}

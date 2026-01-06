@@ -83,21 +83,21 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
       {/* ---------- GENERAL FORM ---------- */}
       {selectedRecord === "general" && (
         <div className="w-full mx-auto">
-          <MultiStepForm />
+          <MultiStepForm onCancel={() => setSelectedRecord(null)} />
         </div>
       )}
 
       {/* ---------- SPEED FORM ---------- */}
       {selectedRecord === "speed" && (
         <div className="w-full p-6 border rounded-xl bg-white">
-          <StaticSpeedForm />
+          <StaticSpeedForm onCancel={() => setSelectedRecord(null)} />
         </div>
       )}
 
       {/* ---------- MP FORM ---------- */}
       {selectedRecord === "mp" && (
         <div className="w-full p-6 border rounded-xl bg-white">
-          <MultiFormReport />
+          <MultiFormReport onCancel={() => setSelectedRecord(null)} />
         </div>
       )}
     </div>

@@ -70,6 +70,7 @@ interface FormInputProps {
   value?: string;
   onChange?: (v: string) => void;
   type?: string;
+  error?: string;
 }
 
 export function FormInput({
@@ -78,6 +79,7 @@ export function FormInput({
   value,
   onChange,
   type = "text",
+  error,
 }: FormInputProps) {
   return (
     <div className="space-y-1">
@@ -90,10 +92,12 @@ export function FormInput({
         onChange={(e) => onChange?.(e.target.value)}
         className={`
           ${value ? "border-blue-500 bg-blue-50" : "border-gray-300"}
+          ${error ? "border-red-500 bg-red-50" : ""}
           focus-visible:ring-0
           focus-visible:ring-offset-0
         `}
       />
+      {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );
 }
