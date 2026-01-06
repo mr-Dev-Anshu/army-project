@@ -70,7 +70,7 @@ export default function StaticSpeedCheckReportsPage() {
         if (
           filters.toDate &&
           d >
-            new Date(filters.toDate + "T23:59:59.999").getTime()
+          new Date(filters.toDate + "T23:59:59.999").getTime()
         )
           return false;
       }
@@ -139,7 +139,15 @@ export default function StaticSpeedCheckReportsPage() {
     /* ---------- MAP FOR TABLE ---------- */
     return filtered.map((item: any) => {
       const offence = item.offenceOccurenceDetails || {};
-      const offender = item.offenders?.[0]?.offenderDetails || {};
+
+      // Filter for Driver (Main Offender) vs Co-Driver
+      const driver = item.offenders?.find(
+        (o: any) => o.offenderDetails?.type === "Offender" || !o.offenderDetails?.type
+      )?.offenderDetails || item.offenders?.[0]?.offenderDetails || {};
+
+      const coDriver = item.offenders?.find(
+        (o: any) => o.offenderDetails?.type === "CoDriver" || o.offenderDetails?.type === "Co-Driver"
+      )?.offenderDetails;
 
       const dateObj = new Date(offence.timeOfOffence || item.createdAt);
 
@@ -153,23 +161,35 @@ export default function StaticSpeedCheckReportsPage() {
           hour12: false,
         }),
         driverDetails: {
-          name: offender.name,
-          armyNumber: offender.armyNumber,
-          rank: offender.rank,
+          name: driver.name,
+          armyNumber: driver.armyNumber,
+          rank: driver.rank,
         },
         mpName:
           item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
         unit:
           item.onDutyDetailsMPReporting?.unit ||
-          offender.unit ||
+          driver.unit ||
           "MP Unit",
-        fmn: item.fmn || offender.fmn || "HQ 21 Corps",
+        fmn: item.fmn || driver.fmn || "HQ 21 Corps",
         vehicleNo: item.vehicleNumber || "N/A",
         vehicleModel: item.vehicleName || "Unknown",
         reportNo:
           item.reportNumber ||
           `SSC/21 CPU/${item._id.slice(-4)}/${new Date().getFullYear()}`,
         actionStatus: item.actionStatus,
+
+        // ✅ ADDED MISSING FIELDS
+        offenceBrief: offence.description || "N/A",
+        authSpeed: offence.authSpeed || "-",
+        actualSpeed: offence.actualSpeedNoted || "-",
+        overSpeed: offence.overSpeedCalculated || "-",
+        coDriverDetails: coDriver ? {
+          name: coDriver.name,
+          armyNumber: coDriver.armyNumber,
+          rank: coDriver.rank,
+        } : null,
+
         originalData: item,
       };
     });
