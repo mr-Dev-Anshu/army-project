@@ -1,20 +1,11 @@
-"use client";
-
+// components/common/ReportFilterBar.tsx
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Search, Plus } from "lucide-react";
-import { useGetFieldSuggestions } from "../../features/suggestions/hooks/index";
+import { SearchableSelect } from "./SearchableSelect";
 
 /* ================= TYPES ================= */
-
 export interface FilterState {
   search: string;
   offenceType?: string;
@@ -23,7 +14,9 @@ export interface FilterState {
   actionStatus?: string;
   unit?: string;
   fmn?: string;
+  priceListStatus?: string;
   sortOrder?: "asc" | "desc";
+  [key: string]: any;
 }
 
 interface ReportFilterBarProps {
@@ -40,8 +33,34 @@ interface ReportFilterBarProps {
   onReset?: () => void;
 }
 
-/* ================= COMPONENT ================= */
+/* ================= STATIC OPTIONS ================= */
+const UNIT_OPTIONS = [
+  "hq 21 corps",
+  "21 corps signal regt",
+  "unit 3",
+  "5221 asc bn",
+  "11 engr regt",
+  "12 jak li",
+  "rakhi",
+  "21 corps",
+  "104 infantry brigade",
+  "mp unit fallback",
+];
 
+const FMN_OPTIONS = [
+  "hq 21 corps",
+  "fmn-21",
+  "21 mountain division",
+  "central command",
+  "western command",
+  "hq western command",
+  "hq 21 corps pro",
+  "rakhi",
+  "123",
+  "northern command",
+];
+
+/* ================= MAIN COMPONENT ================= */
 export default function ReportFilterBar({
   filters,
   onFilterChange,
@@ -50,32 +69,16 @@ export default function ReportFilterBar({
   showDateRange = true,
   showActionStatus = true,
   statusLabel = "Action Status",
-  actionStatusOptions = ["All", "Pending", "Taken"],
+  actionStatusOptions = ["Pending", "Taken"], // "All" is handled by placeholder
   showOffenceType = true,
   onAddNew,
   onReset,
 }: ReportFilterBarProps) {
-
-  /* ================= API DATA ================= */
-
-  const { data: unitRes, isLoading: unitLoading } =
-    useGetFieldSuggestions("unit", "");
-
-  const { data: fmnRes, isLoading: fmnLoading } =
-    useGetFieldSuggestions("fmn", "");
-
-  const unitOptions = unitRes?.data ?? [];
-  const fmnOptions = fmnRes?.data ?? [];
-
-  /* ================= UI ================= */
-
   return (
     <div className="flex gap-4 items-end justify-between flex-wrap bg-white p-5 rounded-lg border shadow-sm">
-
-      {/* LEFT FILTERS */}
+      {/* LEFT SIDE - FILTERS */}
       <div className="flex flex-wrap gap-4 items-end">
-
-        {/* SEARCH */}
+        {/* Global Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
@@ -86,131 +89,100 @@ export default function ReportFilterBar({
           />
         </div>
 
-        {/* OFFENCE TYPE */}
+        {/* Offence Type */}
         {showOffenceType && offenceTypeOptions.length > 0 && (
-          <Select
-            value={filters.offenceType || "All"}
-            onValueChange={(v) =>
-              onFilterChange("offenceType", v === "All" ? "" : v)
-            }
-          >
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="All Offence Types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All Offence Types</SelectItem>
-              {offenceTypeOptions.map((opt) => (
-                <SelectItem key={opt} value={opt}>
-                  {opt}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col">
+            <label className="text-xs text-gray-500 mb-1">Offence Type</label>
+            <SearchableSelect
+              options={offenceTypeOptions}
+              value={filters.offenceType || ""}
+              onValueChange={(v) => onFilterChange("offenceType", v)}
+              placeholder="All Offence Types"
+              className="w-[180px]"
+            />
+          </div>
         )}
 
-        {/* DATE RANGE */}
+        {/* Date Range */}
         {showDateRange && (
           <>
-            <Input
-              type="date"
-              className="w-[150px]"
-              value={filters.fromDate || ""}
-              onChange={(e) =>
-                onFilterChange("fromDate", e.target.value)
-              }
-            />
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-500 mb-1">From Date</label>
+              <Input
+                type="date"
+                className="w-[150px]"
+                value={filters.fromDate || ""}
+                onChange={(e) => onFilterChange("fromDate", e.target.value)}
+              />
+            </div>
 
-            <Input
-              type="date"
-              className="w-[150px]"
-              value={filters.toDate || ""}
-              onChange={(e) =>
-                onFilterChange("toDate", e.target.value)
-              }
-            />
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-500 mb-1">To Date</label>
+              <Input
+                type="date"
+                className="w-[150px]"
+                value={filters.toDate || ""}
+                onChange={(e) => onFilterChange("toDate", e.target.value)}
+              />
+            </div>
           </>
         )}
 
-        {/* UNIT DROPDOWN */}
-        <Select
-          disabled={unitLoading}
-          value={filters.unit || "All"}
-          onValueChange={(v) =>
-            onFilterChange("unit", v === "All" ? "" : v)
-          }
-        >
-          <SelectTrigger className="w-[170px]">
-            <SelectValue placeholder="All Units" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All">All Units</SelectItem>
-            {unitOptions.map((u: any) => (
-              <SelectItem key={u._id} value={u.value}>
-                {u.value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Unit */}
+        <div className="flex flex-col">
+          <label className="text-xs text-gray-500 mb-1">Unit</label>
+          <SearchableSelect
+            options={UNIT_OPTIONS}
+            value={filters.unit || ""}
+            onValueChange={(v) => onFilterChange("unit", v)}
+            placeholder="All Units"
+            className="w-[180px]"
+          />
+        </div>
 
-        {/* FMN DROPDOWN */}
-        <Select
-          disabled={fmnLoading}
-          value={filters.fmn || "All"}
-          onValueChange={(v) =>
-            onFilterChange("fmn", v === "All" ? "" : v)
-          }
-        >
-          <SelectTrigger className="w-[170px]">
-            <SelectValue placeholder="All FMNs" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All">All FMNs</SelectItem>
-            {fmnOptions.map((f: any) => (
-              <SelectItem key={f._id} value={f.value}>
-                {f.value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* FMN */}
+        <div className="flex flex-col">
+          <label className="text-xs text-gray-500 mb-1">FMN</label>
+          <SearchableSelect
+            options={FMN_OPTIONS}
+            value={filters.fmn || ""}
+            onValueChange={(v) => onFilterChange("fmn", v)}
+            placeholder="All FMNs"
+            className="w-[180px]"
+          />
+        </div>
 
-        {/* ACTION STATUS */}
+        {/* Action Status */}
         {showActionStatus && (
-          <Select
-            value={filters.actionStatus || "All"}
-            onValueChange={(v) =>
-              onFilterChange("actionStatus", v === "All" ? "" : v)
-            }
-          >
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder={statusLabel} />
-            </SelectTrigger>
-            <SelectContent>
-              {actionStatusOptions.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col">
+            <label className="text-xs text-gray-500 mb-1">{statusLabel}</label>
+            <SearchableSelect
+              options={actionStatusOptions}
+              value={filters.actionStatus || ""}
+              onValueChange={(v) => onFilterChange("actionStatus", v)}
+              placeholder="All"
+              className="w-[150px]"
+            />
+          </div>
         )}
 
-        {/* RESET */}
+        {/* Reset Button */}
         {onReset && (
           <Button
             variant="outline"
             onClick={onReset}
-            className="text-red-600 hover:bg-red-50"
+            className="h-9 text-red-600 hover:bg-red-50 hover:text-red-700"
           >
             Reset Filters
           </Button>
         )}
       </div>
 
-      {/* RIGHT */}
+      {/* RIGHT SIDE - ADD NEW */}
       {onAddNew && (
         <Button
           onClick={onAddNew}
-          className="bg-blue-600 hover:bg-blue-700 gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
         >
           <Plus className="w-5 h-5" />
           Add New Report
