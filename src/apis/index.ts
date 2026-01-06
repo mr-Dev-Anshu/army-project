@@ -49,6 +49,11 @@ export * from "@/apis/maidServant/getById";
 export * from "@/apis/maidServant/update";
 export * from "@/apis/maidServant/delete";
 
+
+/* ================= OFFENCE REFERENCES ================= */
+export * from "@/apis/offence-references/create";
+export * from "@/apis/offence-references/getAll";
+
 /* ================= CIVIL EMPLOYEE - TEMPORARY HIRED WORKER ================= */
 export * from "@/apis/temporaryHiredWorker/create";
 export * from "@/apis/temporaryHiredWorker/getAll";
