@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,7 +16,6 @@ import {
     Calendar,
     Printer,
     Edit,
-    Plus,
     MoreVertical,
     Trash2,
     ArrowUpDown,
@@ -31,8 +31,6 @@ import { toast } from "react-toastify";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
-import DivisionForm from "./DivisionForm";
-
 interface DivisionTableProps {
     formation: {
         groupKey: string;
@@ -45,14 +43,35 @@ export default function DivisionTable({
     formation,
     onBack,
 }: DivisionTableProps) {
-    const [isEditing, setIsEditing] = React.useState(false);
-    const [editingEntry, setEditingEntry] = React.useState<any>(null);
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     const [deleteId, setDeleteId] = React.useState<string | null>(null);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [selectedOffenceType, setSelectedOffenceType] = React.useState("All");
-    const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
+
+    // Initialize date from URL or default to current date
+    const [selectedDate, setSelectedDate] = React.useState<Date>(() => {
+        const dateParam = searchParams.get("monthYear");
+        if (dateParam) {
+            const [year, month] = dateParam.split("-").map(Number);
+            if (!isNaN(year) && !isNaN(month)) return new Date(year, month - 1, 1);
+        }
+        return new Date();
+    });
+
     const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
     const dateInputRef = React.useRef<HTMLInputElement>(null);
+
+    // Update URL when date changes
+    const updateDate = (newDate: Date) => {
+        setSelectedDate(newDate);
+        const params = new URLSearchParams(searchParams.toString());
+        const dateStr = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}`;
+        params.set("monthYear", dateStr);
+        router.replace(`${pathname}?${params.toString()}`);
+    };
 
     const currentMonth = selectedDate.getMonth() + 1;
     const currentYear = selectedDate.getFullYear();
@@ -78,6 +97,10 @@ export default function DivisionTable({
             },
             onError: () => toast.error("Failed to delete entry")
         });
+    };
+
+    const handleEditEntry = (row: any) => {
+        router.push(`${pathname}/entry?id=${row._id}`);
     };
 
     // Mock data for specific MT Accident fields
@@ -223,10 +246,7 @@ export default function DivisionTable({
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer"
-                            onClick={() => {
-                                setEditingEntry(row);
-                                setIsEditing(true);
-                            }}
+                            onClick={() => handleEditEntry(row)}
                         >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
@@ -326,10 +346,7 @@ export default function DivisionTable({
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem
                             className="gap-2 cursor-pointer"
-                            onClick={() => {
-                                setEditingEntry(row);
-                                setIsEditing(true);
-                            }}
+                            onClick={() => handleEditEntry(row)}
                         >
                             <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
@@ -351,21 +368,8 @@ export default function DivisionTable({
         setSearchQuery("");
         setSelectedOffenceType("All");
         setSortOrder("desc");
-        setSelectedDate(new Date());
+        updateDate(new Date());
     };
-
-    if (isEditing) {
-        return (
-            <DivisionForm
-                formation={formation}
-                onClose={() => {
-                    setIsEditing(false);
-                    setEditingEntry(null);
-                }}
-                initialData={editingEntry}
-            />
-        );
-    }
 
     return (
         <div className="space-y-6 min-h-screen">
@@ -391,7 +395,7 @@ export default function DivisionTable({
                 </div>
                 <Button
                     className="bg-[#0088FF] text-white font-medium hover:bg-blue-600 gap-2 px-6 cursor-pointer rounded-md"
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => router.push(`${pathname}/entry`)}
                 >
                     Fill New Analysis Data
                     <Edit className="w-4 h-4 ml-1" />
@@ -470,7 +474,7 @@ export default function DivisionTable({
                                 if (e.target.value) {
                                     const [year, month] = e.target.value.split('-').map(Number);
                                     const newDate = new Date(year, month - 1, 1);
-                                    setSelectedDate(newDate);
+                                    updateDate(newDate);
                                 }
                             }}
                         />

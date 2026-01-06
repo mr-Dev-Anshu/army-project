@@ -310,10 +310,10 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 <div className="flex items-center gap-2">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="24" height="24" rx="12" fill="#E5E5E5" />
-                        <g clip-path="url(#clip0_670_96759)">
-                            <path d="M10 17C10.2761 17 10.5 16.7761 10.5 16.5C10.5 16.2239 10.2761 16 10 16C9.72386 16 9.5 16.2239 9.5 16.5C9.5 16.7761 9.72386 17 10 17Z" stroke="#404040" stroke-width="1.2" stroke-linejoin="round" />
-                            <path d="M15.5 17C15.7761 17 16 16.7761 16 16.5C16 16.2239 15.7761 16 15.5 16C15.2239 16 15 16.2239 15 16.5C15 16.7761 15.2239 17 15.5 17Z" stroke="#404040" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round" />
-                            <path d="M7.02344 7.02499H8.02344L9.35344 13.235C9.40223 13.4624 9.52877 13.6657 9.71129 13.8099C9.89381 13.9541 10.1209 14.0302 10.3534 14.025H15.2434C15.471 14.0246 15.6917 13.9466 15.869 13.8039C16.0462 13.6612 16.1695 13.4623 16.2184 13.24L17.0434 9.52499H8.55844" stroke="#404040" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round" />
+                        <g clipPath="url(#clip0_670_96759)">
+                            <path d="M10 17C10.2761 17 10.5 16.7761 10.5 16.5C10.5 16.2239 10.2761 16 10 16C9.72386 16 9.5 16.2239 9.5 16.5C9.5 16.7761 9.72386 17 10 17Z" stroke="#404040" strokeWidth="1.2" strokeLinejoin="round" />
+                            <path d="M15.5 17C15.7761 17 16 16.7761 16 16.5C16 16.2239 15.7761 16 15.5 16C15.2239 16 15 16.2239 15 16.5C15 16.7761 15.2239 17 15.5 17Z" stroke="#404040" strokeWidth="1.2" strokeLinecap="square" strokeLinejoin="round" />
+                            <path d="M7.02344 7.02499H8.02344L9.35344 13.235C9.40223 13.4624 9.52877 13.6657 9.71129 13.8099C9.89381 13.9541 10.1209 14.0302 10.3534 14.025H15.2434C15.471 14.0246 15.6917 13.9466 15.869 13.8039C16.0462 13.6612 16.1695 13.4623 16.2184 13.24L17.0434 9.52499H8.55844" stroke="#404040" strokeWidth="1.2" strokeLinecap="square" strokeLinejoin="round" />
                         </g>
                         <defs>
                             <clipPath id="clip0_670_96759">
