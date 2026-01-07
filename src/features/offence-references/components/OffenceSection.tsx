@@ -8,7 +8,7 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 interface OffencesSectionProps {
   selectedOffences: string[]; // lowercase offence types
   setSelectedOffences: React.Dispatch<React.SetStateAction<string[]>>;
-  selectedReferences: string[]; // single flat array of reference IDs
+  selectedReferences: string[]; 
   setSelectedReferences: React.Dispatch<React.SetStateAction<string[]>>;
 }
 

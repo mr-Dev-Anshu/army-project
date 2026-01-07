@@ -28,3 +28,7 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+
+// 1. change the model , validator ,  accordinglly , make sure apis are working 
+// 2. use this component in all 3 forms , 
