@@ -264,17 +264,81 @@ export default function ReportsPage({
 /* ================= REPORT MAPPER ================= */
 
 function mapToReportProps(offence: any): MilitaryPoliceReportProps {
+  const primary = offence.offenders?.[0]?.offenderDetails || {};
+  const secondary = offence.offenders?.[1]?.offenderDetails;
+
+  const val = (v: any) => v || "N/A";
+
+  const mpDetails = offence.onDutyDetailsMPReporting || {};
+  // Assuming the first witnessing MP is the main witness
+  const witness = offence.onDutyWitnessingMps?.[0] || {};
+
   return {
     reportNo: offence.reportNumber || "N/A",
     reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
-    particulars: {},
-    occurrence: {},
+    particulars: {
+      primary: {
+        aadharCardNo: val(primary.aadharCard),
+        name: val(primary.name),
+        so: val(primary.fatherName),
+        relation: "Father", // Default as per typical usage, or map if available
+        armyNo: val(primary.armyNo),
+        rank: val(primary.rank),
+        unit: val(primary.unit),
+        command: "N/A",
+        fmn: val(primary.fmn),
+        address: val(primary.address),
+        iCardNo: val(primary.identityCard),
+      },
+      secondary: secondary ? {
+        aadharCardNo: val(secondary.aadharCard),
+        name: val(secondary.name),
+        so: val(secondary.fatherName),
+        relation: "Father",
+        armyNo: val(secondary.armyNo),
+        rank: val(secondary.rank),
+        unit: val(secondary.unit),
+        command: "N/A",
+        fmn: val(secondary.fmn),
+        address: val(secondary.address),
+        iCardNo: val(secondary.identityCard),
+      } : undefined,
+      vehicle: offence.isVehicleInvolved ? {
+        baNo: val(offence.vehicleNumber),
+        makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
+      } : undefined,
+    },
+    occurrence: {
+      dateOfDuty: offence.onDutyDetails?.dateOfDuty ? new Date(offence.onDutyDetails.dateOfDuty).toLocaleDateString("en-GB") : "N/A",
+      dutyTime: offence.onDutyDetails?.startTime ? new Date(offence.onDutyDetails.startTime).toLocaleTimeString("en-GB") : "N/A",
+      dutyLocation: val(offence.onDutyDetails?.dutyLocation),
+      nameOfWitnessingOfficial1: val(witness.name) || "N/A",
+      nameOfWitnessingOfficial2: "N/A",
+      timeOfOffence: offence.offenceOccurenceDetails?.timeOfOffence ? new Date(offence.offenceOccurenceDetails.timeOfOffence).toLocaleTimeString("en-GB") : "N/A",
+      locationOfOffence: val(offence.offenceOccurenceDetails?.incidentLocation),
+      statement: val(offence.offenceOccurenceDetails?.description),
+    },
     offence: {
-      type: offence.currentOffenceType || "Traffic Offence",
-      description: offence.offenceOccurenceDetails?.description || "",
+      type: val(offence.currentOffenceType),
+      ref1: "N/A",
+      ref2: "N/A",
+      description: val(offence.offenceOccurenceDetails?.description),
+    },
+    witnessSig: {
+      armyNo: val(witness.armyNo),
+      rank: val(witness.rank),
+      name: val(witness.name),
+      unit: val(witness.unit),
+    },
+    mpSig: {
+      armyNo: val(mpDetails.armyNumber),
+      rank: val(mpDetails.rank),
+      name: val(mpDetails.nameReportingMP),
+      unit: val(mpDetails.unit),
     },
     remarks: {
-      text: offence.remarks || "",
+      text: val(offence.actionStatusRemark) || val(offence.customFields?.remarks),
+      station: "N/A",
       dated: new Date().toLocaleDateString("en-GB"),
     },
   };

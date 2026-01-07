@@ -316,7 +316,7 @@ export default function StaticSpeedForm({
 
       /* ================= CREATE WITNESS ================= */
       if (staticData.witnesses?.length > 0) {
-        const witnessPayload = staticData.witnesses.map((w) => ({
+        const witnessPayload = staticData.witnesses.map((w: any) => ({
           offenceId: staticRes._id,
           rank: w.reportingBlock.rank,
           unit: w.reportingBlock.unit,
@@ -329,7 +329,7 @@ export default function StaticSpeedForm({
 
         try {
           const witnessResponses = await Promise.all(
-            witnessPayload.map((w) => createWitnessMutation.mutateAsync(w))
+            witnessPayload.map((w: any) => createWitnessMutation.mutateAsync(w))
           );
 
           console.log("✅ WITNESS BACKEND RESPONSES ===>", witnessResponses);

@@ -647,7 +647,7 @@ export default function OffenderWithoutVehicleForm({
           {/* 🔹 FORM */}
           {block.type && block.index !== undefined && (
             <OffenderDynamicForm
-              title={`${block.type} Details`}
+              title={`${String(block.type)} Details`}
               fields={offenderFormsConfig[block.type].fields}
               scope={scope as any}
               path={getRenderPath(block)}

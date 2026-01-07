@@ -335,10 +335,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
-                showPriceListFilter={true}
-                showDate={false}
-                showSort={true}
-                showFilter={true}
+                showDateRange={false}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
                     search: "",

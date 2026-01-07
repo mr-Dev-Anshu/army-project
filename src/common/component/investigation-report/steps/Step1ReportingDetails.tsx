@@ -104,7 +104,7 @@ export default function Step1ReportDetails() {
               <Button
                 variant="outline"
                 className="text-green-600 border-green-600"
-                onClick={() => window.open(mp.firFile, "_blank")}
+                onClick={() => window.open(mp.firFile!, "_blank")}
               >
                 View FIR
               </Button>

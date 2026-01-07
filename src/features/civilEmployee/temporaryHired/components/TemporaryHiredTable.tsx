@@ -293,9 +293,7 @@ const TemporaryHiredTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdi
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
-                showDate={false}
-                showSort={false}
-                showFilter={true}
+                showDateRange={false}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
                     search: "",

@@ -8,12 +8,12 @@ export default function Step3Offence() {
   const { state, dispatch } = useForm();
 
   const staticData = state.formData.staticSpeed;
-  const offence = staticData?.offenceOccurenceDetails || {};
+  const offence = staticData?.offenceBlock || {};
 
   const updateOffence = (value: any) => {
     dispatch({
       type: "SET_PATH",
-      path: "formData.staticSpeed.offenceOccurenceDetails",
+      path: "formData.staticSpeed.offenceBlock",
       value: {
         ...offence,
         ...value,

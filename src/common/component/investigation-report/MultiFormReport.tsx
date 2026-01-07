@@ -352,14 +352,13 @@ export default function MultiFormReport({
 
         evidences: buildEvidences(mp.evidence),
 
-        detailedOccurrenceReport:
-          mp.detailedReport?.statement || mp.detailedReport || "Nil",
+        detailedOccurrenceReport: mp.detailedReport || "Nil",
 
         pointsFindOutDuringInvestigation: Array.isArray(mp.investigationPoints)
           ? mp.investigationPoints.join("\n")
           : mp.investigationPoints || "Nil",
 
-        opinion: mp.opinion?.statement || mp.opinion || "Nil",
+        opinion: mp.opinion || "Nil",
 
         remarks: {
           analysis: mp.remarks.analysis || "Nil",
@@ -430,7 +429,7 @@ export default function MultiFormReport({
 
       /* 3️⃣ WITNESSES (USING SAME OFFENDER API) */
       for (const w of mp.witnesses || []) {
-        const d = w.details ?? w;
+        const d = (w as any).details ?? w;
         const hasData = Object.values(d || {}).some(
           (v) => v !== "" && v !== null && v !== undefined
         );

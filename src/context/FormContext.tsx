@@ -147,6 +147,8 @@ export const initialState: GlobalFormState = {
 
       occurrenceDetails: {
         offenceType: "",
+        offenceTypes: [],
+        offenceTypeReference: [],
         place: "",
         date: "",
         time: "",

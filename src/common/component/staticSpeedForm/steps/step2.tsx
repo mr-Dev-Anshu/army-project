@@ -22,16 +22,16 @@ export default function StaticSpeedStep2() {
     staticData.witnesses?.length > 0
       ? staticData.witnesses
       : [
-          {
-            reportingBlock: {
-              nameReportingMP: "",
-              rank: "",
-              unit: "",
-              armyNumber: "",
-              contactNumber: "",
-            },
+        {
+          reportingBlock: {
+            nameReportingMP: "",
+            rank: "",
+            unit: "",
+            armyNumber: "",
+            contactNumber: "",
           },
-        ];
+        },
+      ];
 
   const set = (path: string, value: any) =>
     dispatch({
@@ -104,12 +104,7 @@ export default function StaticSpeedStep2() {
 
       {/* ================== MP REPORTING ================== */}
       <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Reporting</span>
-          </>
-        }
+        title="On-Duty Details of MP Reporting"
       >
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -158,12 +153,7 @@ export default function StaticSpeedStep2() {
 
       {/* ================== WITNESSING MP ================== */}
       <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Witnessing</span>
-          </>
-        }
+        title="On-Duty Details of MP Witnessing"
       >
         {witnesses.map((w, i) => (
           <div
@@ -272,66 +262,66 @@ export default function StaticSpeedStep2() {
           w.reportingBlock?.unit ||
           w.reportingBlock?.armyNumber
       ) && (
-        <FormSection title="List of On-Duty Details of Witnessing MP - Select One for Signature">
-          <div className="text-sm text-gray-500 mb-2">
-            List of Witnesses, choose one for Signature Proof
-          </div>
+          <FormSection title="List of On-Duty Details of Witnessing MP - Select One for Signature">
+            <div className="text-sm text-gray-500 mb-2">
+              List of Witnesses, choose one for Signature Proof
+            </div>
 
-          <div>
-            {witnesses
-              .filter(
-                (w) =>
-                  w.reportingBlock?.nameReportingMP ||
-                  w.reportingBlock?.rank ||
-                  w.reportingBlock?.unit ||
-                  w.reportingBlock?.armyNumber
-              )
-              .map((w, index) => {
-                const data = w.reportingBlock;
+            <div>
+              {witnesses
+                .filter(
+                  (w) =>
+                    w.reportingBlock?.nameReportingMP ||
+                    w.reportingBlock?.rank ||
+                    w.reportingBlock?.unit ||
+                    w.reportingBlock?.armyNumber
+                )
+                .map((w, index) => {
+                  const data = w.reportingBlock;
 
-                return (
-                  <label
-                    key={index}
-                    className="border rounded-md p-4 flex gap-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="selectedWitness"
-                      checked={staticData.selectedWitness === index}
-                      onChange={() =>
-                        set("formData.staticSpeed.selectedWitness", index)
-                      }
-                    />
+                  return (
+                    <label
+                      key={index}
+                      className="border rounded-md p-4 flex gap-3 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="selectedWitness"
+                        checked={staticData.selectedWitness === index}
+                        onChange={() =>
+                          set("formData.staticSpeed.selectedWitness", index)
+                        }
+                      />
 
-                    <div className="w-full grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <p>
-                          <span className="font-semibold">Name:</span>{" "}
-                          {data.nameReportingMP || "—"}
-                        </p>
-                        <p>
-                          <span className="font-semibold">Unit:</span>{" "}
-                          {data.unit || "—"}
-                        </p>
+                      <div className="w-full grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <p>
+                            <span className="font-semibold">Name:</span>{" "}
+                            {data.nameReportingMP || "—"}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Unit:</span>{" "}
+                            {data.unit || "—"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p>
+                            <span className="font-semibold">Rank:</span>{" "}
+                            {data.rank || "—"}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Army no.:</span>{" "}
+                            {data.armyNumber || "—"}
+                          </p>
+                        </div>
                       </div>
-
-                      <div>
-                        <p>
-                          <span className="font-semibold">Rank:</span>{" "}
-                          {data.rank || "—"}
-                        </p>
-                        <p>
-                          <span className="font-semibold">Army no.:</span>{" "}
-                          {data.armyNumber || "—"}
-                        </p>
-                      </div>
-                    </div>
-                  </label>
-                );
-              })}
-          </div>
-        </FormSection>
-      )}
+                    </label>
+                  );
+                })}
+            </div>
+          </FormSection>
+        )}
 
       {/* ================== OFFENCE DETAILS ================== */}
       <FormSection title="Offence Occurrence Details">

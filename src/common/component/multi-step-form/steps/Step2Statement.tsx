@@ -345,16 +345,16 @@ export default function Step2Statement() {
     Array.isArray(d?.witnesses) && d.witnesses.length > 0
       ? d.witnesses
       : [
-          {
-            reportingBlock: {
-              nameReportingMP: "",
-              rank: "",
-              unit: "",
-              armyNumber: "",
-              contactNumber: "",
-            },
+        {
+          reportingBlock: {
+            nameReportingMP: "",
+            rank: "",
+            unit: "",
+            armyNumber: "",
+            contactNumber: "",
           },
-        ];
+        },
+      ];
 
   const hasFilledWitness = witnesses.some((w) => {
     const r = w.reportingBlock;
@@ -425,12 +425,7 @@ export default function Step2Statement() {
 
       {/* ================= MP REPORTING ================= */}
       <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Reporting</span>
-          </>
-        }
+        title="On-Duty Details of MP Reporting"
       >
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -491,12 +486,7 @@ export default function Step2Statement() {
 
       {/* ================= WITNESSING MP ================= */}
       <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Witnessing</span>
-          </>
-        }
+        title="On-Duty Details of MP Witnessing"
       >
         {witnesses.map((w, i) => (
           <div
@@ -618,9 +608,12 @@ export default function Step2Statement() {
                   <input
                     type="radio"
                     name="selectedWitnessTraffic"
-                    checked={d.selectedWitness === index}
+                    checked={d.selectedWitness?.armyNumber === data.armyNumber}
                     onChange={() =>
-                      set("formData.traffic.selectedWitness", index)
+                      set(
+                        "formData.traffic.selectedWitness",
+                        witnesses[index].reportingBlock
+                      )
                     }
                   />
 
@@ -687,9 +680,9 @@ export default function Step2Statement() {
           <FormTextarea
             label="Full Description of Offence"
             description="Provide a detailed description of the offence."
-            value={d.offenceOccurenceDetails.description2}
+            value={d.offenceOccurenceDetails.description}
             onChange={(v) =>
-              set("formData.traffic.offenceOccurenceDetails.description2", v)
+              set("formData.traffic.offenceOccurenceDetails.description", v)
             }
           />
         </div>

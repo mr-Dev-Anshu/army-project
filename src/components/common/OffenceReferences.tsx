@@ -242,7 +242,7 @@ const OffencesSection: React.FC<{
             placeholder="Type to search or add new offence..."
             value={inputValue}
             onChange={setInputValue}
-            onSelect={handleAddOffence} // This triggers when user selects from dropdown
+            onItemSelect={handleAddOffence}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter" && inputValue.trim()) {
                 e.preventDefault();

@@ -21,7 +21,7 @@ export default function Step5WitnessList() {
   const witnesses = mp.witnesses || [];
   const witnessVehicleStatus: YesNo = mp.witnessVehicleStatus || "";
 
-  const setVehicleStatus = (value: YesNo) => {
+  const setVehicleStatus = (value: string) => {
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.witnessVehicleStatus",

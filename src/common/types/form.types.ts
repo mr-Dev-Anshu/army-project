@@ -68,7 +68,7 @@ export interface MpReportState {
     reportNo: string;
     command: string;
     firNo: string;
-    firFile?: File | null;
+    firFile?: string | null;
   };
 
   mpParticulars: {
@@ -84,6 +84,8 @@ export interface MpReportState {
 
   occurrenceDetails: {
     offenceType: string;
+    offenceTypes: string[];
+    offenceTypeReference: string[];
     place: string; // <-- same as context
     date: string;
     time: string;
@@ -169,7 +171,7 @@ export interface OffenderPerson {
 // ---------- FORM ROOT ----------
 // ---------- TRAFFIC ----------
 export interface TrafficFormState {
-  reportNo: string;
+  reportNo?: string;
   vehicleInvolved: string;
   vehicleDetails: VehicleDetailsState;
   offenderWithoutVehicle: OffenderWithoutVehicleState;
@@ -194,6 +196,8 @@ export interface TrafficFormState {
 
 // ---------- STATIC SPEED ----------
 export interface StaticSpeedFormState {
+  remarks?: string;
+  vehicleInvolved?: string;
   vehicleDetails: {
     category: string;
     vehicleType: string;
@@ -202,30 +206,42 @@ export interface StaticSpeedFormState {
     vehicleName: string;
   };
 
+  dutyBlock: {
+    dateOfDuty: string;
+    startTime: string;
+    endTime: string;
+    dutyLocation: string;
+    dutyType: string;
+  };
+
+  reportingBlock: {
+    nameReportingMP: string;
+    rank: string;
+    unit: string;
+    armyNumber: string;
+    contactNumber: string;
+  };
+
+  offenceBlock: {
+    timeOfOffence: string;
+    time: string;
+    incidentLocation: string;
+    description: string;
+    description2: string;
+    authSpeed: string;
+    actualSpeedNoted: string;
+    overSpeedCalculated: string;
+    offenceTypes?: string[];
+    offenceTypeReference?: string[];
+  };
+
   witnesses: any[];
   selectedWitness?: any;
 
   offenderDetails: any;
   offenderPeople: any[];
 
-  offenceOccurenceDetails: {
-    timeOfOffence: string;
-    incidentLocation: string;
-    description: string;
-    authSpeed: string;
-    actualSpeedNoted: string;
-    overSpeedCalculated: string;
-    dateOfDuty?: string; // observed in usage
-    startTime?: string;
-    endTime?: string;
-    dutyLocation?: string;
-    dutyType?: string;
-    nameReportingMP?: string;
-    rank?: string;
-    unit?: string;
-    armyNumber?: string;
-    time?: string;
-  };
+
 }
 
 // ---------- FORM ROOT ----------

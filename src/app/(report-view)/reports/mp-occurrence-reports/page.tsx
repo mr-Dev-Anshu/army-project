@@ -358,7 +358,7 @@ export default function MpOccurrenceReportsPage() {
         }
         showOffenceType={false}
         // showSort={true}
-        showFilter={true}
+
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({
