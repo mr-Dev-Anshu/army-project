@@ -143,19 +143,33 @@ export default function OffenderDynamicForm({
     });
 
     // Validate Dates
-    let issueDate = updated["passIssueDate"];
-    let expireDate = updated["passExpireDate"];
+    const issueKey = "passIssueDate";
+    const expireKey = "passExpireDate";
 
-    if (issueDate && expireDate) {
-      const i = new Date(issueDate);
-      const e = new Date(expireDate);
+    let issueDate = updated[issueKey];
+    let expireDate = updated[expireKey];
 
-      if (e <= i) {
-        setErrors((prev) => ({
-          ...prev,
-          "Pass Expire Date": "Expire date must be greater than Issue date",
-        }));
+    // If current field is issue date or expire date, re-validate
+    if (key === issueKey || key === expireKey) {
+      if (issueDate && expireDate) {
+        const i = new Date(issueDate);
+        const e = new Date(expireDate);
+
+        if (e <= i) {
+          setErrors((prev) => ({
+            ...prev,
+            "Pass Expire Date": "Pass Expire Date must be later than Pass Issue Date",
+          }));
+        } else {
+          setErrors((prev) => {
+            const newErr = { ...prev };
+            delete newErr["Pass Expire Date"];
+            return newErr;
+          });
+        }
       } else {
+        // If one is missing, clear error just in case? Or wait? 
+        // Better to clear error if one is removed.
         setErrors((prev) => {
           const newErr = { ...prev };
           delete newErr["Pass Expire Date"];

@@ -15,45 +15,57 @@ type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional";
 
 interface VehicleDetailsFormProps {
   scope?: ScopeType;
+  rootPath?: string;
 }
 
 export default function VehicleDetailsForm({
   scope = "traffic",
+  rootPath,
 }: VehicleDetailsFormProps) {
   const { state, dispatch } = useForm();
 
   const traffic = state.formData.traffic;
   const staticSpeed = state.formData.staticSpeed;
   const mpMain = state.formData.mpReport.individualDetails;
-  const mpAdd = state.formData.mpReport.additionalIndividual;
+
+  // Helper for deep access
+  const getValue = (obj: any, path: string) =>
+    path.split('.').reduce((o, k) => (o || {})[k], obj);
+
+  const mpAdd = rootPath
+    ? getValue(state, rootPath)
+    : state.formData.mpReport.additionalIndividual;
 
   /* ================= GUARD ================= */
   if (scope === "traffic" && traffic.vehicleInvolved !== "yes") return null;
   if (scope === "mp-main" && mpMain.vehicleInvolved !== "yes") return null;
-  if (scope === "mp-additional" && mpAdd.vehicleInvolved !== "yes") return null;
+  // Use mpAdd for check if we are using rootPath or default
+  if (scope === "mp-additional" && mpAdd?.vehicleInvolved !== "yes") return null;
 
   /* ================= VEHICLE STATE ================= */
-  const vehicleState =
-    scope === "traffic"
-      ? traffic.vehicleDetails
-      : scope === "static"
-      ? staticSpeed.vehicleDetails
-      : scope === "mp-main"
-      ? mpMain.vehicleData
-      : mpAdd.vehicleData;
+  let vehicleState: any = {};
+
+  if (scope === "traffic") vehicleState = traffic.vehicleDetails;
+  else if (scope === "static") vehicleState = staticSpeed.vehicleDetails;
+  else if (scope === "mp-main") vehicleState = mpMain.vehicleData;
+  else if (scope === "mp-additional") vehicleState = mpAdd?.vehicleData;
 
   const category = vehicleState?.category || "";
   const vehicleType = vehicleState?.vehicleType || "";
   const driverType = vehicleState?.driverType || "";
 
-  const vehiclePath =
-    scope === "traffic"
-      ? "formData.traffic.vehicleDetails"
-      : scope === "static"
-      ? "formData.staticSpeed.vehicleDetails"
-      : scope === "mp-main"
-      ? "formData.mpReport.individualDetails.vehicleData"
-      : "formData.mpReport.additionalIndividual.vehicleData";
+  let vehiclePath = "";
+  if (rootPath) {
+    vehiclePath = `${rootPath}.vehicleData`;
+  } else if (scope === "traffic") {
+    vehiclePath = "formData.traffic.vehicleDetails";
+  } else if (scope === "static") {
+    vehiclePath = "formData.staticSpeed.vehicleDetails";
+  } else if (scope === "mp-main") {
+    vehiclePath = "formData.mpReport.individualDetails.vehicleData";
+  } else if (scope === "mp-additional") {
+    vehiclePath = "formData.mpReport.additionalIndividual.vehicleData";
+  }
 
   /* ================= UPDATE VEHICLE ================= */
   const updateVehicle = (data: any) => {
@@ -239,19 +251,20 @@ export default function VehicleDetailsForm({
       {driverType && (
         <div className="border rounded-xl p-4 mt-4">
           <OffenderDynamicForm
-            scope={scope}
+            scope={scope as any}
             title={`${driverType} Details`}
             fields={offenderFormsConfig[driverType].fields}
             path={
-              scope === "traffic"
-                ? "formData.traffic.offenderPeople[0].details"
-                : scope === "static"
-                ? "formData.staticSpeed.offenderPeople[0].details"
-                : scope === "mp-main"
-                ? "formData.mpReport.individualDetails.offenderList[0].details"
-                : "formData.mpReport.additionalIndividual.tempOffender.details"
+              rootPath
+                ? `${rootPath}.tempOffender.details`
+                : scope === "traffic"
+                  ? "formData.traffic.offenderPeople[0].details"
+                  : scope === "static"
+                    ? "formData.staticSpeed.offenderPeople[0].details"
+                    : scope === "mp-main"
+                      ? "formData.mpReport.individualDetails.tempOffender.details"
+                      : "formData.mpReport.additionalIndividual.tempOffender.details"
             }
-            showCoDriver={scope === "traffic" || scope === "static"}
             isRoot={true}
           />
         </div>

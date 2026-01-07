@@ -447,22 +447,18 @@ type Block = {
 };
 
 interface Props {
-  scope?: "traffic" | "static";
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+  rootPath?: string; // 👈 NEW: Allow overriding the state path
 }
 
 /* ================= COMPONENT ================= */
 
 export default function OffenderWithoutVehicleForm({
   scope = "traffic",
-}: {
-  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
-}) {
+  rootPath,
+}: Props) {
   const { state, dispatch } = useForm();
-
-  // ✅ default first block
-  const [blocks, setBlocks] = useState<Block[]>([
-    { id: Date.now() },
-  ]);
+  const [blocks, setBlocks] = useState<Block[]>([{ id: Date.now() }]);
 
   /* ================= HYDRATE FROM STATE ================= */
   useEffect(() => {
@@ -483,25 +479,32 @@ export default function OffenderWithoutVehicleForm({
       }
     }
 
-    // 2. MP (Single Object)
-    if (scope === "mp-main" || scope === "mp-additional") {
-      const tempPath =
-        scope === "mp-main"
-          ? "formData.mpReport.individualDetails.tempOffender"
-          : "formData.mpReport.additionalIndividual.tempOffender";
+    // 2. MP / Root Path (Single Object)
+    if (scope === "mp-main" || scope === "mp-additional" || rootPath) {
+      // Determine Path
+      let tempPath = "";
+      if (rootPath) {
+        tempPath = `${rootPath}.tempOffender`;
+      } else if (scope === "mp-main") {
+        tempPath = "formData.mpReport.individualDetails.tempOffender";
+      } else if (scope === "mp-additional") {
+        tempPath = "formData.mpReport.additionalIndividual.tempOffender";
+      }
 
       // Helper to access deep path
       const getValue = (obj: any, path: string) =>
-        path.split('.').reduce((o, k) => (o || {})[k], obj);
+        path.split(".").reduce((o, k) => (o || {})[k], obj);
 
       const temp = getValue(state, tempPath);
 
       if (temp?.offenderType) {
-        setBlocks([{
-          id: Date.now(),
-          type: temp.offenderType,
-          index: 0
-        }]);
+        setBlocks([
+          {
+            id: Date.now(),
+            type: temp.offenderType,
+            index: 0,
+          },
+        ]);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -526,36 +529,22 @@ export default function OffenderWithoutVehicleForm({
           ? state.formData.staticSpeed?.offenderPeople || []
           : state.formData.traffic?.offenderPeople || [];
 
-      const newIndex = existing.length;
-
-      // Update existing if re-selecting same block? 
-      // Current logic appends new entry. 
-      // BUT for hydration to work bi-directionally, we should probably update if index exists.
-      // However, simplified logic: just append new for now as per original code, 
-      // but UI state tracks index.
-
-      // Original code always appended. This might duplicate if user changes selection?
-      // "handleSelect" is called on Radio change. 
-      // If user changes type, we probably want to replace the entry at index?
-      // Original code: `value: [...existing, { ... }]` -> always APPENDS. 
-      // This implies 1 block = 1 new entry?
-      // But if I change type, it appends AGAIN? That seems buggy in original code too.
-      // Let's fix that: specific index update if block has index.
-
-      const currentBlock = blocks.find(b => b.id === blockId);
+      // Logic: If block already mapped to index, update it. Else append.
+      const currentBlock = blocks.find((b) => b.id === blockId);
       let newList = [...existing];
-      let finalIndex = newIndex;
+      let finalIndex = existing.length;
 
-      if (currentBlock?.index !== undefined && currentBlock.index < existing.length) {
-        // Update existing
+      if (
+        currentBlock?.index !== undefined &&
+        currentBlock.index < existing.length
+      ) {
         finalIndex = currentBlock.index;
         newList[finalIndex] = {
           whoIsIt: "Offender",
           type,
-          details: {}, // Reset details on type change? Usually yes.
+          details: {},
         };
       } else {
-        // Append new
         newList.push({
           whoIsIt: "Offender",
           type,
@@ -584,12 +573,16 @@ export default function OffenderWithoutVehicleForm({
       );
     }
 
-    /* --- CASE 2: MP (SINGLE OBJECT) --- */
+    /* --- CASE 2: MP / ROOT PATH (SINGLE OBJECT) --- */
     else {
-      const tempPath =
-        scope === "mp-main"
-          ? "formData.mpReport.individualDetails.tempOffender"
-          : "formData.mpReport.additionalIndividual.tempOffender";
+      let tempPath = "";
+      if (rootPath) {
+        tempPath = `${rootPath}.tempOffender`;
+      } else if (scope === "mp-main") {
+        tempPath = "formData.mpReport.individualDetails.tempOffender";
+      } else if (scope === "mp-additional") {
+        tempPath = "formData.mpReport.additionalIndividual.tempOffender";
+      }
 
       dispatch({
         type: "SET_PATH",
@@ -598,9 +591,7 @@ export default function OffenderWithoutVehicleForm({
       });
 
       setBlocks((prev) =>
-        prev.map((b) =>
-          b.id === blockId ? { ...b, type, index: 0 } : b
-        )
+        prev.map((b) => (b.id === blockId ? { ...b, type, index: 0 } : b))
       );
     }
   };
@@ -611,10 +602,14 @@ export default function OffenderWithoutVehicleForm({
       return `formData.traffic.offenderPeople[${block.index}].details`;
     if (scope === "static")
       return `formData.staticSpeed.offenderPeople[${block.index}].details`;
+
+    if (rootPath) return `${rootPath}.tempOffender.details`;
+
     if (scope === "mp-main")
       return "formData.mpReport.individualDetails.tempOffender.details";
     if (scope === "mp-additional")
       return "formData.mpReport.additionalIndividual.tempOffender.details";
+
     return "";
   };
 
@@ -629,9 +624,7 @@ export default function OffenderWithoutVehicleForm({
           <div className="border rounded-lg p-4">
             <RadioGroup
               value={(block.type as string) || ""}
-              onValueChange={(v) =>
-                handleSelect(block.id, v as OffenderKey)
-              }
+              onValueChange={(v) => handleSelect(block.id, v as OffenderKey)}
               className="grid grid-cols-2 gap-3"
             >
               {Object.keys(offenderFormsConfig).map((item) => (

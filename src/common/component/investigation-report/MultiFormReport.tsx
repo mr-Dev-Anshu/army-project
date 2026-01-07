@@ -245,10 +245,55 @@ export default function MultiFormReport({
     }
   };
 
+  /* ================= SUBMIT HANDLER ================= */
   const onSubmitFinal = async () => {
     setIsSubmitting(true);
     try {
       const mp = state.formData.mpReport;
+
+      /* ================= MAP INDIVIDUALS (EMBEDDED) ================= */
+      const individualsPayload = (mp.individualDetails?.offenderList || []).map(
+        (o: any) => {
+          const d = o.details || {};
+
+          // Helper to sanitize "Nil" or empty string to undefined for cleaner payload
+          const sanitize = (v: any) => (v && v !== "Nil" && v !== "" ? v : undefined);
+
+          return {
+            armyNo: sanitize(d.armyNumber) || sanitize(d.armyNo),
+            rank: sanitize(d.rank),
+            name: sanitize(d.name),
+            unit: sanitize(d.unit),
+            fmn: sanitize(d.fmn),
+            address: sanitize(d.address),
+            iCardNumber: sanitize(d.iCardNumber) || sanitize(d.icard) || sanitize(d.passNo),
+            remark: sanitize(d.remark) || "--",
+            role: o.role || o.offenderType || "Offender",
+            isVehicleInvolved: Boolean(o.vehicleInvolved === "yes" || d.vehicleInvolved === "yes" || o.isVehicleInvolved),
+            customFields: d,
+          };
+        }
+      );
+
+      /* ================= MAP WITNESSES (EMBEDDED) ================= */
+      const witnessesPayload = (mp.witnesses || []).map((w: any) => {
+        const d = w.details || w;
+
+        // Helper to sanitize "Nil" or empty string to undefined for cleaner payload
+        const sanitize = (v: any) => (v && v !== "Nil" && v !== "" ? v : undefined);
+
+        return {
+          armyNo: sanitize(d.armyNumber) || sanitize(d.armyNo),
+          rank: sanitize(d.rank),
+          name: sanitize(d.name),
+          unit: sanitize(d.unit),
+          fmn: sanitize(d.fmn),
+          address: sanitize(d.address),
+          iCardNumber: sanitize(d.iCardNumber),
+          remark: sanitize(d.remark) || "--",
+          customFields: d,
+        };
+      });
 
       /* ================= MP REPORT PAYLOAD ================= */
       const payload = {
@@ -284,9 +329,14 @@ export default function MultiFormReport({
           customFields: {},
         },
 
+        // ✅ POPULATE EMBEDDED ARRAYS
+        individuals: individualsPayload,
+        witnesses: witnessesPayload,
+
         documents: (mp.documents || []).map((d: any) => ({
           statement: d.statement || "Nil",
           url: d.url || "NA",
+          fileName: d.fileName || "",
         })),
 
         evidences: buildEvidences(mp.evidence),
@@ -321,7 +371,9 @@ export default function MultiFormReport({
         return;
       }
 
-      /* ================= CREATE ALL OFFENDERS & WITNESSES ================= */
+      /* ================= CREATE ALL OFFENDERS & WITNESSES (GLOBAL SEARCH) ================= */
+      // We still create these for the global search / centralized offender DB if needed.
+      // If the user only cares about the report document, this part is less critical but good to keep.
       const offendersToCreate: any[] = [];
 
       /* 1️⃣ MAIN INDIVIDUAL OFFENDERS */
@@ -339,8 +391,6 @@ export default function MultiFormReport({
           offenderDetails: {
             type: o.role || "Offender",
             category: "individual",
-
-            // 🔥 CORE FIX — SEND ALL DYNAMIC FIELDS
             ...d,
           },
         });
@@ -350,7 +400,6 @@ export default function MultiFormReport({
       const add = mp?.additionalIndividual?.tempOffender;
       if (add?.details) {
         const d = add.details;
-
         const hasData = Object.values(d).some(
           (v) => v !== "" && v !== null && v !== undefined
         );
@@ -362,8 +411,6 @@ export default function MultiFormReport({
             offenderDetails: {
               type: "Additional Individual",
               category: "individual",
-
-              // 🔥 dynamic again
               ...d,
             },
           });
@@ -373,7 +420,6 @@ export default function MultiFormReport({
       /* 3️⃣ WITNESSES (USING SAME OFFENDER API) */
       for (const w of mp.witnesses || []) {
         const d = w.details ?? w;
-
         const hasData = Object.values(d || {}).some(
           (v) => v !== "" && v !== null && v !== undefined
         );
@@ -385,8 +431,6 @@ export default function MultiFormReport({
           offenderDetails: {
             type: "Witness",
             category: "witness",
-
-            // 🔥 witness dynamic fields
             ...d,
           },
         });
@@ -405,7 +449,7 @@ export default function MultiFormReport({
       dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
       dispatch({ type: "SET_STEP", payload: 1 });
       dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
-
+      if (onCancel) onCancel(); // Return to dashboard
     } catch (err) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
       toast.error("Failed to create report");

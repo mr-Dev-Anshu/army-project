@@ -319,8 +319,21 @@ export default function Step4IndividualDetails() {
   };
 
   /* ================= SAVE ADDITIONAL ================= */
+  /* ================= SAVE ADDITIONAL ================= */
   const handleSaveAdditional = (formId: number) => {
-    const add = state.formData.mpReport.additionalIndividual;
+    // Helper to get deep value
+    const getValue = (obj: any, path: string) =>
+      path.split(".").reduce((o, k) => (o || {})[k], obj);
+
+    // Read unique local state
+    const uniquePath = `formData.mpReport.additionalIndividual.tempList.${formId}`;
+    const add = getValue(state, uniquePath);
+
+    if (!add) {
+      toast.error("Form data not found!");
+      return;
+    }
+
     let temp: any = null;
 
     if (add.vehicleInvolved === "no") {
@@ -358,10 +371,15 @@ export default function Step4IndividualDetails() {
       value: [...offenders, temp],
     });
 
-    /* 🔒 remove only this form, NOT others */
+    /* 🔒 remove only this form */
     setAdditionalForms((prev) => prev.filter((id) => id !== formId));
 
-    dispatch({ type: "CLEAR_MP_ADDITIONAL" });
+    // Cleanup temporary state
+    dispatch({
+      type: "SET_PATH",
+      path: uniquePath,
+      value: undefined
+    });
 
     toast.success("Additional Person Added!");
   };
@@ -387,50 +405,59 @@ export default function Step4IndividualDetails() {
       )}
 
       {/* ================= ADDITIONAL PERSON FORMS ================= */}
-      {additionalForms.map((id, index) => (
-        <div key={id} className="mt-6 border rounded-lg p-6 bg-gray-50">
-          <VehiclePrimaryQuestion
-            title={`Additional Person ${index + 1}`}
-            vehicleStatus={extraVehicleMap[id] || ""}
-            setVehicleStatus={(v) => {
-              const norm = normalizeVehicle(v);
+      {additionalForms.map((id, index) => {
+        // Unique state location for this form instance
+        const rootPath = `formData.mpReport.additionalIndividual.tempList.${id}`;
 
-              setExtraVehicleMap((prev) => ({
-                ...prev,
-                [id]: norm,
-              }));
+        return (
+          <div key={id} className="mt-6 border rounded-lg p-6 bg-gray-50">
+            <VehiclePrimaryQuestion
+              title={`Additional Person ${index + 1}`}
+              vehicleStatus={extraVehicleMap[id] || ""}
+              setVehicleStatus={(v) => {
+                const norm = normalizeVehicle(v);
 
-              dispatch({
-                type: "SET_PATH",
-                path: "formData.mpReport.additionalIndividual.vehicleInvolved",
-                value: norm,
-              });
-            }}
-          />
+                setExtraVehicleMap((prev) => ({
+                  ...prev,
+                  [id]: norm,
+                }));
 
-          {extraVehicleMap[id] === "yes" && (
-            <VehicleDetailsForm scope="mp-additional" />
-          )}
+                const finalPath = `${rootPath}.vehicleInvolved`;
+                dispatch({
+                  type: "SET_PATH",
+                  path: finalPath,
+                  value: norm,
+                });
+              }}
+            />
 
-          {extraVehicleMap[id] === "no" && (
-            <OffenderWithoutVehicleForm scope="mp-additional" />
-          )}
+            {extraVehicleMap[id] === "yes" && (
+              <VehicleDetailsForm scope="mp-additional" rootPath={rootPath} />
+            )}
 
-          <div className="mt-4 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() =>
-                setAdditionalForms((prev) => prev.filter((x) => x !== id))
-              }
-            >
-              Cancel
-            </Button>
-            <Button onClick={() => handleSaveAdditional(id)}>
-              Save Person
-            </Button>
+            {extraVehicleMap[id] === "no" && (
+              <OffenderWithoutVehicleForm
+                scope="mp-additional"
+                rootPath={rootPath}
+              />
+            )}
+
+            <div className="mt-4 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setAdditionalForms((prev) => prev.filter((x) => x !== id))
+                }
+              >
+                Cancel
+              </Button>
+              <Button onClick={() => handleSaveAdditional(id)}>
+                Save Person
+              </Button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* ================= ADD BUTTON ================= */}
       <div className="mt-6">

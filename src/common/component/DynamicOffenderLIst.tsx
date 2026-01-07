@@ -1,5 +1,7 @@
 import { Trash2 } from "lucide-react";
 
+type GenericObject = Record<string, unknown>;
+
 interface DynamicOffenderListProps {
   data?: any[];
   title?: string;
@@ -9,7 +11,7 @@ interface DynamicOffenderListProps {
 export default function DynamicOffenderList({
   data = [],
   title = "Victim / Offender List",
-  onDelete = (index: number) => {},
+  onDelete = (index: number) => { },
 }: DynamicOffenderListProps) {
   if (!data.length) return null;
 
@@ -67,13 +69,16 @@ export default function DynamicOffenderList({
           <tbody>
             {data.map((off, i) => {
               /* 🔥 SUPPORT BOTH SHAPES */
-              const source: GenericObject =
-                (off as any).details ?? off;
+              const source: GenericObject = {
+                ...off,
+                ...((off as any).details || {}),
+              };
 
               /* 🔥 ROLE / TYPE LABEL */
               const roleLabel =
                 (off as any).role ||
                 (off as any).offenderType ||
+                (off as any).type ||
                 "Unknown";
 
               const col1 = pickMatching(source, [
@@ -83,6 +88,9 @@ export default function DynamicOffenderList({
                 "name",
                 "driver",
                 "rider",
+                "vehicle", // Catch vehicle fields
+                "type",
+                "role",
               ]);
 
               const col2 = pickMatching(source, [
@@ -90,6 +98,9 @@ export default function DynamicOffenderList({
                 "card",
                 "icard",
                 "icardnumber",
+                "pass", // Catch pass numbers
+                "issue",
+                "expire",
               ]);
 
               const col3 = pickMatching(source, [
@@ -97,21 +108,24 @@ export default function DynamicOffenderList({
                 "fmn",
                 "address",
                 "command",
+                "place", // Catch place of work/stay
+                "work",
+                "stay",
               ]);
 
               return (
                 <tr key={i} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3 border-r">
-                    {i + 1}.
+                    {i + 1}. <br />
+                    <span className="text-xs font-semibold text-gray-500">{roleLabel}</span>
                   </td>
 
                   {/* ===== COLUMN 1 ===== */}
-                  <td className="px-4 py-3 border-r align-top">
-                    
+                  <td className="px-4 py-3 border-r align-top text-sm">
                     {col1.length ? (
                       col1.map((f) => (
                         <div key={f.key}>
-                          <b>{formatFieldName(f.key)}:</b>{" "}
+                          <span className="font-medium text-gray-700">{formatFieldName(f.key)}:</span>{" "}
                           {String(f.value)}
                         </div>
                       ))
@@ -121,10 +135,11 @@ export default function DynamicOffenderList({
                   </td>
 
                   {/* ===== COLUMN 2 ===== */}
-                  <td className="px-4 py-3 border-r align-top">
+                  <td className="px-4 py-3 border-r align-top text-sm">
                     {col2.length ? (
                       col2.map((f) => (
                         <div key={f.key}>
+                          <span className="font-medium text-gray-700">{formatFieldName(f.key)}:</span>{" "}
                           {String(f.value)}
                         </div>
                       ))
@@ -134,11 +149,11 @@ export default function DynamicOffenderList({
                   </td>
 
                   {/* ===== COLUMN 3 ===== */}
-                  <td className="px-4 py-3 border-r align-top">
+                  <td className="px-4 py-3 border-r align-top text-sm">
                     {col3.length ? (
                       col3.map((f) => (
                         <div key={f.key}>
-                          <b>{formatFieldName(f.key)}:</b>{" "}
+                          <span className="font-medium text-gray-700">{formatFieldName(f.key)}:</span>{" "}
                           {String(f.value)}
                         </div>
                       ))
