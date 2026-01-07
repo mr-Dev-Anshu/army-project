@@ -1,30 +1,34 @@
-// app/test/page.tsx
 "use client";
 
-import { useEffect } from "react";
-import { useSidebar } from "@/context/SidebarContext";
+import React, { useState } from "react";
+import OffencesSection from "@/features/offence-references/components/OffenceSection";
 
-export default function TestPage() {
-  const { setCollapsed } = useSidebar();
-
-  // Collapse sidebar when this page mounts
-  useEffect(() => {
-    setCollapsed(true);
-    
-    // Optional: reset when leaving the page
-    return () => {
-      setCollapsed(false); // or keep last user preference
-    };
-  }, [setCollapsed]);
+const Page: React.FC = () => {
+  const [selectedOffences, setSelectedOffences] = useState<string[]>([]);
+  const [selectedReferences, setSelectedReferences] = useState<string[]>([]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Test Page</h1>
-      <p>This page starts with collapsed sidebar by default.</p>
-      
-      <div className="h-[200vh] bg-gradient-to-b from-blue-50 to-purple-50">
-        Long content to test scrolling...
+    <div className="min-h-screen bg-gray-50 py-8">
+      <OffencesSection
+        selectedOffences={selectedOffences}
+        setSelectedOffences={setSelectedOffences}
+        selectedReferences={selectedReferences}
+        setSelectedReferences={setSelectedReferences}
+      />
+
+      <div className="mt-10 max-w-4xl mx-auto p-4 bg-gray-100 rounded">
+        <pre className="text-sm">
+          Selected Offences: {JSON.stringify(selectedOffences, null, 2)}
+          <br />
+          Selected References (all): {JSON.stringify(selectedReferences, null, 2)}
+        </pre>
       </div>
     </div>
   );
-}
+};
+
+export default Page;
+
+
+// 1. change the model , validator ,  accordinglly , make sure apis are working 
+// 2. use this component in all 3 forms , 

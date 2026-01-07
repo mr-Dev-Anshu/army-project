@@ -4,14 +4,14 @@ import { Label } from "@/components/ui/label";
 import { useGetFieldSuggestions } from "@/features/suggestions/hooks";
 import { Loader2 } from "lucide-react";
 
-interface SuggestionInputProps
-  extends Omit<React.ComponentProps<"input">, "onChange" | "value"> {
+interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onChange" | "value"> {
   label?: string;
   placeholder?: string;
   value?: string;
   onChange?: (v: string) => void;
+  onItemSelect?: (selectedValue: string) => void;
   type?: string;
-  fieldType: string; // Required for fetching suggestions
+  fieldType: string;
   className?: string;
   defaultOptions?: (string | { label: string; value: string })[];
 }
@@ -21,6 +21,7 @@ export function SuggestionInput({
   placeholder,
   value = "",
   onChange,
+  onItemSelect,
   type = "text",
   fieldType,
   className,
@@ -34,10 +35,7 @@ export function SuggestionInput({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target as Node)
-      ) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
       }
     };
@@ -47,81 +45,64 @@ export function SuggestionInput({
 
   const handleSelect = (suggestion: string) => {
     onChange?.(suggestion);
+    onItemSelect?.(suggestion);
     setShowSuggestions(false);
-  };
+  }
+};
+document.addEventListener("mousedown", handleClickOutside);
+return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVal = e.target.value;
-    onChange?.(newVal);
-    setShowSuggestions(true);
-  };
+const handleSelect = (suggestion: string) => {
+  onChange?.(suggestion);
+  setShowSuggestions(false);
+};
 
-  const suggestions =
-    data && data.data && Array.isArray(data.data) ? data.data : [];
-  const safeValue = value || "";
+const suggestions = (data && data.data && Array.isArray(data.data)) ? data.data : [];
+const safeValue = value || "";
+const filteredDefaults = (defaultOptions || [])
+  .filter(opt => {
+    const val = typeof opt === 'string' ? opt : opt.label;
+    return val.toLowerCase().includes(safeValue.toLowerCase()) &&
+      !suggestions.some((s: any) => s.value.toLowerCase() === val.toLowerCase());
+  })
+  .map(opt => typeof opt === 'string' ? { value: opt } : { value: opt.label });
 
-  // Process default options
-  const filteredDefaults = (defaultOptions || [])
-    .filter((opt) => {
-      const val = typeof opt === "string" ? opt : opt.label;
-      return (
-        val.toLowerCase().includes(safeValue.toLowerCase()) &&
-        !suggestions.some(
-          (s: any) => s.value.toLowerCase() === val.toLowerCase()
-        )
-      );
-    })
-    .map((opt) =>
-      typeof opt === "string" ? { value: opt } : { value: opt.label }
-    );
+const allSuggestions = [...filteredDefaults, ...suggestions];
+const showList = showSuggestions && (allSuggestions.length > 0 || isLoading);
 
-  const allSuggestions = [...filteredDefaults, ...suggestions];
-  const showList = showSuggestions && (allSuggestions.length > 0 || isLoading);
+return (
+  <div className={`space-y-1 relative w-full ${className || ''}`} ref={wrapperRef}>
+    {label && <Label>{label}</Label>}
+    <Input
+      type={type}
+      placeholder={placeholder}
+      value={safeValue}
+      onChange={handleChange}
+      onFocus={() => setShowSuggestions(true)}
+      className="bg-white"
+      autoComplete="off"
+      {...props}
+    />
 
-  return (
-    <div
-      className={`space-y-1 relative w-full ${className || ""}`}
-      ref={wrapperRef}
-    >
-      {label && <Label>{label}</Label>}
-      <Input
-        type={type}
-        placeholder={placeholder}
-        value={safeValue}
-        onChange={handleChange}
-        onFocus={() => setShowSuggestions(true)}
-        autoComplete="off"
-        className={`
-    bg-white
-    border
-    ${safeValue ? "border-blue-500" : "border-gray-300"}
-    focus:border-blue-500
-    focus:ring-0
-    focus-visible:ring-0
-    focus-visible:ring-offset-0
-  `}
-        {...props}
-      />
-
-      {showList && (
-        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
-          {isLoading && (
-            <div className="p-2 text-sm text-gray-500 flex items-center justify-center">
-              <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading...
-            </div>
-          )}
-          {!isLoading &&
-            allSuggestions.map((item: any, idx: number) => (
-              <div
-                key={idx}
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm text-gray-700"
-                onClick={() => handleSelect(item.value)}
-              >
-                {item.value}
-              </div>
-            ))}
-        </div>
-      )}
-    </div>
-  );
+    {showList && (
+      <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
+        {isLoading && (
+          <div className="p-2 text-sm text-gray-500 flex items-center justify-center">
+            <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading...
+          </div>
+        )}
+        {!isLoading && allSuggestions.map((item: any, idx: number) => (
+          <div
+            key={idx}
+            className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm text-gray-700"
+            onClick={() => handleSelect(item.value)}
+          >
+            {item.value}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 }
