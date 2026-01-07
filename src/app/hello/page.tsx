@@ -7,6 +7,12 @@ import { useSidebar } from "@/context/SidebarContext";
 export default function TestPage() {
   const { setCollapsed } = useSidebar();
 
+
+
+
+
+
+
   // Collapse sidebar when this page mounts
   useEffect(() => {
     setCollapsed(true);
