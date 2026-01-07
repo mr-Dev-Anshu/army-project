@@ -1,12 +1,12 @@
 import api from "@/config/axios";
-import { OffenceReference, GetOffenceReferenceQuery } from "./types";
+import { OffenceReference } from "./types";
 
 /* =====================
    GET / SEARCH OFFENCE REFERENCES
 ===================== */
 
 export const getAllOffenceReferences = async (
-  params?: GetOffenceReferenceQuery
+  params?: object
 ): Promise<OffenceReference[]> => {
   const res = await api.get("/api/offence-references", { params });
   return res.data.data;

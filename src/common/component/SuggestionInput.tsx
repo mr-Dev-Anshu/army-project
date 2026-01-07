@@ -9,8 +9,9 @@ interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onCh
     placeholder?: string;
     value?: string;
     onChange?: (v: string) => void;
+    onItemSelect?: (selectedValue: string) => void;
     type?: string;
-    fieldType: string; // Required for fetching suggestions
+    fieldType: string; 
     className?: string;
     defaultOptions?: (string | { label: string; value: string })[];
 }
@@ -20,6 +21,7 @@ export function SuggestionInput({
     placeholder,
     value = "",
     onChange,
+    onItemSelect,
     type = "text",
     fieldType,
     className,
@@ -43,6 +45,7 @@ export function SuggestionInput({
 
     const handleSelect = (suggestion: string) => {
         onChange?.(suggestion);
+        onItemSelect?.(suggestion); 
         setShowSuggestions(false);
     };
 
@@ -52,11 +55,8 @@ export function SuggestionInput({
         setShowSuggestions(true);
     };
 
-
     const suggestions = (data && data.data && Array.isArray(data.data)) ? data.data : [];
     const safeValue = value || "";
-
-    // Process default options
     const filteredDefaults = (defaultOptions || [])
         .filter(opt => {
             const val = typeof opt === 'string' ? opt : opt.label;
