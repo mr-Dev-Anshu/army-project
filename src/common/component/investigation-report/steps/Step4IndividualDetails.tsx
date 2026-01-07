@@ -385,7 +385,18 @@ export default function Step4IndividualDetails() {
   };
 
   return (
-    <FormSection title="">
+    <div className="space-y-6">
+      <div className="mb-6">
+        <p className="font-semibold text-lg text-gray-900 mb-2">
+          MP must verify personal particulars
+        </p>
+        <p className="text-gray-500 text-sm leading-relaxed">
+          (To be read out to the Offender(s) by the MP above recorded personal
+          particulars have been given by me voluntarily and I certify and sign
+          them as correct. If found otherwise. I am liable for disciplinary
+          action under the Army Act&apos;)
+        </p>
+      </div>
       {/* ================= MAIN PERSON ================= */}
       <VehiclePrimaryQuestion
         title="Does this occurrence involve vehicles?"
@@ -475,7 +486,7 @@ export default function Step4IndividualDetails() {
         onDelete={handleDeleteOffender}
         data={offenders}
       />
-    </FormSection>
+    </div>
   );
 }
 

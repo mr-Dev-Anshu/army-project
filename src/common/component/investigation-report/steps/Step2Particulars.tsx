@@ -34,7 +34,7 @@ export default function Step2MpParticulars() {
     });
 
   return (
-    <FormSection title="2. MP PARTICULARS:" onClear={clearForm}>
+    <div className="space-y-6">
       <p className="font-semibold">Investigation Head Details</p>
       <p className="text-sm text-gray-500 mb-4">
         MP must caution witness and ensure presence of independent witness if possible
@@ -81,6 +81,6 @@ export default function Step2MpParticulars() {
         <SuggestionInput label="Address" value={mp.address} onChange={(v) => set("address", v)} fieldType="address" />
         <FormInput label="I Card Number" value={mp.icard} onChange={(v) => set("icard", v)} />
       </div>
-    </FormSection>
+    </div>
   );
 }

@@ -27,6 +27,15 @@ const buildEvidences = (ev: any) => {
   const evidences: any[] = [];
   if (!ev) return evidences;
 
+  if (ev?.attachEvidence?.url) {
+    evidences.push({
+      type: "Evidence",
+      url: ev.attachEvidence.url,
+      description: ev.attachEvidence.description || "",
+      customFields: {},
+    });
+  }
+
   if (ev?.eyeSketch?.url) {
     evidences.push({
       type: "Eye Sketch",
@@ -472,11 +481,11 @@ export default function MultiFormReport({
       component: <Step2 />,
     },
     3: {
-      title: "3. OFFENCE",
+      title: "3. OCCURRENCE DETAILS:",
       component: <Step3OccurrenceDetails />,
     },
     4: {
-      title: "4. DETAILS OF INDIVIDUAL",
+      title: "4. DETAILS OF INDIVIDUAL:",
       component: <Step4IndividualDetails />,
     },
     5: {

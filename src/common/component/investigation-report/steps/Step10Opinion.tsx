@@ -25,8 +25,8 @@ export default function Step10Opinion() {
     });
 
   return (
-    <FormSection title="10. OPINION :" onClear={clear}>
+    <div className="space-y-6">
       <FormTextarea label="" value={value} onChange={set} />
-    </FormSection>
+    </div>
   );
 }

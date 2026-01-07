@@ -60,7 +60,7 @@ export default function Step3OccurrenceDetails() {
   };
 
   return (
-    <FormSection title="3. OCCURRENCE DETAILS:" onClear={clearForm}>
+    <div className="space-y-6">
       {/* OFFENCE TYPE with REUSABLE COMPONENT */}
       <OffencesSection
         selectedOffences={mp.offenceTypes || []}
@@ -102,6 +102,6 @@ export default function Step3OccurrenceDetails() {
         value={mp.description}
         onChange={(v) => set("description", v)}
       />
-    </FormSection>
+    </div>
   );
 }

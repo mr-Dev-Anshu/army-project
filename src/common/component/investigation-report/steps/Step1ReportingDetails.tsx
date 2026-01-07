@@ -58,7 +58,7 @@ export default function Step1ReportDetails() {
   };
 
   return (
-    <FormSection title="1. REPORT DETAILS:" onClear={clearForm}>
+    <div className="space-y-6">
       <FormInput
         label="Report No : PRO/21 CPU/"
         placeholder="PRO/21CPU/00082/106/25"
@@ -133,6 +133,6 @@ export default function Step1ReportDetails() {
           )}
         </div>
       </div>
-    </FormSection>
+    </div>
   );
 }
