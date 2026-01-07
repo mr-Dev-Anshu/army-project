@@ -319,6 +319,8 @@ export default function MultiFormReport({
 
         occurrenceDetails: {
           offenceType: mp.occurrenceDetails.offenceType || "NA",
+          offenceTypes: mp.occurrenceDetails?.offenceTypes ?? [],
+          offenceTypeReference: mp.occurrenceDetails?.offenceTypeReference ?? [],
           placeOfOccurrence: mp.occurrenceDetails.place || "NA",
           dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
           timeOfOccurrence: toISODateTime(

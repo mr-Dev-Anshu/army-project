@@ -8,7 +8,7 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 interface OffencesSectionProps {
   selectedOffences: string[]; // lowercase offence types
   setSelectedOffences: React.Dispatch<React.SetStateAction<string[]>>;
-  selectedReferences: string[]; 
+  selectedReferences: string[];
   setSelectedReferences: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
@@ -40,22 +40,21 @@ const OffencesSection: React.FC<OffencesSectionProps> = ({
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-6">
-        3. OFFENCE COMMITTED/ORDERS CONTRAVENED:
-      </h2>
+    <div className="w-full">
+
 
       <div className="mb-8">
-        <label className="block text-lg font-medium mb-2">
-          Add Offence Type
+        <label className="block text-sm font-bold text-gray-900 mb-2">
+          Select Offence Type
         </label>
-        <div className="max-w-md">
+        <div className="w-full">
           <SuggestionInput
             fieldType="offenceType"
-            placeholder="Type to search or add new offence..."
+            placeholder="Select Offences"
             value={inputValue}
             onChange={setInputValue}
             onItemSelect={handleAddOffence}
+            className="w-full"
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter" && inputValue.trim()) {
                 e.preventDefault();
@@ -63,23 +62,20 @@ const OffencesSection: React.FC<OffencesSectionProps> = ({
               }
             }}
           />
-          <p className="text-sm text-gray-500 mt-2">
-            Type to search existing or add a new offence type
-          </p>
         </div>
       </div>
 
-      <div className="mb-8">
-        <div className="font-medium text-gray-700 mb-4">
-          Selected Offences ({selectedOffences.length})
+      <div className="mb-4">
+        <div className="text-sm text-gray-500 mb-4">
+          List of Offence Selected
         </div>
 
         {selectedOffences.length === 0 ? (
-          <p className="text-gray-500 italic py-8 text-center bg-gray-50 rounded-lg">
-            No offences selected yet. Start by adding one above.
+          <p className="text-gray-400 italic text-sm">
+            No offences selected.
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {selectedOffences.map((offence) => (
               <OffenceItem
                 key={offence}

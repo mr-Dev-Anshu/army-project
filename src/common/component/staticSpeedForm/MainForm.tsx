@@ -193,14 +193,18 @@ export default function StaticSpeedForm({
           description: [
             staticData.offenceBlock?.description,
             staticData.offenceBlock?.description2,
+            staticData.offenceOccurenceDetails?.description,
           ]
             .filter(Boolean)
             .join("\n\n"),
-
           overSpeedCalculated:
             staticData.offenceBlock?.overSpeedCalculated ?? "",
           actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
           authSpeed: staticData.offenceBlock?.authSpeed ?? "",
+
+          // New fields
+          offenceTypes: staticData.offenceOccurenceDetails?.offenceTypes ?? [],
+          offenceTypeReference: staticData.offenceOccurenceDetails?.offenceTypeReference ?? [],
         },
       };
 
@@ -400,10 +404,6 @@ export default function StaticSpeedForm({
             stepsConfig={stepsConfig}
             mode="static"
             mapReport={mapStaticToReport}
-            onCancel={() => {
-              dispatch({ type: "SET_STEP", payload: 1 });
-              onCancel();
-            }}
           />
         </div>
       </div>

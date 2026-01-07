@@ -42,6 +42,8 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     actualSpeedNoted: Joi.string().trim().optional(),
 
     authSpeed: Joi.string().trim().optional(),
+    offenceTypes: Joi.array().items(Joi.string()).optional(),
+    offenceTypeReference: Joi.array().items(Joi.string()).optional(),
 
     // Accept frontend overSpeed
     overSpeed: Joi.string().trim().optional(),

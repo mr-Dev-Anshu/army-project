@@ -51,7 +51,8 @@ export const createMPReportSchema = Joi.object({
   }).required(),
 
   occurrenceDetails: Joi.object({
-    offenceType: requiredString,
+    offenceTypes: Joi.array().items(Joi.string()).optional(),
+    offenceTypeReference: Joi.array().items(Joi.string()).optional(),
     placeOfOccurrence: requiredString,
     dateOfOccurrence: Joi.date().required().messages({
       "date.base": "Valid date required",

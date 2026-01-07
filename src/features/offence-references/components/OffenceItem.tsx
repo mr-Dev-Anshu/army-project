@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import Modal from "@/common/ui/Modal";
-import { FiPlus, FiX } from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   useGetOffenceReferences,
   useCreateOffenceReference,
-} from "../hooks/index"; 
+} from "../hooks/index";
 
 interface Reference {
   _id: string;
@@ -14,9 +15,9 @@ interface Reference {
 }
 
 interface OffenceItemProps {
-  offenceName: string; 
+  offenceName: string;
   displayName: string;
-  selectedReferences: string[]; 
+  selectedReferences: string[];
   onRemove: (name: string) => void;
   onReferencesChange: (refIds: string[]) => void;
 }
@@ -30,11 +31,10 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRefText, setNewRefText] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: availableRefs = [], isLoading } = useGetOffenceReferences(
     offenceName,
-    searchQuery
+    "" // Fetch all references without search query filtering
   );
 
   const createMutation = useCreateOffenceReference();
@@ -65,71 +65,62 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
   };
 
   return (
-    <>
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-black rounded flex items-center justify-center text-white text-xs font-bold">
-              ✓
-            </div>
-            <span className="font-medium text-gray-800 text-lg">
-              {displayName}
-            </span>
-          </div>
-          <button
-            onClick={() => onRemove(offenceName)}
-            className="p-1.5 rounded-lg hover:bg-gray-200 transition text-gray-500 hover:text-red-600"
-          >
-            <FiX size={18} />
-          </button>
-        </div>
+    <div className="mb-6">
+      {/* Offence Header (Checkbox + Name) */}
+      <div className="flex items-center gap-3 mb-2">
+        <Checkbox
+          checked={true} // Always checked as it is in the 'Selected' list
+          onCheckedChange={(checked) => {
+            if (checked === false) {
+              onRemove(offenceName);
+            }
+          }}
+          className="w-5 h-5 border-gray-400 bg-white data-[state=checked]:bg-black data-[state=checked]:border-black rounded-sm"
+        />
+        <span className="font-medium text-gray-900 text-base">
+          {displayName}
+        </span>
+      </div>
 
-        <div className="ml-8">
-          <div className="font-medium text-gray-500 mb-3">References:</div>
+      <div className="ml-8">
+        <div className="text-sm text-gray-500 mb-2">Reference:</div>
 
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search references..."
-            className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
+        {/* References List */}
+        <div className="space-y-3 mb-3">
           {isLoading ? (
-            <p className="text-sm text-gray-500">Loading references...</p>
+            <p className="text-sm text-gray-400">Loading references...</p>
           ) : availableRefs.length === 0 ? (
-            <p className="text-sm text-gray-500">
-              {searchQuery
-                ? "No matching references found."
-                : "No references available yet."}
-            </p>
+            <p className="text-sm text-gray-400">No Reference</p>
           ) : (
-            <div className="space-y-2 mb-4 max-h-60 overflow-y-auto pr-2">
-              {availableRefs.map((ref: Reference) => (
+            availableRefs.map((ref: Reference) => (
+              <div key={ref._id} className="flex items-start gap-3">
+                <Checkbox
+                  id={`ref-${ref._id}`}
+                  checked={selectedReferences.includes(ref._id)}
+                  onCheckedChange={(c) =>
+                    toggleReference(ref._id, c === true)
+                  }
+                  className="mt-0.5 border-gray-300 rounded-[4px] w-4 h-4"
+                />
                 <label
-                  key={ref._id}
-                  className="flex items-start gap-2 text-[20px] cursor-pointer hover:bg-gray-100 p-2 rounded"
+                  htmlFor={`ref-${ref._id}`}
+                  className="text-sm text-gray-800 leading-snug cursor-pointer"
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedReferences.includes(ref._id)}
-                    onChange={(e) => toggleReference(ref._id, e.target.checked)}
-                    className="mt-2.5 mr-2 w-4 h-4 accent-black rounded"
-                  />
-                  <span className="text-gray-900">{ref.reference}</span>
+                  {ref.reference}
                 </label>
-              ))}
-            </div>
+              </div>
+            ))
           )}
-
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-1 text-blue-600 text-sm font-medium hover:underline"
-          >
-            <FiPlus size={16} />
-            Add New Reference
-          </button>
         </div>
+
+        {/* Add New Reference Button */}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
+        >
+          <FiPlus className="mr-1" />
+          Add New Reference
+        </button>
       </div>
 
       <Modal
@@ -149,9 +140,9 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
             <textarea
               value={newRefText}
               onChange={(e) => setNewRefText(e.target.value)}
-              rows={5}
+              rows={4}
               placeholder="Enter the full reference text..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
               autoFocus
             />
           </div>
@@ -162,14 +153,14 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
                 setIsModalOpen(false);
                 setNewRefText("");
               }}
-              className="px-5 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSaveNewReference}
               disabled={!newRefText.trim() || createMutation.isPending}
-              className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
             >
               {createMutation.isPending && (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -179,7 +170,7 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   );
 };
 

@@ -30,11 +30,12 @@ export const investigationHeadSchema = new Schema({
 });
 
 export const occurrenceDetailsSchema = new Schema({
-  offenceType: { type: String },
   placeOfOccurrence: { type: String },
   dateOfOccurrence: { type: Date },
   timeOfOccurrence: { type: Date },
   description: { type: String },
+  offenceTypes: [{ type: String }],
+  offenceTypeReference: [{ type: String }],
 
   customFields: {
     type: Schema.Types.Mixed,
@@ -139,6 +140,7 @@ const mpReportSchema = new Schema(
         default: {},
       },
     },
+
     evidences: [evidenceSchema],
     customFields: {
       type: Schema.Types.Mixed,
@@ -163,5 +165,8 @@ mpReportSchema.index({ "occurrenceDetails.offenceType": 1 });
 mpReportSchema.index({ "occurrenceDetails.placeOfOccurrence": 1 });
 mpReportSchema.index({ "occurrenceDetails.dateOfOccurrence": -1 });
 
-export const MPReport =
-  mongoose.models.MPReport || mongoose.model("MPReport", mpReportSchema);
+if (mongoose.models.MPReport) {
+  delete mongoose.models.MPReport;
+}
+
+export const MPReport = mongoose.model("MPReport", mpReportSchema);
