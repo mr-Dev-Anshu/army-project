@@ -197,6 +197,7 @@ export interface TrafficFormState {
 
 // ---------- STATIC SPEED ----------
 export interface StaticSpeedFormState {
+  reportNo?: string;
   remarks?: string;
   vehicleInvolved?: string;
   vehicleDetails: {
@@ -228,6 +229,7 @@ export interface StaticSpeedFormState {
     time: string;
     incidentLocation: string;
     description: string;
+    briefDescription?: string;
     description2: string;
     authSpeed: string;
     actualSpeedNoted: string;

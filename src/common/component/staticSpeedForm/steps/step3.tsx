@@ -55,8 +55,8 @@ export default function Step3Offence() {
       <div className="w-full">
         <FormTextarea
           label="Brief Description of Offence (Optional)"
-          value={offence.description || ""}
-          onChange={(val) => updateOffence({ description: val })}
+          value={offence.briefDescription || ""}
+          onChange={(val) => updateOffence({ briefDescription: val })}
         />
       </div>
     </div>

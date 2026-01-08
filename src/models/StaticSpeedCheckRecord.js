@@ -25,6 +25,9 @@ const offenceOccurrenceSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  briefDescription: {
+    type: String,
+  },
   offenceTypes: [{ type: String }],
   offenceTypeReference: [{ type: String }],
 });

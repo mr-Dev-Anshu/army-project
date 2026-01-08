@@ -29,6 +29,17 @@ export default function StaticSpeedForm({
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
 
+  /* ================= FETCH REPORT NO ================= */
+  const reportNo = staticData.reportNo || "TEMP/STATIC/001";
+
+  const handleReportNoChange = (newReportNo: string) => {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.staticSpeed.reportNo",
+      value: newReportNo,
+    });
+  };
+
   // ... (existing mapStaticToReport code) ...
 
   const mapStaticToReport = (data: any) => {
@@ -163,6 +174,7 @@ export default function StaticSpeedForm({
     try {
       /* ================= STATIC SPEED PAYLOAD ================= */
       const payload = {
+        reportId: reportNo,
         vehicleType: staticData.vehicleDetails.vehicleType,
         vehicleCategory: staticData.vehicleDetails.category,
         vehicleNumber: staticData.vehicleDetails.vehicleNumber,
@@ -203,8 +215,9 @@ export default function StaticSpeedForm({
           authSpeed: staticData.offenceBlock?.authSpeed ?? "",
 
           // New fields
-          offenceTypes: staticData.offenceOccurenceDetails?.offenceTypes ?? [],
-          offenceTypeReference: staticData.offenceOccurenceDetails?.offenceTypeReference ?? [],
+          briefDescription: staticData.offenceBlock?.briefDescription || "",
+          offenceTypes: staticData.offenceBlock?.offenceTypes ?? [],
+          offenceTypeReference: staticData.offenceBlock?.offenceTypeReference ?? [],
         },
       };
 
@@ -359,6 +372,7 @@ export default function StaticSpeedForm({
         path: "completedSteps",
         value: [],
       });
+      dispatch({ type: "SET_PREVIEW", payload: false });
     } catch (error: any) {
       console.error(
         "❌ FINAL STATIC SPEED ERROR ===>",
@@ -386,7 +400,7 @@ export default function StaticSpeedForm({
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
             title="Create New Static Speed Check Record"
-            reportNo="PRO/21 CPU/00042/106/25"
+            reportNo={reportNo}
             onCreate={handleFinalSubmit}
             onCancel={() => {
               dispatch({ type: "SET_STEP", payload: 1 });
@@ -394,6 +408,7 @@ export default function StaticSpeedForm({
             }}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
+            onReportNoChange={handleReportNoChange}
           />
 
           <RightPanel

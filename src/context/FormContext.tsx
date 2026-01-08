@@ -83,6 +83,7 @@ export const initialState: GlobalFormState = {
     },
 
     staticSpeed: {
+      reportNo: "",
       remarks: "",
       vehicleInvolved: "",
       vehicleDetails: {
@@ -114,6 +115,7 @@ export const initialState: GlobalFormState = {
         time: "",
         incidentLocation: "",
         description: "",
+        briefDescription: "",
         description2: "",
         authSpeed: "30",
         actualSpeedNoted: "",

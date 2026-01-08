@@ -52,6 +52,7 @@ export const createStaticSpeedCheckRecordSchema = Joi.object({
     overSpeedCalculated: Joi.string().trim().optional(),
 
     description: Joi.string().trim().optional(),
+    briefDescription: Joi.string().trim().optional(),
 
     customFields: Joi.object().unknown(true).optional(),
   }).required(),
