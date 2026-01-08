@@ -79,6 +79,17 @@ export default function MultiFormReport({
   const { mutateAsync: createReportAsync } = useCreateMPReport();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
 
+  /* ================= FETCH REPORT NO ================= */
+  const reportNo = state.formData.mpReport.reportDetails.reportNo || "PRO/21 CPU/00042/106/25";
+
+  const handleReportNoChange = (newReportNo: string) => {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.reportDetails.reportNo",
+      value: newReportNo,
+    });
+  };
+
   /* ✅ FIX 1 — STEPS ARRAY (REQUIRED FOR LeftStepper) */
   const steps = [
     { id: 1, label: "Report Details", icon: "1" },
@@ -153,7 +164,7 @@ export default function MultiFormReport({
 
     return {
       /* ================= HEADER ================= */
-      reportNo: mp?.reportDetails?.reportNo || "Nil",
+      reportNo: mp?.reportDetails?.reportNo || reportNo,
       command: mp?.reportDetails?.command || "Nil",
       firNo: mp?.reportDetails?.firNo || "Nil",
 
@@ -527,11 +538,12 @@ export default function MultiFormReport({
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
             title="Create New MP Occurrence & Investigation Report"
-            reportNo="PRO/21 CPU/00042/106/25"
+            reportNo={reportNo}
             onCancel={onCancel}
             onCreate={onSubmitFinal}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
+            onReportNoChange={handleReportNoChange} // Wired up
           />
 
           {/* RIGHT SIDE DYNAMIC CONTENT */}

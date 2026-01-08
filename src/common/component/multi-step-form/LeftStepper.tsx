@@ -51,15 +51,15 @@ export const LeftStepper = ({
   const [reportValue, setReportValue] = useState(reportNo || "");
 
   useEffect(() => {
-    setReportValue(reportNo || "");
-  }, [reportNo]);
+    if (!editing) {
+      setReportValue(reportNo || "");
+    }
+  }, [reportNo, editing]);
 
   const saveReportNo = () => {
     setEditing(false);
     console.log("Saved Report No:", reportValue);
-    if (onReportNoChange) {
-      onReportNoChange(reportValue);
-    }
+    // Already synced via onChange
   };
 
   return (
@@ -93,7 +93,11 @@ export const LeftStepper = ({
                 <input
                   autoFocus
                   value={reportValue}
-                  onChange={(e) => setReportValue(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setReportValue(v);
+                    if (onReportNoChange) onReportNoChange(v);
+                  }}
                   onBlur={saveReportNo}
                   className="bg-transparent border-b border-gray-400 outline-none px-1 w-[160px]"
                 />
