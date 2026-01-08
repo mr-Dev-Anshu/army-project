@@ -29,6 +29,7 @@ export const offenceOccurenceDetails = new mongoose.Schema({
   timeOfOffence: { type: Date },
   incidentLocation: { type: String },
   description: { type: String },
+  briefDescription: { type: String },
 
   customFields: {
     type: mongoose.Schema.Types.Mixed,

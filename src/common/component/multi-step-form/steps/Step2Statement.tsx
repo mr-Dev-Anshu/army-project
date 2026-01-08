@@ -451,6 +451,7 @@ export default function Step2Statement() {
                 set("formData.traffic.onDutyDetailsMPReporting.rank", v)
               }
               fieldType="rank"
+              defaultOptions={["Lieutenant", "Captain", "Major", "Colonel", "L/Nk", "Nk", "Hav", "Subedar"]}
             />
           </div>
         </div>
@@ -517,6 +518,7 @@ export default function Step2Statement() {
                   set("formData.traffic.witnesses", copy);
                 }}
                 fieldType="rank"
+                defaultOptions={["Lieutenant", "Captain", "Major", "Colonel", "L/Nk", "Nk", "Hav", "Subedar"]}
               />
             </div>
 

@@ -127,6 +127,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         ref1: traffic?.offenceCode?.[0] || "Nil",
         ref2: traffic?.offenceCode?.[1] || "Nil",
         description: occ?.description || "Nil",
+        briefDescription: occ?.briefDescription || "Nil",
       },
 
       // ✅ MP WITNESS SIGNATURE
@@ -169,7 +170,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
 
       /* ================= CREATE OFFENCE ================= */
       const offenceRes = await createOffence({
-        reportNo: reportNo,
+        reportId: reportNo,
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
         // Mapped Vehicle Details
@@ -199,6 +200,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             traffic.onDutyDetails?.dateOfDuty,
             traffic.offenceOccurenceDetails?.timeOfOffence
           ),
+          briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
         },
         offenceTypes: traffic.offenceTypes?.length
           ? traffic.offenceTypes
@@ -284,6 +286,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
       dispatch({ type: "SET_STEP", payload: 1 });
       dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
+      dispatch({ type: "SET_PREVIEW", payload: false });
     } catch (err) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
       toast.error("Submit failed");
@@ -344,6 +347,13 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             onCreate={onSubmitFinal}
             onCancel={onCancel}
             isSubmitting={isSubmitting} // Passed prop
+            onReportNoChange={(val) =>
+              dispatch({
+                type: "SET_PATH",
+                path: "formData.traffic.reportNo",
+                value: val,
+              })
+            }
           />
 
           <RightPanel

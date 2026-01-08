@@ -66,10 +66,10 @@ export default function Step3Offence() {
         </Label>
         <Textarea
           placeholder="Provide a detailed description of the offence, including what happened and how it occurred."
-          value={d.offenceOccurenceDetails?.description || ""}
+          value={d.offenceOccurenceDetails?.briefDescription || ""}
           onChange={(e) =>
             set(
-              "formData.traffic.offenceOccurenceDetails.description",
+              "formData.traffic.offenceOccurenceDetails.briefDescription",
               e.target.value
             )
           }

@@ -266,6 +266,9 @@ export default function OffenderDynamicForm({
             "Command",
             "Select Rank",
             "Address",
+            "ID Card Number",
+            "I Card Number",
+            "Army Rider / Driver Number",
           ].includes(f.label);
 
           return isSuggestion ? (
@@ -277,6 +280,7 @@ export default function OffenderDynamicForm({
               onChange={(v) => saveField(f.label, v)}
               fieldType={f.label.toLowerCase()}
               className={cn(value ? "border-blue-500" : "border-gray-300")}
+              defaultOptions={f.options}
             />
           ) : (
             <FormInput

@@ -73,180 +73,181 @@ export class GeneralTrafficOffenceRepository {
     return results.length > 0 ? results[0] : null;
   }
 
-async getGroupedByOffenceType(filters = {}) {
+  async getGroupedByOffenceType(filters = {}) {
 
-  const matchStage = {};
+    const matchStage = {};
 
-  /* ================= VEHICLE / STATUS FILTERS ================= */
+    /* ================= VEHICLE / STATUS FILTERS ================= */
 
-  if (filters.isVehicleInvolved !== undefined) {
-    matchStage.isVehicleInvolved = filters.isVehicleInvolved === "true";
-  }
-
-  if (filters.status !== undefined) {
-    if (filters.status === "true" || filters.status === "Taken") {
-      matchStage.actionStatus = true;
-    }
-    if (filters.status === "false" || filters.status === "Pending") {
-      matchStage.actionStatus = false;
-    }
-  }
-
-//  unit and fmn
-
-   if (filters.unit) {
-    matchStage["customFields.unit"] = filters.unit;
-  }
-
-  if (filters.fmn) {
-    matchStage["customFields.fmn"] = filters.fmn;
-  }
-
-  if (filters.vehicleType) {
-    matchStage.vehicleType = filters.vehicleType;
-  }
-
-  if (filters.vehicleCategory) {
-    matchStage.vehicleCategory = filters.vehicleCategory;
-  }
-
-  /* ================= DATE FILTER (FIXED – NO CONFLICT) ================= */
-
-  // PRIORITY 1: Start → End Date
-  if (filters.fromDate || filters.toDate) {
-    matchStage.createdAt = {};
-
-    if (filters.fromDate) {
-      matchStage.createdAt.$gte = new Date(filters.fromDate);
+    if (filters.isVehicleInvolved !== undefined) {
+      matchStage.isVehicleInvolved = filters.isVehicleInvolved === "true";
     }
 
-    if (filters.toDate) {
-      matchStage.createdAt.$lte = new Date(
-        filters.toDate + "T23:59:59.999Z"
-      );
+    if (filters.status !== undefined) {
+      if (filters.status === "true" || filters.status === "Taken") {
+        matchStage.actionStatus = true;
+      }
+      if (filters.status === "false" || filters.status === "Pending") {
+        matchStage.actionStatus = false;
+      }
     }
-  }
 
-  // PRIORITY 2: Single Date (ONLY if from/to not present)
-  else if (filters.date) {
-    const dateStr = filters.date.split("T")[0];
-    const startDate = new Date(dateStr);
-    startDate.setUTCHours(0, 0, 0, 0);
+    //  unit and fmn
 
-    const endDate = new Date(dateStr);
-    endDate.setUTCHours(23, 59, 59, 999);
+    if (filters.unit) {
+      matchStage["customFields.unit"] = filters.unit;
+    }
 
-    matchStage.$or = [
+    if (filters.fmn) {
+      matchStage["customFields.fmn"] = filters.fmn;
+    }
+
+    if (filters.vehicleType) {
+      matchStage.vehicleType = filters.vehicleType;
+    }
+
+    if (filters.vehicleCategory) {
+      matchStage.vehicleCategory = filters.vehicleCategory;
+    }
+
+    /* ================= DATE FILTER (FIXED – NO CONFLICT) ================= */
+
+    // PRIORITY 1: Start → End Date
+    if (filters.fromDate || filters.toDate) {
+      matchStage.createdAt = {};
+
+      if (filters.fromDate) {
+        matchStage.createdAt.$gte = new Date(filters.fromDate);
+      }
+
+      if (filters.toDate) {
+        matchStage.createdAt.$lte = new Date(
+          filters.toDate + "T23:59:59.999Z"
+        );
+      }
+    }
+
+    // PRIORITY 2: Single Date (ONLY if from/to not present)
+    else if (filters.date) {
+      const dateStr = filters.date.split("T")[0];
+      const startDate = new Date(dateStr);
+      startDate.setUTCHours(0, 0, 0, 0);
+
+      const endDate = new Date(dateStr);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      matchStage.$or = [
+        {
+          "offenceOccurenceDetails.timeOfOffence": {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+        {
+          createdAt: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      ];
+    }
+
+    /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
+
+    if (filters.offenceType && filters.offenceType !== "All") {
+      matchStage.offenceTypes = filters.offenceType;
+    }
+
+    /* ================= AGGREGATION PIPELINE ================= */
+
+    const pipeline = [
+      Object.keys(matchStage).length > 0 ? { $match: matchStage } : null,
+
       {
-        "offenceOccurenceDetails.timeOfOffence": {
-          $gte: startDate,
-          $lte: endDate,
+        $lookup: {
+          from: "offenders",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "offenders",
         },
       },
       {
-        createdAt: {
-          $gte: startDate,
-          $lte: endDate,
+        $lookup: {
+          from: "ondutywitnessingmps",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "onDutyWitnessingMps",
         },
       },
-    ];
-  }
 
-  /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
-
-  if (filters.offenceType && filters.offenceType !== "All") {
-    matchStage.offenceTypes = filters.offenceType;
-  }
-
-  /* ================= AGGREGATION PIPELINE ================= */
-
-  const pipeline = [
-    Object.keys(matchStage).length > 0 ? { $match: matchStage } : null,
-
-    {
-      $lookup: {
-        from: "offenders",
-        localField: "_id",
-        foreignField: "offenceId",
-        as: "offenders",
+      {
+        $addFields: {
+          offendersCount: { $size: "$offenders" },
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          originalOffenceTypes: "$offenceTypes",
+        },
       },
-    },
-    {
-      $lookup: {
-        from: "ondutywitnessingmps",
-        localField: "_id",
-        foreignField: "offenceId",
-        as: "onDutyWitnessingMps",
+
+      {
+        $unwind: {
+          path: "$offenceTypes",
+          preserveNullAndEmptyArrays: true,
+        },
       },
-    },
 
-    {
-      $addFields: {
-        offendersCount: { $size: "$offenders" },
-        witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
-        originalOffenceTypes: "$offenceTypes",
-      },
-    },
+      // STRICT offenceType filter AFTER unwind
+      filters.offenceType && filters.offenceType !== "All"
+        ? { $match: { offenceTypes: filters.offenceType } }
+        : null,
 
-    {
-      $unwind: {
-        path: "$offenceTypes",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-
-    // STRICT offenceType filter AFTER unwind
-    filters.offenceType && filters.offenceType !== "All"
-      ? { $match: { offenceTypes: filters.offenceType } }
-      : null,
-
-    {
-      $group: {
-        _id: "$offenceTypes",
-        totalOffences: { $sum: 1 },
-        totalOffenders: { $sum: "$offendersCount" },
-        totalWitnessingMps: { $sum: "$witnessingMpsCount" },
-        offences: {
-          $push: {
-            _id: "$_id",
-            offenceTypes: "$originalOffenceTypes",
-            currentOffenceType: "$offenceTypes",
-            createdAt: "$createdAt",
-            vehicleNumber: "$vehicleNumber",
-            isVehicleInvolved: "$isVehicleInvolved",
-            offenceOccurenceDetails: "$offenceOccurenceDetails",
-            offenders: "$offenders",
-            onDutyWitnessingMps: "$onDutyWitnessingMps",
-            offendersCount: "$offendersCount",
-            witnessingMpsCount: "$witnessingMpsCount",
-            customFields: "$customFields",
-            onDutyDetails: "$onDutyDetails",
-            onDutyDetailsMPReporting: "$onDutyDetailsMPReporting",
-            actionStatus: "$actionStatus",
-            vehicleName: "$vehicleName",
+      {
+        $group: {
+          _id: "$offenceTypes",
+          totalOffences: { $sum: 1 },
+          totalOffenders: { $sum: "$offendersCount" },
+          totalWitnessingMps: { $sum: "$witnessingMpsCount" },
+          offences: {
+            $push: {
+              _id: "$_id",
+              offenceTypes: "$originalOffenceTypes",
+              currentOffenceType: "$offenceTypes",
+              createdAt: "$createdAt",
+              vehicleNumber: "$vehicleNumber",
+              isVehicleInvolved: "$isVehicleInvolved",
+              offenceOccurenceDetails: "$offenceOccurenceDetails",
+              offenders: "$offenders",
+              onDutyWitnessingMps: "$onDutyWitnessingMps",
+              offendersCount: "$offendersCount",
+              witnessingMpsCount: "$witnessingMpsCount",
+              customFields: "$customFields",
+              onDutyDetails: "$onDutyDetails",
+              onDutyDetailsMPReporting: "$onDutyDetailsMPReporting",
+              actionStatus: "$actionStatus",
+              vehicleName: "$vehicleName",
+              reportId: "$reportId",
+            },
           },
         },
       },
-    },
 
-    { $sort: { _id: 1 } },
+      { $sort: { _id: 1 } },
 
-    {
-      $project: {
-        offenceType: "$_id",
-        totalOffences: 1,
-        totalOffenders: 1,
-        totalWitnessingMps: 1,
-        offences: 1,
-        _id: 0,
+      {
+        $project: {
+          offenceType: "$_id",
+          totalOffences: 1,
+          totalOffenders: 1,
+          totalWitnessingMps: 1,
+          offences: 1,
+          _id: 0,
+        },
       },
-    },
-  ].filter(Boolean);
+    ].filter(Boolean);
 
-  /* ================= EXECUTE ================= */
+    /* ================= EXECUTE ================= */
 
-  return await GeneralTrafficOffence.aggregate(pipeline);
-}
+    return await GeneralTrafficOffence.aggregate(pipeline);
+  }
 
 
 

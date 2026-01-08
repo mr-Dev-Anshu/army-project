@@ -49,6 +49,7 @@ export interface OffenceOccurenceDetails {
   time?: string;
   incidentLocation: string;
   description: string;
+  briefDescription?: string;
   authSpeed?: string;
   actualSpeed?: string;
   overSpeed?: string;

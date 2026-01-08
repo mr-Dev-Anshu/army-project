@@ -35,6 +35,7 @@ export const createGeneralTrafficOffenceSchema = Joi.object({
     timeOfOffence: Joi.date().optional(),
     incidentLocation: Joi.string().optional(),
     description: Joi.string().optional(),
+    briefDescription: Joi.string().optional(),
     customFields: Joi.object().unknown(true).optional(),
   })
     .unknown(true)

@@ -2,7 +2,7 @@
 import { Check, Edit2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@/context/FormContext";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface Step {
   id: number;
@@ -21,6 +21,7 @@ interface LeftStepperProps {
   // ⭐ ADD THIS
   onCreate?: () => void;
   onCancel?: () => void;
+  onReportNoChange?: (val: string) => void;
   hideReportNo?: boolean;
   isSubmitting?: boolean;
 }
@@ -34,6 +35,7 @@ export const LeftStepper = ({
   onStepClick,
   onCreate,
   onCancel,
+  onReportNoChange,
   hideReportNo = false,
   isSubmitting = false,
 }: LeftStepperProps) => {
@@ -48,9 +50,16 @@ export const LeftStepper = ({
   const [editing, setEditing] = useState(false);
   const [reportValue, setReportValue] = useState(reportNo || "");
 
+  useEffect(() => {
+    setReportValue(reportNo || "");
+  }, [reportNo]);
+
   const saveReportNo = () => {
     setEditing(false);
     console.log("Saved Report No:", reportValue);
+    if (onReportNoChange) {
+      onReportNoChange(reportValue);
+    }
   };
 
   return (

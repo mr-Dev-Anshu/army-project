@@ -70,6 +70,7 @@ export const initialState: GlobalFormState = {
         timeOfOffence: "",
         incidentLocation: "",
         description: "",
+        briefDescription: "",
         time: "",
       },
 
