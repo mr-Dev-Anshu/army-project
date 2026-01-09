@@ -136,6 +136,7 @@ export default function MultiFormReport({
             : p.offenderType === "Offender"
               ? "Offender"
               : "Unknown",
+        customFields: { ...src, ...(src.customFields || {}) },
       };
     });
 
@@ -154,6 +155,7 @@ export default function MultiFormReport({
         fmn: val(src.fmn),
         address: val(src.address),
         remark: val(src.remark),
+        customFields: { ...src, ...(src.customFields || {}) },
       };
     });
 
@@ -185,7 +187,10 @@ export default function MultiFormReport({
 
       /* ================= 2–3. OCCURRENCE DETAILS ================= */
       occurrence: {
-        offenceType: val(mp?.occurrenceDetails?.offenceType),
+        types: mp?.occurrenceDetails?.offenceTypes && mp.occurrenceDetails.offenceTypes.length > 0
+          ? mp.occurrenceDetails.offenceTypes
+          : (mp?.occurrenceDetails?.offenceType ? [mp.occurrenceDetails.offenceType] : []),
+        refs: mp?.occurrenceDetails?.offenceTypeReference || [],
         place: val(mp?.occurrenceDetails?.place),
         date: val(mp?.occurrenceDetails?.date),
         time: val(mp?.occurrenceDetails?.time),

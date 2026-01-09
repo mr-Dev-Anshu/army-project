@@ -51,7 +51,7 @@ export const createMPReportSchema = Joi.object({
   }).required(),
 
   occurrenceDetails: Joi.object({
-    offenceType: optionalString,
+    offenceType: Joi.string().optional(),
     offenceTypes: Joi.array().items(Joi.string()).optional(),
     offenceTypeReference: Joi.array().items(Joi.string()).optional(),
     placeOfOccurrence: requiredString,

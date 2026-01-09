@@ -156,18 +156,31 @@ export default function MpOccurrenceReportsPage() {
       raw.customFields?.offenderList ||
       [];
 
-    const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => ({
-      sno: index + 1,
-      armyNo: p.armyNumber || p.armyNo || p.aadharNumber || "",
-      rank: p.rank || "",
-      name: p.name || p.personName || "",
-      identityCard: p.iCardNumber || p.icard || p.idCardNumber || p.identityCard || "",
-      unitName: p.unit || p.unitName || "",
-      fmn: p.fmn || p.fmnName || "",
-      address: p.address || "",
-      remark: p.remark || "",
-      role: p.role || p.type || "" // Default to empty if unknown
-    })) : [];
+    const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
+      const src = p.details || p;
+      const custom = src.customFields || {};
+      const merged = { ...custom, ...src }; // flatten for search
+
+      return {
+        sno: index + 1,
+        armyNo: merged.armyNo || merged.armyNumber || merged.serviceNumber || merged.aadharNumber || "",
+        rank: merged.rank || "",
+        name: merged.name || merged.personName || merged.fullName || "",
+        identityCard: merged.iCardNumber || merged.icard || merged.idCardNumber || merged.identityCard || merged.passNo || "",
+        unitName: merged.unit || merged.unitName || "",
+        fmn: merged.fmn || merged.fmnName || "",
+        address: merged.address || "",
+        remark: merged.remark || "",
+        role: mappedRole(merged.role || merged.type || "Offender"),
+        customFields: merged
+      };
+    }) : [];
+
+    // Helper for role mapping if needed, otherwise string
+    function mappedRole(r: string) {
+      if (!r) return "";
+      return r;
+    }
 
     // Dynamic Fields: Witnesses
     const rawWitnesses =
@@ -177,17 +190,24 @@ export default function MpOccurrenceReportsPage() {
       raw.customFields?.witnesses ||
       [];
 
-    const witnesses = Array.isArray(rawWitnesses) ? rawWitnesses.map((w: any, index: number) => ({
-      sno: index + 1,
-      armyNo: w.armyNumber || w.armyNo || "",
-      rank: w.rank || "",
-      name: w.name || w.witnessName || "",
-      identityCard: w.iCardNumber || w.icard || w.idCardNumber || "",
-      unitName: w.unit || w.unitName || "",
-      fmn: w.fmn || w.fmnName || "",
-      address: w.address || "",
-      remark: w.remark || ""
-    })) : [];
+    const witnesses = Array.isArray(rawWitnesses) ? rawWitnesses.map((w: any, index: number) => {
+      const src = w.details || w;
+      const custom = src.customFields || {};
+      const merged = { ...custom, ...src };
+
+      return {
+        sno: index + 1,
+        armyNo: merged.armyNo || merged.armyNumber || merged.serviceNumber || "",
+        rank: merged.rank || "",
+        name: merged.name || merged.witnessName || merged.fullName || "",
+        identityCard: merged.iCardNumber || merged.icard || merged.idCardNumber || merged.passNo || "",
+        unitName: merged.unit || merged.unitName || "",
+        fmn: merged.fmn || merged.fmnName || "",
+        address: merged.address || "",
+        remark: merged.remark || "",
+        customFields: merged
+      };
+    }) : [];
 
     // Dynamic Fields: Documents
     const rawDocs = raw.documents || [];
@@ -249,7 +269,10 @@ export default function MpOccurrenceReportsPage() {
         command: invHead.command || ""
       },
       occurrence: {
-        offenceType: occurrence.offenceType || "",
+        types: occurrence.offenceTypes && occurrence.offenceTypes.length > 0
+          ? occurrence.offenceTypes
+          : (occurrence.offenceType ? [occurrence.offenceType] : []),
+        refs: occurrence.offenceTypeReference || [],
         place: occurrence.placeOfOccurrence || "",
         date: occurrence.dateOfOccurrence ? new Date(occurrence.dateOfOccurrence).toLocaleDateString("en-GB") : (raw.createdAt ? new Date(raw.createdAt).toLocaleDateString("en-GB") : ""),
         time: occurrence.timeOfOccurrence ? new Date(occurrence.timeOfOccurrence).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }) : ""

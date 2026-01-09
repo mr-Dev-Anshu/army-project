@@ -44,15 +44,15 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
 
   const createMutation = useCreateOffenceReference();
 
-  const toggleReference = (refId: string, checked: boolean) => {
+  const toggleReference = (refText: string, checked: boolean) => {
     const updated = checked
-      ? [...selectedReferences, refId]
-      : selectedReferences.filter((id) => id !== refId);
+      ? [...selectedReferences, refText]
+      : selectedReferences.filter((text) => text !== refText);
 
     onReferencesChange(updated);
 
     if (onReferenceToggle) {
-      const refObj = availableRefs.find((r: Reference) => r._id === refId);
+      const refObj = availableRefs.find((r: Reference) => r.reference === refText);
       if (refObj) {
         onReferenceToggle(refObj, checked);
       }
@@ -83,7 +83,7 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
     toggleRef.current = onReferenceToggle;
   });
 
-  // Healing effect: If we have references loaded, and some are selected (IDs),
+  // Healing effect: If we have references loaded, and some are selected (Text),
   // but parent might not have the objects (Text), push them up.
   React.useEffect(() => {
     if (
@@ -91,8 +91,8 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
       availableRefs.length > 0 &&
       selectedReferences.length > 0
     ) {
-      selectedReferences.forEach((id) => {
-        const found = availableRefs.find((r: Reference) => r._id === id);
+      selectedReferences.forEach((text) => {
+        const found = availableRefs.find((r: Reference) => r.reference === text);
         if (found && toggleRef.current) {
           toggleRef.current(found, true);
         }
@@ -132,8 +132,8 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
               <div key={ref._id} className="flex items-start gap-3">
                 <Checkbox
                   id={`ref-${ref._id}`}
-                  checked={selectedReferences.includes(ref._id)}
-                  onCheckedChange={(c) => toggleReference(ref._id, c === true)}
+                  checked={selectedReferences.includes(ref.reference)}
+                  onCheckedChange={(c) => toggleReference(ref.reference, c === true)}
                   className="mt-0.5 border-gray-300 rounded-[4px] w-4 h-4"
                 />
                 <label

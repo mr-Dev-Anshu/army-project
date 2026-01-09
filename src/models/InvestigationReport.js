@@ -30,11 +30,11 @@ export const investigationHeadSchema = new Schema({
 });
 
 export const occurrenceDetailsSchema = new Schema({
-  offenceType: { type: String },
   placeOfOccurrence: { type: String },
   dateOfOccurrence: { type: Date },
   timeOfOccurrence: { type: Date },
   description: { type: String },
+  offenceType: { type: String },
   offenceTypes: [{ type: String }],
   offenceTypeReference: [{ type: String }],
 

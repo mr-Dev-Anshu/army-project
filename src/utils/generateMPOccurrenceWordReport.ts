@@ -634,7 +634,8 @@ function createOccurrenceDetailsTable(occ: any) {
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: TableBordersNone(),
     rows: [
-      makeRow("2.1", "Occurrence Offence Type-", occ.offenceType),
+      makeRow("2.1", "Occurrence Offence Type-", occ.types && occ.types.length > 0 ? occ.types.join(", ") : (occ.offenceType || "N/A")),
+      ...(occ.refs && occ.refs.length > 0 ? [makeRow("", "Ref :-", occ.refs.map((r: string, i: number) => `(${i + 1}) ${r}`).join("; "))] : []),
       makeRow("2.2", "Place of Occurrence-", occ.place),
       makeRow("2.3", "Date of Occurrence-", occ.date),
       makeRow("2.4", "Time of Occurrence-", occ.time + " Hrs"),

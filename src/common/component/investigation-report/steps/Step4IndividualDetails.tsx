@@ -283,7 +283,10 @@ export default function Step4IndividualDetails() {
 
       temp = {
         offenderType: mp.vehicleData.driverType,
-        details: structuredClone(mp.vehicleData),
+        details: {
+          ...structuredClone(mp.vehicleData),
+          ...structuredClone(mp.tempOffender?.details || {}),
+        },
       };
     }
 
@@ -301,6 +304,12 @@ export default function Step4IndividualDetails() {
     dispatch({
       type: "SET_PATH",
       path: "formData.mpReport.individualDetails.tempOffender",
+      value: {},
+    });
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.individualDetails.vehicleData",
       value: {},
     });
 
@@ -356,7 +365,10 @@ export default function Step4IndividualDetails() {
 
       temp = {
         offenderType: add.vehicleData.driverType,
-        details: structuredClone(add.vehicleData),
+        details: {
+          ...structuredClone(add.vehicleData),
+          ...structuredClone(add.tempOffender?.details || {}),
+        },
       };
     }
 

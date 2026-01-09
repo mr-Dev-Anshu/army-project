@@ -5,7 +5,7 @@ export interface MpOccurrenceReportProps {
     command: string;
     firNo: string;
     mpDetails: {
-        armyNo: string;
+        armyNumber: string;
         rank: string;
         name: string;
         unit: string;
@@ -13,34 +13,37 @@ export interface MpOccurrenceReportProps {
         command: string;
     };
     occurrence: {
-        offenceType: string;
+        types: string[]; // 3.1 - Dynamic List
+        refs: string[];
         place: string;
         date: string;
         time: string;
     };
     people: {
         sno: number;
-        armyNo: string;
-        rank: string;
-        name: string;
-        identityCard: string;
-        unitName: string;
-        fmn: string;
-        address: string;
-        remark: string;
-        role: "Victim" | "Offender" | "Unknown";
+        armyNo?: string;
+        rank?: string;
+        name?: string;
+        identityCard?: string;
+        unitName?: string;
+        fmn?: string;
+        address?: string;
+        remark?: string;
+        role: "Victim" | "Offender" | "Unknown" | string;
+        customFields?: Record<string, any>;
     }[];
     briefOfOccurrence: string;
     witnesses: {
         sno: number;
-        armyNo: string;
-        rank: string;
-        name: string;
-        identityCard: string;
-        unitName: string;
-        fmn: string;
-        address: string;
-        remark: string;
+        armyNo?: string;
+        rank?: string;
+        name?: string;
+        identityCard?: string;
+        unitName?: string;
+        fmn?: string;
+        address?: string;
+        remark?: string;
+        customFields?: Record<string, any>;
     }[];
     evidence: {
         eyeSketch: string;
@@ -138,7 +141,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                     <div className="font-bold mb-2 text-[12px]">1. &nbsp;&nbsp; MP DETAILS:</div>
                     <div className="border border-gray-300 p-6 rounded-sm text-[12px] mb-2">
                         <div className="grid grid-cols-2 gap-x-12 gap-y-2">
-                            <DataField label="Army no." value={mpDetails.armyNo} />
+                            <DataField label="Army no." value={mpDetails.armyNumber} />
                             <DataField label="Rank" value={mpDetails.rank} />
                             <DataField label="Name" value={mpDetails.name} />
                             <DataField label="Unit" value={mpDetails.unit} />
@@ -157,11 +160,31 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                         2. &nbsp;&nbsp; <span className="underline">OCCURRENCE DETAILS:</span>
                     </div>
                     <div className="pl-4 space-y-2 text-[12px] ">
-                        {occurrence.offenceType && (
-                            <div className="flex">
-                                <span className="w-8 ">2.1</span>
+                        {occurrence.types && occurrence.types.length > 0 && (
+                            <div className="flex mb-2">
+                                <span className="w-8 shrink-0">2.1</span>
                                 <div className="flex-1">
-                                    <span className="font-bold">Occurrence Offence Type-</span> <span className="ml-2">{occurrence.offenceType}</span>
+                                    <div className="flex mb-1">
+                                        <span className="font-bold">Occurrence Offence Type-</span>
+                                        <span className="ml-2 leading-relaxed">
+                                            {occurrence.types.filter(Boolean).join(", ")}
+                                        </span>
+                                    </div>
+
+                                    {/* References */}
+                                    {occurrence.refs && occurrence.refs.length > 0 && (
+                                        <div className="flex mt-1">
+                                            <span className="font-bold mr-2 whitespace-nowrap">Ref :-</span>
+                                            <div className="flex flex-col gap-1 w-full">
+                                                {occurrence.refs.map((ref, i) => (
+                                                    <div className="flex" key={i}>
+                                                        <span className="mr-2 min-w-[20px]">{i + 1}.</span>
+                                                        <span className="leading-tight">{ref}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -201,44 +224,99 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                         <thead>
                             <tr className="bg-white">
                                 <th className="border border-gray-300 p-2 w-16 text-center align-middle">Sr no.</th>
-                                <th className="border border-gray-300 p-2 text-left align-middle">Army No, Rank & Name</th>
+                                <th className="border border-gray-300 p-2 text-left align-middle">Particulars</th>
                                 <th className="border border-gray-300 p-2 text-left align-middle">Identity Card</th>
                                 <th className="border border-gray-300 p-2 text-left align-middle">Unit/Tele No.</th>
                                 <th className="border border-gray-300 p-2 text-left align-middle">Remark</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {people.map((person, index) => (
-                                <tr key={index} className="break-inside-avoid">
-                                    <td className="border border-gray-300 p-2 text-center font-bold align-middle">3.{person.sno}</td>
-                                    <td className="border border-gray-300 p-2 align-top">
-                                        <div className="grid grid-cols-[60px_1fr] gap-y-1">
-                                            <span className="font-bold">Army no.:</span>
-                                            <span>{person.armyNo}</span>
-                                            <span className="font-bold">Rank:</span>
-                                            <span>{person.rank}</span>
-                                            <span className="font-bold">Name:</span>
-                                            <span>{person.name}</span>
-                                        </div>
-                                    </td>
-                                    <td className="border border-gray-300 p-2 text-center align-middle">
-                                        {person.identityCard}
-                                    </td>
-                                    <td className="border border-gray-300 p-2 align-top">
-                                        <div className="grid grid-cols-[60px_1fr] gap-y-1">
-                                            <span className="font-bold">Unit:</span>
-                                            <span>{person.unitName}</span>
-                                            <span className="font-bold">FMN:</span>
-                                            <span>{person.fmn}</span>
-                                            <span className="font-bold">Address:</span>
-                                            <span>{person.address}</span>
-                                        </div>
-                                    </td>
-                                    <td className="border border-gray-300 p-2 align-middle text-center">
-                                        {person.remark || ""}
-                                    </td>
-                                </tr>
-                            ))}
+                            {people.map((person, index) => {
+                                // Helper to resolve value from prop or customFields (case-insensitive search in customFields)
+                                const getVal = (keys: string[], propVal?: string) => {
+                                    if (propVal && propVal !== "" && propVal !== "Nil") return propVal;
+                                    if (!person.customFields) return null;
+
+                                    for (const key of keys) {
+                                        // Exact match
+                                        if (person.customFields[key]) return person.customFields[key];
+
+                                        // Case insensitive match
+                                        const lowerKey = key.toLowerCase();
+                                        const foundKey = Object.keys(person.customFields).find(k => k.toLowerCase() === lowerKey || k.toLowerCase().replace(/\s/g, '') === lowerKey);
+                                        if (foundKey) return person.customFields[foundKey];
+                                    }
+                                    return null;
+                                };
+
+                                const armyNo = getVal(['armyNo', 'armyNumber', 'serviceNumber'], person.armyNo);
+                                const rank = getVal(['rank'], person.rank);
+                                const name = getVal(['name', 'personName', 'witnessName'], person.name);
+                                const iCard = getVal(['iCardNumber', 'identityCard', 'icard', 'idCard', 'passNo'], person.identityCard);
+                                const unit = getVal(['unit', 'unitName'], person.unitName);
+                                const fmn = getVal(['fmn', 'fmnName'], person.fmn);
+                                const address = getVal(['address'], person.address);
+
+                                return (
+                                    <tr key={index} className="break-inside-avoid">
+                                        <td className="border border-gray-300 p-2 text-center font-bold align-middle">3.{person.sno}</td>
+                                        <td className="border border-gray-300 p-2 align-top">
+                                            <div className="grid grid-cols-[80px_1fr] gap-y-1">
+                                                {armyNo && (
+                                                    <>
+                                                        <span className="font-bold">Army no.:</span>
+                                                        <span className="break-words">{armyNo}</span>
+                                                    </>
+                                                )}
+
+                                                {rank && (
+                                                    <>
+                                                        <span className="font-bold">Rank:</span>
+                                                        <span className="break-words">{rank}</span>
+                                                    </>
+                                                )}
+
+                                                {name && (
+                                                    <>
+                                                        <span className="font-bold">Name:</span>
+                                                        <span className="break-words">{name}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="border border-gray-300 p-2 text-center align-middle break-words max-w-[100px]">
+                                            {iCard || "--"}
+                                        </td>
+                                        <td className="border border-gray-300 p-2 align-top">
+                                            <div className="grid grid-cols-[60px_1fr] gap-y-1">
+                                                {unit && (
+                                                    <>
+                                                        <span className="font-bold">Unit:</span>
+                                                        <span className="break-words">{unit}</span>
+                                                    </>
+                                                )}
+
+                                                {fmn && (
+                                                    <>
+                                                        <span className="font-bold">FMN:</span>
+                                                        <span className="break-words">{fmn}</span>
+                                                    </>
+                                                )}
+
+                                                {address && (
+                                                    <>
+                                                        <span className="font-bold">Address:</span>
+                                                        <span className="break-words">{address}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="border border-gray-300 p-2 align-middle text-center">
+                                            {person.remark || "--"}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             {people.length === 0 && (
                                 <tr>
                                     <td colSpan={5} className="p-4 text-center text-gray-500">No details available</td>
@@ -298,37 +376,92 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             </tr>
                         </thead>
                         <tbody>
-                            {witnesses.length > 0 ? witnesses.map((person, index) => (
-                                <tr key={index} className="break-inside-avoid">
-                                    <td className="border border-gray-300 p-2 text-center font-bold align-middle">5.{person.sno}</td>
-                                    <td className="border border-gray-300 p-2 align-top">
-                                        <div className="grid grid-cols-[60px_1fr] gap-y-1">
-                                            <span className="font-bold">Army no.:</span>
-                                            <span>{person.armyNo}</span>
-                                            <span className="font-bold">Rank:</span>
-                                            <span>{person.rank}</span>
-                                            <span className="font-bold">Name:</span>
-                                            <span>{person.name}</span>
-                                        </div>
-                                    </td>
-                                    <td className="border border-gray-300 p-2 text-center align-middle">
-                                        {person.identityCard}
-                                    </td>
-                                    <td className="border border-gray-300 p-2 align-top">
-                                        <div className="grid grid-cols-[60px_1fr] gap-y-1">
-                                            <span className="font-bold">Unit:</span>
-                                            <span>{person.unitName}</span>
-                                            <span className="font-bold">FMN:</span>
-                                            <span>{person.fmn}</span>
-                                            <span className="font-bold">Address:</span>
-                                            <span>{person.address}</span>
-                                        </div>
-                                    </td>
-                                    <td className="border border-gray-300 p-2 align-middle text-center">
-                                        {person.remark || ""}
-                                    </td>
-                                </tr>
-                            )) : (
+                            {witnesses.length > 0 ? witnesses.map((person, index) => {
+                                // Helper to resolve value from prop or customFields (case-insensitive search in customFields)
+                                const getVal = (keys: string[], propVal?: string) => {
+                                    if (propVal && propVal !== "" && propVal !== "Nil") return propVal;
+                                    if (!person.customFields) return null;
+
+                                    for (const key of keys) {
+                                        // Exact match
+                                        if (person.customFields[key]) return person.customFields[key];
+
+                                        // Case insensitive match
+                                        const lowerKey = key.toLowerCase();
+                                        const foundKey = Object.keys(person.customFields).find(k => k.toLowerCase() === lowerKey || k.toLowerCase().replace(/\s/g, '') === lowerKey);
+                                        if (foundKey) return person.customFields[foundKey];
+                                    }
+                                    return null;
+                                };
+
+                                const armyNo = getVal(['armyNo', 'armyNumber', 'serviceNumber'], person.armyNo);
+                                const rank = getVal(['rank'], person.rank);
+                                const name = getVal(['name', 'personName', 'witnessName'], person.name);
+                                const iCard = getVal(['iCardNumber', 'identityCard', 'icard', 'idCard', 'passNo'], person.identityCard);
+                                const unit = getVal(['unit', 'unitName'], person.unitName);
+                                const fmn = getVal(['fmn', 'fmnName'], person.fmn);
+                                const address = getVal(['address'], person.address);
+
+                                return (
+                                    <tr key={index} className="break-inside-avoid">
+                                        <td className="border border-gray-300 p-2 text-center font-bold align-middle">5.{person.sno}</td>
+                                        <td className="border border-gray-300 p-2 align-top">
+                                            <div className="grid grid-cols-[80px_1fr] gap-y-1">
+                                                {armyNo && (
+                                                    <>
+                                                        <span className="font-bold">Army no.:</span>
+                                                        <span className="break-words">{armyNo}</span>
+                                                    </>
+                                                )}
+
+                                                {rank && (
+                                                    <>
+                                                        <span className="font-bold">Rank:</span>
+                                                        <span className="break-words">{rank}</span>
+                                                    </>
+                                                )}
+
+                                                {name && (
+                                                    <>
+                                                        <span className="font-bold">Name:</span>
+                                                        <span className="break-words">{name}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="border border-gray-300 p-2 text-center align-middle break-words max-w-[100px]">
+                                            {iCard || "--"}
+                                        </td>
+                                        <td className="border border-gray-300 p-2 align-top">
+                                            <div className="grid grid-cols-[60px_1fr] gap-y-1">
+                                                {unit && (
+                                                    <>
+                                                        <span className="font-bold">Unit:</span>
+                                                        <span className="break-words">{unit}</span>
+                                                    </>
+                                                )}
+
+                                                {fmn && (
+                                                    <>
+                                                        <span className="font-bold">FMN:</span>
+                                                        <span className="break-words">{fmn}</span>
+                                                    </>
+                                                )}
+
+                                                {address && (
+                                                    <>
+                                                        <span className="font-bold">Address:</span>
+                                                        <span className="break-words">{address}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="border border-gray-300 p-2 align-middle text-center">
+                                            {person.remark || "--"}
+                                        </td>
+                                    </tr>
+                                )
+                            }) : (
                                 <tr><td colSpan={5} className="p-4 text-center text-gray-400">No witnesses recorded</td></tr>
                             )}
                         </tbody>
