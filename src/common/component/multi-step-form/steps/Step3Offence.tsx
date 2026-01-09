@@ -34,9 +34,9 @@ export default function Step3Offence() {
 
   // Wrapper for selectedReferences state
   // Bind to 'offenceCode' as per existing data structure usage in MultiStepForm
-  const setSelectedReferences: React.Dispatch<React.SetStateAction<string[]>> = (
-    action
-  ) => {
+  const setSelectedReferences: React.Dispatch<
+    React.SetStateAction<string[]>
+  > = (action) => {
     const current = d.offenceCode || [];
     let newValue: string[];
 
@@ -49,6 +49,32 @@ export default function Step3Offence() {
     set("formData.traffic.offenceCode", newValue);
   };
 
+  const handleReferenceToggle = (
+    ref: { _id: string; reference: string },
+    isSelected: boolean
+  ) => {
+    const currentList: { _id: string; reference: string }[] =
+      d.offenceRefList || [];
+
+    let newList;
+    if (isSelected) {
+      // Prevent duplicates
+      if (!currentList.some((r) => r._id === ref._id)) {
+        newList = [...currentList, ref];
+      } else {
+        // Did NOT change, return early to prevent render loop
+        return;
+      }
+    } else {
+      if (currentList.some((r) => r._id === ref._id)) {
+        newList = currentList.filter((r) => r._id !== ref._id);
+      } else {
+        return;
+      }
+    }
+    set("formData.traffic.offenceRefList", newList);
+  };
+
   return (
     <div className="space-y-6">
       {/* Reusable Offences Section */}
@@ -57,6 +83,7 @@ export default function Step3Offence() {
         setSelectedOffences={setSelectedOffences}
         selectedReferences={d.offenceCode || []}
         setSelectedReferences={setSelectedReferences}
+        onReferenceToggle={handleReferenceToggle}
       />
 
       {/* Description Field Matching Design */}

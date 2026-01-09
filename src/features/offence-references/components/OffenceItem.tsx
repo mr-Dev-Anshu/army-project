@@ -20,6 +20,10 @@ interface OffenceItemProps {
   selectedReferences: string[];
   onRemove: (name: string) => void;
   onReferencesChange: (refIds: string[]) => void;
+  onReferenceToggle?: (
+    ref: { _id: string; reference: string },
+    isSelected: boolean
+  ) => void;
 }
 
 const OffenceItem: React.FC<OffenceItemProps> = ({
@@ -28,6 +32,7 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
   selectedReferences,
   onRemove,
   onReferencesChange,
+  onReferenceToggle,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRefText, setNewRefText] = useState("");
@@ -45,6 +50,13 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
       : selectedReferences.filter((id) => id !== refId);
 
     onReferencesChange(updated);
+
+    if (onReferenceToggle) {
+      const refObj = availableRefs.find((r: Reference) => r._id === refId);
+      if (refObj) {
+        onReferenceToggle(refObj, checked);
+      }
+    }
   };
 
   const handleSaveNewReference = () => {
@@ -63,6 +75,30 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
       }
     );
   };
+
+  // Use a ref to stable-ize onReferenceToggle so it doesn't trigger the effect unnecessarily,
+  // but allow the effect to call the latest version.
+  const toggleRef = React.useRef(onReferenceToggle);
+  React.useEffect(() => {
+    toggleRef.current = onReferenceToggle;
+  });
+
+  // Healing effect: If we have references loaded, and some are selected (IDs),
+  // but parent might not have the objects (Text), push them up.
+  React.useEffect(() => {
+    if (
+      !isLoading &&
+      availableRefs.length > 0 &&
+      selectedReferences.length > 0
+    ) {
+      selectedReferences.forEach((id) => {
+        const found = availableRefs.find((r: Reference) => r._id === id);
+        if (found && toggleRef.current) {
+          toggleRef.current(found, true);
+        }
+      });
+    }
+  }, [isLoading, availableRefs, selectedReferences]);
 
   return (
     <div className="mb-6">
@@ -97,9 +133,7 @@ const OffenceItem: React.FC<OffenceItemProps> = ({
                 <Checkbox
                   id={`ref-${ref._id}`}
                   checked={selectedReferences.includes(ref._id)}
-                  onCheckedChange={(c) =>
-                    toggleReference(ref._id, c === true)
-                  }
+                  onCheckedChange={(c) => toggleReference(ref._id, c === true)}
                   className="mt-0.5 border-gray-300 rounded-[4px] w-4 h-4"
                 />
                 <label

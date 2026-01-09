@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState } from "react";
@@ -25,22 +23,24 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
   const { mutateAsync: createOffence } = useCreateTrafficOffence();
   const { mutateAsync: createOffender } = useCreateOffender();
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
-  const reportNo =
-    state.formData.traffic?.reportNo || "TEMP/REPORT/001";
+  const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
   // ... (existing code: mapTrafficToReport function) ...
 
   const mapTrafficToReport = (traffic: any) => {
     const occ = traffic?.offenceOccurenceDetails || {};
     const duty = traffic?.onDutyDetails || {};
+    const mp = traffic?.onDutyDetailsMPReporting || {};
     const v = traffic?.vehicleDetails || {};
+
+    const val = (v: any) => (v && v !== "Nil" ? v : "");
+    const dateVal = (d: string) =>
+      d ? new Date(d).toLocaleDateString("en-GB") : "";
 
     /* ================= HELPER FOR PERSON MAPPING ================= */
     const mapPerson = (person: any) => {
       const d = person?.details || {};
       if (!Object.keys(d).length && !person?.type) return null;
-
-      const val = (v: any) => (v && v !== "Nil" ? v : "");
 
       return {
         aadharCardNo: val(d.aadharCardNo),
@@ -53,7 +53,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         command: val(d.command),
         fmn: val(d.fmn),
         address: val(d.address),
-        iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo), // Pass No mapped for employee/others
+        iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo),
       };
     };
 
@@ -63,83 +63,92 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         : null;
 
     const secondaryPerson =
-      Array.isArray(traffic?.offenderPeople) && traffic.offenderPeople.length > 1
+      Array.isArray(traffic?.offenderPeople) &&
+      traffic.offenderPeople.length > 1
         ? traffic.offenderPeople[1]
         : null;
 
-    // ✅ MP WITNESSING RESTORED
-    const mpWitness =
-      Array.isArray(traffic?.witnesses) && traffic.witnesses.length > 0
-        ? traffic.witnesses[0]
-        : null;
-
-    const reporting = mpWitness?.reportingBlock || {};
-    const dutyBlock = mpWitness?.dutyBlock || {};
-
-    const val = (v: any) => (v && v !== "Nil" ? v : "");
+    const witnesses = Array.isArray(traffic?.witnesses)
+      ? traffic.witnesses
+      : [];
 
     return {
       reportNo: traffic?.reportNo || reportNo,
       reportDate: new Date().toLocaleDateString("en-GB"),
 
       particulars: {
-        primary: mapPerson(primaryPerson),
+        primary: mapPerson(primaryPerson) || {
+          aadharCardNo: "",
+          name: "",
+          so: "",
+          relation: "",
+          armyNo: "",
+          rank: "",
+          unit: "",
+          command: "",
+          fmn: "",
+          address: "",
+          iCardNo: "",
+        },
         secondary: mapPerson(secondaryPerson),
 
         vehicle:
           traffic.vehicleInvolved === "yes"
             ? {
-              category: val(v.category),
-              vehicleType: val(v.vehicleType),
-              vehicleNumber: val(v.vehicleNumber),
-              vehicleName: val(v.vehicleName),
-            }
-            : undefined, // undefined relies on component to handle null/undefined, changed from null
+                baNo: val(v.vehicleNumber),
+                makeAndTake: val(v.vehicleName),
+                vehicleNumber:
+                  v.vehicleType === "DD Vehicle"
+                    ? "DD Veh. BA No."
+                    : "Registration No.",
+              }
+            : undefined,
       },
 
       occurrence: {
-        dateOfDuty: val(dutyBlock?.dateOfDuty),
-        dutyTime:
-          dutyBlock?.startTime && dutyBlock?.endTime
-            ? `${dutyBlock.startTime} - ${dutyBlock.endTime}`
-            : "",
-        dutyLocation: val(dutyBlock?.dutyLocation),
-
-        // ✅ MP WITNESS NAME (NOT MP REPORTING)
-        nameOfWitnessingOfficial1: val(reporting?.nameReportingMP),
-
-        timeOfOffence: val(occ?.timeOfOffence),
-        locationOfOffence: val(occ?.incidentLocation),
-        statement: val(occ?.description),
+        dateOfDuty: dateVal(duty.dateOfDuty),
+        dutyTime: (() => {
+          const start = duty.startTime;
+          const end = duty.endTime;
+          if (start && end) return `${start} Hrs - ${end} Hrs`;
+          if (start) return `${start} Hrs`;
+          return "";
+        })(),
+        dutyLocation: val(duty.dutyLocation),
+        witnessingMps: witnesses.map((w: any) => ({
+          name: val(w.reportingBlock?.nameReportingMP),
+          rank: val(w.reportingBlock?.rank),
+        })),
+        timeOfOffence: val(occ.timeOfOffence)
+          ? val(occ.timeOfOffence) + " Hrs"
+          : "",
+        locationOfOffence: val(occ.incidentLocation),
+        statement: val(occ.description),
       },
 
       offence: {
-        type: val(traffic?.offenceTypes?.[0]),
-        ref1: val(traffic?.offenceCode?.[0]),
-        ref2: val(traffic?.offenceCode?.[1]),
-        description: val(occ?.description),
-        briefDescription: val(occ?.briefDescription),
+        types: traffic.offenceTypes || [],
+        refs: traffic.offenceRefList?.map((r: any) => r.reference) || [],
+        description: val(occ.description),
       },
 
-      // ✅ MP WITNESS SIGNATURE
       witnessSig: {
-        armyNo: val(reporting?.armyNumber),
-        rank: val(reporting?.rank),
-        name: val(reporting?.nameReportingMP),
-        unit: val(reporting?.unit),
+        armyNo: val(witnesses[0]?.reportingBlock?.armyNumber),
+        rank: val(witnesses[0]?.reportingBlock?.rank),
+        name: val(witnesses[0]?.reportingBlock?.nameReportingMP),
+        unit: val(witnesses[0]?.reportingBlock?.unit),
       },
 
-      // ✅ MP SIGNATURE
       mpSig: {
-        armyNo: val(reporting?.armyNumber),
-        rank: val(reporting?.rank),
-        name: val(reporting?.nameReportingMP),
-        unit: val(reporting?.unit),
+        armyNo: val(mp.armyNumber),
+        rank: val(mp.rank),
+        name: val(mp.nameReportingMP),
+        unit: val(mp.unit),
       },
 
       remarks: {
-        text: val(traffic?.remarks),
-        station: val(dutyBlock?.dutyLocation),
+        text: val(traffic.remarks),
+        station: val(duty.dutyLocation),
         dated: new Date().toLocaleDateString("en-GB"),
       },
     };
@@ -149,7 +158,6 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     if (!date || !time) return null;
     return new Date(`${date}T${time}`).toISOString();
   };
-
 
   const onSubmitFinal = async () => {
     setIsSubmitting(true);
@@ -164,8 +172,14 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
 
         // Mapped Vehicle Details
         ...(traffic.vehicleInvolved === "yes" && {
-          vehicleCategory: traffic.vehicleDetails.category === "2w" ? "2-Wheeler" : "4-Wheeler",
-          vehicleType: traffic.vehicleDetails.vehicleType === "civilian" ? "Civilian Vehicle" : "DD Vehicle",
+          vehicleCategory:
+            traffic.vehicleDetails.category === "2w"
+              ? "2-Wheeler"
+              : "4-Wheeler",
+          vehicleType:
+            traffic.vehicleDetails.vehicleType === "civilian"
+              ? "Civilian Vehicle"
+              : "DD Vehicle",
           vehicleName: traffic.vehicleDetails.vehicleName,
           vehicleNumber: traffic.vehicleDetails.vehicleNumber,
           driverType: traffic.vehicleDetails.driverType,
@@ -220,8 +234,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       ) {
         const m = traffic.offenderWithoutVehicle.military;
 
-        const hasData =
-          m?.name || m?.armyNumber || m?.address || m?.rank;
+        const hasData = m?.name || m?.armyNumber || m?.address || m?.rank;
 
         if (hasData) {
           offenders.push({
@@ -255,7 +268,6 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         console.log("🚨 OFFENDER PAYLOAD ===>", payload);
         await createOffender(payload);
       }
-
 
       /* ================= WITNESSES ================= */
       if (Array.isArray(traffic.witnesses)) {
@@ -343,9 +355,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             completedSteps={state.completedSteps}
             title="Create New General & Traffic Offence Record"
             reportNo={reportNo || "PRO/21 CPU/00042/106/25"}
-            onStepClick={(id) =>
-              dispatch({ type: "SET_STEP", payload: id })
-            }
+            onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             onCreate={onSubmitFinal}
             onCancel={onCancel}
             isSubmitting={isSubmitting} // Passed prop

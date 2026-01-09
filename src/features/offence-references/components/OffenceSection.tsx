@@ -10,6 +10,10 @@ interface OffencesSectionProps {
   setSelectedOffences: React.Dispatch<React.SetStateAction<string[]>>;
   selectedReferences: string[];
   setSelectedReferences: React.Dispatch<React.SetStateAction<string[]>>;
+  onReferenceToggle?: (
+    ref: { _id: string; reference: string },
+    isSelected: boolean
+  ) => void;
 }
 
 const OffencesSection: React.FC<OffencesSectionProps> = ({
@@ -17,6 +21,7 @@ const OffencesSection: React.FC<OffencesSectionProps> = ({
   setSelectedOffences,
   selectedReferences,
   setSelectedReferences,
+  onReferenceToggle,
 }) => {
   const [inputValue, setInputValue] = useState("");
 
@@ -41,8 +46,6 @@ const OffencesSection: React.FC<OffencesSectionProps> = ({
 
   return (
     <div className="w-full">
-
-
       <div className="mb-8">
         <label className="block text-sm font-bold text-gray-900 mb-2">
           Select Offence Type
@@ -71,9 +74,7 @@ const OffencesSection: React.FC<OffencesSectionProps> = ({
         </div>
 
         {selectedOffences.length === 0 ? (
-          <p className="text-gray-400 italic text-sm">
-            No offences selected.
-          </p>
+          <p className="text-gray-400 italic text-sm">No offences selected.</p>
         ) : (
           <div className="space-y-6">
             {selectedOffences.map((offence) => (
@@ -84,6 +85,7 @@ const OffencesSection: React.FC<OffencesSectionProps> = ({
                 onRemove={handleRemoveOffence}
                 selectedReferences={selectedReferences}
                 onReferencesChange={handleReferencesChange}
+                onReferenceToggle={onReferenceToggle}
               />
             ))}
           </div>
