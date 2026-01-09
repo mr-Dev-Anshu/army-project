@@ -12,17 +12,14 @@ export interface MilitaryPoliceReportProps {
     dateOfDuty: string;
     dutyTime: string;
     dutyLocation: string;
-    nameOfWitnessingOfficial1: string; // 2.4.1
-    nameOfWitnessingOfficial2: string; // 2.4.2
-    nameOfWitnessingOfficial3?: string; // 2.4.3
+    witnessingMps: { name: string; rank: string }[]; // 2.4 - Dynamic List
     timeOfOffence: string;
     locationOfOffence: string;
     statement: string; // 2.5
   };
   offence: {
-    type: string; // 3.1
-    ref1: string;
-    ref2: string;
+    types: string[]; // 3.1 - Dynamic List
+    refs: string[]; // Dynamic References
     description: string;
   };
   witnessSig: SignatureDetails;
@@ -52,6 +49,7 @@ interface PersonDetails {
 interface VehicleDetails {
   baNo: string;
   makeAndTake: string;
+  vehicleNumber: string;
 }
 
 interface SignatureDetails {
@@ -60,6 +58,16 @@ interface SignatureDetails {
   name: string;
   unit: string;
 }
+
+const DataField = ({ label, value, className = "grid-cols-[110px_1fr]" }: { label: React.ReactNode; value?: string; className?: string }) => {
+  if (!value || value === "N/A") return null;
+  return (
+    <div className={`grid ${className}`}>
+      <span className="font-bold text-xs flex items-center">{label}</span>
+      <span className="text-xs flex items-center">{value}</span>
+    </div>
+  );
+};
 
 const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
   reportNo,
@@ -106,22 +114,10 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
               <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
                 <div className="text-xs">(1.1)</div>
                 <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                  <div className="grid grid-cols-[110px_1fr]">
-                    <span className="font-bold text-xs">Aadhar Card No.</span>
-                    <span className="text-xs">{particulars.primary.aadharCardNo}</span>
-                  </div>
-                  <div className="grid grid-cols-[120px_1fr]">
-                    <span className="font-bold text-xs">S/O</span>
-                    <span className="text-xs">{particulars.primary.so}</span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr]">
-                    <span className="font-bold text-xs">Driver Name</span>
-                    <span className="text-xs">{particulars.primary.name}</span>
-                  </div>
-                  <div className="grid grid-cols-[120px_1fr]">
-                    <span className="font-bold text-xs">Name the Relation</span>
-                    <span className="text-xs">{particulars.primary.relation}</span>
-                  </div>
+                  <DataField label="Aadhar Card No." value={particulars.primary.aadharCardNo} />
+                  <DataField label="S/O" value={particulars.primary.so} className="grid-cols-[120px_1fr]" />
+                  <DataField label="Driver Name" value={particulars.primary.name} />
+                  <DataField label="Name the Relation" value={particulars.primary.relation} className="grid-cols-[120px_1fr]" />
                 </div>
               </div>
 
@@ -130,38 +126,14 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
               <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
                 <div className="text-xs">(1.1.1)</div>
                 <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                  <div className="grid grid-cols-[110px_1fr]">
-                    <span className="font-bold text-xs">Army No.</span>
-                    <span className="text-xs">{particulars.primary.armyNo}</span>
-                  </div>
-                  <div className="grid grid-cols-[120px_1fr]">
-                    <span className="font-bold text-xs">Rank</span>
-                    <span className="text-xs">{particulars.primary.rank}</span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr]">
-                    <span className="font-bold text-xs">Name</span>
-                    <span className="text-xs">{particulars.primary.name}</span>
-                  </div>
-                  <div className="grid grid-cols-[120px_1fr]">
-                    <span className="font-bold text-xs">Unit</span>
-                    <span className="text-xs">{particulars.primary.unit}</span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr]">
-                    <span className="font-bold text-xs">FMN</span>
-                    <span className="text-xs">{particulars.primary.fmn}</span>
-                  </div>
-                  <div className="grid grid-cols-[120px_1fr]">
-                    <span className="font-bold text-xs">Command</span>
-                    <span className="text-xs">{particulars.primary.command}</span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr]">
-                    <span className="font-bold text-xs">Address</span>
-                    <span className="text-xs">{particulars.primary.address}</span>
-                  </div>
-                  <div className="grid grid-cols-[120px_1fr]">
-                    <span className="font-bold text-xs">I Card No.</span>
-                    <span className="text-xs">{particulars.primary.iCardNo}</span>
-                  </div>
+                  <DataField label="Army No." value={particulars.primary.armyNo} />
+                  <DataField label="Rank" value={particulars.primary.rank} className="grid-cols-[120px_1fr]" />
+                  <DataField label="Name" value={particulars.primary.name} />
+                  <DataField label="Unit" value={particulars.primary.unit} className="grid-cols-[120px_1fr]" />
+                  <DataField label="FMN" value={particulars.primary.fmn} />
+                  <DataField label="Command" value={particulars.primary.command} className="grid-cols-[120px_1fr]" />
+                  <DataField label="Address" value={particulars.primary.address} />
+                  <DataField label="I Card No." value={particulars.primary.iCardNo} className="grid-cols-[120px_1fr]" />
                 </div>
               </div>
             </div>
@@ -172,22 +144,10 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
                 <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
                   <div className="text-xs">(1.2)</div>
                   <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                    <div className="grid grid-cols-[110px_1fr]">
-                      <span className="font-bold text-xs">Aadhar Card No.</span>
-                      <span className="text-xs">{particulars.secondary.aadharCardNo}</span>
-                    </div>
-                    <div className="grid grid-cols-[120px_1fr]">
-                      <span className="font-bold text-xs">S/O</span>
-                      <span className="text-xs">{particulars.secondary.so}</span>
-                    </div>
-                    <div className="grid grid-cols-[110px_1fr]">
-                      <span className="font-bold text-xs">Co-Driver Name</span>
-                      <span className="text-xs">{particulars.secondary.name}</span>
-                    </div>
-                    <div className="grid grid-cols-[120px_1fr]">
-                      <span className="font-bold text-xs">Name the Relation</span>
-                      <span className="text-xs">{particulars.secondary.relation}</span>
-                    </div>
+                    <DataField label="Aadhar Card No." value={particulars.secondary.aadharCardNo} />
+                    <DataField label="S/O" value={particulars.secondary.so} className="grid-cols-[120px_1fr]" />
+                    <DataField label="Co-Driver Name" value={particulars.secondary.name} />
+                    <DataField label="Name the Relation" value={particulars.secondary.relation} className="grid-cols-[120px_1fr]" />
                   </div>
                 </div>
 
@@ -196,38 +156,14 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
                 <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
                   <div className="text-xs">(1.2.1)</div>
                   <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                    <div className="grid grid-cols-[110px_1fr]">
-                      <span className="font-bold text-xs">Army No.</span>
-                      <span className="text-xs">{particulars.secondary.armyNo}</span>
-                    </div>
-                    <div className="grid grid-cols-[120px_1fr]">
-                      <span className="font-bold text-xs">Rank</span>
-                      <span className="text-xs">{particulars.secondary.rank}</span>
-                    </div>
-                    <div className="grid grid-cols-[110px_1fr]">
-                      <span className="font-bold text-xs">Name</span>
-                      <span className="text-xs">{particulars.secondary.name}</span>
-                    </div>
-                    <div className="grid grid-cols-[120px_1fr]">
-                      <span className="font-bold text-xs">Unit</span>
-                      <span className="text-xs">{particulars.secondary.unit}</span>
-                    </div>
-                    <div className="grid grid-cols-[110px_1fr]">
-                      <span className="font-bold text-xs">FMN</span>
-                      <span className="text-xs">{particulars.secondary.fmn}</span>
-                    </div>
-                    <div className="grid grid-cols-[120px_1fr]">
-                      <span className="font-bold text-xs">Command</span>
-                      <span className="text-xs">{particulars.secondary.command}</span>
-                    </div>
-                    <div className="grid grid-cols-[110px_1fr]">
-                      <span className="font-bold text-xs">Address</span>
-                      <span className="text-xs">{particulars.secondary.address}</span>
-                    </div>
-                    <div className="grid grid-cols-[120px_1fr]">
-                      <span className="font-bold text-xs">I Card No.</span>
-                      <span className="text-xs">{particulars.secondary.iCardNo}</span>
-                    </div>
+                    <DataField label="Army No." value={particulars.secondary.armyNo} />
+                    <DataField label="Rank" value={particulars.secondary.rank} className="grid-cols-[120px_1fr]" />
+                    <DataField label="Name" value={particulars.secondary.name} />
+                    <DataField label="Unit" value={particulars.secondary.unit} className="grid-cols-[120px_1fr]" />
+                    <DataField label="FMN" value={particulars.secondary.fmn} />
+                    <DataField label="Command" value={particulars.secondary.command} className="grid-cols-[120px_1fr]" />
+                    <DataField label="Address" value={particulars.secondary.address} />
+                    <DataField label="I Card No." value={particulars.secondary.iCardNo} className="grid-cols-[120px_1fr]" />
                   </div>
                 </div>
               </div>
@@ -238,14 +174,8 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
               <div className="border border-gray-300 p-4 mb-4 grid grid-cols-[40px_1fr] gap-4">
                 <div className="text-xs">(1.3)</div>
                 <div className="grid grid-cols-2 gap-x-12">
-                  <div className="grid grid-cols-[110px_1fr]">
-                    <span className="font-bold text-xs">DD Veh. BA No.</span>
-                    <span className="text-xs">{particulars.vehicle.baNo}</span>
-                  </div>
-                  <div className="grid grid-cols-[120px_1fr]">
-                    <span className="font-bold text-xs">Make & Take</span>
-                    <span className="text-xs">{particulars.vehicle.makeAndTake}</span>
-                  </div>
+                  <DataField label={particulars.vehicle.vehicleNumber} value={particulars.vehicle.baNo} />
+                  <DataField label="Make & Take" value={particulars.vehicle.makeAndTake} className="grid-cols-[120px_1fr]" />
                 </div>
               </div>
             )}
@@ -260,78 +190,76 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
           <div className="border border-gray-300 mb-6">
             {/* Row 2.1 */}
             <div className="grid grid-cols-2">
-              <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
-                <span className="text-xs">(2.1)</span>
-                <span className="text-xs font-bold">Date of Duty</span>
-                <span className="text-xs">{occurrence.dateOfDuty}</span>
+              <div className="p-2 pl-4 grid grid-cols-[45px_1fr]">
+                <div className="grid grid-cols-[45px_140px_1fr] items-center">
+                  <span className="text-xs">(2.1)</span>
+                  <div className="col-span-2">
+                    <DataField label="Date of Duty" value={occurrence.dateOfDuty} className="grid-cols-[140px_1fr]" />
+                  </div>
+                </div>
               </div>
-              <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
-                <span className="text-xs font-bold">Duty Time</span>
-                <span className="text-xs">{occurrence.dutyTime}</span>
+              <div className="p-2 pl-4">
+                <DataField label="Duty Time" value={occurrence.dutyTime} className="grid-cols-[130px_1fr]" />
               </div>
             </div>
 
             {/* Row Duty Location */}
-            <div className="grid grid-cols-2 border-b border-gray-300">
-              <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
-                <span className="text-xs"></span>
-                <span className="text-xs font-bold">Duty Location</span>
-                <span className="text-xs">{occurrence.dutyLocation}</span>
+            <div className={`grid grid-cols-2 border-b border-gray-300 ${(!occurrence.dutyLocation || occurrence.dutyLocation === 'N/A') ? 'hidden' : ''}`}>
+              <div className="p-2 pl-4 grid grid-cols-[45px_1fr]">
+                <div className="grid grid-cols-[45px_140px_1fr] items-center">
+                  <span className="text-xs"></span>
+                  <div className="col-span-2">
+                    <DataField label="Duty Location" value={occurrence.dutyLocation} className="grid-cols-[140px_1fr]" />
+                  </div>
+                </div>
               </div>
-              <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
-                {/* Empty right side */}
-              </div>
+              <div className="p-2 pl-4"></div>
             </div>
 
             {/* Row 2.2 */}
-            <div className="grid grid-cols-2 border-b border-gray-300">
-              <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
-                <span className="text-xs">(2.2)</span>
-                <span className="text-xs font-bold">Name of MP <br />Witnessing</span>
-                <span className="text-xs">{occurrence.nameOfWitnessingOfficial1}</span>
+            {/* Dynamic Witness Rows */}
+            {occurrence.witnessingMps && occurrence.witnessingMps.length > 0 ? (
+              occurrence.witnessingMps.map((mp, index) => (
+                <div key={index} className="grid grid-cols-2 border-b border-gray-300">
+                  <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
+                    <span className="text-xs">
+                      {index === 0 ? "(2.2)" : `(2.2.${index})`}
+                    </span>
+                    <span className="text-xs font-bold">Name of MP <br />Witnessing</span>
+                    <span className="text-xs">{mp.name}</span>
+                  </div>
+                  <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
+                    <span className="text-xs font-bold">Rank</span>
+                    <span className="text-xs">{mp.rank}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="grid grid-cols-2 border-b border-gray-300">
+                <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
+                  <span className="text-xs">(2.2)</span>
+                  <span className="text-xs font-bold">Name of MP <br />Witnessing</span>
+                  <span className="text-xs">N/A</span>
+                </div>
+                <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
+                  <span className="text-xs font-bold">Rank</span>
+                  <span className="text-xs">N/A</span>
+                </div>
               </div>
-              <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
-                <span className="text-xs font-bold">Rank</span>
-                <span className="text-xs">Hav (MP)</span>
-              </div>
-            </div>
-
-            {/* Row 2.2.1 */}
-            <div className="grid grid-cols-2 border-b border-gray-300">
-              <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
-                <span className="text-xs">(2.2.1)</span>
-                <span className="text-xs font-bold">Name of MP <br />Witnessing</span>
-                <span className="text-xs">{occurrence.nameOfWitnessingOfficial2}</span>
-              </div>
-              <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
-                <span className="text-xs font-bold">Rank</span>
-                <span className="text-xs">Hav (MP)</span>
-              </div>
-            </div>
-
-            {/* Row 2.2.2 */}
-            <div className="grid grid-cols-2 border-b border-gray-300">
-              <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
-                <span className="text-xs">(2.2.2)</span>
-                <span className="text-xs font-bold">Name of MP <br />Witnessing</span>
-                <span className="text-xs">{occurrence.nameOfWitnessingOfficial3}</span>
-              </div>
-              <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
-                <span className="text-xs font-bold">Rank</span>
-                <span className="text-xs">Hav (MP)</span>
-              </div>
-            </div>
+            )}
 
             {/* Row 2.3 */}
             <div className="grid grid-cols-2">
-              <div className="p-2 pl-4 grid grid-cols-[45px_140px_1fr] items-center">
-                <span className="text-xs">(2.3)</span>
-                <span className="text-xs font-bold">Time of <br />Offence</span>
-                <span className="text-xs">{occurrence.timeOfOffence}</span>
+              <div className="p-2 pl-4 grid grid-cols-[45px_1fr]">
+                <div className="grid grid-cols-[45px_140px_1fr] items-center">
+                  <span className="text-xs">(2.3)</span>
+                  <div className="col-span-2">
+                    <DataField label={<>Time of <br />Offence</>} value={occurrence.timeOfOffence} className="grid-cols-[140px_1fr]" />
+                  </div>
+                </div>
               </div>
-              <div className="p-2 pl-4 grid grid-cols-[130px_1fr] items-center">
-                <span className="text-xs font-bold">Location of <br />Offence</span>
-                <span className="text-xs">{occurrence.locationOfOffence}</span>
+              <div className="p-2 pl-4">
+                <DataField label={<>Location of <br />Offence</>} value={occurrence.locationOfOffence} className="grid-cols-[130px_1fr]" />
               </div>
             </div>
           </div>
@@ -350,26 +278,36 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
           <h2 className="font-bold text-xs mb-4">3. &nbsp;&nbsp; <span className="underline">OFFENCE COMMITTED/ORDERS CONTRAVENED:</span></h2>
 
           <div className="grid grid-cols-[40px_1fr] gap-y-2 mb-4">
-            {/* 3.1 */}
+            {/* 3.1 - Types */}
             <div className="text-xs">(3.1)</div>
             <div className="text-xs">
-              <span className="font-bold">Offence Type</span> &nbsp; {offence.type}
+              <span className="font-bold">Offence Type</span> &nbsp;
+              <span className="leading-relaxed">
+                {offence.types ? offence.types.filter(Boolean).join(", ") : "N/A"}
+              </span>
+
+              {/* References List */}
               <div className="flex mt-1">
-                <span className="font-bold mr-2">Ref :-</span>
-                <div className="flex flex-col gap-1">
-                  <div className="flex">
-                    <span className="mr-2">(i.)</span>
-                    <span>{offence.ref1}</span>
-                  </div>
-                  <div className="flex">
-                    <span className="mr-2">(ii.)</span>
-                    <span>{offence.ref2}</span>
-                  </div>
+                <span className="font-bold mr-2 whitespace-nowrap">Ref :-</span>
+                <div className="flex flex-col gap-1 w-full">
+                  {offence.refs && offence.refs.length > 0 ? (
+                    offence.refs.map((ref, i) => (
+                      <div className="flex" key={i}>
+                        <span className="mr-2 min-w-[20px]">{`${i + 1}.`}</span>
+                        <span className="leading-tight">{ref}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex">
+                      <span className="mr-2">(i.)</span>
+                      <span>N/A</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* 3.2 */}
+            {/* 3.2 - Description */}
             <div className="text-xs">(3.2)</div>
             <div className="text-xs text-justify leading-relaxed">
               {offence.description}
@@ -434,9 +372,9 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
         {/* Remarks Footer */}
         <div className="mt-8">
           <h3 className="text-center font-bold underline mb-4 text-xs">REMARKS OF CO/2IC PROVOST UNIT</h3>
-          <p className="text-justify text-xs mb-8 indent-8 leading-relaxed">
+          {remarks.text && <p className="text-justify text-xs mb-8 indent-8 leading-relaxed">
             {remarks.text}
-          </p>
+          </p>}
 
           <div className="flex flex-col gap-1">
             <div className="flex">

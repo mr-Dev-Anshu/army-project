@@ -267,68 +267,82 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const primary = offence.offenders?.[0]?.offenderDetails || {};
   const secondary = offence.offenders?.[1]?.offenderDetails;
 
-  const val = (v: any) => v || "N/A";
+  const val = (v: any) => v || "";
+  const dateVal = (d: string) => d ? new Date(d).toLocaleDateString("en-GB") : "";
+  const timeVal = (d: string) => d ? new Date(d).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }) : "";
 
   const mpDetails = offence.onDutyDetailsMPReporting || {};
-  // Assuming the first witnessing MP is the main witness
-  const witness = offence.onDutyWitnessingMps?.[0] || {};
+  const witnesses = offence.onDutyWitnessingMps || [];
+  const witness1 = witnesses[0] || {};
+  const witness2 = witnesses[1];
+  const witness3 = witnesses[2];
 
   return {
-    reportNo: offence.reportNumber || "N/A",
-    reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
+    reportNo: offence.reportNo || offence.reportId || offence.reportNumber || "",
+    reportDate: dateVal(offence.createdAt),
     particulars: {
       primary: {
-        aadharCardNo: val(primary.aadharCard),
+        aadharCardNo: val(primary.aadharCard || primary.aadharNumber),
         name: val(primary.name),
-        so: val(primary.fatherName),
-        relation: "Father", // Default as per typical usage, or map if available
-        armyNo: val(primary.armyNo),
-        rank: val(primary.rank),
+        so: val(primary.fatherName || primary.so),
+        relation: val(primary.relation),
+        armyNo: val(primary.armyNumber || primary.armyNo),
+        rank: val(primary.rank || primary["Select Rank"]),
         unit: val(primary.unit),
-        command: "N/A",
+        command: val(primary.command),
         fmn: val(primary.fmn),
         address: val(primary.address),
-        iCardNo: val(primary.identityCard),
+        iCardNo: val(primary.identityCard || primary.iCardNumber || primary["I Card Number"]),
       },
       secondary: secondary ? {
-        aadharCardNo: val(secondary.aadharCard),
+        aadharCardNo: val(secondary.aadharCard || secondary.aadharNumber),
         name: val(secondary.name),
-        so: val(secondary.fatherName),
-        relation: "Father",
-        armyNo: val(secondary.armyNo),
-        rank: val(secondary.rank),
+        so: val(secondary.fatherName || secondary.so),
+        relation: val(secondary.relation),
+        armyNo: val(secondary.armyNumber || secondary.armyNo),
+        rank: val(secondary.rank || secondary["Select Rank"]),
         unit: val(secondary.unit),
-        command: "N/A",
+        command: val(secondary.command),
         fmn: val(secondary.fmn),
         address: val(secondary.address),
-        iCardNo: val(secondary.identityCard),
+        iCardNo: val(secondary.identityCard || secondary.iCardNumber || secondary["I Card Number"]),
       } : undefined,
       vehicle: offence.isVehicleInvolved ? {
         baNo: val(offence.vehicleNumber),
         makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
+        vehicleNumber: offence.vehicleType === "DD Vehicle" ? "DD Veh. BA No." : "Registration No.",
       } : undefined,
     },
     occurrence: {
-      dateOfDuty: offence.onDutyDetails?.dateOfDuty ? new Date(offence.onDutyDetails.dateOfDuty).toLocaleDateString("en-GB") : "N/A",
-      dutyTime: offence.onDutyDetails?.startTime ? new Date(offence.onDutyDetails.startTime).toLocaleTimeString("en-GB") : "N/A",
+      dateOfDuty: dateVal(offence.onDutyDetails?.dateOfDuty),
+      dutyTime: (() => {
+        const start = offence.onDutyDetails?.startTime;
+        const end = offence.onDutyDetails?.endTime;
+        const sVal = timeVal(start);
+        const eVal = timeVal(end);
+        if (sVal && eVal) return `${sVal} Hrs - ${eVal} Hrs`;
+        if (sVal) return `${sVal} Hrs`;
+        return "";
+      })(),
       dutyLocation: val(offence.onDutyDetails?.dutyLocation),
-      nameOfWitnessingOfficial1: val(witness.name) || "N/A",
-      nameOfWitnessingOfficial2: "N/A",
-      timeOfOffence: offence.offenceOccurenceDetails?.timeOfOffence ? new Date(offence.offenceOccurenceDetails.timeOfOffence).toLocaleTimeString("en-GB") : "N/A",
+      witnessingMps: witnesses.length > 0 ? witnesses.map((w: any) => ({
+        name: val(w.name),
+        rank: val(w.rank)
+      })) : [],
+      timeOfOffence: timeVal(offence.offenceOccurenceDetails?.timeOfOffence) ? timeVal(offence.offenceOccurenceDetails?.timeOfOffence) + " Hrs" : "",
       locationOfOffence: val(offence.offenceOccurenceDetails?.incidentLocation),
       statement: val(offence.offenceOccurenceDetails?.description),
     },
     offence: {
-      type: val(offence.currentOffenceType),
-      ref1: "N/A",
-      ref2: "N/A",
+      types: (offence.offenceTypes?.length ? offence.offenceTypes : offence.offenceOccurenceDetails?.offenceTypes) || (val(offence.currentOffenceType) ? [val(offence.currentOffenceType)] : []),
+      refs: (offence.offenceTypeReference?.length ? offence.offenceTypeReference : offence.offenceOccurenceDetails?.offenceTypeReference) || [],
       description: val(offence.offenceOccurenceDetails?.description),
     },
     witnessSig: {
-      armyNo: val(witness.armyNo),
-      rank: val(witness.rank),
-      name: val(witness.name),
-      unit: val(witness.unit),
+      armyNo: val(witness1.armyNumber || witness1.ArmyNo),
+      rank: val(witness1.rank),
+      name: val(witness1.name),
+      unit: val(witness1.unit),
     },
     mpSig: {
       armyNo: val(mpDetails.armyNumber),
@@ -337,8 +351,8 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
       unit: val(mpDetails.unit),
     },
     remarks: {
-      text: val(offence.actionStatusRemark) || val(offence.customFields?.remarks),
-      station: "N/A",
+      text: val(offence.customFields?.remarks || offence.remarks),
+      station: val(offence.onDutyDetails?.dutyLocation),
       dated: new Date().toLocaleDateString("en-GB"),
     },
   };

@@ -146,7 +146,7 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
         header: "Offence Type/ Brief",
         className: "min-w-[180px] max-w-[200px]",
         cell: (offence) => (
-          <div>
+          <div title={offence.offenceOccurenceDetails?.description || ""}>
             <div className="font-medium text-gray-900">{offence.currentOffenceType || "Traffic Offence"}</div>
             <div className="text-xs text-gray-500 mt-1 line-clamp-2">
               {offence.offenceOccurenceDetails?.description || ""}
@@ -258,6 +258,7 @@ export default function DetailsTable({ offences, isVehicleInvolved, onView, onPr
           return (
             <div
               className="flex flex-col items-center gap-1 cursor-pointer"
+              title={offence.actionStatusRemark || "No remark"}
               onClick={() => {
                 if (offence._id) {
                   handleStatusClick(offence._id, isTaken);

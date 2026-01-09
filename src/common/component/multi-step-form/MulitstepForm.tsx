@@ -40,18 +40,20 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       const d = person?.details || {};
       if (!Object.keys(d).length && !person?.type) return null;
 
+      const val = (v: any) => (v && v !== "Nil" ? v : "");
+
       return {
-        aadharCardNo: d.aadharCardNo || "Nil",
-        name: d.name || "Nil",
-        so: d.so || "Nil",
-        relation: d.relation || "Nil",
-        armyNo: d.armyNumber || d.armyNo || "Nil",
-        rank: d.rank || "Nil",
-        unit: d.unit || "Nil",
-        command: d.command || "Nil",
-        fmn: d.fmn || "Nil",
-        address: d.address || "Nil",
-        iCardNo: d.iCardNumber || d.iCardNo || d.passNo || "Nil", // Pass No mapped for employee/others
+        aadharCardNo: val(d.aadharCardNo),
+        name: val(d.name),
+        so: val(d.so),
+        relation: val(d.relation),
+        armyNo: val(d.armyNumber || d.armyNo),
+        rank: val(d.rank),
+        unit: val(d.unit),
+        command: val(d.command),
+        fmn: val(d.fmn),
+        address: val(d.address),
+        iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo), // Pass No mapped for employee/others
       };
     };
 
@@ -74,83 +76,70 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     const reporting = mpWitness?.reportingBlock || {};
     const dutyBlock = mpWitness?.dutyBlock || {};
 
+    const val = (v: any) => (v && v !== "Nil" ? v : "");
+
     return {
       reportNo: traffic?.reportNo || reportNo,
       reportDate: new Date().toLocaleDateString("en-GB"),
 
       particulars: {
-        primary: mapPerson(primaryPerson) || {
-          aadharCardNo: "Nil",
-          name: "Nil",
-          so: "Nil",
-          relation: "Nil",
-          armyNo: "Nil",
-          rank: "Nil",
-          unit: "Nil",
-          command: "Nil",
-          fmn: "Nil",
-          address: "Nil",
-          iCardNo: "Nil",
-        },
-
+        primary: mapPerson(primaryPerson),
         secondary: mapPerson(secondaryPerson),
 
         vehicle:
           traffic.vehicleInvolved === "yes"
             ? {
-              category: v.category || "Nil",
-              vehicleType: v.vehicleType || "Nil",
-              vehicleNumber: v.vehicleNumber || "Nil",
-              vehicleName: v.vehicleName || "Nil",
+              category: val(v.category),
+              vehicleType: val(v.vehicleType),
+              vehicleNumber: val(v.vehicleNumber),
+              vehicleName: val(v.vehicleName),
             }
-            : null,
+            : undefined, // undefined relies on component to handle null/undefined, changed from null
       },
 
       occurrence: {
-        dateOfDuty: dutyBlock?.dateOfDuty || "Nil",
+        dateOfDuty: val(dutyBlock?.dateOfDuty),
         dutyTime:
           dutyBlock?.startTime && dutyBlock?.endTime
             ? `${dutyBlock.startTime} - ${dutyBlock.endTime}`
-            : "Nil",
-        dutyLocation: dutyBlock?.dutyLocation || "Nil",
+            : "",
+        dutyLocation: val(dutyBlock?.dutyLocation),
 
         // ✅ MP WITNESS NAME (NOT MP REPORTING)
-        nameOfWitnessingOfficial1: reporting?.nameReportingMP || "Nil",
+        nameOfWitnessingOfficial1: val(reporting?.nameReportingMP),
 
-        timeOfOffence: occ?.timeOfOffence || "Nil",
-        locationOfOffence: occ?.incidentLocation || "Nil",
-        statement: occ?.description || "Nil",
+        timeOfOffence: val(occ?.timeOfOffence),
+        locationOfOffence: val(occ?.incidentLocation),
+        statement: val(occ?.description),
       },
 
       offence: {
-        type: traffic?.offenceTypes?.[0] || "Nil",
-        ref1: traffic?.offenceCode?.[0] || "Nil",
-        ref2: traffic?.offenceCode?.[1] || "Nil",
-        description: occ?.description || "Nil",
-        briefDescription: occ?.briefDescription || "Nil",
+        type: val(traffic?.offenceTypes?.[0]),
+        ref1: val(traffic?.offenceCode?.[0]),
+        ref2: val(traffic?.offenceCode?.[1]),
+        description: val(occ?.description),
+        briefDescription: val(occ?.briefDescription),
       },
 
       // ✅ MP WITNESS SIGNATURE
       witnessSig: {
-        armyNo: reporting?.armyNumber || "Nil",
-        rank: reporting?.rank || "Nil",
-        name: reporting?.nameReportingMP || "Nil",
-        unit: reporting?.unit || "Nil",
+        armyNo: val(reporting?.armyNumber),
+        rank: val(reporting?.rank),
+        name: val(reporting?.nameReportingMP),
+        unit: val(reporting?.unit),
       },
 
       // ✅ MP SIGNATURE
       mpSig: {
-        armyNo: reporting?.armyNumber || "Nil",
-        rank: reporting?.rank || "Nil",
-        name: reporting?.nameReportingMP || "Nil",
-        unit: reporting?.unit || "Nil",
+        armyNo: val(reporting?.armyNumber),
+        rank: val(reporting?.rank),
+        name: val(reporting?.nameReportingMP),
+        unit: val(reporting?.unit),
       },
 
       remarks: {
-        text:
-          traffic?.remarks ||
-          "Suitable disciplinary action may be taken and intimated.",
-        station: dutyBlock?.dutyLocation || "Nil",
+        text: val(traffic?.remarks),
+        station: val(dutyBlock?.dutyLocation),
         dated: new Date().toLocaleDateString("en-GB"),
       },
     };
@@ -206,6 +195,8 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
           ? traffic.offenceTypes
           : ["minor"],
         offenceTypeReference: traffic.offenceCode || [],
+        remarks: traffic.remarks,
+        customFields: { remarks: traffic.remarks },
       });
 
       const offenceId = offenceRes?._id;
@@ -322,7 +313,18 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     },
     4: {
       title: "4. REMARKS",
-      component: <Step4Remarks />,
+      component: (
+        <Step4Remarks
+          value={state.formData.traffic.remarks}
+          onChange={(v) =>
+            dispatch({
+              type: "SET_PATH",
+              path: "formData.traffic.remarks",
+              value: v,
+            })
+          }
+        />
+      ),
     },
   };
 

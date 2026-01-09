@@ -295,14 +295,18 @@ export default function StaticSpeedTable({
             <DropdownMenuContent align="end" className="w-[200px]">
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
-                onClick={() => onView && onView(item)}
+                onSelect={() => {
+                  if (onView) {
+                    onView(item);
+                  }
+                }}
               >
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
-                onClick={() => onPrint && onPrint(item)}
+                onSelect={() => onPrint && onPrint(item)}
               >
                 <Printer className="w-4 h-4" />
                 Print
@@ -317,7 +321,7 @@ export default function StaticSpeedTable({
               </DropdownMenuItem> */}
               <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => {
+                onSelect={() => {
                   if (item._id) {
                     handleDeleteClick(item._id);
                   }

@@ -62,6 +62,16 @@ export interface MpOccurrenceReportProps {
     className?: string;
 }
 
+const DataField = ({ label, value, className = "grid-cols-[100px_1fr]" }: { label: React.ReactNode; value?: string; className?: string }) => {
+    if (!value || value === "N/A" || value === "") return null;
+    return (
+        <div className={`grid ${className}`}>
+            <span className="font-bold">{label}</span>
+            <span>{value}</span>
+        </div>
+    );
+};
+
 const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
     reportNo,
     command,
@@ -128,32 +138,12 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                     <div className="font-bold mb-2 text-[12px]">1. &nbsp;&nbsp; MP DETAILS:</div>
                     <div className="border border-gray-300 p-6 rounded-sm text-[12px] mb-2">
                         <div className="grid grid-cols-2 gap-x-12 gap-y-2">
-                            <div className="grid grid-cols-[100px_1fr]">
-                                <span className="font-bold">Army no.</span>
-                                <span>{mpDetails.armyNo}</span>
-                            </div>
-                            <div className="grid grid-cols-[100px_1fr]">
-                                <span className="font-bold">Rank</span>
-                                <span>{mpDetails.rank}</span>
-                            </div>
-
-                            <div className="grid grid-cols-[100px_1fr]">
-                                <span className="font-bold">Name</span>
-                                <span>{mpDetails.name}</span>
-                            </div>
-                            <div className="grid grid-cols-[100px_1fr]">
-                                <span className="font-bold">Unit</span>
-                                <span>{mpDetails.unit}</span>
-                            </div>
-
-                            <div className="grid grid-cols-[100px_1fr]">
-                                <span className="font-bold">FMN</span>
-                                <span>{mpDetails.fmn}</span>
-                            </div>
-                            <div className="grid grid-cols-[100px_1fr]">
-                                <span className="font-bold">Command</span>
-                                <span>{mpDetails.command}</span>
-                            </div>
+                            <DataField label="Army no." value={mpDetails.armyNo} />
+                            <DataField label="Rank" value={mpDetails.rank} />
+                            <DataField label="Name" value={mpDetails.name} />
+                            <DataField label="Unit" value={mpDetails.unit} />
+                            <DataField label="FMN" value={mpDetails.fmn} />
+                            <DataField label="Command" value={mpDetails.command} />
                         </div>
                     </div>
                     <div className="text-[12px] text-gray-600 pl-1">
@@ -167,30 +157,38 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                         2. &nbsp;&nbsp; <span className="underline">OCCURRENCE DETAILS:</span>
                     </div>
                     <div className="pl-4 space-y-2 text-[12px] ">
-                        <div className="flex">
-                            <span className="w-8 ">2.1</span>
-                            <div className="flex-1">
-                                <span className="font-bold">Occurrence Offence Type-</span> <span className="ml-2">{occurrence.offenceType}</span>
+                        {occurrence.offenceType && (
+                            <div className="flex">
+                                <span className="w-8 ">2.1</span>
+                                <div className="flex-1">
+                                    <span className="font-bold">Occurrence Offence Type-</span> <span className="ml-2">{occurrence.offenceType}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <span className="w-8 ">2.2</span>
-                            <div className="flex-1">
-                                <span className="font-bold">Place of Occurrence-</span> <span className="ml-2">{occurrence.place}</span>
+                        )}
+                        {occurrence.place && (
+                            <div className="flex">
+                                <span className="w-8 ">2.2</span>
+                                <div className="flex-1">
+                                    <span className="font-bold">Place of Occurrence-</span> <span className="ml-2">{occurrence.place}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <span className="w-8 ">2.3</span>
-                            <div className="flex-1">
-                                <span className="font-bold">Date of Occurrence-</span> <span className="ml-2">{occurrence.date}</span>
+                        )}
+                        {occurrence.date && (
+                            <div className="flex">
+                                <span className="w-8 ">2.3</span>
+                                <div className="flex-1">
+                                    <span className="font-bold">Date of Occurrence-</span> <span className="ml-2">{occurrence.date}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex">
-                            <span className="w-8 ">2.4</span>
-                            <div className="flex-1">
-                                <span className="font-bold">Time of Occurrence-</span> <span className="ml-2">{occurrence.time} Hrs</span>
+                        )}
+                        {occurrence.time && (
+                            <div className="flex">
+                                <span className="w-8 ">2.4</span>
+                                <div className="flex-1">
+                                    <span className="font-bold">Time of Occurrence-</span> <span className="ml-2">{occurrence.time} Hrs</span>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -237,7 +235,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                                         </div>
                                     </td>
                                     <td className="border border-gray-300 p-2 align-middle text-center">
-                                        {person.remark || "--"}
+                                        {person.remark || ""}
                                     </td>
                                 </tr>
                             ))}
@@ -327,7 +325,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                                         </div>
                                     </td>
                                     <td className="border border-gray-300 p-2 align-middle text-center">
-                                        {person.remark || "--"}
+                                        {person.remark || ""}
                                     </td>
                                 </tr>
                             )) : (
@@ -343,15 +341,21 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                         6. &nbsp;&nbsp; <span className="underline">EVIDENCE:</span> <span className="font-normal text-[12px] ml-2">(Collect and record evidence carefully)</span>
                     </div>
                     <div className="flex justify-between items-end px-4 text-[12px] mt-8 gap-8">
-                        <div className="border-b border-gray-400 flex-1 pb-1">
-                            <span className="font-bold mr-2">6.1 Eye Sketch-</span> {evidence.eyeSketch || "Nil"}
-                        </div>
-                        <div className="border-b border-gray-400 flex-1 pb-1 mx-4">
-                            <span className="font-bold mr-2">6.2 Photos-</span> {evidence.photos || "________"}
-                        </div>
-                        <div className="border-b border-gray-400 flex-1 pb-1">
-                            <span className="font-bold mr-2">6.3 Videos-</span> {evidence.videos || "________"}
-                        </div>
+                        {evidence.eyeSketch && (
+                            <div className="border-b border-gray-400 flex-1 pb-1">
+                                <span className="font-bold mr-2">6.1 Eye Sketch-</span> {evidence.eyeSketch}
+                            </div>
+                        )}
+                        {evidence.photos && (
+                            <div className="border-b border-gray-400 flex-1 pb-1 mx-4">
+                                <span className="font-bold mr-2">6.2 Photos-</span> {evidence.photos}
+                            </div>
+                        )}
+                        {evidence.videos && (
+                            <div className="border-b border-gray-400 flex-1 pb-1">
+                                <span className="font-bold mr-2">6.3 Videos-</span> {evidence.videos}
+                            </div>
+                        )}
                     </div>
                 </div>
 

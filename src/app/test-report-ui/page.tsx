@@ -54,9 +54,11 @@ const mockData: MilitaryPoliceReportProps = {
     statement: "Taqriban 0650 baje uper likhe huye Civilian Dronbachal Base se aa raha tha tab maine usko rokh kar check karne par unke pass Cantt mein in/out hone keliye koi bhi pass nahi tha tab maine usse puch-tach karne par pata chala ki 21 CSR ka Hav(CLK) Ajay Shankar Jha ka Brother-in-Law hai. uska particulars uska aadhar card se note kiya aur usko jane diya.",
   },
   offence: {
-    type: "Violation Of Local Orders",
-    ref1: "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
-    ref2: "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order.",
+    types: ["Violation Of Local Orders"],
+    refs: [
+      "Mil Tfc offence (Auth - Para 48 of SAO 6/S/2001/PM).",
+      "Para 463(a) of CMP manual, SAO 9/S/78 and Stn order."
+    ],
     description: "The above Civilian Mr Rakesh Kumar brother-in-Law of Hav(CLK) Ajay Shankar Jha was staying in Govt Married Accn QTR No- 123/45 in Dronachal Base without any permission letter from concerned unit.",
   },
   witnessSig: {

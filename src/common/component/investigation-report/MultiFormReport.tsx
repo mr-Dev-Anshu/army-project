@@ -115,19 +115,21 @@ export default function MultiFormReport({
     const witnessList = mp?.witnesses || [];
 
     /* ================= 4. OFFENDERS ================= */
+    /* ================= 4. OFFENDERS ================= */
     const people = offenderList.map((p: any, i: number) => {
       const src = p.details ?? p;
+      const val = (v: any) => (v && v !== "Nil" && v !== "--" ? v : ""); // Helper inside map
 
       return {
         sno: i + 1,
-        armyNo: src.armyNumber || "Nil",
-        rank: src.rank || "Nil",
-        name: src.name || "Nil",
-        identityCard: src.iCardNumber || "Nil",
-        unitName: src.unit || "Nil",
-        fmn: src.fmn || "Nil",
-        address: src.address || "Nil",
-        remark: src.remark || "--",
+        armyNo: val(src.armyNumber),
+        rank: val(src.rank),
+        name: val(src.name),
+        identityCard: val(src.iCardNumber),
+        unitName: val(src.unit),
+        fmn: val(src.fmn),
+        address: val(src.address),
+        remark: val(src.remark),
         role:
           p.offenderType === "Victim"
             ? "Victim"
@@ -140,17 +142,18 @@ export default function MultiFormReport({
     /* ================= 5. WITNESSES ================= */
     const witnesses = witnessList.map((w: any, i: number) => {
       const src = w.details ?? w;
+      const val = (v: any) => (v && v !== "Nil" && v !== "--" ? v : "");
 
       return {
         sno: i + 1,
-        armyNo: src.armyNumber || src.armyNo || "Nil",
-        rank: src.rank || "Nil",
-        name: src.name || "Nil",
-        identityCard: src.iCardNumber || "Nil",
-        unitName: src.unit || "Nil",
-        fmn: src.fmn || "Nil",
-        address: src.address || "Nil",
-        remark: src.remark || "--",
+        armyNo: val(src.armyNumber || src.armyNo),
+        rank: val(src.rank),
+        name: val(src.name),
+        identityCard: val(src.iCardNumber),
+        unitName: val(src.unit),
+        fmn: val(src.fmn),
+        address: val(src.address),
+        remark: val(src.remark),
       };
     });
 
@@ -162,28 +165,30 @@ export default function MultiFormReport({
         ? mp.investigationPoints.split("\n")
         : [];
 
+    const val = (v: any) => (v && v !== "Nil" && v !== "NA" ? v : "");
+
     return {
       /* ================= HEADER ================= */
       reportNo: mp?.reportDetails?.reportNo || reportNo,
-      command: mp?.reportDetails?.command || "Nil",
-      firNo: mp?.reportDetails?.firNo || "Nil",
+      command: val(mp?.reportDetails?.command),
+      firNo: val(mp?.reportDetails?.firNo),
 
       /* ================= 1. MP DETAILS ================= */
       mpDetails: {
-        armyNo: mp?.mpParticulars?.armyNo || "Nil",
-        rank: mp?.mpParticulars?.rank || "Nil",
-        name: mp?.mpParticulars?.name || "Nil",
-        unit: mp?.mpParticulars?.unit || "Nil",
-        fmn: mp?.mpParticulars?.fmn || "Nil",
-        command: mp?.mpParticulars?.command || "Nil",
+        armyNo: val(mp?.mpParticulars?.armyNo),
+        rank: val(mp?.mpParticulars?.rank),
+        name: val(mp?.mpParticulars?.name),
+        unit: val(mp?.mpParticulars?.unit),
+        fmn: val(mp?.mpParticulars?.fmn),
+        command: val(mp?.mpParticulars?.command),
       },
 
       /* ================= 2–3. OCCURRENCE DETAILS ================= */
       occurrence: {
-        offenceType: mp?.occurrenceDetails?.offenceType || "Nil",
-        place: mp?.occurrenceDetails?.place || "Nil",
-        date: mp?.occurrenceDetails?.date || "Nil",
-        time: mp?.occurrenceDetails?.time || "Nil",
+        offenceType: val(mp?.occurrenceDetails?.offenceType),
+        place: val(mp?.occurrenceDetails?.place),
+        date: val(mp?.occurrenceDetails?.date),
+        time: val(mp?.occurrenceDetails?.time),
       },
 
       /* ================= 4. OFFENDERS ================= */
@@ -194,26 +199,26 @@ export default function MultiFormReport({
 
       /* ================= 6. EVIDENCE ================= */
       evidence: {
-        eyeSketch: mp?.evidence?.eyeSketch?.url ? "Available" : "Nil",
+        eyeSketch: mp?.evidence?.eyeSketch?.url ? "Available" : "", // Changed from "Nil" to ""
         photos:
           mp?.evidence?.photos?.length > 0
             ? `${mp.evidence.photos.length} Photos`
-            : "Nil",
+            : "",
         videos:
           mp?.evidence?.videos?.length > 0
             ? `${mp.evidence.videos.length} Videos`
-            : "Nil",
+            : "",
       },
 
       /* ================= 7. DOCUMENTS ================= */
-      documents: (mp?.documents || []).map((d: any) => d?.statement || "Nil"),
+      documents: (mp?.documents || []).map((d: any) => val(d?.statement)),
 
       /* ================= 8–10. DETAILED REPORT ================= */
       detailedReport: {
-        statement:
+        statement: val(
           mp?.detailedOccurrenceReport?.statement ||
-          mp?.detailedOccurrenceReport ||
-          "Nil",
+          mp?.detailedOccurrenceReport
+        ),
 
         findings: Array.isArray(mp?.investigationPoints)
           ? mp.investigationPoints
@@ -222,17 +227,17 @@ export default function MultiFormReport({
             ? mp.investigationPoints.split("\n")
             : [],
 
-        opinion: mp?.opinion?.statement || mp?.opinion || "Nil",
+        opinion: val(mp?.opinion?.statement || mp?.opinion),
       },
 
       /* ================= 11. REMARKS ================= */
       remarks: {
-        analysis: mp?.remarks?.analysis || "Nil",
-        recommendation: mp?.remarks?.recommendation || "Nil",
+        analysis: val(mp?.remarks?.analysis),
+        recommendation: val(mp?.remarks?.recommendation),
       },
 
       /* ================= FOOTER ================= */
-      station: mp?.station || "Nil",
+      station: val(mp?.station),
       reportDate: mp?.reportDate || new Date().toLocaleDateString("en-GB"),
     };
   };

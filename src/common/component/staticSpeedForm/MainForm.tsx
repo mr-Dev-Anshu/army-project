@@ -45,24 +45,17 @@ export default function StaticSpeedForm({
   const mapStaticToReport = (data: any) => {
     const riderDetails = data?.offenderPeople?.[0]?.details || {};
 
+    const val = (v: any) => (v ? v : "");
+
     const rider = {
-      armyNo:
-        riderDetails["DD veh rider no."] || riderDetails["Army No."] || "N/A",
-
-      name: riderDetails["Name"] || riderDetails["Driver Name"] || "N/A",
-
-      rank: riderDetails["Select Rank"] || riderDetails["Rank"] || "N/A",
-
-      unit: riderDetails["Unit"] || "N/A",
-
-      fmn: riderDetails["FMN"] || "N/A",
-
-      command: riderDetails["Command"] || "N/A",
-
-      address:
-        riderDetails["Address"] || riderDetails["Place of Stay"] || "N/A",
-
-      iCardNo: riderDetails["I Card No."] || riderDetails["ICard"] || "N/A",
+      armyNo: val(riderDetails["DD veh rider no."] || riderDetails["Army No."]),
+      name: val(riderDetails["Name"] || riderDetails["Driver Name"]),
+      rank: val(riderDetails["Select Rank"] || riderDetails["Rank"]),
+      unit: val(riderDetails["Unit"]),
+      fmn: val(riderDetails["FMN"]),
+      command: val(riderDetails["Command"]),
+      address: val(riderDetails["Address"] || riderDetails["Place of Stay"]),
+      iCardNo: val(riderDetails["I Card No."] || riderDetails["ICard"]),
     };
 
     const witness =
@@ -71,74 +64,79 @@ export default function StaticSpeedForm({
         : null;
 
     return {
-      reportNo: "TEMP/STATIC/001",
+      reportNo: data.reportNo || "TEMP/STATIC/001",
       reportDate: new Date().toLocaleDateString("en-GB"),
 
-      unitName: rider?.unit || "N/A",
+      unitName: val(rider?.unit),
 
       /* -------- 1️⃣ PARTICULARS -------- */
       particulars: {
         rider: {
-          armyNo: rider?.armyNo || rider?.armyNo || "N/A",
-          name: rider?.name || "N/A",
-          fmn: rider?.fmn || "N/A",
-          address: rider?.address || "N/A",
-          rank: rider?.rank || "N/A",
-          unit: rider?.unit || "N/A",
-          command: rider?.command || "N/A",
-          iCardNo: rider?.iCardNo || "N/A",
+          armyNo: val(rider?.armyNo),
+          name: val(rider?.name),
+          fmn: val(rider?.fmn),
+          address: val(rider?.address),
+          rank: val(rider?.rank),
+          unit: val(rider?.unit),
+          command: val(rider?.command),
+          iCardNo: val(rider?.iCardNo),
         },
 
         vehicle: {
-          baNo: data?.vehicleDetails?.vehicleNumber || "N/A",
-          makeAndTake: data?.vehicleDetails?.vehicleName || "N/A",
+          baNo: val(data?.vehicleDetails?.vehicleNumber),
+          makeAndTake: val(data?.vehicleDetails?.vehicleName),
         },
       },
 
       /* -------- 2️⃣ OCCURRENCE -------- */
       occurrence: {
-        statement: data?.offenceBlock?.description || "No statement available",
+        dateOfDuty: val(data?.dutyBlock?.dateOfDuty),
+        dutyTime:
+          data?.dutyBlock?.startTime && data?.dutyBlock?.endTime
+            ? `${data.dutyBlock.startTime} - ${data.dutyBlock.endTime}`
+            : "",
+        dutyLocation: val(data?.dutyBlock?.dutyLocation),
+        nameOfWitnessingOfficial1: val(data?.reportingBlock?.nameReportingMP), // Using reporting MP as witness 1 for preview context if needed, or check mappings
+        rankOfWitnessingOfficial1: val(data?.reportingBlock?.rank),
+        nameOfWitnessingOfficial2: "", // Can be mapped if form supports 2nd witness
+        rankOfWitnessingOfficial2: "",
+        statement: val(data?.offenceBlock?.description),
       },
 
       /* -------- 3️⃣ OFFENCE -------- */
       offence: {
-        actualSpeed:
-          data?.offenceBlock?.actualSpeedNoted ||
-          data?.offenceBlock?.actualSpeed ||
-          "N/A",
-
-        authSpeed: data?.offenceBlock?.authSpeed || "N/A",
-
-        overSpeed:
+        actualSpeed: val(
+          data?.offenceBlock?.actualSpeedNoted || data?.offenceBlock?.actualSpeed
+        ),
+        authSpeed: val(data?.offenceBlock?.authSpeed),
+        overSpeed: val(
           data?.offenceBlock?.overSpeedCalculated ||
-          data?.offenceBlock?.overSpeed ||
-          "N/A",
+          data?.offenceBlock?.overSpeed
+        ),
       },
 
       /* -------- 4️ WITNESS SIGN -------- */
       witnessSig: {
-        armyNo:
-          witness?.reportingBlock?.armyNumber ||
-          witness?.reportingBlock?.ArmyNo ||
-          "N/A",
-        rank: witness?.reportingBlock?.rank || "N/A",
-        name: witness?.reportingBlock?.nameReportingMP || "N/A",
-        unit: witness?.reportingBlock?.unit || "N/A",
+        armyNo: val(
+          witness?.reportingBlock?.armyNumber || witness?.reportingBlock?.ArmyNo
+        ),
+        rank: val(witness?.reportingBlock?.rank),
+        name: val(witness?.reportingBlock?.nameReportingMP),
+        unit: val(witness?.reportingBlock?.unit),
       },
 
       /* -------- MP SIGN -------- */
       mpSig: {
-        armyNo: data?.reportingBlock?.armyNumber || "N/A",
-        rank: data?.reportingBlock?.rank || "N/A",
-        name: data?.reportingBlock?.nameReportingMP || "N/A",
-        unit: data?.reportingBlock?.unit || "N/A",
+        armyNo: val(data?.reportingBlock?.armyNumber),
+        rank: val(data?.reportingBlock?.rank),
+        name: val(data?.reportingBlock?.nameReportingMP),
+        unit: val(data?.reportingBlock?.unit),
       },
 
       /* -------- REMARKS -------- */
       remarks: {
-        text:
-          data?.remarks || "Suitable disciplinary action may please be taken.",
-        station: data?.dutyBlock?.dutyLocation || "N/A",
+        text: val(data?.remarks),
+        station: val(data?.dutyBlock?.dutyLocation),
         dated: new Date().toLocaleDateString("en-GB"),
       },
     };
@@ -163,7 +161,18 @@ export default function StaticSpeedForm({
     },
     4: {
       title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
-      component: <Step4Remarks />,
+      component: (
+        <Step4Remarks
+          value={state.formData.staticSpeed.remarks}
+          onChange={(v) =>
+            dispatch({
+              type: "SET_PATH",
+              path: "formData.staticSpeed.remarks",
+              value: v,
+            })
+          }
+        />
+      ),
     },
   };
 

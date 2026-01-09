@@ -23,11 +23,44 @@ export class GeneralTrafficOffenceRepository {
           as: "onDutyWitnessingMps"
         }
       },
-      // Add counts
+      {
+        $addFields: {
+          refIds: {
+            $map: {
+              input: { $ifNull: ["$offenceTypeReference", []] },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs"
+        }
+      },
+      // Add counts and resolved references
       {
         $addFields: {
           offendersCount: { $size: "$offenders" },
-          witnessingMpsCount: { $size: "$onDutyWitnessingMps" }
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          offenceTypeReference: {
+            $map: {
+              input: "$resolvedRefs",
+              as: "r",
+              in: "$$r.reference"
+            }
+          }
         }
       },
       {
@@ -62,8 +95,41 @@ export class GeneralTrafficOffenceRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: { $ifNull: ["$offenceTypeReference", []] },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs"
+        }
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
-          witnessingMpsCount: { $size: "$onDutyWitnessingMps" }
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          offenceTypeReference: {
+            $map: {
+              input: "$resolvedRefs",
+              as: "r",
+              in: "$$r.reference"
+            }
+          }
         }
       },
       {
@@ -182,9 +248,42 @@ export class GeneralTrafficOffenceRepository {
 
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: { $ifNull: ["$offenceTypeReference", []] },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs"
+        }
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
           originalOffenceTypes: "$offenceTypes",
+          offenceTypeReference: {
+            $map: {
+              input: "$resolvedRefs",
+              as: "r",
+              in: "$$r.reference"
+            }
+          }
         },
       },
 
@@ -225,6 +324,7 @@ export class GeneralTrafficOffenceRepository {
               actionStatus: "$actionStatus",
               vehicleName: "$vehicleName",
               reportId: "$reportId",
+              offenceTypeReference: "$offenceTypeReference",
             },
           },
         },

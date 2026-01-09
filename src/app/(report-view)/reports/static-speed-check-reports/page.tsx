@@ -203,56 +203,62 @@ export default function StaticSpeedCheckReportsPage() {
     const offender = raw.offenders?.[0]?.offenderDetails || {};
     const mp = raw.onDutyDetailsMPReporting || {};
 
+    // Witness details might be missing in schema, so we attempt to find them safely
+    const witness1 = raw.onDutyWitnessingMps?.[0] || {};
+    const witness2 = raw.onDutyWitnessingMps?.[1] || {};
+
+    const val = (v: any) => v || "";
+
     return {
       reportNo: item.reportNo,
       reportDate: new Date(raw.createdAt).toLocaleDateString("en-GB"),
       unitName: "21 Corps Provost Unit",
       particulars: {
         rider: {
-          armyNo: offender.armyNumber || "N/A",
-          name: offender.name || "N/A",
-          rank: offender.rank || "N/A",
-          unit: mp.unit || offender.unit || "N/A",
-          fmn: raw.fmn || offender.fmn || "N/A",
-          address: raw.address || offender.address || "N/A",
-          command: raw.command || offender.command || "N/A",
-          iCardNo: offender.iCardNumber || "N/A",
+          armyNo: val(offender.armyNumber),
+          name: val(offender.name),
+          rank: val(offender.rank),
+          unit: val(mp.unit || offender.unit),
+          fmn: val(raw.fmn || offender.fmn),
+          address: val(raw.address || offender.address),
+          command: val(raw.command || offender.command),
+          iCardNo: val(offender.iCardNumber),
         },
         vehicle: {
-          baNo: raw.vehicleNumber,
-          makeAndTake: raw.vehicleName,
+          baNo: val(raw.vehicleNumber),
+          makeAndTake: val(raw.vehicleName),
         },
       },
       occurrence: {
-        dateOfDuty: item.date,
-        dutyLocation: item.placeOfOffence,
-        dutyTime: item.time,
-        nameOfWitnessingOfficial1: "N/A",
-        rankOfWitnessingOfficial1: "N/A",
-        nameOfWitnessingOfficial2: "N/A",
-        rankOfWitnessingOfficial2: "N/A",
-        statement: offence.description || "",
+        dateOfDuty: val(item.date),
+        dutyLocation: val(item.placeOfOffence),
+        dutyTime: item.time ? `${item.time} Hrs` : "",
+        nameOfWitnessingOfficial1: val(witness1.name),
+        rankOfWitnessingOfficial1: val(witness1.rank),
+        nameOfWitnessingOfficial2: val(witness2.name),
+        rankOfWitnessingOfficial2: val(witness2.rank),
+        statement: val(offence.description),
       },
       offence: {
-        actualSpeed: offence.actualSpeedNoted || "N/A",
-        authSpeed: offence.authSpeed || "N/A",
-        overSpeed: offence.overSpeedCalculated || "N/A",
+        actualSpeed: val(offence.actualSpeedNoted),
+        authSpeed: val(offence.authSpeed),
+        overSpeed: val(offence.overSpeedCalculated),
       },
       witnessSig: {
-        armyNo: "N/A",
-        rank: "N/A",
-        name: "N/A",
-        unit: "N/A",
+        armyNo: "",
+        rank: "",
+        name: "",
+        unit: "",
       },
       mpSig: {
-        armyNo: mp.armyNumber || "N/A",
-        name: mp.nameReportingMP || "N/A",
-        rank: mp.rank || "N/A",
-        unit: mp.unit || "N/A",
+        armyNo: val(mp.armyNumber),
+        name: val(mp.nameReportingMP),
+        rank: val(mp.rank),
+        unit: val(mp.unit),
       },
       remarks: {
-        text: raw.remarks || "",
-        station: "N/A",
+        text: val(raw.remarks),
+        station: "",
         dated: new Date().toLocaleDateString("en-GB"),
       },
     };
@@ -275,6 +281,43 @@ export default function StaticSpeedCheckReportsPage() {
     return (
       <div className="p-8 text-red-500 text-center">
         Failed to load reports
+      </div>
+    );
+  }
+
+  if (viewingReport) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setViewingReport(null);
+              setShouldAutoPrint(false);
+            }}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Reports
+          </Button>
+          <h1 className="text-lg font-semibold text-gray-800">
+            Static Speed Check Report
+          </h1>
+          <div className="ml-auto">
+            <Button
+              onClick={() => handleDownloadReport(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download Word Report
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
+          <StaticSpeedReport {...mapToReportProps(viewingReport)} />
+        </div>
       </div>
     );
   }

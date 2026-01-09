@@ -160,13 +160,13 @@ export default function MpOccurrenceReportsPage() {
       sno: index + 1,
       armyNo: p.armyNumber || p.armyNo || p.aadharNumber || "",
       rank: p.rank || "",
-      name: p.name || p.personName || "Unknown",
-      identityCard: p.iCardNumber || p.icard || p.idCardNumber || p.identityCard || "-",
+      name: p.name || p.personName || "",
+      identityCard: p.iCardNumber || p.icard || p.idCardNumber || p.identityCard || "",
       unitName: p.unit || p.unitName || "",
       fmn: p.fmn || p.fmnName || "",
       address: p.address || "",
-      remark: p.remark || "--",
-      role: p.role || p.type || "Victim" // Default to Victim if unknown
+      remark: p.remark || "",
+      role: p.role || p.type || "" // Default to empty if unknown
     })) : [];
 
     // Dynamic Fields: Witnesses
@@ -181,12 +181,12 @@ export default function MpOccurrenceReportsPage() {
       sno: index + 1,
       armyNo: w.armyNumber || w.armyNo || "",
       rank: w.rank || "",
-      name: w.name || w.witnessName || "Unknown",
-      identityCard: w.iCardNumber || w.icard || w.idCardNumber || "-",
+      name: w.name || w.witnessName || "",
+      identityCard: w.iCardNumber || w.icard || w.idCardNumber || "",
       unitName: w.unit || w.unitName || "",
       fmn: w.fmn || w.fmnName || "",
       address: w.address || "",
-      remark: w.remark || "--"
+      remark: w.remark || ""
     })) : [];
 
     // Dynamic Fields: Documents
