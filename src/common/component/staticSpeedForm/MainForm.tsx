@@ -71,7 +71,7 @@ export default function StaticSpeedForm({
     const witReportBlock = witness?.reportingBlock || {};
 
     return {
-      reportNo: data.reportNo || "TEMP/STATIC/001",
+      reportNo: data.reportNo || data.reportId,
       reportDate: new Date().toLocaleDateString("en-GB"),
 
       unitName: val(rider?.unit),
@@ -235,6 +235,9 @@ export default function StaticSpeedForm({
           offenceTypeReference:
             staticData.offenceBlock?.offenceTypeReference ?? [],
         },
+
+        // ✅ ADDED REMARK
+        remark: staticData.remarks,
       };
 
       console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);

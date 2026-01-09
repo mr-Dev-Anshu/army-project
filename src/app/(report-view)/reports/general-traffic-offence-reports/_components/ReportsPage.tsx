@@ -113,8 +113,9 @@ export default function ReportsPage({
       // Search
       if (filters.search) {
         const s = filters.search.toLowerCase();
+        const rNo = o.reportId || o.reportNumber || "";
         if (
-          !o.reportNumber?.toLowerCase().includes(s) &&
+          !rNo.toLowerCase().includes(s) &&
           !o.currentOffenceType?.toLowerCase().includes(s)
         ) {
           return false;

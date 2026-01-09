@@ -106,8 +106,9 @@ export default function StaticSpeedCheckReportsPage() {
       /* ---------- SEARCH ---------- */
       if (filters.search) {
         const s = filters.search.toLowerCase();
+        const rNo = item.reportId || item.reportNumber || item.reportNo || "";
         if (
-          !item.reportNumber?.toLowerCase().includes(s) &&
+          !rNo.toLowerCase().includes(s) &&
           !item.vehicleNumber?.toLowerCase().includes(s)
         )
           return false;
@@ -169,9 +170,7 @@ export default function StaticSpeedCheckReportsPage() {
         fmn: item.fmn || driver.fmn || "HQ 21 Corps",
         vehicleNo: item.vehicleNumber || "N/A",
         vehicleModel: item.vehicleName || "Unknown",
-        reportNo:
-          item.reportNumber ||
-          `SSC/21 CPU/${item._id.slice(-4)}/${new Date().getFullYear()}`,
+        reportNo: item.reportId || item.reportNumber || item.reportNo || "N/A",
         actionStatus: item.actionStatus,
 
         // ✅ ADDED MISSING FIELDS
@@ -186,6 +185,8 @@ export default function StaticSpeedCheckReportsPage() {
               rank: coDriver.rank,
             }
           : null,
+
+        remarks: item.remark || item.remarks || "N/A",
 
         originalData: item,
       };
@@ -207,7 +208,7 @@ export default function StaticSpeedCheckReportsPage() {
     const val = (v: any) => v || "";
 
     return {
-      reportNo: item.reportNo,
+      reportNo: raw.reportId || item.reportNo,
       reportDate: new Date(raw.createdAt).toLocaleDateString("en-GB"),
       unitName: "21 Corps Provost Unit",
       particulars: {
@@ -254,7 +255,7 @@ export default function StaticSpeedCheckReportsPage() {
         unit: val(mp.unit),
       },
       remarks: {
-        text: val(raw.remarks),
+        text: val(raw.remark || raw.remarks),
         station: "",
         dated: new Date().toLocaleDateString("en-GB"),
       },
