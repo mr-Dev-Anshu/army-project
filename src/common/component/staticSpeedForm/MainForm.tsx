@@ -48,20 +48,27 @@ export default function StaticSpeedForm({
     const val = (v: any) => (v ? v : "");
 
     const rider = {
-      armyNo: val(riderDetails["DD veh rider no."] || riderDetails["Army No."]),
-      name: val(riderDetails["Name"] || riderDetails["Driver Name"]),
-      rank: val(riderDetails["Select Rank"] || riderDetails["Rank"]),
-      unit: val(riderDetails["Unit"]),
-      fmn: val(riderDetails["FMN"]),
-      command: val(riderDetails["Command"]),
-      address: val(riderDetails["Address"] || riderDetails["Place of Stay"]),
-      iCardNo: val(riderDetails["I Card No."] || riderDetails["ICard"]),
+      armyNo: val(
+        riderDetails["armyNumber"] || riderDetails["Army Rider / Driver Number"]
+      ),
+      name: val(riderDetails["name"] || riderDetails["Full Name"]),
+      rank: val(riderDetails["rank"] || riderDetails["Select Rank"]),
+      unit: val(riderDetails["unit"] || riderDetails["Unit"]),
+      fmn: val(riderDetails["fmn"] || riderDetails["FMN"]),
+      command: val(riderDetails["command"] || riderDetails["Command"]),
+      address: val(riderDetails["address"] || riderDetails["Address"]),
+      iCardNo: val(
+        riderDetails["iCardNumber"] || riderDetails["ID Card Number"]
+      ),
     };
 
     const witness =
-      data.selectedWitness !== null
+      typeof data.selectedWitness === "number"
         ? data.witnesses?.[data.selectedWitness]
-        : null;
+        : data.witnesses?.[0] || null;
+
+    // Safety check for witness object structure
+    const witReportBlock = witness?.reportingBlock || {};
 
     return {
       reportNo: data.reportNo || "TEMP/STATIC/001",
@@ -96,9 +103,9 @@ export default function StaticSpeedForm({
             ? `${data.dutyBlock.startTime} - ${data.dutyBlock.endTime}`
             : "",
         dutyLocation: val(data?.dutyBlock?.dutyLocation),
-        nameOfWitnessingOfficial1: val(data?.reportingBlock?.nameReportingMP), // Using reporting MP as witness 1 for preview context if needed, or check mappings
-        rankOfWitnessingOfficial1: val(data?.reportingBlock?.rank),
-        nameOfWitnessingOfficial2: "", // Can be mapped if form supports 2nd witness
+        nameOfWitnessingOfficial1: val(witReportBlock.nameReportingMP),
+        rankOfWitnessingOfficial1: val(witReportBlock.rank),
+        nameOfWitnessingOfficial2: "",
         rankOfWitnessingOfficial2: "",
         statement: val(data?.offenceBlock?.description),
       },
@@ -106,23 +113,22 @@ export default function StaticSpeedForm({
       /* -------- 3️⃣ OFFENCE -------- */
       offence: {
         actualSpeed: val(
-          data?.offenceBlock?.actualSpeedNoted || data?.offenceBlock?.actualSpeed
+          data?.offenceBlock?.actualSpeedNoted ||
+            data?.offenceBlock?.actualSpeed
         ),
         authSpeed: val(data?.offenceBlock?.authSpeed),
         overSpeed: val(
           data?.offenceBlock?.overSpeedCalculated ||
-          data?.offenceBlock?.overSpeed
+            data?.offenceBlock?.overSpeed
         ),
       },
 
       /* -------- 4️ WITNESS SIGN -------- */
       witnessSig: {
-        armyNo: val(
-          witness?.reportingBlock?.armyNumber || witness?.reportingBlock?.ArmyNo
-        ),
-        rank: val(witness?.reportingBlock?.rank),
-        name: val(witness?.reportingBlock?.nameReportingMP),
-        unit: val(witness?.reportingBlock?.unit),
+        armyNo: val(witReportBlock.armyNumber || witReportBlock.ArmyNo),
+        rank: val(witReportBlock.rank),
+        name: val(witReportBlock.nameReportingMP),
+        unit: val(witReportBlock.unit),
       },
 
       /* -------- MP SIGN -------- */
@@ -163,7 +169,7 @@ export default function StaticSpeedForm({
       title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
       component: (
         <Step4Remarks
-          value={state.formData.staticSpeed.remarks}
+          value={state.formData.staticSpeed.remarks || ""}
           onChange={(v) =>
             dispatch({
               type: "SET_PATH",
@@ -195,13 +201,13 @@ export default function StaticSpeedForm({
           dutyType: staticData.dutyBlock?.dutyType || undefined,
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
-            ).toISOString()
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+              ).toISOString()
             : undefined,
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
-            ).toISOString()
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+              ).toISOString()
             : undefined,
         },
 
@@ -226,7 +232,8 @@ export default function StaticSpeedForm({
           // New fields
           briefDescription: staticData.offenceBlock?.briefDescription || "",
           offenceTypes: staticData.offenceBlock?.offenceTypes ?? [],
-          offenceTypeReference: staticData.offenceBlock?.offenceTypeReference ?? [],
+          offenceTypeReference:
+            staticData.offenceBlock?.offenceTypeReference ?? [],
         },
       };
 

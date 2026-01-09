@@ -61,25 +61,19 @@ export default function StaticSpeedCheckReportsPage() {
       if (filters.fromDate || filters.toDate) {
         const d = new Date(rawDate).getTime();
 
-        if (
-          filters.fromDate &&
-          d < new Date(filters.fromDate).getTime()
-        )
+        if (filters.fromDate && d < new Date(filters.fromDate).getTime())
           return false;
 
         if (
           filters.toDate &&
-          d >
-          new Date(filters.toDate + "T23:59:59.999").getTime()
+          d > new Date(filters.toDate + "T23:59:59.999").getTime()
         )
           return false;
       }
 
       /* ---------- SINGLE DATE ---------- */
       if (filters.date) {
-        const recDate = new Date(rawDate)
-          .toISOString()
-          .split("T")[0];
+        const recDate = new Date(rawDate).toISOString().split("T")[0];
         if (recDate !== filters.date) return false;
       }
 
@@ -104,8 +98,7 @@ export default function StaticSpeedCheckReportsPage() {
 
       /* ---------- FMN ---------- */
       if (filters.fmn) {
-        const fmn =
-          item.fmn || item.offenders?.[0]?.offenderDetails?.fmn;
+        const fmn = item.fmn || item.offenders?.[0]?.offenderDetails?.fmn;
 
         if (!fmn || fmn !== filters.fmn) return false;
       }
@@ -141,12 +134,18 @@ export default function StaticSpeedCheckReportsPage() {
       const offence = item.offenceOccurenceDetails || {};
 
       // Filter for Driver (Main Offender) vs Co-Driver
-      const driver = item.offenders?.find(
-        (o: any) => o.offenderDetails?.type === "Offender" || !o.offenderDetails?.type
-      )?.offenderDetails || item.offenders?.[0]?.offenderDetails || {};
+      const driver =
+        item.offenders?.find(
+          (o: any) =>
+            o.offenderDetails?.type === "Offender" || !o.offenderDetails?.type
+        )?.offenderDetails ||
+        item.offenders?.[0]?.offenderDetails ||
+        {};
 
       const coDriver = item.offenders?.find(
-        (o: any) => o.offenderDetails?.type === "CoDriver" || o.offenderDetails?.type === "Co-Driver"
+        (o: any) =>
+          o.offenderDetails?.type === "CoDriver" ||
+          o.offenderDetails?.type === "Co-Driver"
       )?.offenderDetails;
 
       const dateObj = new Date(offence.timeOfOffence || item.createdAt);
@@ -165,12 +164,8 @@ export default function StaticSpeedCheckReportsPage() {
           armyNumber: driver.armyNumber,
           rank: driver.rank,
         },
-        mpName:
-          item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
-        unit:
-          item.onDutyDetailsMPReporting?.unit ||
-          driver.unit ||
-          "MP Unit",
+        mpName: item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
+        unit: item.onDutyDetailsMPReporting?.unit || driver.unit || "MP Unit",
         fmn: item.fmn || driver.fmn || "HQ 21 Corps",
         vehicleNo: item.vehicleNumber || "N/A",
         vehicleModel: item.vehicleName || "Unknown",
@@ -184,11 +179,13 @@ export default function StaticSpeedCheckReportsPage() {
         authSpeed: offence.authSpeed || "-",
         actualSpeed: offence.actualSpeedNoted || "-",
         overSpeed: offence.overSpeedCalculated || "-",
-        coDriverDetails: coDriver ? {
-          name: coDriver.name,
-          armyNumber: coDriver.armyNumber,
-          rank: coDriver.rank,
-        } : null,
+        coDriverDetails: coDriver
+          ? {
+              name: coDriver.name,
+              armyNumber: coDriver.armyNumber,
+              rank: coDriver.rank,
+            }
+          : null,
 
         originalData: item,
       };
@@ -245,10 +242,10 @@ export default function StaticSpeedCheckReportsPage() {
         overSpeed: val(offence.overSpeedCalculated),
       },
       witnessSig: {
-        armyNo: "",
-        rank: "",
-        name: "",
-        unit: "",
+        armyNo: val(witness1.armyNumber || witness1.ArmyNo),
+        rank: val(witness1.rank),
+        name: val(witness1.name),
+        unit: val(witness1.unit),
       },
       mpSig: {
         armyNo: val(mp.armyNumber),
@@ -279,9 +276,7 @@ export default function StaticSpeedCheckReportsPage() {
 
   if (isError) {
     return (
-      <div className="p-8 text-red-500 text-center">
-        Failed to load reports
-      </div>
+      <div className="p-8 text-red-500 text-center">Failed to load reports</div>
     );
   }
 
@@ -331,9 +326,7 @@ export default function StaticSpeedCheckReportsPage() {
 
       <ReportFilterBar
         filters={filters}
-        onFilterChange={(k, v) =>
-          setFilters((p) => ({ ...p, [k]: v }))
-        }
+        onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
         showOffenceType={false}
         placeholder="Search by report no or vehicle..."
         onAddNew={() => setIsCreating(true)}
