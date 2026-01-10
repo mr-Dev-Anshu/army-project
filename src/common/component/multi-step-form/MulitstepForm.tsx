@@ -64,7 +64,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
 
     const secondaryPerson =
       Array.isArray(traffic?.offenderPeople) &&
-      traffic.offenderPeople.length > 1
+        traffic.offenderPeople.length > 1
         ? traffic.offenderPeople[1]
         : null;
 
@@ -95,13 +95,13 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         vehicle:
           traffic.vehicleInvolved === "yes"
             ? {
-                baNo: val(v.vehicleNumber),
-                makeAndTake: val(v.vehicleName),
-                vehicleNumber:
-                  v.vehicleType === "DD Vehicle"
-                    ? "DD Veh. BA No."
-                    : "Registration No.",
-              }
+              baNo: val(v.vehicleNumber),
+              makeAndTake: val(v.vehicleName),
+              vehicleNumber:
+                v.vehicleType === "DD Vehicle"
+                  ? "DD Veh. BA No."
+                  : "Registration No.",
+            }
             : undefined,
       },
 
@@ -133,10 +133,10 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       },
 
       witnessSig: {
-        armyNo: val(witnesses[0]?.reportingBlock?.armyNumber),
-        rank: val(witnesses[0]?.reportingBlock?.rank),
-        name: val(witnesses[0]?.reportingBlock?.nameReportingMP),
-        unit: val(witnesses[0]?.reportingBlock?.unit),
+        armyNo: val(traffic.selectedWitness?.armyNumber || witnesses[0]?.reportingBlock?.armyNumber),
+        rank: val(traffic.selectedWitness?.rank || witnesses[0]?.reportingBlock?.rank),
+        name: val(traffic.selectedWitness?.nameReportingMP || witnesses[0]?.reportingBlock?.nameReportingMP),
+        unit: val(traffic.selectedWitness?.unit || witnesses[0]?.reportingBlock?.unit),
       },
 
       mpSig: {
@@ -209,8 +209,12 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
           ? traffic.offenceTypes
           : ["minor"],
         offenceTypeReference: traffic.offenceCode || [],
+
         remarks: traffic.remarks,
-        customFields: { remarks: traffic.remarks },
+        customFields: {
+          remarks: traffic.remarks,
+          selectedWitness: traffic.selectedWitness,
+        },
       });
 
       const offenceId = offenceRes?._id;

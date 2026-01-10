@@ -614,7 +614,7 @@ export default function Step2Statement() {
                     onChange={() =>
                       set(
                         "formData.traffic.selectedWitness",
-                        witnesses[index].reportingBlock
+                        w.reportingBlock
                       )
                     }
                   />

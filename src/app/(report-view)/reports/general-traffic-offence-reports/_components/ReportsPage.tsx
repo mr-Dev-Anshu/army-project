@@ -188,17 +188,37 @@ export default function ReportsPage({
 
   if (viewingReport) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <Button onClick={() => setViewingReport(null)} className="m-4">
-          <ArrowLeft /> Back
-        </Button>
-        <Button
-          onClick={() => handleDownloadReport(viewingReport)}
-          className="m-4"
-        >
-          <Download /> Download
-        </Button>
-        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setViewingReport(null);
+              setShouldAutoPrint(false);
+            }}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Reports
+          </Button>
+          <h1 className="text-lg font-semibold text-gray-800">
+            General & Traffic Offence Report
+          </h1>
+          <div className="ml-auto">
+            <Button
+              onClick={() => handleDownloadReport(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download Word Report
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
+          <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+        </div>
       </div>
     );
   }
@@ -278,6 +298,8 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const witness2 = witnesses[1];
   const witness3 = witnesses[2];
 
+  const selectedWitness = offence.customFields?.selectedWitness || {};
+
   return {
     reportNo: offence.reportNo || offence.reportId || offence.reportNumber || "",
     reportDate: dateVal(offence.createdAt),
@@ -340,10 +362,10 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
       description: val(offence.offenceOccurenceDetails?.description),
     },
     witnessSig: {
-      armyNo: val(witness1.armyNumber || witness1.ArmyNo),
-      rank: val(witness1.rank),
-      name: val(witness1.name),
-      unit: val(witness1.unit),
+      armyNo: val(selectedWitness?.armyNumber || witness1.armyNumber || witness1.ArmyNo),
+      rank: val(selectedWitness?.rank || witness1.rank),
+      name: val(selectedWitness?.nameReportingMP || witness1.name),
+      unit: val(selectedWitness?.unit || witness1.unit),
     },
     mpSig: {
       armyNo: val(mpDetails.armyNumber),
