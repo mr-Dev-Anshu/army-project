@@ -1,4 +1,3 @@
-
 // "use client";
 
 // import { Input } from "@/components/ui/input";
@@ -200,7 +199,6 @@
 //         ))}
 //       </FormSection>
 
-
 //       {/* ================= WITNESS SELECTION LIST ================= */}
 //       {hasFilledWitness && (
 //         <div className="p-6 rounded-lg">
@@ -308,10 +306,6 @@
 //   );
 // }
 
-
-
-
-
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -345,16 +339,16 @@ export default function Step2Statement() {
     Array.isArray(d?.witnesses) && d.witnesses.length > 0
       ? d.witnesses
       : [
-        {
-          reportingBlock: {
-            nameReportingMP: "",
-            rank: "",
-            unit: "",
-            armyNumber: "",
-            contactNumber: "",
+          {
+            reportingBlock: {
+              nameReportingMP: "",
+              rank: "",
+              unit: "",
+              armyNumber: "",
+              contactNumber: "",
+            },
           },
-        },
-      ];
+        ];
 
   const hasFilledWitness = witnesses.some((w) => {
     const r = w.reportingBlock;
@@ -424,9 +418,7 @@ export default function Step2Statement() {
       </FormSection>
 
       {/* ================= MP REPORTING ================= */}
-      <FormSection
-        title="On-Duty Details of MP Reporting"
-      >
+      <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="mb-2 font-semibold">Reporting MP Name</Label>
@@ -451,7 +443,16 @@ export default function Step2Statement() {
                 set("formData.traffic.onDutyDetailsMPReporting.rank", v)
               }
               fieldType="rank"
-              defaultOptions={["Lieutenant", "Captain", "Major", "Colonel", "L/Nk", "Nk", "Hav", "Subedar"]}
+              defaultOptions={[
+                "Lieutenant",
+                "Captain",
+                "Major",
+                "Colonel",
+                "L/Nk",
+                "Nk",
+                "Hav",
+                "Subedar",
+              ]}
             />
           </div>
         </div>
@@ -486,9 +487,7 @@ export default function Step2Statement() {
       </FormSection>
 
       {/* ================= WITNESSING MP ================= */}
-      <FormSection
-        title="On-Duty Details of MP Witnessing"
-      >
+      <FormSection title="On-Duty Details of MP Witnessing">
         {witnesses.map((w, i) => (
           <div
             key={i}
@@ -518,7 +517,16 @@ export default function Step2Statement() {
                   set("formData.traffic.witnesses", copy);
                 }}
                 fieldType="rank"
-                defaultOptions={["Lieutenant", "Captain", "Major", "Colonel", "L/Nk", "Nk", "Hav", "Subedar"]}
+                defaultOptions={[
+                  "Lieutenant",
+                  "Captain",
+                  "Major",
+                  "Colonel",
+                  "L/Nk",
+                  "Nk",
+                  "Hav",
+                  "Subedar",
+                ]}
               />
             </div>
 
@@ -610,12 +618,15 @@ export default function Step2Statement() {
                   <input
                     type="radio"
                     name="selectedWitnessTraffic"
-                    checked={d.selectedWitness?.armyNumber === data.armyNumber}
+                    checked={
+                      d.selectedWitness &&
+                      d.selectedWitness.nameReportingMP ===
+                        data.nameReportingMP &&
+                      d.selectedWitness.armyNumber === data.armyNumber &&
+                      d.selectedWitness.unit === data.unit
+                    }
                     onChange={() =>
-                      set(
-                        "formData.traffic.selectedWitness",
-                        w.reportingBlock
-                      )
+                      set("formData.traffic.selectedWitness", w.reportingBlock)
                     }
                   />
 

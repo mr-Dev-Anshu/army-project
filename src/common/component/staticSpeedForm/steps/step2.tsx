@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -22,16 +21,16 @@ export default function StaticSpeedStep2() {
     staticData.witnesses?.length > 0
       ? staticData.witnesses
       : [
-        {
-          reportingBlock: {
-            nameReportingMP: "",
-            rank: "",
-            unit: "",
-            armyNumber: "",
-            contactNumber: "",
+          {
+            reportingBlock: {
+              nameReportingMP: "",
+              rank: "",
+              unit: "",
+              armyNumber: "",
+              contactNumber: "",
+            },
           },
-        },
-      ];
+        ];
 
   const set = (path: string, value: any) =>
     dispatch({
@@ -103,9 +102,7 @@ export default function StaticSpeedStep2() {
       </FormSection>
 
       {/* ================== MP REPORTING ================== */}
-      <FormSection
-        title="On-Duty Details of MP Reporting"
-      >
+      <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="mb-2 font-semibold">Reporting MP Name</Label>
@@ -152,9 +149,7 @@ export default function StaticSpeedStep2() {
       </FormSection>
 
       {/* ================== WITNESSING MP ================== */}
-      <FormSection
-        title="On-Duty Details of MP Witnessing"
-      >
+      <FormSection title="On-Duty Details of MP Witnessing">
         {witnesses.map((w, i) => (
           <div
             key={i}
@@ -262,66 +257,76 @@ export default function StaticSpeedStep2() {
           w.reportingBlock?.unit ||
           w.reportingBlock?.armyNumber
       ) && (
-          <FormSection title="List of On-Duty Details of Witnessing MP - Select One for Signature">
-            <div className="text-sm text-gray-500 mb-2">
-              List of Witnesses, choose one for Signature Proof
-            </div>
+        <FormSection title="List of On-Duty Details of Witnessing MP - Select One for Signature">
+          <div className="text-sm text-gray-500 mb-2">
+            List of Witnesses, choose one for Signature Proof
+          </div>
 
-            <div>
-              {witnesses
-                .filter(
-                  (w) =>
-                    w.reportingBlock?.nameReportingMP ||
-                    w.reportingBlock?.rank ||
-                    w.reportingBlock?.unit ||
-                    w.reportingBlock?.armyNumber
-                )
-                .map((w, index) => {
-                  const data = w.reportingBlock;
+          <div>
+            {witnesses
+              .filter(
+                (w) =>
+                  w.reportingBlock?.nameReportingMP ||
+                  w.reportingBlock?.rank ||
+                  w.reportingBlock?.unit ||
+                  w.reportingBlock?.armyNumber
+              )
+              .map((w, index) => {
+                const data = w.reportingBlock;
 
-                  return (
-                    <label
-                      key={index}
-                      className="border rounded-md p-4 flex gap-3 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="selectedWitness"
-                        checked={staticData.selectedWitness === index}
-                        onChange={() =>
-                          set("formData.staticSpeed.selectedWitness", index)
-                        }
-                      />
+                return (
+                  <label
+                    key={index}
+                    className="border rounded-md p-4 flex gap-3 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="selectedWitness"
+                      checked={
+                        staticData.selectedWitness &&
+                        staticData.selectedWitness.nameReportingMP ===
+                          data.nameReportingMP &&
+                        staticData.selectedWitness.armyNumber ===
+                          data.armyNumber &&
+                        staticData.selectedWitness.unit === data.unit
+                      }
+                      onChange={() =>
+                        set(
+                          "formData.staticSpeed.selectedWitness",
+                          w.reportingBlock
+                        )
+                      }
+                    />
 
-                      <div className="w-full grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <p>
-                            <span className="font-semibold">Name:</span>{" "}
-                            {data.nameReportingMP || "—"}
-                          </p>
-                          <p>
-                            <span className="font-semibold">Unit:</span>{" "}
-                            {data.unit || "—"}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p>
-                            <span className="font-semibold">Rank:</span>{" "}
-                            {data.rank || "—"}
-                          </p>
-                          <p>
-                            <span className="font-semibold">Army no.:</span>{" "}
-                            {data.armyNumber || "—"}
-                          </p>
-                        </div>
+                    <div className="w-full grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p>
+                          <span className="font-semibold">Name:</span>{" "}
+                          {data.nameReportingMP || "—"}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Unit:</span>{" "}
+                          {data.unit || "—"}
+                        </p>
                       </div>
-                    </label>
-                  );
-                })}
-            </div>
-          </FormSection>
-        )}
+
+                      <div>
+                        <p>
+                          <span className="font-semibold">Rank:</span>{" "}
+                          {data.rank || "—"}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Army no.:</span>{" "}
+                          {data.armyNumber || "—"}
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+          </div>
+        </FormSection>
+      )}
 
       {/* ================== OFFENCE DETAILS ================== */}
       <FormSection title="Offence Occurrence Details">

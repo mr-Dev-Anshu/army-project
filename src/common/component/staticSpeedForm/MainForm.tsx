@@ -68,7 +68,10 @@ export default function StaticSpeedForm({
         : data.witnesses?.[0] || null;
 
     // Safety check for witness object structure
-    const witReportBlock = witness?.reportingBlock || {};
+    // If selectedWitness is the object (new flow), use it directly
+    let witReportBlock = data.selectedWitness?.nameReportingMP
+      ? data.selectedWitness
+      : witness?.reportingBlock || {};
 
     return {
       reportNo: data.reportNo || data.reportId,
@@ -238,6 +241,9 @@ export default function StaticSpeedForm({
 
         // ✅ ADDED REMARK
         remark: staticData.remarks,
+        customFields: {
+          selectedWitness: staticData.selectedWitness,
+        },
       };
 
       console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
