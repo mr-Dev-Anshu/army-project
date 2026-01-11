@@ -217,6 +217,22 @@ export default function ReportsPage({
               <Download className="w-4 h-4" />
               Download Word Report
             </Button>
+            <Button
+              onClick={() => {
+                const id = viewingReport._id || viewingReport.reportId;
+                if (id) {
+                  window.open(`/api/military-police-report/pdf/${id}`, '_blank');
+                } else {
+                  alert("Report ID not found");
+                }
+              }}
+              variant="outline"
+              size="sm"
+              className="gap-2 ml-2"
+            >
+              <Download className="w-4 h-4" />
+              Download PDF Report
+            </Button>
           </div>
         </div>
         <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
@@ -292,9 +308,9 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const timeVal = (d: string) =>
     d
       ? new Date(d).toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        hour: "2-digit",
+        minute: "2-digit",
+      })
       : "";
 
   const mpDetails = offence.onDutyDetailsMPReporting || {};
@@ -323,38 +339,38 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
         address: val(primary.address),
         iCardNo: val(
           primary.identityCard ||
-            primary.iCardNumber ||
-            primary["I Card Number"]
+          primary.iCardNumber ||
+          primary["I Card Number"]
         ),
       },
       secondary: secondary
         ? {
-            aadharCardNo: val(secondary.aadharCard || secondary.aadharNumber),
-            name: val(secondary.name),
-            so: val(secondary.fatherName || secondary.so),
-            relation: val(secondary.relation),
-            armyNo: val(secondary.armyNumber || secondary.armyNo),
-            rank: val(secondary.rank || secondary["Select Rank"]),
-            unit: val(secondary.unit),
-            command: val(secondary.command),
-            fmn: val(secondary.fmn),
-            address: val(secondary.address),
-            iCardNo: val(
-              secondary.identityCard ||
-                secondary.iCardNumber ||
-                secondary["I Card Number"]
-            ),
-          }
+          aadharCardNo: val(secondary.aadharCard || secondary.aadharNumber),
+          name: val(secondary.name),
+          so: val(secondary.fatherName || secondary.so),
+          relation: val(secondary.relation),
+          armyNo: val(secondary.armyNumber || secondary.armyNo),
+          rank: val(secondary.rank || secondary["Select Rank"]),
+          unit: val(secondary.unit),
+          command: val(secondary.command),
+          fmn: val(secondary.fmn),
+          address: val(secondary.address),
+          iCardNo: val(
+            secondary.identityCard ||
+            secondary.iCardNumber ||
+            secondary["I Card Number"]
+          ),
+        }
         : undefined,
       vehicle: offence.isVehicleInvolved
         ? {
-            baNo: val(offence.vehicleNumber),
-            makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
-            vehicleNumber:
-              offence.vehicleType === "DD Vehicle"
-                ? "DD Veh. BA No."
-                : "Registration No.",
-          }
+          baNo: val(offence.vehicleNumber),
+          makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
+          vehicleNumber:
+            offence.vehicleType === "DD Vehicle"
+              ? "DD Veh. BA No."
+              : "Registration No.",
+        }
         : undefined,
     },
     occurrence: {
@@ -372,9 +388,9 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
       witnessingMps:
         witnesses.length > 0
           ? witnesses.map((w: any) => ({
-              name: val(w.name),
-              rank: val(w.rank),
-            }))
+            name: val(w.name),
+            rank: val(w.rank),
+          }))
           : [],
       timeOfOffence: timeVal(offence.offenceOccurenceDetails?.timeOfOffence)
         ? timeVal(offence.offenceOccurenceDetails?.timeOfOffence) + " Hrs"

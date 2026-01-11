@@ -3,6 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -135,7 +136,8 @@
   /* ================= CUSTOM SCROLLBAR ================= */
 
   .custom-scrollbar {
-    scrollbar-width: thin;              /* Firefox */
+    scrollbar-width: thin;
+    /* Firefox */
     scrollbar-color: #4b5563 transparent;
   }
 
@@ -148,12 +150,14 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #4b5563;          /* gray-600 */
+    background-color: #4b5563;
+    /* gray-600 */
     border-radius: 9999px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: #6b7280;          /* gray-500 */
+    background-color: #6b7280;
+    /* gray-500 */
   }
 }
 
@@ -177,12 +181,13 @@
 /* Print Specific Styles */
 @media print {
   @page {
-    margin: 15mm 15mm 25mm 15mm;
+    margin: 10mm 10mm 10mm 10mm;
   }
 
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    background-color: white !important;
   }
 
   /* Footer for Dynamic Page Numbers */
@@ -216,4 +221,9 @@
     counter-increment: page;
     content: "-" counter(page) "-";
   }
+}
+
+#mp-report {
+  width: 210mm;
+  background: white;
 }
