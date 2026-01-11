@@ -46,6 +46,47 @@ export class MPReportRepository {
         $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$occurrenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
+          "occurrenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$occurrenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       { $limit: 1 },
@@ -123,6 +164,47 @@ export class MPReportRepository {
         $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$occurrenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
+          "occurrenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$occurrenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
 

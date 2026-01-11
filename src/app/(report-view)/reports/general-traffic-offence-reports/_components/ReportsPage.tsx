@@ -135,8 +135,7 @@ export default function ReportsPage({
       // FMN
       if (filters.fmn) {
         const fmn =
-          o.customFields?.fmn ||
-          o.offenders?.[0]?.offenderDetails?.fmn;
+          o.customFields?.fmn || o.offenders?.[0]?.offenderDetails?.fmn;
 
         if (!fmn || fmn !== filters.fmn) return false;
       }
@@ -148,11 +147,15 @@ export default function ReportsPage({
     const nvg: any[] = [];
 
     data.forEach((group: any) => {
-      const v = group.offences
-        ?.filter((o: any) => o.isVehicleInvolved && filterRecord(o)) || [];
+      const v =
+        group.offences?.filter(
+          (o: any) => o.isVehicleInvolved && filterRecord(o)
+        ) || [];
 
-      const nv = group.offences
-        ?.filter((o: any) => !o.isVehicleInvolved && filterRecord(o)) || [];
+      const nv =
+        group.offences?.filter(
+          (o: any) => !o.isVehicleInvolved && filterRecord(o)
+        ) || [];
 
       if (v.length) vg.push({ ...group, offences: v });
       if (nv.length) nvg.push({ ...group, offences: nv });
@@ -223,8 +226,7 @@ export default function ReportsPage({
     );
   }
 
-  const activeGroups =
-    viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
+  const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -239,9 +241,7 @@ export default function ReportsPage({
       {/* FILTER BAR */}
       <ReportFilterBar
         filters={filters}
-        onFilterChange={(k, v) =>
-          setFilters((p) => ({ ...p, [k]: v }))
-        }
+        onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
         showOffenceType
         showDateRange
         showActionStatus
@@ -274,9 +274,7 @@ export default function ReportsPage({
           onPrint={handlePrintReport}
         />
       ) : (
-        <div className="text-center text-gray-500 mt-10">
-          No records found
-        </div>
+        <div className="text-center text-gray-500 mt-10">No records found</div>
       )}
     </div>
   );
@@ -289,8 +287,15 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const secondary = offence.offenders?.[1]?.offenderDetails;
 
   const val = (v: any) => v || "";
-  const dateVal = (d: string) => d ? new Date(d).toLocaleDateString("en-GB") : "";
-  const timeVal = (d: string) => d ? new Date(d).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }) : "";
+  const dateVal = (d: string) =>
+    d ? new Date(d).toLocaleDateString("en-GB") : "";
+  const timeVal = (d: string) =>
+    d
+      ? new Date(d).toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
 
   const mpDetails = offence.onDutyDetailsMPReporting || {};
   const witnesses = offence.onDutyWitnessingMps || [];
@@ -301,7 +306,8 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const selectedWitness = offence.customFields?.selectedWitness || {};
 
   return {
-    reportNo: offence.reportNo || offence.reportId || offence.reportNumber || "",
+    reportNo:
+      offence.reportNo || offence.reportId || offence.reportNumber || "",
     reportDate: dateVal(offence.createdAt),
     particulars: {
       primary: {
@@ -315,26 +321,41 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
         command: val(primary.command),
         fmn: val(primary.fmn),
         address: val(primary.address),
-        iCardNo: val(primary.identityCard || primary.iCardNumber || primary["I Card Number"]),
+        iCardNo: val(
+          primary.identityCard ||
+            primary.iCardNumber ||
+            primary["I Card Number"]
+        ),
       },
-      secondary: secondary ? {
-        aadharCardNo: val(secondary.aadharCard || secondary.aadharNumber),
-        name: val(secondary.name),
-        so: val(secondary.fatherName || secondary.so),
-        relation: val(secondary.relation),
-        armyNo: val(secondary.armyNumber || secondary.armyNo),
-        rank: val(secondary.rank || secondary["Select Rank"]),
-        unit: val(secondary.unit),
-        command: val(secondary.command),
-        fmn: val(secondary.fmn),
-        address: val(secondary.address),
-        iCardNo: val(secondary.identityCard || secondary.iCardNumber || secondary["I Card Number"]),
-      } : undefined,
-      vehicle: offence.isVehicleInvolved ? {
-        baNo: val(offence.vehicleNumber),
-        makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
-        vehicleNumber: offence.vehicleType === "DD Vehicle" ? "DD Veh. BA No." : "Registration No.",
-      } : undefined,
+      secondary: secondary
+        ? {
+            aadharCardNo: val(secondary.aadharCard || secondary.aadharNumber),
+            name: val(secondary.name),
+            so: val(secondary.fatherName || secondary.so),
+            relation: val(secondary.relation),
+            armyNo: val(secondary.armyNumber || secondary.armyNo),
+            rank: val(secondary.rank || secondary["Select Rank"]),
+            unit: val(secondary.unit),
+            command: val(secondary.command),
+            fmn: val(secondary.fmn),
+            address: val(secondary.address),
+            iCardNo: val(
+              secondary.identityCard ||
+                secondary.iCardNumber ||
+                secondary["I Card Number"]
+            ),
+          }
+        : undefined,
+      vehicle: offence.isVehicleInvolved
+        ? {
+            baNo: val(offence.vehicleNumber),
+            makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
+            vehicleNumber:
+              offence.vehicleType === "DD Vehicle"
+                ? "DD Veh. BA No."
+                : "Registration No.",
+          }
+        : undefined,
     },
     occurrence: {
       dateOfDuty: dateVal(offence.onDutyDetails?.dateOfDuty),
@@ -348,21 +369,37 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
         return "";
       })(),
       dutyLocation: val(offence.onDutyDetails?.dutyLocation),
-      witnessingMps: witnesses.length > 0 ? witnesses.map((w: any) => ({
-        name: val(w.name),
-        rank: val(w.rank)
-      })) : [],
-      timeOfOffence: timeVal(offence.offenceOccurenceDetails?.timeOfOffence) ? timeVal(offence.offenceOccurenceDetails?.timeOfOffence) + " Hrs" : "",
+      witnessingMps:
+        witnesses.length > 0
+          ? witnesses.map((w: any) => ({
+              name: val(w.name),
+              rank: val(w.rank),
+            }))
+          : [],
+      timeOfOffence: timeVal(offence.offenceOccurenceDetails?.timeOfOffence)
+        ? timeVal(offence.offenceOccurenceDetails?.timeOfOffence) + " Hrs"
+        : "",
       locationOfOffence: val(offence.offenceOccurenceDetails?.incidentLocation),
       statement: val(offence.offenceOccurenceDetails?.description),
     },
     offence: {
-      types: (offence.offenceTypes?.length ? offence.offenceTypes : offence.offenceOccurenceDetails?.offenceTypes) || (val(offence.currentOffenceType) ? [val(offence.currentOffenceType)] : []),
-      refs: (offence.offenceTypeReference?.length ? offence.offenceTypeReference : offence.offenceOccurenceDetails?.offenceTypeReference) || [],
+      types:
+        (offence.offenceTypes?.length
+          ? offence.offenceTypes
+          : offence.offenceOccurenceDetails?.offenceTypes) ||
+        (val(offence.currentOffenceType)
+          ? [val(offence.currentOffenceType)]
+          : []),
+      refs:
+        (offence.offenceTypeReference?.length
+          ? offence.offenceTypeReference
+          : offence.offenceOccurenceDetails?.offenceTypeReference) || [],
       description: val(offence.offenceOccurenceDetails?.description),
     },
     witnessSig: {
-      armyNo: val(selectedWitness?.armyNumber || witness1.armyNumber || witness1.ArmyNo),
+      armyNo: val(
+        selectedWitness?.armyNumber || witness1.armyNumber || witness1.ArmyNo
+      ),
       rank: val(selectedWitness?.rank || witness1.rank),
       name: val(selectedWitness?.nameReportingMP || witness1.name),
       unit: val(selectedWitness?.unit || witness1.unit),

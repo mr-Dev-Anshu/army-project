@@ -55,10 +55,16 @@ export class GeneralTrafficOffenceRepository {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
           offenceTypeReference: {
-            $map: {
-              input: "$resolvedRefs",
-              as: "r",
-              in: "$$r.reference"
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference"
+                }
+              },
+              else: "$offenceTypeReference"
             }
           }
         }
@@ -124,10 +130,16 @@ export class GeneralTrafficOffenceRepository {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
           offenceTypeReference: {
-            $map: {
-              input: "$resolvedRefs",
-              as: "r",
-              in: "$$r.reference"
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference"
+                }
+              },
+              else: "$offenceTypeReference"
             }
           }
         }
@@ -278,10 +290,16 @@ export class GeneralTrafficOffenceRepository {
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
           originalOffenceTypes: "$offenceTypes",
           offenceTypeReference: {
-            $map: {
-              input: "$resolvedRefs",
-              as: "r",
-              in: "$$r.reference"
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference"
+                }
+              },
+              else: "$offenceTypeReference"
             }
           }
         },
@@ -325,6 +343,7 @@ export class GeneralTrafficOffenceRepository {
               vehicleName: "$vehicleName",
               reportId: "$reportId",
               offenceTypeReference: "$offenceTypeReference",
+              resolvedRefs: "$resolvedRefs",
             },
           },
         },

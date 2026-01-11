@@ -27,8 +27,49 @@ export class StaticSpeedCheckRecordRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       { $sort: { createdAt: -1 } },
@@ -58,8 +99,49 @@ export class StaticSpeedCheckRecordRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       { $limit: 1 },
@@ -146,8 +228,49 @@ export class StaticSpeedCheckRecordRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       { $sort: { createdAt: -1 } },
@@ -229,9 +352,50 @@ export class StaticSpeedCheckRecordRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
           originalOffenceTypes: "$offenceOccurenceDetails.offenceTypes",
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       {
