@@ -166,9 +166,59 @@ export default function ReportsPage({
 
   /* ================= REPORT HELPERS ================= */
 
-  const handleDownloadReport = (offence: any) => {
-    const props = mapToReportProps(offence);
-    generateWordReport(props);
+  /* ================= DOWNLOAD STATE ================= */
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+
+  /* ================= REPORT HELPERS ================= */
+
+  const handleDownloadReport = async (offence: any) => {
+    setIsDownloading(true);
+    setDownloadType("Word");
+    try {
+      const props = mapToReportProps(offence);
+      await generateWordReport(props);
+    } catch (error) {
+      console.error("Word Download Error", error);
+      alert("Failed to download Word report");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
+  };
+
+  const handleDownloadPdf = async (offence: any) => {
+    const id = offence._id || offence.reportId;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+
+    setIsDownloading(true);
+    setDownloadType("PDF");
+
+    try {
+      const response = await fetch(`/api/military-police-report/pdf/${id}`);
+      if (!response.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Report-${offence.reportNo || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF Download Error", error);
+      alert("Failed to download PDF report");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
   };
 
   const handlePrintReport = (offence: any) => {
@@ -191,7 +241,20 @@ export default function ReportsPage({
 
   if (viewingReport) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gray-100 flex flex-col relative">
+        {/* DOWNLOAD LOADER MODAL */}
+        {isDownloading && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4 min-w-[300px] animate-in zoom-in-95 duration-200">
+              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+              <div className="text-center">
+                <h3 className="font-semibold text-lg">Generating {downloadType} Report</h3>
+                <p className="text-gray-500 text-sm">Please wait while we prepare your download...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
           <Button
             variant="ghost"
@@ -207,30 +270,25 @@ export default function ReportsPage({
           <h1 className="text-lg font-semibold text-gray-800">
             General & Traffic Offence Report
           </h1>
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
             <Button
               onClick={() => handleDownloadReport(viewingReport)}
               variant="outline"
               size="sm"
               className="gap-2"
+              disabled={isDownloading}
             >
-              <Download className="w-4 h-4" />
+              {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
               Download Word Report
             </Button>
             <Button
-              onClick={() => {
-                const id = viewingReport._id || viewingReport.reportId;
-                if (id) {
-                  window.open(`/api/military-police-report/pdf/${id}`, '_blank');
-                } else {
-                  alert("Report ID not found");
-                }
-              }}
+              onClick={() => handleDownloadPdf(viewingReport)}
               variant="outline"
               size="sm"
-              className="gap-2 ml-2"
+              className="gap-2"
+              disabled={isDownloading}
             >
-              <Download className="w-4 h-4" />
+              {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
               Download PDF Report
             </Button>
           </div>
