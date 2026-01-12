@@ -17,14 +17,24 @@ import { Button } from "@/components/ui/button";
 import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
 
 export default function StaticSpeedCheckReportsPage() {
-  const { data, isLoading, isError } = useGetStaticSpeedRecords();
+  /* ================= FILTER STATE ================= */
+  const [filters, setFilters] = useState({
+    search: "",
+    date: "",
+    fromDate: "",
+    toDate: "",
+    unit: "",
+    fmn: "",
+    placeOfOffence: "",
+    actionStatus: "All",
+    sortOrder: "desc" as "asc" | "desc",
+  });
 
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
   /* ================= AUTO PRINT ================= */
-
   useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
       const t = setTimeout(() => {
@@ -35,18 +45,20 @@ export default function StaticSpeedCheckReportsPage() {
     }
   }, [viewingReport, shouldAutoPrint]);
 
-  /* ================= FILTER STATE ================= */
+  /* ================= API PARAMS ================= */
+  const apiParams = useMemo(() => {
+    const params: any = {};
+    if (filters.unit) params.unit = filters.unit;
+    if (filters.fmn) params.fmn = filters.fmn;
+    if (filters.fromDate) params.fromDate = filters.fromDate;
+    if (filters.toDate) params.toDate = filters.toDate;
+    if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
+    if (filters.date) params.date = filters.date;
+    if (filters.actionStatus && filters.actionStatus !== "All") params.status = filters.actionStatus;
+    return params;
+  }, [filters]);
 
-  const [filters, setFilters] = useState({
-    search: "",
-    date: "",
-    fromDate: "",
-    toDate: "",
-    unit: "",
-    fmn: "",
-    actionStatus: "All",
-    sortOrder: "desc" as "asc" | "desc",
-  });
+  const { data, isLoading, isError } = useGetStaticSpeedRecords(apiParams);
 
   /* ================= FILTER + TRANSFORM DATA ================= */
 
@@ -101,6 +113,20 @@ export default function StaticSpeedCheckReportsPage() {
         const fmn = item.fmn || item.offenders?.[0]?.offenderDetails?.fmn;
 
         if (!fmn || fmn !== filters.fmn) return false;
+      }
+
+      /* ---------- PLACE OF OFFENCE ---------- */
+      if (filters.placeOfOffence) {
+        const place =
+          item.placeOfOffence ||
+          item.offenceOccurenceDetails?.incidentLocation ||
+          item.incidentLocation;
+
+        if (
+          !place ||
+          place.toLowerCase() !== filters.placeOfOffence.toLowerCase()
+        )
+          return false;
       }
 
       /* ---------- SEARCH ---------- */
@@ -411,6 +437,7 @@ export default function StaticSpeedCheckReportsPage() {
         showOffenceType={false}
         placeholder="Search by report no or vehicle..."
         onAddNew={() => setIsCreating(true)}
+        showFilter
         onReset={() =>
           setFilters({
             search: "",
@@ -419,6 +446,7 @@ export default function StaticSpeedCheckReportsPage() {
             toDate: "",
             unit: "",
             fmn: "",
+            placeOfOffence: "",
             actionStatus: "All",
             sortOrder: "desc",
           })

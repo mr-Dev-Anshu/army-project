@@ -170,15 +170,10 @@ export class GeneralTrafficOffenceRepository {
       }
     }
 
-    //  unit and fmn
-
-    if (filters.unit) {
-      matchStage["customFields.unit"] = filters.unit;
-    }
-
-    if (filters.fmn) {
-      matchStage["customFields.fmn"] = filters.fmn;
-    }
+    /* 
+       NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
+       because they might depend on looked-up fields (e.g., offenders).
+    */
 
     if (filters.vehicleType) {
       matchStage.vehicleType = filters.vehicleType;
@@ -257,6 +252,46 @@ export class GeneralTrafficOffenceRepository {
           as: "onDutyWitnessingMps",
         },
       },
+
+      /* ================= POST LOOKUP FILTERS ================= */
+      (() => {
+        const rules = [];
+
+        if (filters.unit) {
+          const regex = new RegExp(filters.unit, "i");
+          rules.push({
+            $or: [
+              { "customFields.unit": { $regex: regex } },
+              { "onDutyDetailsMPReporting.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unitName": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.fmn) {
+          const regex = new RegExp(filters.fmn, "i");
+          rules.push({
+            $or: [
+              { "customFields.fmn": { $regex: regex } },
+              { "offenders.offenderDetails.fmn": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.placeOfOffence) {
+          const regex = new RegExp(filters.placeOfOffence, "i");
+          rules.push({
+            $or: [
+              { "customFields.placeOfOffence": { $regex: regex } },
+              { "onDutyDetails.dutyLocation": { $regex: regex } },
+              { "offenceOccurenceDetails.incidentLocation": { $regex: regex } }
+            ]
+          });
+        }
+
+        return rules.length > 0 ? { $match: { $and: rules } } : null;
+      })(),
 
       {
         $addFields: {

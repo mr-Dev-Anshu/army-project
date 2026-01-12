@@ -21,10 +21,13 @@ export async function GET(request) {
         isVehicleInvolved: searchParams.get('isVehicleInvolved'),
 
 
-          fromDate: searchParams.get("fromDate"),
+        fromDate: searchParams.get("fromDate"),
         toDate: searchParams.get("toDate"),
 
         date: searchParams.get('date'),
+        unit: searchParams.get('unit'),
+        fmn: searchParams.get('fmn'),
+        placeOfOffence: searchParams.get('placeOfOffence'),
       };
 
       // Remove null/undefined values

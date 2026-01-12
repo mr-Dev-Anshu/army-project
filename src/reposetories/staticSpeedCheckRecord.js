@@ -191,21 +191,8 @@ export class StaticSpeedCheckRecordRepository {
       ];
     }
 
-    /* ---------- UNIT FILTER ---------- */
-    if (filters.unit) {
-      matchStage.$or = [
-        { "onDutyDetailsMPReporting.unit": filters.unit },
-        { "offenders.offenderDetails.unit": filters.unit },
-      ];
-    }
-
-    /* ---------- FMN FILTER ---------- */
-    if (filters.fmn) {
-      matchStage.$or = [
-        { fmn: filters.fmn },
-        { "offenders.offenderDetails.fmn": filters.fmn },
-      ];
-    }
+    /* ---------- UNIT & FMN FILTER (Moved to Post-Lookup) ---------- */
+    // Logic moved to pipeline for regex support and lookup access
 
     // Support existing logic
     const pipeline = [
@@ -226,6 +213,43 @@ export class StaticSpeedCheckRecordRepository {
           as: "onDutyWitnessingMps",
         },
       },
+
+      /* ================= DYNAMIC REGEX FILTER (UNIT/FMN) ================= */
+      (() => {
+        const rules = [];
+
+        if (filters.unit) {
+          const regex = new RegExp(filters.unit, "i");
+          rules.push({
+            $or: [
+              { "onDutyDetailsMPReporting.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unit": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.fmn) {
+          const regex = new RegExp(filters.fmn, "i");
+          rules.push({
+            $or: [
+              { "fmn": { $regex: regex } }, // Assuming fmn might be at root or customFields
+              { "offenders.offenderDetails.fmn": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.placeOfOffence) {
+          const regex = new RegExp(filters.placeOfOffence, "i");
+          rules.push({
+            $or: [
+              { "offenceOccurenceDetails.incidentLocation": { $regex: regex } },
+              { "onDutyDetails.dutyLocation": { $regex: regex } }
+            ]
+          });
+        }
+
+        return rules.length > 0 ? { $match: { $and: rules } } : null;
+      })(),
       {
         $addFields: {
           refIds: {
@@ -292,10 +316,10 @@ export class StaticSpeedCheckRecordRepository {
       }
     }
 
-    //  unit and fmn
-    if (filters.unit) {
-      matchStage["onDutyDetailsMPReporting.unit"] = filters.unit;
-    }
+    //  unit and fmn (MOVED TO POST-LOOKUP)
+    // if (filters.unit) {
+    //   matchStage["onDutyDetailsMPReporting.unit"] = filters.unit;
+    // }
 
     // FMN isn't directly on static speed, usually inside offender or mapped manually
     // but assuming structure similar to traffic:
@@ -350,6 +374,43 @@ export class StaticSpeedCheckRecordRepository {
           as: "onDutyWitnessingMps",
         },
       },
+
+      /* ================= DYNAMIC REGEX FILTER (UNIT/FMN) ================= */
+      (() => {
+        const rules = [];
+
+        if (filters.unit) {
+          const regex = new RegExp(filters.unit, "i");
+          rules.push({
+            $or: [
+              { "onDutyDetailsMPReporting.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unit": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.fmn) {
+          const regex = new RegExp(filters.fmn, "i");
+          rules.push({
+            $or: [
+              { "fmn": { $regex: regex } },
+              { "offenders.offenderDetails.fmn": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.placeOfOffence) {
+          const regex = new RegExp(filters.placeOfOffence, "i");
+          rules.push({
+            $or: [
+              { "offenceOccurenceDetails.incidentLocation": { $regex: regex } },
+              { "onDutyDetails.dutyLocation": { $regex: regex } }
+            ]
+          });
+        }
+
+        return rules.length > 0 ? { $match: { $and: rules } } : null;
+      })(),
       {
         $addFields: {
           refIds: {

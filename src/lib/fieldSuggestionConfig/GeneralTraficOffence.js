@@ -7,13 +7,13 @@ export const GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG = {
   ],
 
   nestedFields: {
-    'onDutyDetails.dutyLocation': 'dutyLocation',
+    'onDutyDetails.dutyLocation': 'placeOfOffence',
     'onDutyDetails.dutyType': 'dutyType',
     'onDutyDetailsMPReporting.nameReportingMP': 'reportingMPName',
     'onDutyDetailsMPReporting.rank': 'rank',
     'onDutyDetailsMPReporting.unit': 'unit',
     'onDutyDetailsMPReporting.armyNumber': 'reportingMPArmyNo',
-    'offenceOccurenceDetails.incidentLocation': 'incidentLocation',
+    'offenceOccurenceDetails.incidentLocation': 'placeOfOffence',
     'offenceOccurenceDetails.description': 'description',
   },
 

@@ -64,10 +64,12 @@ export default function ReportsPage({
   const [filters, setFilters] = useState({
     search: "",
     offenceType: "All",
+    date: "",
     fromDate: "",
     toDate: "",
     unit: "",
     fmn: "",
+    placeOfOffence: "",
     actionStatus: "All",
     sortOrder: "desc" as "asc" | "desc",
   });
@@ -98,11 +100,28 @@ export default function ReportsPage({
     if (filters.toDate) params.toDate = filters.toDate;
     if (filters.unit) params.unit = filters.unit;
     if (filters.fmn) params.fmn = filters.fmn;
+    if (filters.fmn) params.fmn = filters.fmn;
+    if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
+    if (filters.date) params.date = filters.date;
 
     return params;
   }, [filters, viewType]);
 
   const { data, isLoading, isError } = useGetAllTrafficOffences(apiParams);
+
+  /* ================= OFFENCE TYPE OPTIONS ================= */
+  const offenceTypeOptions = useMemo(() => {
+    if (!data) return [];
+    // Extract unique offence types from the groups
+    // When grouped, the group key (offenceType) is usually the _id or fetched separately.
+    // Based on repo, _id is the offenceType string
+    const types = new Set<string>();
+    data.forEach((group: any) => {
+      if (group.offenceType) types.add(group.offenceType);
+      else if (typeof group._id === 'string') types.add(group._id);
+    });
+    return Array.from(types).sort();
+  }, [data]);
 
   /* ================= CLIENT SIDE FILTERING ================= */
 
@@ -138,6 +157,20 @@ export default function ReportsPage({
           o.customFields?.fmn || o.offenders?.[0]?.offenderDetails?.fmn;
 
         if (!fmn || fmn !== filters.fmn) return false;
+      }
+
+      // Place of Offence
+      if (filters.placeOfOffence) {
+        const place =
+          o.customFields?.placeOfOffence ||
+          o.onDutyDetails?.dutyLocation ||
+          o.offenceOccurenceDetails?.incidentLocation;
+
+        if (
+          !place ||
+          place.toLowerCase() !== filters.placeOfOffence.toLowerCase()
+        )
+          return false;
       }
 
       return true;
@@ -317,17 +350,21 @@ export default function ReportsPage({
         filters={filters}
         onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
         showOffenceType
+        offenceTypeOptions={offenceTypeOptions}
         showDateRange
         showActionStatus
+        showFilter
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({
             search: "",
             offenceType: "All",
+            date: "",
             fromDate: "",
             toDate: "",
             unit: "",
             fmn: "",
+            placeOfOffence: "",
             actionStatus: "All",
             sortOrder: "desc",
           })

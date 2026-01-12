@@ -13,7 +13,6 @@ import { ArrowLeft, Download } from "lucide-react";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 
 export default function MpOccurrenceReportsPage() {
-  const { data, isLoading, isError } = useGetAllMPReports();
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
@@ -35,9 +34,29 @@ export default function MpOccurrenceReportsPage() {
     search: "",
     offenceType: "All",
     date: "",
+    fromDate: "",
+    toDate: "",
+    unit: "",
+    fmn: "",
+    placeOfOffence: "",
     actionStatus: "All",
     sortOrder: "desc" as "asc" | "desc",
   });
+
+  /* ================= API FILTERS ================= */
+  const apiParams = useMemo(() => {
+    const params: any = {};
+    if (filters.unit) params.unit = filters.unit;
+    if (filters.fmn) params.fmn = filters.fmn;
+    if (filters.fromDate) params.fromDate = filters.fromDate;
+    if (filters.toDate) params.toDate = filters.toDate;
+    if (filters.toDate) params.toDate = filters.toDate;
+    if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
+    if (filters.date) params.date = filters.date;
+    return params;
+  }, [filters]);
+
+  const { data, isLoading, isError } = useGetAllMPReports(apiParams);
 
   const processedData = useMemo(() => {
     if (!data) return [];
@@ -45,10 +64,21 @@ export default function MpOccurrenceReportsPage() {
     // Filter raw data
     const filteredData = data.filter((item: any) => {
       const occurrence = item.occurrenceDetails || {};
+      const invHead = item.investigationHead || {};
+      const primaryIndividual = item.individuals?.[0] || item.individual?.[0] || {};
 
       // Date Check
+      const rawDate = occurrence.dateOfOccurrence || item.createdAt;
+
+      /* ---------- DATE RANGE ---------- */
+      if (filters.fromDate || filters.toDate) {
+        const d = new Date(rawDate).getTime();
+        if (filters.fromDate && d < new Date(filters.fromDate).getTime()) return false;
+        if (filters.toDate && d > new Date(filters.toDate + "T23:59:59.999").getTime()) return false;
+      }
+
+      /* ---------- SINGLE DATE ---------- */
       if (filters.date) {
-        const rawDate = occurrence.dateOfOccurrence || item.createdAt;
         if (rawDate) {
           const recordDate = new Date(rawDate).toISOString().split('T')[0];
           if (recordDate !== filters.date) return false;
@@ -60,6 +90,30 @@ export default function MpOccurrenceReportsPage() {
         const isTaken = item.actionStatus === true;
         const filterTaken = filters.actionStatus === "Taken";
         if (isTaken !== filterTaken) return false;
+      }
+
+      /* ---------- UNIT ---------- */
+      if (filters.unit) {
+        const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
+        if (!unit || unit !== filters.unit) return false;
+      }
+
+      /* ---------- FMN ---------- */
+      if (filters.fmn) {
+        const fmn = invHead.fmn || primaryIndividual.fmn || item.customFields?.fmn;
+        if (!fmn || fmn !== filters.fmn) return false;
+      }
+
+      /* ---------- PLACE OF OFFENCE ---------- */
+      if (filters.placeOfOffence) {
+        const place =
+          item.occurrenceDetails?.placeOfOccurrence ||
+          item.placeOfOccurrence;
+        if (
+          !place ||
+          place.toLowerCase() !== filters.placeOfOffence.toLowerCase()
+        )
+          return false;
       }
 
       // Search
@@ -261,7 +315,7 @@ export default function MpOccurrenceReportsPage() {
       command: reportDetails.command || invHead.command || "",
       firNo: reportDetails.firNumber || "",
       mpDetails: {
-        armyNo: invHead.armyNumber || invHead.armyNo || "",
+        armyNumber: invHead.armyNumber || invHead.armyNo || "",
         rank: invHead.rank || "",
         name: invHead.name || "",
         unit: invHead.unit || "",
@@ -380,6 +434,8 @@ export default function MpOccurrenceReportsPage() {
           setFilters((prev) => ({ ...prev, [key]: value }))
         }
         showOffenceType={false}
+        showDateRange
+        showFilter
         // showSort={true}
 
         onAddNew={() => setIsCreating(true)}
@@ -388,6 +444,11 @@ export default function MpOccurrenceReportsPage() {
             search: "",
             offenceType: "All",
             date: "",
+            fromDate: "",
+            toDate: "",
+            unit: "",
+            fmn: "",
+            placeOfOffence: "",
             actionStatus: "All",
             sortOrder: "desc",
           })

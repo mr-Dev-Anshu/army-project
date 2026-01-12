@@ -101,22 +101,24 @@ export class MPReportRepository {
 
     const postLookupMatch = {};
 
-    /* ---------- UNIT & FMN FILTER ---------- */
-    if (filters.unit || filters.fmn) {
-      postLookupMatch.$or = [];
+    /* ---------- UNIT & FMN & PLACE FILTER ---------- */
+    // Note: We move these to post-lookup matching in the pipeline, but we define the logic here.
+    // However, the `postLookupMatch` object is currently being assigned exact values.
+    // Instead of building `postLookupMatch` object here, we will build a dynamic match stage inside the pipeline construction 
+    // to handle regexes cleanly.
 
-      if (filters.unit) {
-        postLookupMatch.$or.push(
-          { "reportDetails.unit": filters.unit },
-          { "onDutyDetailsMPReporting.unit": filters.unit },
-          { "offenders.offenderDetails.unit": filters.unit }
-        );
+    /* ---------- DATE RANGE FILTER ---------- */
+    // Date ranges should be kept in postLookupMatch for now, or moved too.
+    if (filters.fromDate || filters.toDate) {
+      postLookupMatch.createdAt = {};
+
+      if (filters.fromDate) {
+        postLookupMatch.createdAt.$gte = new Date(filters.fromDate);
       }
 
-      if (filters.fmn) {
-        postLookupMatch.$or.push(
-          { "reportDetails.fmn": filters.fmn },
-          { "offenders.offenderDetails.fmn": filters.fmn }
+      if (filters.toDate) {
+        postLookupMatch.createdAt.$lte = new Date(
+          filters.toDate + "T23:59:59.999Z"
         );
       }
     }
@@ -154,6 +156,46 @@ export class MPReportRepository {
           as: "onDutyWitnessingMps",
         },
       },
+
+      /* ================= DYNAMIC REGEX FILTER (UNIT/FMN/PLACE) ================= */
+      (() => {
+        const rules = [];
+
+        if (filters.unit) {
+          const regex = new RegExp(filters.unit, "i");
+          rules.push({
+            $or: [
+              { "reportDetails.unit": { $regex: regex } },
+              { "onDutyDetailsMPReporting.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unit": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.fmn) {
+          const regex = new RegExp(filters.fmn, "i");
+          rules.push({
+            $or: [
+              { "reportDetails.fmn": { $regex: regex } },
+              { "offenders.offenderDetails.fmn": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.placeOfOffence) {
+          const regex = new RegExp(filters.placeOfOffence, "i");
+          rules.push({
+            $or: [
+              { "occurrenceDetails.placeOfOccurrence": { $regex: regex } },
+              { "placeOfOccurrence": { $regex: regex } }, // legacy support
+              { "onDutyDetailsMPReporting.place": { $regex: regex } },
+              { "customFields.placeOfOffence": { $regex: regex } }
+            ]
+          });
+        }
+
+        return rules.length > 0 ? { $match: { $and: rules } } : null;
+      })(),
 
       /* ---------- APPLY FILTERS AFTER LOOKUP ---------- */
       Object.keys(postLookupMatch).length

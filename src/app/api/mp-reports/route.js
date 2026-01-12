@@ -23,11 +23,13 @@ export async function GET(request) {
     const fmn = searchParams.get("fmn");
     const fromDate = searchParams.get("fromDate");
     const toDate = searchParams.get("toDate");
+    const placeOfOffence = searchParams.get("placeOfOffence");
 
     if (unit) filters.unit = unit;
     if (fmn) filters.fmn = fmn;
     if (fromDate) filters.fromDate = fromDate;
     if (toDate) filters.toDate = toDate;
+    if (placeOfOffence) filters.placeOfOffence = placeOfOffence;
 
     const reports = await service.getAllReports(filters);
 
