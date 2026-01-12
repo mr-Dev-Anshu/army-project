@@ -10,16 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Search, Calendar, Plus, ArrowUpDown, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SearchableSelect } from "./SearchableSelect";
@@ -45,6 +44,9 @@ interface ReportFilterBarProps {
   filters: FilterState;
   onFilterChange: (key: keyof FilterState, value: any) => void;
   offenceTypeOptions?: string[];
+  unitOptions?: string[];
+  fmnOptions?: string[];
+  placeOptions?: string[];
   placeholder?: string;
   showDate?: boolean;
   showDateRange?: boolean;
@@ -64,6 +66,9 @@ export default function ReportFilterBar({
   filters,
   onFilterChange,
   offenceTypeOptions = [],
+  unitOptions,
+  fmnOptions,
+  placeOptions,
   placeholder = "Search by report number or offence...",
   showDate = true,
   showDateRange = true,
@@ -168,10 +173,10 @@ export default function ReportFilterBar({
           </div>
         )}
 
-        {/* Filter Button */}
+        {/* Filter Button (Sheet) */}
         {showFilter && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Sheet>
+            <SheetTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
@@ -182,114 +187,135 @@ export default function ReportFilterBar({
                     : "bg-white border-gray-300 hover:bg-gray-50 text-[#0A0A0A]"
                 )}
               >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 11.125C9.41421 11.125 9.75 11.4608 9.75 11.875C9.75 12.2892 9.41421 12.625 9 12.625H6C5.58579 12.625 5.25 12.2892 5.25 11.875C5.25 11.4608 5.58579 11.125 6 11.125H9ZM11.25 6.625C11.6642 6.625 12 6.96079 12 7.375C12 7.78921 11.6642 8.125 11.25 8.125H3.75C3.33579 8.125 3 7.78921 3 7.375C3 6.96079 3.33579 6.625 3.75 6.625H11.25ZM14.25 2.125C14.6642 2.125 15 2.46079 15 2.875C15 3.28921 14.6642 3.625 14.25 3.625H0.75C0.335786 3.625 0 3.28921 0 2.875C0 2.46079 0.335786 2.125 0.75 2.125H14.25Z" fill="currentColor" />
-                </svg>
-
+                <Filter className="w-4 h-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[340px] p-4 bg-white max-h-[500px] overflow-y-auto">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between border-b pb-2 mb-2">
-                  <h4 className="font-semibold text-sm text-gray-900">Filters</h4>
-                </div>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="w-[400px] sm:w-[450px] overflow-y-auto"
+            >
+              <SheetHeader className="mb-6 flex flex-col gap-1 border-b pb-4">
+                <SheetTitle>Filters</SheetTitle>
+                <SheetDescription>
+                  Apply filters to refine the report list.
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="flex flex-col gap-6">
+
+                {/* Offence Type (Inside Sheet if screen small or preference) */}
+                {/* Note: The user kept simple filters outside, but let's keep advanced ones inside */}
+
+                {/* Action Status Checkbox Group (Example from design image usually has checkboxes, but we'll stick to select/dropdown for now or adapt if requested. Design shows "Select Status" with checkboxes. Sticking to Select for now as per code, can upgrade later if exact match needed) */}
+                {/* Actually design shows:
+                    Offence Type (Dropdown)
+                    Action Status (Dropdown/Checkboxes)
+                    Unit (List with checkboxes)
+                    FMN
+                    Place of Offence
+                    Date range
+                */}
 
                 {/* Date Range */}
                 {showDateRange && (
-                  <div className="flex gap-2">
-                    <div className="flex flex-col flex-1">
-                      <label className="text-xs text-gray-500 mb-1">From Date</label>
-                      <Input
-                        type="date"
-                        className="w-full h-8 text-xs"
-                        value={filters.fromDate || ""}
-                        onChange={(e) => onFilterChange("fromDate", e.target.value)}
-                      />
-                    </div>
-
-                    <div className="flex flex-col flex-1">
-                      <label className="text-xs text-gray-500 mb-1">To Date</label>
-                      <Input
-                        type="date"
-                        className="w-full h-8 text-xs"
-                        value={filters.toDate || ""}
-                        onChange={(e) => onFilterChange("toDate", e.target.value)}
-                      />
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">Offence Date</label>
+                    <div className="flex gap-4">
+                      <div className="flex flex-col flex-1">
+                        <label className="text-xs text-gray-500 mb-1">Start Date</label>
+                        <Input
+                          type="date"
+                          className="w-full text-sm"
+                          value={filters.fromDate || ""}
+                          onChange={(e) => onFilterChange("fromDate", e.target.value)}
+                        />
+                      </div>
+                      <div className="flex flex-col flex-1">
+                        <label className="text-xs text-gray-500 mb-1">End Date</label>
+                        <Input
+                          type="date"
+                          className="w-full text-sm"
+                          value={filters.toDate || ""}
+                          onChange={(e) => onFilterChange("toDate", e.target.value)}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {/* Unit */}
-                <div className="flex flex-col">
-                  <label className="text-xs text-gray-500 mb-1">Unit</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700">Unit</label>
+                  <label className="text-xs text-gray-500">Select Unit</label>
                   <AsyncSearchableSelect
                     fieldType="unit"
                     value={filters.unit || ""}
                     onValueChange={(v) => onFilterChange("unit", v)}
                     placeholder="Search Unit..."
                     className="w-full"
+                    defaultOptions={unitOptions}
                   />
                 </div>
 
                 {/* FMN */}
-                <div className="flex flex-col">
-                  <label className="text-xs text-gray-500 mb-1">FMN</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700">FMN</label>
+                  <label className="text-xs text-gray-500">Select Formation</label>
                   <AsyncSearchableSelect
                     fieldType="fmn"
                     value={filters.fmn || ""}
                     onValueChange={(v) => onFilterChange("fmn", v)}
                     placeholder="Search FMN..."
                     className="w-full"
+                    defaultOptions={fmnOptions}
                   />
                 </div>
 
                 {/* Place of Offence */}
-                <div className="flex flex-col">
-                  <label className="text-xs text-gray-500 mb-1">Place of Offence</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700">Place of Offence</label>
+                  <label className="text-xs text-gray-500">Select Location</label>
                   <AsyncSearchableSelect
                     fieldType="placeOfOffence"
                     value={filters.placeOfOffence || ""}
                     onValueChange={(v) => onFilterChange("placeOfOffence", v)}
                     placeholder="Search Location..."
                     className="w-full"
+                    defaultOptions={placeOptions}
                   />
                 </div>
 
                 {showPriceListFilter && (
-                  <>
-                    <DropdownMenuLabel className={cn(filters.priceListStatus !== "All" && "text-blue-600", "px-0 pb-1")}>Price List Status</DropdownMenuLabel>
-                    <DropdownMenuRadioGroup
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">Price List Status</label>
+                    <Select
                       value={filters.priceListStatus || "All"}
                       onValueChange={(value) => onFilterChange("priceListStatus", value)}
                     >
-                      <div className="flex gap-2 flex-wrap">
-                        {["All", "Approved", "Not Approved"].map((opt) => (
-                          <DropdownMenuRadioItem
-                            key={opt}
-                            value={opt}
-                            className="cursor-pointer border border-gray-200 rounded-md px-3 py-1 data-[state=checked]:bg-blue-50 data-[state=checked]:border-blue-200 data-[state=checked]:text-blue-700"
-                          >
-                            {opt}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </div>
-                    </DropdownMenuRadioGroup>
-                    <div className="h-px bg-gray-100 my-2" />
-                  </>
+                      <SelectTrigger className="w-full bg-white border-gray-300">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="All">All</SelectItem>
+                        <SelectItem value="Approved">Approved</SelectItem>
+                        <SelectItem value="Not Approved">Not Approved</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 )}
 
                 {onReset && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     onClick={onReset}
-                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 h-8 text-sm mt-2"
+                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 mt-4"
                   >
                     Reset All Filters
                   </Button>
                 )}
               </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SheetContent>
+          </Sheet>
         )}
       </div>
 

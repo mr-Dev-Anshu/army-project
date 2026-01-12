@@ -109,18 +109,44 @@ export default function ReportsPage({
 
   const { data, isLoading, isError } = useGetAllTrafficOffences(apiParams);
 
-  /* ================= OFFENCE TYPE OPTIONS ================= */
-  const offenceTypeOptions = useMemo(() => {
-    if (!data) return [];
-    // Extract unique offence types from the groups
-    // When grouped, the group key (offenceType) is usually the _id or fetched separately.
-    // Based on repo, _id is the offenceType string
+  /* ================= DYNAMIC OPTIONS FROM DATA ================= */
+  const { offenceTypeOptions, unitOptions, fmnOptions, placeOptions } = useMemo(() => {
+    if (!data) return { offenceTypeOptions: [], unitOptions: [], fmnOptions: [], placeOptions: [] };
+
     const types = new Set<string>();
+    const units = new Set<string>();
+    const fmns = new Set<string>();
+    const places = new Set<string>();
+
     data.forEach((group: any) => {
+      // Offence Types
       if (group.offenceType) types.add(group.offenceType);
       else if (typeof group._id === 'string') types.add(group._id);
+
+      // Iterate through nested offences in the group to collect other fields
+      if (Array.isArray(group.offences)) {
+        group.offences.forEach((o: any) => {
+          // Unit
+          const unit = o.customFields?.unit || o.onDutyDetailsMPReporting?.unit || o.offenders?.[0]?.offenderDetails?.unit;
+          if (unit) units.add(unit);
+
+          // FMN
+          const fmn = o.customFields?.fmn || o.offenders?.[0]?.offenderDetails?.fmn;
+          if (fmn) fmns.add(fmn);
+
+          // Place
+          const place = o.customFields?.placeOfOffence || o.onDutyDetails?.dutyLocation || o.offenceOccurenceDetails?.incidentLocation;
+          if (place) places.add(place);
+        });
+      }
     });
-    return Array.from(types).sort();
+
+    return {
+      offenceTypeOptions: Array.from(types).sort(),
+      unitOptions: Array.from(units).sort(),
+      fmnOptions: Array.from(fmns).sort(),
+      placeOptions: Array.from(places).sort(),
+    };
   }, [data]);
 
   /* ================= CLIENT SIDE FILTERING ================= */
@@ -351,6 +377,9 @@ export default function ReportsPage({
         onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
         showOffenceType
         offenceTypeOptions={offenceTypeOptions}
+        unitOptions={unitOptions}
+        fmnOptions={fmnOptions}
+        placeOptions={placeOptions}
         showDateRange
         showActionStatus
         showFilter

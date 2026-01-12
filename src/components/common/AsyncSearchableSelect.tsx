@@ -10,6 +10,7 @@ interface AsyncSearchableSelectProps {
     label?: string;
     placeholder?: string;
     className?: string;
+    defaultOptions?: string[]; // Options to show when search is empty (e.g. from current page)
 }
 
 export function AsyncSearchableSelect({
@@ -19,17 +20,27 @@ export function AsyncSearchableSelect({
     label,
     placeholder = "Select...",
     className,
+    defaultOptions = [],
 }: AsyncSearchableSelectProps) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Use the suggestion hook
-    const { data: responseData, isLoading } = useGetFieldSuggestions(fieldType, search);
+    // Only fetch if we are NOT showing default options (search is non-empty) OR if we have no default options.
+    // Actually, we can just let it fetch (it caches), but we prioritize defaultOptions for display if search is empty.
+    const { data: responseData, isLoading: isApiLoading } = useGetFieldSuggestions(fieldType, search);
 
-    // Extract suggestions from response structure { success: true, data: [...] }
-    // and map objects { value: "...", count: ... } to simple strings
-    const suggestions = (responseData?.data || []).map((item: any) => item.value);
+    // Determine what to show
+    // If user has NOT typed anything and we have defaultOptions, show them.
+    // Otherwise, show API results.
+    const showDefaultOptions = !search && defaultOptions.length > 0;
+
+    const suggestions = showDefaultOptions
+        ? defaultOptions
+        : (responseData?.data || []).map((item: any) => item.value);
+
+    const isLoading = showDefaultOptions ? false : isApiLoading;
 
     const displayText = value || placeholder;
     const isActive = !!value;

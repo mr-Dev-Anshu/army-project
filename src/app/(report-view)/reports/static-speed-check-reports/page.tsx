@@ -60,6 +60,35 @@ export default function StaticSpeedCheckReportsPage() {
 
   const { data, isLoading, isError } = useGetStaticSpeedRecords(apiParams);
 
+  /* ================= DYNAMIC OPTIONS FROM DATA ================= */
+  const { unitOptions, fmnOptions, placeOptions } = useMemo(() => {
+    if (!data) return { unitOptions: [], fmnOptions: [], placeOptions: [] };
+
+    const units = new Set<string>();
+    const fmns = new Set<string>();
+    const places = new Set<string>();
+
+    data.forEach((item: any) => {
+      // Unit
+      const unit = item.onDutyDetailsMPReporting?.unit || item.offenders?.[0]?.offenderDetails?.unit;
+      if (unit) units.add(unit);
+
+      // FMN
+      const fmn = item.fmn || item.offenders?.[0]?.offenderDetails?.fmn;
+      if (fmn) fmns.add(fmn);
+
+      // Place
+      const place = item.placeOfOffence || item.offenceOccurenceDetails?.incidentLocation || item.incidentLocation;
+      if (place) places.add(place);
+    });
+
+    return {
+      unitOptions: Array.from(units).sort(),
+      fmnOptions: Array.from(fmns).sort(),
+      placeOptions: Array.from(places).sort(),
+    };
+  }, [data]);
+
   /* ================= FILTER + TRANSFORM DATA ================= */
 
   const processedData = useMemo(() => {
@@ -434,6 +463,9 @@ export default function StaticSpeedCheckReportsPage() {
       <ReportFilterBar
         filters={filters}
         onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
+        unitOptions={unitOptions}
+        fmnOptions={fmnOptions}
+        placeOptions={placeOptions}
         showOffenceType={false}
         placeholder="Search by report no or vehicle..."
         onAddNew={() => setIsCreating(true)}

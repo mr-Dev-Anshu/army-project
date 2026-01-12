@@ -58,6 +58,47 @@ export default function MpOccurrenceReportsPage() {
 
   const { data, isLoading, isError } = useGetAllMPReports(apiParams);
 
+  /* ================= DYNAMIC OPTIONS FROM DATA ================= */
+  const { offenceTypeOptions, unitOptions, fmnOptions, placeOptions } = useMemo(() => {
+    if (!data) return { offenceTypeOptions: [], unitOptions: [], fmnOptions: [], placeOptions: [] };
+
+    const types = new Set<string>();
+    const units = new Set<string>();
+    const fmns = new Set<string>();
+    const places = new Set<string>();
+
+    data.forEach((item: any) => {
+      // Offence Types
+      const type = item.occurrenceDetails?.offenceType;
+      if (type) types.add(type);
+      const typeList = item.occurrenceDetails?.offenceTypes;
+      if (Array.isArray(typeList)) {
+        typeList.forEach((t: string) => types.add(t));
+      }
+
+      // Unit
+      const invHead = item.investigationHead || {};
+      const primaryIndividual = item.individuals?.[0] || item.individual?.[0] || {};
+      const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
+      if (unit) units.add(unit);
+
+      // FMN
+      const fmn = invHead.fmn || primaryIndividual.fmn || item.customFields?.fmn;
+      if (fmn) fmns.add(fmn);
+
+      // Place
+      const place = item.occurrenceDetails?.placeOfOccurrence || item.placeOfOccurrence;
+      if (place) places.add(place);
+    });
+
+    return {
+      offenceTypeOptions: Array.from(types).sort(),
+      unitOptions: Array.from(units).sort(),
+      fmnOptions: Array.from(fmns).sort(),
+      placeOptions: Array.from(places).sort()
+    };
+  }, [data]);
+
   const processedData = useMemo(() => {
     if (!data) return [];
 
@@ -90,6 +131,17 @@ export default function MpOccurrenceReportsPage() {
         const isTaken = item.actionStatus === true;
         const filterTaken = filters.actionStatus === "Taken";
         if (isTaken !== filterTaken) return false;
+      }
+
+      // Offence Type Check
+      if (filters.offenceType !== "All") {
+        const type = occurrence.offenceType;
+        const typeList = occurrence.offenceTypes || [];
+
+        const matchSingle = type === filters.offenceType;
+        const matchArray = Array.isArray(typeList) && typeList.includes(filters.offenceType);
+
+        if (!matchSingle && !matchArray) return false;
       }
 
       /* ---------- UNIT ---------- */
@@ -433,7 +485,11 @@ export default function MpOccurrenceReportsPage() {
         onFilterChange={(key, value) =>
           setFilters((prev) => ({ ...prev, [key]: value }))
         }
-        showOffenceType={false}
+        showOffenceType={true}
+        offenceTypeOptions={offenceTypeOptions}
+        unitOptions={unitOptions}
+        fmnOptions={fmnOptions}
+        placeOptions={placeOptions}
         showDateRange
         showFilter
         // showSort={true}
