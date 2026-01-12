@@ -11,6 +11,7 @@ interface AsyncSearchableSelectProps {
     placeholder?: string;
     className?: string;
     defaultOptions?: string[]; // Options to show when search is empty (e.g. from current page)
+    mode?: "dropdown" | "list-checkbox"; // New prop to switch between dropdown and inline list with checkboxes
 }
 
 export function AsyncSearchableSelect({
@@ -21,6 +22,7 @@ export function AsyncSearchableSelect({
     placeholder = "Select...",
     className,
     defaultOptions = [],
+    mode = "dropdown"
 }: AsyncSearchableSelectProps) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -42,24 +44,110 @@ export function AsyncSearchableSelect({
 
     const isLoading = showDefaultOptions ? false : isApiLoading;
 
-    const displayText = value || placeholder;
-    const isActive = !!value;
+    // Parse values for multi-select
+    // We assume multiple values are stored as comma-separated string
+    const selectedValues = value ? value.split(",") : [];
 
-    // Auto-focus search input when dropdown opens
-    useEffect(() => {
-        if (open && inputRef.current) {
-            inputRef.current.focus();
+    const handleToggle = (option: string) => {
+        let newValues: string[] = [];
+        if (option === "") {
+            // Selected "All" -> clear filter
+            newValues = [];
+        } else {
+            if (selectedValues.includes(option)) {
+                newValues = selectedValues.filter(v => v !== option);
+            } else {
+                newValues = [...selectedValues, option];
+            }
         }
-    }, [open]);
+        onValueChange(newValues.join(","));
+    };
 
-    // Reset search when closing
+    // Reset search when closing (only for dropdown)
     useEffect(() => {
-        if (!open) {
+        if (!open && mode === "dropdown") {
             setSearch("");
         }
-    }, [open]);
+    }, [open, mode]);
 
-    // Close on outside click is handled by the backdrop div
+
+    /* ================= LIST CHECKBOX MODE (INLINE) ================= */
+    if (mode === "list-checkbox") {
+        return (
+            <div className={cn("border border-gray-200 rounded-md bg-white overflow-hidden", className)}>
+                <div className="p-2 border-b border-gray-100 bg-gray-50/50">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder={placeholder}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-sm focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-100 bg-white"
+                        />
+                        {isLoading && (
+                            <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-blue-600" />
+                        )}
+                    </div>
+                </div>
+
+                <div className="max-h-[220px] overflow-y-auto p-1">
+                    {/* All Option */}
+                    <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer text-sm">
+                        <div className={cn(
+                            "w-4 h-4 rounded border flex items-center justify-center transition-colors",
+                            selectedValues.length === 0 ? "bg-blue-600 border-blue-600" : "border-gray-300 bg-white"
+                        )}>
+                            {selectedValues.length === 0 && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <input
+                            type="checkbox"
+                            className="hidden"
+                            checked={selectedValues.length === 0}
+                            onChange={() => handleToggle("")}
+                        />
+                        <span className={cn(selectedValues.length === 0 ? "text-blue-700 font-medium" : "text-gray-700")}>
+                            All
+                        </span>
+                    </label>
+
+                    {/* Options */}
+                    {suggestions.length === 0 && !isLoading ? (
+                        <div className="px-3 py-2 text-xs text-gray-500 text-center">
+                            No options found
+                        </div>
+                    ) : (
+                        suggestions.map((option: string) => {
+                            const isSelected = selectedValues.includes(option);
+                            return (
+                                <label key={option} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer text-sm">
+                                    <div className={cn(
+                                        "w-4 h-4 rounded border flex items-center justify-center transition-colors",
+                                        isSelected ? "bg-blue-600 border-blue-600" : "border-gray-300 bg-white"
+                                    )}>
+                                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="hidden"
+                                        checked={isSelected}
+                                        onChange={() => handleToggle(option)}
+                                    />
+                                    <span className={cn(isSelected ? "text-blue-700 font-medium" : "text-gray-700")}>
+                                        {option}
+                                    </span>
+                                </label>
+                            )
+                        })
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    /* ================= DROPDOWN MODE (LEGACY) ================= */
+    const displayText = value || placeholder;
+    const isActive = !!value;
 
     return (
         <div className={cn("relative searchable-select", className)}>

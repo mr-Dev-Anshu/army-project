@@ -106,72 +106,7 @@ export default function ReportFilterBar({
           />
         </div>
 
-        {/* Offence Type Select */}
-        {showOffenceType && (
-          <div className="w-[220px] shrink-0">
-            <Select
-              value={filters.offenceType || "All"}
-              onValueChange={(value) => onFilterChange("offenceType", value)}
-            >
-              <SelectTrigger className={cn("bg-white border-gray-300 w-[220px]", filters.offenceType !== "All" && "border-blue-200 bg-blue-50 text-blue-600")}>
-                <div className="flex items-center truncate">
-                  <span className={cn("text-gray-500 mr-1", filters.offenceType !== "All" && "text-blue-600")}>Offence Type:</span>
-                  <SelectValue placeholder="All" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All</SelectItem>
-                {offenceTypeOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
 
-        {/* Date Input */}
-        {showDate && (
-          <div className={cn(
-            "flex items-center h-9 border border-gray-300 rounded-md bg-white px-2 w-auto min-w-[200px] hover:bg-gray-50 transition-colors cursor-pointer group shrink-0",
-            filters.date && "border-blue-200 bg-blue-50"
-          )}>
-            <span className={cn("text-gray-500 mr-2 text-sm text-[16px]", filters.date && "text-blue-600")}>Date:</span>
-            <input
-              type="date"
-              value={filters.date || ""}
-              onChange={(e) => onFilterChange("date", e.target.value)}
-              className={cn("bg-transparent border-none p-0 text-sm text-[16px] text-gray-900 focus:outline-none h-full w-full cursor-pointer font-medium uppercase font-sans placeholder-gray-500", filters.date && "text-blue-600")}
-              style={{ colorScheme: "light" }}
-            />
-          </div>
-        )}
-
-        {/* Action Status Select */}
-        {showActionStatus && (
-          <div className="max-w-[200px] shrink-0">
-            <Select
-              value={filters.actionStatus || "All"}
-              onValueChange={(value) => onFilterChange("actionStatus", value)}
-            >
-              <SelectTrigger className={cn("bg-white border-gray-300", filters.actionStatus !== "All" && "border-blue-200 bg-blue-50 text-blue-600")}>
-                <div className="flex items-center truncate">
-                  <span className={cn("text-gray-500 mr-1", filters.actionStatus !== "All" && "text-blue-600")}>{statusLabel}:</span>
-                  <SelectValue placeholder="All" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All</SelectItem>
-                {actionStatusOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
 
         {/* Filter Button (Sheet) */}
         {showFilter && (
@@ -192,29 +127,75 @@ export default function ReportFilterBar({
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[400px] sm:w-[450px] overflow-y-auto"
+              className="w-[400px] sm:w-[450px] flex flex-col p-0 gap-0"
             >
-              <SheetHeader className="mb-6 flex flex-col gap-1 border-b pb-4">
+              <SheetHeader className="px-4 py-4 border-b flex flex-col gap-1">
                 <SheetTitle>Filters</SheetTitle>
                 <SheetDescription>
                   Apply filters to refine the report list.
                 </SheetDescription>
               </SheetHeader>
 
-              <div className="flex flex-col gap-6">
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
 
-                {/* Offence Type (Inside Sheet if screen small or preference) */}
-                {/* Note: The user kept simple filters outside, but let's keep advanced ones inside */}
+                {/* Offence Type */}
+                {showOffenceType && (
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">Offence Type</label>
+                    <Select
+                      value={filters.offenceType || "All"}
+                      onValueChange={(value) => onFilterChange("offenceType", value)}
+                    >
+                      <SelectTrigger className="w-full bg-white border-gray-300">
+                        <SelectValue placeholder="All" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="All">All</SelectItem>
+                        {offenceTypeOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
-                {/* Action Status Checkbox Group (Example from design image usually has checkboxes, but we'll stick to select/dropdown for now or adapt if requested. Design shows "Select Status" with checkboxes. Sticking to Select for now as per code, can upgrade later if exact match needed) */}
-                {/* Actually design shows:
-                    Offence Type (Dropdown)
-                    Action Status (Dropdown/Checkboxes)
-                    Unit (List with checkboxes)
-                    FMN
-                    Place of Offence
-                    Date range
-                */}
+                {/* Action Status */}
+                {showActionStatus && (
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">{statusLabel}</label>
+                    <Select
+                      value={filters.actionStatus || "All"}
+                      onValueChange={(value) => onFilterChange("actionStatus", value)}
+                    >
+                      <SelectTrigger className="w-full bg-white border-gray-300">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="All">All</SelectItem>
+                        {actionStatusOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Specific Date */}
+                {showDate && (
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">Specific Date</label>
+                    <Input
+                      type="date"
+                      className="w-full text-sm"
+                      value={filters.date || ""}
+                      onChange={(e) => onFilterChange("date", e.target.value)}
+                    />
+                  </div>
+                )}
 
                 {/* Date Range */}
                 {showDateRange && (
@@ -251,9 +232,10 @@ export default function ReportFilterBar({
                     fieldType="unit"
                     value={filters.unit || ""}
                     onValueChange={(v) => onFilterChange("unit", v)}
-                    placeholder="Search Unit..."
+                    placeholder="Search Unit..." // Placeholder for inside input
                     className="w-full"
                     defaultOptions={unitOptions}
+                    mode="list-checkbox"
                   />
                 </div>
 
@@ -268,6 +250,7 @@ export default function ReportFilterBar({
                     placeholder="Search FMN..."
                     className="w-full"
                     defaultOptions={fmnOptions}
+                    mode="list-checkbox"
                   />
                 </div>
 
@@ -282,6 +265,7 @@ export default function ReportFilterBar({
                     placeholder="Search Location..."
                     className="w-full"
                     defaultOptions={placeOptions}
+                    mode="list-checkbox"
                   />
                 </div>
 
@@ -303,17 +287,19 @@ export default function ReportFilterBar({
                     </Select>
                   </div>
                 )}
+              </div>
 
-                {onReset && (
+              {onReset && (
+                <div className="p-4 border-t bg-white mt-auto">
                   <Button
                     variant="outline"
                     onClick={onReset}
-                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 mt-4"
+                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                   >
                     Reset All Filters
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </SheetContent>
           </Sheet>
         )}
