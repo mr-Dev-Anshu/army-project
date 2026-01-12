@@ -180,10 +180,10 @@ export default function StaticSpeedCheckReportsPage() {
         overSpeed: offence.overSpeedCalculated || "-",
         coDriverDetails: coDriver
           ? {
-              name: coDriver.name,
-              armyNumber: coDriver.armyNumber,
-              rank: coDriver.rank,
-            }
+            name: coDriver.name,
+            armyNumber: coDriver.armyNumber,
+            rank: coDriver.rank,
+          }
           : null,
 
         remarks: item.remark || item.remarks || "N/A",
@@ -262,10 +262,66 @@ export default function StaticSpeedCheckReportsPage() {
     };
   };
 
+  /* ================= DOWNLOAD STATE ================= */
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+
   /* ================= ACTIONS ================= */
 
-  const handleDownloadReport = (item: any) => {
-    generateStaticSpeedWordReport(mapToReportProps(item));
+  const handleDownloadReport = async (item: any) => {
+    setIsDownloading(true);
+    setDownloadType("Word");
+    try {
+      generateStaticSpeedWordReport(mapToReportProps(item));
+      // Small delay to allow file saver to trigger, since generateStaticSpeedWordReport might be synchronous or fast.
+      // If generateStaticSpeedWordReport is async, await it. Assuming it is sync based on import name (utils usually are), 
+      // but let's wrap it in a small timeout logic or just set false immediately after.
+      // Better to simulate async if it's sync to show loader briefly.
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to download Word report");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
+  };
+
+  const handleDownloadPdf = async (item: any) => {
+    const id = item._id || item.reportId;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+
+    setIsDownloading(true);
+    setDownloadType("PDF");
+
+    try {
+      const response = await fetch(`/api/static-speed-report/pdf/${id}`);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ error: "Unknown server error" }));
+        throw new Error(errData.error || "Failed to generate PDF");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `StaticSpeedReport-${item.reportNo || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF Download Error", error);
+      alert(`Failed to download PDF report: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
   };
 
   const handlePrintReport = (item: any) => {
@@ -283,7 +339,20 @@ export default function StaticSpeedCheckReportsPage() {
 
   if (viewingReport) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gray-100 flex flex-col relative">
+        {/* DOWNLOAD LOADER MODAL */}
+        {isDownloading && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4 min-w-[300px] animate-in zoom-in-95 duration-200">
+              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+              <div className="text-center">
+                <h3 className="font-semibold text-lg">Generating {downloadType} Report</h3>
+                <p className="text-gray-500 text-sm">Please wait while we prepare your download...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
           <Button
             variant="ghost"
@@ -299,15 +368,26 @@ export default function StaticSpeedCheckReportsPage() {
           <h1 className="text-lg font-semibold text-gray-800">
             Static Speed Check Report
           </h1>
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
             <Button
               onClick={() => handleDownloadReport(viewingReport)}
               variant="outline"
               size="sm"
               className="gap-2"
+              disabled={isDownloading}
             >
-              <Download className="w-4 h-4" />
+              {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
               Download Word Report
+            </Button>
+            <Button
+              onClick={() => handleDownloadPdf(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isDownloading}
+            >
+              {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
+              Download PDF Report
             </Button>
           </div>
         </div>

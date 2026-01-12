@@ -87,15 +87,14 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
 }) => {
   return (
     <div
-      className={`font-[Arial] text-[#0A0A0A]  p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 ${
-        className || ""
-      }`}
+      className={`font-[Arial] text-[#0A0A0A]  p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 ${className || ""
+        }`}
     >
       <style type="text/css" media="print">
         {`
                   @page {
                     size: A4;
-                    margin: 20mm;
+                    margin: 10mm;
                   }
                   body {
                     background-color: white !important;
@@ -103,9 +102,6 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
                   }
                 `}
       </style>
-
-      {/* Print Only: Fixed Global Page Numbering */}
-      <div className="hidden print:block fixed top-0 w-full text-center font-bold text-sm page-number mt-4 z-50"></div>
 
       {/* ==================== PAGE 1 ==================== */}
       <div
@@ -234,48 +230,48 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
             {/* (2.2) Witness 1 */}
             {(occurrence.nameOfWitnessingOfficial1 ||
               occurrence.rankOfWitnessingOfficial1) && (
-              <div className="grid grid-cols-2 border-b border-gray-300">
-                <div className="p-2 pl-4 grid grid-cols-[45px_110px_1fr] items-center">
-                  <span>(2.2)</span>
-                  <span className="font-bold">
-                    Name of MP <br />
-                    Witnessing
-                  </span>
-                  <span>{occurrence.nameOfWitnessingOfficial1}</span>
+                <div className="grid grid-cols-2 border-b border-gray-300">
+                  <div className="p-2 pl-4 grid grid-cols-[45px_110px_1fr] items-center">
+                    <span>(2.2)</span>
+                    <span className="font-bold">
+                      Name of MP <br />
+                      Witnessing
+                    </span>
+                    <span>{occurrence.nameOfWitnessingOfficial1}</span>
+                  </div>
+                  <div className="p-2 pl-4 grid grid-cols-[110px_1fr] items-center">
+                    {occurrence.rankOfWitnessingOfficial1 && (
+                      <>
+                        <span className="font-bold">Rank</span>
+                        <span>{occurrence.rankOfWitnessingOfficial1}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="p-2 pl-4 grid grid-cols-[110px_1fr] items-center">
-                  {occurrence.rankOfWitnessingOfficial1 && (
-                    <>
-                      <span className="font-bold">Rank</span>
-                      <span>{occurrence.rankOfWitnessingOfficial1}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
+              )}
 
             {/* (2.2.1) Witness 2 */}
             {(occurrence.nameOfWitnessingOfficial2 ||
               occurrence.rankOfWitnessingOfficial2) && (
-              <div className="grid grid-cols-2">
-                <div className="p-2 pl-4 grid grid-cols-[45px_110px_1fr] items-center">
-                  <span>(2.2.1)</span>
-                  <span className="font-bold">
-                    Name of MP <br />
-                    Witnessing
-                  </span>
-                  <span>{occurrence.nameOfWitnessingOfficial2}</span>
+                <div className="grid grid-cols-2">
+                  <div className="p-2 pl-4 grid grid-cols-[45px_110px_1fr] items-center">
+                    <span>(2.2.1)</span>
+                    <span className="font-bold">
+                      Name of MP <br />
+                      Witnessing
+                    </span>
+                    <span>{occurrence.nameOfWitnessingOfficial2}</span>
+                  </div>
+                  <div className="p-2 pl-4 grid grid-cols-[110px_1fr] items-center">
+                    {occurrence.rankOfWitnessingOfficial2 && (
+                      <>
+                        <span className="font-bold">Rank</span>
+                        <span>{occurrence.rankOfWitnessingOfficial2}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="p-2 pl-4 grid grid-cols-[110px_1fr] items-center">
-                  {occurrence.rankOfWitnessingOfficial2 && (
-                    <>
-                      <span className="font-bold">Rank</span>
-                      <span>{occurrence.rankOfWitnessingOfficial2}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
+              )}
           </div>
 
           <div className="flex gap-4 mb-4 text-xs">
