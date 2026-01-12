@@ -46,7 +46,7 @@ export function AsyncSearchableSelect({
 
     // Parse values for multi-select
     // We assume multiple values are stored as comma-separated string
-    const selectedValues = value ? value.split(",") : [];
+    const selectedValues = value ? value.split(",").filter(v => v && v !== "All") : [];
 
     const handleToggle = (option: string) => {
         let newValues: string[] = [];

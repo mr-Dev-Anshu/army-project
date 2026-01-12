@@ -227,8 +227,10 @@ export class GeneralTrafficOffenceRepository {
 
     /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
 
+    /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
+
     if (filters.offenceType && filters.offenceType !== "All") {
-      matchStage.offenceTypes = filters.offenceType;
+      matchStage.offenceTypes = { $in: filters.offenceType.split(",") };
     }
 
     /* ================= AGGREGATION PIPELINE ================= */
@@ -258,7 +260,8 @@ export class GeneralTrafficOffenceRepository {
         const rules = [];
 
         if (filters.unit) {
-          const regex = new RegExp(filters.unit, "i");
+          const pattern = filters.unit.split(',').map(s => s.trim()).join('|');
+          const regex = new RegExp(pattern, "i");
           rules.push({
             $or: [
               { "customFields.unit": { $regex: regex } },
@@ -270,7 +273,8 @@ export class GeneralTrafficOffenceRepository {
         }
 
         if (filters.fmn) {
-          const regex = new RegExp(filters.fmn, "i");
+          const pattern = filters.fmn.split(',').map(s => s.trim()).join('|');
+          const regex = new RegExp(pattern, "i");
           rules.push({
             $or: [
               { "customFields.fmn": { $regex: regex } },
@@ -280,7 +284,8 @@ export class GeneralTrafficOffenceRepository {
         }
 
         if (filters.placeOfOffence) {
-          const regex = new RegExp(filters.placeOfOffence, "i");
+          const pattern = filters.placeOfOffence.split(',').map(s => s.trim()).join('|');
+          const regex = new RegExp(pattern, "i");
           rules.push({
             $or: [
               { "customFields.placeOfOffence": { $regex: regex } },
@@ -349,7 +354,7 @@ export class GeneralTrafficOffenceRepository {
 
       // STRICT offenceType filter AFTER unwind
       filters.offenceType && filters.offenceType !== "All"
-        ? { $match: { offenceTypes: filters.offenceType } }
+        ? { $match: { offenceTypes: { $in: filters.offenceType.split(",") } } }
         : null,
 
       {

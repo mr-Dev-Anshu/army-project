@@ -134,12 +134,14 @@ export default function MpOccurrenceReportsPage() {
       }
 
       // Offence Type Check
-      if (filters.offenceType !== "All") {
+      if (filters.offenceType && filters.offenceType !== "All") {
         const type = occurrence.offenceType;
         const typeList = occurrence.offenceTypes || [];
+        const selectedTypes = filters.offenceType.split(",");
 
-        const matchSingle = type === filters.offenceType;
-        const matchArray = Array.isArray(typeList) && typeList.includes(filters.offenceType);
+        // Check if ANY of the selected types match the record's type(s)
+        const matchSingle = selectedTypes.includes(type);
+        const matchArray = Array.isArray(typeList) && typeList.some(t => selectedTypes.includes(t));
 
         if (!matchSingle && !matchArray) return false;
       }
@@ -147,13 +149,15 @@ export default function MpOccurrenceReportsPage() {
       /* ---------- UNIT ---------- */
       if (filters.unit) {
         const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
-        if (!unit || unit !== filters.unit) return false;
+        const selectedUnits = filters.unit.split(",");
+        if (!unit || !selectedUnits.includes(unit)) return false;
       }
 
       /* ---------- FMN ---------- */
       if (filters.fmn) {
         const fmn = invHead.fmn || primaryIndividual.fmn || item.customFields?.fmn;
-        if (!fmn || fmn !== filters.fmn) return false;
+        const selectedFmns = filters.fmn.split(",");
+        if (!fmn || !selectedFmns.includes(fmn)) return false;
       }
 
       /* ---------- PLACE OF OFFENCE ---------- */
@@ -161,9 +165,12 @@ export default function MpOccurrenceReportsPage() {
         const place =
           item.occurrenceDetails?.placeOfOccurrence ||
           item.placeOfOccurrence;
+
+        const selectedPlaces = filters.placeOfOffence.split(",").map(p => p.toLowerCase());
+
         if (
           !place ||
-          place.toLowerCase() !== filters.placeOfOffence.toLowerCase()
+          !selectedPlaces.includes(place.toLowerCase())
         )
           return false;
       }

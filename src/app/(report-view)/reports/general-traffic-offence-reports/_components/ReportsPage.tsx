@@ -174,7 +174,8 @@ export default function ReportsPage({
           o.onDutyDetailsMPReporting?.unit ||
           o.offenders?.[0]?.offenderDetails?.unit;
 
-        if (!unit || unit !== filters.unit) return false;
+        const selectedUnits = filters.unit.split(",");
+        if (!unit || !selectedUnits.includes(unit)) return false;
       }
 
       // FMN
@@ -182,7 +183,8 @@ export default function ReportsPage({
         const fmn =
           o.customFields?.fmn || o.offenders?.[0]?.offenderDetails?.fmn;
 
-        if (!fmn || fmn !== filters.fmn) return false;
+        const selectedFmns = filters.fmn.split(",");
+        if (!fmn || !selectedFmns.includes(fmn)) return false;
       }
 
       // Place of Offence
@@ -192,9 +194,11 @@ export default function ReportsPage({
           o.onDutyDetails?.dutyLocation ||
           o.offenceOccurenceDetails?.incidentLocation;
 
+        const selectedPlaces = filters.placeOfOffence.split(",").map(p => p.toLowerCase());
+
         if (
           !place ||
-          place.toLowerCase() !== filters.placeOfOffence.toLowerCase()
+          !selectedPlaces.includes(place.toLowerCase())
         )
           return false;
       }
@@ -287,6 +291,11 @@ export default function ReportsPage({
 
   /* ================= RENDER STATES ================= */
 
+  const pageTitle =
+    viewType === "vehicle"
+      ? "General & Traffic Offence Reports - Vehicle Involved"
+      : "General & Traffic Offence Reports - No Vehicle Involved";
+
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -327,7 +336,7 @@ export default function ReportsPage({
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
           <h1 className="text-lg font-semibold text-gray-800">
-            General & Traffic Offence Report
+            {pageTitle}
           </h1>
           <div className="ml-auto flex gap-2">
             <Button
@@ -364,7 +373,7 @@ export default function ReportsPage({
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <ReportPageHeader
-        title="General & Traffic Offence Reports"
+        title={pageTitle}
         reportCount={activeGroups.reduce(
           (a: number, g: any) => a + g.offences.length,
           0
