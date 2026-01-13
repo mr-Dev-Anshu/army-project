@@ -1,4 +1,4 @@
-import GeneralDutyDiaryForm from "@/features/RegisterBooks/original-military-police-general-duty-diary/components/form";
+import GeneralDutyDiaryForm from "@/features/RegisterBooks/originalMilitaryPoliceGeneralDutyDiary/components/form";
 import React from "react";
 
 const Page = () => {

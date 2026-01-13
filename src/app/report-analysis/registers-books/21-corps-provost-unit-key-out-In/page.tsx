@@ -1,4 +1,4 @@
-import KeyOutInForm from "@/features/RegisterBooks/21-corps-provost-unit-key-out-In/components/form";
+import KeyOutInForm from "@/features/RegisterBooks/21CorpsProvostUnitKeyOutIn/components/form";
 import React from "react";
 
 const Page = () => {
