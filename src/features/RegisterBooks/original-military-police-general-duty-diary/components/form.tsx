@@ -1,0 +1,250 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+    Calendar,
+    Clock,
+    Pen,
+    X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AssignedIndividuals, Individual } from "@/features/RegisterBooks/components/AssignedIndividuals";
+
+const GeneralDutyDiaryForm = () => {
+    const [offenceOccurred, setOffenceOccurred] = useState(true);
+    const [individuals, setIndividuals] = useState<Individual[]>([]);
+
+    return (
+        <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
+                <div>
+                    <h2 className="text-lg font-bold text-neutral-900">
+                        Add General Duty Diary Entry
+                    </h2>
+                    <p className="text-sm text-neutral-500">
+                        Record daily MP duty deployment and activity
+                    </p>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400">
+                    <X className="h-5 w-5" />
+                </Button>
+            </div>
+
+            <div className="p-6 space-y-8">
+                {/* Duty Details Section */}
+                <section className="space-y-4">
+                    <h3 className="text-sm font-bold text-neutral-900">Duty Details</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="dateOfDuty" className="text-xs font-medium text-neutral-700">
+                                Date of Duty
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="dateOfDuty"
+                                    type="text"
+                                    placeholder="Select Date"
+                                    className="pr-10"
+                                />
+                                <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
+                            </div>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="dutyFrom" className="text-xs font-medium text-neutral-700">
+                                Duty From
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="dutyFrom"
+                                    type="text"
+                                    placeholder="-- : --"
+                                    className="pr-10"
+                                />
+                                <Clock className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
+                            </div>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="dutyTill" className="text-xs font-medium text-neutral-700">
+                                Duty Till
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="dutyTill"
+                                    type="text"
+                                    placeholder="-- : --"
+                                    className="pr-10"
+                                />
+                                <Clock className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="placeOfDuty" className="text-xs font-medium text-neutral-700">
+                            Place of Duty
+                        </Label>
+                        <Input id="placeOfDuty" placeholder="Location" />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="typeOfDuty" className="text-xs font-medium text-neutral-700">
+                            Type of Duty/Event
+                        </Label>
+                        <Input id="typeOfDuty" placeholder="eg. Mobile duty" />
+                    </div>
+                </section>
+
+                {/* Assigned Individuals Section */}
+                <section className="space-y-4 pt-4 border-t border-neutral-100">
+                    <h3 className="text-sm font-bold text-neutral-900">
+                        Assigned Individuals on Duty
+                    </h3>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="totalStrength" className="text-xs font-medium text-neutral-700">
+                            Total Strength
+                        </Label>
+                        <Input id="totalStrength" placeholder="eg. 02" />
+                    </div>
+
+                    <AssignedIndividuals
+                        individuals={individuals}
+                        setIndividuals={setIndividuals}
+                    />
+                </section>
+
+                {/* Duty Description Section */}
+                <section className="space-y-4 pt-4 border-t border-neutral-100">
+                    <h3 className="text-sm font-bold text-neutral-900">Duty Description</h3>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="briefOfDuty" className="text-xs font-medium text-neutral-700">
+                            Brief of Duty
+                        </Label>
+                        <Textarea
+                            id="briefOfDuty"
+                            placeholder="Enter remark"
+                            className="resize-none min-h-[80px]"
+                        />
+                    </div>
+
+                    <div className="flex items-center space-x-2 py-2">
+                        <Checkbox
+                            id="offenceOccurred"
+                            checked={offenceOccurred}
+                            onCheckedChange={(c) => setOffenceOccurred(!!c)}
+                            className="border-neutral-300 data-[state=checked]:bg-black data-[state=checked]:text-white"
+                        />
+                        <Label
+                            htmlFor="offenceOccurred"
+                            className="text-xs font-medium text-neutral-700 cursor-pointer"
+                        >
+                            Offence Occurred During Duty
+                        </Label>
+                    </div>
+
+                    {offenceOccurred && (
+                        <div className="space-y-4 pl-1">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="reportNo" className="text-xs font-medium text-neutral-700">
+                                    Enter Report No.
+                                </Label>
+                                <Input id="reportNo" placeholder="New" />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="offenceType" className="text-xs font-medium text-neutral-700">
+                                    Offence Type{" "}
+                                    <span className="text-neutral-400 font-normal">(Auto Fill from report)</span>
+                                </Label>
+                                <Input id="offenceType" className="bg-neutral-50" disabled />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="placeOfOffence" className="text-xs font-medium text-neutral-700">
+                                    Place of Offence
+                                </Label>
+                                <Input id="placeOfOffence" />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="occurrenceBrief" className="text-xs font-medium text-neutral-700">
+                                    Occurrence Brief
+                                </Label>
+                                <Textarea
+                                    id="occurrenceBrief"
+                                    placeholder="Enter remark"
+                                    className="resize-none min-h-[80px]"
+                                />
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {/* Initials / Authentication Section */}
+                <section className="space-y-4 pt-4 border-t border-neutral-100">
+                    <h3 className="text-sm font-bold text-neutral-900">Initials / Authentication</h3>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="initialsMpcr" className="text-xs font-medium text-neutral-700">
+                            Initials of MPCR NCO
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="initialsMpcr"
+                                placeholder="Signature Text / Digital"
+                                className="pr-10"
+                            />
+                            <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="initialsSm" className="text-xs font-medium text-neutral-700">
+                            Initials of SM/SJCO
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="initialsSm"
+                                placeholder="Signature Text / Digital"
+                                className="pr-10"
+                            />
+                            <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="initials2ic" className="text-xs font-medium text-neutral-700">
+                            Initials of 2IC
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="initials2ic"
+                                placeholder="Signature Text / Digital"
+                                className="pr-10"
+                            />
+                            <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between border-t border-neutral-100 px-6 py-4 bg-white sticky bottom-0 z-10">
+                <Button variant="outline" className="border-neutral-200 text-neutral-700 hover:bg-neutral-50 px-6">
+                    Cancel
+                </Button>
+                <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6">
+                    Save & Add Another
+                </Button>
+            </div>
+        </div>
+    );
+};
+
+export default GeneralDutyDiaryForm;
