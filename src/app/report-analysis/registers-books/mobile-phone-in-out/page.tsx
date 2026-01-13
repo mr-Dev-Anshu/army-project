@@ -1,4 +1,4 @@
-import MobilePhoneInOutForm from "@/features/RegisterBooks/mobilePhoneInOut/components/form";
+import MobilePhoneInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/mobilePhoneInOut/components/form";
 import React from "react";
 
 const Page = () => {

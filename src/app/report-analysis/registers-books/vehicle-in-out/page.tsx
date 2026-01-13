@@ -1,4 +1,4 @@
-import VehicleInOutForm from "@/features/RegisterBooks/vehicleInOut/components/form";
+import VehicleInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/vehicleInOut/components/form";
 import React from "react";
 
 const Page = () => {

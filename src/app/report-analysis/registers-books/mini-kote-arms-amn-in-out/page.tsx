@@ -1,10 +1,10 @@
-import ConvoyInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/convoyInOut/components/form";
+import MiniKoteArmsAmnInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/miniKoteArmsAmnInOut/components/form";
 import React from "react";
 
 const Page = () => {
     return (
         <div className="flex justify-center py-8 min-h-screen bg-neutral-50">
-            <ConvoyInOutForm />
+            <MiniKoteArmsAmnInOutForm />
         </div>
     );
 };
