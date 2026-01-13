@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IndividualInputFields, IndividualData, Individual } from "@/features/RegisterBooks/components/IndividualInputFields";
 import { IndividualsTable } from "@/features/RegisterBooks/components/IndividualsTable";
+import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
+import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
 
 const GeneralDutyDiaryForm = () => {
     const [offenceOccurred, setOffenceOccurred] = useState(true);
@@ -264,62 +266,11 @@ const GeneralDutyDiaryForm = () => {
                 </section>
 
                 {/* Initials / Authentication Section */}
-                <section className="space-y-4 pt-4 border-t border-neutral-100">
-                    <h3 className="text-sm font-bold text-neutral-900">Initials / Authentication</h3>
-
-                    <div className="space-y-1.5">
-                        <Label htmlFor="initialsMpcr" className="text-xs font-medium text-neutral-700">
-                            Initials of MPCR NCO
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="initialsMpcr"
-                                placeholder="Signature Text / Digital"
-                                className="pr-10"
-                            />
-                            <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <Label htmlFor="initialsSm" className="text-xs font-medium text-neutral-700">
-                            Initials of SM/SJCO
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="initialsSm"
-                                placeholder="Signature Text / Digital"
-                                className="pr-10"
-                            />
-                            <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <Label htmlFor="initials2ic" className="text-xs font-medium text-neutral-700">
-                            Initials of 2IC
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="initials2ic"
-                                placeholder="Signature Text / Digital"
-                                className="pr-10"
-                            />
-                            <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                        </div>
-                    </div>
-                </section>
+                <AuthenticationSection />
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between border-t border-neutral-100 px-6 py-4 bg-white sticky bottom-0 z-10">
-                <Button variant="outline" className="border-neutral-200 text-neutral-700 hover:bg-neutral-50 px-6">
-                    Cancel
-                </Button>
-                <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6">
-                    Save & Add Another
-                </Button>
-            </div>
+            <FormFooter />
         </div>
     );
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Pen, X } from "lucide-react";
+import { Pen, X, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import { IndividualInputFields, IndividualData } from "@/features/RegisterBooks/
 import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
 import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
 
-const DutyKeyOutInForm = () => {
+const KeyOutInForm = () => {
     const [individual, setIndividual] = useState<IndividualData>({
         armyNo: "",
         rank: "",
@@ -26,14 +26,14 @@ const DutyKeyOutInForm = () => {
 
     return (
         <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
-            {/* ... keeping header ... */}
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
                 <div>
                     <h2 className="text-lg font-bold text-neutral-900">
-                        Add Duty Out Entry
+                        Add Key Out Entry
                     </h2>
                     <p className="text-sm text-neutral-500">
-                        Record individual duty departure details
+                        Record Key departure details
                     </p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400">
@@ -42,16 +42,16 @@ const DutyKeyOutInForm = () => {
             </div>
 
             <div className="p-6 space-y-8">
-                {/* Duty OUT Details */}
+                {/* Key OUT Details */}
                 <section className="space-y-4">
-                    <h3 className="text-sm font-bold text-neutral-900">Duty OUT Details</h3>
+                    <h3 className="text-sm font-bold text-neutral-900">Key OUT Details</h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-1.5">
-                            <Label htmlFor="dutyOutTime" className="text-xs font-medium text-neutral-700">
-                                Duty OUT Time
+                            <Label htmlFor="keyOutTime" className="text-xs font-medium text-neutral-700">
+                                Key OUT Time
                             </Label>
                             <Input
-                                id="dutyOutTime"
+                                id="keyOutTime"
                                 type="time"
                                 className="block w-full"
                             />
@@ -72,6 +72,30 @@ const DutyKeyOutInForm = () => {
                     </div>
                 </section>
 
+                {/* Key Details */}
+                <section className="space-y-4 pt-4 border-t border-neutral-100">
+                    <h3 className="text-sm font-bold text-neutral-900">Key Details</h3>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="storeName" className="text-xs font-medium text-neutral-700">
+                            Store/Office Name
+                        </Label>
+                        <Input id="storeName" placeholder="eg. ramu ki dukan" />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="keyNumber" className="text-xs font-medium text-neutral-700">
+                            Key Number
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="keyNumber"
+                                placeholder="eg. 123456"
+                                className="pr-10"
+                            />
+                            <Key className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
+                        </div>
+                    </div>
+                </section>
+
                 {/* Individual Details Section */}
                 <section className="space-y-4 pt-4 border-t border-neutral-100">
                     <h3 className="text-sm font-bold text-neutral-900">
@@ -83,65 +107,16 @@ const DutyKeyOutInForm = () => {
                     />
                 </section>
 
-                {/* Duty Details */}
+                {/* Key IN Details */}
                 <section className="space-y-4 pt-4 border-t border-neutral-100">
-                    <h3 className="text-sm font-bold text-neutral-900">Duty Details</h3>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <div className="space-y-1.5">
-                            <Label htmlFor="dateOfDuty" className="text-xs font-medium text-neutral-700">
-                                Date of Duty
-                            </Label>
-                            <Input
-                                id="dateOfDuty"
-                                type="date"
-                                className="block w-full"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <Label htmlFor="dutyFrom" className="text-xs font-medium text-neutral-700">
-                                Duty From
-                            </Label>
-                            <Input
-                                id="dutyFrom"
-                                type="time"
-                                className="block w-full"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <Label htmlFor="dutyTill" className="text-xs font-medium text-neutral-700">
-                                Duty Till
-                            </Label>
-                            <Input
-                                id="dutyTill"
-                                type="time"
-                                className="block w-full"
-                            />
-                        </div>
-                    </div>
-                    <div className="space-y-1.5">
-                        <Label htmlFor="placeOfDuty" className="text-xs font-medium text-neutral-700">
-                            Place of Duty
-                        </Label>
-                        <Input id="placeOfDuty" placeholder="Location" />
-                    </div>
-                    <div className="space-y-1.5">
-                        <Label htmlFor="typeOfDuty" className="text-xs font-medium text-neutral-700">
-                            Type of Duty/Event
-                        </Label>
-                        <Input id="typeOfDuty" placeholder="eg. Mobile duty" />
-                    </div>
-                </section>
-
-                {/* Duty IN Details */}
-                <section className="space-y-4 pt-4 border-t border-neutral-100">
-                    <h3 className="text-sm font-bold text-neutral-900">Duty IN Details</h3>
+                    <h3 className="text-sm font-bold text-neutral-900">Key IN Details</h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-1.5">
-                            <Label htmlFor="dutyInTime" className="text-xs font-medium text-neutral-700">
-                                Duty IN Time
+                            <Label htmlFor="keyInTime" className="text-xs font-medium text-neutral-700">
+                                Key IN Time
                             </Label>
                             <Input
-                                id="dutyInTime"
+                                id="keyInTime"
                                 type="time"
                                 className="block w-full"
                             />
@@ -184,4 +159,4 @@ const DutyKeyOutInForm = () => {
     );
 };
 
-export default DutyKeyOutInForm;
+export default KeyOutInForm;
