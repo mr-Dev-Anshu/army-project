@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
     Book,
     Key,
@@ -50,6 +51,7 @@ const RegisterBooks = () => {
                         <path d="M28.666 23.9974L30.9993 26.3307L35.666 21.6641" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         <path d="M35.6667 17V13.5H28.6667C26.1 13.5 24 15.6 24 18.1667V34.5C24 32.5167 25.5167 31 27.5 31H35.6667V28.3167" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>,
+                    route: "/analysis/registers-books/original-military-police-general-duty-diary",
                 },
                 {
                     title: (
@@ -62,6 +64,7 @@ const RegisterBooks = () => {
                         <path d="M34.4993 12.3359L32.166 14.6693M32.166 14.6693L35.666 18.1693L31.5827 22.2526L28.0827 18.7526M32.166 14.6693L28.0827 18.7526M23.2877 23.5476C23.8901 24.142 24.3689 24.8496 24.6967 25.6299C25.0245 26.4101 25.1947 27.2474 25.1975 28.0937C25.2004 28.9399 25.0358 29.7784 24.7132 30.5608C24.3907 31.3432 23.9166 32.054 23.3182 32.6524C22.7198 33.2508 22.0089 33.725 21.2265 34.0475C20.4441 34.37 19.6057 34.5346 18.7594 34.5318C17.9132 34.529 17.0758 34.3588 16.2956 34.031C15.5154 33.7032 14.8077 33.2243 14.2133 32.6219C13.0445 31.4117 12.3977 29.7909 12.4124 28.1084C12.427 26.426 13.1018 24.8166 14.2915 23.6269C15.4812 22.4372 17.0906 21.7624 18.773 21.7478C20.4554 21.7332 22.0763 22.3799 23.2865 23.5488L23.2877 23.5476ZM23.2877 23.5476L28.0827 18.7526" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/21-corps-provost-unit-key-out-In",
                 },
                 {
                     title: (
@@ -76,6 +79,7 @@ const RegisterBooks = () => {
                         <path d="M25.5 24H11.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/duty-in-out",
                 },
                 {
                     title: (
@@ -89,6 +93,7 @@ const RegisterBooks = () => {
                         <path d="M24 31H24.0117" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/mobile-phone-in-out",
                 },
                 {
                     title: (
@@ -103,6 +108,7 @@ const RegisterBooks = () => {
                         <path d="M29.2507 32.1693C30.8615 32.1693 32.1673 30.8634 32.1673 29.2526C32.1673 27.6418 30.8615 26.3359 29.2507 26.3359C27.6398 26.3359 26.334 27.6418 26.334 29.2526C26.334 30.8634 27.6398 32.1693 29.2507 32.1693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/vehicle-in-out",
                 },
                 {
                     title: (
@@ -118,6 +124,7 @@ const RegisterBooks = () => {
                         <path d="M29.2507 33.3333C30.8615 33.3333 32.1673 32.0275 32.1673 30.4167C32.1673 28.8058 30.8615 27.5 29.2507 27.5C27.6398 27.5 26.334 28.8058 26.334 30.4167C26.334 32.0275 27.6398 33.3333 29.2507 33.3333Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/convoy-in-out",
                 },
                 {
                     title: (
@@ -135,6 +142,7 @@ const RegisterBooks = () => {
                         <path d="M20.5007 18.1667V14.6667C20.5007 14.3572 20.3777 14.0605 20.1589 13.8417C19.9401 13.6229 19.6434 13.5 19.334 13.5H17.0007C16.6912 13.5 16.3945 13.6229 16.1757 13.8417C15.9569 14.0605 15.834 14.3572 15.834 14.6667V18.1667" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/recce-in-out",
                 },
                 {
                     title: (
@@ -147,6 +155,7 @@ const RegisterBooks = () => {
                         <path d="M23.9993 35.6693C23.9993 35.6693 33.3327 31.0026 33.3327 24.0026V15.8359L23.9993 12.3359L14.666 15.8359V24.0026C14.666 31.0026 23.9993 35.6693 23.9993 35.6693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/mini-kote-arms-amn-in-out",
                 },
                 {
                     title: (
@@ -163,6 +172,7 @@ const RegisterBooks = () => {
                         <path d="M20.5 28.6693L22.8333 31.0026L27.5 26.3359" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/duty-roster",
                 },
             ],
         },
@@ -191,6 +201,7 @@ const RegisterBooks = () => {
                         <path d="M20 34H18.5C17.837 34 17.2011 33.7366 16.7322 33.2678C16.2634 32.7989 16 32.163 16 31.5C16 30.837 16.2634 30.2011 16.7322 29.7322C17.2011 29.2634 17.837 29 18.5 29H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/lost-and-found",
                 },
                 {
                     title: (
@@ -209,6 +220,7 @@ const RegisterBooks = () => {
                         <path d="M31 30V32" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/vehicle-demand",
                 },
                 {
                     title: (
@@ -223,6 +235,7 @@ const RegisterBooks = () => {
                         <path d="M24.3926 19C25.54 19.2263 26.5929 19.7922 27.4147 20.6244C28.2365 21.4565 28.7891 22.5165 29.0009 23.6667" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/army-help-line-complaints-record",
                 },
             ],
         },
@@ -243,6 +256,7 @@ const RegisterBooks = () => {
                         <path d="M24 22C25.1046 22 26 21.1046 26 20C26 18.8954 25.1046 18 24 18C22.8954 18 22 18.8954 22 20C22 21.1046 22.8954 22 24 22Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/contact-info-army-personnel",
                 },
                 {
                     title: (
@@ -257,6 +271,7 @@ const RegisterBooks = () => {
                         <path d="M24 22C25.1046 22 26 21.1046 26 20C26 18.8954 25.1046 18 24 18C22.8954 18 22 18.8954 22 20C22 21.1046 22.8954 22 24 22Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/contact-info-civil-police-station",
                 },
                 {
                     title: (
@@ -272,6 +287,7 @@ const RegisterBooks = () => {
                         <path d="M23.9993 21.6667C25.288 21.6667 26.3327 20.622 26.3327 19.3333C26.3327 18.0447 25.288 17 23.9993 17C22.7107 17 21.666 18.0447 21.666 19.3333C21.666 20.622 22.7107 21.6667 23.9993 21.6667Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,
+                    route: "/analysis/registers-books/military-police-control-room-contact-directory",
                 },
             ],
         },
@@ -311,20 +327,25 @@ const RegisterBooks = () => {
                         {/* Grid */}
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {section.items.map((item, itemIdx) => (
-                                <div
+                                <Link
                                     key={itemIdx}
-                                    className="group relative flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg cursor-pointer"
+                                    href={item.route || "#"}
+                                    className="block group"
                                 >
-                                    {/* Icon */}
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:bg-black">
-                                        {item.icon}
-                                    </div>
+                                    <div
+                                        className="relative flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg cursor-pointer h-full"
+                                    >
+                                        {/* Icon */}
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:bg-black">
+                                            {item.icon}
+                                        </div>
 
-                                    {/* Title */}
-                                    <div className="text-lg font-medium leading-snug text-neutral-800">
-                                        {item.title}
+                                        {/* Title */}
+                                        <div className="text-lg font-medium leading-snug text-neutral-800">
+                                            {item.title}
+                                        </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </section>

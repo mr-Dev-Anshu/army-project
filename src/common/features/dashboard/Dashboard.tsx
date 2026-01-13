@@ -37,14 +37,14 @@ export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
 
   // Fetch Data
- const { data: trafficOffences, isLoading: trafficLoading } =
-  useGetAllTrafficOffences({ groupBy: "offenceType" });
+  const { data: trafficOffences, isLoading: trafficLoading } =
+    useGetAllTrafficOffences({ groupBy: "offenceType" });
 
-const { data: staticSpeedRecords, isLoading: speedLoading } =
-  useGetStaticSpeedRecords();
+  const { data: staticSpeedRecords, isLoading: speedLoading } =
+    useGetStaticSpeedRecords();
 
-const { data: mpReports, isLoading: mpLoading } =
-  useGetAllMPReports();
+  const { data: mpReports, isLoading: mpLoading } =
+    useGetAllMPReports();
 
 
   const isStatsLoading = trafficLoading || speedLoading || mpLoading;
@@ -287,7 +287,7 @@ const { data: mpReports, isLoading: mpLoading } =
           />
         </svg>
       ),
-      href: "/registers",
+      href: "/analysis/registers-books",
     },
     {
       title: "Outsidery Report Analysis Module",
@@ -377,15 +377,15 @@ const { data: mpReports, isLoading: mpLoading } =
         </div>
 
         {/* STATS GRID */}
-       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 print:hidden">
-  {isStatsLoading
-    ? Array.from({ length: 4 }).map((_, i) => (
-        <StatsCardSkeleton key={i} />
-      ))
-    : statsData.map((card, i) => (
-        <DynamicStatsCard key={i} {...card} />
-      ))}
-</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 print:hidden">
+          {isStatsLoading
+            ? Array.from({ length: 4 }).map((_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))
+            : statsData.map((card, i) => (
+              <DynamicStatsCard key={i} {...card} />
+            ))}
+        </div>
 
 
         {/* QUICK ACTIONS */}

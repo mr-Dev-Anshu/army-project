@@ -131,7 +131,7 @@ const Sidebar = () => {
     {
       icon: <BookOpen className="w-5 h-5" />,
       label: "Registers/Books",
-      href: "/registers",
+      href: "/analysis/registers-books",
     },
     {
       icon: <LineChart className="w-5 h-5" />,
