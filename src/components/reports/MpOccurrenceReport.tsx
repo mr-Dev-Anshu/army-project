@@ -108,11 +108,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </style>
 
             {/* ==================== PAGE 1 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:px-[48px] print:pb-[48px] print:pt-[20px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 1 */}
-                <div className="text-center font-bold text-[12px] underline mb-4 print:invisible">RESTRICTED</div>
-                <div className="text-right font-bold text-[12px] mb-8 print:mt-12 underline">IAFP-1479 (Revised)</div>
+                <div className="text-center font-bold text-[12px] underline mb-4 print:hidden">RESTRICTED</div>
+                <div className="text-right font-bold text-[12px] mb-8 underline">IAFP-1479 (Revised)</div>
 
                 <h1 className="text-center font-bold text-[16px] underline mb-8">
                     MP OCCURRENCE & INVESTIGATION REPORT
