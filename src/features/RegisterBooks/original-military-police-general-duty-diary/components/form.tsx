@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import {
-    Calendar,
-    Clock,
     Pen,
     X,
 } from "lucide-react";
@@ -47,11 +45,9 @@ const GeneralDutyDiaryForm = () => {
                             <div className="relative">
                                 <Input
                                     id="dateOfDuty"
-                                    type="text"
-                                    placeholder="Select Date"
-                                    className="pr-10"
+                                    type="date"
+                                    className="block w-full"
                                 />
-                                <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
                             </div>
                         </div>
                         <div className="space-y-1.5">
@@ -61,11 +57,9 @@ const GeneralDutyDiaryForm = () => {
                             <div className="relative">
                                 <Input
                                     id="dutyFrom"
-                                    type="text"
-                                    placeholder="-- : --"
-                                    className="pr-10"
+                                    type="time"
+                                    className="block w-full"
                                 />
-                                <Clock className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
                             </div>
                         </div>
                         <div className="space-y-1.5">
@@ -75,11 +69,9 @@ const GeneralDutyDiaryForm = () => {
                             <div className="relative">
                                 <Input
                                     id="dutyTill"
-                                    type="text"
-                                    placeholder="-- : --"
-                                    className="pr-10"
+                                    type="time"
+                                    className="block w-full"
                                 />
-                                <Clock className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
                             </div>
                         </div>
                     </div>
