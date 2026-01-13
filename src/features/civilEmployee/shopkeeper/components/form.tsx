@@ -383,7 +383,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
               >
                 <label
                   className={cn(
-                    "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-gray-50 transition-colors",
+                    "flex items-center space-x-3 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
                     shopkeeper.priceListApproved ? "border-black bg-gray-50" : "border-gray-200"
                   )}
                 >
@@ -392,7 +392,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
                 </label>
                 <label
                   className={cn(
-                    "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-gray-50 transition-colors",
+                    "flex items-center space-x-3 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
                     !shopkeeper.priceListApproved ? "border-black bg-gray-50" : "border-gray-200"
                   )}
                 >
@@ -402,13 +402,14 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
               </RadioGroup>
             </div>
 
-            <div className="space-y-3">
+            <div className={cn("space-y-3 transition-opacity duration-200", !shopkeeper.priceListApproved && "opacity-50 pointer-events-none")}>
               <Label className="font-semibold">Agreement Dates</Label>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label>Effective From</Label>
                   <Input
                     type="date"
+                    disabled={!shopkeeper.priceListApproved}
                     value={shopkeeper.priceListEffectiveFrom ? shopkeeper.priceListEffectiveFrom.split('T')[0] : ""}
                     onChange={(e) => setField("priceListEffectiveFrom", e.target.value ? new Date(e.target.value).toISOString() : null)}
                   />
@@ -417,6 +418,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
                   <Label>Expired on</Label>
                   <Input
                     type="date"
+                    disabled={!shopkeeper.priceListApproved}
                     min={shopkeeper.priceListEffectiveFrom ? shopkeeper.priceListEffectiveFrom.split('T')[0] : undefined}
                     value={shopkeeper.priceListExpiredOn ? shopkeeper.priceListExpiredOn.split('T')[0] : ""}
                     onChange={(e) => setField("priceListExpiredOn", e.target.value ? new Date(e.target.value).toISOString() : null)}

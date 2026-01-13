@@ -36,6 +36,7 @@ export interface FilterState {
   fmn?: string;
   placeOfOffence?: string;
   priceListStatus?: string;
+  agreementStatus?: string;
   sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
@@ -62,6 +63,7 @@ interface ReportFilterBarProps {
   showFmn?: boolean;
   showPlaceOfOffence?: boolean;
   showUnit?: boolean;
+  showAgreementStatus?: boolean;
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -87,9 +89,11 @@ export default function ReportFilterBar({
   showFmn = true,
   showPlaceOfOffence = true,
   showUnit = true,
+  showAgreementStatus = false,
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
+    (showAgreementStatus && filters.agreementStatus && filters.agreementStatus !== "All") ||
     !!filters.fromDate ||
     !!filters.toDate ||
     !!filters.unit ||
@@ -292,6 +296,25 @@ export default function ReportFilterBar({
                       </Select>
                     </div>
                   )}
+
+                  {showAgreementStatus && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Agreement Status</label>
+                      <Select
+                        value={filters.agreementStatus || "All"}
+                        onValueChange={(value) => onFilterChange("agreementStatus", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          <SelectItem value="Valid">Valid</SelectItem>
+                          <SelectItem value="Expired">Expired</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 {onReset && (
@@ -322,7 +345,7 @@ export default function ReportFilterBar({
           )}
         </div>
       </div>
-    </div>
+    </div >
 
 
 

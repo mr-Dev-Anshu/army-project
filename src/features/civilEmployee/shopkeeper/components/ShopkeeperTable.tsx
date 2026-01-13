@@ -75,6 +75,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         date: "",
         actionStatus: "All",
         priceListStatus: "All",
+        agreementStatus: "All",
         sortOrder: "asc",
     });
 
@@ -126,6 +127,19 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 }
             }
 
+            // Agreement Status Logic
+            let matchesAgreement = true;
+            if (filters.agreementStatus && filters.agreementStatus !== "All") {
+                const expiredOn = item.priceListExpiredOn ? new Date(item.priceListExpiredOn) : null;
+                const isAgreementExpired = expiredOn && isValid(expiredOn) ? expiredOn < new Date() : false;
+
+                if (filters.agreementStatus === "Valid") {
+                    matchesAgreement = !isAgreementExpired;
+                } else if (filters.agreementStatus === "Expired") {
+                    matchesAgreement = isAgreementExpired;
+                }
+            }
+
             // Unit Logic (Multi-select)
             let matchesUnit = true;
             if (filters.unit) {
@@ -135,7 +149,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 }
             }
 
-            return matchesSearch && matchesDate && matchesStatus && matchesPriceList && matchesUnit;
+            return matchesSearch && matchesDate && matchesStatus && matchesPriceList && matchesUnit && matchesAgreement;
         });
     }, [shopkeepers, filters]);
 
@@ -409,12 +423,14 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                     date: "",
                     actionStatus: "All",
                     priceListStatus: "All",
+                    agreementStatus: "All",
                     sortOrder: "asc",
                     unit: "",
                 })}
                 placeholder="Search by shop name, owner, unit..."
                 showFmn={false}
                 showPlaceOfOffence={false}
+                showAgreementStatus={true}
             />
 
             <DynamicTable
