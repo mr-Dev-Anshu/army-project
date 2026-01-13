@@ -414,9 +414,63 @@ export default function MpOccurrenceReportsPage() {
   };
 
 
-  const handleDownloadReport = (item: any) => {
-    const props = mapToReportProps(item);
-    generateMPOccurrenceWordReport(props);
+  /* ================= DOWNLOAD STATE ================= */
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+
+  /* ================= ACTIONS ================= */
+
+  const handleDownloadReport = async (item: any) => {
+    setIsDownloading(true);
+    setDownloadType("Word");
+    try {
+      const props = mapToReportProps(item);
+      generateMPOccurrenceWordReport(props);
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to download Word report");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
+  };
+
+  const handleDownloadPdf = async (item: any) => {
+    const id = item._id;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+
+    setIsDownloading(true);
+    setDownloadType("PDF");
+
+    try {
+      const response = await fetch(`/api/mp-occurrence-report/pdf/${id}`);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ error: "Unknown server error" }));
+        throw new Error(errData.error || "Failed to generate PDF");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `MPOccurrenceReport-${item.reportDetails?.reportNumber || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF Download Error", error);
+      alert(`Failed to download PDF report: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
   };
 
   const handlePrintReport = (item: any) => {
@@ -450,16 +504,45 @@ export default function MpOccurrenceReportsPage() {
 
   if (viewingReport) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gray-100 flex flex-col relative">
+        {/* DOWNLOAD LOADER MODAL */}
+        {isDownloading && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4 min-w-[300px] animate-in zoom-in-95 duration-200">
+              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+              <div className="text-center">
+                <h3 className="font-semibold text-lg">Generating {downloadType} Report</h3>
+                <p className="text-gray-500 text-sm">Please wait while we prepare your download...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
           <Button variant="ghost" size="sm" onClick={() => { setViewingReport(null); setShouldAutoPrint(false); }} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
           <h1 className="text-lg font-semibold text-gray-800">MP Occurrence & Investigation Report</h1>
-          <div className="ml-auto">
-            <Button onClick={() => handleDownloadReport(viewingReport)} variant="outline" size="sm" className="gap-2">
-              <Download className="w-4 h-4" />
+          <div className="ml-auto flex gap-2">
+            <Button
+              onClick={() => handleDownloadReport(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isDownloading}
+            >
+              {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
               Download Word Report
+            </Button>
+            <Button
+              onClick={() => handleDownloadPdf(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isDownloading}
+            >
+              {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
+              Download PDF Report
             </Button>
           </div>
         </div>

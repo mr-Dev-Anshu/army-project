@@ -98,7 +98,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 {`
                   @page {
                     size: A4;
-                    margin: 20mm;
+                    margin: 0mm;
                   }
                   body {
                     background-color: white !important;
@@ -107,11 +107,8 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 `}
             </style>
 
-            {/* Print Only: Fixed Global Page Numbering */}
-            <div className="hidden print:block fixed top-0 w-full text-center font-bold text-sm page-number mt-4 z-50"></div>
-
             {/* ==================== PAGE 1 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 1 */}
                 <div className="text-center font-bold text-[12px] underline mb-4 print:invisible">RESTRICTED</div>
@@ -352,11 +349,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
 
             {/* ==================== PAGE 2 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 2 */}
                 <div className="text-center font-bold mb-8">
-                    <div className="text-sm print:hidden">-2-</div>
+                    <div className="text-sm ">-2-</div>
                     <div className="text-xs underline">RESTRICTED</div>
                 </div>
 
@@ -514,11 +511,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 3 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 3 */}
                 <div className="text-center font-bold mb-4">
-                    <div className="text-sm print:hidden">-3-</div>
+                    <div className="text-sm ">-3-</div>
                     <div className="text-[12px] underline">RESTRICTED</div>
                 </div>
 
@@ -552,11 +549,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 4 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 4 */}
                 <div className="text-center font-bold mb-4">
-                    <div className="text-sm print:hidden">-4-</div>
+                    <div className="text-sm ">-4-</div>
                     <div className="text-xs underline">RESTRICTED</div>
                 </div>
 
@@ -584,11 +581,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 5 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 5 */}
                 <div className="text-center font-bold mb-4">
-                    <div className="text-sm print:hidden">-5-</div>
+                    <div className="text-sm ">-5-</div>
                     <div className="text-xs underline">RESTRICTED</div>
                 </div>
 
@@ -623,11 +620,11 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 6 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-0">
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]">
 
                 {/* Header Page 6 */}
                 <div className="text-center font-bold mb-4">
-                    <div className="text-sm print:hidden">-6-</div>
+                    <div className="text-sm ">-6-</div>
                     <div className="text-xs underline">RESTRICTED</div>
                 </div>
 
