@@ -4,17 +4,69 @@ import React, { useState } from "react";
 import {
     Pen,
     X,
+    Plus,
+    Save
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AssignedIndividuals, Individual } from "@/features/RegisterBooks/components/AssignedIndividuals";
+import { IndividualInputFields, IndividualData, Individual } from "@/features/RegisterBooks/components/IndividualInputFields";
+import { IndividualsTable } from "@/features/RegisterBooks/components/IndividualsTable";
 
 const GeneralDutyDiaryForm = () => {
     const [offenceOccurred, setOffenceOccurred] = useState(true);
     const [individuals, setIndividuals] = useState<Individual[]>([]);
+
+    // Individual Input State
+    const [currentIndividual, setCurrentIndividual] = useState<Omit<Individual, "id">>({
+        armyNo: "",
+        rank: "",
+        name: "",
+        unit: "",
+        fmn: "",
+        command: "",
+    });
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleFieldChange = (field: keyof IndividualData, value: string) => {
+        setCurrentIndividual((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleAddIndividual = () => {
+        if (!currentIndividual.armyNo || !currentIndividual.name) return; // Basic validation
+        setIndividuals([
+            ...individuals,
+            { ...currentIndividual, id: Math.random().toString(36).substr(2, 9) },
+        ]);
+        setCurrentIndividual({
+            armyNo: "",
+            rank: "",
+            name: "",
+            unit: "",
+            fmn: "",
+            command: "",
+        });
+        setIsEditing(false);
+    };
+
+    const handleRemoveIndividual = (id: string) => {
+        setIndividuals(individuals.filter((ind) => ind.id !== id));
+    };
+
+    const handleEditIndividual = (individual: Individual) => {
+        setCurrentIndividual({
+            armyNo: individual.armyNo,
+            rank: individual.rank,
+            name: individual.name,
+            unit: individual.unit,
+            fmn: individual.fmn,
+            command: individual.command,
+        });
+        handleRemoveIndividual(individual.id);
+        setIsEditing(true);
+    };
 
     return (
         <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
@@ -104,9 +156,42 @@ const GeneralDutyDiaryForm = () => {
                         <Input id="totalStrength" placeholder="eg. 02" />
                     </div>
 
-                    <AssignedIndividuals
+                    <div className="space-y-3">
+                        <div>
+                            <Label className="text-xs font-medium text-neutral-700">
+                                Enter Each Individuals Details
+                            </Label>
+                            <p className="text-[10px] text-neutral-400">
+                                Click on "Add Worker button" to add all individuals details
+                            </p>
+                        </div>
+
+                        <IndividualInputFields
+                            data={currentIndividual}
+                            onChange={handleFieldChange}
+                        />
+
+                        <div className="flex justify-end pt-2">
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={handleAddIndividual}
+                                className="bg-neutral-100 hover:bg-neutral-200 text-neutral-900 border border-neutral-200"
+                            >
+                                {isEditing ? (
+                                    <Save className="mr-2 h-4 w-4" />
+                                ) : (
+                                    <Plus className="mr-2 h-4 w-4" />
+                                )}
+                                {isEditing ? "Update Individual" : "Add Individual to list"}
+                            </Button>
+                        </div>
+                    </div>
+
+                    <IndividualsTable
                         individuals={individuals}
-                        setIndividuals={setIndividuals}
+                        onRemove={handleRemoveIndividual}
+                        onEdit={handleEditIndividual}
                     />
                 </section>
 

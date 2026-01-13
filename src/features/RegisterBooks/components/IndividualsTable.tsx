@@ -3,7 +3,7 @@
 import React from "react";
 import { Minus, Pencil } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Individual } from "./AssignedIndividuals";
+import { Individual } from "./IndividualInputFields";
 
 interface IndividualsTableProps {
     individuals: Individual[];
