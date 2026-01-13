@@ -29,20 +29,31 @@ export function AsyncSearchableSelect({
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Use the suggestion hook
-    // Only fetch if we are NOT showing default options (search is non-empty) OR if we have no default options.
-    // Actually, we can just let it fetch (it caches), but we prioritize defaultOptions for display if search is empty.
-    const { data: responseData, isLoading: isApiLoading } = useGetFieldSuggestions(fieldType, search);
-
     // Determine what to show
-    // If user has NOT typed anything and we have defaultOptions, show them.
-    // Otherwise, show API results.
-    const showDefaultOptions = !search && defaultOptions.length > 0;
+    // If we have defaultOptions, we use them as the source of truth and filter them client-side if a search exists.
+    // If we DO NOT have defaultOptions, we fetch from API.
+    const hasDefaultOptions = defaultOptions.length > 0;
 
-    const suggestions = showDefaultOptions
-        ? defaultOptions
-        : (responseData?.data || []).map((item: any) => item.value);
+    // Only fetch if we DO NOT have default options.
+    const { data: responseData, isLoading: isApiLoading } = useGetFieldSuggestions(fieldType, search, {
+        enabled: !hasDefaultOptions
+    });
 
-    const isLoading = showDefaultOptions ? false : isApiLoading;
+    let suggestions: string[] = [];
+
+    if (hasDefaultOptions) {
+        if (search) {
+            suggestions = defaultOptions.filter(opt =>
+                opt.toLowerCase().includes(search.toLowerCase())
+            );
+        } else {
+            suggestions = defaultOptions;
+        }
+    } else {
+        suggestions = (responseData?.data || []).map((item: any) => item.value);
+    }
+
+    const isLoading = hasDefaultOptions ? false : isApiLoading;
 
     // Parse values for multi-select
     // We assume multiple values are stored as comma-separated string

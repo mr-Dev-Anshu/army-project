@@ -493,10 +493,6 @@ export default function MpOccurrenceReportsPage() {
           setFilters((prev) => ({ ...prev, [key]: value }))
         }
         showOffenceType={true}
-        offenceTypeOptions={offenceTypeOptions}
-        unitOptions={unitOptions}
-        fmnOptions={fmnOptions}
-        placeOptions={placeOptions}
         showDateRange
         showFilter
         // showSort={true}

@@ -463,9 +463,6 @@ export default function StaticSpeedCheckReportsPage() {
       <ReportFilterBar
         filters={filters}
         onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
-        unitOptions={unitOptions}
-        fmnOptions={fmnOptions}
-        placeOptions={placeOptions}
         showOffenceType={false}
         placeholder="Search by report no or vehicle..."
         onAddNew={() => setIsCreating(true)}

@@ -282,7 +282,7 @@ const TemporaryHiredTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdi
                     </svg>
                     <h2 className="text-lg font-semibold text-[#404040]">Temporary Hired Worker Security Passes</h2>
                 </div>
-                <span className="text-sm font-semibold text-[#0A0A0A]">{workers.length} Servants</span>
+                <span className="text-sm font-semibold text-[#0A0A0A]">{filteredData.length} Servants</span>
             </div>
 
             <ReportFilterBar
@@ -294,6 +294,7 @@ const TemporaryHiredTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdi
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
                 showDateRange={false}
+                showFilter={true}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
                     search: "",
@@ -303,6 +304,9 @@ const TemporaryHiredTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdi
                     sortOrder: "asc",
                 })}
                 placeholder="Search by worker name, place of work, pass no..."
+                showFmn={false}
+                showPlaceOfOffence={false}
+                showUnit={false}
             />
 
             <DynamicTable

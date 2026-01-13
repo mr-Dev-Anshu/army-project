@@ -81,6 +81,14 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
         setFilters((prev) => ({ ...prev, [key]: value }));
     };
 
+    const unitOptions = useMemo(() => {
+        const units = new Set<string>();
+        shopkeepers.forEach((s: Shopkeeper) => {
+            if (s.unit) units.add(s.unit);
+        });
+        return Array.from(units).sort();
+    }, [shopkeepers]);
+
     const filteredData = useMemo(() => {
         return shopkeepers.filter((item: Shopkeeper) => {
             // Search logic (Shop Name, Owner Name, Unit)
@@ -90,8 +98,7 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 item.ownerName?.toLowerCase().includes(searchTerm) ||
                 item.unit?.toLowerCase().includes(searchTerm);
 
-            // Date logic (Valid From/Till or CreatedAt?)
-            // Assuming 'date' filter matches Valid From or just ignores for now if not specific
+            // Date logic
             const matchesDate = filters.date
                 ? (item.validFrom && item.validFrom.includes(filters.date)) ||
                 (item.createdAt && item.createdAt.includes(filters.date))
@@ -118,7 +125,16 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                 }
             }
 
-            return matchesSearch && matchesDate && matchesStatus && matchesPriceList;
+            // Unit Logic (Multi-select)
+            let matchesUnit = true;
+            if (filters.unit) {
+                const selectedUnits = filters.unit.split(",");
+                if (!item.unit || !selectedUnits.includes(item.unit)) {
+                    matchesUnit = false;
+                }
+            }
+
+            return matchesSearch && matchesDate && matchesStatus && matchesPriceList && matchesUnit;
         });
     }, [shopkeepers, filters]);
 
@@ -324,18 +340,21 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
 
                     <h2 className="text-lg font-semibold text-[#404040]">Shopkeepers & Workers Security Passes</h2>
                 </div>
-                <span className="text-sm font-medium  text-[#0A0A0A]">{shopkeepers.length} Shop owners & Workers</span>
+                <span className="text-sm font-medium  text-[#0A0A0A]">{filteredData.length} Shop owners & Workers</span>
             </div>
 
             <ReportFilterBar
                 filters={filters}
                 onFilterChange={handleFilterChange}
-                offenceTypeOptions={["Option 1", "Option 2"]} // Example options
+                offenceTypeOptions={[]}
                 showOffenceType={false}
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
                 showDateRange={false}
+                showPriceListFilter={true}
+                unitOptions={unitOptions}
+                showFilter={true}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
                     search: "",
@@ -344,8 +363,11 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
                     actionStatus: "All",
                     priceListStatus: "All",
                     sortOrder: "asc",
+                    unit: "",
                 })}
                 placeholder="Search by shop name, owner, unit..."
+                showFmn={false}
+                showPlaceOfOffence={false}
             />
 
             <DynamicTable

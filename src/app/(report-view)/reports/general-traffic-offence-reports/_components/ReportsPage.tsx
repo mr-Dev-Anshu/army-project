@@ -385,10 +385,6 @@ export default function ReportsPage({
         filters={filters}
         onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
         showOffenceType
-        offenceTypeOptions={offenceTypeOptions}
-        unitOptions={unitOptions}
-        fmnOptions={fmnOptions}
-        placeOptions={placeOptions}
         showDateRange
         showActionStatus
         showFilter

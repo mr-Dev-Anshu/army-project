@@ -59,6 +59,9 @@ interface ReportFilterBarProps {
   onReset?: () => void;
   showSort?: boolean;
   showFilter?: boolean;
+  showFmn?: boolean;
+  showPlaceOfOffence?: boolean;
+  showUnit?: boolean;
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -81,6 +84,9 @@ export default function ReportFilterBar({
   onReset,
   showSort = false,
   showFilter = false,
+  showFmn = true,
+  showPlaceOfOffence = true,
+  showUnit = true,
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
@@ -148,6 +154,7 @@ export default function ReportFilterBar({
                         onValueChange={(v) => onFilterChange("offenceType", v)}
                         placeholder="Search Offence Type..."
                         className="w-full"
+                        defaultOptions={offenceTypeOptions}
                         mode="list-checkbox"
                       />
                     </div>
@@ -217,46 +224,55 @@ export default function ReportFilterBar({
                   )}
 
                   {/* Unit */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-gray-700">Unit</label>
-                    <label className="text-xs text-gray-500">Select Unit</label>
-                    <AsyncSearchableSelect
-                      fieldType="unit"
-                      value={filters.unit || ""}
-                      onValueChange={(v) => onFilterChange("unit", v)}
-                      placeholder="Search Unit..." // Placeholder for inside input
-                      className="w-full"
-                      mode="list-checkbox"
-                    />
-                  </div>
+                  {showUnit && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Unit</label>
+                      <label className="text-xs text-gray-500">Select Unit</label>
+                      <AsyncSearchableSelect
+                        fieldType="unit"
+                        value={filters.unit || ""}
+                        onValueChange={(v) => onFilterChange("unit", v)}
+                        placeholder="Search Unit..." // Placeholder for inside input
+                        className="w-full"
+                        defaultOptions={unitOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
 
                   {/* FMN */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-gray-700">FMN</label>
-                    <label className="text-xs text-gray-500">Select Formation</label>
-                    <AsyncSearchableSelect
-                      fieldType="fmn"
-                      value={filters.fmn || ""}
-                      onValueChange={(v) => onFilterChange("fmn", v)}
-                      placeholder="Search FMN..."
-                      className="w-full"
-                      mode="list-checkbox"
-                    />
-                  </div>
+                  {showFmn && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">FMN</label>
+                      <label className="text-xs text-gray-500">Select Formation</label>
+                      <AsyncSearchableSelect
+                        fieldType="fmn"
+                        value={filters.fmn || ""}
+                        onValueChange={(v) => onFilterChange("fmn", v)}
+                        placeholder="Search FMN..."
+                        className="w-full"
+                        defaultOptions={fmnOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
 
                   {/* Place of Offence */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-gray-700">Place of Offence</label>
-                    <label className="text-xs text-gray-500">Select Location</label>
-                    <AsyncSearchableSelect
-                      fieldType="placeOfOffence"
-                      value={filters.placeOfOffence || ""}
-                      onValueChange={(v) => onFilterChange("placeOfOffence", v)}
-                      placeholder="Search Location..."
-                      className="w-full"
-                      mode="list-checkbox"
-                    />
-                  </div>
+                  {showPlaceOfOffence && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Place of Offence</label>
+                      <label className="text-xs text-gray-500">Select Location</label>
+                      <AsyncSearchableSelect
+                        fieldType="placeOfOffence"
+                        value={filters.placeOfOffence || ""}
+                        onValueChange={(v) => onFilterChange("placeOfOffence", v)}
+                        placeholder="Search Location..."
+                        className="w-full"
+                        defaultOptions={placeOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
 
                   {showPriceListFilter && (
                     <div className="flex flex-col gap-2">
