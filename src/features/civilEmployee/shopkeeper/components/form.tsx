@@ -32,6 +32,7 @@ const INITIAL_SHOPKEEPER_STATE = {
   passNumber: "",
   priceListApproved: false,
   priceListEffectiveFrom: null,
+  priceListExpiredOn: null,
   workers: [],
   validFrom: null,
   validTill: null,
@@ -230,6 +231,14 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
       }
     }
 
+    // Agreement Date validation
+    if (shopkeeper.priceListEffectiveFrom && shopkeeper.priceListExpiredOn) {
+      if (new Date(shopkeeper.priceListExpiredOn) <= new Date(shopkeeper.priceListEffectiveFrom)) {
+        toast.error("Agreement Expiry date must be greater than Effective From date.");
+        return;
+      }
+    }
+
 
     // Check for ID in either shopkeeper state or initialData to determine if this is an update
     const idToUpdate = (shopkeeper as any)._id || (initialData as any)?._id;
@@ -370,7 +379,7 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
               <RadioGroup
                 value={shopkeeper.priceListApproved ? "yes" : "no"}
                 onValueChange={(v) => setField("priceListApproved", v === "yes")}
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-2 gap-4 "
               >
                 <label
                   className={cn(
@@ -393,13 +402,27 @@ export default function ShopkeeperSecurityPassEntryForm({ onCancel, onSuccess, i
               </RadioGroup>
             </div>
 
-            <div className="space-y-1">
-              <Label>Effective from</Label>
-              <Input
-                type="date"
-                value={shopkeeper.priceListEffectiveFrom ? shopkeeper.priceListEffectiveFrom.split('T')[0] : ""}
-                onChange={(e) => setField("priceListEffectiveFrom", e.target.value ? new Date(e.target.value).toISOString() : null)}
-              />
+            <div className="space-y-3">
+              <Label className="font-semibold">Agreement Dates</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label>Effective From</Label>
+                  <Input
+                    type="date"
+                    value={shopkeeper.priceListEffectiveFrom ? shopkeeper.priceListEffectiveFrom.split('T')[0] : ""}
+                    onChange={(e) => setField("priceListEffectiveFrom", e.target.value ? new Date(e.target.value).toISOString() : null)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Expired on</Label>
+                  <Input
+                    type="date"
+                    min={shopkeeper.priceListEffectiveFrom ? shopkeeper.priceListEffectiveFrom.split('T')[0] : undefined}
+                    value={shopkeeper.priceListExpiredOn ? shopkeeper.priceListExpiredOn.split('T')[0] : ""}
+                    onChange={(e) => setField("priceListExpiredOn", e.target.value ? new Date(e.target.value).toISOString() : null)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>

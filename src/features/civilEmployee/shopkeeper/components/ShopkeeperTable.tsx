@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, isValid } from "date-fns";
 import { MoreVertical } from "lucide-react";
 
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -31,7 +31,8 @@ interface Shopkeeper {
     passNumber: string;
     unit: string;
     priceListApproved: boolean;
-    priceListEffectiveFrom: string;
+    priceListEffectiveFrom: string | null;
+    priceListExpiredOn?: string | null;
     workers: {
         name: string;
         type: string;
@@ -192,6 +193,52 @@ const ShopkeeperTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: (
             ),
             className: "border-r border-gray-300",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
+        },
+        {
+            header: (
+                <div className="flex flex-col h-full">
+                    <div className="text-xs text-center font-bold uppercase text-[#0A0A0A] pb-2 border-b border-gray-300 px-4 pt-3 bg-gray-100">
+                        Agreement Valid Date
+                    </div>
+                    <div className="flex text-[10px] items-center text-[#0A0A0A] font-medium bg-gray-100">
+                        <div className="flex-1 px-4 py-1 border-r border-gray-300 ">Effective From</div>
+                        <div className="flex-1 px-4 py-1">Expired on</div>
+                    </div>
+                </div>
+            ),
+            cell: (item) => {
+                const effectiveFrom = item.priceListEffectiveFrom ? new Date(item.priceListEffectiveFrom) : null;
+                const expiredOn = item.priceListExpiredOn ? new Date(item.priceListExpiredOn) : null;
+                const isExpired = expiredOn && isValid(expiredOn) ? expiredOn < new Date() : false;
+                const daysAgo = isExpired && expiredOn && isValid(expiredOn) ? differenceInDays(new Date(), expiredOn) : 0;
+
+                return (
+                    <div className="relative h-full flex flex-col items-center justify-center font-[Arial]">
+                        <div className="flex w-full">
+                            <div className={`flex-1 px-4 text-sm font-normal text-center${isExpired ? " text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
+                                {effectiveFrom && isValid(effectiveFrom) ? format(effectiveFrom, "dd/MM/yyyy") : "-"}
+                            </div>
+                            <div className={`flex-1 px-4 text-sm font-normal text-center${isExpired ? " text-[#AEAEB2]" : "text-[#0A0A0A]"}`}>
+                                {expiredOn && isValid(expiredOn) ? format(expiredOn, "dd/MM/yyyy") : "-"}
+                            </div>
+                        </div>
+                        {
+                            isExpired && (
+                                <div className="flex flex-col items-center justify-center mt-3">
+                                    <span className="text-[12px] font-bold text-[#FF383C] uppercase tracking-wide">
+                                        AGREEMENT EXPIRED
+                                    </span>
+                                    <span className="text-[10px] font-semibold text-[#0A0A0A]">
+                                        {daysAgo} Days Ago
+                                    </span>
+                                </div>
+                            )
+                        }
+                    </div >
+                );
+            },
+            className: "min-w-[220px] py-4 align-top border-r border-gray-300",
+            headerClassName: "p-0 min-w-[220px] border-r border-gray-300 font-bold text-[#0A0A0A]",
         },
         {
             header: (

@@ -101,7 +101,7 @@ export default function ReportFilterBar({
     <div className="flex gap-3 justify-between items-center mb-6">
       <div className="flex flex-1 gap-3 justify-between items-center">
         {/* Search Input */}
-        <div className="relative flex-1 max-w-[220px] ">
+        <div className="relative flex-1 max-w-[500px] ">
           <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500", filters.search && "text-blue-600")} />
           <Input
             type="text"
