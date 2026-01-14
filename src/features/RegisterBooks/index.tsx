@@ -37,11 +37,10 @@ interface RegisterSection {
 }
 
 const RegisterBooks = () => {
-    // Data definition matching the visual provided
     const sections: RegisterSection[] = [
         {
             title: "Daily Operations Registers",
-            count: "01",
+            count: "09",
             items: [
                 {
                     title: "Original Military Police General Duty Diary",
@@ -178,7 +177,7 @@ const RegisterBooks = () => {
         },
         {
             title: "Occasional Use Registers",
-            count: "02",
+            count: "03",
             items: [
                 {
                     title: (

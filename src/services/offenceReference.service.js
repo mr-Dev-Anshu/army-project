@@ -13,4 +13,27 @@ export class OffenceReferenceService {
   async create(data) {
     return await repo.create(data);
   }
+
+  async delete(query) {
+    if (query.offenceType) {
+      return await repo.deleteByOffenceType(query.offenceType);
+    }
+    if (query.id) {
+      return await repo.deleteById(query.id);
+    }
+    throw new Error("Invalid delete request");
+  }
+
+  async updateReferences(offenceType, references) {
+    // Transactional-like behavior: Delete all for type, then create new ones
+    await repo.deleteByOffenceType(offenceType);
+
+    // Ensure all new references have the correct offenceType
+    const payload = references.map(ref => ({
+      offenceType: offenceType,
+      reference: ref
+    }));
+
+    return await repo.create(payload);
+  }
 }

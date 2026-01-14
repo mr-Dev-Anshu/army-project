@@ -46,6 +46,34 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* ANIMATIONS */
+  --animate-in: animate-enter 0.2s ease-out;
+  --animate-out: animate-exit 0.2s ease-in;
+
+  @keyframes animate-enter {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes animate-exit {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
 }
 
 :root {
@@ -129,6 +157,15 @@
   body {
     font-family: var(--font-inter);
   }
+}
+
+/* UI DIALOG ANIMATIONS - MANUAL OVERRIDE for v4 */
+div[data-state="open"] {
+  animation: var(--animate-in);
+}
+
+div[data-state="closed"] {
+  animation: var(--animate-out);
 }
 
 

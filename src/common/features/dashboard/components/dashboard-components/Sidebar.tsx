@@ -158,7 +158,7 @@ const Sidebar = () => {
       icon: <Database className="w-5 h-5" />,
       label: "Basic Information",
       submenu: [
-        { label: "Offence Types", href: "/setup/offence-types" },
+        { label: "Offence Types Management", href: "/setup/offence-type-management" },
         { label: "Civil Employees Management", href: "/setup/civil-employees" },
         { label: "Vehicles (Make & Take)", href: "/setup/vehicles" },
         { label: "Ranks", href: "/setup/ranks" },

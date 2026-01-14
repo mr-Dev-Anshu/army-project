@@ -52,3 +52,59 @@ export async function POST(req) {
     );
   }
 }
+
+/* =====================
+   DELETE
+===================== */
+export async function DELETE(req) {
+  try {
+    await connectDB();
+
+    const { searchParams } = new URL(req.url);
+    const query = {
+      offenceType: searchParams.get("offenceType"),
+      id: searchParams.get("id"),
+    };
+
+    await service.delete(query);
+
+    return NextResponse.json({ success: true, message: "Deleted successfully" });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+/* =====================
+   PUT (UPDATE / REPLACE)
+===================== */
+export async function PUT(req) {
+  try {
+    await connectDB();
+
+    const body = await req.json();
+    const { offenceType, references } = body;
+
+    if (!offenceType || !references) {
+      return NextResponse.json(
+        { success: false, message: "Missing offenceType or references" },
+        { status: 400 }
+      );
+    }
+
+    // Call service update method (which does replace)
+    const updated = await service.updateReferences(offenceType, references);
+
+    return NextResponse.json(
+      { success: true, data: updated, message: "Updated successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
+  }
+}

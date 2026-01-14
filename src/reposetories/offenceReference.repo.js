@@ -41,4 +41,14 @@ export class OffenceReferenceRepository {
   async create(data) {
     return await OffenceReference.create(data);
   }
+
+  async deleteByOffenceType(offenceType) {
+    return await OffenceReference.deleteMany({
+      offenceType: offenceType.toLowerCase(),
+    });
+  }
+
+  async deleteById(id) {
+    return await OffenceReference.findByIdAndDelete(id);
+  }
 }
