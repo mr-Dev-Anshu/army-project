@@ -226,12 +226,7 @@ export const initialState: GlobalFormState = {
         name: "",
         mobileNumber: "",
         ownerType: "militaryPersonnel",
-        armyNo: "",
-        rank: "",
-        unit: "",
-        fmn: "",
-        command: "",
-        address: "",
+        ownerDetails: {},
       },
       vehiclePassDetails: {
         isAvailable: false,

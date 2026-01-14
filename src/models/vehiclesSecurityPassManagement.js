@@ -24,12 +24,10 @@ const ownerInformationSchema = new Schema({
             "shopKeeper", "tempHiredWorker",
         ]
     },
-    armyNo: { type: String },
-    rank: { type: String },
-    unit: { type: String },
-    fmn: { type: String },
-    command: { type: String },
-    address: { type: String },
+    ownerDetails: {
+        type: Schema.Types.Mixed,
+        default: {}
+    },
 }, { _id: false });
 
 // Vehicle Pass Details Schema

@@ -17,12 +17,7 @@ const ownerInformationSchema = Joi.object({
     mobileNumber: Joi.string().trim().optional().allow(""),
     ownerType: Joi.string().trim().optional().allow(""),
 
-    armyNo: Joi.string().trim().optional().allow(""),
-    rank: Joi.string().trim().optional().allow(""),
-    unit: Joi.string().trim().optional().allow(""),
-    fmn: Joi.string().trim().optional().allow(""),
-    command: Joi.string().trim().optional().allow(""),
-    address: Joi.string().trim().optional().allow(""),
+    ownerDetails: Joi.object().optional(),
 });
 
 // Sub-schema for Vehicle Pass Details

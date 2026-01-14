@@ -15,12 +15,7 @@ export interface OwnerInformation {
     | "servantMaid"
     | "shopKeeper"
     | "tempHiredWorker";
-    armyNo?: string;
-    rank?: string;
-    unit?: string;
-    fmn?: string;
-    command?: string;
-    address?: string;
+    ownerDetails?: Record<string, any>;
 }
 
 export interface VehiclePassDetails {
@@ -42,8 +37,8 @@ export interface VehiclesSecurityPassManagement {
     _id: string;
     vehicleIdentification: VehicleIdentification;
     ownerInformation: OwnerInformation;
-    vehiclePassDetails?: VehiclePassDetails;
-    authentication?: Authentication;
+    vehiclePassDetails: VehiclePassDetails;
+    authentication: Authentication;
     remark?: string;
     customFields?: Record<string, any>;
     createdAt: string;
