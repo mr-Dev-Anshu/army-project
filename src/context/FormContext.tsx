@@ -211,6 +211,44 @@ export const initialState: GlobalFormState = {
 
     maidServant: {} as any, // Placeholder until fully defined
     tempWorker: {} as any,   // Placeholder until fully defined
+
+    vehiclesSecurityPassManagement: {
+      _id: "",
+      createdAt: "",
+      updatedAt: "",
+      vehicleIdentification: {
+        registrationNumber: "",
+        color: "",
+        category: "",
+        type: "",
+      },
+      ownerInformation: {
+        name: "",
+        mobileNumber: "",
+        ownerType: "militaryPersonnel",
+        armyNo: "",
+        rank: "",
+        unit: "",
+        fmn: "",
+        command: "",
+        address: "",
+      },
+      vehiclePassDetails: {
+        isAvailable: false,
+        passNumber: "",
+        issuedDate: "",
+        validFrom: "",
+        validTo: "",
+        issuingAuthority: "",
+      },
+      authentication: {
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: "",
+      },
+      remark: "",
+      customFields: {},
+    },
   },
 };
 
