@@ -18,7 +18,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { MoreVertical, Edit, Trash, Paperclip, X } from "lucide-react";
+import { MoreVertical, Edit, Trash, Paperclip, X, Check, CheckCheck } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface OffenceGroup {
@@ -43,6 +43,14 @@ export default function OffenceTypesManagement() {
     const [editOffenceType, setEditOffenceType] = useState("");
     const [editReferences, setEditReferences] = useState<string[]>([]);
     const [newReferenceInput, setNewReferenceInput] = useState("");
+
+    // Inline Edit State for References (Modal)
+    const [editingRefIndex, setEditingRefIndex] = useState<number | null>(null);
+    const [editingRefText, setEditingRefText] = useState("");
+
+    // Inline Edit State for Pending References (Create Form)
+    const [pendingEditingIndex, setPendingEditingIndex] = useState<number | null>(null);
+    const [pendingEditingText, setPendingEditingText] = useState("");
 
     // Fetch Data
     const fetchOffenceTypes = async () => {
@@ -79,6 +87,37 @@ export default function OffenceTypesManagement() {
         const newRefs = [...pendingReferences];
         newRefs.splice(index, 1);
         setPendingReferences(newRefs);
+        setPendingReferences(newRefs);
+    };
+
+    // --- PENDING REFERENCES INLINE EDIT ---
+    const startEditingPendingRef = (index: number) => {
+        setPendingEditingIndex(index);
+        setPendingEditingText(pendingReferences[index]);
+    };
+
+    const cancelEditingPendingRef = () => {
+        setPendingEditingIndex(null);
+        setPendingEditingText("");
+    };
+
+    const savePendingRef = (index: number) => {
+        if (!pendingEditingText.trim()) {
+            toast.warning("Reference text cannot be empty");
+            return;
+        }
+        // Check for duplicates
+        if (pendingEditingText.trim().toLowerCase() !== pendingReferences[index].toLowerCase()) {
+            if (pendingReferences.some((r, i) => i !== index && r.toLowerCase() === pendingEditingText.trim().toLowerCase())) {
+                toast.warning("Reference already added");
+                return;
+            }
+        }
+        const newRefs = [...pendingReferences];
+        newRefs[index] = pendingEditingText.trim();
+        setPendingReferences(newRefs);
+        setPendingEditingIndex(null);
+        setPendingEditingText("");
     };
 
     const handleSave = async () => {
@@ -150,6 +189,8 @@ export default function OffenceTypesManagement() {
         setEditOffenceType(group.offenceType); // Initialize with capitalisation from DB usually
         setEditReferences([...group.references]);
         setNewReferenceInput("");
+        setEditingRefIndex(null); // Reset
+        setEditingRefText("");
         setIsEditModalOpen(true);
     };
 
@@ -168,6 +209,37 @@ export default function OffenceTypesManagement() {
         }
         setEditReferences([...editReferences, newReferenceInput.trim()]);
         setNewReferenceInput("");
+    };
+
+    // --- INLINE EDIT HANDLERS ---
+    const startEditingRef = (index: number) => {
+        setEditingRefIndex(index);
+        setEditingRefText(editReferences[index]);
+    };
+
+    const cancelEditingRef = () => {
+        setEditingRefIndex(null);
+        setEditingRefText("");
+    };
+
+    const saveEditingRef = (index: number) => {
+        if (!editingRefText.trim()) {
+            toast.warning("Reference text cannot be empty");
+            return;
+        }
+        // Check duplicate if changed
+        if (editingRefText.trim().toLowerCase() !== editReferences[index].toLowerCase()) {
+            if (editReferences.some((r, i) => i !== index && r.toLowerCase() === editingRefText.trim().toLowerCase())) {
+                toast.warning("Reference already exists");
+                return;
+            }
+        }
+
+        const newRefs = [...editReferences];
+        newRefs[index] = editingRefText.trim();
+        setEditReferences(newRefs);
+        setEditingRefIndex(null);
+        setEditingRefText("");
     };
 
     const handleSaveEdit = async () => {
@@ -214,7 +286,7 @@ export default function OffenceTypesManagement() {
         <div className="w-full bg-white">
             {/* Header / Breadcrumb Section */}
             <div className="border-b bg-white px-6 py-4">
-                <div className="mb-2 flex items-center text-sm text-gray-500">
+                <div className="mb-2 flex items-center text-sm text-[#404040]">
                     <button className="flex items-center gap-2 hover:text-gray-900 transition-colors">
                         <span className="h-4 w-4">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -228,7 +300,7 @@ export default function OffenceTypesManagement() {
                     <span className="mx-2">|</span>
                     <button className="hover:text-gray-900 transition-colors">Basic Information</button>
                     <span className="mx-2 text-gray-400">&gt;</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="font-semibold text-[#404040]">
                         Offence Types Management
                     </span>
                 </div>
@@ -236,19 +308,20 @@ export default function OffenceTypesManagement() {
 
             {/* Main Content */}
             <div className="p-6">
-                <h1 className="mb-8 text-xl font-semibold text-gray-700">
+                <h1 className="mb-8 text-base font-semibold text-[#404040]">
                     Offence Types Management
                 </h1>
 
                 {/* Add New Section */}
                 <div className="bg-white p-6 rounded-md shadow-sm border border-slate-200 mb-8">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold">Add New Offence Type</h2>
+                        <h2 className="text-xl font-semibold text-[#0A0A0A]">Add New Offence Type</h2>
+
                     </div>
 
                     <div className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">
+                            <label className="text-sm font-medium text-[#0A0A0A]">
                                 Add New Offence Type if not present in the list
                             </label>
                             <Input
@@ -260,7 +333,7 @@ export default function OffenceTypesManagement() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">
+                            <label className="text-sm font-medium text-[#0A0A0A]">
                                 Enter Reference Related to the Above Offence
                             </label>
                             <div className="flex gap-2">
@@ -278,33 +351,73 @@ export default function OffenceTypesManagement() {
                                 />
                                 <span
                                     onClick={handleAddReference}
-                                    className="text-blue-500 hover:text-blue-600 text-sm font-medium cursor-pointer flex items-center self-center shrink-0"
+                                    className="text-blue-500 hover:text-blue-600 text-sm font-medium cursor-pointer flex items-center self-center shrink-0 whitespace-nowrap"
                                 >
                                     + Add New Reference
                                 </span>
                             </div>
 
-                            {/* Pending References List */}
+                            {/* Pending References List (Stacked) */}
                             {pendingReferences.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2">
+                                <div className="mt-4 border rounded-md divide-y divide-slate-100 border-slate-200">
                                     {pendingReferences.map((ref, idx) => (
-                                        <div key={idx} className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                                            <span>{ref}</span>
-                                            <button
-                                                onClick={() => handleRemovePendingReference(idx)}
-                                                className="hover:text-red-500 font-bold"
-                                            >
-                                                &times;
-                                            </button>
+                                        <div key={idx} className="flex items-center justify-between p-3 bg-white">
+                                            <div className="flex gap-3 text-sm text-[#0A0A0A] items-center flex-1 mr-4">
+                                                <span className="text-slate-400 font-medium">{idx + 1}.</span>
+
+                                                {pendingEditingIndex === idx ? (
+                                                    <div className="flex items-center gap-2 w-full">
+                                                        <Input
+                                                            value={pendingEditingText}
+                                                            onChange={(e) => setPendingEditingText(e.target.value)}
+                                                            className="h-8 text-sm"
+                                                            autoFocus
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === "Enter") savePendingRef(idx);
+                                                                if (e.key === "Escape") cancelEditingPendingRef();
+                                                            }}
+                                                        />
+                                                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:text-green-600 text-green-500" onClick={() => savePendingRef(idx)}>
+                                                            <Check className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:text-red-500 text-slate-400" onClick={cancelEditingPendingRef}>
+                                                            <X className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="break-all">{ref}</span>
+                                                )}
+                                            </div>
+
+                                            {/* Actions */}
+                                            {pendingEditingIndex !== idx && (
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => startEditingPendingRef(idx)}
+                                                        className="text-slate-400 hover:text-blue-500 transition-colors p-1"
+                                                        title="Edit"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemovePendingReference(idx)}
+                                                        className="text-red-400 hover:text-red-600 transition-colors bg-red-50 hover:bg-red-100 p-1 rounded-full"
+                                                        title="Remove"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        <div className="flex justify-start gap-3 mt-6">
-                            <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-                            <Button onClick={handleSave} className="bg-black text-white hover:bg-slate-800">
+                        <div className="flex justify-between items-center mt-6 pt-2">
+                            <Button variant="outline" onClick={handleCancel} className="px-6">Cancel</Button>
+                            <Button onClick={handleSave} className="bg-black text-white hover:bg-slate-800 px-6">
+                                <CheckCheck className="w-4 h-4 mr-2" />
                                 Save to list
                             </Button>
                         </div>
@@ -314,17 +427,17 @@ export default function OffenceTypesManagement() {
                 {/* List Section */}
                 <div className="bg-white p-6 rounded-md shadow-sm border border-slate-200">
                     <div className="flex justify-between items-end mb-4">
-                        <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-tight">
+                        <h2 className="text-sm font-semibold text-[#404040] uppercase tracking-tight">
                             Monthly Offence Analysis – Data Entered
                         </h2>
-                        <div className="text-sm text-slate-500">
-                            Total Offences: <span className="font-semibold text-slate-800">{offenceGroups.length}</span>
+                        <div className="text-sm text-[#404040]">
+                            Total Offences: <span className="font-semibold">{offenceGroups.length}</span>
                         </div>
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-slate-700">
-                            <thead className="bg-slate-50 text-slate-600 font-medium">
+                        <table className="w-full text-left text-sm text-[#0A0A0A]">
+                            <thead className="bg-slate-50 text-[#0A0A0A] font-bold">
                                 <tr>
                                     <th className="px-4 py-3 w-16">Sr no.</th>
                                     <th className="px-4 py-3 w-1/4">Offence Type</th>
@@ -346,7 +459,7 @@ export default function OffenceTypesManagement() {
                                                 {group.offenceType.charAt(0).toUpperCase() + group.offenceType.slice(1)}
                                             </td>
                                             <td className="px-4 py-3 align-top">
-                                                <ol className="list-decimal list-inside space-y-1 text-slate-600">
+                                                <ol className="list-decimal list-inside space-y-1 text-[#404040]">
                                                     {group.references.map((ref, rIdx) => (
                                                         <li key={rIdx}>{ref}</li>
                                                     ))}
@@ -399,7 +512,7 @@ export default function OffenceTypesManagement() {
                     <div className="space-y-6 py-4">
                         {/* 1. Offence Type Name */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">
+                            <label className="text-sm font-medium text-[#0A0A0A]">
                                 Add New Offence Type if not present in the list
                             </label>
                             <Input
@@ -419,16 +532,52 @@ export default function OffenceTypesManagement() {
                             <div className="border rounded-md divide-y divide-slate-100 border-slate-200">
                                 {editReferences.map((ref, idx) => (
                                     <div key={idx} className="flex items-center justify-between p-3 bg-white">
-                                        <div className="flex gap-3 text-sm text-slate-700">
+                                        <div className="flex gap-3 text-sm text-[#0A0A0A] items-center flex-1 mr-4">
                                             <span className="text-slate-400 font-medium">{idx + 1}.</span>
-                                            <span>{ref}</span>
+
+                                            {editingRefIndex === idx ? (
+                                                <div className="flex items-center gap-2 w-full">
+                                                    <Input
+                                                        value={editingRefText}
+                                                        onChange={(e) => setEditingRefText(e.target.value)}
+                                                        className="h-8 text-sm"
+                                                        autoFocus
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "Enter") saveEditingRef(idx);
+                                                            if (e.key === "Escape") cancelEditingRef();
+                                                        }}
+                                                    />
+                                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:text-green-600 text-green-500" onClick={() => saveEditingRef(idx)}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                    </Button>
+                                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:text-red-500 text-slate-400" onClick={cancelEditingRef}>
+                                                        <X className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <span className="break-all">{ref}</span>
+                                            )}
                                         </div>
-                                        <button
-                                            onClick={() => handleRemoveReferenceInEdit(idx)}
-                                            className="text-red-400 hover:text-red-600 transition-colors"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
+
+                                        {/* Actions */}
+                                        {editingRefIndex !== idx && (
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => startEditingRef(idx)}
+                                                    className="text-slate-400 hover:text-blue-500 transition-colors p-1"
+                                                    title="Edit Reference"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRemoveReferenceInEdit(idx)}
+                                                    className="text-red-400 hover:text-red-600 transition-colors p-1"
+                                                    title="Remove Reference"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 {editReferences.length === 0 && (
@@ -441,7 +590,7 @@ export default function OffenceTypesManagement() {
 
                         {/* 3. Add New Reference */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">
+                            <label className="text-sm font-medium text-[#0A0A0A]">
                                 Add Additional References for this Offence Type
                             </label>
                             <Textarea
