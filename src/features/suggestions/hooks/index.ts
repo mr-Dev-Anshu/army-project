@@ -6,6 +6,6 @@ export const useGetFieldSuggestions = (fieldType: string, query: string, options
     queryKey: ["field-suggestions", fieldType, query],
     queryFn: () => api.getFieldSuggestions(fieldType, query),
     enabled: options?.enabled !== undefined ? options.enabled : !!fieldType, // Use options.enabled if provided, else fallback to default logic
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 0, // Always fetch fresh data to show newly added items immediately
   });
 };
