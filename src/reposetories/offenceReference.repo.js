@@ -25,7 +25,11 @@ export class OffenceReferenceRepository {
           _id: "$offenceType",
           references: { $push: "$reference" },
           count: { $sum: 1 },
+          latestId: { $max: "$_id" }
         },
+      },
+      {
+        $sort: { latestId: -1 }
       },
       {
         $project: {

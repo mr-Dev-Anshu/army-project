@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { MoreVertical, Edit, Trash, Paperclip, X, Check, CheckCheck } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 interface OffenceGroup {
     offenceType: string;
@@ -51,6 +52,10 @@ export default function OffenceTypesManagement() {
     // Inline Edit State for Pending References (Create Form)
     const [pendingEditingIndex, setPendingEditingIndex] = useState<number | null>(null);
     const [pendingEditingText, setPendingEditingText] = useState("");
+
+    // Confirmation Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [offenceTypeToDelete, setOffenceTypeToDelete] = useState<string | null>(null);
 
     // Fetch Data
     const fetchOffenceTypes = async () => {
@@ -171,15 +176,24 @@ export default function OffenceTypesManagement() {
     };
 
     // --- DELETE HANDLER ---
-    const handleDelete = async (offenceType: string) => {
-        if (!confirm(`Are you sure you want to delete all references for "${offenceType}"?`)) return;
+    const handleDeleteClick = (offenceType: string) => {
+        setOffenceTypeToDelete(offenceType);
+        setDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!offenceTypeToDelete) return;
+
         try {
-            await axios.delete(`/api/offence-references?offenceType=${encodeURIComponent(offenceType)}`);
+            await axios.delete(`/api/offence-references?offenceType=${encodeURIComponent(offenceTypeToDelete)}`);
             toast.success("Deleted successfully");
             fetchOffenceTypes();
         } catch (error: any) {
             console.error("Delete error", error);
             toast.error("Failed to delete");
+        } finally {
+            setDeleteModalOpen(false);
+            setOffenceTypeToDelete(null);
         }
     };
 
@@ -359,11 +373,11 @@ export default function OffenceTypesManagement() {
 
                             {/* Pending References List (Stacked) */}
                             {pendingReferences.length > 0 && (
-                                <div className="mt-4 border rounded-md divide-y divide-slate-100 border-slate-200">
+                                <div className="mt-4 border border-[#E5E5E5]  divide-y divide-[#E5E5E5]">
                                     {pendingReferences.map((ref, idx) => (
                                         <div key={idx} className="flex items-center justify-between p-3 bg-white">
                                             <div className="flex gap-3 text-sm text-[#0A0A0A] items-center flex-1 mr-4">
-                                                <span className="text-slate-400 font-medium">{idx + 1}.</span>
+                                                <span className="text-[#0A0A0A] font-medium">{idx + 1}.</span>
 
                                                 {pendingEditingIndex === idx ? (
                                                     <div className="flex items-center gap-2 w-full">
@@ -435,57 +449,66 @@ export default function OffenceTypesManagement() {
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border border-[#E5E5E5] rounded-md">
                         <table className="w-full text-left text-sm text-[#0A0A0A]">
-                            <thead className="bg-slate-50 text-[#0A0A0A] font-bold">
+                            <thead className="bg-[#E5E5E5] font-bold text-[#0A0A0A]">
                                 <tr>
-                                    <th className="px-4 py-3 w-16">Sr no.</th>
-                                    <th className="px-4 py-3 w-1/4">Offence Type</th>
-                                    <th className="px-4 py-3">Reference Related</th>
+                                    <th className="px-4 py-3 w-18 border-r border-[#E5E5E5]">Sr no.</th>
+                                    <th className="px-4 py-3 w-1/4 border-r border-[#E5E5E5]">Offence Type</th>
+                                    <th className="px-4 py-3 border-r border-[#E5E5E5]">Reference Related</th>
                                     <th className="px-4 py-3 w-10"></th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-[#E5E5E5] bg-white">
                                 {loading ? (
                                     <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr>
                                 ) : offenceGroups.length === 0 ? (
                                     <tr><td colSpan={4} className="p-4 text-center text-slate-400">No records found</td></tr>
                                 ) : (
                                     offenceGroups.map((group, idx) => (
-                                        <tr key={idx} className="hover:bg-slate-50 group transition-colors">
-                                            <td className="px-4 py-3 align-top">{idx + 1}.</td>
-                                            <td className="px-4 py-3 align-top font-medium text-slate-900 border-r border-slate-100">
+                                        <tr key={idx} className="divide-x divide-[#E5E5E5]">
+                                            <td className="px-4 py-3 align-top text-center font-medium text-[#0A0A0A]">
+                                                {idx + 1}.
+                                            </td>
+                                            <td className="px-4 py-3 align-top font-medium text-[#0A0A0A] bg-white">
                                                 {/* Capitalize first letter */}
                                                 {group.offenceType.charAt(0).toUpperCase() + group.offenceType.slice(1)}
                                             </td>
-                                            <td className="px-4 py-3 align-top">
-                                                <ol className="list-decimal list-inside space-y-1 text-[#404040]">
-                                                    {group.references.map((ref, rIdx) => (
-                                                        <li key={rIdx}>{ref}</li>
-                                                    ))}
-                                                </ol>
-                                                {group.references.length === 0 && <span className="text-slate-400 italic">No Reference added</span>}
+                                            <td className="px-0 py-0 align-top bg-white">
+                                                {/* Nested list with borders */}
+                                                {group.references.length > 0 ? (
+                                                    <div className="flex flex-col">
+                                                        {group.references.map((ref, rIdx) => (
+                                                            <div key={rIdx} className={`px-4 py-3 flex gap-2 ${rIdx !== group.references.length - 1 ? 'border-b border-[#E5E5E5]' : ''}`}>
+                                                                <span className="text-[#0A0A0A] font-medium min-w-[1.2rem]">{rIdx + 1}.</span>
+                                                                <span>{ref}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="px-4 py-3 text-slate-400 italic">No Reference added</div>
+                                                )}
                                             </td>
-                                            <td className="px-4 py-3 align-top text-right">
+                                            <td className="px-2 py-3 align-top text-center">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <Button variant="ghost" className="h-8 w-8 p-0 rounded-full hover:bg-slate-100">
                                                             <span className="sr-only">Open menu</span>
-                                                            <MoreVertical className="h-4 w-4" />
+                                                            <MoreVertical className="h-4 w-4 text-slate-500" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem className="cursor-pointer" onClick={() => openEditModal(group)}>
+                                                    <DropdownMenuContent align="end" className="w-56 shadow-lg border-slate-200">
+                                                        <DropdownMenuItem className="cursor-pointer py-2 focus:bg-slate-50" onClick={() => openEditModal(group)}>
                                                             <Edit className="mr-2 h-4 w-4" />
                                                             <span>Edit</span>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="cursor-pointer">
+                                                        <DropdownMenuItem className="cursor-pointer py-2 focus:bg-slate-50">
                                                             <Paperclip className="mr-2 h-4 w-4" />
                                                             <span>Attach Forms / Certificates / Letters</span>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
-                                                            className="text-red-600 cursor-pointer focus:text-red-600"
-                                                            onClick={() => handleDelete(group.offenceType)}
+                                                            className="text-red-600 cursor-pointer py-2 focus:bg-red-50 focus:text-red-700"
+                                                            onClick={() => handleDeleteClick(group.offenceType)}
                                                         >
                                                             <Trash className="mr-2 h-4 w-4" />
                                                             <span>Delete</span>
@@ -504,15 +527,15 @@ export default function OffenceTypesManagement() {
 
             {/* EDIT MODAL */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Edit Offence Type</DialogTitle>
+                <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col p-0 overflow-hidden gap-0">
+                    <DialogHeader className="px-6 py-4 border-b border-[#E5E5E5] shrink-0">
+                        <DialogTitle className="text-xl font-semibold text-[#0A0A0A]">Edit Offence Type</DialogTitle>
                     </DialogHeader>
 
-                    <div className="space-y-6 py-4">
+                    <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
                         {/* 1. Offence Type Name */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#0A0A0A]">
+                            <label className="text-sm font-medium text-[#737373]">
                                 Add New Offence Type if not present in the list
                             </label>
                             <Input
@@ -525,15 +548,15 @@ export default function OffenceTypesManagement() {
 
                         {/* 2. Existing References List */}
                         <div className="space-y-2">
-                            <div className="flex justify-between text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                            <div className="flex justify-between text-sm font-semibold text-[#737373]  tracking-wide">
                                 <span>Reference Related to the Above Offence:</span>
                                 <span>{String(editReferences.length).padStart(2, '0')}</span>
                             </div>
-                            <div className="border rounded-md divide-y divide-slate-100 border-slate-200">
+                            <div className="space-y-2">
                                 {editReferences.map((ref, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 bg-white">
+                                    <div key={idx} className="flex items-center justify-between p-3 bg-white border border-[#E5E5E5] rounded-md">
                                         <div className="flex gap-3 text-sm text-[#0A0A0A] items-center flex-1 mr-4">
-                                            <span className="text-slate-400 font-medium">{idx + 1}.</span>
+                                            <span className="text-[#A3A3A3] font-medium">{idx + 1}.</span>
 
                                             {editingRefIndex === idx ? (
                                                 <div className="flex items-center gap-2 w-full">
@@ -581,7 +604,7 @@ export default function OffenceTypesManagement() {
                                     </div>
                                 ))}
                                 {editReferences.length === 0 && (
-                                    <div className="p-4 text-center text-slate-400 text-sm italic">
+                                    <div className="p-4 text-center text-slate-400 text-sm italic border border-dashed border-[#E5E5E5] rounded-md">
                                         No references
                                     </div>
                                 )}
@@ -599,7 +622,7 @@ export default function OffenceTypesManagement() {
                                 placeholder="Offence Reference"
                                 className="bg-slate-50 min-h-[80px]"
                             />
-                            <div className="flex justify-end">
+                            <div className="flex justify-end pt-2">
                                 <span
                                     onClick={handleAddNewReferenceInEdit}
                                     className="text-blue-500 hover:text-blue-600 text-sm font-medium cursor-pointer flex items-center gap-1"
@@ -610,13 +633,23 @@ export default function OffenceTypesManagement() {
                         </div>
                     </div>
 
-                    <DialogFooter className="flex gap-2 sm:justify-between w-full">
-                        <div className="flex-1"></div> {/* Spacer to push buttons right if needed, but layout expects right align */}
-                        <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                        <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleSaveEdit}>Save Changes</Button>
+                    <DialogFooter className="flex gap-2 justify-between w-full px-6 py-4 border-t border-slate-100 bg-white shrink-0 sm:justify-between">
+                        <Button variant="outline" onClick={() => setIsEditModalOpen(false)} className="h-10 px-6 text-[#0A0A0A] font-medium border-slate-200">Cancel</Button>
+                        <Button className="bg-[#22C55E] hover:bg-[#16A34A] text-white h-10 px-6 font-medium" onClick={handleSaveEdit}>Save Changes</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* DELETE CONFIRMATION MODAL */}
+            <ConfirmationModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Confirm Delete"
+                message={<span>Are you sure you want to delete all references for <span className="font-semibold text-red-600">"{offenceTypeToDelete}"</span> ? This action cannot be undone.</span>}
+                confirmLabel="Delete"
+                variant="danger"
+            />
         </div>
     );
 }
