@@ -191,6 +191,7 @@ export interface TrafficFormState {
 
   offenceTypes: string[];
   offenceCode: string[];
+  offenceRefList?: { _id: string; reference: string }[];
 
   witnesses: Witness[];
   selectedWitness?: OnDutyDetailsMPReporting | null;

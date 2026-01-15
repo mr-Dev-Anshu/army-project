@@ -76,6 +76,7 @@ export const initialState: GlobalFormState = {
 
       offenceTypes: [],
       offenceCode: [],
+      offenceRefList: [],
       witnesses: [],
       selectedWitness: null,
       offenderPeople: [],

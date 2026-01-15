@@ -339,16 +339,16 @@ export default function Step2Statement() {
     Array.isArray(d?.witnesses) && d.witnesses.length > 0
       ? d.witnesses
       : [
-          {
-            reportingBlock: {
-              nameReportingMP: "",
-              rank: "",
-              unit: "",
-              armyNumber: "",
-              contactNumber: "",
-            },
+        {
+          reportingBlock: {
+            nameReportingMP: "",
+            rank: "",
+            unit: "",
+            armyNumber: "",
+            contactNumber: "",
           },
-        ];
+        },
+      ];
 
   const hasFilledWitness = witnesses.some((w) => {
     const r = w.reportingBlock;
@@ -618,13 +618,13 @@ export default function Step2Statement() {
                   <input
                     type="radio"
                     name="selectedWitnessTraffic"
-                    checked={
+                    checked={Boolean(
                       d.selectedWitness &&
                       d.selectedWitness.nameReportingMP ===
-                        data.nameReportingMP &&
+                      data.nameReportingMP &&
                       d.selectedWitness.armyNumber === data.armyNumber &&
                       d.selectedWitness.unit === data.unit
-                    }
+                    )}
                     onChange={() =>
                       set("formData.traffic.selectedWitness", w.reportingBlock)
                     }

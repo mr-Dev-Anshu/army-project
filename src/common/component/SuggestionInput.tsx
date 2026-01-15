@@ -7,7 +7,7 @@ import { useGetFieldSuggestions } from "@/features/suggestions/hooks";
 import { Loader2 } from "lucide-react";
 
 interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onChange" | "value"> {
-  label?: string;
+  label?: React.ReactNode;
   placeholder?: string;
   value?: string;
   onChange?: (v: string) => void;

@@ -68,7 +68,7 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                 item.vehicleIdentification?.registrationNumber?.toLowerCase().includes(searchTerm) ||
                 item.ownerInformation?.name?.toLowerCase().includes(searchTerm) ||
                 item.vehiclePassDetails?.passNumber?.toLowerCase().includes(searchTerm) ||
-                item.ownerInformation?.unit?.toLowerCase().includes(searchTerm);
+                item.ownerInformation?.ownerDetails?.unit?.toLowerCase().includes(searchTerm);
 
             // Date logic (Record Date or Issued Date)
             const createdDate = item.createdAt;
