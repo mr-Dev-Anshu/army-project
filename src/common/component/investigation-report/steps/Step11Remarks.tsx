@@ -24,7 +24,7 @@ export default function Step11Remarks() {
     });
 
   return (
-    <FormSection title="11. REMARKS OF CO/21C PROVOST UNIT :" onClear={clear}>
+    <div className="space-y-6">
       <div className="mt-2">
         <p className="font-semibold mb-1">ANALYSIS</p>
         <FormTextarea
@@ -42,6 +42,6 @@ export default function Step11Remarks() {
           onChange={(v) => set("recommendation", v)}
         />
       </div>
-    </FormSection>
+    </div>
   );
 }

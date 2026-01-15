@@ -13,7 +13,6 @@ import { ArrowLeft, Download } from "lucide-react";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 
 export default function MpOccurrenceReportsPage() {
-  const { data, isLoading, isError } = useGetAllMPReports();
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
@@ -35,9 +34,70 @@ export default function MpOccurrenceReportsPage() {
     search: "",
     offenceType: "All",
     date: "",
+    fromDate: "",
+    toDate: "",
+    unit: "",
+    fmn: "",
+    placeOfOffence: "",
     actionStatus: "All",
     sortOrder: "desc" as "asc" | "desc",
   });
+
+  /* ================= API FILTERS ================= */
+  const apiParams = useMemo(() => {
+    const params: any = {};
+    if (filters.unit) params.unit = filters.unit;
+    if (filters.fmn) params.fmn = filters.fmn;
+    if (filters.fromDate) params.fromDate = filters.fromDate;
+    if (filters.toDate) params.toDate = filters.toDate;
+    if (filters.toDate) params.toDate = filters.toDate;
+    if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
+    if (filters.date) params.date = filters.date;
+    return params;
+  }, [filters]);
+
+  const { data, isLoading, isError } = useGetAllMPReports(apiParams);
+
+  /* ================= DYNAMIC OPTIONS FROM DATA ================= */
+  const { offenceTypeOptions, unitOptions, fmnOptions, placeOptions } = useMemo(() => {
+    if (!data) return { offenceTypeOptions: [], unitOptions: [], fmnOptions: [], placeOptions: [] };
+
+    const types = new Set<string>();
+    const units = new Set<string>();
+    const fmns = new Set<string>();
+    const places = new Set<string>();
+
+    data.forEach((item: any) => {
+      // Offence Types
+      const type = item.occurrenceDetails?.offenceType;
+      if (type) types.add(type);
+      const typeList = item.occurrenceDetails?.offenceTypes;
+      if (Array.isArray(typeList)) {
+        typeList.forEach((t: string) => types.add(t));
+      }
+
+      // Unit
+      const invHead = item.investigationHead || {};
+      const primaryIndividual = item.individuals?.[0] || item.individual?.[0] || {};
+      const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
+      if (unit) units.add(unit);
+
+      // FMN
+      const fmn = invHead.fmn || primaryIndividual.fmn || item.customFields?.fmn;
+      if (fmn) fmns.add(fmn);
+
+      // Place
+      const place = item.occurrenceDetails?.placeOfOccurrence || item.placeOfOccurrence;
+      if (place) places.add(place);
+    });
+
+    return {
+      offenceTypeOptions: Array.from(types).sort(),
+      unitOptions: Array.from(units).sort(),
+      fmnOptions: Array.from(fmns).sort(),
+      placeOptions: Array.from(places).sort()
+    };
+  }, [data]);
 
   const processedData = useMemo(() => {
     if (!data) return [];
@@ -45,10 +105,21 @@ export default function MpOccurrenceReportsPage() {
     // Filter raw data
     const filteredData = data.filter((item: any) => {
       const occurrence = item.occurrenceDetails || {};
+      const invHead = item.investigationHead || {};
+      const primaryIndividual = item.individuals?.[0] || item.individual?.[0] || {};
 
       // Date Check
+      const rawDate = occurrence.dateOfOccurrence || item.createdAt;
+
+      /* ---------- DATE RANGE ---------- */
+      if (filters.fromDate || filters.toDate) {
+        const d = new Date(rawDate).getTime();
+        if (filters.fromDate && d < new Date(filters.fromDate).getTime()) return false;
+        if (filters.toDate && d > new Date(filters.toDate + "T23:59:59.999").getTime()) return false;
+      }
+
+      /* ---------- SINGLE DATE ---------- */
       if (filters.date) {
-        const rawDate = occurrence.dateOfOccurrence || item.createdAt;
         if (rawDate) {
           const recordDate = new Date(rawDate).toISOString().split('T')[0];
           if (recordDate !== filters.date) return false;
@@ -60,6 +131,48 @@ export default function MpOccurrenceReportsPage() {
         const isTaken = item.actionStatus === true;
         const filterTaken = filters.actionStatus === "Taken";
         if (isTaken !== filterTaken) return false;
+      }
+
+      // Offence Type Check
+      if (filters.offenceType && filters.offenceType !== "All") {
+        const type = occurrence.offenceType;
+        const typeList = occurrence.offenceTypes || [];
+        const selectedTypes = filters.offenceType.split(",");
+
+        // Check if ANY of the selected types match the record's type(s)
+        const matchSingle = selectedTypes.includes(type);
+        const matchArray = Array.isArray(typeList) && typeList.some(t => selectedTypes.includes(t));
+
+        if (!matchSingle && !matchArray) return false;
+      }
+
+      /* ---------- UNIT ---------- */
+      if (filters.unit) {
+        const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
+        const selectedUnits = filters.unit.split(",");
+        if (!unit || !selectedUnits.includes(unit)) return false;
+      }
+
+      /* ---------- FMN ---------- */
+      if (filters.fmn) {
+        const fmn = invHead.fmn || primaryIndividual.fmn || item.customFields?.fmn;
+        const selectedFmns = filters.fmn.split(",");
+        if (!fmn || !selectedFmns.includes(fmn)) return false;
+      }
+
+      /* ---------- PLACE OF OFFENCE ---------- */
+      if (filters.placeOfOffence) {
+        const place =
+          item.occurrenceDetails?.placeOfOccurrence ||
+          item.placeOfOccurrence;
+
+        const selectedPlaces = filters.placeOfOffence.split(",").map(p => p.toLowerCase());
+
+        if (
+          !place ||
+          !selectedPlaces.includes(place.toLowerCase())
+        )
+          return false;
       }
 
       // Search
@@ -156,18 +269,31 @@ export default function MpOccurrenceReportsPage() {
       raw.customFields?.offenderList ||
       [];
 
-    const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => ({
-      sno: index + 1,
-      armyNo: p.armyNumber || p.armyNo || p.aadharNumber || "",
-      rank: p.rank || "",
-      name: p.name || p.personName || "Unknown",
-      identityCard: p.iCardNumber || p.icard || p.idCardNumber || p.identityCard || "-",
-      unitName: p.unit || p.unitName || "",
-      fmn: p.fmn || p.fmnName || "",
-      address: p.address || "",
-      remark: p.remark || "--",
-      role: p.role || p.type || "Victim" // Default to Victim if unknown
-    })) : [];
+    const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
+      const src = p.details || p;
+      const custom = src.customFields || {};
+      const merged = { ...custom, ...src }; // flatten for search
+
+      return {
+        sno: index + 1,
+        armyNo: merged.armyNo || merged.armyNumber || merged.serviceNumber || merged.aadharNumber || "",
+        rank: merged.rank || "",
+        name: merged.name || merged.personName || merged.fullName || "",
+        identityCard: merged.iCardNumber || merged.icard || merged.idCardNumber || merged.identityCard || merged.passNo || "",
+        unitName: merged.unit || merged.unitName || "",
+        fmn: merged.fmn || merged.fmnName || "",
+        address: merged.address || "",
+        remark: merged.remark || "",
+        role: mappedRole(merged.role || merged.type || "Offender"),
+        customFields: merged
+      };
+    }) : [];
+
+    // Helper for role mapping if needed, otherwise string
+    function mappedRole(r: string) {
+      if (!r) return "";
+      return r;
+    }
 
     // Dynamic Fields: Witnesses
     const rawWitnesses =
@@ -177,17 +303,24 @@ export default function MpOccurrenceReportsPage() {
       raw.customFields?.witnesses ||
       [];
 
-    const witnesses = Array.isArray(rawWitnesses) ? rawWitnesses.map((w: any, index: number) => ({
-      sno: index + 1,
-      armyNo: w.armyNumber || w.armyNo || "",
-      rank: w.rank || "",
-      name: w.name || w.witnessName || "Unknown",
-      identityCard: w.iCardNumber || w.icard || w.idCardNumber || "-",
-      unitName: w.unit || w.unitName || "",
-      fmn: w.fmn || w.fmnName || "",
-      address: w.address || "",
-      remark: w.remark || "--"
-    })) : [];
+    const witnesses = Array.isArray(rawWitnesses) ? rawWitnesses.map((w: any, index: number) => {
+      const src = w.details || w;
+      const custom = src.customFields || {};
+      const merged = { ...custom, ...src };
+
+      return {
+        sno: index + 1,
+        armyNo: merged.armyNo || merged.armyNumber || merged.serviceNumber || "",
+        rank: merged.rank || "",
+        name: merged.name || merged.witnessName || merged.fullName || "",
+        identityCard: merged.iCardNumber || merged.icard || merged.idCardNumber || merged.passNo || "",
+        unitName: merged.unit || merged.unitName || "",
+        fmn: merged.fmn || merged.fmnName || "",
+        address: merged.address || "",
+        remark: merged.remark || "",
+        customFields: merged
+      };
+    }) : [];
 
     // Dynamic Fields: Documents
     const rawDocs = raw.documents || [];
@@ -241,7 +374,7 @@ export default function MpOccurrenceReportsPage() {
       command: reportDetails.command || invHead.command || "",
       firNo: reportDetails.firNumber || "",
       mpDetails: {
-        armyNo: invHead.armyNumber || invHead.armyNo || "",
+        armyNumber: invHead.armyNumber || invHead.armyNo || "",
         rank: invHead.rank || "",
         name: invHead.name || "",
         unit: invHead.unit || "",
@@ -249,7 +382,10 @@ export default function MpOccurrenceReportsPage() {
         command: invHead.command || ""
       },
       occurrence: {
-        offenceType: occurrence.offenceType || "",
+        types: occurrence.offenceTypes && occurrence.offenceTypes.length > 0
+          ? occurrence.offenceTypes
+          : (occurrence.offenceType ? [occurrence.offenceType] : []),
+        refs: occurrence.offenceTypeReference || [],
         place: occurrence.placeOfOccurrence || "",
         date: occurrence.dateOfOccurrence ? new Date(occurrence.dateOfOccurrence).toLocaleDateString("en-GB") : (raw.createdAt ? new Date(raw.createdAt).toLocaleDateString("en-GB") : ""),
         time: occurrence.timeOfOccurrence ? new Date(occurrence.timeOfOccurrence).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }) : ""
@@ -278,9 +414,63 @@ export default function MpOccurrenceReportsPage() {
   };
 
 
-  const handleDownloadReport = (item: any) => {
-    const props = mapToReportProps(item);
-    generateMPOccurrenceWordReport(props);
+  /* ================= DOWNLOAD STATE ================= */
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+
+  /* ================= ACTIONS ================= */
+
+  const handleDownloadReport = async (item: any) => {
+    setIsDownloading(true);
+    setDownloadType("Word");
+    try {
+      const props = mapToReportProps(item);
+      generateMPOccurrenceWordReport(props);
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to download Word report");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
+  };
+
+  const handleDownloadPdf = async (item: any) => {
+    const id = item._id;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+
+    setIsDownloading(true);
+    setDownloadType("PDF");
+
+    try {
+      const response = await fetch(`/api/mp-occurrence-report/pdf/${id}`);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ error: "Unknown server error" }));
+        throw new Error(errData.error || "Failed to generate PDF");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `MPOccurrenceReport-${item.reportDetails?.reportNumber || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF Download Error", error);
+      alert(`Failed to download PDF report: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
   };
 
   const handlePrintReport = (item: any) => {
@@ -314,16 +504,45 @@ export default function MpOccurrenceReportsPage() {
 
   if (viewingReport) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gray-100 flex flex-col relative">
+        {/* DOWNLOAD LOADER MODAL */}
+        {isDownloading && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4 min-w-[300px] animate-in zoom-in-95 duration-200">
+              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+              <div className="text-center">
+                <h3 className="font-semibold text-lg">Generating {downloadType} Report</h3>
+                <p className="text-gray-500 text-sm">Please wait while we prepare your download...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
           <Button variant="ghost" size="sm" onClick={() => { setViewingReport(null); setShouldAutoPrint(false); }} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
           <h1 className="text-lg font-semibold text-gray-800">MP Occurrence & Investigation Report</h1>
-          <div className="ml-auto">
-            <Button onClick={() => handleDownloadReport(viewingReport)} variant="outline" size="sm" className="gap-2">
-              <Download className="w-4 h-4" />
+          <div className="ml-auto flex gap-2">
+            <Button
+              onClick={() => handleDownloadReport(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isDownloading}
+            >
+              {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
               Download Word Report
+            </Button>
+            <Button
+              onClick={() => handleDownloadPdf(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isDownloading}
+            >
+              {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
+              Download PDF Report
             </Button>
           </div>
         </div>
@@ -356,15 +575,22 @@ export default function MpOccurrenceReportsPage() {
         onFilterChange={(key, value) =>
           setFilters((prev) => ({ ...prev, [key]: value }))
         }
-        showOffenceType={false}
+        showOffenceType={true}
+        showDateRange
+        showFilter
         // showSort={true}
-        showFilter={true}
+
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({
             search: "",
             offenceType: "All",
             date: "",
+            fromDate: "",
+            toDate: "",
+            unit: "",
+            fmn: "",
+            placeOfOffence: "",
             actionStatus: "All",
             sortOrder: "desc",
           })

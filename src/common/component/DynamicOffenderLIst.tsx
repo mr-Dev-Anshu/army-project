@@ -1,5 +1,7 @@
 import { Trash2 } from "lucide-react";
 
+type GenericObject = Record<string, unknown>;
+
 interface DynamicOffenderListProps {
   data?: any[];
   title?: string;
@@ -9,103 +11,122 @@ interface DynamicOffenderListProps {
 export default function DynamicOffenderList({
   data = [],
   title = "Victim / Offender List",
-  onDelete = (index: number) => {},
+  onDelete = (index: number) => { },
 }: DynamicOffenderListProps) {
-  const offenders = data;
-  if (!offenders.length) return null;
+  if (!data.length) return null;
 
-  // convert any key into pretty label
-  const formatFieldName = (key: string) => {
-    return key
-      ?.replace(/_/g, " ")
-      ?.replace(/\s+/g, " ")
-      ?.replace(/([A-Z])/g, " $1")
-      ?.replace(/\b\w/g, (c) => c.toUpperCase())
-      ?.trim();
-  };
+  /* ================= FORMAT LABEL ================= */
+  const formatFieldName = (key: string): string =>
+    key
+      .replace(/_/g, " ")
+      .replace(/([A-Z])/g, " $1")
+      .replace(/\s+/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim();
 
-  // helper -> get keys belonging to a column (by fuzzy match)
-  const pickMatching = (obj: any, keywords: string[] = []) => {
-    return Object.entries(obj)
-      .filter(([k, v]) => {
-        if (!v) return false;
-
-        return keywords.some((word) =>
-          k.toLowerCase().includes(word.toLowerCase())
-        );
-      })
+  /* ================= PICK BY KEYWORDS ================= */
+  const pickMatching = (
+    obj: GenericObject,
+    keywords: string[]
+  ): { key: string; value: unknown }[] =>
+    Object.entries(obj)
+      .filter(
+        ([k, v]) =>
+          v !== undefined &&
+          v !== null &&
+          v !== "" &&
+          keywords.some((word) =>
+            k.toLowerCase().includes(word.toLowerCase())
+          )
+      )
       .map(([k, v]) => ({ key: k, value: v }));
-  };
 
   return (
     <div className="mt-6 border border-gray-300 rounded-lg overflow-hidden bg-white">
-      <div className="flex justify-between items-center px-6 py-3 bg-white border-b border-gray-200">
-        <h3 className="font-normal text-base text-gray-900">{title}:</h3>
-
-        <span className="text-blue-600 font-normal text-base">
-          ({String(offenders.length).padStart(2, "0")})
+      <div className="flex justify-between items-center px-6 py-3 border-b">
+        <h3 className="text-base">{title}:</h3>
+        <span className="text-blue-600">
+          ({String(data.length).padStart(2, "0")})
         </span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="px-4 py-3 text-left text-sm font-semibold w-14 border-r">
-                Sno.
-              </th>
-
-              <th className="px-4 py-3 text-left text-sm font-semibold border-r">
+            <tr className="bg-gray-50 border-b">
+              <th className="px-4 py-3 w-14 border-r">Sno.</th>
+              <th className="px-4 py-3 border-r">
                 Army No / Rank / Name
               </th>
-
-              <th className="px-4 py-3 text-left text-sm font-semibold border-r">
-                Identity Card
-              </th>
-
-              <th className="px-4 py-3 text-left text-sm font-semibold border-r">
+              <th className="px-4 py-3 border-r">Identity Card</th>
+              <th className="px-4 py-3 border-r">
                 Unit / FMN / Address
               </th>
-
-              <th className="px-4 py-3 text-left text-sm font-semibold">
-                Remark
-              </th>
+              <th className="px-4 py-3">Remark</th>
             </tr>
           </thead>
 
           <tbody>
-            {offenders.map((off, i) => {
-              const col1 = pickMatching(off, [
+            {data.map((off, i) => {
+              /* 🔥 SUPPORT BOTH SHAPES */
+              const source: GenericObject = {
+                ...off,
+                ...((off as any).details || {}),
+              };
+
+              /* 🔥 ROLE / TYPE LABEL */
+              const roleLabel =
+                (off as any).role ||
+                (off as any).offenderType ||
+                (off as any).type ||
+                "Unknown";
+
+              const col1 = pickMatching(source, [
                 "army",
+                "armynumber",
                 "rank",
-                "rider",
-                "driver",
                 "name",
-                "witness",
+                "driver",
+                "rider",
+                "vehicle", // Catch vehicle fields
+                "type",
+                "role",
               ]);
 
-              const col2 = pickMatching(off, ["id", "card"]);
+              const col2 = pickMatching(source, [
+                "id",
+                "card",
+                "icard",
+                "icardnumber",
+                "pass", // Catch pass numbers
+                "issue",
+                "expire",
+              ]);
 
-              const col3 = pickMatching(off, [
+              const col3 = pickMatching(source, [
                 "unit",
                 "fmn",
                 "address",
                 "command",
+                "place", // Catch place of work/stay
+                "work",
+                "stay",
               ]);
 
               return (
-                <tr
-                  key={i}
-                  className="border-b border-gray-200 hover:bg-gray-50"
-                >
-                  <td className="px-4 py-3 font-medium border-r">{i + 1}.</td>
+                <tr key={i} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-3 border-r">
+                    {i + 1}. <br />
+                    <span className="text-xs font-semibold text-gray-500">{roleLabel}</span>
+                  </td>
 
-                  {/* Column 1 */}
-                  <td className="px-4 py-3 text-sm border-r align-top">
+                  {/* ===== COLUMN 1 ===== */}
+                  <td className="px-4 py-3 border-r align-top text-sm">
                     {col1.length ? (
                       col1.map((f) => (
                         <div key={f.key}>
-                          <b>{formatFieldName(f.key)}:</b> {String(f.value)}
+                          <span className="font-medium text-gray-700">{formatFieldName(f.key)}:</span>{" "}
+                          {String(f.value)}
                         </div>
                       ))
                     ) : (
@@ -113,21 +134,27 @@ export default function DynamicOffenderList({
                     )}
                   </td>
 
-                  {/* Column 2 */}
-                  <td className="px-4 py-3 text-sm border-r align-top">
+                  {/* ===== COLUMN 2 ===== */}
+                  <td className="px-4 py-3 border-r align-top text-sm">
                     {col2.length ? (
-                      col2.map((f) => <div key={f.key}>{String(f.value)}</div>)
+                      col2.map((f) => (
+                        <div key={f.key}>
+                          <span className="font-medium text-gray-700">{formatFieldName(f.key)}:</span>{" "}
+                          {String(f.value)}
+                        </div>
+                      ))
                     ) : (
                       <span className="text-gray-400">--</span>
                     )}
                   </td>
 
-                  {/* Column 3 */}
-                  <td className="px-4 py-3 text-sm border-r align-top">
+                  {/* ===== COLUMN 3 ===== */}
+                  <td className="px-4 py-3 border-r align-top text-sm">
                     {col3.length ? (
                       col3.map((f) => (
                         <div key={f.key}>
-                          <b>{formatFieldName(f.key)}:</b> {String(f.value)}
+                          <span className="font-medium text-gray-700">{formatFieldName(f.key)}:</span>{" "}
+                          {String(f.value)}
                         </div>
                       ))
                     ) : (
@@ -135,18 +162,14 @@ export default function DynamicOffenderList({
                     )}
                   </td>
 
-                  {/* Remark */}
-                  <td className="px-4 py-3 text-sm">
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-600">--</span>
-
-                      <button
-                        className="text-gray-400 hover:text-red-600"
-                        onClick={() => onDelete(i)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  {/* ===== DELETE ===== */}
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => onDelete(i)}
+                      className="text-gray-400 hover:text-red-600"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               );

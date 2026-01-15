@@ -25,6 +25,7 @@ const shopkeeperSecurityPassSchema = Joi.object({
 
   priceListApproved: Joi.boolean().optional(),
   priceListEffectiveFrom: Joi.date().allow(null).optional(),
+  priceListExpiredOn: Joi.date().allow(null).optional(),
 
   passNumber: Joi.string().trim().min(1).required().messages({
     "string.empty": "Pass number is required",
@@ -47,6 +48,7 @@ const updateShopkeeperSecurityPassSchema = shopkeeperSecurityPassSchema.fork(
     "ownerAadhar",
     "priceListApproved",
     "priceListEffectiveFrom",
+    "priceListExpiredOn",
     "passNumber",
     "validFrom",
     "validTill",

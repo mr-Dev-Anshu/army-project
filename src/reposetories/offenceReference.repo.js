@@ -25,7 +25,11 @@ export class OffenceReferenceRepository {
           _id: "$offenceType",
           references: { $push: "$reference" },
           count: { $sum: 1 },
+          latestId: { $max: "$_id" }
         },
+      },
+      {
+        $sort: { latestId: -1 }
       },
       {
         $project: {
@@ -40,5 +44,15 @@ export class OffenceReferenceRepository {
 
   async create(data) {
     return await OffenceReference.create(data);
+  }
+
+  async deleteByOffenceType(offenceType) {
+    return await OffenceReference.deleteMany({
+      offenceType: offenceType.toLowerCase(),
+    });
+  }
+
+  async deleteById(id) {
+    return await OffenceReference.findByIdAndDelete(id);
   }
 }

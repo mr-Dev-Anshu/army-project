@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as api from "@/apis";
 
-export const useGetStaticSpeedRecords = () => {
+export const useGetStaticSpeedRecords = (filters: any = {}) => {
   return useQuery({
-    queryKey: ["static-speed-records"],
-    queryFn: api.getAllStaticSpeedRecord,
+    queryKey: ["static-speed-records", filters],
+    queryFn: () => api.getAllStaticSpeedRecord(filters),
     retry: 1,
   });
 };

@@ -2,19 +2,41 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus } from "lucide-react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Search, Calendar, Plus, ArrowUpDown, Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { SearchableSelect } from "./SearchableSelect";
+import { AsyncSearchableSelect } from "./AsyncSearchableSelect";
 
 /* ================= TYPES ================= */
 export interface FilterState {
   search: string;
   offenceType?: string;
+  date?: string;
   fromDate?: string;
   toDate?: string;
   actionStatus?: string;
   unit?: string;
   fmn?: string;
+  placeOfOffence?: string;
   priceListStatus?: string;
+  agreementStatus?: string;
   sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
@@ -23,171 +45,311 @@ interface ReportFilterBarProps {
   filters: FilterState;
   onFilterChange: (key: keyof FilterState, value: any) => void;
   offenceTypeOptions?: string[];
+  unitOptions?: string[];
+  fmnOptions?: string[];
+  placeOptions?: string[];
   placeholder?: string;
+  showDate?: boolean;
   showDateRange?: boolean;
   showActionStatus?: boolean;
   statusLabel?: string;
   actionStatusOptions?: string[];
   showOffenceType?: boolean;
+  showPriceListFilter?: boolean;
   onAddNew?: () => void;
   onReset?: () => void;
+  showSort?: boolean;
+  showFilter?: boolean;
+  showFmn?: boolean;
+  showPlaceOfOffence?: boolean;
+  showUnit?: boolean;
+  showAgreementStatus?: boolean;
 }
-
-/* ================= STATIC OPTIONS ================= */
-const UNIT_OPTIONS = [
-  "hq 21 corps",
-  "21 corps signal regt",
-  "unit 3",
-  "5221 asc bn",
-  "11 engr regt",
-  "12 jak li",
-  "rakhi",
-  "21 corps",
-  "104 infantry brigade",
-  "mp unit fallback",
-];
-
-const FMN_OPTIONS = [
-  "hq 21 corps",
-  "fmn-21",
-  "21 mountain division",
-  "central command",
-  "western command",
-  "hq western command",
-  "hq 21 corps pro",
-  "rakhi",
-  "123",
-  "northern command",
-];
 
 /* ================= MAIN COMPONENT ================= */
 export default function ReportFilterBar({
   filters,
   onFilterChange,
   offenceTypeOptions = [],
+  unitOptions,
+  fmnOptions,
+  placeOptions,
   placeholder = "Search by report number or offence...",
+  showDate = true,
   showDateRange = true,
   showActionStatus = true,
   statusLabel = "Action Status",
   actionStatusOptions = ["Pending", "Taken"], // "All" is handled by placeholder
   showOffenceType = true,
+  showPriceListFilter = false,
   onAddNew,
   onReset,
+  showSort = false,
+  showFilter = false,
+  showFmn = true,
+  showPlaceOfOffence = true,
+  showUnit = true,
+  showAgreementStatus = false,
 }: ReportFilterBarProps) {
+  const isFilterActive =
+    (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
+    (showAgreementStatus && filters.agreementStatus && filters.agreementStatus !== "All") ||
+    !!filters.fromDate ||
+    !!filters.toDate ||
+    !!filters.unit ||
+    !!filters.fmn ||
+    !!filters.placeOfOffence;
   return (
-    <div className="flex gap-4 items-end justify-between flex-wrap bg-white p-5 rounded-lg border shadow-sm">
-      {/* LEFT SIDE - FILTERS */}
-      <div className="flex flex-wrap gap-4 items-end">
-        {/* Global Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+
+
+    <div className="flex gap-3 justify-between items-center mb-6">
+      <div className="flex flex-1 gap-3 justify-between items-center">
+        {/* Search Input */}
+        <div className="relative flex-1 max-w-[500px] ">
+          <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500", filters.search && "text-blue-600")} />
           <Input
+            type="text"
             placeholder={placeholder}
-            className="pl-10 w-[210px]"
-            value={filters.search || ""}
+            className={cn("pl-9 bg-white border-gray-300 w-full", filters.search && "border-blue-200 bg-blue-50 text-blue-600")}
+            value={filters.search}
             onChange={(e) => onFilterChange("search", e.target.value)}
           />
         </div>
 
-        {/* Offence Type */}
-        {showOffenceType && offenceTypeOptions.length > 0 && (
-          <div className="flex flex-col">
-            <label className="text-xs text-gray-500 mb-1">Offence Type</label>
-            <SearchableSelect
-              options={offenceTypeOptions}
-              value={filters.offenceType || ""}
-              onValueChange={(v) => onFilterChange("offenceType", v)}
-              placeholder="All Offence Types"
-              className="w-[180px]"
-            />
-          </div>
-        )}
 
-        {/* Date Range */}
-        {showDateRange && (
-          <>
-            <div className="flex flex-col">
-              <label className="text-xs text-gray-500 mb-1">From Date</label>
-              <Input
-                type="date"
-                className="w-[150px]"
-                value={filters.fromDate || ""}
-                onChange={(e) => onFilterChange("fromDate", e.target.value)}
-              />
-            </div>
+        <div className="flex gap-3">
+          {/* Filter Button (Sheet) */}
+          {showFilter && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-9 px-3 shrink-0 ml-1 gap-2 transition-colors cursor-pointer",
+                    isFilterActive
+                      ? "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 hover:text-blue-700"
+                      : "bg-white border-gray-300 hover:bg-gray-50 text-[#0A0A0A]"
+                  )}
+                >
+                  <Filter className="w-4 h-4" />
+                  Filter
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="w-[400px] sm:w-[450px] flex flex-col p-0 gap-0"
+              >
+                <SheetHeader className="px-4 py-4 border-b flex flex-col gap-1">
+                  <SheetTitle>Filters</SheetTitle>
+                  <SheetDescription>
+                    Apply filters to refine the report list.
+                  </SheetDescription>
+                </SheetHeader>
 
-            <div className="flex flex-col">
-              <label className="text-xs text-gray-500 mb-1">To Date</label>
-              <Input
-                type="date"
-                className="w-[150px]"
-                value={filters.toDate || ""}
-                onChange={(e) => onFilterChange("toDate", e.target.value)}
-              />
-            </div>
-          </>
-        )}
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
 
-        {/* Unit */}
-        <div className="flex flex-col">
-          <label className="text-xs text-gray-500 mb-1">Unit</label>
-          <SearchableSelect
-            options={UNIT_OPTIONS}
-            value={filters.unit || ""}
-            onValueChange={(v) => onFilterChange("unit", v)}
-            placeholder="All Units"
-            className="w-[180px]"
-          />
+                  {/* Offence Type */}
+                  {showOffenceType && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Offence Type</label>
+                      <AsyncSearchableSelect
+                        fieldType="offenceType"
+                        value={filters.offenceType === "All" ? "" : (filters.offenceType || "")}
+                        onValueChange={(v) => onFilterChange("offenceType", v)}
+                        placeholder="Search Offence Type..."
+                        className="w-full"
+                        defaultOptions={offenceTypeOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Action Status */}
+                  {showActionStatus && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">{statusLabel}</label>
+                      <Select
+                        value={filters.actionStatus || "All"}
+                        onValueChange={(value) => onFilterChange("actionStatus", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          {actionStatusOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* Specific Date */}
+                  {showDate && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Specific Date</label>
+                      <Input
+                        type="date"
+                        className="w-full text-sm"
+                        value={filters.date || ""}
+                        onChange={(e) => onFilterChange("date", e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* Date Range */}
+                  {showDateRange && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Offence Date</label>
+                      <div className="flex gap-4">
+                        <div className="flex flex-col flex-1">
+                          <label className="text-xs text-gray-500 mb-1">Start Date</label>
+                          <Input
+                            type="date"
+                            className="w-full text-sm"
+                            value={filters.fromDate || ""}
+                            onChange={(e) => onFilterChange("fromDate", e.target.value)}
+                          />
+                        </div>
+                        <div className="flex flex-col flex-1">
+                          <label className="text-xs text-gray-500 mb-1">End Date</label>
+                          <Input
+                            type="date"
+                            className="w-full text-sm"
+                            value={filters.toDate || ""}
+                            onChange={(e) => onFilterChange("toDate", e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Unit */}
+                  {showUnit && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Unit</label>
+                      <label className="text-xs text-gray-500">Select Unit</label>
+                      <AsyncSearchableSelect
+                        fieldType="unit"
+                        value={filters.unit || ""}
+                        onValueChange={(v) => onFilterChange("unit", v)}
+                        placeholder="Search Unit..." // Placeholder for inside input
+                        className="w-full"
+                        defaultOptions={unitOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* FMN */}
+                  {showFmn && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">FMN</label>
+                      <label className="text-xs text-gray-500">Select Formation</label>
+                      <AsyncSearchableSelect
+                        fieldType="fmn"
+                        value={filters.fmn || ""}
+                        onValueChange={(v) => onFilterChange("fmn", v)}
+                        placeholder="Search FMN..."
+                        className="w-full"
+                        defaultOptions={fmnOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Place of Offence */}
+                  {showPlaceOfOffence && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Place of Offence</label>
+                      <label className="text-xs text-gray-500">Select Location</label>
+                      <AsyncSearchableSelect
+                        fieldType="placeOfOffence"
+                        value={filters.placeOfOffence || ""}
+                        onValueChange={(v) => onFilterChange("placeOfOffence", v)}
+                        placeholder="Search Location..."
+                        className="w-full"
+                        defaultOptions={placeOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {showPriceListFilter && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Price List Status</label>
+                      <Select
+                        value={filters.priceListStatus || "All"}
+                        onValueChange={(value) => onFilterChange("priceListStatus", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          <SelectItem value="Approved">Approved</SelectItem>
+                          <SelectItem value="Not Approved">Not Approved</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {showAgreementStatus && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Agreement Status</label>
+                      <Select
+                        value={filters.agreementStatus || "All"}
+                        onValueChange={(value) => onFilterChange("agreementStatus", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          <SelectItem value="Valid">Valid</SelectItem>
+                          <SelectItem value="Expired">Expired</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                {onReset && (
+                  <div className="p-4 border-t bg-white mt-auto">
+                    <Button
+                      variant="outline"
+                      onClick={onReset}
+                      className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                    >
+                      Reset All Filters
+                    </Button>
+                  </div>
+                )}
+              </SheetContent>
+            </Sheet>
+          )}
+
+
+          {/* Add New Button */}
+          {onAddNew && (
+            <Button
+              onClick={onAddNew}
+              className="ml-auto bg-[#0088FF] hover:bg-[#0088FF] cursor-pointer text-white gap-2 px-4 shadow-sm shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              Add New
+            </Button>
+          )}
         </div>
-
-        {/* FMN */}
-        <div className="flex flex-col">
-          <label className="text-xs text-gray-500 mb-1">FMN</label>
-          <SearchableSelect
-            options={FMN_OPTIONS}
-            value={filters.fmn || ""}
-            onValueChange={(v) => onFilterChange("fmn", v)}
-            placeholder="All FMNs"
-            className="w-[180px]"
-          />
-        </div>
-
-        {/* Action Status */}
-        {showActionStatus && (
-          <div className="flex flex-col">
-            <label className="text-xs text-gray-500 mb-1">{statusLabel}</label>
-            <SearchableSelect
-              options={actionStatusOptions}
-              value={filters.actionStatus || ""}
-              onValueChange={(v) => onFilterChange("actionStatus", v)}
-              placeholder="All"
-              className="w-[150px]"
-            />
-          </div>
-        )}
-
-        {/* Reset Button */}
-        {onReset && (
-          <Button
-            variant="outline"
-            onClick={onReset}
-            className="h-9 text-red-600 hover:bg-red-50 hover:text-red-700"
-          >
-            Reset Filters
-          </Button>
-        )}
       </div>
+    </div >
 
-      {/* RIGHT SIDE - ADD NEW */}
-      {onAddNew && (
-        <Button
-          onClick={onAddNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Add New Report
-        </Button>
-      )}
-    </div>
+
+
+
+
   );
 }

@@ -96,7 +96,7 @@ export default function StaticSpeedTable({
           id: modalState.recordId,
           data: {
             actionStatus: modalState.newStatus,
-            actionStatusRemark: actionRemark // Include remark
+            actionStatusRemark: actionRemark, // Include remark
           },
         });
         toast.success("Action status updated successfully!");
@@ -261,12 +261,14 @@ export default function StaticSpeedTable({
               }}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
-                  }`}
+                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${
+                  isTaken ? "bg-green-500" : "bg-red-500"
+                }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
-                    }`}
+                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
+                    isTaken ? "translate-x-5" : "translate-x-0"
+                  }`}
                 ></div>
               </div>
               <span className="text-[10px] text-gray-500 font-medium uppercase">
@@ -295,14 +297,18 @@ export default function StaticSpeedTable({
             <DropdownMenuContent align="end" className="w-[200px]">
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
-                onClick={() => onView && onView(item)}
+                onSelect={() => {
+                  if (onView) {
+                    onView(item);
+                  }
+                }}
               >
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
-                onClick={() => onPrint && onPrint(item)}
+                onSelect={() => onPrint && onPrint(item)}
               >
                 <Printer className="w-4 h-4" />
                 Print
@@ -317,7 +323,7 @@ export default function StaticSpeedTable({
               </DropdownMenuItem> */}
               <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                onClick={() => {
+                onSelect={() => {
                   if (item._id) {
                     handleDeleteClick(item._id);
                   }
@@ -358,8 +364,9 @@ export default function StaticSpeedTable({
         }
         message={
           modalState.type === "status"
-            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
-            }?`
+            ? `Are you sure you want to change the status to ${
+                modalState.newStatus ? "Taken" : "Pending"
+              }?`
             : "Are you sure you want to delete this report? This action cannot be undone."
         }
         confirmLabel={
@@ -370,7 +377,9 @@ export default function StaticSpeedTable({
       >
         {modalState.type === "status" && (
           <div className="flex flex-col gap-2 mt-2">
-            <Label htmlFor="remark">Action Remark <span className="text-red-500">*</span></Label>
+            <Label htmlFor="remark">
+              Action Remark <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="remark"
               placeholder="Enter reason for status change..."
@@ -379,9 +388,13 @@ export default function StaticSpeedTable({
                 setActionRemark(e.target.value);
                 if (e.target.value.trim()) setRemarkError("");
               }}
-              className={remarkError ? "border-red-500 focus-visible:ring-red-500" : ""}
+              className={
+                remarkError ? "border-red-500 focus-visible:ring-red-500" : ""
+              }
             />
-            {remarkError && <span className="text-xs text-red-500 mt-1">{remarkError}</span>}
+            {remarkError && (
+              <span className="text-xs text-red-500 mt-1">{remarkError}</span>
+            )}
           </div>
         )}
       </ConfirmationModal>

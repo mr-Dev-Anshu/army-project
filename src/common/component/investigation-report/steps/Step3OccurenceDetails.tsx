@@ -1,12 +1,12 @@
 
-
 "use client";
 
 import { FormSection } from "@/common/component/FormSection";
-import { FormInput, FormSelect } from "@/common/component/FormInput";
+import { FormInput } from "@/common/component/FormInput";
 import { FormTextarea } from "@/common/component/FormTextarea";
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
+import OffencesSection from "@/features/offence-references/components/OffenceSection";
 
 export default function Step3OccurrenceDetails() {
   const { state, dispatch } = useForm();
@@ -28,6 +28,8 @@ export default function Step3OccurrenceDetails() {
       path: "formData.mpReport.occurrenceDetails",
       value: {
         offenceType: "",
+        offenceTypes: [],
+        offenceTypeReference: [],
         place: "",
         date: "",
         time: "",
@@ -35,21 +37,36 @@ export default function Step3OccurrenceDetails() {
       },
     });
 
-  return (
-    <FormSection title="3. OCCURRENCE DETAILS:" onClear={clearForm}>
+  const setOffenceTypes = (action: React.SetStateAction<string[]>) => {
+    const current = mp.offenceTypes || [];
+    let newValue;
+    if (typeof action === "function") {
+      newValue = action(current);
+    } else {
+      newValue = action;
+    }
+    set("offenceTypes", newValue);
+  };
 
-      {/* OFFENCE TYPE */}
-      <FormSelect
-        label="Select Offence Type"
-        placeholder="Select Offences"
-        options={[
-          { label: "Theft", value: "theft" },
-          { label: "Assault", value: "assault" },
-          { label: "Traffic Violation", value: "traffic" },
-          { label: "Misconduct", value: "misconduct" },
-        ]}
-        value={mp.offenceType}
-        onChange={(v) => set("offenceType", v)}
+  const setOffenceReferences = (action: React.SetStateAction<string[]>) => {
+    const current = mp.offenceTypeReference || [];
+    let newValue;
+    if (typeof action === "function") {
+      newValue = action(current);
+    } else {
+      newValue = action;
+    }
+    set("offenceTypeReference", newValue);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* OFFENCE TYPE with REUSABLE COMPONENT */}
+      <OffencesSection
+        selectedOffences={mp.offenceTypes || []}
+        setSelectedOffences={setOffenceTypes}
+        selectedReferences={mp.offenceTypeReference || []}
+        setSelectedReferences={setOffenceReferences}
       />
 
       {/* PLACE */}
@@ -85,6 +102,6 @@ export default function Step3OccurrenceDetails() {
         value={mp.description}
         onChange={(v) => set("description", v)}
       />
-    </FormSection>
+    </div>
   );
 }

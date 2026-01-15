@@ -1,5 +1,4 @@
 "use client";
-
 import {
   PieChart,
   FileCheck,
@@ -27,6 +26,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import ConeIcon from "@/components/icons/ConeIcon";
+import { useForm } from "@/context/FormContext";
 
 const cn = (...classes: (string | boolean | undefined)[]) =>
   classes.filter(Boolean).join(" ");
@@ -118,7 +118,7 @@ const Sidebar = () => {
     {
       icon: <ClipboardList className="w-5 h-5" />,
       label: "MP Occurrence & Investigation Report",
-      href: "/create-record/mp-report",
+      href: "/create-record/mp-investigation",
     },
   ];
 
@@ -131,7 +131,7 @@ const Sidebar = () => {
     {
       icon: <BookOpen className="w-5 h-5" />,
       label: "Registers/Books",
-      href: "/registers",
+      href: "/analysis/registers-books",
     },
     {
       icon: <LineChart className="w-5 h-5" />,
@@ -158,11 +158,11 @@ const Sidebar = () => {
       icon: <Database className="w-5 h-5" />,
       label: "Basic Information",
       submenu: [
-        { label: "Offence Types", href: "/setup/offence-types" },
+        { label: "Offence Types Management", href: "/setup/offence-type-management" },
         { label: "Civil Employees Management", href: "/setup/civil-employees" },
-        { label: "Vehicles (Make & Take)", href: "/setup/vehicles" },
-        { label: "Ranks", href: "/setup/ranks" },
-        { label: "Units", href: "/setup/units" },
+        { label: "Vehicles Security Pass Management", href: "/setup/vehicles-security-pass-management" },
+        { label: "Ranks Master List", href: "/setup/ranks-master-list" },
+        { label: "Unit Master List", href: "/setup/unit-master-list" },
         { label: "Installation", href: "/setup/installation" },
       ],
     },

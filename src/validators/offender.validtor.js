@@ -18,7 +18,7 @@ export const createOffenderSchema = Joi.object({
     )
     .required(),
   category: Joi.string().optional(),
-  offenderDetails: Joi.object().required(),
+  offenderDetails: Joi.object().unknown(true).required(),
   customFields: Joi.object()
     .unknown(true)
     .default({})

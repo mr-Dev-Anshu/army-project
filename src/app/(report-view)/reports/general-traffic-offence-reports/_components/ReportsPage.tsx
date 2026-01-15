@@ -64,10 +64,12 @@ export default function ReportsPage({
   const [filters, setFilters] = useState({
     search: "",
     offenceType: "All",
+    date: "",
     fromDate: "",
     toDate: "",
     unit: "",
     fmn: "",
+    placeOfOffence: "",
     actionStatus: "All",
     sortOrder: "desc" as "asc" | "desc",
   });
@@ -98,11 +100,54 @@ export default function ReportsPage({
     if (filters.toDate) params.toDate = filters.toDate;
     if (filters.unit) params.unit = filters.unit;
     if (filters.fmn) params.fmn = filters.fmn;
+    if (filters.fmn) params.fmn = filters.fmn;
+    if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
+    if (filters.date) params.date = filters.date;
 
     return params;
   }, [filters, viewType]);
 
   const { data, isLoading, isError } = useGetAllTrafficOffences(apiParams);
+
+  /* ================= DYNAMIC OPTIONS FROM DATA ================= */
+  const { offenceTypeOptions, unitOptions, fmnOptions, placeOptions } = useMemo(() => {
+    if (!data) return { offenceTypeOptions: [], unitOptions: [], fmnOptions: [], placeOptions: [] };
+
+    const types = new Set<string>();
+    const units = new Set<string>();
+    const fmns = new Set<string>();
+    const places = new Set<string>();
+
+    data.forEach((group: any) => {
+      // Offence Types
+      if (group.offenceType) types.add(group.offenceType);
+      else if (typeof group._id === 'string') types.add(group._id);
+
+      // Iterate through nested offences in the group to collect other fields
+      if (Array.isArray(group.offences)) {
+        group.offences.forEach((o: any) => {
+          // Unit
+          const unit = o.customFields?.unit || o.onDutyDetailsMPReporting?.unit || o.offenders?.[0]?.offenderDetails?.unit;
+          if (unit) units.add(unit);
+
+          // FMN
+          const fmn = o.customFields?.fmn || o.offenders?.[0]?.offenderDetails?.fmn;
+          if (fmn) fmns.add(fmn);
+
+          // Place
+          const place = o.customFields?.placeOfOffence || o.onDutyDetails?.dutyLocation || o.offenceOccurenceDetails?.incidentLocation;
+          if (place) places.add(place);
+        });
+      }
+    });
+
+    return {
+      offenceTypeOptions: Array.from(types).sort(),
+      unitOptions: Array.from(units).sort(),
+      fmnOptions: Array.from(fmns).sort(),
+      placeOptions: Array.from(places).sort(),
+    };
+  }, [data]);
 
   /* ================= CLIENT SIDE FILTERING ================= */
 
@@ -113,8 +158,9 @@ export default function ReportsPage({
       // Search
       if (filters.search) {
         const s = filters.search.toLowerCase();
+        const rNo = o.reportId || o.reportNumber || "";
         if (
-          !o.reportNumber?.toLowerCase().includes(s) &&
+          !rNo.toLowerCase().includes(s) &&
           !o.currentOffenceType?.toLowerCase().includes(s)
         ) {
           return false;
@@ -128,16 +174,33 @@ export default function ReportsPage({
           o.onDutyDetailsMPReporting?.unit ||
           o.offenders?.[0]?.offenderDetails?.unit;
 
-        if (!unit || unit !== filters.unit) return false;
+        const selectedUnits = filters.unit.split(",");
+        if (!unit || !selectedUnits.includes(unit)) return false;
       }
 
       // FMN
       if (filters.fmn) {
         const fmn =
-          o.customFields?.fmn ||
-          o.offenders?.[0]?.offenderDetails?.fmn;
+          o.customFields?.fmn || o.offenders?.[0]?.offenderDetails?.fmn;
 
-        if (!fmn || fmn !== filters.fmn) return false;
+        const selectedFmns = filters.fmn.split(",");
+        if (!fmn || !selectedFmns.includes(fmn)) return false;
+      }
+
+      // Place of Offence
+      if (filters.placeOfOffence) {
+        const place =
+          o.customFields?.placeOfOffence ||
+          o.onDutyDetails?.dutyLocation ||
+          o.offenceOccurenceDetails?.incidentLocation;
+
+        const selectedPlaces = filters.placeOfOffence.split(",").map(p => p.toLowerCase());
+
+        if (
+          !place ||
+          !selectedPlaces.includes(place.toLowerCase())
+        )
+          return false;
       }
 
       return true;
@@ -147,11 +210,15 @@ export default function ReportsPage({
     const nvg: any[] = [];
 
     data.forEach((group: any) => {
-      const v = group.offences
-        ?.filter((o: any) => o.isVehicleInvolved && filterRecord(o)) || [];
+      const v =
+        group.offences?.filter(
+          (o: any) => o.isVehicleInvolved && filterRecord(o)
+        ) || [];
 
-      const nv = group.offences
-        ?.filter((o: any) => !o.isVehicleInvolved && filterRecord(o)) || [];
+      const nv =
+        group.offences?.filter(
+          (o: any) => !o.isVehicleInvolved && filterRecord(o)
+        ) || [];
 
       if (v.length) vg.push({ ...group, offences: v });
       if (nv.length) nvg.push({ ...group, offences: nv });
@@ -162,9 +229,59 @@ export default function ReportsPage({
 
   /* ================= REPORT HELPERS ================= */
 
-  const handleDownloadReport = (offence: any) => {
-    const props = mapToReportProps(offence);
-    generateWordReport(props);
+  /* ================= DOWNLOAD STATE ================= */
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+
+  /* ================= REPORT HELPERS ================= */
+
+  const handleDownloadReport = async (offence: any) => {
+    setIsDownloading(true);
+    setDownloadType("Word");
+    try {
+      const props = mapToReportProps(offence);
+      await generateWordReport(props);
+    } catch (error) {
+      console.error("Word Download Error", error);
+      alert("Failed to download Word report");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
+  };
+
+  const handleDownloadPdf = async (offence: any) => {
+    const id = offence._id || offence.reportId;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+
+    setIsDownloading(true);
+    setDownloadType("PDF");
+
+    try {
+      const response = await fetch(`/api/military-police-report/pdf/${id}`);
+      if (!response.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Report-${offence.reportNo || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF Download Error", error);
+      alert("Failed to download PDF report");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
   };
 
   const handlePrintReport = (offence: any) => {
@@ -173,6 +290,11 @@ export default function ReportsPage({
   };
 
   /* ================= RENDER STATES ================= */
+
+  const pageTitle =
+    viewType === "vehicle"
+      ? "General & Traffic Offence Reports - Vehicle Involved"
+      : "General & Traffic Offence Reports - No Vehicle Involved";
 
   if (isCreating) {
     return (
@@ -187,28 +309,71 @@ export default function ReportsPage({
 
   if (viewingReport) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <Button onClick={() => setViewingReport(null)} className="m-4">
-          <ArrowLeft /> Back
-        </Button>
-        <Button
-          onClick={() => handleDownloadReport(viewingReport)}
-          className="m-4"
-        >
-          <Download /> Download
-        </Button>
-        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+      <div className="min-h-screen bg-gray-100 flex flex-col relative">
+        {/* DOWNLOAD LOADER MODAL */}
+        {isDownloading && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4 min-w-[300px] animate-in zoom-in-95 duration-200">
+              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+              <div className="text-center">
+                <h3 className="font-semibold text-lg">Generating {downloadType} Report</h3>
+                <p className="text-gray-500 text-sm">Please wait while we prepare your download...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setViewingReport(null);
+              setShouldAutoPrint(false);
+            }}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Reports
+          </Button>
+          <h1 className="text-lg font-semibold text-gray-800">
+            {pageTitle}
+          </h1>
+          <div className="ml-auto flex gap-2">
+            <Button
+              onClick={() => handleDownloadReport(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isDownloading}
+            >
+              {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
+              Download Word Report
+            </Button>
+            <Button
+              onClick={() => handleDownloadPdf(viewingReport)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isDownloading}
+            >
+              {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
+              Download PDF Report
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
+          <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+        </div>
       </div>
     );
   }
 
-  const activeGroups =
-    viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
+  const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <ReportPageHeader
-        title="General & Traffic Offence Reports"
+        title={pageTitle}
         reportCount={activeGroups.reduce(
           (a: number, g: any) => a + g.offences.length,
           0
@@ -218,21 +383,22 @@ export default function ReportsPage({
       {/* FILTER BAR */}
       <ReportFilterBar
         filters={filters}
-        onFilterChange={(k, v) =>
-          setFilters((p) => ({ ...p, [k]: v }))
-        }
+        onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
         showOffenceType
         showDateRange
         showActionStatus
+        showFilter
         onAddNew={() => setIsCreating(true)}
         onReset={() =>
           setFilters({
             search: "",
             offenceType: "All",
+            date: "",
             fromDate: "",
             toDate: "",
             unit: "",
             fmn: "",
+            placeOfOffence: "",
             actionStatus: "All",
             sortOrder: "desc",
           })
@@ -253,9 +419,7 @@ export default function ReportsPage({
           onPrint={handlePrintReport}
         />
       ) : (
-        <div className="text-center text-gray-500 mt-10">
-          No records found
-        </div>
+        <div className="text-center text-gray-500 mt-10">No records found</div>
       )}
     </div>
   );
@@ -264,17 +428,136 @@ export default function ReportsPage({
 /* ================= REPORT MAPPER ================= */
 
 function mapToReportProps(offence: any): MilitaryPoliceReportProps {
+  const primary = offence.offenders?.[0]?.offenderDetails || {};
+  const secondary = offence.offenders?.[1]?.offenderDetails;
+
+  const val = (v: any) => v || "";
+  const dateVal = (d: string) =>
+    d ? new Date(d).toLocaleDateString("en-GB") : "";
+  const timeVal = (d: string) =>
+    d
+      ? new Date(d).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      : "";
+
+  const mpDetails = offence.onDutyDetailsMPReporting || {};
+  const witnesses = offence.onDutyWitnessingMps || [];
+  const witness1 = witnesses[0] || {};
+  const witness2 = witnesses[1];
+  const witness3 = witnesses[2];
+
+  const selectedWitness = offence.customFields?.selectedWitness || {};
+
   return {
-    reportNo: offence.reportNumber || "N/A",
-    reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
-    particulars: {},
-    occurrence: {},
+    reportNo:
+      offence.reportNo || offence.reportId || offence.reportNumber || "",
+    reportDate: dateVal(offence.createdAt),
+    particulars: {
+      primary: {
+        aadharCardNo: val(primary.aadharCard || primary.aadharNumber),
+        name: val(primary.name),
+        so: val(primary.fatherName || primary.so),
+        relation: val(primary.relation),
+        armyNo: val(primary.armyNumber || primary.armyNo),
+        rank: val(primary.rank || primary["Select Rank"]),
+        unit: val(primary.unit),
+        command: val(primary.command),
+        fmn: val(primary.fmn),
+        address: val(primary.address),
+        iCardNo: val(
+          primary.identityCard ||
+          primary.iCardNumber ||
+          primary["I Card Number"]
+        ),
+      },
+      secondary: secondary
+        ? {
+          aadharCardNo: val(secondary.aadharCard || secondary.aadharNumber),
+          name: val(secondary.name),
+          so: val(secondary.fatherName || secondary.so),
+          relation: val(secondary.relation),
+          armyNo: val(secondary.armyNumber || secondary.armyNo),
+          rank: val(secondary.rank || secondary["Select Rank"]),
+          unit: val(secondary.unit),
+          command: val(secondary.command),
+          fmn: val(secondary.fmn),
+          address: val(secondary.address),
+          iCardNo: val(
+            secondary.identityCard ||
+            secondary.iCardNumber ||
+            secondary["I Card Number"]
+          ),
+        }
+        : undefined,
+      vehicle: offence.isVehicleInvolved
+        ? {
+          baNo: val(offence.vehicleNumber),
+          makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
+          vehicleNumber:
+            offence.vehicleType === "DD Vehicle"
+              ? "DD Veh. BA No."
+              : "Registration No.",
+        }
+        : undefined,
+    },
+    occurrence: {
+      dateOfDuty: dateVal(offence.onDutyDetails?.dateOfDuty),
+      dutyTime: (() => {
+        const start = offence.onDutyDetails?.startTime;
+        const end = offence.onDutyDetails?.endTime;
+        const sVal = timeVal(start);
+        const eVal = timeVal(end);
+        if (sVal && eVal) return `${sVal} Hrs - ${eVal} Hrs`;
+        if (sVal) return `${sVal} Hrs`;
+        return "";
+      })(),
+      dutyLocation: val(offence.onDutyDetails?.dutyLocation),
+      witnessingMps:
+        witnesses.length > 0
+          ? witnesses.map((w: any) => ({
+            name: val(w.name),
+            rank: val(w.rank),
+          }))
+          : [],
+      timeOfOffence: timeVal(offence.offenceOccurenceDetails?.timeOfOffence)
+        ? timeVal(offence.offenceOccurenceDetails?.timeOfOffence) + " Hrs"
+        : "",
+      locationOfOffence: val(offence.offenceOccurenceDetails?.incidentLocation),
+      statement: val(offence.offenceOccurenceDetails?.description),
+    },
     offence: {
-      type: offence.currentOffenceType || "Traffic Offence",
-      description: offence.offenceOccurenceDetails?.description || "",
+      types:
+        (offence.offenceTypes?.length
+          ? offence.offenceTypes
+          : offence.offenceOccurenceDetails?.offenceTypes) ||
+        (val(offence.currentOffenceType)
+          ? [val(offence.currentOffenceType)]
+          : []),
+      refs:
+        (offence.offenceTypeReference?.length
+          ? offence.offenceTypeReference
+          : offence.offenceOccurenceDetails?.offenceTypeReference) || [],
+      description: val(offence.offenceOccurenceDetails?.description),
+    },
+    witnessSig: {
+      armyNo: val(
+        selectedWitness?.armyNumber || witness1.armyNumber || witness1.ArmyNo
+      ),
+      rank: val(selectedWitness?.rank || witness1.rank),
+      name: val(selectedWitness?.nameReportingMP || witness1.name),
+      unit: val(selectedWitness?.unit || witness1.unit),
+    },
+    mpSig: {
+      armyNo: val(mpDetails.armyNumber),
+      rank: val(mpDetails.rank),
+      name: val(mpDetails.nameReportingMP),
+      unit: val(mpDetails.unit),
     },
     remarks: {
-      text: offence.remarks || "",
+      text: val(offence.customFields?.remarks || offence.remarks),
+      station: val(offence.onDutyDetails?.dutyLocation),
       dated: new Date().toLocaleDateString("en-GB"),
     },
   };

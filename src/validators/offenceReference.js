@@ -3,7 +3,6 @@ import Joi from "joi";
 export const createOffenceReferenceSchema = Joi.object({
   offenceType: Joi.string()
     .trim()
-    .lowercase()
     .required()
     .messages({
       "string.empty": "Offence type is required",
@@ -11,7 +10,6 @@ export const createOffenceReferenceSchema = Joi.object({
 
   reference: Joi.string()
     .trim()
-    .lowercase()
     .required()
     .messages({
       "string.empty": "Reference is required",

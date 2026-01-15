@@ -57,7 +57,7 @@ async function trackFieldSuggestions(data, config = {}) {
       for (const item of arrayValue) {
         if (item && typeof item === 'object') {
           for (const [objField, fieldType] of Object.entries(fieldMapping)) {
-            const value = item[objField];
+            const value = getNestedValue(item, objField);
             if (value && typeof value === 'string') {
               updatePromises.push(updateSuggestion(fieldType, value));
             }

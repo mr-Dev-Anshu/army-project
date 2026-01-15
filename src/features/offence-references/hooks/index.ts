@@ -9,7 +9,6 @@ import {
 
 import {
   CreateOffenceReferencePayload,
-  GetOffenceReferenceQuery,
 } from "../../../apis/offence-references/types";
 
 /* =====================
@@ -22,6 +21,9 @@ export const useGetOffenceTypes = () => {
     queryFn: getOffenceTypes,
   });
 };
+
+
+
 
 /* =====================
    GET / SEARCH OFFENCE REFERENCES
@@ -42,7 +44,7 @@ export const useGetOffenceReferences = (
       /**
        * Build query params safely
        */
-      const params: GetOffenceReferenceQuery = {
+      const params: any = {
         offenceType: offenceType.toLowerCase(),
       };
 

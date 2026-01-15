@@ -27,8 +27,49 @@ export class StaticSpeedCheckRecordRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       { $sort: { createdAt: -1 } },
@@ -58,8 +99,49 @@ export class StaticSpeedCheckRecordRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       { $limit: 1 },
@@ -101,7 +183,7 @@ export class StaticSpeedCheckRecordRepository {
       matchStage.$or = [
         { createdAt: { $gte: startDate, $lte: endDate } },
         {
-          "offenceOccurenceDetails.timeOfOffence": {
+          "offenceOccurenceDetails.time": {
             $gte: startDate,
             $lte: endDate,
           },
@@ -109,25 +191,12 @@ export class StaticSpeedCheckRecordRepository {
       ];
     }
 
-    /* ---------- UNIT FILTER ---------- */
-    if (filters.unit) {
-      matchStage.$or = [
-        { "onDutyDetailsMPReporting.unit": filters.unit },
-        { "offenders.offenderDetails.unit": filters.unit },
-      ];
-    }
+    /* ---------- UNIT & FMN FILTER (Moved to Post-Lookup) ---------- */
+    // Logic moved to pipeline for regex support and lookup access
 
-    /* ---------- FMN FILTER ---------- */
-    if (filters.fmn) {
-      matchStage.$or = [
-        { fmn: filters.fmn },
-        { "offenders.offenderDetails.fmn": filters.fmn },
-      ];
-    }
-
+    // Support existing logic
     const pipeline = [
       Object.keys(matchStage).length > 0 ? { $match: matchStage } : null,
-
       {
         $lookup: {
           from: "offenders",
@@ -144,13 +213,306 @@ export class StaticSpeedCheckRecordRepository {
           as: "onDutyWitnessingMps",
         },
       },
+
+      /* ================= DYNAMIC REGEX FILTER (UNIT/FMN) ================= */
+      (() => {
+        const rules = [];
+
+        if (filters.unit) {
+          const regex = new RegExp(filters.unit, "i");
+          rules.push({
+            $or: [
+              { "onDutyDetailsMPReporting.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unit": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.fmn) {
+          const regex = new RegExp(filters.fmn, "i");
+          rules.push({
+            $or: [
+              { "fmn": { $regex: regex } }, // Assuming fmn might be at root or customFields
+              { "offenders.offenderDetails.fmn": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.placeOfOffence) {
+          const regex = new RegExp(filters.placeOfOffence, "i");
+          rules.push({
+            $or: [
+              { "offenceOccurenceDetails.incidentLocation": { $regex: regex } },
+              { "onDutyDetails.dutyLocation": { $regex: regex } }
+            ]
+          });
+        }
+
+        return rules.length > 0 ? { $match: { $and: rules } } : null;
+      })(),
+      {
+        $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
       {
         $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
         },
       },
       { $sort: { createdAt: -1 } },
+    ].filter(Boolean);
+
+    return await StaticSpeedCheckRecord.aggregate(pipeline);
+  }
+
+  async getGroupedByOffenceType(filters = {}) {
+    const matchStage = {};
+
+    /* ================= STATUS FILTERS ================= */
+    if (filters.status !== undefined) {
+      if (filters.status === "true" || filters.status === "Taken") {
+        matchStage.actionStatus = true;
+      }
+      if (filters.status === "false" || filters.status === "Pending") {
+        matchStage.actionStatus = false;
+      }
+    }
+
+    //  unit and fmn (MOVED TO POST-LOOKUP)
+    // if (filters.unit) {
+    //   matchStage["onDutyDetailsMPReporting.unit"] = filters.unit;
+    // }
+
+    // FMN isn't directly on static speed, usually inside offender or mapped manually
+    // but assuming structure similar to traffic:
+    // matchStage["customFields.fmn"] = filters.fmn; // If applicable
+
+    if (filters.vehicleCategory) {
+      matchStage.vehicleCategory = filters.vehicleCategory;
+    }
+
+    /* ================= DATE FILTER ================= */
+    if (filters.fromDate || filters.toDate) {
+      matchStage.createdAt = {};
+      if (filters.fromDate) {
+        matchStage.createdAt.$gte = new Date(filters.fromDate);
+      }
+      if (filters.toDate) {
+        matchStage.createdAt.$lte = new Date(filters.toDate + "T23:59:59.999Z");
+      }
+    } else if (filters.date) {
+      const dateStr = filters.date.split("T")[0];
+      const startDate = new Date(dateStr);
+      startDate.setUTCHours(0, 0, 0, 0);
+      const endDate = new Date(dateStr);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      matchStage.$or = [
+        { "offenceOccurenceDetails.time": { $gte: startDate, $lte: endDate } },
+        { createdAt: { $gte: startDate, $lte: endDate } },
+      ];
+    }
+
+    /* ================= OFFENCE TYPE (PRE-UNWIND) ================= */
+    if (filters.offenceType && filters.offenceType !== "All") {
+      matchStage["offenceOccurenceDetails.offenceTypes"] = filters.offenceType;
+    }
+
+    const pipeline = [
+      Object.keys(matchStage).length > 0 ? { $match: matchStage } : null,
+      {
+        $lookup: {
+          from: "offenders",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "offenders",
+        },
+      },
+      {
+        $lookup: {
+          from: "ondutywitnessingmps",
+          localField: "_id",
+          foreignField: "offenceId",
+          as: "onDutyWitnessingMps",
+        },
+      },
+
+      /* ================= DYNAMIC REGEX FILTER (UNIT/FMN) ================= */
+      (() => {
+        const rules = [];
+
+        if (filters.unit) {
+          const regex = new RegExp(filters.unit, "i");
+          rules.push({
+            $or: [
+              { "onDutyDetailsMPReporting.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unit": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.fmn) {
+          const regex = new RegExp(filters.fmn, "i");
+          rules.push({
+            $or: [
+              { "fmn": { $regex: regex } },
+              { "offenders.offenderDetails.fmn": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.placeOfOffence) {
+          const regex = new RegExp(filters.placeOfOffence, "i");
+          rules.push({
+            $or: [
+              { "offenceOccurenceDetails.incidentLocation": { $regex: regex } },
+              { "onDutyDetails.dutyLocation": { $regex: regex } }
+            ]
+          });
+        }
+
+        return rules.length > 0 ? { $match: { $and: rules } } : null;
+      })(),
+      {
+        $addFields: {
+          refIds: {
+            $map: {
+              input: {
+                $ifNull: ["$offenceOccurenceDetails.offenceTypeReference", []],
+              },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs",
+        },
+      },
+      {
+        $addFields: {
+          offendersCount: { $size: "$offenders" },
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          originalOffenceTypes: "$offenceOccurenceDetails.offenceTypes",
+          "offenceOccurenceDetails.offenceTypeReference": {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference",
+                },
+              },
+              else: "$offenceOccurenceDetails.offenceTypeReference",
+            },
+          },
+        },
+      },
+      {
+        $unwind: {
+          path: "$offenceOccurenceDetails.offenceTypes",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // STRICT FILTER AFTER UNWIND
+      filters.offenceType && filters.offenceType !== "All"
+        ? {
+          $match: {
+            "offenceOccurenceDetails.offenceTypes": filters.offenceType,
+          },
+        }
+        : null,
+
+      {
+        $group: {
+          _id: "$offenceOccurenceDetails.offenceTypes",
+          totalOffences: { $sum: 1 },
+          totalOffenders: { $sum: "$offendersCount" },
+          totalWitnessingMps: { $sum: "$witnessingMpsCount" },
+          offences: {
+            $push: {
+              _id: "$_id",
+              offenceTypes: "$originalOffenceTypes",
+              currentOffenceType: "$offenceOccurenceDetails.offenceTypes",
+              createdAt: "$createdAt",
+              vehicleNumber: "$vehicleNumber",
+              vehicleCategory: "$vehicleCategory",
+              offenceOccurenceDetails: "$offenceOccurenceDetails",
+              offenders: "$offenders",
+              onDutyWitnessingMps: "$onDutyWitnessingMps",
+              offendersCount: "$offendersCount",
+              witnessingMpsCount: "$witnessingMpsCount",
+              customFields: "$customFields",
+              onDutyDetails: "$onDutyDetails",
+              onDutyDetailsMPReporting: "$onDutyDetailsMPReporting",
+              actionStatus: "$actionStatus",
+              vehicleName: "$vehicleName",
+            },
+          },
+        },
+      },
+      { $sort: { _id: 1 } },
+      {
+        $project: {
+          offenceType: "$_id",
+          totalOffences: 1,
+          totalOffenders: 1,
+          totalWitnessingMps: 1,
+          offences: 1,
+          _id: 0,
+        },
+      },
     ].filter(Boolean);
 
     return await StaticSpeedCheckRecord.aggregate(pipeline);

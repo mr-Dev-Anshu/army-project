@@ -15,6 +15,7 @@ export interface Shopkeeper {
 
   priceListApproved: boolean;
   priceListEffectiveFrom: string | null;
+  priceListExpiredOn?: string | null;
 
   workers: Worker[];
 

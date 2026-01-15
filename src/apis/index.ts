@@ -60,3 +60,11 @@ export * from "@/apis/temporaryHiredWorker/getAll";
 export * from "@/apis/temporaryHiredWorker/getById";
 export * from "@/apis/temporaryHiredWorker/update";
 export * from "@/apis/temporaryHiredWorker/delete";
+
+/* ================= VEHICLES SECURITY PASS MANAGEMENT ================= */
+export * from "@/apis/vehiclesSecurityPassManagement/create";
+export * from "@/apis/vehiclesSecurityPassManagement/getAll";
+export * from "@/apis/vehiclesSecurityPassManagement/getById";
+export * from "@/apis/vehiclesSecurityPassManagement/update";
+export * from "@/apis/vehiclesSecurityPassManagement/delete";
+

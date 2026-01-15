@@ -252,9 +252,14 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                     /* 3. OFFENCE */
                     sectionHeading("3.", "OFFENCE COMMITTED/ORDERS CONTRAVENED:"),
 
-                    offenceParagraph("(3.1)", "Offence Type", data.offence.type),
-                    offenceRef("(i.)", data.offence.ref1),
-                    offenceRef("(ii.)", data.offence.ref2),
+                    offenceParagraph("(3.1)", "Offence Type", (data.offence.types || []).join(", ")),
+
+                    ...(data.offence.refs && data.offence.refs.length > 0
+                        ? data.offence.refs.map((ref, index) => {
+                            const roman = ["i", "ii", "iii", "iv", "v"][index] || (index + 1).toString();
+                            return offenceRef(`(${roman}.)`, ref);
+                        })
+                        : [offenceRef("(i.)", "N/A")]),
                     offenceDescription(data.offence.description),
 
                     spacer(),

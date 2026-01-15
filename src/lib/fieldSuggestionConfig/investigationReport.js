@@ -21,7 +21,7 @@ export const INVESTIGATION_REPORT_SUGGESTION_CONFIG = {
 
         // Occurrence Details
         'occurrenceDetails.offenceType': 'offenceType',
-        'occurrenceDetails.placeOfOccurrence': 'placeOfOccurrence',
+        'occurrenceDetails.placeOfOccurrence': 'placeOfOffence',
         'occurrenceDetails.description': 'description',
 
         // Remarks

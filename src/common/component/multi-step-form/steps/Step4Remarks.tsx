@@ -99,10 +99,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 
-export default function Step4Remarks() {
-  const { state, dispatch } = useForm();
-  const d = state.formData;
+interface Step4RemarksProps {
+  value?: string;
+  onChange?: (value: string) => void;
+}
 
+export default function Step4Remarks({ value, onChange }: Step4RemarksProps) {
   const remarkOptions = [
     "The indl committed offence...",
     "Suitable disciplinary action...",
@@ -111,17 +113,14 @@ export default function Step4Remarks() {
 
   const [selected, setSelected] = useState<number | null>(0);
 
-  const set = (value: string) =>
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.remarks",
-      value,
-    });
+  const set = (text: string) => {
+    if (onChange) onChange(text);
+  };
 
   return (
     <div className="space-y-6 px-4">
       <Textarea
-        value={d.remarks || ""}
+        value={value || ""}
         onChange={(e) => set(e.target.value)}
         className="min-h-[140px]"
       />

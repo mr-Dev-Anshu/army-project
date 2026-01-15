@@ -66,6 +66,10 @@ const ShopkeeperSecurityPassSchema = new Schema(
       type: Date,
       default: null,
     },
+    priceListExpiredOn: {
+      type: Date,
+      default: null,
+    },
 
     passNumber: {
       type: String,

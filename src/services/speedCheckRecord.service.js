@@ -13,9 +13,18 @@ export class StaticSpeedCheckRecordService {
     return record;
   }
 
-async getByDateRange(filters) {
-  return await staticSpeedCheckRecordRepo.getByDateRange(filters);
-}
+  async getFilteredRecords(filters) {
+    return await staticSpeedCheckRecordRepo.getFilteredRecords(filters);
+  }
+
+  // Alias for backward compatibility if needed, or deprecate
+  async getByDateRange(filters) {
+    return this.getFilteredRecords(filters);
+  }
+
+  async getGroupedByOffenceType(filters) {
+    return await staticSpeedCheckRecordRepo.getGroupedByOffenceType(filters);
+  }
 
 
   async create(data) {
