@@ -124,25 +124,41 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
         },
         {
             header: "Vehicle Reg. No.",
-            accessorKey: "vehicleIdentification.registrationNumber",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                    {item.vehicleIdentification?.registrationNumber || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[140px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[140px]",
         },
         {
             header: "Vehicle Category",
-            accessorKey: "vehicleIdentification.category",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                    {item.vehicleIdentification?.category || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[120px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },
         {
             header: "Vehicle Type",
-            accessorKey: "vehicleIdentification.type",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                    {item.vehicleIdentification?.type || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[100px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[100px]",
         },
         {
             header: "Color",
-            accessorKey: "vehicleIdentification.color",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                    {item.vehicleIdentification?.color || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[80px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[80px]",
         },
@@ -159,7 +175,11 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
         },
         {
             header: "Owner Type",
-            accessorKey: "ownerInformation.ownerType",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A] capitalize">
+                    {item.ownerInformation?.ownerType?.replace(/([A-Z])/g, ' $1').trim() || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[120px] capitalize",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },
@@ -167,25 +187,177 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
             header: "Owner Particulars",
             cell: (item) => {
                 const info = item.ownerInformation;
+                const details = info?.ownerDetails || {};
                 if (!info) return "-";
-                // Determine format based on ownerType or available fields
-                // Military style
-                if (info.armyNo || info.rank || info.unit) {
+
+                const renderField = (label: string, value: any) => {
+                    if (!value) return null;
                     return (
-                        <div className="flex flex-col space-y-1 font-[Arial] text-xs text-[#0A0A0A]">
-                            {info.armyNo && <div><span className="font-semibold">Army no:</span> {info.armyNo}</div>}
-                            {info.rank && <div><span className="font-semibold">Rank:</span> {info.rank}</div>}
-                            {info.unit && <div><span className="font-semibold">Unit:</span> {info.unit}</div>}
-                            {info.fmn && <div><span className="font-semibold">FMN:</span> {info.fmn}</div>}
+                        <div>
+                            <span className="font-semibold text-gray-500">{label}:</span> <span className="text-gray-900">{value}</span>
+                        </div>
+                    );
+                };
+
+                const renderDate = (label: string, value: any) => {
+                    if (!value) return null;
+                    return renderField(label, format(new Date(value), "dd/MM/yyyy"));
+                };
+
+                // Military Personnel
+                if (info.ownerType === "militaryPersonnel") {
+                    return (
+                        <div className="flex flex-col space-y-1 font-[Arial] text-xs">
+                            {renderField("Army No", details.armyNo)}
+                            {renderField("Rank", details.rank)}
+                            {renderField("Unit", details.unit)}
+                            {renderField("FMN", details.fmn)}
+                            {renderField("Command", details.command)}
                         </div>
                     );
                 }
-                // Civilian/Other style
+
+                // Employee
+                if (info.ownerType === "employee") {
+                    return (
+                        <div className="flex flex-col space-y-1 font-[Arial] text-xs">
+                            {renderField("Service No", details.serviceNumber)}
+                            {renderField("Rank", details.employeeRank)}
+                            {renderField("Unit", details.employeeUnit)}
+                            {renderField("FMN", details.employeeFmn)}
+                            {renderField("Command", details.employeeCommand)}
+                            {renderField("I-Card", details.employeeICardNumber)}
+                        </div>
+                    );
+                }
+
+                // Servant / Maid (Primary)
+                if (info.ownerType === "servantMaid") {
+                    return (
+                        <div className="flex flex-col space-y-1 font-[Arial] text-xs">
+                            {renderField("Pass No", details.maidPassNumber)}
+                            {renderField("Father's Name", details.maidFathersName)}
+                            {renderField("Pass ID", details.maidPassID)}
+                            {renderField("Trade", details.maidTrade)}
+                            {renderField("Worked at Qtr", details.maidQuarterNumber)}
+                            {renderField("Employer Rank", details.officersEnclaveRank)}
+                            {renderField("Employer Name", details.officersEnclaveName)}
+                            {renderField("Place of Qtr", details.maidPlaceOfQtr)}
+                            {renderField("Unit", details.maidUnit)}
+                            {renderField("FMN", details.maidFmn)}
+                            {renderField("Command", details.maidCommand)}
+                            {renderField("I-Card", details.maidICardNumber)}
+                        </div>
+                    );
+                }
+
+                // Shop Keeper (Primary)
+                if (info.ownerType === "shopKeeper") {
+                    return (
+                        <div className="flex flex-col space-y-1 font-[Arial] text-xs">
+                            {renderField("Shop Owner", details.shopOwnerName)}
+                            {renderField("Shop Name", details.shopName)}
+                            {renderField("Address", details.shopAddress)}
+                            {renderField("Unit", details.shopUnit)}
+                            {renderField("Pass No", details.shopPassNo)}
+                            {renderDate("Issue Date", details.shopPassIssueDate)}
+                            {renderDate("Expire Date", details.shopPassExpireDate)}
+                        </div>
+                    );
+                }
+
+                // Temp Hired Worker (Primary)
+                if (info.ownerType === "tempHiredWorker") {
+                    return (
+                        <div className="flex flex-col space-y-1 font-[Arial] text-xs">
+                            {renderField("Name", details.tempWorkerName)}
+                            {renderField("Place of Stay", details.placeOfStay)}
+                            {renderField("Place of Work", details.placeOfWork)}
+                            {renderField("Type of Work", details.typeOfWork)}
+                            {renderField("Pass No", details.tempWorkerPassNo)}
+                            {renderDate("Issue Date", details.tempWorkerPassIssueDate)}
+                            {renderDate("Expire Date", details.tempWorkerPassExpireDate)}
+                        </div>
+                    );
+                }
+
+                // Civilian
+                if (info.ownerType === "civilian") {
+                    return (
+                        <div className="flex flex-col space-y-1 font-[Arial] text-xs">
+                            {renderField("Aadhar No", details.aadharCardNumber)}
+                            {renderField("Father's Name", details.fathersName)}
+
+                            {details.isDependent && (
+                                <div className="mt-2 pt-2 border-t border-gray-200">
+                                    <div className="font-semibold text-gray-700 mb-1">
+                                        Relative ({details.relationName}) - {details.relativeCategory}:
+                                    </div>
+                                    {/* Nested Relative Details */}
+                                    {details.relativeCategory === "militaryPersonnel" && details.relativeDetails && (
+                                        <>
+                                            {renderField("Army No", details.relativeDetails.armyNo)}
+                                            {renderField("Rank", details.relativeDetails.rank)}
+                                            {renderField("Unit", details.relativeDetails.unit)}
+                                            {renderField("FMN", details.relativeDetails.fmn)}
+                                            {renderField("Command", details.relativeDetails.command)}
+                                        </>
+                                    )}
+                                    {details.relativeCategory === "servantMaid" && details.relativeDetails && (
+                                        <>
+                                            {renderField("Pass No", details.relativeDetails.maidPassNumber)}
+                                            {renderField("Father's Name", details.relativeDetails.maidFathersName)}
+                                            {renderField("Pass ID", details.relativeDetails.maidPassID)}
+                                            {renderField("Name", details.relativeDetails.relativeName)}
+                                            {renderField("Trade", details.relativeDetails.maidTrade)}
+                                            {renderField("Worked at Qtr", details.relativeDetails.maidQuarterNumber)}
+                                            {renderField("Employer Rank", details.relativeDetails.officersEnclaveRank)}
+                                            {renderField("Employer Name", details.relativeDetails.officersEnclaveName)}
+                                            {renderField("Place of Qtr", details.relativeDetails.maidPlaceOfQtr)}
+                                            {renderField("Unit", details.relativeDetails.maidUnit)}
+                                            {renderField("FMN", details.relativeDetails.maidFmn)}
+                                            {renderField("Command", details.relativeDetails.maidCommand)}
+                                            {renderField("Address", details.relativeDetails.relativeAddress)}
+                                            {renderField("I-Card", details.relativeDetails.maidICardNumber)}
+
+                                        </>
+                                    )}
+                                    {details.relativeCategory === "shopKeeper" && details.relativeDetails && (
+                                        <>
+                                            {renderField("Shop Owner", details.relativeDetails.shopOwnerName)}
+                                            {renderField("Shop Name", details.relativeDetails.shopName)}
+                                            {renderField("Address", details.relativeDetails.shopAddress)}
+                                            {renderField("Unit", details.relativeDetails.shopUnit)}
+                                            {renderField("Pass No", details.relativeDetails.shopPassNo)}
+                                            {renderDate("Issue Date", details.relativeDetails.shopPassIssueDate)}
+                                            {renderDate("Expire Date", details.relativeDetails.shopPassExpireDate)}
+                                        </>
+                                    )}
+                                    {details.relativeCategory === "tempHiredWorker" && details.relativeDetails && (
+                                        <>
+                                            {renderField("Name", details.relativeDetails.tempWorkerName)}
+                                            {renderField("Place of Stay", details.relativeDetails.tempWorkerPlaceOfStay)}
+                                            {renderField("Place of Work", details.relativeDetails.tempWorkerPlaceOfWork)}
+                                            {renderField("Type of Work", details.relativeDetails.tempWorkerTypeOfWork)}
+                                            {renderField("Pass No", details.relativeDetails.tempWorkerPassNo)}
+                                            {renderDate("Issue Date", details.relativeDetails.tempWorkerPassIssueDate)}
+                                            {renderDate("Expire Date", details.relativeDetails.tempWorkerPassExpireDate)}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                            {/* Fallback Address if exists and not redundant */}
+                            {details.address && renderField("Address", details.address)}
+                        </div>
+                    );
+                }
+
+                // Fallback
                 return (
                     <div className="flex flex-col space-y-1 font-[Arial] text-xs text-[#0A0A0A]">
-                        {info.address && <div><span className="font-semibold">Address:</span> {info.address}</div>}
+                        {details.address && <div><span className="font-semibold">Address:</span> {details.address}</div>}
                     </div>
-                )
+                );
             },
             className: "border-r border-gray-300 min-w-[180px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[180px]",
@@ -208,7 +380,11 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
         },
         {
             header: "Pass No.",
-            accessorKey: "vehiclePassDetails.passNumber",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                    {item.vehiclePassDetails?.passNumber || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[100px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[100px]",
         },
@@ -271,7 +447,11 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
         },
         {
             header: "Issuing Authority",
-            accessorKey: "vehiclePassDetails.issuingAuthority",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                    {item.vehiclePassDetails?.issuingAuthority || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[140px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[140px]",
         },
@@ -300,7 +480,11 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
         },
         {
             header: "Remark",
-            accessorKey: "remark",
+            cell: (item) => (
+                <span className="font-normal font-[Arial] text-[#0A0A0A]">
+                    {item.remark || "-"}
+                </span>
+            ),
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 min-w-[150px]",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[150px]",
         },

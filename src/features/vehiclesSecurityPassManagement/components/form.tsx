@@ -65,6 +65,23 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                 value: {
                     ...INITIAL_VEHICLE_PASS_STATE,
                     ...initialData,
+                    ownerInformation: {
+                        ...INITIAL_VEHICLE_PASS_STATE.ownerInformation,
+                        ...(initialData.ownerInformation || {}),
+                        ownerType: initialData.ownerInformation?.ownerType || INITIAL_VEHICLE_PASS_STATE.ownerInformation.ownerType || "militaryPersonnel",
+                    },
+                    vehicleIdentification: {
+                        ...INITIAL_VEHICLE_PASS_STATE.vehicleIdentification,
+                        ...(initialData.vehicleIdentification || {}),
+                    },
+                    vehiclePassDetails: {
+                        ...INITIAL_VEHICLE_PASS_STATE.vehiclePassDetails,
+                        ...(initialData.vehiclePassDetails || {}),
+                    },
+                    authentication: {
+                        ...INITIAL_VEHICLE_PASS_STATE.authentication,
+                        ...(initialData.authentication || {}),
+                    }
                 },
             });
         } else {
@@ -107,7 +124,15 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                 }
             }
 
-            const payload = { ...vehiclePass };
+            const payload = JSON.parse(JSON.stringify(vehiclePass)); // Deep copy to avoid mutating state
+            // Logic to clean up relative details if not civilian
+            const ownerInfo = payload.ownerInformation;
+            if (ownerInfo?.ownerType !== "civilian" && ownerInfo?.ownerDetails) {
+                delete ownerInfo.ownerDetails.isDependent;
+                delete ownerInfo.ownerDetails.relationName;
+                delete ownerInfo.ownerDetails.relativeCategory;
+                delete ownerInfo.ownerDetails.relativeDetails;
+            }
 
             // Clean up _id for create
             if (!initialData) {
@@ -216,7 +241,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                         <div className="space-y-2">
                             <Label>Owner Type (Select one)</Label>
                             <RadioGroup
-                                value={vehiclePass.ownerInformation.ownerType || "militaryPersonnel"}
+                                value={vehiclePass.ownerInformation.ownerType}
                                 onValueChange={(v) => setField("ownerInformation.ownerType", v)}
                                 className="grid grid-cols-3 gap-3"
                             >
@@ -226,7 +251,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                     { id: "civilian", label: "Civilian" },
                                     { id: "servantMaid", label: "Servant / Maid" },
                                     { id: "shopKeeper", label: "Shop Keeper" },
-                                    { id: "tempHiredWorker", label: "Temp. Hired Worker" },
+                                    { id: "tempHiredWorker", label: "Temporary Hired Worker" },
                                 ].map((type) => (
                                     <label
                                         key={type.id}
@@ -268,7 +293,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                     <SuggestionInput
                                         label="Unit"
                                         fieldType="unit"
-                                        placeholder="eg."
+                                        placeholder="eg. "
                                         value={vehiclePass.ownerInformation.ownerDetails?.unit || ""}
                                         onChange={(v) => setField("ownerInformation.ownerDetails.unit", v)}
                                     />
@@ -645,7 +670,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                     <SuggestionInput
                                         label="Father's / Husband's Name"
                                         fieldType="fathersName"
-                                        placeholder="e.g. Apradhi k Papa"
+                                        placeholder="e.g. Naman"
                                         value={vehiclePass.ownerInformation.ownerDetails?.fathersName || ""}
                                         onChange={(v) => setField("ownerInformation.ownerDetails.fathersName", v)}
                                     />
@@ -1086,7 +1111,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                         </div>
                         <div className="space-y-1">
                             <div className={cn(!vehiclePass.vehiclePassDetails.isAvailable && "text-gray-400")}>
-                                <Label>Pass No. <span className="text-red-500 text-xs font-normal">Visible only if Yes</span></Label>
+                                <Label>Pass No.</Label>
                                 <SuggestionInput
                                     fieldType="passNumber"
                                     placeholder="Enter pass number"
