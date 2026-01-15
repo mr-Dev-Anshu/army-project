@@ -68,3 +68,10 @@ export * from "@/apis/vehiclesSecurityPassManagement/getById";
 export * from "@/apis/vehiclesSecurityPassManagement/update";
 export * from "@/apis/vehiclesSecurityPassManagement/delete";
 
+
+/* ================= RANK MASTER LIST ================= */
+export * from "@/apis/rankMasterList/create";
+export * from "@/apis/rankMasterList/getAll";
+export * from "@/apis/rankMasterList/getById";
+export * from "@/apis/rankMasterList/update";
+export * from "@/apis/rankMasterList/delete";
