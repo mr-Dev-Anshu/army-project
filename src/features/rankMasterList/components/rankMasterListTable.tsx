@@ -128,7 +128,7 @@ const RankMasterListTable: React.FC<RankMasterListTableProps> = ({ onAddNew, onE
             header: "Status",
             accessorKey: "rankActiveStatus",
             cell: (item) => (
-                <span className={item.rankActiveStatus ? "text-green-600" : "text-red-600"}>
+                <span className={item.rankActiveStatus ? "text-[#34C759]" : "text-red-600"}>
                     {item.rankActiveStatus ? "Active" : "Inactive"}
                 </span>
             ),
