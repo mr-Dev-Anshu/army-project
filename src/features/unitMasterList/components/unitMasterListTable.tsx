@@ -98,8 +98,8 @@ const UnitMasterListTable: React.FC<UnitMasterListTableProps> = ({ onAddNew, onE
                     {filteredData.indexOf(item) + 1}.
                 </span>
             ),
-            className: "w-16 border-r border-gray-300 border-b border-gray-300 bg-white",
-            headerClassName: "w-16 border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
+            className: "w-16 border-r border-gray-300 border-b border-gray-300 bg-white sticky left-0 z-20",
+            headerClassName: "w-16 border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] sticky left-0 z-30",
         },
         {
             header: "Unit Name",
@@ -146,7 +146,16 @@ const UnitMasterListTable: React.FC<UnitMasterListTableProps> = ({ onAddNew, onE
         {
             header: "Unit Status",
             accessorKey: "unitClassification",
-            cell: (item) => item.unitClassification?.unitStatus || "N/A",
+            cell: (item) => {
+                const statusMap: Record<string, string> = {
+                    permanent: "Permanent",
+                    attached: "Attached",
+                    visiting: "Visiting",
+                    detached: "Detached",
+                    onTemporaryDuty: "On Temporary Duty",
+                };
+                return statusMap[item.unitClassification?.unitStatus as string] || item.unitClassification?.unitStatus || "N/A";
+            },
             className: "font-normal font-[Arial] text-[#0A0A0A] border-r border-gray-300 border-b border-gray-300",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
         },
@@ -214,8 +223,8 @@ const UnitMasterListTable: React.FC<UnitMasterListTableProps> = ({ onAddNew, onE
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
-            className: "w-[50px] border-l border-gray-300 border-b border-gray-300 bg-white",
-            headerClassName: "w-[50px] border-l border-gray-300 bg-gray-100 font-bold text-[#0A0A0A]",
+            className: "w-[50px] border-l border-gray-300 border-b border-gray-300 bg-white sticky right-0 z-20",
+            headerClassName: "w-[50px] border-l border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] sticky right-0 z-30",
         },
     ];
 
@@ -251,7 +260,7 @@ const UnitMasterListTable: React.FC<UnitMasterListTableProps> = ({ onAddNew, onE
             />
 
             <DynamicTable
-                className="[&::-webkit-scrollbar]:hidden border-gray-300 [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
+                className="max-h-[calc(100vh-170px)] [&::-webkit-scrollbar]:hidden border-gray-300 [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
                 data={filteredData}
                 columns={columns}
                 getRowClassName={() => "border-b border-gray-300 hover:bg-white"}
