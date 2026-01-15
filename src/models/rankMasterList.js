@@ -19,7 +19,8 @@ const rankMasterListSchema = new mongoose.Schema({
     },
     rankActiveStatus: {
         type: Boolean,
-        required: true
+        required: true,
+        default: false,
     },
     serviceArm: {
         type: String,
@@ -27,10 +28,9 @@ const rankMasterListSchema = new mongoose.Schema({
     },
     remarks: {
         type: String,
-        required: true
     }
 }, {
     timestamps: true
 })
 
-export default mongoose.model("RankMasterList", rankMasterListSchema);
+export default mongoose.models.RankMasterList || mongoose.model("RankMasterList", rankMasterListSchema);

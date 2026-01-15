@@ -24,20 +24,17 @@ const rankMasterListSchema = Joi.object({
         "any.required": "Service/Arm is required",
         "string.empty": "Service/Arm is required"
     }),
-    remarks: Joi.string().trim().required().messages({
-        "any.required": "Remarks is required",
-        "string.empty": "Remarks is required"
-    }),
+    remarks: Joi.string().trim().allow('').optional(),
 });
 
 const updateRankMasterListSchema = Joi.object({
-    rankCategory: Joi.string().trim().optional(),
-    rank: Joi.string().trim().optional(),
-    rankShortForm: Joi.string().trim().optional(),
-    rankSeniorityOrder: Joi.string().trim().optional(),
+    rankCategory: Joi.string().trim().allow('').optional(),
+    rank: Joi.string().trim().allow('').optional(),
+    rankShortForm: Joi.string().trim().allow('').optional(),
+    rankSeniorityOrder: Joi.string().trim().allow('').optional(),
     rankActiveStatus: Joi.boolean().optional(),
-    serviceArm: Joi.string().trim().optional(),
-    remarks: Joi.string().trim().optional(),
+    serviceArm: Joi.string().trim().allow('').optional(),
+    remarks: Joi.string().trim().allow('').optional(),
 });
 
 export {

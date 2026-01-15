@@ -94,6 +94,7 @@ export default function ReportFilterBar({
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
     (showAgreementStatus && filters.agreementStatus && filters.agreementStatus !== "All") ||
+    (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
     !!filters.fromDate ||
     !!filters.toDate ||
     !!filters.unit ||
