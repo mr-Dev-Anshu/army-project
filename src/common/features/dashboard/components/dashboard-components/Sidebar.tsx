@@ -317,8 +317,8 @@ const Sidebar = () => {
 
         {!isCollapsed && (
           <div className="flex-1">
-            <h1 className="text-base font-bold text-gray-900">MP System</h1>
-            <p className="text-xs text-gray-400 font-medium">Military Police</p>
+            <h1 className="text-2xl font-bold text-gray-900">Provost</h1>
+            <p className="text-sm text-gray-400 font-medium">Corps HQ</p>
           </div>
         )}
 
