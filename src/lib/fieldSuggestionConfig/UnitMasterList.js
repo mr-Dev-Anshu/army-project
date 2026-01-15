@@ -6,9 +6,10 @@ export const UNIT_MASTER_LIST_SUGGESTION_CONFIG = {
     nestedFields: {
         // unitIdentifier
         'unitIdentifier.unitType': 'unitType',
-        'unitIdentifier.unitName': 'unit',
+        'unitIdentifier.unit': 'unit',
         'unitIdentifier.unitShortForm': 'unitShortForm',
         'unitIdentifier.serviceArm': 'serviceArm',
+        'unitIdentifier.parentFormation': 'parentFormation',
         'unitIdentifier.locationStation': 'locationStation',
 
         // unitHierarchyAndControl

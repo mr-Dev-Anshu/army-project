@@ -5,7 +5,7 @@ const unitIdentifierSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    unitName: {
+    unit: {
         type: String,
         required: true
     },
@@ -14,6 +14,10 @@ const unitIdentifierSchema = new mongoose.Schema({
         required: true
     },
     serviceArm: {
+        type: String,
+        required: true
+    },
+    parentFormation: {
         type: String,
         required: true
     },

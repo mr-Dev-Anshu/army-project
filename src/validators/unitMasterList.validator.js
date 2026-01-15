@@ -4,7 +4,7 @@ const unitIdentifierSchema = Joi.object({
     unitType: Joi.string().trim().required().messages({
         "any.required": "Unit Type is required"
     }),
-    unitName: Joi.string().trim().required().messages({
+    unit: Joi.string().trim().required().messages({
         "any.required": "Unit Name is required"
     }),
     unitShortForm: Joi.string().trim().required().messages({
@@ -12,6 +12,9 @@ const unitIdentifierSchema = Joi.object({
     }),
     serviceArm: Joi.string().trim().required().messages({
         "any.required": "Service/Arm is required"
+    }),
+    parentFormation: Joi.string().trim().required().messages({
+        "any.required": "Parent Formation is required"
     }),
     locationStation: Joi.string().trim().required().messages({
         "any.required": "Location/Station is required"
@@ -40,18 +43,18 @@ const unitClassificationSchema = Joi.object({
     unitStatus: Joi.string().valid("permanent", "attached", "visiting", "detached", "onTemporaryDuty").required(),
     attachmentValidFrom: Joi.date().when('unitStatus', {
         is: Joi.valid('permanent'),
-        then: Joi.optional(),
-        otherwise: Joi.required().messages({ 'any.required': 'Attachment Valid From is required' })
+        then: Joi.allow(null, '').optional(),
+        otherwise: Joi.required().messages({ 'any.required': 'Attachment Valid From is required', 'date.base': 'Attachment Valid From must be a valid date' })
     }),
     attachmentValidTo: Joi.date().when('unitStatus', {
         is: Joi.valid('permanent'),
-        then: Joi.optional(),
-        otherwise: Joi.required().messages({ 'any.required': 'Attachment Valid To is required' })
+        then: Joi.allow(null, '').optional(),
+        otherwise: Joi.required().messages({ 'any.required': 'Attachment Valid To is required', 'date.base': 'Attachment Valid To must be a valid date' })
     }),
     attachedTo: Joi.string().trim().when('unitStatus', {
         is: Joi.valid('permanent'),
-        then: Joi.optional(),
-        otherwise: Joi.required().messages({ 'any.required': 'Attached To is required' })
+        then: Joi.allow('').optional(),
+        otherwise: Joi.required().messages({ 'any.required': 'Attached To is required', 'string.empty': 'Attached To is required' })
     }),
 });
 
