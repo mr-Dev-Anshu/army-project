@@ -160,9 +160,9 @@ const Sidebar = () => {
       submenu: [
         { label: "Offence Types Management", href: "/setup/offence-type-management" },
         { label: "Civil Employees Management", href: "/setup/civil-employees" },
-        { label: "Vehicles (Make & Take)", href: "/setup/vehicles" },
-        { label: "Ranks", href: "/setup/ranks" },
-        { label: "Units", href: "/setup/units" },
+        { label: "Vehicles Security Pass Management", href: "/setup/vehicles-security-pass-management" },
+        { label: "Ranks Master List", href: "/setup/ranks-master-list" },
+        { label: "Unit Master List", href: "/setup/unit-master-list" },
         { label: "Installation", href: "/setup/installation" },
       ],
     },
