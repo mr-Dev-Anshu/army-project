@@ -266,15 +266,6 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                 </div>
                                 <div className="space-y-1">
                                     <SuggestionInput
-                                        label="Name (as per records)"
-                                        fieldType="ownerName"
-                                        placeholder="eg."
-                                        value={vehiclePass.ownerInformation.name}
-                                        onChange={(v) => setField("ownerInformation.name", v)}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <SuggestionInput
                                         label="Unit"
                                         fieldType="unit"
                                         placeholder="eg."
@@ -767,17 +758,17 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label={<span>Maid/Servant Pass Number <span className="text-red-500">*</span></span>}
                                                         fieldType="maidPassNumber"
                                                         placeholder="e.g. 12345678"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.maidPassNumber || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.maidPassNumber", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidPassNumber || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidPassNumber", v)}
                                                     />
                                                 </div>
                                                 <div className="space-y-1">
                                                     <SuggestionInput
                                                         label="Father's Name (Son of)"
                                                         fieldType="fathersName"
-                                                        placeholder="e.g. Apradhi k Papa"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.maidFathersName || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.maidFathersName", v)}
+                                                        placeholder="e.g. Naman"
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidFathersName || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidFathersName", v)}
                                                     />
                                                 </div>
 
@@ -787,17 +778,17 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Pass ID"
                                                             fieldType="passID"
                                                             placeholder="e.g. 1234"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.maidPassID || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidPassID", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidPassID || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidPassID", v)}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
                                                         <SuggestionInput
                                                             label="Name"
                                                             fieldType="ownerName"
-                                                            placeholder="e.g. John Apradhi"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeName || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeName", v)}
+                                                            placeholder="e.g. John "
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.relativeName || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.relativeName", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -808,8 +799,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Trade"
                                                             fieldType="trade"
                                                             placeholder="Maid Servant"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.maidTrade || "Maid Servant"}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidTrade", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidTrade || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidTrade", v)}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
@@ -817,8 +808,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Worked at Quarter Number"
                                                             fieldType="quarterNumber"
                                                             placeholder="e.g. DM-35/4"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.maidQuarterNumber || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidQuarterNumber", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidQuarterNumber || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidQuarterNumber", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -828,8 +819,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="Officers Enclave C/O Rank (Army official's details)"
                                                         fieldType="rank"
                                                         placeholder="Select Rank"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.officersEnclaveRank || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.officersEnclaveRank", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.officersEnclaveRank || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.officersEnclaveRank", v)}
                                                     />
                                                 </div>
                                                 <div className="space-y-1">
@@ -837,8 +828,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="Name"
                                                         fieldType="ownerName"
                                                         placeholder="e.g. John Apradhi"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.officersEnclaveName || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.officersEnclaveName", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.officersEnclaveName || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.officersEnclaveName", v)}
                                                     />
                                                 </div>
 
@@ -848,8 +839,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Place of QTR."
                                                             fieldType="placeOfQtr"
                                                             placeholder="Enter Location"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.maidPlaceOfQtr || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidPlaceOfQtr", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidPlaceOfQtr || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidPlaceOfQtr", v)}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
@@ -857,8 +848,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Unit"
                                                             fieldType="unit"
                                                             placeholder="Select unit"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.maidUnit || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidUnit", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidUnit || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidUnit", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -869,8 +860,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="FMN"
                                                             fieldType="fmn"
                                                             placeholder="Select FMN"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.maidFmn || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidFmn", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidFmn || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidFmn", v)}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
@@ -878,8 +869,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Command"
                                                             fieldType="command"
                                                             placeholder="Select Command"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.maidCommand || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidCommand", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidCommand || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidCommand", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -889,8 +880,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="Address"
                                                         fieldType="address"
                                                         placeholder="e.g. C/O 56 APO"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeAddress || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeAddress", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.relativeAddress || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.relativeAddress", v)}
                                                     />
                                                 </div>
                                                 <div className="space-y-1">
@@ -898,8 +889,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="I Card Number"
                                                         fieldType="iCardNumber"
                                                         placeholder="e.g. A-123456"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.maidICardNumber || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.maidICardNumber", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidICardNumber || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidICardNumber", v)}
                                                     />
                                                 </div>
                                             </div>
@@ -914,8 +905,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="Shop Owner Name"
                                                         fieldType="ownerName"
                                                         placeholder="e.g. John Keeper"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.shopOwnerName || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.shopOwnerName", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.shopOwnerName || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.shopOwnerName", v)}
                                                     />
                                                 </div>
 
@@ -925,8 +916,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Shop Address"
                                                             fieldType="address"
                                                             placeholder="e.g. C/O 56 APO"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.shopAddress || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.shopAddress", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.shopAddress || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.shopAddress", v)}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
@@ -934,8 +925,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Shop Name"
                                                             fieldType="shopName"
                                                             placeholder="e.g. John Shop"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.shopName || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.shopName", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.shopName || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.shopName", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -945,8 +936,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="Unit"
                                                         fieldType="unit"
                                                         placeholder="Select unit"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.shopUnit || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.shopUnit", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.shopUnit || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.shopUnit", v)}
                                                     />
                                                 </div>
 
@@ -955,8 +946,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="Pass No."
                                                         fieldType="passNumber"
                                                         placeholder="Enter Pass No."
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.shopPassNo || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.shopPassNo", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.shopPassNo || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.shopPassNo", v)}
                                                     />
                                                 </div>
 
@@ -965,16 +956,16 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         <Label>Pass Issue Date</Label>
                                                         <Input
                                                             type="date"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.shopPassIssueDate ? new Date(vehiclePass.ownerInformation.ownerDetails.shopPassIssueDate).toISOString().split('T')[0] : ""}
-                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.shopPassIssueDate", new Date(e.target.value).toISOString())}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.shopPassIssueDate ? new Date(vehiclePass.ownerInformation.ownerDetails.relativeDetails.shopPassIssueDate).toISOString().split('T')[0] : ""}
+                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.relativeDetails.shopPassIssueDate", new Date(e.target.value).toISOString())}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
                                                         <Label>Pass Expire Date</Label>
                                                         <Input
                                                             type="date"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.shopPassExpireDate ? new Date(vehiclePass.ownerInformation.ownerDetails.shopPassExpireDate).toISOString().split('T')[0] : ""}
-                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.shopPassExpireDate", new Date(e.target.value).toISOString())}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.shopPassExpireDate ? new Date(vehiclePass.ownerInformation.ownerDetails.relativeDetails.shopPassExpireDate).toISOString().split('T')[0] : ""}
+                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.relativeDetails.shopPassExpireDate", new Date(e.target.value).toISOString())}
                                                         />
                                                     </div>
                                                 </div>
@@ -991,8 +982,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Name"
                                                             fieldType="ownerName"
                                                             placeholder="e.g. John Keeper"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerName || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.tempWorkerName", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.tempWorkerName || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.tempWorkerName", v)}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
@@ -1000,8 +991,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Place of Stay"
                                                             fieldType="address"
                                                             placeholder="e.g. C/O 56 APO"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.placeOfStay || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.placeOfStay", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.tempWorkerPlaceOfStay || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.tempWorkerPlaceOfStay", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -1012,8 +1003,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Place Of Work"
                                                             fieldType="address"
                                                             placeholder="e.g. C/O 56 APO"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.placeOfWork || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.placeOfWork", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.tempWorkerPlaceOfWork || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.tempWorkerPlaceOfWork", v)}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
@@ -1021,8 +1012,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Type of Work"
                                                             fieldType="trade"
                                                             placeholder="e.g. John Shop"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.typeOfWork || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.typeOfWork", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.tempWorkerTypeOfWork || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.tempWorkerTypeOfWork", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -1031,8 +1022,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                     <SuggestionInput
                                                         label="Pass No."
                                                         fieldType="passNumber"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerPassNo || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.tempWorkerPassNo", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.tempWorkerPassNo || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.tempWorkerPassNo", v)}
                                                     />
                                                 </div>
 
@@ -1041,16 +1032,16 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         <Label>Pass Issue Date</Label>
                                                         <Input
                                                             type="date"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerPassIssueDate ? new Date(vehiclePass.ownerInformation.ownerDetails.tempWorkerPassIssueDate).toISOString().split('T')[0] : ""}
-                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.tempWorkerPassIssueDate", new Date(e.target.value).toISOString())}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.tempWorkerPassIssueDate ? new Date(vehiclePass.ownerInformation.ownerDetails.relativeDetails.tempWorkerPassIssueDate).toISOString().split('T')[0] : ""}
+                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.relativeDetails.tempWorkerPassIssueDate", new Date(e.target.value).toISOString())}
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
                                                         <Label>Pass Expire Date</Label>
                                                         <Input
                                                             type="date"
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerPassExpireDate ? new Date(vehiclePass.ownerInformation.ownerDetails.tempWorkerPassExpireDate).toISOString().split('T')[0] : ""}
-                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.tempWorkerPassExpireDate", new Date(e.target.value).toISOString())}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.tempWorkerPassExpireDate ? new Date(vehiclePass.ownerInformation.ownerDetails.relativeDetails.tempWorkerPassExpireDate).toISOString().split('T')[0] : ""}
+                                                            onChange={(e) => e.target.value && setField("ownerInformation.ownerDetails.relativeDetails.tempWorkerPassExpireDate", new Date(e.target.value).toISOString())}
                                                         />
                                                     </div>
                                                 </div>
