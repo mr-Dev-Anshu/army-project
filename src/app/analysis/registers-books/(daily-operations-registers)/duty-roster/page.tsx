@@ -1,4 +1,4 @@
-import DutyRosterForm from "@/features/RegisterBooks/dailyOperationsRegisters/dutyRoster/components/form";
+import DutyRosterForm from "@/features/RegisterBooks/DailyOperationsRegisters/dutyRoster/components/form";
 import React from "react";
 
 const Page = () => {
