@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface RightSideSheetProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface RightSideSheetProps {
     description?: string;
     children: React.ReactNode;
     width?: string;
+    className?: string;
 }
 
 export default function RightSideSheet({
@@ -19,6 +21,7 @@ export default function RightSideSheet({
     description,
     children,
     width = "max-w-4xl",
+    className,
 }: RightSideSheetProps) {
     const sheetRef = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(isOpen);
@@ -68,8 +71,12 @@ export default function RightSideSheet({
             {/* Sheet Content */}
             <div
                 ref={sheetRef}
-                className={`relative z-50 h-full w-full ${width} bg-white shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
-                    }`}
+                className={cn(
+                    "relative z-50 h-full w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col",
+                    width,
+                    isOpen ? "translate-x-0" : "translate-x-full",
+                    className
+                )}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between border-b px-6 py-4">

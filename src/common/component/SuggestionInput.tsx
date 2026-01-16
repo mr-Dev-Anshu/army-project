@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useGetFieldSuggestions } from "@/features/suggestions/hooks";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onChange" | "value"> {
   label?: React.ReactNode;
@@ -16,6 +17,7 @@ interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onCh
   fieldType: string;
   className?: string;
   defaultOptions?: (string | { label: string; value: string })[];
+  icon?: React.ReactNode;
 }
 
 export function SuggestionInput({
@@ -28,6 +30,7 @@ export function SuggestionInput({
   fieldType,
   className,
   defaultOptions = [],
+  icon,
   ...props
 }: SuggestionInputProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -73,18 +76,25 @@ export function SuggestionInput({
   const showList = showSuggestions && (allSuggestions.length > 0 || isLoading);
 
   return (
-    <div className={`space-y-1 relative w-full ${className || ''}`} ref={wrapperRef}>
+    <div className={cn("space-y-1 relative w-full", className)} ref={wrapperRef}>
       {label && <Label>{label}</Label>}
-      <Input
-        type={type}
-        placeholder={placeholder}
-        value={safeValue}
-        onChange={handleChange}
-        onFocus={() => setShowSuggestions(true)}
-        className="bg-white"
-        autoComplete="off"
-        {...props}
-      />
+      <div className="relative">
+        <Input
+          type={type}
+          placeholder={placeholder}
+          value={safeValue}
+          onChange={handleChange}
+          onFocus={() => setShowSuggestions(true)}
+          className={cn("bg-white", icon && "pr-10")}
+          autoComplete="off"
+          {...props}
+        />
+        {icon && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            {icon}
+          </div>
+        )}
+      </div>
 
       {showList && (
         <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">

@@ -1,5 +1,4 @@
-import DutyKeyOutInForm from "@/features/RegisterBooks/DailyOperationsRegisters/dutyInOut/components/form";
-import React from "react";
+import DutyKeyOutInForm from "@/features/RegisterBooks/dailyOperationsRegisters/dutyInOut/components/form";
 
 const Page = () => {
     return (

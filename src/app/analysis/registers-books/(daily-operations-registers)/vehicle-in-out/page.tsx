@@ -1,5 +1,5 @@
-import VehicleInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/vehicleInOut/components/form";
-import React from "react";
+import VehicleInOutForm from "@/features/RegisterBooks/dailyOperationsRegisters/vehicleInOut/components/form";
+
 
 const Page = () => {
     return (
