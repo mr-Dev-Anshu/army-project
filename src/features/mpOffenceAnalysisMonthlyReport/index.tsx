@@ -1,20 +1,17 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart3, ChevronRight } from "lucide-react";
 
 import { useGetDomesticAnalytics } from "./domesticAnalysis/hooks";
-import { useMemo, useState } from "react";
-import FormationAnalysisTable from "./components/FormationAnalysisTable";
-import Hq36RapidDivisionTable from "./components/Hq36RapidDivisionTable";
+import { useGetDivisionAnalysis } from "./hooks/useDivisionAnalysis";
+import { useRouter } from "next/navigation";
+import { FORMATIONS_LIST, MAIN_FORMATION } from "./constants";
 
 export default function MpOffenceAnalysisMonthlyReport() {
-    const [selectedFormation, setSelectedFormation] = useState<{
-        groupKey: string;
-        subtitle: string;
-    } | null>(null);
+    const router = useRouter();
 
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
@@ -41,56 +38,51 @@ export default function MpOffenceAnalysisMonthlyReport() {
         return { totalOffences: total, totalPending: pending, severity: risk };
     }, [analyticsData]);
 
-    /* Static Data for UI matching */
-    const STATIC_OTHER_FORMATIONS = [
-        {
-            groupKey: "HQ 36 RAPID Division",
-            subtitle: "36 RAPID PRO UNIT",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
-        },
-        {
-            groupKey: "HQ 31 ARRMD DIVISION",
-            subtitle: "31 ARMD Division PRO Unit",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
-        },
-        {
-            groupKey: "HQ 41 Arty Division",
-            subtitle: "41 Arty Division PRO unit",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
-        },
-        {
-            groupKey: "HQ 54 Inf Division",
-            subtitle: "54 Inf Division PRO unit",
-            total: 148,
-            actionPending: 26,
-            severity: "High Risk",
-        },
-    ];
+    const firstDayOfMonth = new Date(currentYear, currentDate.getMonth(), 1).toISOString();
+
+    // Fetch Division Analysis (Grouped) for Other Formations
+    const { data: divisionData, isLoading: isDivisionLoading } = useGetDivisionAnalysis({
+        groupBy: "all"
+    });
+
+    const formationsWithData = useMemo(() => {
+        if (!divisionData || !Array.isArray(divisionData)) {
+            // Return static list with 0s if no data
+            return FORMATIONS_LIST.map(f => ({
+                ...f,
+                total: 0,
+                actionPending: 0,
+                severity: "Low Risk"
+            }));
+        }
+
+        return FORMATIONS_LIST.map(f => {
+            const match = divisionData.find((d: any) => d.divisionName === f.groupKey);
+            // Use offenceCount as "Total Offence" as requested to show count of entries/offences
+            const total = match ? (match.offenceCount || 0) : 0;
+            const pending = match ? (match.totalActionPending || 0) : 0;
+            let risk = "Low Risk";
+            if (pending > 20) risk = "High Risk";
+            else if (pending > 10) risk = "Medium Risk";
+
+            return {
+                ...f,
+                total,
+                actionPending: pending,
+                severity: risk
+            };
+        });
+    }, [divisionData]);
+
+
 
     if (isLoading) return <div className="p-8">Loading analysis data...</div>;
 
-    if (selectedFormation) {
-        if (selectedFormation.groupKey === "HQ 36 RAPID Division") {
-            return (
-                <Hq36RapidDivisionTable
-                    formation={selectedFormation}
-                    onBack={() => setSelectedFormation(null)}
-                />
-            );
-        }
-        return (
-            <FormationAnalysisTable
-                formation={selectedFormation}
-                onBack={() => setSelectedFormation(null)}
-            />
-        );
-    }
+    if (isLoading) return <div className="p-8">Loading analysis data...</div>;
+
+    const handleFormationClick = (slug: string) => {
+        router.push(`/analysis/mp-offence-monthly/${slug}`);
+    };
 
     return (
         <div className="p-2 space-y-8 min-h-screen bg-transparent font-sans">
@@ -108,7 +100,10 @@ export default function MpOffenceAnalysisMonthlyReport() {
                         MP Offence Analysis Monthly Report
                     </span>
                 </div>
-                <Button className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer">
+                <Button
+                    className="bg-[#0088FF] hover:bg-blue-600 text-white gap-2 rounded-md px-4 font-medium cursor-pointer"
+                    onClick={() => router.push("/analysis/mp-offence-monthly/overall-analysis")}
+                >
                     View Overall Formation Analysis
                     <BarChart3 className="w-4 h-4 ml-1" />
                 </Button>
@@ -151,9 +146,9 @@ export default function MpOffenceAnalysisMonthlyReport() {
                 {/* Main Card */}
                 <div className="bg-white border border-gray-200 rounded-xl p-5  shadow-sm w-full max-w-[340px] hover:shadow-md transition-shadow relative overflow-hidden">
                     <div className="mb-8">
-                        <h3 className="font-bold text-xl text-[#0A0A0A]">HQ 21 CORPS</h3>
+                        <h3 className="font-bold text-xl text-[#0A0A0A]">{MAIN_FORMATION.groupKey}</h3>
                         <p className="text-[#737373] text-sm font-bold mt-1">
-                            21 Corps Provost Unit
+                            {MAIN_FORMATION.subtitle}
                         </p>
                     </div>
 
@@ -178,12 +173,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                         <Button
                             size="icon"
                             className="bg-[#0088FF] hover:bg-blue-600 rounded-lg w-10 h-10 shadow-sm cursor-pointer"
-                            onClick={() =>
-                                setSelectedFormation({
-                                    groupKey: "HQ 21 CORPS",
-                                    subtitle: "21 Corps Provost Unit",
-                                })
-                            }
+                            onClick={() => handleFormationClick(MAIN_FORMATION.slug)}
                         >
                             <ArrowRight className="w-5 h-5 text-white" />
                         </Button>
@@ -200,7 +190,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {STATIC_OTHER_FORMATIONS.map((formation: any, index: number) => (
+                    {formationsWithData.map((formation: any, index: number) => (
                         <FormationCard
                             key={index}
                             title={formation.groupKey}
@@ -208,7 +198,7 @@ export default function MpOffenceAnalysisMonthlyReport() {
                             totalOffence={formation.total}
                             pendingCases={formation.actionPending}
                             severity={formation.severity}
-                            onClick={() => setSelectedFormation(formation)}
+                            onClick={() => handleFormationClick(formation.slug)}
                         />
                     ))}
                 </div>

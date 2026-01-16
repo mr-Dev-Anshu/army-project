@@ -2,7 +2,7 @@
 import { Check, Edit2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@/context/FormContext";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface Step {
   id: number;
@@ -21,7 +21,9 @@ interface LeftStepperProps {
   // ⭐ ADD THIS
   onCreate?: () => void;
   onCancel?: () => void;
+  onReportNoChange?: (val: string) => void;
   hideReportNo?: boolean;
+  isSubmitting?: boolean;
 }
 
 export const LeftStepper = ({
@@ -33,7 +35,9 @@ export const LeftStepper = ({
   onStepClick,
   onCreate,
   onCancel,
+  onReportNoChange,
   hideReportNo = false,
+  isSubmitting = false,
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
@@ -46,9 +50,16 @@ export const LeftStepper = ({
   const [editing, setEditing] = useState(false);
   const [reportValue, setReportValue] = useState(reportNo || "");
 
+  useEffect(() => {
+    if (!editing) {
+      setReportValue(reportNo || "");
+    }
+  }, [reportNo, editing]);
+
   const saveReportNo = () => {
     setEditing(false);
     console.log("Saved Report No:", reportValue);
+    // Already synced via onChange
   };
 
   return (
@@ -82,7 +93,11 @@ export const LeftStepper = ({
                 <input
                   autoFocus
                   value={reportValue}
-                  onChange={(e) => setReportValue(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setReportValue(v);
+                    if (onReportNoChange) onReportNoChange(v);
+                  }}
                   onBlur={saveReportNo}
                   className="bg-transparent border-b border-gray-400 outline-none px-1 w-[160px]"
                 />
@@ -122,10 +137,9 @@ export const LeftStepper = ({
                     flex-shrink-0
                     w-10 h-10
                     border-2
-                    ${
-                      status === "completed"
-                        ? "bg-green-500 border-green-500"
-                        : status === "active"
+                    ${status === "completed"
+                      ? "bg-green-500 border-green-500"
+                      : status === "active"
                         ? "bg-blue-500 border-blue-500 text-white"
                         : "border-gray-500 bg-[#171717] text-gray-400"
                     }
@@ -141,10 +155,9 @@ export const LeftStepper = ({
                 <span
                   className={`
                     text-sm sm:text-base md:text-lg font-medium
-                    ${
-                      status === "completed"
-                        ? "text-green-400"
-                        : status === "active"
+                    ${status === "completed"
+                      ? "text-green-400"
+                      : status === "active"
                         ? "text-blue-400"
                         : "text-gray-400"
                     }
@@ -159,10 +172,9 @@ export const LeftStepper = ({
                   className={`
                     absolute left-[20px] top-[66px] w-[2px]
                     border-l-2 border-dashed
-                    ${
-                      status === "completed"
-                        ? "border-green-500"
-                        : status === "active"
+                    ${status === "completed"
+                      ? "border-green-500"
+                      : status === "active"
                         ? "border-blue-500"
                         : "border-gray-600"
                     }
@@ -185,13 +197,12 @@ export const LeftStepper = ({
         </Button>
 
         <Button
-          className={`w-full sm:flex-1 text-sm sm:text-base ${
-            state.preview ? "bg-blue-600" : "bg-gray-600 cursor-not-allowed"
-          }`}
-          disabled={!state.preview}
+          className={`w-full sm:flex-1 text-sm sm:text-base ${state.preview ? "bg-blue-600" : "bg-gray-600 cursor-not-allowed"
+            }`}
+          disabled={!state.preview || isSubmitting}
           onClick={() => onCreate && onCreate()}
         >
-          Save Report
+          {isSubmitting ? "Saving..." : "Save Report"}
         </Button>
       </div>
     </div>

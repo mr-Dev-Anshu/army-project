@@ -70,11 +70,13 @@ export const initialState: GlobalFormState = {
         timeOfOffence: "",
         incidentLocation: "",
         description: "",
+        briefDescription: "",
         time: "",
       },
 
       offenceTypes: [],
       offenceCode: [],
+      offenceRefList: [],
       witnesses: [],
       selectedWitness: null,
       offenderPeople: [],
@@ -82,6 +84,7 @@ export const initialState: GlobalFormState = {
     },
 
     staticSpeed: {
+      reportNo: "",
       remarks: "",
       vehicleInvolved: "",
       vehicleDetails: {
@@ -112,8 +115,9 @@ export const initialState: GlobalFormState = {
         timeOfOffence: "",
         time: "",
         incidentLocation: "",
-       description:"",
-       description2: "",
+        description: "",
+        briefDescription: "",
+        description2: "",
         authSpeed: "30",
         actualSpeedNoted: "",
         overSpeedCalculated: "",
@@ -147,6 +151,8 @@ export const initialState: GlobalFormState = {
 
       occurrenceDetails: {
         offenceType: "",
+        offenceTypes: [],
+        offenceTypeReference: [],
         place: "",
         date: "",
         time: "",
@@ -203,37 +209,41 @@ export const initialState: GlobalFormState = {
       validFrom: null,
       validTill: null,
     },
-    maidServant: {
-      qtrNumber: "",
-      ownerName: "",
-      ownerRank: "",
-      ownerUnit: "",
-      servantName: "",
-      servantMobile: "",
-      servantAadhar: "",
-      permanentAddressLine: "",
-      permanentCityDistrict: "",
-      permanentState: "",
-      permanentPincode: "",
-      passNumber: "",
-      validFrom: null,
-      validTill: null,
-      familyMembers: [],
-    },
-    tempWorker: {
-      workerName: "",
-      workerMobile: "",
-      workerAadhar: "",
-      permanentAddressLine: "",
-      permanentCityDistrict: "",
-      permanentState: "",
-      permanentPincode: "",
-      placeOfStay: "",
-      placeOfDuty: "",
-      passNumber: "",
-      validFrom: null,
-      validTill: null,
-      subWorkers: [],
+
+    maidServant: {} as any, // Placeholder until fully defined
+    tempWorker: {} as any,   // Placeholder until fully defined
+
+    vehiclesSecurityPassManagement: {
+      _id: "",
+      createdAt: "",
+      updatedAt: "",
+      vehicleIdentification: {
+        registrationNumber: "",
+        color: "",
+        category: "",
+        type: "",
+      },
+      ownerInformation: {
+        name: "",
+        mobileNumber: "",
+        ownerType: "militaryPersonnel",
+        ownerDetails: {},
+      },
+      vehiclePassDetails: {
+        isAvailable: false,
+        passNumber: "",
+        issuedDate: "",
+        validFrom: "",
+        validTo: "",
+        issuingAuthority: "",
+      },
+      authentication: {
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: "",
+      },
+      remark: "",
+      customFields: {},
     },
   },
 };
@@ -250,7 +260,9 @@ type Action =
   | { type: "REMOVE_PATH"; path: string; index: number }
   | { type: "SET_PREVIEW"; payload: boolean }
   | { type: "SET_FORM_DATA"; payload: any }
-  | { type: "CLEAR_MP_ADDITIONAL" };
+  | { type: "CLEAR_MP_ADDITIONAL" }
+  | { type: "RESET_FORM" };
+
 
 /* ------------------------------------
    REDUCER
@@ -302,6 +314,9 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
 
     case "SET_FORM_DATA":
       return { ...state, formData: action.payload };
+
+    case "RESET_FORM":
+      return initialState;
 
     case "CLEAR_MP_ADDITIONAL": {
       const newState = structuredClone(state);

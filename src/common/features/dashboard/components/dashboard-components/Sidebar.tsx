@@ -1,20 +1,19 @@
 "use client";
-
 import {
   PieChart,
-  ClipboardList,
   FileCheck,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Files,
   BookOpen,
   LineChart,
   Database,
-  Shield,
-  ChevronLeft,
-  Gauge,
   Network,
   User as UserIcon,
+  ClipboardList,
+  Gauge,
+  Shield,
 } from "lucide-react";
 
 import {
@@ -22,33 +21,66 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useState } from "react";
-import ConeIcon from "@/components/icons/ConeIcon";
-import Tooltip from "./Tooltip";
 
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import ConeIcon from "@/components/icons/ConeIcon";
+import { useForm } from "@/context/FormContext";
 
 const cn = (...classes: (string | boolean | undefined)[]) =>
   classes.filter(Boolean).join(" ");
 
 interface MenuItem {
-  icon?: React.ReactNode;
   label: string;
+  href?: string;
+  icon?: React.ReactNode;
   badge?: string;
   submenu?: MenuItem[];
 }
 
-interface SidebarProps {
-  collapsed: boolean;
-  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-  onMenuSelect: (page: string) => void;
-}
+const Sidebar = () => {
+  const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [openMenus, setOpenMenus] = useState<string[]>([
+    "Forms & Certificates",
+    "Basic Information",
+    "Military Structure Data",
+  ]);
 
-const Sidebar: React.FC<SidebarProps> = ({
-  collapsed,
-  setCollapsed,
-  onMenuSelect,
-}) => {
-  const [openMenus, setOpenMenus] = useState<string[]>([]);
+  // Routes where sidebar should DEFAULT to collapsed (for more screen space)
+  const routesThatPreferCollapsed = [
+    "/create-record",
+    "/forms",
+    "/test",
+    "/reports",
+    "/analysis",
+    "/setup",
+    "/structure",
+    "/hello"
+    // Add more prefixes as needed
+  ];
+
+  const shouldPreferCollapsed = () => {
+    return routesThatPreferCollapsed.some((route) =>
+      pathname.startsWith(route)
+    );
+  };
+
+  // Apply default collapse preference only on route change
+  // Does NOT override if user has manually toggled during their stay
+  useEffect(() => {
+    const preferred = shouldPreferCollapsed();
+
+    // Only reset if current state doesn't match route preference
+    // This preserves user manual toggles while on the page
+    if (isCollapsed !== preferred) {
+      setIsCollapsed(preferred);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]); // Only trigger on navigation
+
+  const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) =>
@@ -58,125 +90,158 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
+  const isActive = (href?: string) => {
+    if (!href) return false;
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
   const menuItems: MenuItem[] = [
-    { icon: <PieChart className="w-5 h-5" />, label: "Dashboard", badge: "1" },
+    {
+      icon: <PieChart className="w-5 h-5" />,
+      label: "Dashboard",
+      href: "/",
+      badge: "1",
+    },
+  ];
+
+  const createNewRecordItems: MenuItem[] = [
+    {
+      icon: <ConeIcon className="w-5 h-5" color="currentColor" />,
+      label: "General & Traffic Offence Report",
+      href: "/create-record/general-traffic",
+    },
+    {
+      icon: <Gauge className="w-5 h-5" />,
+      label: "Static Speed Check Report",
+      href: "/create-record/static-speed",
+    },
+    {
+      icon: <ClipboardList className="w-5 h-5" />,
+      label: "MP Occurrence & Investigation Report",
+      href: "/create-record/mp-investigation",
+    },
+  ];
+
+  const reportsAndAnalysis: MenuItem[] = [
+    {
+      icon: <Files className="w-5 h-5" />,
+      label: "All Reports",
+      href: "/reports",
+    },
+    {
+      icon: <BookOpen className="w-5 h-5" />,
+      label: "Registers/Books",
+      href: "/analysis/registers-books",
+    },
+    {
+      icon: <LineChart className="w-5 h-5" />,
+      label: "MP Offence Analysis Monthly Report",
+      href: "/analysis/mp-offence-monthly",
+    },
   ];
 
   const formsAndCertificates: MenuItem = {
     icon: <FileCheck className="w-5 h-5" />,
     label: "Forms & Certificates",
     submenu: [
-      { label: "Compromise Certificate" },
-      { label: "Confiscation Certificate" },
-      { label: "Handing/Taking Certificate" },
-      { label: "MP Report Form" },
-      { label: "Contact Numbers" },
-      { label: "Letters" },
+      { label: "Compromise Certificate", href: "/forms/compromise" },
+      { label: "Confiscation Certificate", href: "/forms/confiscation" },
+      { label: "Handing/Taking Certificate", href: "/forms/handing-taking" },
+      { label: "MP Report Form", href: "/forms/mp-report" },
+      { label: "Contact Numbers", href: "/forms/contact-numbers" },
+      { label: "Letters", href: "/forms/letters" },
     ],
   };
-
-  const reportsAndAnalysis: MenuItem[] = [
-    { icon: <Files className="w-5 h-5" />, label: "All Reports" },
-    { icon: <BookOpen className="w-5 h-5" />, label: "Registers/Books" },
-    {
-      icon: <LineChart className="w-5 h-5" />,
-      label: "MP Offence Analysis Monthly Report",
-    },
-  ];
 
   const systemSetup: MenuItem[] = [
     {
       icon: <Database className="w-5 h-5" />,
       label: "Basic Information",
       submenu: [
-        { label: "Offence Types" },
-        { label: "Civil Employees Management" },
-        { label: "Vehicles (Make & Take)" },
-        { label: "Ranks" },
-        { label: "Units" },
-        { label: "Installation" },
+        { label: "Offence Types Management", href: "/setup/offence-type-management" },
+        { label: "Civil Employees Management", href: "/setup/civil-employees" },
+        { label: "Vehicles Security Pass Management", href: "/setup/vehicles-security-pass-management" },
+        { label: "Ranks Master List", href: "/setup/ranks-master-list" },
+        { label: "Unit Master List", href: "/setup/unit-master-list" },
+        { label: "Installation", href: "/setup/installation" },
       ],
     },
     {
       icon: <Network className="w-5 h-5" />,
       label: "Military Structure Data",
       submenu: [
-        { label: "Brigade" },
-        { label: "Division" },
-        { label: "Corps / Sub-Area" },
-        { label: "Command / Area" },
+        { label: "Brigade", href: "/structure/brigade" },
+        { label: "Division", href: "/structure/division" },
+        { label: "Corps / Sub-Area", href: "/structure/corps" },
+        { label: "Command / Area", href: "/structure/command" },
       ],
     },
-    { icon: <UserIcon className="w-5 h-5" />, label: "User Access Management" },
+    {
+      icon: <UserIcon className="w-5 h-5" />,
+      label: "User Access Management",
+      href: "/setup/users",
+    },
   ];
 
-  const renderMenuItem = (item: MenuItem, isSubmenu = false) => (
-    <button
-      key={item.label}
-      onClick={() => {
-        if (item.label === "Dashboard") {
-          onMenuSelect("dashboard");
-          setCollapsed(true);
-        }
-        if (item.label === "All Reports") {
-          onMenuSelect("viewReports");
-          setCollapsed(true);
-        }
-        if (item.label === "MP Offence Analysis Monthly Report") {
-          onMenuSelect("mpOffenceAnalysis");
-          setCollapsed(true);
-        }
+  const renderMenuItem = (item: MenuItem, isSubmenu = false) => {
+    if (item.submenu) return null;
 
-        if (item.label === "Dashboard") onMenuSelect("dashboard");
-        if (item.label === "All Reports") onMenuSelect("viewReports");
+    const active = isActive(item.href);
 
-        setCollapsed(true);
-        if (item.label === "Civil Employees Management")
-          onMenuSelect("civilEmployees");
-
-      }}
-      className={cn(
-        "w-full relative flex items-center transition-all group",
-        collapsed
-          ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-          : cn(
-              "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg text-left",
-              isSubmenu && "py-1.5"
+    return (
+      <Link
+        href={item.href || "#"}
+        className={cn(
+          "w-full relative flex items-center transition-all group rounded-lg",
+          isCollapsed
+            ? "h-10 justify-center hover:bg-gray-100"
+            : cn(
+              "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
+              isSubmenu && "py-1.5",
+              active && "bg-blue-50 text-blue-700 hover:bg-blue-50"
             )
-      )}
-    >
-      {!isSubmenu && (
-        <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0 relative">
-          {item.icon}
-
-          {/* Tooltip only when collapsed */}
-          {collapsed && <Tooltip label={item.label} />}
-        </span>
-      )}
-
-      {!collapsed && (
-        <>
+        )}
+      >
+        {!isSubmenu && (
           <span
             className={cn(
-              "flex-1 text-gray-600 group-hover:text-gray-900 whitespace-normal break-words leading-snug",
-              isSubmenu ? "text-sm" : "text-base"
+              "flex-shrink-0",
+              active ? "text-blue-700" : "text-gray-500 group-hover:text-gray-900"
             )}
           >
-            {item.label}
+            {item.icon}
           </span>
+        )}
 
-          {item.badge && (
-            <span className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-gray-200 text-gray-600 rounded-full">
-              {item.badge}
+        {!isCollapsed && (
+          <>
+            <span
+              className={cn(
+                "flex-1 whitespace-normal break-words leading-snug",
+                isSubmenu ? "text-sm" : "text-base",
+                active
+                  ? "text-blue-700 font-medium"
+                  : "text-gray-600 group-hover:text-gray-900"
+              )}
+            >
+              {item.label}
             </span>
-          )}
-        </>
-      )}
-    </button>
-  );
+
+            {item.badge && (
+              <span className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-gray-200 text-gray-600 rounded-full">
+                {item.badge}
+              </span>
+            )}
+          </>
+        )}
+      </Link>
+    );
+  };
 
   const renderCollapsibleSection = (item: MenuItem) => {
     if (!item.submenu) return renderMenuItem(item);
+
+    const hasActiveSubmenu = item.submenu.some((sub) => isActive(sub.href));
 
     return (
       <Collapsible
@@ -187,22 +252,34 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <CollapsibleTrigger
           className={cn(
-            "w-full flex items-center transition-all group relative",
-            collapsed
-              ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-              : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100 rounded-lg"
+            "w-full flex items-center transition-all group rounded-lg",
+            isCollapsed
+              ? "h-10 justify-center hover:bg-gray-100"
+              : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100",
+            hasActiveSubmenu && "bg-blue-50"
           )}
         >
-          <span className="text-gray-500 group-hover:text-gray-900 flex-shrink-0 relative">
+          <span
+            className={cn(
+              "flex-shrink-0",
+              hasActiveSubmenu
+                ? "text-blue-700"
+                : "text-gray-500 group-hover:text-gray-900"
+            )}
+          >
             {item.icon}
-
-            {/* Tooltip for collapsible headers */}
-            {collapsed && <Tooltip label={item.label} />}
           </span>
 
-          {!collapsed && (
+          {!isCollapsed && (
             <>
-              <span className="flex-1 text-base text-gray-600 group-hover:text-gray-900 leading-snug">
+              <span
+                className={cn(
+                  "flex-1 text-base leading-snug",
+                  hasActiveSubmenu
+                    ? "text-blue-700 font-medium"
+                    : "text-gray-600 group-hover:text-gray-900"
+                )}
+              >
                 {item.label}
               </span>
               {openMenus.includes(item.label) ? (
@@ -214,21 +291,22 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
         </CollapsibleTrigger>
 
-        {!collapsed && (
-          <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-400 space-y-1">
-            {item.submenu?.map((sub) => renderMenuItem(sub, true))}
+        {!isCollapsed && (
+          <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-200 space-y-1">
+            {item.submenu.map((sub) => (
+              <div key={sub.label}>{renderMenuItem(sub, true)}</div>
+            ))}
           </CollapsibleContent>
         )}
       </Collapsible>
     );
   };
 
-
   return (
     <div
       className={cn(
-        "h-screen bg-white border-r border-gray-300 flex flex-col transition-all duration-300",
-        collapsed ? "w-[74px]" : "w-[340px]"
+        "h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
+        isCollapsed ? "w-[74px]" : "w-[340px]"
       )}
     >
       {/* HEADER */}
@@ -237,18 +315,19 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Shield className="w-5 h-5 text-white" fill="white" />
         </div>
 
-        {!collapsed && (
+        {!isCollapsed && (
           <div className="flex-1">
-            <h1 className="text-base font-bold text-gray-900">Brand name</h1>
-            <p className="text-xs text-gray-400 font-medium">Brand name</p>
+            <h1 className="text-2xl font-bold text-gray-900">Provost</h1>
+            <p className="text-sm text-gray-400 font-medium">Corps HQ</p>
           </div>
         )}
 
         <button
-          className="cursor-pointer absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm z-50 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all opacity-0 group-hover/sidebar:opacity-100"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleSidebar}
+          className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm z-50 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all opacity-0 group-hover/sidebar:opacity-100"
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? (
+          {isCollapsed ? (
             <ChevronRight className="w-4 h-4" />
           ) : (
             <ChevronLeft className="w-4 h-4" />
@@ -256,137 +335,72 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
+      {/* NAVIGATION */}
       <nav
         className={cn(
-          "flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']",
-          collapsed ? "px-2 pt-4" : "p-4 space-y-1"
+          "flex-1 overflow-y-auto no-scrollbar",
+          isCollapsed ? "px-2 pt-4" : "p-4 space-y-1"
         )}
       >
         {/* Dashboard */}
-        <div className="mb-2">{menuItems.map((item) => renderMenuItem(item))}</div>
+        <div className="mb-2">
+          {menuItems.map((item) => (
+            <div key={item.label}>{renderMenuItem(item)}</div>
+          ))}
+        </div>
 
-        <div className="w-full h-px bg-gray-300 my-2" />
+        <div className="w-full h-px bg-gray-100 my-2" />
 
         {/* Create New Record */}
         <div className="mb-2">
-          {!collapsed && (
+          {!isCollapsed && (
             <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
               Create New Record
             </h2>
           )}
-
           <div className="space-y-1">
-            {/* General Traffic */}
-            <button
-              onClick={() => {
-                onMenuSelect("multiForm");
-                setCollapsed(true);
-              }}
-              className={cn(
-                "w-full flex items-center transition-all group",
-                collapsed
-                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
-              )}
-            >
-              <span
-                className={cn(
-                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
-                  !collapsed && "pt-0.5"
-                )}
-              >
-                <ConeIcon className="w-5 h-5" color="currentColor" />
-              </span>
-
-              {!collapsed && (
-                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 flex-1">
-                  General & Traffic Offence Report
-                </span>
-              )}
-            </button>
-
-            {/* Static Speed */}
-            <button
-              onClick={() => {
-                onMenuSelect("staticSpeed");
-                setCollapsed(true);
-              }}
-              className={cn(
-                "w-full flex items-center transition-all group",
-                collapsed
-                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
-              )}
-            >
-              <span
-                className={cn(
-                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
-                  !collapsed && "pt-0.5"
-                )}
-              >
-                <Gauge className="w-5 h-5" />
-              </span>
-
-              {!collapsed && (
-                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 flex-1">
-                  Static Speed Check Report
-                </span>
-              )}
-            </button>
-
-            {/* MP Report */}
-            <button
-              onClick={() => {
-                onMenuSelect("investigation");
-                setCollapsed(true);
-              }}
-              className={cn(
-                "w-full flex items-center transition-all group",
-                collapsed
-                  ? "h-10 justify-center hover:bg-gray-100 rounded-lg"
-                  : "gap-3 px-4 py-2 hover:bg-gray-100 rounded-lg items-start"
-              )}
-            >
-              <span
-                className={cn(
-                  "text-gray-500 group-hover:text-gray-900 flex-shrink-0",
-                  !collapsed && "pt-0.5"
-                )}
-              >
-                <ClipboardList className="w-5 h-5" />
-              </span>
-
-              {!collapsed && (
-                <span className="text-base text-left text-gray-600 group-hover:text-gray-900 flex-1">
-                  MP Occurrence & Investigation Report
-                </span>
-              )}
-            </button>
+            {createNewRecordItems.map((item) => (
+              <div key={item.label}>{renderMenuItem(item)}</div>
+            ))}
           </div>
         </div>
 
-        <div className="w-full h-px bg-gray-300 my-2" />
+        <div className="w-full h-px bg-gray-100 my-2" />
 
-        {/* Reports */}
-        {!collapsed && (
-          <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
-            Reports & Analysis
-          </h2>
-        )}
-        {reportsAndAnalysis.map((item) => renderMenuItem(item))}
+        {/* Reports & Analysis */}
+        <div className="mb-2">
+          {!isCollapsed && (
+            <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
+              Reports & Analysis
+            </h2>
+          )}
+          <div className="space-y-1">
+            {reportsAndAnalysis.map((item) => (
+              <div key={item.label}>{renderMenuItem(item)}</div>
+            ))}
+          </div>
+        </div>
 
-        <div className="w-full h-px bg-gray-300 my-2" />
+        <div className="w-full h-px bg-gray-100 my-2" />
 
-        {renderCollapsibleSection(formsAndCertificates)}
+        {/* Forms & Certificates */}
+        <div className="mb-2">{renderCollapsibleSection(formsAndCertificates)}</div>
 
-        <div className="w-full h-px bg-gray-300 my-2" />
+        <div className="w-full h-px bg-gray-100 my-2" />
 
-        {!collapsed && (
-          <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
-            System Setup
-          </h2>
-        )}
-        {systemSetup.map((item) => renderCollapsibleSection(item))}
+        {/* System Setup */}
+        <div className="pb-4">
+          {!isCollapsed && (
+            <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
+              System Setup
+            </h2>
+          )}
+          <div className="space-y-1">
+            {systemSetup.map((item) => (
+              <div key={item.label}>{renderCollapsibleSection(item)}</div>
+            ))}
+          </div>
+        </div>
       </nav>
     </div>
   );

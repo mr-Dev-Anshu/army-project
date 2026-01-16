@@ -1,8 +1,23 @@
 "use client";
 
+import { useEffect } from "react";
+import { useForm } from "@/context/FormContext";
 import VehicleDetailsForm from "@/common/component/VehicleDetailsForm";
 
 export default function StaticSpeedStep1Particulars() {
+  const { state, dispatch } = useForm();
+
+  /* 🔥 FORCE vehicleInvolved = "yes" for static speed */
+  useEffect(() => {
+    if (state.formData.staticSpeed.vehicleInvolved !== "yes") {
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.staticSpeed.vehicleInvolved",
+        value: "yes",
+      });
+    }
+  }, [dispatch, state.formData.staticSpeed.vehicleInvolved]);
+
   return (
     <div
       className="
@@ -14,6 +29,7 @@ export default function StaticSpeedStep1Particulars() {
         overflow-y-auto
       "
     >
+      {/* 🔹 VEHICLE DETAILS (ALWAYS VISIBLE) */}
       <div
         className="
           w-full
@@ -25,7 +41,10 @@ export default function StaticSpeedStep1Particulars() {
         "
       >
         <div className="w-full">
-        <h1 className="text-xl font-bold mb-4"> 1.1 Fill Vehicle Identification Fields:</h1>
+          <h1 className="text-xl font-bold mb-4">
+            1.1 Fill Vehicle Identification Fields:
+          </h1>
+
           <VehicleDetailsForm scope="static" />
         </div>
       </div>

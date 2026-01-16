@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as api from "@/apis/mpReports"; 
+import * as api from "@/apis/mpReports"; // We'll export this next
 
-export const useGetAllMPReports = () => {
+export const useGetAllMPReports = (filters?: any) => {
   return useQuery({
-    queryKey: ["mp-reports"],
-    queryFn: api.getAllMPReports,
+    queryKey: ["mp-reports", filters],
+    queryFn: () => api.getAllMPReports(filters),
     retry: 1,
   });
 };

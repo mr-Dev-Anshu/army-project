@@ -1,260 +1,674 @@
+// // "use client";
+
+// // import { useState } from "react";
+// // import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
+// // import { useForm } from "@/context/FormContext";
+// // import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// // import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
+// // import { Checkbox } from "@/components/ui/checkbox";
+
+// // /* ================= TYPES ================= */
+
+// // type OffenderKey = keyof typeof offenderFormsConfig;
+
+// // interface OffenderWithoutVehicleFormProps {
+// //   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+// //   externalType?: OffenderKey;
+// // }
+
+// // /* ================= COMPONENT ================= */
+
+// // export default function OffenderWithoutVehicleForm({
+// //   scope = "traffic",
+// //   externalType,
+// // }: OffenderWithoutVehicleFormProps) {
+// //   const offenderConfig = offenderFormsConfig;
+// //   const { dispatch } = useForm();
+
+// //   const [offenderType, setOffenderType] = useState<OffenderKey | "">(
+// //     externalType ?? ""
+// //   );
+// //   const [hasMilitaryRelative, setHasMilitaryRelative] = useState(false);
+// //   const [relativeRelation, setRelativeRelation] = useState("");
+// //   const [relativeType, setRelativeType] = useState<OffenderKey | "">("");
+
+// //   if (!offenderConfig) return null;
+
+// //   /* ================= PATH RESOLVER ================= */
+
+// //   const getPath = () => {
+// //     if (scope === "mp-main")
+// //       return "formData.mpReport.individualDetails.tempOffender.details";
+
+// //     if (scope === "mp-additional")
+// //       return "formData.mpReport.additionalIndividual.tempOffender.details";
+
+// //     // traffic / static
+// //     return "formData.traffic.offenderPeople[0].details";
+// //   };
+
+// //   /* ================= SELECT HANDLER ================= */
+
+// //   const handleOffenderSelect = (value: OffenderKey) => {
+// //     setOffenderType(value);
+// //     setHasMilitaryRelative(false);
+// //     setRelativeRelation("");
+// //     setRelativeType("");
+
+// //     /* traffic / static */
+// //     if (scope === "traffic" || scope === "static") {
+// //       dispatch({
+// //         type: "SET_PATH",
+// //         path: "formData.traffic.offenderPeople",
+// //         value: [
+// //           ...(state.formData.traffic.offenderPeople || []),
+// //           {
+// //             type: value,
+// //             whoIsIt: "Offender",
+// //             details: {},
+// //           },
+// //         ],
+// //       });
+
+// //       dispatch({
+// //         type: "SET_PATH",
+// //         path: "formData.traffic.vehicleInvolved",
+// //         value: "no",
+// //       });
+// //     }
+
+// //     /* mp-main */
+// //     if (scope === "mp-main") {
+// //       dispatch({
+// //         type: "SET_PATH",
+// //         path: "formData.mpReport.individualDetails.tempOffender",
+// //         value: { offenderType: value, details: {} },
+// //       });
+// //     }
+
+// //     /* mp-additional */
+// //     if (scope === "mp-additional") {
+// //       dispatch({
+// //         type: "SET_PATH",
+// //         path: "formData.mpReport.additionalIndividual.tempOffender",
+// //         value: { offenderType: value, details: {} },
+// //       });
+// //     }
+// //   };
+
+// //   /* ================= UI ================= */
+
+// //   return (
+// //     <div className="border rounded-lg p-6 space-y-6">
+// //       <p className="font-semibold text-lg">Who was the Offender?</p>
+
+// //       {/* PRIMARY SELECT */}
+// //       <RadioGroup
+// //         value={offenderType}
+// //         onValueChange={(v) => handleOffenderSelect(v as OffenderKey)}
+// //         className="grid grid-cols-2 gap-3"
+// //       >
+// //         {Object.keys(offenderConfig).map((item) => (
+// //           <label key={item} className="border rounded-lg px-4 py-2 flex gap-2">
+// //             <RadioGroupItem value={item} />
+// //             {item}
+// //           </label>
+// //         ))}
+// //       </RadioGroup>
+
+// //       {/* CIVILIAN FLOW */}
+// //       {offenderType === "Civilian" && (
+// //         <>
+// //           <OffenderDynamicForm
+// //             scope={scope}
+// //             title="Civilian Details"
+// //             fields={offenderFormsConfig.Civilian.fields}
+// //             path={getPath()}
+// //             showCoDriver={false}
+// //           />
+
+// //           <div className="flex gap-2 items-center mt-4">
+// //             <Checkbox
+// //               checked={hasMilitaryRelative}
+// //               onCheckedChange={(v) => {
+// //                 setHasMilitaryRelative(Boolean(v));
+// //                 setRelativeRelation("");
+// //                 setRelativeType("");
+// //               }}
+// //             />
+// //             <p className="font-semibold">
+// //               Is this person Dependent / Relative of Military Personnel?
+// //             </p>
+// //           </div>
+
+// //           {hasMilitaryRelative && (
+// //             <>
+// //               <input
+// //                 className="border rounded-lg px-4 py-2 w-full"
+// //                 placeholder="Relation (Father / Brother / Husband)"
+// //                 value={relativeRelation}
+// //                 onChange={(e) => setRelativeRelation(e.target.value)}
+// //               />
+
+// //               <RadioGroup
+// //                 value={relativeType}
+// //                 onValueChange={(v) => setRelativeType(v as OffenderKey)}
+// //                 className="grid grid-cols-2 gap-3"
+// //               >
+// //                 {Object.keys(offenderConfig)
+// //                   .filter((i) => i !== "Civilian")
+// //                   .map((item) => (
+// //                     <label
+// //                       key={item}
+// //                       className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+// //                     >
+// //                       <RadioGroupItem value={item} />
+// //                       {item}
+// //                     </label>
+// //                   ))}
+// //               </RadioGroup>
+
+// //               {relativeType && (
+// //                 <OffenderDynamicForm
+// //                   scope={scope}
+// //                   title={`${
+// //                     relativeRelation || "Relative"
+// //                   } (${relativeType}) Details`}
+// //                   fields={offenderFormsConfig[relativeType].fields}
+// //                   path={getPath()}
+// //                   showCoDriver={false}
+// //                 />
+// //               )}
+// //             </>
+// //           )}
+// //         </>
+// //       )}
+
+// //       {/* OTHER OFFENDERS */}
+// //       {offenderType &&
+// //         offenderType !== "Civilian" &&
+// //         offenderConfig[offenderType] && (
+// //           <OffenderDynamicForm
+// //             scope={scope}
+// //             title={offenderConfig[offenderType].title}
+// //             helperText={offenderConfig[offenderType].helperText}
+// //             fields={offenderFormsConfig[offenderType].fields}
+// //             path={getPath()}
+// //             showCoDriver={false}
+// //           />
+// //         )}
+// //     </div>
+// //   );
+// // }
+
+// "use client";
+
+// import { useState } from "react";
+// import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
+// import { useForm } from "@/context/FormContext";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
+// import { Checkbox } from "@/components/ui/checkbox";
+
+// /* ================= TYPES ================= */
+
+// type OffenderKey = keyof typeof offenderFormsConfig;
+
+// interface OffenderWithoutVehicleFormProps {
+//   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+//   externalType?: OffenderKey;
+// }
+
+// /* ================= COMPONENT ================= */
+
+// export default function OffenderWithoutVehicleForm({
+//   scope = "traffic",
+//   externalType,
+// }: OffenderWithoutVehicleFormProps) {
+//   const offenderConfig = offenderFormsConfig;
+//   const { state, dispatch } = useForm(); // ✅ state added
+
+//   const [offenderType, setOffenderType] = useState<OffenderKey | "">(
+//     externalType ?? ""
+//   );
+//   const [hasMilitaryRelative, setHasMilitaryRelative] = useState(false);
+//   const [relativeRelation, setRelativeRelation] = useState("");
+//   const [relativeType, setRelativeType] = useState<OffenderKey | "">("");
+
+//   if (!offenderConfig) return null;
+
+//   /* ================= PATH RESOLVER ================= */
+
+//   const getPath = () => {
+//     if (scope === "mp-main")
+//       return "formData.mpReport.individualDetails.tempOffender.details";
+
+//     if (scope === "mp-additional")
+//       return "formData.mpReport.additionalIndividual.tempOffender.details";
+
+//     // traffic / static → last offender index
+//     const list =
+//       scope === "static"
+//         ? state.formData.staticSpeed?.offenderPeople || []
+//         : state.formData.traffic?.offenderPeople || [];
+
+//     const index = Math.max(list.length - 1, 0);
+
+//     return scope === "static"
+//       ? `formData.staticSpeed.offenderPeople[${index}].details`
+//       : `formData.traffic.offenderPeople[${index}].details`;
+//   };
+
+//   /* ================= SELECT HANDLER ================= */
+
+//   const handleOffenderSelect = (value: OffenderKey) => {
+//     setOffenderType(value);
+//     setHasMilitaryRelative(false);
+//     setRelativeRelation("");
+//     setRelativeType("");
+
+//     /* ================= TRAFFIC / STATIC ================= */
+//     if (scope === "traffic" || scope === "static") {
+//       const peoplePath =
+//         scope === "static"
+//           ? "formData.staticSpeed.offenderPeople"
+//           : "formData.traffic.offenderPeople";
+
+//       const existing =
+//         scope === "static"
+//           ? state.formData.staticSpeed?.offenderPeople || []
+//           : state.formData.traffic?.offenderPeople || [];
+
+//       dispatch({
+//         type: "SET_PATH",
+//         path: peoplePath,
+//         value: [
+//           ...existing,
+//           {
+//             type: value,
+//             whoIsIt: "Offender",
+//             details: {},
+//           },
+//         ],
+//       });
+
+//       // no-vehicle flow
+//       if (scope === "traffic") {
+//         dispatch({
+//           type: "SET_PATH",
+//           path: "formData.traffic.vehicleInvolved",
+//           value: "no",
+//         });
+//       }
+//     }
+
+//     /* ================= MP MAIN ================= */
+//     if (scope === "mp-main") {
+//       dispatch({
+//         type: "SET_PATH",
+//         path: "formData.mpReport.individualDetails.tempOffender",
+//         value: { offenderType: value, details: {} },
+//       });
+//     }
+
+//     /* ================= MP ADDITIONAL ================= */
+//     if (scope === "mp-additional") {
+//       dispatch({
+//         type: "SET_PATH",
+//         path: "formData.mpReport.additionalIndividual.tempOffender",
+//         value: { offenderType: value, details: {} },
+//       });
+//     }
+//   };
+
+//   /* ================= UI ================= */
+
+//   return (
+//     <div className="border rounded-lg p-6 space-y-6">
+//       <p className="font-semibold text-lg">Who was the Offender?</p>
+
+//       {/* PRIMARY SELECT */}
+//       <RadioGroup
+//         value={offenderType}
+//         onValueChange={(v) => handleOffenderSelect(v as OffenderKey)}
+//         className="grid grid-cols-2 gap-3"
+//       >
+//         {Object.keys(offenderConfig).map((item) => (
+//           <label key={item} className="border rounded-lg px-4 py-2 flex gap-2">
+//             <RadioGroupItem value={item} />
+//             {item}
+//           </label>
+//         ))}
+//       </RadioGroup>
+
+//       {/* ================= CIVILIAN FLOW ================= */}
+//       {offenderType === "Civilian" && (
+//         <>
+//           <OffenderDynamicForm
+//             scope={scope}
+//             title="Civilian Details"
+//             fields={offenderFormsConfig.Civilian.fields}
+//             path={getPath()}
+//             showCoDriver={false}
+//           />
+
+//           <div className="flex gap-2 items-center mt-4">
+//             <Checkbox
+//               checked={hasMilitaryRelative}
+//               onCheckedChange={(v) => {
+//                 setHasMilitaryRelative(Boolean(v));
+//                 setRelativeRelation("");
+//                 setRelativeType("");
+//               }}
+//             />
+//             <p className="font-semibold">
+//               Is this person Dependent / Relative of Military Personnel?
+//             </p>
+//           </div>
+
+//           {hasMilitaryRelative && (
+//             <>
+//               <input
+//                 className="border rounded-lg px-4 py-2 w-full"
+//                 placeholder="Relation (Father / Brother / Husband)"
+//                 value={relativeRelation}
+//                 onChange={(e) => setRelativeRelation(e.target.value)}
+//               />
+
+//               <RadioGroup
+//                 value={relativeType}
+//                 onValueChange={(v) =>
+//                   setRelativeType(v as OffenderKey)
+//                 }
+//                 className="grid grid-cols-2 gap-3"
+//               >
+//                 {Object.keys(offenderConfig)
+//                   .filter((i) => i !== "Civilian")
+//                   .map((item) => (
+//                     <label
+//                       key={item}
+//                       className="border rounded-lg px-4 py-2 flex gap-2"
+//                     >
+//                       <RadioGroupItem value={item} />
+//                       {item}
+//                     </label>
+//                   ))}
+//               </RadioGroup>
+
+//               {relativeType && (
+//                 <OffenderDynamicForm
+//                   scope={scope}
+//                   title={`${relativeRelation || "Relative"} (${relativeType}) Details`}
+//                   fields={offenderFormsConfig[relativeType].fields}
+//                   path={getPath()}
+//                   showCoDriver={false}
+//                 />
+//               )}
+//             </>
+//           )}
+//         </>
+//       )}
+
+//       {/* ================= OTHER OFFENDERS ================= */}
+//       {offenderType &&
+//         offenderType !== "Civilian" &&
+//         offenderConfig[offenderType] && (
+//           <OffenderDynamicForm
+//             scope={scope}
+//             title={offenderConfig[offenderType].title}
+//             helperText={offenderConfig[offenderType].helperText}
+//             fields={offenderFormsConfig[offenderType].fields}
+//             path={getPath()}
+//             showCoDriver={false}
+//           />
+//         )}
+//     </div>
+//   );
+// }
+
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
+import { cn } from "@/lib/utils";
 
-type OffenderKey = keyof typeof offenderFormsConfig & string;
+/* ================= TYPES ================= */
 
-interface OffenderWithoutVehicleFormProps {
-  offenderType?: OffenderKey;
+type OffenderKey = keyof typeof offenderFormsConfig;
+
+type Block = {
+  id: number;
+  type?: OffenderKey;
+  index?: number;
+};
+
+interface Props {
   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+  rootPath?: string; // 👈 NEW: Allow overriding the state path
 }
 
+/* ================= COMPONENT ================= */
+
 export default function OffenderWithoutVehicleForm({
-  offenderType: externalType = "",
   scope = "traffic",
-}: OffenderWithoutVehicleFormProps) {
-  const offenderConfig = offenderFormsConfig;
+  rootPath,
+}: Props) {
+  const { state, dispatch } = useForm();
+  const [blocks, setBlocks] = useState<Block[]>([{ id: Date.now() }]);
 
-  const [offenderType, setOffenderType] = useState<OffenderKey | "">(
-    externalType as OffenderKey
-  );
+  /* ================= HYDRATE FROM STATE ================= */
+  useEffect(() => {
+    // 1. Traffic / Static (Array)
+    if (scope === "traffic" || scope === "static") {
+      const list =
+        scope === "static"
+          ? state.formData.staticSpeed?.offenderPeople || []
+          : state.formData.traffic?.offenderPeople || [];
 
-  const [hasMilitaryRelative, setHasMilitaryRelative] = useState(false);
-  const [relativeRelation, setRelativeRelation] = useState("");
-  const [relativeType, setRelativeType] = useState("");
+      if (list.length > 0) {
+        const restored = list.map((p: any, i: number) => ({
+          id: Date.now() + i,
+          type: p.type,
+          index: i,
+        }));
+        setBlocks(restored);
+      }
+    }
 
-  const { dispatch } = useForm();
+    // 2. MP / Root Path (Single Object)
+    if (scope === "mp-main" || scope === "mp-additional" || rootPath) {
+      // Determine Path
+      let tempPath = "";
+      if (rootPath) {
+        tempPath = `${rootPath}.tempOffender`;
+      } else if (scope === "mp-main") {
+        tempPath = "formData.mpReport.individualDetails.tempOffender";
+      } else if (scope === "mp-additional") {
+        tempPath = "formData.mpReport.additionalIndividual.tempOffender";
+      }
 
-  if (!offenderConfig) return null;
+      // Helper to access deep path
+      const getValue = (obj: any, path: string) =>
+        path.split(".").reduce((o, k) => (o || {})[k], obj);
 
-  /* ---------------- PRIMARY SELECT HANDLER ---------------- */
-  const storeTraffic = (value: any) => {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic.offenderWithoutVehicle",
-      value,
-    });
+      const temp = getValue(state, tempPath);
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic.vehicleInvolved",
-      value: "no",
-    });
+      if (temp?.offenderType) {
+        setBlocks([
+          {
+            id: Date.now(),
+            type: temp.offenderType,
+            index: 0,
+          },
+        ]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount
 
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.traffic.vehicleDetails",
-      value: {
-        category: "",
-        vehicleType: "",
-        driverType: "",
-      },
-    });
+  /* ================= ADD MORE ================= */
+  const addMore = () => {
+    setBlocks((prev) => [...prev, { id: Date.now() }]);
   };
 
-  const storeMpMain = (value: any) =>
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.tempOffender",
-      value,
-    });
+  /* ================= SELECT HANDLER ================= */
+  const handleSelect = (blockId: number, type: OffenderKey) => {
+    /* --- CASE 1: TRAFFIC / STATIC (ARRAY) --- */
+    if (scope === "traffic" || scope === "static") {
+      const peoplePath =
+        scope === "static"
+          ? "formData.staticSpeed.offenderPeople"
+          : "formData.traffic.offenderPeople";
 
-  const storeMpAdditional = (value: any) =>
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.additionalIndividual.tempOffender",
-      value,
-    });
+      const existing =
+        scope === "static"
+          ? state.formData.staticSpeed?.offenderPeople || []
+          : state.formData.traffic?.offenderPeople || [];
 
-  const saveToContext = (payload: any) => {
-    if (scope === "traffic") storeTraffic(payload);
-    if (scope === "mp-main") storeMpMain(payload);
-    if (scope === "mp-additional") storeMpAdditional(payload);
+      // Logic: If block already mapped to index, update it. Else append.
+      const currentBlock = blocks.find((b) => b.id === blockId);
+      let newList = [...existing];
+      let finalIndex = existing.length;
+
+      if (
+        currentBlock?.index !== undefined &&
+        currentBlock.index < existing.length
+      ) {
+        finalIndex = currentBlock.index;
+        newList[finalIndex] = {
+          whoIsIt: "Offender",
+          type,
+          details: {},
+        };
+      } else {
+        newList.push({
+          whoIsIt: "Offender",
+          type,
+          details: {},
+        });
+      }
+
+      dispatch({
+        type: "SET_PATH",
+        path: peoplePath,
+        value: newList,
+      });
+
+      if (scope === "traffic") {
+        dispatch({
+          type: "SET_PATH",
+          path: "formData.traffic.vehicleInvolved",
+          value: "no",
+        });
+      }
+
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === blockId ? { ...b, type, index: finalIndex } : b
+        )
+      );
+    }
+
+    /* --- CASE 2: MP / ROOT PATH (SINGLE OBJECT) --- */
+    else {
+      let tempPath = "";
+      if (rootPath) {
+        tempPath = `${rootPath}.tempOffender`;
+      } else if (scope === "mp-main") {
+        tempPath = "formData.mpReport.individualDetails.tempOffender";
+      } else if (scope === "mp-additional") {
+        tempPath = "formData.mpReport.additionalIndividual.tempOffender";
+      }
+
+      dispatch({
+        type: "SET_PATH",
+        path: tempPath,
+        value: { offenderType: type, details: {} },
+      });
+
+      setBlocks((prev) =>
+        prev.map((b) => (b.id === blockId ? { ...b, type, index: 0 } : b))
+      );
+    }
   };
 
-  const handleOffenderSelect = (value: OffenderKey) => {
-    setOffenderType(value);
-    setHasMilitaryRelative(false);
-    setRelativeRelation("");
-    setRelativeType("");
+  /* ================= PATH HELPER FOR RENDER ================= */
+  const getRenderPath = (block: Block) => {
+    if (scope === "traffic")
+      return `formData.traffic.offenderPeople[${block.index}].details`;
+    if (scope === "static")
+      return `formData.staticSpeed.offenderPeople[${block.index}].details`;
 
-    saveToContext({
-      offenderType: value,
-      hasMilitaryRelative: false,
-      relativeRelation: "",
-      relativeType: "",
-    });
+    if (rootPath) return `${rootPath}.tempOffender.details`;
+
+    if (scope === "mp-main")
+      return "formData.mpReport.individualDetails.tempOffender.details";
+    if (scope === "mp-additional")
+      return "formData.mpReport.additionalIndividual.tempOffender.details";
+
+    return "";
   };
-
-  /* ===================================================== */
 
   return (
-    <div className="border rounded-lg p-6 space-y-6">
-      <p className="font-semibold text-lg mb-2">Who was the Offender ?</p>
+    <div className="space-y-6 border rounded-lg p-6 bg-white">
+      <p className="font-semibold text-lg">Who was the Offender?</p>
 
-      {/* PRIMARY OFFENDER SELECT */}
-      <RadioGroup
-        value={offenderType}
-        onValueChange={(value) => {
-          setOffenderType(value);
-
-          // 1️ STORE OFFENDER
-          dispatch({
-            type: "SET_PATH",
-            path: "formData.traffic.offenderWithoutVehicle.offenderType",
-            value,
-          });
-
-          // 2️ FIX: FORCE NO VEHICLE MODE
-          dispatch({
-            type: "SET_PATH",
-            path: "formData.traffic.vehicleInvolved",
-            value: "no",
-          });
-
-          //  OPTIONAL: CLEAR VEHICLE DETAILS SAFELY
-          dispatch({
-            type: "SET_PATH",
-            path: "formData.traffic.vehicleDetails",
-            value: {
-              category: "",
-              vehicleType: "",
-              driverType: "",
-            },
-          });
-        }}
-        className="grid grid-cols-2 gap-3"
-      >
-        {Object.keys(offenderConfig).map((item) => (
-          <label
-            key={item}
-            className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-          >
-            <RadioGroupItem value={item} />
-            {item}
-          </label>
-        ))}
-      </RadioGroup>
-
-      {/* ================= CIVILIAN FLOW ================= */}
-      {offenderType === "Civilian" && (
-        <>
-          <OffenderDynamicForm
-            scope={scope}
-            title="Civilian Details"
-            fields={offenderFormsConfig["Civilian"].fields}
-            showCoDriver={false}
-          />
-
-          {/* Checkbox */}
-          <div className="flex gap-2 items-center mt-4">
-            <Checkbox
-              checked={hasMilitaryRelative}
-              onCheckedChange={(v) => {
-                const val = !!v;
-                setHasMilitaryRelative(val);
-                setRelativeRelation("");
-                setRelativeType("");
-
-                saveToContext({
-                  offenderType,
-                  hasMilitaryRelative: val,
-                  relativeRelation: "",
-                  relativeType: "",
-                });
-              }}
-            />
-            <p className="font-semibold">
-              Is this person Dependent /Relative of Millitary Personnel or Other Registered?
-            </p>
+      {/* ================= BLOCKS ================= */}
+      {blocks.map((block) => (
+        <div key={block.id} className="space-y-4">
+          {/* 🔹 OPTIONS */}
+          <div className="border rounded-lg p-4">
+            <RadioGroup
+              value={(block.type as string) || ""}
+              onValueChange={(v) => handleSelect(block.id, v as OffenderKey)}
+              className="grid grid-cols-2 gap-3"
+            >
+              {Object.keys(offenderFormsConfig).map((item) => (
+                <label
+                  key={item}
+                  className={cn(
+                    "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer transition",
+                    block.type === item
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300"
+                  )}
+                >
+                  <RadioGroupItem value={item} />
+                  {item}
+                </label>
+              ))}
+            </RadioGroup>
           </div>
 
-          {/* Relation Input */}
-          {hasMilitaryRelative && (
-            <>
-              <p className="font-semibold mt-4">
-                Enter Relation of Military Person
-              </p>
-
-              <input
-                type="text"
-                className="border rounded-lg px-4 py-2 w-full outline-none focus:border-blue-500"
-                placeholder="Father / Brother / Husband..."
-                value={relativeRelation}
-                onChange={(e) => {
-                  setRelativeRelation(e.target.value);
-                  saveToContext({
-                    offenderType,
-                    hasMilitaryRelative,
-                    relativeRelation: e.target.value,
-                    relativeType,
-                  });
-                }}
-              />
-
-              {/* Always show options right below input */}
-              <p className="font-semibold mt-4">
-                Select Military Relative Type
-              </p>
-
-              <RadioGroup
-                value={relativeType}
-                onValueChange={(v) => {
-                  setRelativeType(v);
-                  saveToContext({
-                    offenderType,
-                    hasMilitaryRelative,
-                    relativeRelation,
-                    relativeType: v,
-                  });
-                }}
-                className="grid grid-cols-2 gap-3"
-              >
-                {Object.keys(offenderConfig)
-                  .filter((i) => i !== "Civilian")
-                  .map((item) => (
-                    <label
-                      key={item}
-                      className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-                    >
-                      <RadioGroupItem value={item} />
-                      {item}
-                    </label>
-                  ))}
-              </RadioGroup>
-
-              {relativeType && (
-                <OffenderDynamicForm
-                  scope={scope}
-                  title={`${
-                    relativeRelation || "Relative"
-                  } (${relativeType}) Details`}
-                  fields={offenderFormsConfig[relativeType].fields}
-                  showCoDriver={false}
-                />
-              )}
-            </>
+          {/* 🔹 FORM */}
+          {block.type && block.index !== undefined && (
+            <OffenderDynamicForm
+              title={`${String(block.type)} Details`}
+              fields={offenderFormsConfig[block.type].fields}
+              scope={scope as any}
+              path={getRenderPath(block)}
+              isRoot={false}
+            />
           )}
-        </>
-      )}
+        </div>
+      ))}
 
-      {/* ================= OTHER NORMAL FLOW ================= */}
-      {offenderType &&
-        offenderType !== "Civilian" &&
-        offenderConfig[offenderType] && (
-          <OffenderDynamicForm
-            scope={scope}
-            title={offenderConfig[offenderType].title}
-            helperText={offenderConfig[offenderType].helperText}
-            fields={offenderFormsConfig[offenderType].fields.slice(1)}
-            showCoDriver={false}
-          />
-        )}
+      {/* ================= ADD MORE BUTTON (Only Traffic/Static) ================= */}
+      {(scope === "traffic" || scope === "static") && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={addMore}
+            className="bg-black text-white px-4 py-2 rounded-md text-sm"
+          >
+            + Add More People
+          </button>
+        </div>
+      )}
     </div>
   );
 }

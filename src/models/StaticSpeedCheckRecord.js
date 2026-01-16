@@ -4,7 +4,7 @@ import {
   onDutyDetailsSchema,
 } from "./GeneralTraficOffence";
 
-const offenceOccurrenceSchema = mongoose.Schema({
+const offenceOccurrenceSchema = new mongoose.Schema({
   time: {
     type: Date,
     required: true,
@@ -25,6 +25,11 @@ const offenceOccurrenceSchema = mongoose.Schema({
   description: {
     type: String,
   },
+  briefDescription: {
+    type: String,
+  },
+  offenceTypes: [{ type: String }],
+  offenceTypeReference: [{ type: String }],
 });
 const staticSpeedCheckRecordSchema = new mongoose.Schema(
   {
@@ -64,16 +69,13 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
       default: false,
     },
 
-    offenceType: {
-      type: String,
-      default: "Over Speeding",
-    },
     actionStatusRemark: {
       type: String,
     },
   },
   {
     timestamps: true,
+    collection: "staticspeedcheckrecords",
   }
 
 );
@@ -81,6 +83,11 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
 staticSpeedCheckRecordSchema.index({ vehicleNumber: 1 });
 staticSpeedCheckRecordSchema.index({ "offenceOccurenceDetails.time": -1 });
 
-export const StaticSpeedCheckRecord =
-  mongoose.models.StaticSpeedCheckRecord ||
-  mongoose.model("StaticSpeedCheckRecord", staticSpeedCheckRecordSchema);
+if (mongoose.models.StaticSpeedCheckRecord) {
+  delete mongoose.models.StaticSpeedCheckRecord;
+}
+
+export const StaticSpeedCheckRecord = mongoose.model(
+  "StaticSpeedCheckRecord",
+  staticSpeedCheckRecordSchema
+);

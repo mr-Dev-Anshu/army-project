@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -104,14 +102,7 @@ export default function StaticSpeedStep2() {
       </FormSection>
 
       {/* ================== MP REPORTING ================== */}
-      <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Reporting</span>
-          </>
-        }
-      >
+      <FormSection title="On-Duty Details of MP Reporting">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="mb-2 font-semibold">Reporting MP Name</Label>
@@ -158,14 +149,7 @@ export default function StaticSpeedStep2() {
       </FormSection>
 
       {/* ================== WITNESSING MP ================== */}
-      <FormSection
-        title={
-          <>
-            On-Duty Details of{" "}
-            <span className="text-blue-500">MP Witnessing</span>
-          </>
-        }
-      >
+      <FormSection title="On-Duty Details of MP Witnessing">
         {witnesses.map((w, i) => (
           <div
             key={i}
@@ -298,9 +282,19 @@ export default function StaticSpeedStep2() {
                     <input
                       type="radio"
                       name="selectedWitness"
-                      checked={staticData.selectedWitness === index}
+                      checked={
+                        staticData.selectedWitness &&
+                        staticData.selectedWitness.nameReportingMP ===
+                          data.nameReportingMP &&
+                        staticData.selectedWitness.armyNumber ===
+                          data.armyNumber &&
+                        staticData.selectedWitness.unit === data.unit
+                      }
                       onChange={() =>
-                        set("formData.staticSpeed.selectedWitness", index)
+                        set(
+                          "formData.staticSpeed.selectedWitness",
+                          w.reportingBlock
+                        )
                       }
                     />
 

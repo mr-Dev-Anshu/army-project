@@ -1,573 +1,407 @@
-// "use client";
-// import { FormInput } from "@/common/component/FormInput";
-// import { SuggestionInput } from "@/common/component/SuggestionInput";
-// import { useForm } from "@/context/FormContext";
-// import { cn } from "@/lib/utils";
-// import { useState, useEffect } from "react";
-// import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
-// import { Label } from "@/components/ui/label";
-
-// interface FieldType {
-//   label: string;
-//   placeholder?: string;
-//   type: "input" | "select";
-//   options?: string[];
-// }
-
-// interface OffenderDynamicFormProps {
-//   title: string;
-//   helperText?: string;
-//   fields: FieldType[];
-//   showCoDriver?: boolean;
-//   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
-//   path?: string;
-// }
-
-// const getValueByPath = (obj: any, path?: string) => {
-//   if (!path) return {};
-//   const keys = path.match(/[^[.\]]+/g) || [];
-//   return keys.reduce((o, k) => (o ? o[k] : undefined), obj) || {};
-// };
-
-// export default function OffenderDynamicForm({
-//   title,
-//   helperText,
-//   fields,
-//   showCoDriver = false,
-//   scope = "traffic",
-//   path,
-// }: OffenderDynamicFormProps) {
-//   const { state, dispatch } = useForm();
-
-//   const preData =
-//     scope === "traffic" && path ? getValueByPath(state, path) : {};
-
-//   const [localData, setLocalData] = useState<any>({});
-//   const [hasCoDriver, setHasCoDriver] = useState(false);
-//   const [coDriverType, setCoDriverType] = useState("");
-
-//   // 🔥 NEW STATES
-//   const [civilianRelative, setCivilianRelative] = useState(false);
-//   const [relativeRelation, setRelativeRelation] = useState("");
-//   const [relativeType, setRelativeType] = useState("");
-
-//   useEffect(() => {
-//     if (scope === "traffic" && path) setLocalData(preData);
-//     else setLocalData({});
-//   }, [scope, path]);
-
-//   const saveField = (label: string, value: string) => {
-//     let targetPath = path;
-
-//     if (!targetPath && scope === "mp-main")
-//       targetPath = "formData.mpReport.individualDetails.tempOffender";
-
-//     if (!targetPath && scope === "mp-additional")
-//       targetPath = "formData.mpReport.additionalIndividual.tempOffender";
-
-//     // ALWAYS UPDATE LOCAL UI FIRST 🔥
-//     setLocalData((prev: any) => ({
-//       ...(prev || {}),
-//       [label]: value,
-//     }));
-
-//     // If no path → bas local UI me hi rakho
-//     if (!targetPath) return;
-
-//     const prevGlobal = getValueByPath(state, targetPath) || {};
-
-//     dispatch({
-//       type: "SET_PATH",
-//       path: targetPath,
-//       value: {
-//         ...prevGlobal,
-//         [label]: value,
-//       },
-//     });
-//   };
-
-//   return (
-//     <div className="space-y-6 mt-4 bg-white p-6 shadow-sm">
-//       <p className="font-semibold text-lg">{title}</p>
-
-//       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
-
-//       {/* ================= MAIN FIELDS ================= */}
-//       <div className="grid grid-cols-2 gap-4">
-//         {fields.map((f, i) => {
-//           const label = f.label;
-//           const value = localData?.[label] || "";
-
-//           // 🔹 Suggestion Input
-//           if ((f as any).type === "suggestion") {
-//             return (
-//               <div key={i} className="flex flex-col gap-1">
-//                 <Label className="font-semibold">{label}</Label>
-
-//                 <SuggestionInput
-//                   placeholder={f.placeholder}
-//                   value={value}
-//                   onChange={(v) => saveField(label, v)}
-//                   fieldType={(f as any).fieldType}
-//                 />
-//               </div>
-//             );
-//           }
-
-//           // 🔹 Normal Input
-//           return (
-//             <div key={i} className="flex flex-col gap-1">
-//               <Label className="font-semibold">{label}</Label>
-
-//               <FormInput
-//               label=""
-//                 placeholder={f.placeholder}
-//                 value={value}
-//                 onChange={(v) => saveField(label, v)}
-//               />
-//             </div>
-//           );
-//         })}
-//       </div>
-
-//       {/* ================= CODRIVER FLOW ================= */}
-//      {showCoDriver && title !== "Civilian Details" && (
-//         <>
-//           <p className="font-semibold mt-4">
-//             <input
-//               type="checkbox"
-//               checked={hasCoDriver}
-//               onChange={(e) => {
-//                 setHasCoDriver(e.target.checked);
-//                 setCoDriverType("");
-//                 setCivilianRelative(false);
-//                 setRelativeRelation("");
-//                 setRelativeType("");
-//               }}
-//               className="mr-2"
-//             />
-//             Was there a Co-Driver or Pillion Rider with the driver/rider?
-//           </p>
-
-//           {hasCoDriver && (
-//             <>
-//               <p className="font-semibold mt-3">
-//                 Select Who was Co-Driver / Rider
-//               </p>
-
-//               <div className="grid sm:grid-cols-2 gap-3">
-//                 {[
-//                   "Military Person",
-//                   "Civilian",
-//                   "Employee",
-//                   "Servant/Maid",
-//                   "Shop Keeper",
-//                   "Temporary Hired Worker",
-//                 ].map((item) => (
-//                   <label
-//                     key={item}
-//                     className={cn(
-//                       "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-//                       coDriverType === item
-//                         ? "border-blue-500 bg-blue-50"
-//                         : "border-gray-300"
-//                     )}
-//                   >
-//                     <input
-//                       type="radio"
-//                       name="coDriver"
-//                       value={item}
-//                       checked={coDriverType === item}
-//                       onChange={() => setCoDriverType(item)}
-//                     />
-//                     {item}
-//                   </label>
-//                 ))}
-//               </div>
-
-//               {/* ================= CIVILIAN SPECIAL FLOW ================= */}
-//               {coDriverType === "Civilian" && (
-//                 <>
-//                   <OffenderDynamicForm
-//                     title="Civilian Co-Driver Details"
-//                     fields={offenderFormsConfig["Civilian"].fields}
-//                     scope={scope}
-//                     showCoDriver={false}
-//                   />
-
-//                   <p className="font-semibold mt-4">
-//                     <input
-//                       type="checkbox"
-//                       checked={civilianRelative}
-//                       onChange={(e) => {
-//                         setCivilianRelative(e.target.checked);
-//                         setRelativeRelation("");
-//                         setRelativeType("");
-//                       }}
-//                       className="mr-2"
-//                     />
-//                     Is this person Dependent/Relative of Millitary Personnel or
-//                     Other Registered?
-//                   </p>
-
-//                   {civilianRelative && (
-//                     <>
-//                       <p className="font-semibold mt-3">
-//                         Enter Relation of Military Person
-//                       </p>
-
-//                       <SuggestionInput
-//                         placeholder="e.g. Father / Husband / Brother"
-//                         value={relativeRelation}
-//                         onChange={setRelativeRelation}
-//                         fieldType="relation"
-//                       />
-
-//                       <p className="font-semibold mt-4">
-//                         Select Military Relative Type
-//                       </p>
-
-//                       <div className="grid sm:grid-cols-2 gap-3">
-//                         {[
-//                           "Military Person",
-//                           "Employee",
-//                           "Servant/Maid",
-//                           "Shop Keeper",
-//                           "Temporary Hired Worker",
-//                         ].map((item) => (
-//                           <label
-//                             key={item}
-//                             className={cn(
-//                               "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-//                               relativeType === item
-//                                 ? "border-blue-500 bg-blue-50"
-//                                 : "border-gray-300"
-//                             )}
-//                           >
-//                             <input
-//                               type="radio"
-//                               name="relativeType"
-//                               value={item}
-//                               checked={relativeType === item}
-//                               onChange={() => setRelativeType(item)}
-//                             />
-//                             {item}
-//                           </label>
-//                         ))}
-//                       </div>
-
-//                       {relativeType && (
-//                         <OffenderDynamicForm
-//                           title={`${relativeType} Details`}
-//                           helperText={
-//                             relativeRelation
-//                               ? `Relation: ${relativeRelation}`
-//                               : ""
-//                           }
-//                           fields={offenderFormsConfig[relativeType].fields}
-//                           scope={scope}
-//                           showCoDriver={false}
-//                         />
-//                       )}
-//                     </>
-//                   )}
-//                 </>
-//               )}
-
-//               {/* ================= OTHER CODRIVER TYPES ================= */}
-//               {coDriverType &&
-//                 coDriverType !== "Civilian" &&
-//                 offenderFormsConfig[coDriverType] && (
-//                   <OffenderDynamicForm
-//                     title={`${coDriverType} Details`}
-//                     fields={offenderFormsConfig[coDriverType].fields}
-//                     scope={scope}
-//                     showCoDriver={false}
-//                   />
-//                 )}
-//             </>
-//           )}
-//         </>
-//       )}
-//     </div>
-//   );
-// }
 
 "use client";
+
+import { useState, useEffect } from "react";
 import { FormInput } from "@/common/component/FormInput";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
-import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
-import { Label } from "@/components/ui/label";
-
-interface FieldType {
-  label: string;
-  placeholder?: string;
-  type: "input" | "select";
-  options?: string[];
-}
 
 interface OffenderDynamicFormProps {
   title: string;
   helperText?: string;
-  fields: FieldType[];
-  showCoDriver?: boolean;
-  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+  fields: any[];
+  scope?: "traffic" | "static";
   path?: string;
+  isRoot?: boolean;
 }
 
-const getValueByPath = (obj: any, path?: string) => {
-  if (!path) return {};
-  const keys = path.match(/[^[.\]]+/g) || [];
+type Step = {
+  id: number;
+  type?: string;
+  index?: number;
+};
+
+const getByPath = (obj: any, path?: string) => {
+  if (!obj || !path) return {};
+  const keys = path.replace(/\[(\d+)\]/g, ".$1").split(".");
   return keys.reduce((o, k) => (o ? o[k] : undefined), obj) || {};
+};
+
+const labelKeyMap: Record<string, string> = {
+  "Full Name": "name",
+  Name: "name",
+  Rank: "rank",
+  "Army Rider / Driver Number": "armyNumber",
+  "Army Number": "armyNumber",
+  Unit: "unit",
+  Command: "command",
+  FMN: "fmn",
+  Address: "address",
+  "ID Card Number": "iCardNumber",
+  "Father's Name (Son of)": "so",
+  "Father's / Husband's Name": "so",
+  "Army Official Name": "armyOfficialName",
+  "Pass No.": "passNo",
+  "Maid/Servant Pass Number": "passNo",
+  "Pass Issue Date": "passIssueDate",
+  "Pass Expire Date": "passExpireDate",
 };
 
 export default function OffenderDynamicForm({
   title,
   helperText,
   fields,
-  showCoDriver = false,
   scope = "traffic",
-  path,
+  path = "",
+  isRoot = false,
 }: OffenderDynamicFormProps) {
   const { state, dispatch } = useForm();
 
-  const preData =
-    scope === "traffic" && path ? getValueByPath(state, path) : {};
-
+  const globalData = getByPath(state, path);
   const [localData, setLocalData] = useState<any>({});
+  const [steps, setSteps] = useState<Step[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  /* ===== CO-DRIVER STATES ===== */
   const [hasCoDriver, setHasCoDriver] = useState(false);
   const [coDriverType, setCoDriverType] = useState("");
-
-  const [civilianRelative, setCivilianRelative] = useState(false);
-  const [relativeRelation, setRelativeRelation] = useState("");
-  const [relativeType, setRelativeType] = useState("");
+  const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
 
   const isMainCivilian =
     title.toLowerCase().includes("civilian") &&
     !title.toLowerCase().includes("co-driver");
 
+  /* ================= SYNC LOCAL DATA ================= */
   useEffect(() => {
-    if (scope === "traffic" && path) setLocalData(preData);
-    else setLocalData({});
-  }, [scope, path]);
+    setLocalData(structuredClone(globalData || {}));
+    setErrors({}); // ✅ Clear errors on form switch
+  }, [path, globalData]);
 
+  /* ================= HYDRATE UI STATE (Fix Back Navigation) ================= */
+  useEffect(() => {
+    if (!isRoot) return;
+
+    const peoplePath =
+      scope === "static"
+        ? "formData.staticSpeed.offenderPeople"
+        : "formData.traffic.offenderPeople";
+
+    const list = getByPath(state, peoplePath);
+
+    if (Array.isArray(list) && list.length > 0) {
+      // 1. Hydrate Co-Driver
+      const coDriverIdx = list.findIndex((p: any) => p.whoIsIt === "Co-Driver");
+      if (coDriverIdx !== -1) {
+        setHasCoDriver(true);
+        setCoDriverType(list[coDriverIdx].type);
+        setCoDriverIndex(coDriverIdx);
+      }
+
+      // 2. Hydrate Additional People
+      const newSteps: Step[] = [];
+      list.forEach((p: any, idx: number) => {
+        // Skip Main Driver (Index 0) and Co-Driver
+        if (idx === 0) return;
+        if (idx === coDriverIdx) return;
+
+        newSteps.push({
+          id: Date.now() + idx, // Generate unique ID
+          type: p.type,
+          index: idx,
+        });
+      });
+
+      if (newSteps.length > 0) {
+        setSteps(newSteps);
+      }
+    }
+    // Run only once on mount to restore UI
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ================= SAVE FIELD ================= */
   const saveField = (label: string, value: string) => {
-    let targetPath = path;
+    if (!path) return;
 
-    if (!targetPath && scope === "mp-main")
-      targetPath = "formData.mpReport.individualDetails.tempOffender";
+    const key = labelKeyMap[label] || label;
 
-    if (!targetPath && scope === "mp-additional")
-      targetPath = "formData.mpReport.additionalIndividual.tempOffender";
+    const updated = {
+      ...(localData || {}),
+      [key]: value,
+    };
 
-    setLocalData((prev: any) => ({
-      ...(prev || {}),
-      [label]: value,
-    }));
-
-    if (!targetPath) return;
-
-    const prevGlobal = getValueByPath(state, targetPath) || {};
+    setLocalData(updated);
 
     dispatch({
       type: "SET_PATH",
-      path: targetPath,
-      value: {
-        ...prevGlobal,
-        [label]: value,
-      },
+      path,
+      value: updated,
     });
+
+    // Validate Dates
+    const issueKey = "passIssueDate";
+    const expireKey = "passExpireDate";
+
+    let issueDate = updated[issueKey];
+    let expireDate = updated[expireKey];
+
+    // If current field is issue date or expire date, re-validate
+    if (key === issueKey || key === expireKey) {
+      if (issueDate && expireDate) {
+        const i = new Date(issueDate);
+        const e = new Date(expireDate);
+
+        if (e <= i) {
+          setErrors((prev) => ({
+            ...prev,
+            "Pass Expire Date": "Pass Expire Date must be later than Pass Issue Date",
+          }));
+        } else {
+          setErrors((prev) => {
+            const newErr = { ...prev };
+            delete newErr["Pass Expire Date"];
+            return newErr;
+          });
+        }
+      } else {
+        // If one is missing, clear error just in case? Or wait? 
+        // Better to clear error if one is removed.
+        setErrors((prev) => {
+          const newErr = { ...prev };
+          delete newErr["Pass Expire Date"];
+          return newErr;
+        });
+      }
+    }
+  };
+
+  /* ================= ADD MORE ================= */
+  const addMore = () => {
+    setSteps((prev) => [...prev, { id: Date.now() }]);
+  };
+
+  /* ================= ADD OFFENDER ================= */
+  const handleSelect = (stepId: number, type: string) => {
+    const peoplePath =
+      scope === "static"
+        ? "formData.staticSpeed.offenderPeople"
+        : "formData.traffic.offenderPeople";
+
+    const list = getByPath(state, peoplePath) || [];
+    const newIndex = list.length;
+
+    dispatch({
+      type: "SET_PATH",
+      path: peoplePath,
+      value: [
+        ...list,
+        {
+          whoIsIt: "Offender",
+          type,
+          details: {},
+        },
+      ],
+    });
+
+    setSteps((prev) =>
+      prev.map((s) =>
+        s.id === stepId ? { ...s, type, index: newIndex } : s
+      )
+    );
+  };
+
+  /* ================= ENSURE CO-DRIVER ================= */
+  const ensureCoDriverSlot = (type: string) => {
+    const peoplePath =
+      scope === "static"
+        ? "formData.staticSpeed.offenderPeople"
+        : "formData.traffic.offenderPeople";
+
+    const list = getByPath(state, peoplePath) || [];
+    const existingIndex = list.findIndex(
+      (p: any) => p.whoIsIt === "Co-Driver"
+    );
+
+    let newList = [...list];
+    let index = existingIndex;
+
+    if (existingIndex >= 0) {
+      newList[existingIndex] = { ...newList[existingIndex], type };
+    } else {
+      index = list.length;
+      newList.push({
+        whoIsIt: "Co-Driver",
+        type,
+        details: {},
+      });
+    }
+
+    dispatch({
+      type: "SET_PATH",
+      path: peoplePath,
+      value: newList,
+    });
+
+    return index;
   };
 
   return (
     <div className="space-y-6 mt-4 bg-white p-6 shadow-sm">
       <p className="font-semibold text-lg">{title}</p>
-
       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
-      {/* ================= MAIN FIELDS ================= */}
+      {/* ================= MAIN FORM ================= */}
       <div className="grid grid-cols-2 gap-4">
-        {fields.map((f, i) => {
-          const label = f.label;
-          const value = localData?.[label] || "";
+        {fields.map((f: any, i: number) => {
+          const key = labelKeyMap[f.label] || f.label;
+          const value = localData?.[key] || "";
 
-          if ((f as any).type === "suggestion") {
-            return (
-              <div key={i} className="flex flex-col gap-1">
-                <Label className="font-semibold">{label}</Label>
+          const isSuggestion = [
+            "Unit",
+            "FMN",
+            "Command",
+            "Select Rank",
+            "Address",
+            "ID Card Number",
+            "I Card Number",
+            "Army Rider / Driver Number",
+          ].includes(f.label);
 
-                <SuggestionInput
-                  placeholder={f.placeholder}
-                  value={value}
-                  onChange={(v) => saveField(label, v)}
-                  fieldType={(f as any).fieldType}
-                />
-              </div>
-            );
-          }
-
-          return (
-            <div key={i} className="flex flex-col gap-1">
-              <Label className="font-semibold">{label}</Label>
-
-              <FormInput
-                label=""
-                placeholder={f.placeholder}
-                value={value}
-                onChange={(v) => saveField(label, v)}
-              />
-            </div>
+          return isSuggestion ? (
+            <SuggestionInput
+              key={i}
+              label={f.label}
+              placeholder={f.placeholder}
+              value={value}
+              onChange={(v) => saveField(f.label, v)}
+              fieldType={f.label.toLowerCase()}
+              className={cn(value ? "border-blue-500" : "border-gray-300")}
+              defaultOptions={f.options}
+            />
+          ) : (
+            <FormInput
+              key={i}
+              label={f.label}
+              placeholder={f.placeholder}
+              value={value}
+              onChange={(v) => saveField(f.label, v)}
+              type={f.type === "input" ? "text" : f.type}
+              error={errors[f.label]}
+            />
           );
         })}
       </div>
 
-      {/* ================= CIVILIAN → RELATIVE FLOW ================= */}
-      {isMainCivilian && (
-        <>
-          <p className="font-semibold mt-4">
-            <input
-              type="checkbox"
-              checked={civilianRelative}
-              onChange={(e) => {
-                setCivilianRelative(e.target.checked);
-                setRelativeRelation("");
-                setRelativeType("");
-              }}
-              className="mr-2"
-            />
-            Is this civilian a Dependent or Relative of a Military Personnel?
-          </p>
-
-          {civilianRelative && (
-            <>
-              <p className="font-semibold mt-3">
-                Enter Relation of Military Person
-              </p>
-
-              <SuggestionInput
-                placeholder="e.g. Father / Husband / Brother"
-                value={relativeRelation}
-                onChange={setRelativeRelation}
-                fieldType="relation"
+      {/* ================= CO-DRIVER ================= */}
+      {isRoot &&
+        !isMainCivilian &&
+        (scope === "traffic" || scope === "static") && (
+          <>
+            <div className="mt-6 flex items-start gap-2">
+              <Checkbox
+                checked={hasCoDriver}
+                onCheckedChange={(v) => {
+                  setHasCoDriver(Boolean(v));
+                  setCoDriverType("");
+                  setCoDriverIndex(null);
+                }}
               />
-
-              <p className="font-semibold mt-4">
-                Select Military Relative Type
+              <p className="text-sm">
+                Was there a <b>Co-Driver / Pillion Rider</b>?
               </p>
+            </div>
 
-              <div className="grid sm:grid-cols-2 gap-3">
-                {[
-                  "Military Person",
-                  "Employee",
-                  "Servant/Maid",
-                  "Shop Keeper",
-                  "Temporary Hired Worker",
-                ].map((item) => (
-                  <label
-                    key={item}
-                    className={cn(
-                      "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-                      relativeType === item
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="relativeType"
-                      value={item}
-                      checked={relativeType === item}
-                      onChange={() => setRelativeType(item)}
-                    />
-                    {item}
-                  </label>
-                ))}
+            {hasCoDriver && (
+              <div className="mt-4 space-y-4">
+                <RadioGroup
+                  value={coDriverType}
+                  onValueChange={(v) => {
+                    setCoDriverType(v);
+                    const idx = ensureCoDriverSlot(v);
+                    setCoDriverIndex(idx);
+                  }}
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {Object.keys(offenderFormsConfig).map((item) => (
+                    <label
+                      key={item}
+                      className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+                    >
+                      <RadioGroupItem value={item} />
+                      {item}
+                    </label>
+                  ))}
+                </RadioGroup>
+
+                {coDriverType && coDriverIndex !== null && (
+                  <OffenderDynamicForm
+                    title={`${coDriverType} (Co-Driver) Details`}
+                    fields={offenderFormsConfig[coDriverType].fields}
+                    scope={scope}
+                    path={
+                      scope === "static"
+                        ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
+                        : `formData.traffic.offenderPeople[${coDriverIndex}].details`
+                    }
+                    isRoot={false}
+                  />
+                )}
               </div>
+            )}
+          </>
+        )}
 
-              {relativeType && (
-                <OffenderDynamicForm
-                  title={`${relativeType} Details`}
-                  helperText={
-                    relativeRelation ? `Relation: ${relativeRelation}` : ""
-                  }
-                  fields={offenderFormsConfig[relativeType].fields}
-                  scope="traffic"
-                  path="formData.traffic.offenderPeople[2].details"
-                  showCoDriver={false}
-                />
-              )}
-            </>
-          )}
-        </>
-      )}
+      {/* ================= EXTRA PEOPLE (STEPS) ================= */}
+      {steps.map((step) => (
+        <div key={step.id} className="mt-8 border-t pt-6">
+          <p className="font-semibold mb-3">Additional Person Details</p>
 
-      {/* ================= NON-CIVILIAN → CODRIVER FLOW ================= */}
-      {showCoDriver && !isMainCivilian && (
-        <>
-          <p className="font-semibold mt-4">
-            <input
-              type="checkbox"
-              checked={hasCoDriver}
-              onChange={(e) => {
-                setHasCoDriver(e.target.checked);
-                setCoDriverType("");
-              }}
-              className="mr-2"
+          {!step.type ? (
+            <RadioGroup
+              onValueChange={(v) => handleSelect(step.id, v)}
+              className="grid sm:grid-cols-2 gap-3"
+            >
+              {Object.keys(offenderFormsConfig).map((item) => (
+                <label
+                  key={item}
+                  className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
+                >
+                  <RadioGroupItem value={item} />
+                  {item}
+                </label>
+              ))}
+            </RadioGroup>
+          ) : (
+            <OffenderDynamicForm
+              title={`${step.type} Details`}
+              fields={offenderFormsConfig[step.type].fields}
+              scope={scope}
+              path={
+                scope === "static"
+                  ? `formData.staticSpeed.offenderPeople[${step.index}].details`
+                  : `formData.traffic.offenderPeople[${step.index}].details`
+              }
+              isRoot={false}
             />
-            Was there a Co-Driver or Pillion Rider with the driver/rider?
-          </p>
-
-          {hasCoDriver && (
-            <>
-              <p className="font-semibold mt-3">
-                Select Who was Co-Driver / Rider
-              </p>
-
-              <div className="grid sm:grid-cols-2 gap-3">
-                {[
-                  "Military Person",
-                  "Civilian",
-                  "Employee",
-                  "Servant/Maid",
-                  "Shop Keeper",
-                  "Temporary Hired Worker",
-                ].map((item) => (
-                  <label
-                    key={item}
-                    className={cn(
-                      "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
-                      coDriverType === item
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="coDriver"
-                      value={item}
-                      checked={coDriverType === item}
-                      onChange={() => setCoDriverType(item)}
-                    />
-                    {item}
-                  </label>
-                ))}
-              </div>
-
-              {coDriverType && offenderFormsConfig[coDriverType] && (
-                <OffenderDynamicForm
-                  title={`${coDriverType} Details`}
-                  fields={offenderFormsConfig[coDriverType].fields}
-                  scope="traffic"
-                  path="formData.traffic.offenderPeople[1].details"
-                  showCoDriver={false}
-                />
-              )}
-            </>
           )}
-        </>
+        </div>
+      ))}
+
+      {/* ================= ADD MORE ================= */}
+      {isRoot && (scope === "traffic" || scope === "static") && (
+        <div className="pt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={addMore}
+            className="bg-black text-white px-4 py-2 rounded-md text-sm"
+          >
+            + Add More People
+          </button>
+        </div>
       )}
     </div>
   );

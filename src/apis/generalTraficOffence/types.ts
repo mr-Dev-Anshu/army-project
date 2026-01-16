@@ -17,7 +17,8 @@ export interface CreateTrafficOffenceData {
   offenderPeople: OffenderPerson[];
   remarks?: string;
   actionStatus?: boolean;
+  customFields?: Record<string, any>;
 }
 
 
-export interface UpdateTrafficOffenceData extends Partial<CreateTrafficOffenceData> {}
+export interface UpdateTrafficOffenceData extends Partial<CreateTrafficOffenceData> { }

@@ -3,9 +3,15 @@ import { CreateMPReportPayload, MPReport, UpdateMPReportPayload } from "./types"
 
 export * from "./types";
 
+export const getAllMPReports = async (filters: any = {}): Promise<MPReport[]> => {
+  const params = new URLSearchParams();
+  if (filters.unit) params.append("unit", filters.unit);
+  if (filters.fmn) params.append("fmn", filters.fmn);
+  if (filters.fromDate) params.append("fromDate", filters.fromDate);
+  if (filters.toDate) params.append("toDate", filters.toDate);
+  if (filters.placeOfOffence) params.append("placeOfOffence", filters.placeOfOffence);
 
-export const getAllMPReports = async (): Promise<MPReport[]> => {
-  const res = await api.get("/api/mp-reports");
+  const res = await api.get(`/api/mp-reports?${params.toString()}`);
   return res.data.data;
 };
 

@@ -35,6 +35,7 @@ const offenderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: "offenders",
   }
 );
 

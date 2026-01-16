@@ -11,7 +11,7 @@ export const STATIC_SPEED_REPORT_SUGGESTION_CONFIG = {
     // 2. Nested object fields
     nestedFields: {
         // On duty details
-        'onDutyDetails.dutyLocation': 'dutyLocation',
+        'onDutyDetails.dutyLocation': 'placeOfOffence',
         'onDutyDetails.dutyType': 'dutyType',
 
         // Reporting MP details
@@ -21,7 +21,7 @@ export const STATIC_SPEED_REPORT_SUGGESTION_CONFIG = {
         'onDutyDetailsMPReporting.armyNumber': 'reportingMPArmyNo',
 
         // Offence occurrence details
-        'offenceOccurenceDetails.incidentLocation': 'incidentLocation',
+        'offenceOccurenceDetails.incidentLocation': 'placeOfOffence',
         'offenceOccurenceDetails.actualSpeedNoted': 'actualSpeedNoted',
         'offenceOccurenceDetails.authSpeed': 'authSpeed',
         'offenceOccurenceDetails.overSpeedCalculated': 'overSpeedCalculated',

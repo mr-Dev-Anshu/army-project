@@ -27,7 +27,7 @@ export default function Step6Evidence() {
     });
 
   return (
-    <FormSection title="">
+    <div className="space-y-6">
       <EvidenceUploadSection
         title="Upload evidence"
         values={evidence}
@@ -39,6 +39,6 @@ export default function Step6Evidence() {
           { label: "Videos", key: "videos", multiple: true },
         ]}
       />
-    </FormSection>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+// lib/validators/mpReport.validator.js
 import Joi from "joi";
 
 // Common schemas
@@ -50,7 +51,9 @@ export const createMPReportSchema = Joi.object({
   }).required(),
 
   occurrenceDetails: Joi.object({
-    offenceType: requiredString,
+    offenceType: Joi.string().optional(),
+    offenceTypes: Joi.array().items(Joi.string()).optional(),
+    offenceTypeReference: Joi.array().items(Joi.string()).optional(),
     placeOfOccurrence: requiredString,
     dateOfOccurrence: Joi.date().required().messages({
       "date.base": "Valid date required",
@@ -60,67 +63,46 @@ export const createMPReportSchema = Joi.object({
     customFields,
   }).required(),
 
- individuals: Joi.array()
-  .items(
-    Joi.object({
-      armyNumber: optionalString,
-      rank: optionalString,
-      name: optionalString,
-      unit: optionalString,
-      fmn: optionalString,
-      address: optionalString,
+  individuals: Joi.array()
+    .items(
+      Joi.object({
+        // known fields...
+        armyNumber: optionalString,
+        rank: optionalString,
+        name: optionalString,
+        unit: optionalString,
+        fmn: optionalString,
+        address: optionalString,
+        identityCard: optionalString,
+        remark: optionalString,
+        role: optionalString,
+        // Traffic fields
+        isVehicleInvolved: Joi.boolean().optional(),
+        vehicleCategory: optionalString,
+        vehicleNumber: optionalString,
+        customFields,
+      }).unknown(true) // 🔥 Allow extra fields like armyNo, iCardNumber
+    )
+    .default([]),
 
-      identityCard: optionalString,
-      iCardNumber: optionalString,
-      command: optionalString,
-      remark: optionalString,
-      role: optionalString,
+  witnesses: Joi.array()
+    .items(
+      Joi.object({
+        armyNumber: optionalString,
+        rank: optionalString,
+        name: optionalString,
+        unit: optionalString,
+        fmn: optionalString,
+        address: optionalString,
+        identityCard: optionalString,
+        remark: optionalString,
+        customFields,
+      }).unknown(true) // 🔥 Allow extra fields
+    )
+    .default([]),
 
-      // 🚀 ADD THIS NEW FIELD
-      fatherOrHusbandName: optionalString,
-
-      // Traffic fields
-      isVehicleInvolved: Joi.boolean().optional(),
-      vehicleCategory: optionalString,
-      vehicleNumber: optionalString,
-
-      customFields,
-    })
-  )
-  .default([]),
-
-
- witnesses: Joi.array()
-  .items(
-    Joi.object({
-      armyNumber: optionalString,
-      rank: optionalString,
-      name: optionalString,
-      unit: optionalString,
-      fmn: optionalString,
-      address: optionalString,
-
-      // 👇 Backend ke liye standard field
-      identityCard: optionalString,
-
-      // 👇 Tumhare UI ke fields bhi allow
-      iCardNumber: optionalString,
-      command: optionalString,
-      remark: optionalString,
-
-      // 👇 Vehicle support add kar diya 🙂
-      isVehicleInvolved: Joi.boolean().optional(),
-      vehicleCategory: optionalString,
-      vehicleNumber: optionalString,
-
-      customFields,
-    })
-  )
-  .default([]),
-
-
-  documents: Joi.array().items(documentItem).default([]),
-  evidences: Joi.array().items(evidenceItem).default([]),
+  documents: Joi.array().items(documentItem.unknown(true)).default([]),
+  evidences: Joi.array().items(evidenceItem.unknown(true)).default([]),
 
   detailedOccurrenceReport: optionalString,
   pointsFindOutDuringInvestigation: optionalString,

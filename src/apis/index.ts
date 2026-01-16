@@ -8,8 +8,6 @@ export * from "@/apis/generalTraficOffence/update"
 
 
 
-
-
 export * from "@/apis/MpWitenessing/create"
 export * from "@/apis/MpWitenessing/delete"
 export * from "@/apis/MpWitenessing/getAll"
@@ -51,9 +49,22 @@ export * from "@/apis/maidServant/getById";
 export * from "@/apis/maidServant/update";
 export * from "@/apis/maidServant/delete";
 
+
+/* ================= OFFENCE REFERENCES ================= */
+export * from "@/apis/offence-references/create";
+export * from "@/apis/offence-references/getAll";
+
 /* ================= CIVIL EMPLOYEE - TEMPORARY HIRED WORKER ================= */
 export * from "@/apis/temporaryHiredWorker/create";
 export * from "@/apis/temporaryHiredWorker/getAll";
 export * from "@/apis/temporaryHiredWorker/getById";
 export * from "@/apis/temporaryHiredWorker/update";
 export * from "@/apis/temporaryHiredWorker/delete";
+
+/* ================= VEHICLES SECURITY PASS MANAGEMENT ================= */
+export * from "@/apis/vehiclesSecurityPassManagement/create";
+export * from "@/apis/vehiclesSecurityPassManagement/getAll";
+export * from "@/apis/vehiclesSecurityPassManagement/getById";
+export * from "@/apis/vehiclesSecurityPassManagement/update";
+export * from "@/apis/vehiclesSecurityPassManagement/delete";
+

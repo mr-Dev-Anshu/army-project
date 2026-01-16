@@ -23,11 +23,50 @@ export class GeneralTrafficOffenceRepository {
           as: "onDutyWitnessingMps"
         }
       },
-      // Add counts
+      {
+        $addFields: {
+          refIds: {
+            $map: {
+              input: { $ifNull: ["$offenceTypeReference", []] },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs"
+        }
+      },
+      // Add counts and resolved references
       {
         $addFields: {
           offendersCount: { $size: "$offenders" },
-          witnessingMpsCount: { $size: "$onDutyWitnessingMps" }
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          offenceTypeReference: {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference"
+                }
+              },
+              else: "$offenceTypeReference"
+            }
+          }
         }
       },
       {
@@ -62,8 +101,47 @@ export class GeneralTrafficOffenceRepository {
       },
       {
         $addFields: {
+          refIds: {
+            $map: {
+              input: { $ifNull: ["$offenceTypeReference", []] },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs"
+        }
+      },
+      {
+        $addFields: {
           offendersCount: { $size: "$offenders" },
-          witnessingMpsCount: { $size: "$onDutyWitnessingMps" }
+          witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
+          offenceTypeReference: {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference"
+                }
+              },
+              else: "$offenceTypeReference"
+            }
+          }
         }
       },
       {
@@ -74,71 +152,211 @@ export class GeneralTrafficOffenceRepository {
   }
 
   async getGroupedByOffenceType(filters = {}) {
+
     const matchStage = {};
-    // 1. Handle filters that need type conversion or mapping
+
+    /* ================= VEHICLE / STATUS FILTERS ================= */
+
     if (filters.isVehicleInvolved !== undefined) {
-      matchStage.isVehicleInvolved = filters.isVehicleInvolved === 'true';
+      matchStage.isVehicleInvolved = filters.isVehicleInvolved === "true";
     }
+
     if (filters.status !== undefined) {
-      if (filters.status === 'true' || filters.status === 'Taken') matchStage.actionStatus = true;
-      if (filters.status === 'false' || filters.status === 'Pending') matchStage.actionStatus = false;
+      if (filters.status === "true" || filters.status === "Taken") {
+        matchStage.actionStatus = true;
+      }
+      if (filters.status === "false" || filters.status === "Pending") {
+        matchStage.actionStatus = false;
+      }
     }
+
+    /* 
+       NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
+       because they might depend on looked-up fields (e.g., offenders).
+    */
+
     if (filters.vehicleType) {
       matchStage.vehicleType = filters.vehicleType;
     }
+
     if (filters.vehicleCategory) {
       matchStage.vehicleCategory = filters.vehicleCategory;
     }
-    if (filters.date) {
-      const dateStr = filters.date.split('T')[0]; // Ensure we have YYYY-MM-DD
-      const startDate = new Date(dateStr);
-      startDate.setUTCHours(0, 0, 0, 0);
-      const endDate = new Date(dateStr);
-      endDate.setUTCHours(23, 59, 59, 999);
-      matchStage.$or = [
-        { "offenceOccurenceDetails.timeOfOffence": { $gte: startDate, $lte: endDate } },
-        { "createdAt": { $gte: startDate, $lte: endDate } }
-      ];
-    }
-    // Filter by offence type (containment check before unwind)
-    if (filters.offenceType && filters.offenceType !== 'All') {
-      matchStage.offenceTypes = filters.offenceType;
+
+    /* ================= DATE FILTER (FIXED – NO CONFLICT) ================= */
+
+    // PRIORITY 1: Start → End Date
+    if (filters.fromDate || filters.toDate) {
+      matchStage.createdAt = {};
+
+      if (filters.fromDate) {
+        matchStage.createdAt.$gte = new Date(filters.fromDate);
+      }
+
+      if (filters.toDate) {
+        matchStage.createdAt.$lte = new Date(
+          filters.toDate + "T23:59:59.999Z"
+        );
+      }
     }
 
+    // PRIORITY 2: Single Date (ONLY if from/to not present)
+    else if (filters.date) {
+      const dateStr = filters.date.split("T")[0];
+      const startDate = new Date(dateStr);
+      startDate.setUTCHours(0, 0, 0, 0);
+
+      const endDate = new Date(dateStr);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      matchStage.$or = [
+        {
+          "offenceOccurenceDetails.timeOfOffence": {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+        {
+          createdAt: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      ];
+    }
+
+    /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
+
+    /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
+
+    if (filters.offenceType && filters.offenceType !== "All") {
+      matchStage.offenceTypes = { $in: filters.offenceType.split(",") };
+    }
+
+    /* ================= AGGREGATION PIPELINE ================= */
+
     const pipeline = [
-      // Initial Match
       Object.keys(matchStage).length > 0 ? { $match: matchStage } : null,
+
       {
         $lookup: {
           from: "offenders",
           localField: "_id",
           foreignField: "offenceId",
-          as: "offenders"
-        }
+          as: "offenders",
+        },
       },
       {
         $lookup: {
           from: "ondutywitnessingmps",
           localField: "_id",
           foreignField: "offenceId",
-          as: "onDutyWitnessingMps"
+          as: "onDutyWitnessingMps",
+        },
+      },
+
+      /* ================= POST LOOKUP FILTERS ================= */
+      (() => {
+        const rules = [];
+
+        if (filters.unit) {
+          const pattern = filters.unit.split(',').map(s => s.trim()).join('|');
+          const regex = new RegExp(pattern, "i");
+          rules.push({
+            $or: [
+              { "customFields.unit": { $regex: regex } },
+              { "onDutyDetailsMPReporting.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unit": { $regex: regex } },
+              { "offenders.offenderDetails.unitName": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.fmn) {
+          const pattern = filters.fmn.split(',').map(s => s.trim()).join('|');
+          const regex = new RegExp(pattern, "i");
+          rules.push({
+            $or: [
+              { "customFields.fmn": { $regex: regex } },
+              { "offenders.offenderDetails.fmn": { $regex: regex } }
+            ]
+          });
+        }
+
+        if (filters.placeOfOffence) {
+          const pattern = filters.placeOfOffence.split(',').map(s => s.trim()).join('|');
+          const regex = new RegExp(pattern, "i");
+          rules.push({
+            $or: [
+              { "customFields.placeOfOffence": { $regex: regex } },
+              { "onDutyDetails.dutyLocation": { $regex: regex } },
+              { "offenceOccurenceDetails.incidentLocation": { $regex: regex } }
+            ]
+          });
+        }
+
+        return rules.length > 0 ? { $match: { $and: rules } } : null;
+      })(),
+
+      {
+        $addFields: {
+          refIds: {
+            $map: {
+              input: { $ifNull: ["$offenceTypeReference", []] },
+              as: "rid",
+              in: {
+                $convert: {
+                  input: "$$rid",
+                  to: "objectId",
+                  onError: null,
+                  onNull: null
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "offencereferences",
+          localField: "refIds",
+          foreignField: "_id",
+          as: "resolvedRefs"
         }
       },
       {
         $addFields: {
           offendersCount: { $size: "$offenders" },
           witnessingMpsCount: { $size: "$onDutyWitnessingMps" },
-          originalOffenceTypes: "$offenceTypes"
-        }
+          originalOffenceTypes: "$offenceTypes",
+          offenceTypeReference: {
+            $cond: {
+              if: { $gt: [{ $size: "$resolvedRefs" }, 0] },
+              then: {
+                $map: {
+                  input: "$resolvedRefs",
+                  as: "r",
+                  in: "$$r.reference"
+                }
+              },
+              else: "$offenceTypeReference"
+            }
+          }
+        },
       },
+
       {
         $unwind: {
           path: "$offenceTypes",
-          preserveNullAndEmptyArrays: true
-        }
+          preserveNullAndEmptyArrays: true,
+        },
       },
-      // Filter by offence type (strict match after unwind to isolate the group)
-      (filters.offenceType && filters.offenceType !== 'All') ? { $match: { offenceTypes: filters.offenceType } } : null,
+
+      // STRICT offenceType filter AFTER unwind
+      filters.offenceType && filters.offenceType !== "All"
+        ? { $match: { offenceTypes: { $in: filters.offenceType.split(",") } } }
+        : null,
+
       {
         $group: {
           _id: "$offenceTypes",
@@ -162,12 +380,17 @@ export class GeneralTrafficOffenceRepository {
               onDutyDetails: "$onDutyDetails",
               onDutyDetailsMPReporting: "$onDutyDetailsMPReporting",
               actionStatus: "$actionStatus",
-              vehicleName: "$vehicleName"
-            }
-          }
-        }
+              vehicleName: "$vehicleName",
+              reportId: "$reportId",
+              offenceTypeReference: "$offenceTypeReference",
+              resolvedRefs: "$resolvedRefs",
+            },
+          },
+        },
       },
+
       { $sort: { _id: 1 } },
+
       {
         $project: {
           offenceType: "$_id",
@@ -175,14 +398,17 @@ export class GeneralTrafficOffenceRepository {
           totalOffenders: 1,
           totalWitnessingMps: 1,
           offences: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ].filter(Boolean);
 
-    const results = await GeneralTrafficOffence.aggregate(pipeline);
-    return results;
+    /* ================= EXECUTE ================= */
+
+    return await GeneralTrafficOffence.aggregate(pipeline);
   }
+
+
 
   async create(data) {
     console.log(data);

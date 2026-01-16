@@ -63,6 +63,14 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
         }
     };
 
+    const unitOptions = useMemo(() => {
+        const units = new Set<string>();
+        maidServants.forEach((s: MaidServantWithId) => {
+            if (s.ownerUnit) units.add(s.ownerUnit);
+        });
+        return Array.from(units).sort();
+    }, [maidServants]);
+
     const filteredData = useMemo(() => {
         return maidServants.filter((item: MaidServantWithId) => {
             const searchTerm = filters.search.toLowerCase();
@@ -88,7 +96,16 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 }
             }
 
-            return matchesSearch && matchesDate && matchesStatus;
+            // Unit Logic (Multi-select)
+            let matchesUnit = true;
+            if (filters.unit && filters.unit !== "All") {
+                const selectedUnits = filters.unit.split(",");
+                if (!item.ownerUnit || !selectedUnits.includes(item.ownerUnit)) {
+                    matchesUnit = false;
+                }
+            }
+
+            return matchesSearch && matchesDate && matchesStatus && matchesUnit;
         });
     }, [maidServants, filters]);
 
@@ -305,7 +322,7 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
 
                     <h2 className="text-lg font-semibold text-[#404040]">Maid Servants Security Passes</h2>
                 </div>
-                <span className="text-sm font-medium text-[#0A0A0A]">{maidServants.length} Servants</span>
+                <span className="text-sm font-medium text-[#0A0A0A]">{filteredData.length} Servants</span>
             </div>
 
             <ReportFilterBar
@@ -316,9 +333,9 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                 showActionStatus={true}
                 statusLabel="Pass Status"
                 actionStatusOptions={["Valid", "Expired"]}
-                showDate={false}
-                showSort={false}
+                showDateRange={false}
                 showFilter={true}
+                unitOptions={unitOptions}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
                     search: "",
@@ -326,8 +343,11 @@ const MaidServantTable = ({ onAddNew, onEdit }: { onAddNew: () => void; onEdit: 
                     date: "",
                     actionStatus: "All",
                     sortOrder: "asc",
+                    unit: "",
                 })}
                 placeholder="Search by name, qtr no, pass number..."
+                showFmn={false}
+                showPlaceOfOffence={false}
             />
 
             <DynamicTable

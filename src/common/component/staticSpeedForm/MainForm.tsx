@@ -1,4 +1,5 @@
 "use client";
+import React, { useState } from "react";
 
 import { initialState, useForm } from "@/context/FormContext";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
@@ -13,7 +14,6 @@ import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
-import { StaticSpeedState } from "@/common/types/form.types";
 
 export default function StaticSpeedForm({
   onCancel,
@@ -21,110 +21,131 @@ export default function StaticSpeedForm({
   onCancel: () => void;
 }) {
   const { state, dispatch } = useForm();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const staticData = state.formData.staticSpeed;
+  const staticData = state.formData.staticSpeed as any;
 
   const createStaticRecord = useCreateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
 
+  /* ================= FETCH REPORT NO ================= */
+  const reportNo = staticData.reportNo || "TEMP/STATIC/001";
+
+  const handleReportNoChange = (newReportNo: string) => {
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.staticSpeed.reportNo",
+      value: newReportNo,
+    });
+  };
+
+  // ... (existing mapStaticToReport code) ...
+
   const mapStaticToReport = (data: any) => {
     const riderDetails = data?.offenderPeople?.[0]?.details || {};
 
+    const val = (v: any) => (v ? v : "");
+
     const rider = {
-      armyNo:
-        riderDetails["DD veh rider no."] || riderDetails["Army No."] || "N/A",
-
-      name: riderDetails["Name"] || riderDetails["Driver Name"] || "N/A",
-
-      rank: riderDetails["Select Rank"] || riderDetails["Rank"] || "N/A",
-
-      unit: riderDetails["Unit"] || "N/A",
-
-      fmn: riderDetails["FMN"] || "N/A",
-
-      command: riderDetails["Command"] || "N/A",
-
-      address:
-        riderDetails["Address"] || riderDetails["Place of Stay"] || "N/A",
-
-      iCardNo: riderDetails["I Card No."] || riderDetails["ICard"] || "N/A",
+      armyNo: val(
+        riderDetails["armyNumber"] || riderDetails["Army Rider / Driver Number"]
+      ),
+      name: val(riderDetails["name"] || riderDetails["Full Name"]),
+      rank: val(riderDetails["rank"] || riderDetails["Select Rank"]),
+      unit: val(riderDetails["unit"] || riderDetails["Unit"]),
+      fmn: val(riderDetails["fmn"] || riderDetails["FMN"]),
+      command: val(riderDetails["command"] || riderDetails["Command"]),
+      address: val(riderDetails["address"] || riderDetails["Address"]),
+      iCardNo: val(
+        riderDetails["iCardNumber"] || riderDetails["ID Card Number"]
+      ),
     };
 
     const witness =
-      data.selectedWitness !== null
+      typeof data.selectedWitness === "number"
         ? data.witnesses?.[data.selectedWitness]
-        : null;
+        : data.witnesses?.[0] || null;
+
+    // Safety check for witness object structure
+    // If selectedWitness is the object (new flow), use it directly
+    let witReportBlock = data.selectedWitness?.nameReportingMP
+      ? data.selectedWitness
+      : witness?.reportingBlock || {};
 
     return {
-      reportNo: "TEMP/STATIC/001",
+      reportNo: data.reportNo || data.reportId,
       reportDate: new Date().toLocaleDateString("en-GB"),
 
-      unitName: rider?.unit || "N/A",
+      unitName: val(rider?.unit),
 
       /* -------- 1️⃣ PARTICULARS -------- */
       particulars: {
         rider: {
-          armyNo: rider?.armyNo || rider?.armyNo || "N/A",
-          name: rider?.name || "N/A",
-          fmn: rider?.fmn || "N/A",
-          address: rider?.address || "N/A",
-          rank: rider?.rank || "N/A",
-          unit: rider?.unit || "N/A",
-          command: rider?.command || "N/A",
-          iCardNo: rider?.iCardNo || "N/A",
+          armyNo: val(rider?.armyNo),
+          name: val(rider?.name),
+          fmn: val(rider?.fmn),
+          address: val(rider?.address),
+          rank: val(rider?.rank),
+          unit: val(rider?.unit),
+          command: val(rider?.command),
+          iCardNo: val(rider?.iCardNo),
         },
 
         vehicle: {
-          baNo: data?.vehicleDetails?.vehicleNumber || "N/A",
-          makeAndTake: data?.vehicleDetails?.vehicleName || "N/A",
+          baNo: val(data?.vehicleDetails?.vehicleNumber),
+          makeAndTake: val(data?.vehicleDetails?.vehicleName),
         },
       },
 
       /* -------- 2️⃣ OCCURRENCE -------- */
       occurrence: {
-        statement: data?.offenceBlock?.description || "No statement available",
+        dateOfDuty: val(data?.dutyBlock?.dateOfDuty),
+        dutyTime:
+          data?.dutyBlock?.startTime && data?.dutyBlock?.endTime
+            ? `${data.dutyBlock.startTime} - ${data.dutyBlock.endTime}`
+            : "",
+        dutyLocation: val(data?.dutyBlock?.dutyLocation),
+        nameOfWitnessingOfficial1: val(witReportBlock.nameReportingMP),
+        rankOfWitnessingOfficial1: val(witReportBlock.rank),
+        nameOfWitnessingOfficial2: "",
+        rankOfWitnessingOfficial2: "",
+        statement: val(data?.offenceBlock?.description),
       },
 
       /* -------- 3️⃣ OFFENCE -------- */
       offence: {
-        actualSpeed:
+        actualSpeed: val(
           data?.offenceBlock?.actualSpeedNoted ||
-          data?.offenceBlock?.actualSpeed ||
-          "N/A",
-
-        authSpeed: data?.offenceBlock?.authSpeed || "N/A",
-
-        overSpeed:
+            data?.offenceBlock?.actualSpeed
+        ),
+        authSpeed: val(data?.offenceBlock?.authSpeed),
+        overSpeed: val(
           data?.offenceBlock?.overSpeedCalculated ||
-          data?.offenceBlock?.overSpeed ||
-          "N/A",
+            data?.offenceBlock?.overSpeed
+        ),
       },
 
       /* -------- 4️ WITNESS SIGN -------- */
       witnessSig: {
-        armyNo:
-          witness?.reportingBlock?.armyNumber ||
-          witness?.reportingBlock?.ArmyNo ||
-          "N/A",
-        rank: witness?.reportingBlock?.rank || "N/A",
-        name: witness?.reportingBlock?.nameReportingMP || "N/A",
-        unit: witness?.reportingBlock?.unit || "N/A",
+        armyNo: val(witReportBlock.armyNumber || witReportBlock.ArmyNo),
+        rank: val(witReportBlock.rank),
+        name: val(witReportBlock.nameReportingMP),
+        unit: val(witReportBlock.unit),
       },
 
       /* -------- MP SIGN -------- */
       mpSig: {
-        armyNo: data?.reportingBlock?.armyNumber || "N/A",
-        rank: data?.reportingBlock?.rank || "N/A",
-        name: data?.reportingBlock?.nameReportingMP || "N/A",
-        unit: data?.reportingBlock?.unit || "N/A",
+        armyNo: val(data?.reportingBlock?.armyNumber),
+        rank: val(data?.reportingBlock?.rank),
+        name: val(data?.reportingBlock?.nameReportingMP),
+        unit: val(data?.reportingBlock?.unit),
       },
 
       /* -------- REMARKS -------- */
       remarks: {
-        text:
-          data?.remarks || "Suitable disciplinary action may please be taken.",
-        station: data?.dutyBlock?.dutyLocation || "N/A",
+        text: val(data?.remarks),
+        station: val(data?.dutyBlock?.dutyLocation),
         dated: new Date().toLocaleDateString("en-GB"),
       },
     };
@@ -149,160 +170,251 @@ export default function StaticSpeedForm({
     },
     4: {
       title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
-      component: <Step4Remarks />,
+      component: (
+        <Step4Remarks
+          value={state.formData.staticSpeed.remarks || ""}
+          onChange={(v) =>
+            dispatch({
+              type: "SET_PATH",
+              path: "formData.staticSpeed.remarks",
+              value: v,
+            })
+          }
+        />
+      ),
     },
   };
 
-const handleFinalSubmit = async () => {
-  try {
-    /* ================= STATIC SPEED PAYLOAD ================= */
-    const payload = {
-      vehicleType: staticData.vehicleDetails.vehicleType,
-      vehicleCategory: staticData.vehicleDetails.category,
-      vehicleNumber: staticData.vehicleDetails.vehicleNumber,
-      vehicleName: staticData.vehicleDetails.vehicleName,
-
-      offenceOccurenceDetails: {
-        time: staticData.offenceBlock?.time || "",
-        incidentLocation: staticData.offenceBlock?.incidentLocation || "",
-         description: [
-    staticData.offenceBlock?.description,
-    staticData.offenceBlock?.description2,
-  ]
-    .filter(Boolean)
-    .join("\n\n"),
-
-        overSpeedCalculated:
-          staticData.offenceBlock?.overSpeedCalculated ?? "",
-        actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
-        authSpeed: staticData.offenceBlock?.authSpeed ?? "",
-      },
-    };
-
-    console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
-
-    /* ================= CREATE STATIC RECORD ================= */
-    const staticRes = await createStaticRecord.mutateAsync(payload);
-    console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
-
-    toast.success("Static Record Created Successfully!");
-
-    if (!staticRes?._id) {
-      toast.error("Static Record ID Missing!");
-      return;
-    }
-
-    /* ================= OFFENDER PAYLOAD ================= */
-    const offenderPayload: CreateOffenderData = {
-      offenceId: staticRes._id,
-      offenderType: "Military Person",
-
-      offenderDetails: {
-        type: "Driver",
-        name: staticData.offenderPeople?.[0]?.details?.Name || "",
-        rank: staticData.offenderPeople?.[0]?.details?.Rank || "",
-        armyNumber:
-          staticData.offenderPeople?.[0]?.details?.[
-            "Army Rider / Driver Number"
-          ] || "",
-        unit: staticData.offenderPeople?.[0]?.details?.Unit || "",
-        command: staticData.offenderPeople?.[0]?.details?.Command || "",
-        fmn: staticData.offenderPeople?.[0]?.details?.FMN || "",
-        address: staticData.offenderPeople?.[0]?.details?.Address || "",
-        iCardNumber:
-          staticData.offenderPeople?.[0]?.details?.["ID Card Number"] || "",
-      },
-    };
-
-    console.log(
-      "👮 OFFENDER PAYLOAD SENT ===>",
-      JSON.stringify(offenderPayload, null, 2)
-    );
-
-    /* ================= CREATE OFFENDER ================= */
+  const handleFinalSubmit = async () => {
+    setIsSubmitting(true);
+    const { contactNumber, ...mpReportingSafe } =
+      staticData.reportingBlock || {};
     try {
-      const offenderRes = await createOffenderMutation.mutateAsync(
-        offenderPayload
-      );
-      console.log("✅ OFFENDER BACKEND RESPONSE ===>", offenderRes);
-      toast.success("Offender Created Successfully!");
-    } catch (err: any) {
-      console.error(
-        "❌ OFFENDER BACKEND ERROR ===>",
-        err?.response?.data || err
-      );
-      throw err;
-    }
+      /* ================= STATIC SPEED PAYLOAD ================= */
+      const payload = {
+        reportId: reportNo,
+        vehicleType: staticData.vehicleDetails.vehicleType,
+        vehicleCategory: staticData.vehicleDetails.category,
+        vehicleNumber: staticData.vehicleDetails.vehicleNumber,
+        vehicleName: staticData.vehicleDetails.vehicleName,
 
-    /* ================= CREATE WITNESS ================= */
-    if (staticData.witnesses?.length > 0) {
-      const witnessPayload = staticData.witnesses.map((w) => ({
-        offenceId: staticRes._id,
-        rank: w.reportingBlock.rank,
-        unit: w.reportingBlock.unit,
-        ArmyNo: w.reportingBlock.armyNumber,
-        name: w.reportingBlock.nameReportingMP || "",
-        contactNumber: w.reportingBlock.contactNumber || "",
-      }));
+        onDutyDetails: {
+          dateOfDuty: staticData.dutyBlock?.dateOfDuty || undefined,
+          dutyLocation: staticData.dutyBlock?.dutyLocation || undefined,
+          dutyType: staticData.dutyBlock?.dutyType || undefined,
+          startTime: staticData.dutyBlock?.startTime
+            ? new Date(
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+              ).toISOString()
+            : undefined,
+          endTime: staticData.dutyBlock?.endTime
+            ? new Date(
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+              ).toISOString()
+            : undefined,
+        },
 
-      console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
+        // 🔥 FIXED HERE
+        onDutyDetailsMPReporting: mpReportingSafe,
 
-      try {
-        const witnessResponses = await Promise.all(
-          witnessPayload.map((w) =>
-            createWitnessMutation.mutateAsync(w)
-          )
-        );
+        offenceOccurenceDetails: {
+          time: staticData.offenceBlock?.time || undefined,
+          incidentLocation: staticData.offenceBlock?.incidentLocation || "",
+          description: [
+            staticData.offenceBlock?.description,
+            staticData.offenceBlock?.description2,
+            staticData.offenceOccurenceDetails?.description,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+          overSpeedCalculated:
+            staticData.offenceBlock?.overSpeedCalculated ?? "",
+          actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
+          authSpeed: staticData.offenceBlock?.authSpeed ?? "",
+
+          // New fields
+          briefDescription: staticData.offenceBlock?.briefDescription || "",
+          offenceTypes: staticData.offenceBlock?.offenceTypes ?? [],
+          offenceTypeReference:
+            staticData.offenceBlock?.offenceTypeReference ?? [],
+        },
+
+        // ✅ ADDED REMARK
+        remark: staticData.remarks,
+        customFields: {
+          selectedWitness: staticData.selectedWitness,
+        },
+      };
+
+      console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
+
+      /* ================= CREATE STATIC RECORD ================= */
+      const staticRes = await createStaticRecord.mutateAsync(payload);
+      console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
+
+      toast.success("Static Record Created Successfully!");
+
+      if (!staticRes?._id) {
+        toast.error("Static Record ID Missing!");
+        return;
+      }
+
+      /* ================= CREATE OFFENDER ================= */
+      // Checking ID validity
+      const _idString = staticRes?._id ? String(staticRes._id) : "";
+      console.log("🆔 Static Res ID:", _idString);
+
+      if (!_idString) {
+        console.error("❌ CRTICAL: No Static Record ID returned");
+        toast.error("Error: Record ID missing. Offenders cannot be linked.");
+        return;
+      }
+      /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
+
+      /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
+
+      const people = staticData.offenderPeople || [];
+      console.log("👥 Offender People Array:", JSON.stringify(people, null, 2));
+
+      for (const person of people) {
+        const details = person.details || {};
+
+        // 🔥 skip only when absolutely empty
+        if (!Object.keys(details).length) {
+          console.warn("⚠️ Skipping empty offender:", person);
+          continue;
+        }
+
+        const offenderPayload: CreateOffenderData = {
+          offenceId: _idString,
+          offenderType: person.type as OffenderType,
+
+          offenderDetails: {
+            // 🔥🔥🔥 KEY FIX
+            ...details,
+
+            // role = Driver / Co-Driver / Offender
+            type: person.whoIsIt || "Offender",
+          },
+        };
 
         console.log(
-          "✅ WITNESS BACKEND RESPONSES ===>",
-          witnessResponses
+          "👮 Creating Offender Payload ===>",
+          JSON.stringify(offenderPayload, null, 2)
         );
 
-        toast.success("Witness Added Successfully!");
-      } catch (err: any) {
-        console.error(
-          "❌ WITNESS BACKEND ERROR ===>",
-          err?.response?.data || err
-        );
-        throw err;
+        try {
+          await createOffenderMutation.mutateAsync(offenderPayload);
+        } catch (err: any) {
+          console.error(
+            "❌ Offender Creation Failed ===>",
+            err?.response?.data || err
+          );
+          toast.error("One offender failed to save");
+        }
       }
+
+      toast.success("✅ All offenders created successfully");
+
+      // 2.2 Co-Driver
+      const coDriverType = state.formData.coDriverType;
+      const coDriverOrPillion = state.formData.coDriverOrPillion;
+      console.log("🏍️ Co-Driver Logic:", { coDriverOrPillion, coDriverType });
+
+      if (coDriverOrPillion && coDriverType && coDriverType !== "") {
+        // Find by ROLE "CoDriver"
+        const coDriverEntry = people.find((p: any) => p.role === "CoDriver");
+        console.log("👤 Co-Driver Entry Found:", coDriverEntry);
+
+        const coDriverDetails = {
+          ...(coDriverEntry?.details || {}),
+          type: "CoDriver",
+        };
+
+        const coDriverPayload: CreateOffenderData = {
+          offenceId: _idString,
+          offenderType: coDriverType as OffenderType,
+          offenderDetails: coDriverDetails,
+        };
+        console.log(
+          "👮 REQ CO-DRIVER PAYLOAD:",
+          JSON.stringify(coDriverPayload, null, 2)
+        );
+
+        try {
+          const res = await createOffenderMutation.mutateAsync(coDriverPayload);
+          console.log("✅ Co-Driver Created:", res);
+        } catch (e: any) {
+          console.error("❌ Co-Driver Creation Failed:", e);
+          toast.error(`Co-Driver Creation Failed: ${e?.message}`);
+        }
+      }
+
+      toast.success("Offenders Saved!");
+
+      /* ================= CREATE WITNESS ================= */
+      if (staticData.witnesses?.length > 0) {
+        const witnessPayload = staticData.witnesses.map((w: any) => ({
+          offenceId: staticRes._id,
+          rank: w.reportingBlock.rank,
+          unit: w.reportingBlock.unit,
+          ArmyNo: w.reportingBlock.armyNumber,
+          name: w.reportingBlock.nameReportingMP || "",
+          contactNumber: w.reportingBlock.contactNumber || "",
+        }));
+
+        console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
+
+        try {
+          const witnessResponses = await Promise.all(
+            witnessPayload.map((w: any) => createWitnessMutation.mutateAsync(w))
+          );
+
+          console.log("✅ WITNESS BACKEND RESPONSES ===>", witnessResponses);
+
+          toast.success("Witness Added Successfully!");
+        } catch (err: any) {
+          console.error(
+            "❌ WITNESS BACKEND ERROR ===>",
+            err?.response?.data || err
+          );
+          throw err;
+        }
+      }
+
+      toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
+
+      /* ================= RESET FORM ================= */
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.staticSpeed",
+        value: initialState.formData.staticSpeed,
+      });
+
+      dispatch({ type: "SET_STEP", payload: 1 });
+      dispatch({
+        type: "SET_PATH",
+        path: "completedSteps",
+        value: [],
+      });
+      dispatch({ type: "SET_PREVIEW", payload: false });
+    } catch (error: any) {
+      console.error(
+        "❌ FINAL STATIC SPEED ERROR ===>",
+        error?.response?.data || error
+      );
+
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to submit record";
+
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
-
-    /* ================= RESET FORM ================= */
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed",
-      value: initialState.formData.staticSpeed,
-    });
-
-    dispatch({ type: "SET_STEP", payload: 1 });
-    dispatch({
-      type: "SET_PATH",
-      path: "completedSteps",
-      value: [],
-    });
-  } catch (error: any) {
-    console.error(
-      "❌ FINAL STATIC SPEED ERROR ===>",
-      error?.response?.data || error
-    );
-
-    const msg =
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Failed to submit record";
-
-    toast.error(msg);
-  }
-};
-
-
-
-
+  };
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
@@ -313,36 +425,25 @@ const handleFinalSubmit = async () => {
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
             title="Create New Static Speed Check Record"
-            reportNo="PRO/21 CPU/00042/106/25"
+            reportNo={reportNo}
             onCreate={handleFinalSubmit}
             onCancel={() => {
               dispatch({ type: "SET_STEP", payload: 1 });
               onCancel();
             }}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
+            isSubmitting={isSubmitting} // Passed prop
+            onReportNoChange={handleReportNoChange}
           />
 
           <RightPanel
             step={state.currentStep}
             formData={state.formData}
-            setFormData={(data: StaticSpeedState) => {
-              Object.keys(data).forEach((key) => {
-                dispatch({
-                  type: "SET_PATH",
-                  path: `formData.${key}`,
-                  value: (data as any)[key],
-                });
-              });
-            }}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onPrev={() => dispatch({ type: "PREV_STEP" })}
             stepsConfig={stepsConfig}
             mode="static"
-            mapTrafficToReport={mapStaticToReport}
-            onCancel={() => {
-              dispatch({ type: "SET_STEP", payload: 1 });
-              onCancel();
-            }}
+            mapReport={mapStaticToReport}
           />
         </div>
       </div>

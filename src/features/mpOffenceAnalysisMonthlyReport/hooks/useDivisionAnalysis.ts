@@ -10,7 +10,7 @@ export const useGetDivisionAnalysis = (params: any) => {
     return useQuery({
         queryKey: ["division-analysis", params],
         queryFn: () => getDivisionAnalysis(params),
-        enabled: !!params.divisionName,
+        enabled: !!params.divisionName || !!params.groupBy,
     });
 };
 

@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { FormProvider } from "@/context/FormContext";
 import Wrapper from "@/common/hoc/Wrapper";
-import { ToastContainer } from "react-toastify";
+import ClientLayout from "@/components/layout/ClientLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,24 +12,17 @@ export const metadata: Metadata = {
   description: "Awesome app with breadcrumbs",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning className={inter.className}>
-
-        {/* Main Content */}
-        <Wrapper>
-          <FormProvider>
-            <main className="min-h-screen ">
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} h-full bg-[#f5f5f7] overflow-hidden`} suppressHydrationWarning>
+        <FormProvider>
+          <Wrapper>
+            <ClientLayout>
               {children}
-              <ToastContainer position="top-right" autoClose={3000} />
-            </main>
-          </FormProvider>
-        </Wrapper>
+            </ClientLayout>
+          </Wrapper>
+        </FormProvider>
       </body>
     </html>
   );

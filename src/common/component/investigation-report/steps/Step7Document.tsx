@@ -7,6 +7,7 @@ import { Upload, Download, FileIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { uploadFile } from "@/lib/uploadFile";
 
 export default function Step7Documents() {
   const { state, dispatch } = useForm();
@@ -16,16 +17,32 @@ export default function Step7Documents() {
   const [statement, setStatement] = useState("");
   const [url, setUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [fileUploading, setFileUploading] = useState(false);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   /* ========= SAVE ========= */
-  const saveDocument = () => {
+  const saveDocument = async () => {
     if (!statement.trim()) return alert("Statement required");
+
+    let finalUrl = url;
+    if (file) {
+      if (fileUploading) return;
+      setFileUploading(true);
+      try {
+        const res = await uploadFile(file);
+        finalUrl = res.url;
+      } catch (err: any) {
+        alert("File upload failed: " + err.message);
+        setFileUploading(false);
+        return;
+      }
+      setFileUploading(false);
+    }
 
     const newDoc = {
       statement,
-      url,
+      url: finalUrl,
       fileName: file?.name || "",
     };
 
@@ -88,9 +105,9 @@ export default function Step7Documents() {
           <Button
             className="bg-black text-white flex gap-2"
             onClick={() => fileRef.current?.click()}
+            disabled={fileUploading}
           >
-            <Upload size={16} />
-            Upload Document
+            {fileUploading ? "Uploading..." : <><Upload size={16} /> Upload Document</>}
           </Button>
 
           <Input
@@ -105,8 +122,8 @@ export default function Step7Documents() {
 
       {/* Save Button Right Aligned */}
       <div className="flex justify-end mt-6">
-        <Button className="bg-black text-white" onClick={saveDocument}>
-          Save Document
+        <Button className="bg-black text-white" onClick={saveDocument} disabled={fileUploading}>
+          {fileUploading ? "Uploading..." : "Save Document"}
         </Button>
       </div>
 

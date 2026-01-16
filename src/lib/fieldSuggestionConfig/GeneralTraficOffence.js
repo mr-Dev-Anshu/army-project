@@ -7,19 +7,31 @@ export const GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG = {
   ],
 
   nestedFields: {
-    'onDutyDetails.dutyLocation': 'dutyLocation',
+    'onDutyDetails.dutyLocation': 'placeOfOffence',
     'onDutyDetails.dutyType': 'dutyType',
     'onDutyDetailsMPReporting.nameReportingMP': 'reportingMPName',
     'onDutyDetailsMPReporting.rank': 'rank',
     'onDutyDetailsMPReporting.unit': 'unit',
     'onDutyDetailsMPReporting.armyNumber': 'reportingMPArmyNo',
-    'offenceOccurenceDetails.incidentLocation': 'incidentLocation',
+    'offenceOccurenceDetails.incidentLocation': 'placeOfOffence',
     'offenceOccurenceDetails.description': 'description',
   },
 
   arrayFields: {
     'offenceTypes': 'offenceType',
     'offenceTypeReference': 'offenceTypeReference',
+  },
+
+  arrayObjectFields: {
+    'offenderPeople': {
+      'details.rank': 'select rank',
+      'details.unit': 'unit',
+      'details.fmn': 'fmn',
+      'details.command': 'command',
+      'details.address': 'address',
+      'details.iCardNumber': 'id card number',
+      'details.armyNumber': 'army rider / driver number',
+    }
   },
 
   // YEH LINE CHANGE KAR LENA APNE HISAAB SE

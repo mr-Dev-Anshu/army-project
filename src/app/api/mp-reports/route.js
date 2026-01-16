@@ -1,14 +1,44 @@
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db/mongodb";
 import { MPReportService } from "@/services/investigationReport.repo";
 import { createMPReportSchema } from "@/validators/investigationReport";
-import { NextResponse } from "next/server";
 
 const service = new MPReportService();
 
-export async function GET() {
+/* ============================================================
+   GET MP REPORTS WITH FILTERS
+   /api/mp-reports?unit=&fmn=&fromDate=&toDate=
+============================================================ */
+
+export async function GET(request) {
   try {
-    const reports = await service.getAllReports();
-    return NextResponse.json({ success: true, data: reports });
+    // 🔥 ALWAYS CONNECT DB IN APP ROUTES
+    await connectDB();
+
+    const { searchParams } = new URL(request.url);
+
+    const filters = {};
+
+    const unit = searchParams.get("unit");
+    const fmn = searchParams.get("fmn");
+    const fromDate = searchParams.get("fromDate");
+    const toDate = searchParams.get("toDate");
+    const placeOfOffence = searchParams.get("placeOfOffence");
+
+    if (unit) filters.unit = unit;
+    if (fmn) filters.fmn = fmn;
+    if (fromDate) filters.fromDate = fromDate;
+    if (toDate) filters.toDate = toDate;
+    if (placeOfOffence) filters.placeOfOffence = placeOfOffence;
+
+    const reports = await service.getAllReports(filters);
+
+    return NextResponse.json({
+      success: true,
+      data: reports,
+    });
   } catch (error) {
+    console.error("MP Reports GET Error:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -16,21 +46,27 @@ export async function GET() {
   }
 }
 
+/* ============================================================
+   CREATE MP REPORT
+============================================================ */
+
 export async function POST(request) {
   try {
+    await connectDB();
+
     const body = await request.json();
 
-    // Joi Validation
     const { error, value } = createMPReportSchema.validate(body, {
-      abortEarly: false,     // all errors collect kar
-      stripUnknown: false,  // extra fields allow (customFields ke liye)
+      abortEarly: false,
+      stripUnknown: false,
     });
 
     if (error) {
-      const errors = error.details.map((detail) => ({
-        field: detail.path.join("."),
-        message: detail.message,
+      const errors = error.details.map((d) => ({
+        field: d.path.join("."),
+        message: d.message,
       }));
+
       return NextResponse.json(
         { success: false, message: "Validation failed", errors },
         { status: 400 }
@@ -38,10 +74,17 @@ export async function POST(request) {
     }
 
     const report = await service.createReport(value);
-    return NextResponse.json({ success: true, data: report }, { status: 201 });
+
+    return NextResponse.json(
+      { success: true, data: report },
+      { status: 201 }
+    );
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: error.message || "Failed to create report" },
+      {
+        success: false,
+        message: error.message || "Failed to create report",
+      },
       { status: 400 }
     );
   }
