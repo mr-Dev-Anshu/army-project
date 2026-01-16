@@ -1,5 +1,5 @@
-import RecceInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/recceInOut/components/form";
-import React from "react";
+import RecceInOutForm from "@/features/RegisterBooks/dailyOperationsRegisters/recceInOut/components/form";
+
 
 const Page = () => {
     return (

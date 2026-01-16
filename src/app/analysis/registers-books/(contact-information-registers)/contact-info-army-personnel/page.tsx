@@ -1,5 +1,4 @@
 import ContactInfoArmyPersonnelForm from "@/features/RegisterBooks/contactInformationRegisters/contactInfoArmyPersonnel/components/form";
-import React from "react";
 
 const Page = () => {
     return (

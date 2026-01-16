@@ -1,5 +1,4 @@
-import ConvoyInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/convoyInOut/components/form";
-import React from "react";
+import ConvoyInOutForm from "@/features/RegisterBooks/dailyOperationsRegisters/convoyInOut/components/form";
 
 const Page = () => {
     return (

@@ -1,5 +1,4 @@
 import MilitaryPoliceControlRoomContactForm from "@/features/RegisterBooks/contactInformationRegisters/militaryPoliceControlRoomContactDirectory/components/form";
-import React from "react";
 
 const Page = () => {
     return (
