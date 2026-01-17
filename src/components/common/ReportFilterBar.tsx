@@ -35,6 +35,8 @@ export interface FilterState {
   unit?: string;
   fmn?: string;
   placeOfOffence?: string;
+  unitLocation?: string;
+  individualWorkingStatus?: string;
   priceListStatus?: string;
   agreementStatus?: string;
   sortOrder?: "asc" | "desc";
@@ -48,11 +50,14 @@ interface ReportFilterBarProps {
   unitOptions?: string[];
   fmnOptions?: string[];
   placeOptions?: string[];
+  unitLocationOptions?: string[];
   placeholder?: string;
   showDate?: boolean;
   showDateRange?: boolean;
   showActionStatus?: boolean;
   statusLabel?: string;
+  placeLabel?: string;
+  dateRangeLabel?: string;
   actionStatusOptions?: string[];
   showOffenceType?: boolean;
   showPriceListFilter?: boolean;
@@ -64,6 +69,8 @@ interface ReportFilterBarProps {
   showPlaceOfOffence?: boolean;
   showUnit?: boolean;
   showAgreementStatus?: boolean;
+  showIndividualWorkingStatus?: boolean;
+  showUnitLocation?: boolean;
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -74,11 +81,14 @@ export default function ReportFilterBar({
   unitOptions,
   fmnOptions,
   placeOptions,
+  unitLocationOptions,
   placeholder = "Search by report number or offence...",
   showDate = true,
   showDateRange = true,
   showActionStatus = true,
   statusLabel = "Action Status",
+  placeLabel = "Place of Offence",
+  dateRangeLabel = "Offence Date",
   actionStatusOptions = ["Pending", "Taken"], // "All" is handled by placeholder
   showOffenceType = true,
   showPriceListFilter = false,
@@ -90,16 +100,20 @@ export default function ReportFilterBar({
   showPlaceOfOffence = true,
   showUnit = true,
   showAgreementStatus = false,
+  showIndividualWorkingStatus = false,
+  showUnitLocation = false,
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
     (showAgreementStatus && filters.agreementStatus && filters.agreementStatus !== "All") ||
     (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
+    (showIndividualWorkingStatus && filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") ||
     !!filters.fromDate ||
     !!filters.toDate ||
     !!filters.unit ||
     !!filters.fmn ||
-    !!filters.placeOfOffence;
+    !!filters.placeOfOffence ||
+    !!filters.unitLocation;
   return (
 
 
@@ -204,7 +218,7 @@ export default function ReportFilterBar({
                   {/* Date Range */}
                   {showDateRange && (
                     <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium text-gray-700">Offence Date</label>
+                      <label className="text-sm font-medium text-gray-700">{dateRangeLabel}</label>
                       <div className="flex gap-4">
                         <div className="flex flex-col flex-1">
                           <label className="text-xs text-gray-500 mb-1">Start Date</label>
@@ -265,7 +279,7 @@ export default function ReportFilterBar({
                   {/* Place of Offence */}
                   {showPlaceOfOffence && (
                     <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium text-gray-700">Place of Offence</label>
+                      <label className="text-sm font-medium text-gray-700">{placeLabel}</label>
                       <label className="text-xs text-gray-500">Select Location</label>
                       <AsyncSearchableSelect
                         fieldType="placeOfOffence"
@@ -276,6 +290,43 @@ export default function ReportFilterBar({
                         defaultOptions={placeOptions}
                         mode="list-checkbox"
                       />
+                    </div>
+                  )}
+
+                  {/* Unit Location */}
+                  {showUnitLocation && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Unit Location</label>
+                      <label className="text-xs text-gray-500">Select Unit Location</label>
+                      <AsyncSearchableSelect
+                        fieldType="unitLocation"
+                        value={filters.unitLocation || ""}
+                        onValueChange={(v) => onFilterChange("unitLocation", v)}
+                        placeholder="Search Unit Location..."
+                        className="w-full"
+                        defaultOptions={unitLocationOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Individual Working Status */}
+                  {showIndividualWorkingStatus && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Individual Working Status</label>
+                      <Select
+                        value={filters.individualWorkingStatus || "All"}
+                        onValueChange={(value) => onFilterChange("individualWorkingStatus", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          <SelectItem value="Leave">Leave</SelectItem>
+                          <SelectItem value="Duty">Duty</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
 
