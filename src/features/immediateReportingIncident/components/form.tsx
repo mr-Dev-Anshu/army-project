@@ -13,7 +13,7 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { SuggestionTextarea } from "@/common/component/SuggestionTextarea";
 import { useCreateImmediateReportingIncident, useUpdateImmediateReportingIncident } from "../hooks";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types"; // Ensure this type is exported
-import { Loader2, Upload, X, Plus, Trash2 } from "lucide-react";
+import { Loader2, Upload, X, Plus, Trash2, CheckCheck } from "lucide-react";
 import { uploadFile, uploadMultipleFiles } from "@/lib/uploadFile";
 
 const INITIAL_STATE = {
@@ -505,11 +505,11 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
             </div>
 
-            <div className="flex justify-start gap-4 pt-6 border-t mt-4">
+            <div className="flex justify-between gap-4 pt-6 border-t mt-4">
                 <Button variant="outline" onClick={onCancel}>Cancel</Button>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSave} disabled={isPending}>
+                <Button className="bg-[#0088FF] hover:bg-blue-700 text-white" onClick={handleSave} disabled={isPending}>
                     {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Save Report
+                    <CheckCheck />Save Report
                 </Button>
             </div>
         </div>

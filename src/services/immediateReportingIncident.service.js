@@ -5,8 +5,13 @@ import {
     updateImmediateReportingIncidentByIdRepo,
     deleteImmediateReportingIncidentByIdRepo,
 } from "@/reposetories/immediateReportingIncident.repo";
+import { saveOrUpdateArmyPersonnel } from "@/services/individual.service";
 
 export async function createImmediateReportingIncident(data) {
+    // Automatically capture/update personnel details
+    if (data.individuals && Array.isArray(data.individuals)) {
+        await saveOrUpdateArmyPersonnel(data.individuals);
+    }
     return await createImmediateReportingIncidentRepo(data);
 }
 
@@ -19,6 +24,10 @@ export async function getImmediateReportingIncidentById(id) {
 }
 
 export async function updateImmediateReportingIncident(id, data) {
+    // Automatically capture/update personnel details
+    if (data.individuals && Array.isArray(data.individuals)) {
+        await saveOrUpdateArmyPersonnel(data.individuals);
+    }
     return await updateImmediateReportingIncidentByIdRepo(id, data);
 }
 
