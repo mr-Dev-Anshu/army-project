@@ -61,6 +61,27 @@ export default function AllRegisteredReports() {
 
   const reportCards = [
     {
+      title: "(Initial Report) Immediate Reporting of Incident",
+      count: 0,
+      icon: (
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="24" fill="#FF9933" />
+          <path d="M19 24C19 22.6739 19.5268 21.4021 20.4645 20.4645C21.4021 19.5268 22.6739 19 24 19C25.3261 19 26.5979 19.5268 27.5355 20.4645C28.4732 21.4021 29 22.6739 29 24V30H19V24Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M17 32C17 31.4696 17.2107 30.9609 17.5858 30.5858C17.9609 30.2107 18.4696 30 19 30H29C29.5304 30 30.0391 30.2107 30.4142 30.5858C30.7893 30.9609 31 31.4696 31 32V34H17V32Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M33 24H34" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M30.5 16.5L30 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M14 24H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M24 14V15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M16.9297 16.9297L17.6367 17.6367" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M24 24V30" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+
+      ),
+      iconBgColor: "bg-[#FF9933]",
+      onClick: () =>
+        router.push("/reports/immediate-reporting-incident"),
+    },
+    {
       title: "General & Traffic Offence Reports - No Vehicle Involved",
       count: counts.trafficNoVehicle,
       icon: (
@@ -277,7 +298,7 @@ export default function AllRegisteredReports() {
 
   return (
     <div className="space-y-6">
-    
+
       <ReportPageHeader
         title="All Registered Reports"
         breadcrumbItems={[{ label: "Reports & Analysis", href: "/" }]}
