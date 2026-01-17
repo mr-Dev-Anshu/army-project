@@ -1,14 +1,17 @@
+export interface AffectedIndividual {
+    armyNo: string;
+    rank: string;
+    name: string;
+    age: string;
+    totalServiceDuration: string;
+    unit: string;
+    unitLocation: string;
+    fmn: string;
+    individualWorkingStatus: "Leave" | "Duty" | "";
+}
 export interface ImmediateReportingIncident {
     _id: string;
-    armyNo?: string;
-    name?: string;
-    rank?: string;
-    age?: string;
-    totalServiceDuration?: string;
-    unit?: string;
-    unitLocation?: string;
-    fmn?: string;
-    individualWorkingStatus?: "Leave" | "Duty" | "";
+    individuals: AffectedIndividual[];
     incidentPlace?: string;
     incidentDate?: string;
     incidentTime?: string;

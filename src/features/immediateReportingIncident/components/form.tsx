@@ -13,19 +13,21 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { SuggestionTextarea } from "@/common/component/SuggestionTextarea";
 import { useCreateImmediateReportingIncident, useUpdateImmediateReportingIncident } from "../hooks";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types"; // Ensure this type is exported
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, Plus, Trash2 } from "lucide-react";
 import { uploadFile, uploadMultipleFiles } from "@/lib/uploadFile";
 
 const INITIAL_STATE = {
-    armyNo: "",
-    name: "",
-    rank: "",
-    age: "",
-    totalServiceDuration: "",
-    unit: "",
-    unitLocation: "",
-    fmn: "",
-    individualWorkingStatus: "", // "Leave" | "Duty"
+    individuals: [{
+        armyNo: "",
+        rank: "",
+        name: "",
+        age: "",
+        totalServiceDuration: "",
+        unit: "",
+        unitLocation: "",
+        fmn: "",
+        individualWorkingStatus: "", // "Leave" | "Duty"
+    }],
     incidentPlace: "",
     incidentDate: "",
     incidentTime: "",
@@ -57,6 +59,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
     const isPending = isCreating || isUpdating;
 
     useEffect(() => {
+
         if (initialData) {
             dispatch({
                 type: "SET_PATH",
@@ -82,8 +85,13 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
     const handleSave = async () => {
         try {
-            if (!reportData.armyNo) {
-                toast.error("Army Number is required");
+            if (!reportData.individuals || reportData.individuals.length === 0) {
+                toast.error("At least one individual is required");
+                return;
+            }
+            // Optional: Check if all have armyNo or just the first one
+            if (reportData.individuals.some((ind: any) => !ind.armyNo)) {
+                toast.error("Army Number is required for all individuals");
                 return;
             }
 
@@ -156,6 +164,37 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
         setField("relevantPhotos", newPhotos);
     };
 
+    const addIndividual = () => {
+        setField("individuals", [
+            ...(reportData.individuals || []),
+            {
+                armyNo: "",
+                rank: "",
+                name: "",
+                age: "",
+                totalServiceDuration: "",
+                unit: "",
+                unitLocation: "",
+                fmn: "",
+                individualWorkingStatus: "",
+            }
+        ]);
+    };
+
+    const removeIndividual = (index: number) => {
+        const newIndividuals = [...(reportData.individuals || [])];
+        if (newIndividuals.length > 1) {
+            newIndividuals.splice(index, 1);
+            setField("individuals", newIndividuals);
+        }
+    };
+
+    const updateIndividual = (index: number, field: string, value: any) => {
+        const newIndividuals = [...(reportData.individuals || [])];
+        newIndividuals[index] = { ...newIndividuals[index], [field]: value };
+        setField("individuals", newIndividuals);
+    };
+
     return (
         <div className="flex flex-col h-full bg-white font-[Inter] p-6 max-w-5xl mx-auto">
             <div className="space-y-1 mb-8">
@@ -166,126 +205,154 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
             <div className="space-y-8 flex-1 overflow-y-auto pb-6">
                 <div className="text-sm font-medium text-gray-700">Fill Details Carefully:</div>
 
-                {/* ROW 1 */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pl-6">
-                    <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">1.</span>
-                        <Label>Army Number</Label>
-                        <SuggestionInput
-                            fieldType="armyNo"
-                            placeholder="e.g. 12345678A"
-                            value={reportData.armyNo}
-                            onChange={(v) => setField("armyNo", v)}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Rank</Label>
-                        <SuggestionInput
-                            fieldType="rank"
-                            placeholder="Enter rank"
-                            value={reportData.rank}
-                            onChange={(v) => setField("rank", v)}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Name</Label>
-                        <SuggestionInput
-                            fieldType="name" // or ownerName if consistent
-                            placeholder="e.g. John Apradhi"
-                            value={reportData.name}
-                            onChange={(v) => setField("name", v)}
-                        />
-                    </div>
-                </div>
+                <div className="space-y-6">
+                    {reportData.individuals?.map((individual: any, index: number) => (
+                        <div key={index} className="relative border rounded-lg p-6 bg-gray-50/50">
+                            {reportData.individuals.length > 1 && (
+                                <button
+                                    onClick={() => removeIndividual(index)}
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                                    title="Remove Individual"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            )}
 
-                {/* ROW 2 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-6">
-                    <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">2.</span>
-                        <Label>Age</Label>
-                        <SuggestionInput
-                            fieldType="age"
-                            placeholder="00"
-                            value={reportData.age}
-                            onChange={(v) => setField("age", v)}
-                            icon={<span className="text-gray-400 text-sm">Years old</span>}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Total Service Duration</Label>
-                        <SuggestionInput
-                            fieldType="totalServiceDuration"
-                            placeholder="00"
-                            value={reportData.totalServiceDuration}
-                            onChange={(v) => setField("totalServiceDuration", v)}
-                            icon={<span className="text-gray-400 text-sm">Years</span>}
-                        />
-                    </div>
-                </div>
+                            <div className="text-sm font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                                <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
+                                    {index + 1}
+                                </span>
+                                Individual Details
+                            </div>
 
-                {/* ROW 3 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-6">
-                    <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">3.</span>
-                        <Label>Unit</Label>
-                        <SuggestionInput
-                            fieldType="unit"
-                            placeholder="Enter unit"
-                            value={reportData.unit}
-                            onChange={(v) => setField("unit", v)}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Location of UNIT</Label>
-                        <SuggestionInput
-                            fieldType="unitLocation" // New suggestion tracking if desired
-                            placeholder="e.g. Pune"
-                            value={reportData.unitLocation}
-                            onChange={(v) => setField("unitLocation", v)}
-                        />
-                    </div>
-                </div>
+                            {/* ROW 1 */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <Label>Army Number</Label>
+                                    <SuggestionInput
+                                        fieldType="armyNo"
+                                        placeholder="e.g. 12345678A"
+                                        value={individual.armyNo}
+                                        onChange={(v) => updateIndividual(index, "armyNo", v)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Rank</Label>
+                                    <SuggestionInput
+                                        fieldType="rank"
+                                        placeholder="Enter rank"
+                                        value={individual.rank}
+                                        onChange={(v) => updateIndividual(index, "rank", v)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Name</Label>
+                                    <SuggestionInput
+                                        fieldType="name"
+                                        placeholder="e.g. John Apradhi"
+                                        value={individual.name}
+                                        onChange={(v) => updateIndividual(index, "name", v)}
+                                    />
+                                </div>
+                            </div>
 
-                {/* ROW 4 */}
-                <div className="grid grid-cols-1 gap-6 pl-6">
-                    <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">4.</span>
-                        <Label>FMN</Label>
-                        <SuggestionInput
-                            fieldType="fmn"
-                            placeholder="Enter FMN"
-                            value={reportData.fmn}
-                            onChange={(v) => setField("fmn", v)}
-                        />
-                    </div>
-                </div>
+                            {/* ROW 2 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <div className="space-y-2">
+                                    <Label>Age</Label>
+                                    <SuggestionInput
+                                        fieldType="age"
+                                        placeholder="00"
+                                        value={individual.age}
+                                        onChange={(v) => updateIndividual(index, "age", v)}
+                                        icon={<span className="text-gray-400 text-sm">Years old</span>}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Total Service Duration</Label>
+                                    <SuggestionInput
+                                        fieldType="totalServiceDuration"
+                                        placeholder="00"
+                                        value={individual.totalServiceDuration}
+                                        onChange={(v) => updateIndividual(index, "totalServiceDuration", v)}
+                                        icon={<span className="text-gray-400 text-sm">Years</span>}
+                                    />
+                                </div>
+                            </div>
 
-                {/* ROW 5: Leave/Duty */}
-                <div className="grid grid-cols-1 gap-6 pl-6">
-                    <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">5.</span>
-                        <Label>Whether Individual on Leave or Duty</Label>
-                        <RadioGroup
-                            value={reportData.individualWorkingStatus}
-                            onValueChange={(v) => setField("individualWorkingStatus", v)}
-                            className="flex gap-4"
-                        >
-                            <label className={cn(
-                                "flex items-center space-x-2 border rounded-md px-4 py-2 w-48 cursor-pointer hover:bg-gray-50",
-                                reportData.individualWorkingStatus === "Leave" ? "border-black ring-1 ring-black" : "border-gray-200"
-                            )}>
-                                <RadioGroupItem value="Leave" id="leave" />
-                                <span className="text-sm">Leave</span>
-                            </label>
-                            <label className={cn(
-                                "flex items-center space-x-2 border rounded-md px-4 py-2 w-48 cursor-pointer hover:bg-gray-50",
-                                reportData.individualWorkingStatus === "Duty" ? "border-black ring-1 ring-black" : "border-gray-200"
-                            )}>
-                                <RadioGroupItem value="Duty" id="duty" />
-                                <span className="text-sm">Duty</span>
-                            </label>
-                        </RadioGroup>
-                    </div>
+                            {/* ROW 3 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <div className="space-y-2">
+                                    <Label>Unit</Label>
+                                    <SuggestionInput
+                                        fieldType="unit"
+                                        placeholder="Enter unit"
+                                        value={individual.unit}
+                                        onChange={(v) => updateIndividual(index, "unit", v)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Location of UNIT</Label>
+                                    <SuggestionInput
+                                        fieldType="unitLocation"
+                                        placeholder="e.g. Pune"
+                                        value={individual.unitLocation}
+                                        onChange={(v) => updateIndividual(index, "unitLocation", v)}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* ROW 4 */}
+                            <div className="grid grid-cols-1 gap-6 mt-6">
+                                <div className="space-y-2">
+                                    <Label>FMN</Label>
+                                    <SuggestionInput
+                                        fieldType="fmn"
+                                        placeholder="Enter FMN"
+                                        value={individual.fmn}
+                                        onChange={(v) => updateIndividual(index, "fmn", v)}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* ROW 5: Leave/Duty */}
+                            <div className="grid grid-cols-1 gap-6 mt-6">
+                                <div className="space-y-2">
+                                    <Label>Whether Individual on Leave or Duty</Label>
+                                    <RadioGroup
+                                        value={individual.individualWorkingStatus}
+                                        onValueChange={(v) => updateIndividual(index, "individualWorkingStatus", v)}
+                                        className="flex gap-4"
+                                    >
+                                        <label className={cn(
+                                            "flex items-center space-x-2 border rounded-md px-4 py-2 w-48 cursor-pointer hover:bg-gray-50",
+                                            individual.individualWorkingStatus === "Leave" ? "border-black ring-1 ring-black" : "border-gray-200"
+                                        )}>
+                                            <RadioGroupItem value="Leave" id={`leave-${index}`} />
+                                            <span className="text-sm">Leave</span>
+                                        </label>
+                                        <label className={cn(
+                                            "flex items-center space-x-2 border rounded-md px-4 py-2 w-48 cursor-pointer hover:bg-gray-50",
+                                            individual.individualWorkingStatus === "Duty" ? "border-black ring-1 ring-black" : "border-gray-200"
+                                        )}>
+                                            <RadioGroupItem value="Duty" id={`duty-${index}`} />
+                                            <span className="text-sm">Duty</span>
+                                        </label>
+                                    </RadioGroup>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={addIndividual}
+                        className="w-full border-dashed py-6 text-gray-500 hover:text-gray-900 hover:bg-gray-50 mb-6"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Another Individual
+                    </Button>
                 </div>
 
                 {/* ROW 6: Incident Place/Date/Time */}

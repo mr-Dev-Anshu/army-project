@@ -81,9 +81,14 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
 
         incidents.forEach(item => {
             if (item.incidentPlace) places.add(item.incidentPlace);
-            if (item.unit) units.add(item.unit);
-            if (item.fmn) fmns.add(item.fmn);
-            if (item.unitLocation) unitLocations.add(item.unitLocation);
+
+            if (item.individuals && Array.isArray(item.individuals)) {
+                item.individuals.forEach((ind: any) => {
+                    if (ind.unit) units.add(ind.unit);
+                    if (ind.fmn) fmns.add(ind.fmn);
+                    if (ind.unitLocation) unitLocations.add(ind.unitLocation);
+                });
+            }
         });
 
         return {
@@ -98,12 +103,17 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
     const filteredData = useMemo(() => {
         return incidents.filter((item: ImmediateReportingIncident) => {
             const searchTerm = filters.search.toLowerCase();
+
+            const individuals = item.individuals || [];
+
             // Basic search across multiple fields
             const matchesSearch =
-                (item.armyNo || "").toLowerCase().includes(searchTerm) ||
-                (item.name || "").toLowerCase().includes(searchTerm) ||
-                (item.unit || "").toLowerCase().includes(searchTerm) ||
-                (item.incidentBrief || "").toLowerCase().includes(searchTerm);
+                (item.incidentBrief || "").toLowerCase().includes(searchTerm) ||
+                individuals.some((ind: any) =>
+                    (ind.armyNo || "").toLowerCase().includes(searchTerm) ||
+                    (ind.name || "").toLowerCase().includes(searchTerm) ||
+                    (ind.unit || "").toLowerCase().includes(searchTerm)
+                );
 
             let matchesDate = true;
             // Specific Date Check
@@ -128,12 +138,12 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
 
             let matchesUnit = true;
             if (filters.unit && filters.unit !== "All") {
-                matchesUnit = (item.unit || "").toLowerCase() === filters.unit.toLowerCase();
+                matchesUnit = individuals.some((ind: any) => (ind.unit || "").toLowerCase() === filters.unit.toLowerCase());
             }
 
             let matchesFmn = true;
             if (filters.fmn && filters.fmn !== "All") {
-                matchesFmn = (item.fmn || "").toLowerCase() === filters.fmn.toLowerCase();
+                matchesFmn = individuals.some((ind: any) => (ind.fmn || "").toLowerCase() === filters.fmn.toLowerCase());
             }
 
             let matchesPlace = true;
@@ -143,12 +153,12 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
 
             let matchesUnitLocation = true;
             if (filters.unitLocation && filters.unitLocation !== "All") {
-                matchesUnitLocation = (item.unitLocation || "").toLowerCase().includes(filters.unitLocation.toLowerCase());
+                matchesUnitLocation = individuals.some((ind: any) => (ind.unitLocation || "").toLowerCase().includes(filters.unitLocation.toLowerCase()));
             }
 
             let matchesWorkingStatus = true;
             if (filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") {
-                matchesWorkingStatus = item.individualWorkingStatus === filters.individualWorkingStatus;
+                matchesWorkingStatus = individuals.some((ind: any) => ind.individualWorkingStatus === filters.individualWorkingStatus);
             }
 
             return matchesSearch && matchesDate && matchesUnit && matchesFmn && matchesPlace && matchesUnitLocation && matchesWorkingStatus;
@@ -169,48 +179,119 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
         },
         {
             header: "Particulars of Individual/Victim",
-            cell: (item) => (
-                <div className="flex flex-col font-[Arial] text-xs space-y-1">
-                    <div><span className="font-semibold text-gray-500">Army no.:</span> <span className="text-[#0A0A0A]">{item.armyNo}</span></div>
-                    <div><span className="font-semibold text-gray-500">Rank:</span> <span className="text-[#0A0A0A]">{item.rank}</span></div>
-                    <div><span className="font-semibold text-gray-500">Name:</span> <span className="text-[#0A0A0A]">{item.name}</span></div>
-                </div>
-            ),
+            cell: (item) => {
+                const inds = item.individuals && item.individuals.length > 0
+                    ? item.individuals
+                    : [];
+
+                return (
+                    <div className="flex flex-col space-y-3">
+                        {inds.map((ind: any, idx: number) => (
+                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                                <div><span className="font-semibold text-gray-500">Army no.:</span> <span className="text-[#0A0A0A]">{ind.armyNo}</span></div>
+                                <div><span className="font-semibold text-gray-500">Rank:</span> <span className="text-[#0A0A0A]">{ind.rank}</span></div>
+                                <div><span className="font-semibold text-gray-500">Name:</span> <span className="text-[#0A0A0A]">{ind.name}</span></div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
             className: "border-r border-gray-300 min-w-[200px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[200px]",
         },
         {
             header: "Age & Service Yrs",
-            cell: (item) => (
-                <div className="flex flex-col font-[Arial] text-xs space-y-1">
-                    <div>{item.age} Years old</div>
-                    <div>{item.totalServiceDuration} Years</div>
-                </div>
-            ),
+            cell: (item) => {
+                const inds = item.individuals && item.individuals.length > 0
+                    ? item.individuals
+                    : [];
+                return (
+                    <div className="flex flex-col space-y-3">
+                        {inds.map((ind: any, idx: number) => (
+                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                                <div>{ind.age} Years old</div>
+                                <div>{ind.totalServiceDuration} Years</div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
             className: "border-r border-gray-300 min-w-[120px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },
         {
             header: "Unit",
-            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.unit || "-"}</span>,
+            cell: (item) => {
+                const inds = item.individuals && item.individuals.length > 0
+                    ? item.individuals
+                    : [];
+                return (
+                    <div className="flex flex-col space-y-3">
+                        {inds.map((ind: any, idx: number) => (
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                                {ind.unit || "-"}
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
             className: "border-r border-gray-300 min-w-[100px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[100px]",
         },
         {
             header: "Unit Location",
-            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.unitLocation || "-"}</span>,
+            cell: (item) => {
+                const inds = item.individuals && item.individuals.length > 0
+                    ? item.individuals
+                    : [];
+                return (
+                    <div className="flex flex-col space-y-3">
+                        {inds.map((ind: any, idx: number) => (
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                                {ind.unitLocation || "-"}
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
             className: "border-r border-gray-300 min-w-[120px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },
         {
             header: "FMN",
-            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.fmn || "-"}</span>,
+            cell: (item) => {
+                const inds = item.individuals && item.individuals.length > 0
+                    ? item.individuals
+                    : [];
+                return (
+                    <div className="flex flex-col space-y-3">
+                        {inds.map((ind: any, idx: number) => (
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                                {ind.fmn || "-"}
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
             className: "border-r border-gray-300 min-w-[120px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },
         {
             header: "Whether Indl on Lve or Duty",
-            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.individualWorkingStatus || "-"}</span>,
+            cell: (item) => {
+                const inds = item.individuals && item.individuals.length > 0
+                    ? item.individuals
+                    : [];
+                return (
+                    <div className="flex flex-col space-y-3">
+                        {inds.map((ind: any, idx: number) => (
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                                {ind.individualWorkingStatus || "-"}
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
             className: "border-r border-gray-300 min-w-[120px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },

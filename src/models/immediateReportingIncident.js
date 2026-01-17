@@ -1,35 +1,24 @@
 import mongoose from "mongoose";
 
-const immediateReportingIncidentSchema = new mongoose.Schema({
-    armyNo: {
-        type: String,
-
-    },
-    name: {
-        type: String,
-
-    },
-    rank: {
-        type: String,
-    },
-    age: {
-        type: String,
-    },
-    totalServiceDuration: {
-        type: String,
-    },
-    unit: {
-        type: String,
-    },
-    unitLocation: {
-        type: String,
-    },
-    fmn: {
-        type: String,
-    },
+const individualSchema = new mongoose.Schema({
+    armyNo: { type: String },
+    name: { type: String },
+    rank: { type: String },
+    age: { type: String },
+    totalServiceDuration: { type: String },
+    unit: { type: String },
+    unitLocation: { type: String },
+    fmn: { type: String },
     individualWorkingStatus: {
         type: String,
-        enum: ["Leave", "Duty"]
+        enum: ["Leave", "Duty", ""]
+    }
+});
+
+const immediateReportingIncidentSchema = new mongoose.Schema({
+    individuals: {
+        type: [individualSchema],
+        default: []
     },
     incidentPlace: {
         type: String,
@@ -54,9 +43,11 @@ const immediateReportingIncidentSchema = new mongoose.Schema({
         default: []
     },
 
+}, { timestamps: true });
 
+// Force model recompilation if it exists to pick up schema changes
+if (mongoose.models.ImmediateReportingIncident) {
+    delete mongoose.models.ImmediateReportingIncident;
+}
 
-
-})
-export default mongoose.models.ImmediateReportingIncident ||
-    mongoose.model('ImmediateReportingIncident', immediateReportingIncidentSchema);
+export default mongoose.model('ImmediateReportingIncident', immediateReportingIncidentSchema);
