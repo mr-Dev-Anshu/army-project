@@ -187,10 +187,10 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-100 last:border-0 pb-2 last:pb-0">
-                                <div><span className="font-semibold text-gray-500">Army no.:</span> <span className="text-[#0A0A0A]">{ind.armyNo}</span></div>
-                                <div><span className="font-semibold text-gray-500">Rank:</span> <span className="text-[#0A0A0A]">{ind.rank}</span></div>
-                                <div><span className="font-semibold text-gray-500">Name:</span> <span className="text-[#0A0A0A]">{ind.name}</span></div>
+                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-300 last:border-0 pb-2 last:pb-0">
+                                <div><span className="font-bold text-[#0A0A0A]">Army no.:</span> <span className="text-[#0A0A0A]">{ind.armyNo}</span></div>
+                                <div><span className="font-bold text-[#0A0A0A]">Rank:</span> <span className="text-[#0A0A0A]">{ind.rank}</span></div>
+                                <div><span className="font-bold text-[#0A0A0A]">Name:</span> <span className="text-[#0A0A0A]">{ind.name}</span></div>
                             </div>
                         ))}
                     </div>
@@ -208,7 +208,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-300 last:border-0 pb-2 last:pb-0">
                                 <div>{ind.age} Years old</div>
                                 <div>{ind.totalServiceDuration} Years</div>
                             </div>
@@ -228,7 +228,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
                                 {ind.unit || "-"}
                             </div>
                         ))}
@@ -247,7 +247,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
                                 {ind.unitLocation || "-"}
                             </div>
                         ))}
@@ -266,7 +266,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
                                 {ind.fmn || "-"}
                             </div>
                         ))}
@@ -285,7 +285,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
                                 {ind.individualWorkingStatus || "-"}
                             </div>
                         ))}
