@@ -260,38 +260,15 @@ export default function AllRegisteredReports() {
       title: "MT Accident Register: 21 Corps Pro",
       count: counts.mtAccident,
       icon: (
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 48 48"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect width="48" height="48" rx="24" fill="#FF9933" />
-          <path
-            d="M35.3518 31L26.0185 14.6666C25.815 14.3075 25.5199 14.0089 25.1632 13.8011C24.8066 13.5933 24.4012 13.4838 23.9885 13.4838C23.5757 13.4838 23.1704 13.5933 22.8138 13.8011C22.4571 14.0089 22.162 14.3075 21.9585 14.6666L12.6252 31C12.4195 31.3562 12.3116 31.7605 12.3125 32.1719C12.3134 32.5833 12.4231 32.9871 12.6303 33.3424C12.8376 33.6978 13.1352 33.992 13.4928 34.1953C13.8504 34.3986 14.2555 34.5037 14.6668 34.5H33.3335C33.7429 34.4996 34.1449 34.3914 34.4993 34.1865C34.8537 33.9815 35.1479 33.6869 35.3524 33.3323C35.5569 32.9776 35.6645 32.5754 35.6644 32.166C35.6643 31.7567 35.5565 31.3545 35.3518 31Z"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M24 20.5V25.1667"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M24 29.8334H24.0117"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="24" fill="#C2A14D" />
+          <path d="M26.332 28.6641H20.4987M32.1654 28.6641H35.6654V24.9891C35.6662 24.7115 35.5679 24.4427 35.3883 24.2309C35.2087 24.0192 34.9594 23.8785 34.6854 23.8341L28.6654 22.8308L25.5154 18.6308C25.4067 18.4859 25.2658 18.3683 25.1038 18.2873C24.9418 18.2063 24.7632 18.1641 24.582 18.1641H16.112C15.6772 18.1611 15.2501 18.2796 14.8791 18.5064C14.508 18.7332 14.2077 19.0591 14.012 19.4475L13.0787 21.3491C12.5889 22.3228 12.3332 23.3975 12.332 24.4875V28.6641H14.6654" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M17.5846 32.1693C19.1955 32.1693 20.5013 30.8634 20.5013 29.2526C20.5013 27.6418 19.1955 26.3359 17.5846 26.3359C15.9738 26.3359 14.668 27.6418 14.668 29.2526C14.668 30.8634 15.9738 32.1693 17.5846 32.1693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M29.2487 32.1693C30.8595 32.1693 32.1654 30.8634 32.1654 29.2526C32.1654 27.6418 30.8595 26.3359 29.2487 26.3359C27.6379 26.3359 26.332 27.6418 26.332 29.2526C26.332 30.8634 27.6379 32.1693 29.2487 32.1693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
+
       ),
-      iconBgColor: "bg-[#FF9933]",
+      iconBgColor: "bg-[#C2A14D]",
       onClick: () => console.log("Navigate to MT Accident"),
     },
   ];
