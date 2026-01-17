@@ -10,15 +10,18 @@ import StaticSpeedStep1Particulars from "./steps/Step1";
 import Step2Statement from "./steps/step2";
 import Step3Offence from "./steps/step3";
 import { toast } from "react-toastify";
-import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+import { useCreateStaticSpeedRecord, useGetStaticSpeedRecordById, useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
+import { useEffect } from "react";
 
 export default function StaticSpeedForm({
   onCancel,
+  recordId,
 }: {
   onCancel: () => void;
+  recordId?: string;
 }) {
   const { state, dispatch } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,8 +29,95 @@ export default function StaticSpeedForm({
   const staticData = state.formData.staticSpeed as any;
 
   const createStaticRecord = useCreateStaticSpeedRecord();
+  const updateStaticRecord = useUpdateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
+
+  const { data: existingRecord, isLoading: isLoadingRecord } = useGetStaticSpeedRecordById(recordId || "");
+
+  useEffect(() => {
+    if (recordId && existingRecord) {
+      // Map existing record to form state
+      const mappedData = {
+        ...initialState.formData,
+        staticSpeed: {
+          reportNo: existingRecord.reportId || existingRecord.reportNo,
+          remarks: existingRecord.remark,
+          vehicleInvolved: existingRecord.vehicleInvolved ? "yes" : "no",
+          vehicleDetails: {
+            category: existingRecord.vehicleCategory,
+            vehicleType: existingRecord.vehicleType,
+            driverType: "",
+            vehicleNumber: existingRecord.vehicleNumber,
+            vehicleName: existingRecord.vehicleName,
+          },
+          dutyBlock: {
+            dateOfDuty: existingRecord.onDutyDetails?.dateOfDuty ? existingRecord.onDutyDetails.dateOfDuty.split("T")[0] : "",
+            startTime: existingRecord.onDutyDetails?.startTime
+              ? (existingRecord.onDutyDetails.startTime.includes("T")
+                ? existingRecord.onDutyDetails.startTime.split("T")[1].substring(0, 5)
+                : existingRecord.onDutyDetails.startTime.substring(0, 5))
+              : "",
+            endTime: existingRecord.onDutyDetails?.endTime
+              ? (existingRecord.onDutyDetails.endTime.includes("T")
+                ? existingRecord.onDutyDetails.endTime.split("T")[1].substring(0, 5)
+                : existingRecord.onDutyDetails.endTime.substring(0, 5))
+              : "",
+            dutyLocation: existingRecord.onDutyDetails?.dutyLocation,
+            dutyType: existingRecord.onDutyDetails?.dutyType,
+          },
+          reportingBlock: {
+            nameReportingMP: existingRecord.onDutyDetailsMPReporting?.nameReportingMP,
+            rank: existingRecord.onDutyDetailsMPReporting?.rank,
+            unit: existingRecord.onDutyDetailsMPReporting?.unit,
+            armyNumber: existingRecord.onDutyDetailsMPReporting?.armyNumber,
+            contactNumber: existingRecord.onDutyDetailsMPReporting?.contactNumber,
+          },
+          offenceBlock: {
+            timeOfOffence: existingRecord.offenceOccurenceDetails?.time,
+            time: existingRecord.offenceOccurenceDetails?.time,
+            incidentLocation: existingRecord.offenceOccurenceDetails?.incidentLocation,
+            description: existingRecord.offenceOccurenceDetails?.description,
+            briefDescription: existingRecord.offenceOccurenceDetails?.briefDescription,
+            // description2 might be merged in description string, tough to separate
+            authSpeed: existingRecord.offenceOccurenceDetails?.authSpeed,
+            actualSpeedNoted: existingRecord.offenceOccurenceDetails?.actualSpeedNoted,
+            overSpeedCalculated: existingRecord.offenceOccurenceDetails?.overSpeedCalculated,
+          },
+          // Mapping witnesses and offenders back 
+          witnesses: (existingRecord.witnesses || []).map((w: any) => ({
+            reportingBlock: {
+              armyNumber: w.armyNumber || w.ArmyNo,
+              rank: w.rank,
+              nameReportingMP: w.name,
+              unit: w.unit,
+              contactNumber: w.contactNumber,
+            }
+          })),
+          selectedWitness: existingRecord.customFields?.selectedWitness,
+          offenderDetails: {},
+          offenderPeople: (existingRecord.offenders || existingRecord.individuals || []).map((p: any) => ({
+            whoIsIt: p.offenderDetails?.type || p.type || "Offender", // "Driver", "Co-Driver", etc.
+            type: p.offenderType || "Military", // "Military", "Civilian"
+            role: p.offenderDetails?.role || p.role,
+            details: {
+              armyNumber: p.armyNumber || p.offenderDetails?.armyNumber || p.offenderDetails?.armyNo,
+              rank: p.rank || p.offenderDetails?.rank,
+              name: p.name || p.offenderDetails?.name,
+              unit: p.unit || p.offenderDetails?.unit,
+              fmn: p.fmn || p.offenderDetails?.fmn,
+              command: p.command || p.offenderDetails?.command,
+              address: p.address || p.offenderDetails?.address,
+              iCardNumber: p.iCardNumber || p.offenderDetails?.iCardNumber,
+              ...p.customFields,
+              ...p.offenderDetails,
+            }
+          })),
+        }
+      };
+      dispatch({ type: "SET_FORM_DATA", payload: mappedData });
+    }
+  }, [recordId, existingRecord, dispatch]);
 
   /* ================= FETCH REPORT NO ================= */
   const reportNo = staticData.reportNo || "TEMP/STATIC/001";
@@ -117,12 +207,12 @@ export default function StaticSpeedForm({
       offence: {
         actualSpeed: val(
           data?.offenceBlock?.actualSpeedNoted ||
-            data?.offenceBlock?.actualSpeed
+          data?.offenceBlock?.actualSpeed
         ),
         authSpeed: val(data?.offenceBlock?.authSpeed),
         overSpeed: val(
           data?.offenceBlock?.overSpeedCalculated ||
-            data?.offenceBlock?.overSpeed
+          data?.offenceBlock?.overSpeed
         ),
       },
 
@@ -204,13 +294,13 @@ export default function StaticSpeedForm({
           dutyType: staticData.dutyBlock?.dutyType || undefined,
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+            ).toISOString()
             : undefined,
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+            ).toISOString()
             : undefined,
         },
 
@@ -248,11 +338,18 @@ export default function StaticSpeedForm({
 
       console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
 
-      /* ================= CREATE STATIC RECORD ================= */
-      const staticRes = await createStaticRecord.mutateAsync(payload);
-      console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
+      /* ================= CREATE / UPDATE STATIC RECORD ================= */
+      let staticRes;
+      if (recordId) {
+        await updateStaticRecord.mutateAsync({ id: recordId, data: payload });
+        staticRes = { _id: recordId };
+        toast.success("Static Record Updated Successfully!");
+      } else {
+        staticRes = await createStaticRecord.mutateAsync(payload);
+        toast.success("Static Record Created Successfully!");
+      }
 
-      toast.success("Static Record Created Successfully!");
+      console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
 
       if (!staticRes?._id) {
         toast.error("Static Record ID Missing!");
@@ -424,7 +521,7 @@ export default function StaticSpeedForm({
             steps={steps}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
-            title="Create New Static Speed Check Record"
+            title={recordId ? "Edit Static Speed Check Record" : "Create New Static Speed Check Record"}
             reportNo={reportNo}
             onCreate={handleFinalSubmit}
             onCancel={() => {

@@ -13,11 +13,12 @@ import StaticSpeedReport, {
   StaticSpeedReportProps,
 } from "@/components/reports/StaticSpeedReport";
 
-import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
 
 export default function StaticSpeedCheckReportsPage() {
+  const router = useRouter();
   /* ================= FILTER STATE ================= */
   const [filters, setFilters] = useState({
     search: "",
@@ -31,7 +32,6 @@ export default function StaticSpeedCheckReportsPage() {
     sortOrder: "desc" as "asc" | "desc",
   });
 
-  const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
@@ -424,7 +424,7 @@ export default function StaticSpeedCheckReportsPage() {
         onFilterChange={(k, v) => setFilters((p) => ({ ...p, [k]: v }))}
         showOffenceType={false}
         placeholder="Search by report no or vehicle..."
-        onAddNew={() => setIsCreating(true)}
+        onAddNew={() => router.push("/create-record/static-speed")}
         showFilter
         onReset={() =>
           setFilters({

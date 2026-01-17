@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { initialState, useForm } from "@/context/FormContext";
 import { toast } from "react-toastify";
 
@@ -19,7 +19,7 @@ import Step11Remarks from "./steps/Step11Remarks";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
 import { RightPanel } from "../multi-step-form/RightPanel";
 
-import { useCreateMPReport } from "@/features/mpReports/hooks";
+import { useCreateMPReport, useGetMPReportById, useUpdateMPReport } from "@/features/mpReports/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 
 /* ================= EVIDENCE BUILDER ================= */
@@ -70,14 +70,121 @@ const buildEvidences = (ev: any) => {
 
 export default function MultiFormReport({
   onCancel,
+  recordId,
 }: {
   onCancel: () => void;
+  recordId?: string;
 }) {
   const { state, dispatch } = useForm();
   const [mode] = useState("mp");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createReportAsync } = useCreateMPReport();
+  const { mutateAsync: updateReportAsync } = useUpdateMPReport();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
+
+  const { data: existingReport, isLoading: isLoadingReport } = useGetMPReportById(recordId || "");
+
+  useEffect(() => {
+    if (recordId && existingReport) {
+      // Map existing report to form state
+      const mappedData = {
+        ...initialState.formData,
+        mpReport: {
+          reportDetails: {
+            reportNo: existingReport.reportDetails?.reportNumber,
+            command: existingReport.reportDetails?.command,
+            firNo: existingReport.reportDetails?.firNumber,
+            firFile: existingReport.reportDetails?.firFileUrl ? { url: existingReport.reportDetails.firFileUrl, name: 'Existing File' } : null,
+          },
+          mpParticulars: {
+            armyNo: existingReport.investigationHead?.armyNumber || existingReport.investigationHead?.armyNo,
+            rank: existingReport.investigationHead?.rank,
+            name: existingReport.investigationHead?.name,
+            unit: existingReport.investigationHead?.unit,
+            fmn: existingReport.investigationHead?.fmn,
+            command: existingReport.investigationHead?.command,
+            address: existingReport.investigationHead?.address,
+            icard: existingReport.investigationHead?.iCardNumber,
+          },
+          occurrenceDetails: {
+            offenceType: existingReport.occurrenceDetails?.offenceType,
+            offenceTypes: existingReport.occurrenceDetails?.offenceTypes || [],
+            offenceTypeReference: existingReport.occurrenceDetails?.offenceTypeReference || [],
+            place: existingReport.occurrenceDetails?.placeOfOccurrence,
+            date: existingReport.occurrenceDetails?.dateOfOccurrence ? existingReport.occurrenceDetails.dateOfOccurrence.split("T")[0] : "",
+            time: existingReport.occurrenceDetails?.timeOfOccurrence 
+                ? (existingReport.occurrenceDetails.timeOfOccurrence.includes("T") 
+                    ? existingReport.occurrenceDetails.timeOfOccurrence.split("T")[1].substring(0, 5) 
+                    : existingReport.occurrenceDetails.timeOfOccurrence.substring(0, 5))
+                : "",
+            description: existingReport.occurrenceDetails?.description,
+          },
+          individualDetails: {
+            vehicleInvolved: "",
+            vehicleData: {},
+            driverType: "",
+            offenderList: (existingReport.individuals || []).map((ind: any) => ({
+              role: ind.role || ind.type || "Offender",
+              offenderType: ind.offenderType, // Preserve offenderType
+              vehicleInvolved: ind.isVehicleInvolved ? "yes" : "no",
+              // Ensure we reconstruct the nested details object expected by the form
+              details: {
+                armyNumber: ind.armyNumber || ind.armyNo,
+                rank: ind.rank,
+                name: ind.name,
+                unit: ind.unit,
+                fmn: ind.fmn,
+                address: ind.address,
+                iCardNumber: ind.iCardNumber,
+                remark: ind.remark,
+                ...ind.customFields, // Spread custom fields
+              },
+            })),
+            tempOffender: {},
+          },
+          witnesses: (existingReport.witnesses || []).map((wit: any) => ({
+            details: {
+              armyNumber: wit.armyNumber || wit.armyNo,
+              rank: wit.rank,
+              name: wit.name,
+              unit: wit.unit,
+              fmn: wit.fmn,
+              address: wit.address,
+              iCardNumber: wit.iCardNumber,
+              remark: wit.remark,
+              contactNumber: wit.contactNumber, 
+              ...wit.customFields,
+            }
+          })),
+          witnessVehicleStatus: "",
+          evidence: {
+            attachEvidence: existingReport.evidences?.find((e: any) => e.type === "Evidence") ? { url: existingReport.evidences.find((e: any) => e.type === "Evidence")?.url || "" } : null,
+            eyeSketch: existingReport.evidences?.find((e: any) => e.type === "Eye Sketch") ? { url: existingReport.evidences.find((e: any) => e.type === "Eye Sketch")?.url || "" } : null,
+            photos: existingReport.evidences?.filter((e: any) => e.type === "Photo") || [],
+            videos: existingReport.evidences?.filter((e: any) => e.type === "Video") || [],
+          },
+          documents: existingReport.documents || [],
+          additionalIndividual: {
+            vehicleInvolved: "",
+            vehicleData: {},
+            driverType: "",
+            tempOffender: {},
+          },
+          detailedReport: (typeof existingReport.detailedOccurrenceReport === 'string')
+            ? existingReport.detailedOccurrenceReport
+            : (existingReport.detailedOccurrenceReport?.statement || ""),
+          investigationPoints: existingReport.pointsFindOutDuringInvestigation,
+          opinion: existingReport.opinion,
+          remarks: {
+            analysis: existingReport.remarks?.analysis,
+            recommendation: existingReport.remarks?.recommendation,
+          },
+        }
+      };
+
+      dispatch({ type: "SET_FORM_DATA", payload: mappedData });
+    }
+  }, [recordId, existingReport, dispatch]);
 
   /* ================= FETCH REPORT NO ================= */
   const reportNo = state.formData.mpReport.reportDetails.reportNo || "PRO/21 CPU/00042/106/25";
@@ -392,8 +499,22 @@ export default function MultiFormReport({
 
       console.log("🚀 MP REPORT PAYLOAD ===>", payload);
 
-      /* ================= CREATE MP REPORT ================= */
-      const reportRes = await createReportAsync(payload);
+      /* ================= CREATE / UPDATE MP REPORT ================= */
+      let reportRes;
+      if (recordId) {
+        // Ensure dateOfOccurrence is string
+        const safePayload = { ...payload };
+        if (safePayload.occurrenceDetails) {
+          safePayload.occurrenceDetails.dateOfOccurrence = safePayload.occurrenceDetails.dateOfOccurrence || "";
+        }
+        await updateReportAsync({ id: recordId, data: safePayload as any });
+        reportRes = { _id: recordId };
+        toast.success("MP Investigation Report Updated 🎉");
+      } else {
+        reportRes = await createReportAsync(payload);
+        toast.success("MP Investigation Report Created 🎉");
+      }
+
       console.log("✅ MP REPORT RESPONSE ===>", reportRes);
 
       const offenceId = reportRes?._id;
@@ -402,9 +523,7 @@ export default function MultiFormReport({
         return;
       }
 
-      /* ================= CREATE ALL OFFENDERS & WITNESSES (GLOBAL SEARCH) ================= */
-      // We still create these for the global search / centralized offender DB if needed.
-      // If the user only cares about the report document, this part is less critical but good to keep.
+      /* ================= CREATE ALL OFFENDERS & WITNESSES ================= */
       const offendersToCreate: any[] = [];
 
       /* 1️⃣ MAIN INDIVIDUAL OFFENDERS */
@@ -469,12 +588,11 @@ export default function MultiFormReport({
 
       /* ================= ONE BY ONE API CALL ================= */
       for (const offenderPayload of offendersToCreate) {
-        console.log("🚨 OFFENDER API PAYLOAD ===>", offenderPayload);
+        // console.log("🚨 OFFENDER API PAYLOAD ===>", offenderPayload);
         await createOffenderMutate(offenderPayload);
       }
 
-      console.log("🎯 ALL OFFENDERS + WITNESSES CREATED");
-      toast.success("MP Investigation Report Created 🎉");
+      console.log("🎯 ALL OFFENDERS + WITNESSES PROCESSED");
 
       /* ================= RESET FORM ================= */
       dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
@@ -483,7 +601,7 @@ export default function MultiFormReport({
       if (onCancel) onCancel(); // Return to dashboard
     } catch (err) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
-      toast.error("Failed to create report");
+      toast.error("Failed to save report");
     } finally {
       setIsSubmitting(false);
     }
@@ -547,7 +665,7 @@ export default function MultiFormReport({
             steps={steps}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
-            title="Create New MP Occurrence & Investigation Report"
+            title={recordId ? "Edit MP Occurrence & Investigation Report" : "Create New MP Occurrence & Investigation Report"}
             reportNo={reportNo}
             onCancel={onCancel}
             onCreate={onSubmitFinal}

@@ -12,9 +12,10 @@ import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/report
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
+import { useRouter } from "next/navigation";
 
 export default function MpOccurrenceReportsPage() {
-  const [isCreating, setIsCreating] = useState(false);
+  const router = useRouter();
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
@@ -482,27 +483,6 @@ export default function MpOccurrenceReportsPage() {
   const distinctReportsCount = processedData.length;
   const pageTitle = "MP Occurrence & Investigation Report";
 
-  if (isCreating) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
-            <ArrowLeft className="w-4 h-4" /> Back to Reports
-          </Button>
-          <h1 className="text-lg font-semibold text-gray-800">Create New MP Occurrence & Investigation Report</h1>
-        </div>
-        <div className="flex-1 overflow-auto p-6">
-          <div className="w-full max-w-5xl p-6 border rounded-xl mx-auto bg-white">
-            <h2 className="font-semibold text-lg">
-              MP Occurrence & Investigation Form
-            </h2>
-            <p className="text-gray-500 mt-2">Form implementation pending...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   if (viewingReport) {
     return (
       <ReportViewerWrapper
@@ -549,7 +529,7 @@ export default function MpOccurrenceReportsPage() {
         showFilter
         // showSort={true}
 
-        onAddNew={() => setIsCreating(true)}
+        onAddNew={() => router.push("/create-record/mp-investigation")}
         onReset={() =>
           setFilters({
             search: "",

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { Loader2, ArrowLeft, Download } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
@@ -9,7 +10,7 @@ import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
-import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
+// import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 
 import MilitaryPoliceReport, {
@@ -56,7 +57,7 @@ export default function ReportsPage({
 }: {
   viewType?: "vehicle" | "no-vehicle";
 }) {
-  const [isCreating, setIsCreating] = useState(false);
+  const router = useRouter();
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
@@ -297,16 +298,7 @@ export default function ReportsPage({
       ? "General & Traffic Offence Reports - Vehicle Involved"
       : "General & Traffic Offence Reports - No Vehicle Involved";
 
-  if (isCreating) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Button onClick={() => setIsCreating(false)} className="m-4">
-          <ArrowLeft /> Back
-        </Button>
-        <MultiStepForm />
-      </div>
-    );
-  }
+
 
   if (viewingReport) {
     return (
@@ -347,7 +339,7 @@ export default function ReportsPage({
         showDateRange
         showActionStatus
         showFilter
-        onAddNew={() => setIsCreating(true)}
+        onAddNew={() => router.push("/create-record/general-traffic")}
         onReset={() =>
           setFilters({
             search: "",

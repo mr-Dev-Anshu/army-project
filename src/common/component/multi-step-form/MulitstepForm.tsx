@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, initialState } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
-import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
+import { useCreateTrafficOffence, useGetTrafficOffenceById, useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { toast } from "react-toastify";
 
 import Step1Particulars from "./steps/Step1Particulars";
@@ -16,13 +16,119 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
-export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
+export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () => void, recordId?: string }) {
   const { state, dispatch } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutateAsync: createOffence } = useCreateTrafficOffence();
+  const { mutateAsync: updateOffence } = useUpdateTrafficOffence();
   const { mutateAsync: createOffender } = useCreateOffender();
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
+
+  const { data: existingOffence, isLoading: isLoadingOffence } = useGetTrafficOffenceById(recordId || "");
+
+  useEffect(() => {
+    if (recordId && existingOffence) {
+      // Map existing offence to form state
+      const mappedData = {
+        ...initialState.formData,
+        traffic: {
+          reportNo: existingOffence.reportNo || existingOffence.reportId,
+          vehicleInvolved: existingOffence.isVehicleInvolved ? "yes" : "no",
+          vehicleDetails: {
+            category: existingOffence.vehicleCategory === "2-Wheeler" ? "2w" : "4w",
+            vehicleType: existingOffence.vehicleType === "Civilian Vehicle" ? "civilian" : "army",
+            driverType: existingOffence.driverType,
+            vehicleName: existingOffence.vehicleName,
+            vehicleNumber: existingOffence.vehicleNumber,
+          },
+          offenderWithoutVehicle: {
+            // Mapping back from offenders list if vehicleInvolved is no
+            offenderType: "",
+            military: { // Basic mapping, heavily relies on offender list order
+              armyNumber: "",
+              rank: "",
+              name: "",
+              unit: "",
+              fmn: "",
+              command: "",
+              address: "",
+              iCardNumber: "",
+            }
+          },
+          offenderDetails: {},
+          onDutyDetails: {
+            dateOfDuty: existingOffence.onDutyDetails?.dateOfDuty ? existingOffence.onDutyDetails.dateOfDuty.split("T")[0] : "",
+            startTime: existingOffence.onDutyDetails?.startTime
+              ? (existingOffence.onDutyDetails.startTime.includes("T")
+                ? existingOffence.onDutyDetails.startTime.split("T")[1].substring(0, 5)
+                : existingOffence.onDutyDetails.startTime.substring(0, 5))
+              : "",
+            endTime: existingOffence.onDutyDetails?.endTime
+              ? (existingOffence.onDutyDetails.endTime.includes("T")
+                ? existingOffence.onDutyDetails.endTime.split("T")[1].substring(0, 5)
+                : existingOffence.onDutyDetails.endTime.substring(0, 5))
+              : "",
+            dutyLocation: existingOffence.onDutyDetails?.dutyLocation,
+            dutyType: existingOffence.onDutyDetails?.dutyType,
+          },
+          onDutyDetailsMPReporting: {
+            nameReportingMP: existingOffence.onDutyDetailsMPReporting?.nameReportingMP,
+            rank: existingOffence.onDutyDetailsMPReporting?.rank,
+            unit: existingOffence.onDutyDetailsMPReporting?.unit,
+            armyNumber: existingOffence.onDutyDetailsMPReporting?.armyNumber,
+            contactNumber: existingOffence.onDutyDetailsMPReporting?.contactNumber,
+          },
+          offenceOccurenceDetails: {
+            timeOfOffence: existingOffence.offenceOccurenceDetails?.timeOfOffence
+              ? (existingOffence.offenceOccurenceDetails.timeOfOffence.includes("T")
+                ? existingOffence.offenceOccurenceDetails.timeOfOffence.split("T")[1].substring(0, 5)
+                : existingOffence.offenceOccurenceDetails.timeOfOffence.substring(0, 5))
+              : "",
+            incidentLocation: existingOffence.offenceOccurenceDetails?.incidentLocation,
+            description: existingOffence.offenceOccurenceDetails?.description,
+            briefDescription: existingOffence.offenceOccurenceDetails?.briefDescription,
+            time: "",
+          },
+          offenceTypes: existingOffence.offenceTypes || [],
+          // Ensure existing code doesn't break if offenceTypeReference is string[] or object[]
+          offenceCode: (existingOffence.offenceTypeReference || []).map((r: any) => typeof r === 'string' ? r : r.reference || r.code),
+          offenceRefList: existingOffence.offenceRefList || [],
+          witnesses: (existingOffence.witnesses || []).map((w: any) => ({
+            reportingBlock: {
+              armyNumber: w.armyNumber || w.ArmyNo || w.details?.armyNumber || w.details?.armyNo,
+              rank: w.rank || w.details?.rank,
+              nameReportingMP: w.name || w.details?.name,
+              unit: w.unit || w.details?.unit,
+              contactNumber: w.contactNumber || w.details?.contactNumber,
+            }
+          })),
+          selectedWitness: existingOffence.customFields?.selectedWitness,
+          offenderPeople: (existingOffence.offenders || existingOffence.individuals || []).map((p: any) => ({
+            whoIsIt: p.offenderDetails?.type || p.type || "Offender",
+            type: p.offenderType || "Military",
+            // If p.details exists (flat list from some APIs) or if p itself is the detail
+            details: {
+              armyNumber: p.armyNumber || p.offenderDetails?.armyNumber || p.offenderDetails?.armyNo || p.details?.armyNumber,
+              rank: p.rank || p.offenderDetails?.rank || p.details?.rank,
+              name: p.name || p.offenderDetails?.name || p.details?.name,
+              unit: p.unit || p.offenderDetails?.unit || p.details?.unit,
+              fmn: p.fmn || p.offenderDetails?.fmn || p.details?.fmn,
+              command: p.command || p.offenderDetails?.command || p.details?.command,
+              address: p.address || p.offenderDetails?.address || p.details?.address,
+              iCardNumber: p.iCardNumber || p.offenderDetails?.iCardNumber || p.details?.iCardNumber,
+              ...p.customFields,
+              ...p.offenderDetails,
+              ...p.details
+            }
+          })),
+          remarks: existingOffence.remarks,
+        }
+      };
+      dispatch({ type: "SET_FORM_DATA", payload: mappedData });
+    }
+  }, [recordId, existingOffence, dispatch]);
+
   const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
   // ... (existing code: mapTrafficToReport function) ...
@@ -167,57 +273,119 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       const traffic = state.formData.traffic;
       console.log("🚔 RAW TRAFFIC ===>", traffic);
 
-      /* ================= CREATE OFFENCE ================= */
-      const offenceRes = await createOffence({
-        reportId: reportNo,
-        isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
-        // Mapped Vehicle Details
-        ...(traffic.vehicleInvolved === "yes" && {
-          vehicleCategory:
-            traffic.vehicleDetails.category === "2w"
-              ? "2-Wheeler"
-              : "4-Wheeler",
-          vehicleType:
-            traffic.vehicleDetails.vehicleType === "civilian"
-              ? "Civilian Vehicle"
-              : "DD Vehicle",
-          vehicleName: traffic.vehicleDetails.vehicleName,
-          vehicleNumber: traffic.vehicleDetails.vehicleNumber,
-          driverType: traffic.vehicleDetails.driverType,
-        }),
 
-        onDutyDetails: {
-          ...traffic.onDutyDetails,
-          startTime: toISO(
-            traffic.onDutyDetails?.dateOfDuty,
-            traffic.onDutyDetails?.startTime
-          ),
-          endTime: toISO(
-            traffic.onDutyDetails?.dateOfDuty,
-            traffic.onDutyDetails?.endTime
-          ),
-        },
-        onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
-        offenceOccurenceDetails: {
-          ...traffic.offenceOccurenceDetails,
-          timeOfOffence: toISO(
-            traffic.onDutyDetails?.dateOfDuty,
-            traffic.offenceOccurenceDetails?.timeOfOffence
-          ),
-          briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
-        },
-        offenceTypes: traffic.offenceTypes?.length
-          ? traffic.offenceTypes
-          : ["minor"],
-        offenceTypeReference: traffic.offenceCode || [],
+      /* ================= CREATE / UPDATE OFFENCE ================= */
+      let offenceRes;
+      if (recordId) {
+        // Fix reportId in payload if missing during edit
+        const payload = { ...traffic, reportId: reportNo };
+        // Adjust nested payload as constructed above... 
+        // Since createOffence above is constructing payload directly in call, I should extract payload construction.
+        // Or just call updateOffence with same structure.
 
-        remarks: traffic.remarks,
-        customFields: {
+        const apiPayload = {
+          reportId: reportNo,
+          isVehicleInvolved: traffic.vehicleInvolved === "yes",
+          // Mapped Vehicle Details
+          ...(traffic.vehicleInvolved === "yes" && {
+            vehicleCategory:
+              traffic.vehicleDetails.category === "2w"
+                ? "2-Wheeler"
+                : "4-Wheeler",
+            vehicleType:
+              traffic.vehicleDetails.vehicleType === "civilian"
+                ? "Civilian Vehicle"
+                : "DD Vehicle",
+            vehicleName: traffic.vehicleDetails.vehicleName,
+            vehicleNumber: traffic.vehicleDetails.vehicleNumber,
+            driverType: traffic.vehicleDetails.driverType,
+          }),
+          onDutyDetails: {
+            ...traffic.onDutyDetails,
+            startTime: toISO(
+              traffic.onDutyDetails?.dateOfDuty,
+              traffic.onDutyDetails?.startTime
+            ),
+            endTime: toISO(
+              traffic.onDutyDetails?.dateOfDuty,
+              traffic.onDutyDetails?.endTime
+            ),
+          },
+          onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
+          offenceOccurenceDetails: {
+            ...traffic.offenceOccurenceDetails,
+            timeOfOffence: toISO(
+              traffic.onDutyDetails?.dateOfDuty,
+              traffic.offenceOccurenceDetails?.timeOfOffence
+            ),
+            briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
+          },
+          offenceTypes: traffic.offenceTypes?.length
+            ? traffic.offenceTypes
+            : ["minor"],
+          offenceTypeReference: traffic.offenceCode || [],
           remarks: traffic.remarks,
-          selectedWitness: traffic.selectedWitness,
-        },
-      });
+          customFields: {
+            remarks: traffic.remarks,
+            selectedWitness: traffic.selectedWitness,
+          },
+        };
+
+        await updateOffence({ id: recordId, data: apiPayload });
+        offenceRes = { _id: recordId };
+        toast.success("Traffic Offence Updated 🎉");
+
+      } else {
+        offenceRes = await createOffence({
+          reportId: reportNo,
+          isVehicleInvolved: traffic.vehicleInvolved === "yes",
+          // Mapped Vehicle Details
+          ...(traffic.vehicleInvolved === "yes" && {
+            vehicleCategory:
+              traffic.vehicleDetails.category === "2w"
+                ? "2-Wheeler"
+                : "4-Wheeler",
+            vehicleType:
+              traffic.vehicleDetails.vehicleType === "civilian"
+                ? "Civilian Vehicle"
+                : "DD Vehicle",
+            vehicleName: traffic.vehicleDetails.vehicleName,
+            vehicleNumber: traffic.vehicleDetails.vehicleNumber,
+            driverType: traffic.vehicleDetails.driverType,
+          }),
+          onDutyDetails: {
+            ...traffic.onDutyDetails,
+            startTime: toISO(
+              traffic.onDutyDetails?.dateOfDuty,
+              traffic.onDutyDetails?.startTime
+            ),
+            endTime: toISO(
+              traffic.onDutyDetails?.dateOfDuty,
+              traffic.onDutyDetails?.endTime
+            ),
+          },
+          onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
+          offenceOccurenceDetails: {
+            ...traffic.offenceOccurenceDetails,
+            timeOfOffence: toISO(
+              traffic.onDutyDetails?.dateOfDuty,
+              traffic.offenceOccurenceDetails?.timeOfOffence
+            ),
+            briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
+          },
+          offenceTypes: traffic.offenceTypes?.length
+            ? traffic.offenceTypes
+            : ["minor"],
+          offenceTypeReference: traffic.offenceCode || [],
+          remarks: traffic.remarks,
+          customFields: {
+            remarks: traffic.remarks,
+            selectedWitness: traffic.selectedWitness,
+          },
+        });
+        toast.success("Traffic Offence Created 🎉");
+      }
 
       const offenceId = offenceRes?._id;
       if (!offenceId) {
@@ -359,7 +527,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             ]}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
-            title="Create New General & Traffic Offence Record"
+            title={recordId ? "Edit General & Traffic Offence Record" : "Create New General & Traffic Offence Record"}
             reportNo={reportNo || "PRO/21 CPU/00042/106/25"}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             onCreate={onSubmitFinal}

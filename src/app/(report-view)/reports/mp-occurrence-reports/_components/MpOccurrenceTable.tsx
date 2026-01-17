@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   MoreVertical,
   Eye,
@@ -44,6 +45,7 @@ export default function MpOccurrenceTable({
   onPrint,
   onDownload,
 }: MpOccurrenceTableProps) {
+  const router = useRouter();
   const { mutateAsync: updateReport, isPending: isUpdating } =
     useUpdateMPReport();
   const { mutateAsync: deleteReport, isPending: isDeleting } =
@@ -290,7 +292,14 @@ export default function MpOccurrenceTable({
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => {
+                  if (item._id) {
+                    router.push(`/create-record/mp-investigation?id=${item._id}`);
+                  }
+                }}
+              >
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
