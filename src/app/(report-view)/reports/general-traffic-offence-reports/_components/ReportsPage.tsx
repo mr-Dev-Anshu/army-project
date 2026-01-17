@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Loader2, ArrowLeft, Download } from "lucide-react";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
+import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 
@@ -309,62 +310,20 @@ export default function ReportsPage({
 
   if (viewingReport) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col relative">
-        {/* DOWNLOAD LOADER MODAL */}
-        {isDownloading && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4 min-w-[300px] animate-in zoom-in-95 duration-200">
-              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-              <div className="text-center">
-                <h3 className="font-semibold text-lg">Generating {downloadType} Report</h3>
-                <p className="text-gray-500 text-sm">Please wait while we prepare your download...</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 print:hidden">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setViewingReport(null);
-              setShouldAutoPrint(false);
-            }}
-            className="gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Reports
-          </Button>
-          <h1 className="text-lg font-semibold text-gray-800">
-            {pageTitle}
-          </h1>
-          <div className="ml-auto flex gap-2">
-            <Button
-              onClick={() => handleDownloadReport(viewingReport)}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              disabled={isDownloading}
-            >
-              {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
-              Download Word Report
-            </Button>
-            <Button
-              onClick={() => handleDownloadPdf(viewingReport)}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              disabled={isDownloading}
-            >
-              {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
-              Download PDF Report
-            </Button>
-          </div>
-        </div>
-        <div className="flex-1 overflow-auto p-8 flex justify-center bg-gray-500/10">
-          <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
-        </div>
-      </div>
+      <ReportViewerWrapper
+        title="REPORT PREVIEW"
+        onBack={() => {
+          setViewingReport(null);
+          setShouldAutoPrint(false);
+        }}
+        isDownloading={isDownloading}
+        downloadType={downloadType}
+        onDownloadWord={() => handleDownloadReport(viewingReport)}
+        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+        onPrint={() => window.print()}
+      >
+        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+      </ReportViewerWrapper>
     );
   }
 

@@ -87,7 +87,7 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
 }) => {
   return (
     <div
-      className={`font-[Arial] text-[#0A0A0A]  p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 ${className || ""
+      className={`font-[Arial] text-[#0A0A0A] w-full items-center flex flex-col gap-8 print:block print:gap-0 ${className || ""
         }`}
     >
       <style type="text/css" media="print">
@@ -105,7 +105,7 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
 
       {/* ==================== PAGE 1 ==================== */}
       <div
-        className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]"
+        className="max-w-[210mm] w-full mx-auto bg-white p-[48px] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:justify-between print:p-[48px]"
         style={{ pageBreakAfter: "always" }}
       >
         {/* Header */}

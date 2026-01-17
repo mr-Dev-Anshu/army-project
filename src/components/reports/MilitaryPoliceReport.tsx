@@ -84,7 +84,7 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
     <div id='mp-report' className={`font-[Arial] text-[#0A0A0A] flex flex-col gap-8 items-center print:block print:gap-0 ${className || ''}`}>
 
       {/* ==================== PAGE 1 ==================== */}
-      < div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col justify-between" style={{ pageBreakAfter: 'always' }}>
+      <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:justify-between print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
         {/* Page 1 Content Wrapper */}
         <div>
@@ -276,12 +276,12 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
         </div >
 
         {/* Page 1 Footer */}
-        < div className="text-center font-bold text-xs mb-8" > RESTRICTED</div >
+        < div className="text-center absolute bottom-0 left-1/2 -translate-x-1/2 font-bold text-xs mb-8" > RESTRICTED</div >
       </div >
 
 
       {/* ==================== PAGE 2 ==================== */}
-      < div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col justify-between" style={{ pageBreakBefore: 'always' }}>
+      <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:justify-between print:p-[48px]" style={{ pageBreakBefore: 'always' }}>
 
         {/* Page 2 Content Wrapper */}
         <div>
@@ -406,7 +406,7 @@ const MilitaryPoliceReport: React.FC<MilitaryPoliceReportProps> = ({
         </div >
 
         {/* Page 2 Footer */}
-        < div className="text-center font-bold text-xs mb-8" > RESTRICTED</div >
+        < div className="text-center absolute bottom-0 left-1/2 -translate-x-1/2 font-bold text-xs mb-8" > RESTRICTED</div >
       </div >
     </div >
   );
