@@ -1,0 +1,126 @@
+import mongoose from 'mongoose';
+
+const { Schema } = mongoose;
+
+const SignatureSchema = new Schema({
+  type: {
+    type: String,
+    enum: ['text', 'digital'],
+    default: 'text',
+  },
+  value: {
+    type: String,
+    trim: true,
+  },
+  by: {
+    type: String,
+    trim: true,
+  },
+}, { _id: false });
+
+const AuthenticationSchema = new Schema({
+  role: {
+    type: String,
+    enum: ['MPCR_NCO', 'SM_SJCO', '2IC'],
+    required: true,
+  },
+  initials: {
+    type: String,
+    trim: true,
+  },
+  signatureType: {
+    type: String,
+    enum: ['text', 'digital'],
+    default: 'text',
+  },
+  signedAt: {
+    type: Date,
+    default: Date.now,
+  },
+}, { _id: false });
+
+const DutyAndAssetMovementSchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: [
+        'mobile_phone',
+        'vehicle',
+        'convoy',
+        'key',
+        'arms_amn',
+        'recce',
+        'duty_out',
+        'duty_roster',
+        'general_duty_diary',
+      ],
+      required: [true, 'Register type is required'],
+      index: true,
+    },
+
+    date: {
+      type: Date,
+      required: [true, 'Date is required'],
+    },
+    outTime: {
+      type: Date,
+      required: false,
+    },
+    inTime: {
+      type: Date,
+      required: false,
+    },
+    duty: {
+      dateOfDuty: Date,
+      place: String,
+      location: String,
+      typeOfDuty: String, 
+      natureOfDuty: String,
+      from: String, 
+      to: String,   
+      fromTime: Date,
+      tillTime: Date,
+    },
+
+    details: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+
+    outSignature: {
+      type: SignatureSchema,
+      default: null,
+    },
+    inSignature: {
+      type: SignatureSchema,
+      default: null,
+    },
+
+    authentication: {
+      type: [AuthenticationSchema],
+      default: [],
+    },
+
+    remark: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+
+    status: {
+      type: String,
+      enum: ['pending_out', 'out', 'returned', 'cancelled'],
+      default: 'pending_out',
+      index: true,
+    },
+  },
+  {
+    timestamps: true, 
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+export default mongoose.models.DutyAndAssetMovement ||
+  mongoose.model('Register', DutyAndAssetMovementSchema);
