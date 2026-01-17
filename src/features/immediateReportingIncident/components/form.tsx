@@ -358,7 +358,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 {/* ROW 6: Incident Place/Date/Time */}
                 <div className="grid grid-cols-1 gap-6 pl-6">
                     <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">6.</span>
+                        <span className="absolute -left-6 top-0 text-sm font-semibold">{(reportData.individuals?.length || 0) + 1}.</span>
                         <Label>Place of Incident</Label>
                         <SuggestionInput
                             fieldType="incidentPlace"
@@ -394,7 +394,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 {/* ROW 7: Brief */}
                 <div className="grid grid-cols-1 gap-6 pl-6">
                     <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">7.</span>
+                        <span className="absolute -left-6 top-0 text-sm font-semibold">{(reportData.individuals?.length || 0) + 2}.</span>
                         <Label>Brief of the Incident</Label>
                         <SuggestionTextarea
                             fieldType="incidentBrief"
@@ -409,7 +409,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 {/* ROW 8: Coord */}
                 <div className="grid grid-cols-1 gap-6 pl-6">
                     <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">8.</span>
+                        <span className="absolute -left-6 top-0 text-sm font-semibold">{(reportData.individuals?.length || 0) + 3}.</span>
                         <Label>Coord with Police on Civ Adm, FIR, Current Sit</Label>
                         <SuggestionTextarea
                             fieldType="coordinationWithPolice"
@@ -424,7 +424,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 {/* ROW 9: Covered By */}
                 <div className="grid grid-cols-1 gap-6 pl-6">
                     <div className="flex items-center gap-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">9.</span>
+                        <span className="absolute -left-6 top-0 text-sm font-semibold">{(reportData.individuals?.length || 0) + 4}.</span>
                         <span className="text-sm font-medium text-gray-700 whitespace-nowrap">(Mention Incident being Covered by</span>
                         <div className="w-64">
                             <SuggestionInput
@@ -442,7 +442,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 {/* ROW 10: Photos */}
                 <div className="grid grid-cols-1 gap-6 pl-6">
                     <div className="space-y-2 relative">
-                        <span className="absolute -left-6 top-0 text-sm font-semibold">10.</span>
+                        <span className="absolute -left-6 top-0 text-sm font-semibold">{(reportData.individuals?.length || 0) + 5}.</span>
                         <Label>Note: Relevant Photos if any may also be attached/shared</Label>
                         <div className="space-y-4 pt-2">
                             <Label className="text-sm text-gray-500 font-normal">Attach Relevant Photos (Optional)</Label>
