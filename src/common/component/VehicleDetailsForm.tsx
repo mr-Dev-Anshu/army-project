@@ -10,6 +10,7 @@ import { offenderFormsConfig } from "./multi-step-form/steps/Step1Particulars/co
 import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
+import CivilianWithDependent from "@/common/component/CivilianWithDependent";
 
 type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional";
 
@@ -250,23 +251,42 @@ export default function VehicleDetailsForm({
       {/* OFFENDER DETAILS */}
       {driverType && (
         <div className="border rounded-xl p-4 mt-4">
-          <OffenderDynamicForm
-            scope={scope as any}
-            title={`${driverType} Details`}
-            fields={offenderFormsConfig[driverType].fields}
-            path={
-              rootPath
-                ? `${rootPath}.tempOffender.details`
-                : scope === "traffic"
-                  ? "formData.traffic.offenderPeople[0].details"
-                  : scope === "static"
-                    ? "formData.staticSpeed.offenderPeople[0].details"
-                    : scope === "mp-main"
-                      ? "formData.mpReport.individualDetails.tempOffender.details"
-                      : "formData.mpReport.additionalIndividual.tempOffender.details"
-            }
-            isRoot={true}
-          />
+          {driverType === "Civilian" ? (
+            <CivilianWithDependent
+              id="vehicle-driver"
+              scope={scope as any}
+              showCoDriver={true}
+              path={
+                rootPath
+                  ? `${rootPath}.tempOffender.details`
+                  : scope === "traffic"
+                    ? "formData.traffic.offenderPeople[0].details"
+                    : scope === "static"
+                      ? "formData.staticSpeed.offenderPeople[0].details"
+                      : scope === "mp-main"
+                        ? "formData.mpReport.individualDetails.tempOffender.details"
+                        : "formData.mpReport.additionalIndividual.tempOffender.details"
+              }
+            />
+          ) : (
+            <OffenderDynamicForm
+              scope={scope as any}
+              title={`${driverType} Details`}
+              fields={offenderFormsConfig[driverType].fields}
+              path={
+                rootPath
+                  ? `${rootPath}.tempOffender.details`
+                  : scope === "traffic"
+                    ? "formData.traffic.offenderPeople[0].details"
+                    : scope === "static"
+                      ? "formData.staticSpeed.offenderPeople[0].details"
+                      : scope === "mp-main"
+                        ? "formData.mpReport.individualDetails.tempOffender.details"
+                        : "formData.mpReport.additionalIndividual.tempOffender.details"
+              }
+              isRoot={true}
+            />
+          )}
         </div>
       )}
     </div>

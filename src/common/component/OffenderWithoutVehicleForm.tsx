@@ -435,6 +435,8 @@ import { useForm } from "@/context/FormContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import OffenderDynamicForm from "./multi-step-form/steps/forms/OffenderDynamicForm";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import CivilianWithDependent from "./CivilianWithDependent";
 
 /* ================= TYPES ================= */
 
@@ -448,10 +450,14 @@ type Block = {
 
 interface Props {
   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
-  rootPath?: string; // 👈 NEW: Allow overriding the state path
+  rootPath?: string;
 }
 
-/* ================= COMPONENT ================= */
+/* ================= HELPER: GET VALUE DEEP ================= */
+const getValue = (obj: any, path: string) =>
+  path.split(".").reduce((o, k) => (o || {})[k], obj);
+
+/* ================= COMPONENT: MAIN ================= */
 
 export default function OffenderWithoutVehicleForm({
   scope = "traffic",
@@ -481,7 +487,6 @@ export default function OffenderWithoutVehicleForm({
 
     // 2. MP / Root Path (Single Object)
     if (scope === "mp-main" || scope === "mp-additional" || rootPath) {
-      // Determine Path
       let tempPath = "";
       if (rootPath) {
         tempPath = `${rootPath}.tempOffender`;
@@ -490,10 +495,6 @@ export default function OffenderWithoutVehicleForm({
       } else if (scope === "mp-additional") {
         tempPath = "formData.mpReport.additionalIndividual.tempOffender";
       }
-
-      // Helper to access deep path
-      const getValue = (obj: any, path: string) =>
-        path.split(".").reduce((o, k) => (o || {})[k], obj);
 
       const temp = getValue(state, tempPath);
 
@@ -529,7 +530,6 @@ export default function OffenderWithoutVehicleForm({
           ? state.formData.staticSpeed?.offenderPeople || []
           : state.formData.traffic?.offenderPeople || [];
 
-      // Logic: If block already mapped to index, update it. Else append.
       const currentBlock = blocks.find((b) => b.id === blockId);
       let newList = [...existing];
       let finalIndex = existing.length;
@@ -615,7 +615,7 @@ export default function OffenderWithoutVehicleForm({
 
   return (
     <div className="space-y-6 border rounded-lg p-6 bg-white">
-      <p className="font-semibold text-lg">Who was the Offender?</p>
+      <p className="font-semibold text-lg">Who was the Offender ?</p>
 
       {/* ================= BLOCKS ================= */}
       {blocks.map((block) => (
@@ -646,13 +646,21 @@ export default function OffenderWithoutVehicleForm({
 
           {/* 🔹 FORM */}
           {block.type && block.index !== undefined && (
-            <OffenderDynamicForm
-              title={`${String(block.type)} Details`}
-              fields={offenderFormsConfig[block.type].fields}
-              scope={scope as any}
-              path={getRenderPath(block)}
-              isRoot={false}
-            />
+            block.type === 'Civilian' ? (
+              <CivilianWithDependent
+                id={block.id}
+                scope={scope}
+                path={getRenderPath(block)}
+              />
+            ) : (
+              <OffenderDynamicForm
+                title={`${String(block.type)} Details`}
+                fields={offenderFormsConfig[block.type].fields}
+                scope={scope as any}
+                path={getRenderPath(block)}
+                isRoot={false}
+              />
+            )
           )}
         </div>
       ))}

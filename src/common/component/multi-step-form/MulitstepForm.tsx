@@ -40,6 +40,8 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     /* ================= HELPER FOR PERSON MAPPING ================= */
     const mapPerson = (person: any) => {
       const d = person?.details || {};
+      const rel = d.relativeDetails || {};
+
       if (!Object.keys(d).length && !person?.type) return null;
 
       return {
@@ -47,11 +49,11 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         name: val(d.name),
         so: val(d.so),
         relation: val(d.relation),
-        armyNo: val(d.armyNumber || d.armyNo),
-        rank: val(d.rank),
-        unit: val(d.unit),
-        command: val(d.command),
-        fmn: val(d.fmn),
+        armyNo: val(d.armyNumber || d.armyNo || rel.armyNumber || rel.armyNo),
+        rank: val(d.rank || rel.rank),
+        unit: val(d.unit || rel.unit),
+        command: val(d.command || rel.command),
+        fmn: val(d.fmn || rel.fmn),
         address: val(d.address),
         iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo),
       };

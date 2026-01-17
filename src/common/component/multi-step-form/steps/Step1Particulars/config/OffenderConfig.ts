@@ -31,14 +31,23 @@ export const offenderFormsConfig: any = {
   /* ================= CIVILIAN ================= */
 
   Civilian: {
-    title: "Fill Civilian Details",
-    helperText: "Enter required civilian offender details.",
+    title: "Fill Offender Particulars",
+    helperText:
+      "Select who the offender is and fill their details. The form will update based on your selection.",
     fields: [
-      { type: "input", label: "Full Name", placeholder: "Enter Name" },
-      { type: "input", label: "Address", placeholder: "Enter Address" },
-      { type: "input", label: "Father's / Husband's Name", placeholder: "Enter Father's / Husband's Name" },
+      { type: "input", label: "Name", placeholder: "e.g. John Apradhi" },
+      {
+        type: "input",
+        label: "Aadhar Card Number",
+        placeholder: "e.g. 8888 8888 8888",
+      },
+      {
+        type: "input",
+        label: "Father's / Husband's Name",
+        placeholder: "e.g. Apradhi k Papa",
+      },
+      { type: "input", label: "Address", placeholder: "Loaction" },
 
-      { type: "input", label: "I Card Number", placeholder: "Enter ID" },
     ],
   },
 

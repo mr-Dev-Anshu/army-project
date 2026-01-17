@@ -49,6 +49,8 @@ const labelKeyMap: Record<string, string> = {
   "Maid/Servant Pass Number": "passNo",
   "Pass Issue Date": "passIssueDate",
   "Pass Expire Date": "passExpireDate",
+  "Aadhar Card Number": "aadharCardNo",
+  "Civil/DD Vehicle Rider/Driver Name": "name",
 };
 
 export default function OffenderDynamicForm({
