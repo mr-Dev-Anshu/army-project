@@ -6,6 +6,7 @@ import ReportsCard from "@/common/component/cards/ReportsCard";
 import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
 import { useGetStaticSpeedRecords } from "@/features/staticSpeed/hooks";
 import { useGetAllMPReports } from "@/features/mpReports/hooks";
+import { useGetAllImmediateReportingIncidents } from "@/features/immediateReportingIncident/hooks"; // Import the hook
 import { useRouter } from "next/navigation";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 
@@ -22,6 +23,9 @@ export default function AllRegisteredReports() {
 
   // 3. MP Reports
   const { data: mpData, isLoading: mpLoading } = useGetAllMPReports();
+
+  // 4. Immediate Reporting Incidents
+  const { data: immediateData, isLoading: immediateLoading } = useGetAllImmediateReportingIncidents();
 
   // Compute Counts
   const counts = useMemo(() => {
@@ -45,11 +49,12 @@ export default function AllRegisteredReports() {
       trafficNoVehicle,
       staticSpeed: speedData?.length || 0,
       mpOccurrence: mpData?.length || 0,
-      mtAccident: 56, // Mock data as requested/implied by screenshot (placeholder)
+      immediateIncident: immediateData?.length || 0, // Add count here
+      mtAccident: 56, // Mock data
     };
-  }, [trafficData, speedData, mpData]);
+  }, [trafficData, speedData, mpData, immediateData]);
 
-  const isLoading = trafficLoading || speedLoading || mpLoading;
+  const isLoading = trafficLoading || speedLoading || mpLoading || immediateLoading;
 
   if (isLoading) {
     return (
@@ -62,7 +67,7 @@ export default function AllRegisteredReports() {
   const reportCards = [
     {
       title: "(Initial Report) Immediate Reporting of Incident",
-      count: 0,
+      count: counts.immediateIncident, // Use dynamic count
       icon: (
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="48" height="48" rx="24" fill="#FF9933" />
@@ -279,6 +284,7 @@ export default function AllRegisteredReports() {
       <ReportPageHeader
         title="All Registered Reports"
         breadcrumbItems={[{ label: "Reports & Analysis", href: "/" }]}
+        reportCount={counts.trafficVehicle + counts.trafficNoVehicle + counts.staticSpeed + counts.mpOccurrence + counts.immediateIncident + counts.mtAccident}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

@@ -509,7 +509,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 <Button variant="outline" onClick={onCancel}>Cancel</Button>
                 <Button className="bg-[#0088FF] hover:bg-blue-700 text-white" onClick={handleSave} disabled={isPending}>
                     {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    <CheckCheck />Save Report
+                    <CheckCheck className="w-4 h-4 mr-2" />{initialData ? "Update Report" : "Save Report"}
                 </Button>
             </div>
         </div>

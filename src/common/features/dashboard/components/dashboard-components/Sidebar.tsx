@@ -14,6 +14,7 @@ import {
   ClipboardList,
   Gauge,
   Shield,
+  Siren,
 } from "lucide-react";
 
 import {
@@ -105,6 +106,12 @@ const Sidebar = () => {
   ];
 
   const createNewRecordItems: MenuItem[] = [
+    {
+      icon: <Siren className="w-5 h-5" />
+      ,
+      label: "Immediate Reporting of Incident (Initial Report)",
+      href: "/create-record/immediate-reporting-incident",
+    },
     {
       icon: <ConeIcon className="w-5 h-5" color="currentColor" />,
       label: "General & Traffic Offence Report",
@@ -317,8 +324,8 @@ const Sidebar = () => {
 
         {!isCollapsed && (
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">Provost</h1>
-            <p className="text-sm text-gray-400 font-medium">Corps HQ</p>
+            <h1 className="text-2xl font-bold text-gray-900">Provost | 21 Corps</h1>
+            <p className="text-sm text-gray-400 font-medium">Central Command</p>
           </div>
         )}
 

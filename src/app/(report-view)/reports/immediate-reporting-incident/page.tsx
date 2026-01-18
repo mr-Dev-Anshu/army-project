@@ -87,6 +87,7 @@ export default function ImmediateReportingIncidentReportsPage() {
                     setViewingReport(null);
                     setShouldAutoPrint(false);
                 }}
+                onEdit={() => handleEdit(viewingReport)}
                 isDownloading={isDownloading}
                 downloadType={downloadType}
                 onDownloadWord={handleDownloadWord}

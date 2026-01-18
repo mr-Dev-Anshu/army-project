@@ -116,7 +116,9 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 individuals.some((ind: any) =>
                     (ind.armyNo || "").toLowerCase().includes(searchTerm) ||
                     (ind.name || "").toLowerCase().includes(searchTerm) ||
-                    (ind.unit || "").toLowerCase().includes(searchTerm)
+                    (ind.unit || "").toLowerCase().includes(searchTerm) ||
+                    (ind.unitLocation || "").toLowerCase().includes(searchTerm) ||
+                    (ind.fmn || "").toLowerCase().includes(searchTerm)
                 );
 
             let matchesDate = true;
@@ -415,7 +417,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                     fromDate: "",
                     toDate: "",
                 })}
-                placeholder="Search by report no..."
+                placeholder="Search by army no, name unit, fmn..."
                 showFmn={true}
                 showUnit={true}
             />
