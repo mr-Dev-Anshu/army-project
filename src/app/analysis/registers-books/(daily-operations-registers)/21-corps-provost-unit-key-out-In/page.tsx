@@ -1,11 +1,8 @@
-import KeyOutInForm from "@/features/RegisterBooks/dailyOperationsRegisters/21CorpsProvostUnitKeyOutIn/components/form";
-
+import KeyOutInRegisterPage from "@/features/RegisterBooks/DailyOperationsRegisters/21CorpsProvostUnitKeyOutIn";
 
 const Page = () => {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-neutral-100 p-8">
-            <KeyOutInForm />
-        </div>
+        <KeyOutInRegisterPage />
     );
 };
 

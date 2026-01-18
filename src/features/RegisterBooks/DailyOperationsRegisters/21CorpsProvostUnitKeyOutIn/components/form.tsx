@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Pen, X, Key } from "lucide-react";
+import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +10,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { IndividualInputFields, IndividualData } from "@/features/RegisterBooks/components/IndividualInputFields";
 import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
 import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
+import { useCreateKeyOutInRegister, useUpdateKeyOutInRegister } from "../hooks";
 
-const KeyOutInForm = () => {
+interface KeyOutInFormProps {
+    initialData?: any;
+    onSuccess: () => void;
+    onCancel: () => void;
+}
+
+const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) => {
+    const createMutation = useCreateKeyOutInRegister();
+    const updateMutation = useUpdateKeyOutInRegister();
+
+    // Form State
+    const [keyOutTime, setKeyOutTime] = useState("");
+    const [outSignature, setOutSignature] = useState("");
+    const [storeName, setStoreName] = useState("");
+    const [keyNumber, setKeyNumber] = useState("");
+    const [keyInTime, setKeyInTime] = useState("");
+    const [inSignature, setInSignature] = useState("");
+    const [remark, setRemark] = useState("");
     const [individual, setIndividual] = useState<IndividualData>({
         armyNo: "",
         rank: "",
@@ -20,26 +39,79 @@ const KeyOutInForm = () => {
         command: "",
     });
 
+    useEffect(() => {
+        if (initialData) {
+            setKeyOutTime(initialData.outTime ? new Date(initialData.outTime).toISOString().substring(11, 16) : "");
+            setKeyInTime(initialData.inTime ? new Date(initialData.inTime).toISOString().substring(11, 16) : "");
+            setOutSignature(initialData.outSignature?.value || "");
+            setInSignature(initialData.inSignature?.value || "");
+            setRemark(initialData.remark || "");
+
+            // Details
+            if (initialData.details) {
+                setStoreName(initialData.details.storeName || "");
+                setKeyNumber(initialData.details.keyNumber || "");
+                if (initialData.details.individual) {
+                    setIndividual(initialData.details.individual);
+                }
+            }
+        }
+    }, [initialData]);
+
     const handleFieldChange = (field: keyof IndividualData, value: string) => {
         setIndividual((prev) => ({ ...prev, [field]: value }));
     };
 
+    const handleSubmit = async () => {
+        // Validation
+        if (!keyOutTime) {
+            toast.error("Key OUT Time is required");
+            return;
+        }
+        if (!storeName) {
+            toast.error("Store name is required");
+            return;
+        }
+        if (!keyNumber) {
+            toast.error("Key number is required");
+            return;
+        }
+        if (!individual.armyNo) {
+            toast.error("Army Number is required");
+            return;
+        }
+
+        const payload: any = {
+            type: "key",
+            date: new Date().toISOString(), // Or a specific date picker field
+            outTime: keyOutTime ? new Date(`1970-01-01T${keyOutTime}:00Z`).toISOString() : undefined, // Simplify for demo
+            inTime: keyInTime ? new Date(`1970-01-01T${keyInTime}:00Z`).toISOString() : undefined,
+            outSignature: { type: "text", value: outSignature },
+            inSignature: { type: "text", value: inSignature },
+            remark,
+            details: {
+                storeName,
+                keyNumber,
+                individual
+            }
+        };
+
+        try {
+            if (initialData?._id) {
+                await updateMutation.mutateAsync({ id: initialData._id, payload });
+            } else {
+                await createMutation.mutateAsync(payload);
+            }
+            onSuccess();
+        } catch (error) {
+            console.error("Failed to save:", error);
+            // Handle error (toast, etc.)
+        }
+    };
+
     return (
-        <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
-                <div>
-                    <h2 className="text-lg font-bold text-neutral-900">
-                        Add Key Out Entry
-                    </h2>
-                    <p className="text-sm text-neutral-500">
-                        Record Key departure details
-                    </p>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400">
-                    <X className="h-5 w-5" />
-                </Button>
-            </div>
+        <div className="mx-auto w-full max-w-4xl bg-white font-inter">
+            {/* Note: Header removed as it is handled by the RightSideSheet/Modal usually, or can stay if inline */}
 
             <div className="p-6 space-y-8">
                 {/* Key OUT Details */}
@@ -54,6 +126,8 @@ const KeyOutInForm = () => {
                                 id="keyOutTime"
                                 type="time"
                                 className="block w-full"
+                                value={keyOutTime}
+                                onChange={(e) => setKeyOutTime(e.target.value)}
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -65,6 +139,8 @@ const KeyOutInForm = () => {
                                     id="outSignature"
                                     placeholder="Text / Digital"
                                     className="pr-10"
+                                    value={outSignature}
+                                    onChange={(e) => setOutSignature(e.target.value)}
                                 />
                                 <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
                             </div>
@@ -79,7 +155,12 @@ const KeyOutInForm = () => {
                         <Label htmlFor="storeName" className="text-xs font-medium text-neutral-700">
                             Store/Office Name
                         </Label>
-                        <Input id="storeName" placeholder="eg. ramu ki dukan" />
+                        <Input
+                            id="storeName"
+                            placeholder="eg. Ramu ki dukan"
+                            value={storeName}
+                            onChange={(e) => setStoreName(e.target.value)}
+                        />
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="keyNumber" className="text-xs font-medium text-neutral-700">
@@ -90,6 +171,8 @@ const KeyOutInForm = () => {
                                 id="keyNumber"
                                 placeholder="eg. 123456"
                                 className="pr-10"
+                                value={keyNumber}
+                                onChange={(e) => setKeyNumber(e.target.value)}
                             />
                             <Key className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
                         </div>
@@ -119,6 +202,8 @@ const KeyOutInForm = () => {
                                 id="keyInTime"
                                 type="time"
                                 className="block w-full"
+                                value={keyInTime}
+                                onChange={(e) => setKeyInTime(e.target.value)}
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -130,6 +215,8 @@ const KeyOutInForm = () => {
                                     id="inSignature"
                                     placeholder="Text / Digital"
                                     className="pr-10"
+                                    value={inSignature}
+                                    onChange={(e) => setInSignature(e.target.value)}
                                 />
                                 <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
                             </div>
@@ -145,6 +232,8 @@ const KeyOutInForm = () => {
                             id="remark"
                             placeholder="Enter remark"
                             className="resize-none min-h-[80px]"
+                            value={remark}
+                            onChange={(e) => setRemark(e.target.value)}
                         />
                     </div>
                 </section>
@@ -154,7 +243,12 @@ const KeyOutInForm = () => {
             </div>
 
             {/* Footer */}
-            <FormFooter />
+            <div className="border-t border-neutral-100 p-6 flex justify-end gap-3">
+                <Button variant="outline" onClick={onCancel}>Cancel</Button>
+                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+                    {createMutation.isPending || updateMutation.isPending ? "Saving..." : "Save Entry"}
+                </Button>
+            </div>
         </div>
     );
 };
