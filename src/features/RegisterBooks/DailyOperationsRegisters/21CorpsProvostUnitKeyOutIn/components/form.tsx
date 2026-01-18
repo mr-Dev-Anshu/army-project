@@ -38,6 +38,11 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
         fmn: "",
         command: "",
     });
+    const [authentication, setAuthentication] = useState({
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: "",
+    });
 
     useEffect(() => {
         if (initialData) {
@@ -46,6 +51,10 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
             setOutSignature(initialData.outSignature?.value || "");
             setInSignature(initialData.inSignature?.value || "");
             setRemark(initialData.remark || "");
+
+            if (initialData.authentication) {
+                setAuthentication(initialData.authentication);
+            }
 
             // Details
             if (initialData.details) {
@@ -60,6 +69,10 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
 
     const handleFieldChange = (field: keyof IndividualData, value: string) => {
         setIndividual((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleAuthenticationChange = (field: string, value: string) => {
+        setAuthentication((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleSubmit = async () => {
@@ -89,6 +102,7 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
             outSignature: { type: "text", value: outSignature },
             inSignature: { type: "text", value: inSignature },
             remark,
+            authentication,
             details: {
                 storeName,
                 keyNumber,
@@ -239,7 +253,10 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
                 </section>
 
                 {/* Initials / Authentication */}
-                <AuthenticationSection />
+                <AuthenticationSection
+                    data={authentication}
+                    onChange={handleAuthenticationChange}
+                />
             </div>
 
             {/* Footer */}

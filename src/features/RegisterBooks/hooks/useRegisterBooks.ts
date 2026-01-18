@@ -13,7 +13,11 @@ export interface RegisterEntry {
     details?: any;
     outSignature?: any;
     inSignature?: any;
-    authentication?: any[];
+    authentication?: {
+        initialsMPCPNCO?: string;
+        initialsQMSJCO?: string;
+        initials2IC?: string;
+    };
     remark?: string;
     status?: string;
     createdAt?: string;

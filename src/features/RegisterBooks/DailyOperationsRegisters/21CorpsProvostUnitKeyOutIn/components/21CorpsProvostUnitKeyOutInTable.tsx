@@ -188,8 +188,8 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
                                             <td className="px-4 py-4 align-top border-r border-gray-50 text-gray-900 font-medium">
                                                 {item.outTime ? format(new Date(item.outTime), "HH:mm") : "-"}
                                             </td>
-                                            <td className="px-4 py-4 align-top border-r border-gray-50">
-                                                {/* Signature Placeholder */}
+                                            <td className="px-4 py-4 align-top border-r border-gray-50 text-gray-900 font-medium">
+                                                {item.outSignature?.value || "-"}
                                             </td>
 
                                             {/* Key In */}
@@ -197,18 +197,18 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
                                                 {item.inTime ? format(new Date(item.inTime), "HH:mm") : "--"}
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-50">
-                                                {item.inTime ? "--" : ""}
+                                                {item.inSignature?.value || "--"}
                                             </td>
 
                                             {/* Initials */}
                                             <td className="px-4 py-4 align-top border-r border-gray-50 text-center">
-                                                {/* MPCR NCO */}
+                                                {item.authentication?.initialsMPCPNCO || "-"}
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-50 text-center">
-                                                {/* SM/SJCO */}
+                                                {item.authentication?.initialsQMSJCO || "-"}
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-50 text-center">
-                                                {/* 2IC */}
+                                                {item.authentication?.initials2IC || "-"}
                                             </td>
 
                                             {/* Actions */}

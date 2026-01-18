@@ -26,10 +26,9 @@ const signatureSchema = Joi.object({
 });
 
 const authenticationSchema = Joi.object({
-    role: Joi.string().required(),
-    initials: Joi.string().trim().allow(""),
-    signatureType: Joi.string().valid(...textDigitalEnum).default("text"),
-    signedAt: Joi.date().default(Date.now),
+    initialsMPCPNCO: Joi.string().trim().allow("").optional(),
+    initialsQMSJCO: Joi.string().trim().allow("").optional(),
+    initials2IC: Joi.string().trim().allow("").optional(),
 });
 
 const dutySchema = Joi.object({
@@ -71,7 +70,7 @@ export const createRegisterSchema = Joi.object({
     outSignature: signatureSchema.allow(null).optional(),
     inSignature: signatureSchema.allow(null).optional(),
 
-    authentication: Joi.array().items(authenticationSchema).optional(),
+    authentication: authenticationSchema.optional(),
 
     remark: Joi.string().trim().allow("").optional(),
 

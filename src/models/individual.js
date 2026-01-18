@@ -43,9 +43,4 @@ const individualSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Force model recompilation if it exists to pick up schema changes
-if (mongoose.models.Individual) {
-    delete mongoose.models.Individual;
-}
-
-export default mongoose.model('Individual', individualSchema);
+export default mongoose.models.Individual || mongoose.model('Individual', individualSchema);

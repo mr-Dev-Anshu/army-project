@@ -18,25 +18,10 @@ const SignatureSchema = new Schema({
   },
 }, { _id: false });
 
-const AuthenticationSchema = new Schema({
-  role: {
-    type: String,
-    enum: ['MPCR_NCO', 'SM_SJCO', '2IC'],
-    required: true,
-  },
-  initials: {
-    type: String,
-    trim: true,
-  },
-  signatureType: {
-    type: String,
-    enum: ['text', 'digital'],
-    default: 'text',
-  },
-  signedAt: {
-    type: Date,
-    default: Date.now,
-  },
+const authenticationSchema = new Schema({
+  initialsMPCPNCO: { type: String },
+  initialsQMSJCO: { type: String },
+  initials2IC: { type: String },
 }, { _id: false });
 
 const DutyAndAssetMovementSchema = new Schema(
@@ -103,8 +88,8 @@ const DutyAndAssetMovementSchema = new Schema(
     },
 
     authentication: {
-      type: [AuthenticationSchema],
-      default: [],
+      type: authenticationSchema,
+      default: {},
     },
 
     remark: {
@@ -128,5 +113,5 @@ const DutyAndAssetMovementSchema = new Schema(
   }
 );
 
-export default mongoose.models.DutyAndAssetMovement ||
+export default mongoose.models.Register ||
   mongoose.model('Register', DutyAndAssetMovementSchema);

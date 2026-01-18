@@ -46,8 +46,9 @@ export async function POST(req: NextRequest) {
         const newRegister = await service.createRegister(value);
         return NextResponse.json(newRegister, { status: 201 });
     } catch (error: any) {
+        console.error("Register creation error:", error);
         return NextResponse.json(
-            { error: error.message || "Failed to create register entry" },
+            { error: error.message || "Failed to create register entry", details: error.toString() },
             { status: 500 }
         );
     }
