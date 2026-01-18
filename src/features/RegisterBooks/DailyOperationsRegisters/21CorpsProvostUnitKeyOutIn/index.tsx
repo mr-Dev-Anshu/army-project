@@ -74,8 +74,8 @@ const KeyOutInRegisterPage = () => {
             <RightSideSheet
                 isOpen={isAddOpen}
                 onClose={() => setIsAddOpen(false)}
-                title={editingItem ? "Edit Key Record" : "Add Key Record"}
-                description={editingItem ? "Modify details of the key transaction." : "Record a new key transaction."}
+                title={editingItem ? "Edit Key Out Entry" : "Add Key Out Entry"}
+                description={editingItem ? "Modify details of the key departure." : "Record Key departure details"}
             >
                 <KeyOutInForm
                     initialData={editingItem}
