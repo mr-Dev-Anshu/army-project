@@ -51,6 +51,7 @@ const Sidebar = () => {
 
   // Routes where sidebar should DEFAULT to collapsed (for more screen space)
   const routesThatPreferCollapsed = [
+    "/",
     "/create-record",
     "/forms",
     "/test",

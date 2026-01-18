@@ -13,8 +13,9 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { SuggestionTextarea } from "@/common/component/SuggestionTextarea";
 import { useCreateImmediateReportingIncident, useUpdateImmediateReportingIncident } from "../hooks";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types"; // Ensure this type is exported
-import { Loader2, Upload, X, Plus, Trash2, CheckCheck } from "lucide-react";
+import { Loader2, Upload, X, Plus, Trash2, CheckCheck, PanelLeft } from "lucide-react";
 import { uploadFile, uploadMultipleFiles } from "@/lib/uploadFile";
+import Link from "next/link";
 
 const INITIAL_STATE = {
     individuals: [{
@@ -197,6 +198,21 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
     return (
         <div className="flex flex-col h-full bg-white font-[Inter] p-6 max-w-5xl mx-auto">
+            {/* Breadcrumb Header */}
+            <div className="flex items-center gap-4 text-sm text-[#0A0A0A] mb-6 pb-4 border-b border-gray-200">
+                <PanelLeft className="w-5 h-5 text-gray-500" />
+                <div className="h-4 w-[1px] bg-gray-200"></div>
+                <div className="flex items-center gap-2">
+                    <Link href="/create-record" className="text-gray-600 hover:text-gray-900 transition-colors">
+                        Create New Record
+                    </Link>
+                    <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
+                        <path d="M0.75 8.75L4.75 4.75L0.75 0.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="font-semibold text-[#0A0A0A]">Immediate Reporting of Incident</span>
+                </div>
+            </div>
+
             <div className="space-y-1 mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">Create New Immediate Reporting of Incident</h1>
                 <p className="text-gray-500 text-sm">Type of incident like injury to serving soldier due to RTA etc.</p>
