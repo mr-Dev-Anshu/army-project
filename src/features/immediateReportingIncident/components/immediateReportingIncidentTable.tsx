@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { format } from "date-fns";
 import { MoreVertical } from "lucide-react";
 import { toast } from "react-toastify";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
+import { useReactToPrint } from "react-to-print";
 
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
@@ -16,6 +17,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import ImmediateReportingIncidentReport from "@/components/reports/ImmediateReportingIncident";
 
 import { useGetAllImmediateReportingIncidents, useDeleteImmediateReportingIncident } from "../hooks";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types";
@@ -23,9 +26,10 @@ import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/ty
 interface Props {
     onAddNew: () => void;
     onEdit: (item: ImmediateReportingIncident) => void;
+    onView: (item: ImmediateReportingIncident) => void;
 }
 
-const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) => {
+const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, onView }) => {
     // 1. Fetch data
     const { data: incidents = [], isLoading } = useGetAllImmediateReportingIncidents();
     const { mutateAsync: deleteIncident, isPending: isDeleting } = useDeleteImmediateReportingIncident();
@@ -344,6 +348,9 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit }) 
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onView(item)}>
+                            View
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEdit(item)}>
                             Edit
                         </DropdownMenuItem>
