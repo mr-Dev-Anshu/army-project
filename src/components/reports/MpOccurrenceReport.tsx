@@ -93,7 +93,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
     className
 }) => {
     return (
-        <div className={`font-[Arial] text-[#0A0A0A]  p-8 flex flex-col gap-8 print:block print:p-0 print:gap-0 print:bg-white text-[12px] ${className || ''}`}>
+        <div className={`font-[Arial] text-[#0A0A0A] w-full items-center flex flex-col gap-8 print:block print:gap-0 print:bg-white text-[12px] ${className || ''}`}>
             <style type="text/css" media="print">
                 {`
                   @page {
@@ -108,7 +108,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </style>
 
             {/* ==================== PAGE 1 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:px-[48px] print:pb-[48px] print:pt-[20px]" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:px-[48px] print:pb-[48px] print:pt-[20px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 1 */}
                 <div className="text-center font-bold text-[12px] underline mb-4 print:hidden">RESTRICTED</div>
@@ -343,13 +343,13 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
 
                 {/* Page 1 Footer */}
                 <div className="mt-8 text-center font-bold">
-                    <div className="text-[12px] underline mt-2">RESTRICTED</div>
+                    <div className="text-[12px]  underline mt-2">RESTRICTED</div>
                 </div>
             </div>
 
 
             {/* ==================== PAGE 2 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 2 */}
                 <div className="text-center font-bold mb-8">
@@ -511,7 +511,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 3 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 3 */}
                 <div className="text-center font-bold mb-4">
@@ -549,7 +549,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 4 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 4 */}
                 <div className="text-center font-bold mb-4">
@@ -581,7 +581,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 5 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
                 {/* Header Page 5 */}
                 <div className="text-center font-bold mb-4">
@@ -620,7 +620,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
             </div>
 
             {/* ==================== PAGE 6 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-0 relative flex flex-col print:p-[48px]">
+            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]">
 
                 {/* Header Page 6 */}
                 <div className="text-center font-bold mb-4">
