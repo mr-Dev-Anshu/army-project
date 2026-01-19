@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "@/apis";
-import { CreateImmediateReportingIncidentData, PrepareUpdateImmediateReportingIncidentData, ImmediateReportingIncidentFilters, UpdateImmediateReportingIncidentData } from "@/apis/immediateReportingIncident/types";
+import { CreateImmediateReportingIncidentData, ImmediateReportingIncidentFilters, UpdateImmediateReportingIncidentData } from "@/apis/immediateReportingIncident/types";
 
 export const useGetAllImmediateReportingIncidents = (filters?: ImmediateReportingIncidentFilters) => {
     return useQuery({

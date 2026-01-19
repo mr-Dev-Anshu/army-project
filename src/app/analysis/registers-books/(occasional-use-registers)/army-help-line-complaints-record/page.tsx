@@ -1,4 +1,4 @@
-import ArmyHelpLineComplaintsForm from "@/features/RegisterBooks/occasionalUseRegisters/armyHelpLineComplaintsRecord/components/form";
+import ArmyHelpLineComplaintsForm from "@/features/RegisterBooks/OccasionalUseRegisters/armyHelpLineComplaintsRecord/components/form";
 
 const Page = () => {
     return (

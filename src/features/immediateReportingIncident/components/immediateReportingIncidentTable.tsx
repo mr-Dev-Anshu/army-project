@@ -144,27 +144,27 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
 
             let matchesUnit = true;
             if (filters.unit && filters.unit !== "All") {
-                matchesUnit = individuals.some((ind: any) => (ind.unit || "").toLowerCase() === filters.unit.toLowerCase());
+                matchesUnit = individuals.some((ind: any) => (ind.unit || "").toLowerCase() === (filters.unit || "").toLowerCase());
             }
 
             let matchesFmn = true;
             if (filters.fmn && filters.fmn !== "All") {
-                matchesFmn = individuals.some((ind: any) => (ind.fmn || "").toLowerCase() === filters.fmn.toLowerCase());
+                matchesFmn = individuals.some((ind: any) => (ind.fmn || "").toLowerCase() === (filters.fmn || "").toLowerCase());
             }
 
             let matchesPlace = true;
             if (filters.placeOfOffence && filters.placeOfOffence !== "All") {
-                matchesPlace = (item.incidentPlace || "").toLowerCase().includes(filters.placeOfOffence.toLowerCase());
+                matchesPlace = (item.incidentPlace || "").toLowerCase().includes((filters.placeOfOffence || "").toLowerCase());
             }
 
             let matchesUnitLocation = true;
             if (filters.unitLocation && filters.unitLocation !== "All") {
-                matchesUnitLocation = individuals.some((ind: any) => (ind.unitLocation || "").toLowerCase().includes(filters.unitLocation.toLowerCase()));
+                matchesUnitLocation = individuals.some((ind: any) => (ind.unitLocation || "").toLowerCase().includes((filters.unitLocation || "").toLowerCase()));
             }
 
             let matchesWorkingStatus = true;
             if (filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") {
-                matchesWorkingStatus = individuals.some((ind: any) => ind.individualWorkingStatus === filters.individualWorkingStatus);
+                matchesWorkingStatus = individuals.some((ind: any) => (ind.individualWorkingStatus || "") === (filters.individualWorkingStatus || ""));
             }
 
             return matchesSearch && matchesDate && matchesUnit && matchesFmn && matchesPlace && matchesUnitLocation && matchesWorkingStatus;

@@ -1,11 +1,12 @@
 "use client";
 
+import React, { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ImmediateReportingIncidentForm } from "@/features/immediateReportingIncident/components/form";
 import { useGetImmediateReportingIncidentById } from "@/features/immediateReportingIncident/hooks";
 import { Loader2 } from "lucide-react";
 
-export default function CreateImmediateReportingIncidentPage() {
+function CreateImmediateReportingIncidentPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
@@ -36,5 +37,17 @@ export default function CreateImmediateReportingIncidentPage() {
                 initialData={initialData}
             />
         </div>
+    );
+}
+
+export default function CreateImmediateReportingIncidentPage() {
+    return (
+        <Suspense fallback={
+            <div className="h-full flex items-center justify-center bg-gray-50">
+                <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+            </div>
+        }>
+            <CreateImmediateReportingIncidentPageContent />
+        </Suspense>
     );
 }

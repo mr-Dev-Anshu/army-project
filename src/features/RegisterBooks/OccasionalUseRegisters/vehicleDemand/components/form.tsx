@@ -24,6 +24,16 @@ const VehicleDemandForm = () => {
         setIndividual((prev) => ({ ...prev, [field]: value }));
     };
 
+    const [authData, setAuthData] = useState({
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: "",
+    });
+
+    const handleAuthChange = (field: string, value: string) => {
+        setAuthData(prev => ({ ...prev, [field]: value }));
+    };
+
     return (
         <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
             {/* Header */}
@@ -138,7 +148,7 @@ const VehicleDemandForm = () => {
                 </section>
 
                 {/* Initials / Authentication */}
-                <AuthenticationSection />
+                <AuthenticationSection data={authData} onChange={handleAuthChange} />
 
                 {/* Add Remark */}
                 <section className="space-y-4 pt-4 border-t border-neutral-100">
