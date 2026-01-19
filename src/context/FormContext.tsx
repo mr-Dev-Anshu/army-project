@@ -245,6 +245,28 @@ export const initialState: GlobalFormState = {
       remark: "",
       customFields: {},
     },
+
+    immediateReportingIncident: {
+      _id: "",
+      individuals: [{
+        armyNo: "",
+        rank: "",
+        name: "",
+        age: "",
+        totalServiceDuration: "",
+        unit: "",
+        unitLocation: "",
+        fmn: "",
+        individualWorkingStatus: "",
+      }],
+      incidentPlace: "",
+      incidentDate: "",
+      incidentTime: "",
+      incidentBrief: "",
+      coordinationWithPolice: "",
+      incidentCoveredBy: "",
+      relevantPhotos: [],
+    },
   },
 };
 

@@ -1,5 +1,4 @@
-import MobilePhoneInOutForm from "@/features/RegisterBooks/dailyOperationsRegisters/mobilePhoneInOut/components/form";
-
+import MobilePhoneInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/mobilePhoneInOut/components/form";
 
 const Page = () => {
     return (

@@ -44,6 +44,16 @@ const ConvoyInOutForm = () => {
         return total > 0 ? total.toString() : "";
     };
 
+    const [authData, setAuthData] = useState({
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: "",
+    });
+
+    const handleAuthChange = (field: string, value: string) => {
+        setAuthData(prev => ({ ...prev, [field]: value }));
+    };
+
     return (
         <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
             {/* Header */}
@@ -355,7 +365,7 @@ const ConvoyInOutForm = () => {
                 </section>
 
                 {/* Initials / Authentication */}
-                <AuthenticationSection />
+                <AuthenticationSection data={authData} onChange={handleAuthChange} />
             </div>
 
             {/* Footer */}

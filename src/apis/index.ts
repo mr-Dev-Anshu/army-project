@@ -77,9 +77,19 @@ export * from "@/apis/rankMasterList/update";
 export * from "@/apis/rankMasterList/delete";
 
 
+
 /* ================= UNIT MASTER LIST ================= */
 export * from "@/apis/unitMasterList/create";
 export * from "@/apis/unitMasterList/getAll";
 export * from "@/apis/unitMasterList/getById";
 export * from "@/apis/unitMasterList/update";
 export * from "@/apis/unitMasterList/delete";
+
+
+/* ================= IMMEDIATE REPORTING INCIDENT ================= */
+export * from "@/apis/immediateReportingIncident/create";
+export * from "@/apis/immediateReportingIncident/getAll";
+export * from "@/apis/immediateReportingIncident/getById";
+export * from "@/apis/immediateReportingIncident/update";
+export * from "@/apis/immediateReportingIncident/delete";
+

@@ -36,6 +36,16 @@ const GeneralDutyDiaryForm = () => {
         setCurrentIndividual((prev) => ({ ...prev, [field]: value }));
     };
 
+    const [authData, setAuthData] = useState({
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: "",
+    });
+
+    const handleAuthChange = (field: string, value: string) => {
+        setAuthData(prev => ({ ...prev, [field]: value }));
+    };
+
     const handleAddIndividual = () => {
         if (!currentIndividual.armyNo || !currentIndividual.name) return; // Basic validation
         setIndividuals([
@@ -266,7 +276,7 @@ const GeneralDutyDiaryForm = () => {
                 </section>
 
                 {/* Initials / Authentication Section */}
-                <AuthenticationSection />
+                <AuthenticationSection data={authData} onChange={handleAuthChange} />
             </div>
 
             {/* Footer */}
