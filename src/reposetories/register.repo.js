@@ -1,9 +1,18 @@
 import Register from "@/models/Register";
 
+import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
+import { REGISTER_BOOKS_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/RegisterBooks";
+
 export class RegisterRepository {
     async create(data) {
         const record = new Register(data);
-        return await record.save();
+        const savedRecord = await record.save();
+
+        // Track suggestions
+        trackFieldSuggestions(savedRecord.toObject(), REGISTER_BOOKS_SUGGESTION_CONFIG)
+            .catch(err => console.error("Error tracking register suggestions:", err));
+
+        return savedRecord;
     }
 
     async findById(id) {
@@ -34,10 +43,17 @@ export class RegisterRepository {
     }
 
     async updateById(id, data) {
-        return await Register.findByIdAndUpdate(id, data, {
+        const updated = await Register.findByIdAndUpdate(id, data, {
             new: true,
             runValidators: true,
         }).populate('offender').lean();
+
+        if (updated) {
+            trackFieldSuggestions(updated, REGISTER_BOOKS_SUGGESTION_CONFIG)
+                .catch(err => console.error("Error tracking register suggestions on update:", err));
+        }
+
+        return updated;
     }
 
     async deleteById(id) {

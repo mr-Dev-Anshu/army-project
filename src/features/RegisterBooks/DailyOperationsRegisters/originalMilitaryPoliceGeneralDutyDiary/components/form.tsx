@@ -1,6 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+
+
+
+
+
+
+
+
 import {
     Pen,
     X,
@@ -120,7 +129,9 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
 
             try {
                 // Fetch from Registers endpoint to get records created by this form
+                console.log("Fetching report:", reportNo);
                 const res = await fetch(`/api/registers?reportNo=${reportNo}`);
+                console.log("Fetch status:", res.status);
                 if (res.ok) {
                     const data = await res.json();
                     if (data && data.details) { // Check for 'details' which is specific to Register schema
@@ -149,10 +160,18 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                         if (details) {
                             setOffenderDetails(details);
                         }
+
+                        toast.success("Report data loaded successfully");
+                    } else {
+                        toast.error("No data exists for this report no.");
                     }
+                } else {
+                    console.error("Fetch failed:", res.status, res.statusText);
+                    toast.error(`Failed to fetch report data: ${res.status}`);
                 }
             } catch (error) {
                 console.error("Error fetching report data:", error);
+                toast.error("Failed to fetch report data");
             }
         };
 
@@ -1415,8 +1434,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
             <FormFooter
                 onSave={handleSubmit}
                 onCancel={onCancel}
-                saveText={initialData?._id ? "Update" : "Save"}
-                isSaving={createMutation.isPending || updateMutation.isPending}
+                saveLabel={initialData ? "Update" : "Save & Add Another"}
+                isLoading={createMutation.isPending || updateMutation.isPending}
             />
         </div>
     );
