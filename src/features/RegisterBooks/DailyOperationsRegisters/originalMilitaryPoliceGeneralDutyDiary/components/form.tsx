@@ -108,6 +108,58 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
         }
     }, [initialData]);
 
+    // Auto-fetch report data when reportNo changes
+    useEffect(() => {
+        const fetchReportData = async () => {
+            if (!reportNo || reportNo.length < 3) return;
+
+            // Avoid fetching if we are populating from initialData to prevent overwrite loop, 
+            // but here we rely on user input. 
+            // If reportNo matches initialData.reportNo, and we haven't changed it...
+            // Actually, fetching fresh data is fine.
+
+            try {
+                // Fetch from Registers endpoint to get records created by this form
+                const res = await fetch(`/api/registers?reportNo=${reportNo}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.details) { // Check for 'details' which is specific to Register schema
+                        // Populate Offence details from Register data
+                        if (data.details.offenceType) {
+                            setOffenceType(data.details.offenceType);
+                        }
+
+                        if (data.details.placeOfOffence) {
+                            setPlaceOfOffence(data.details.placeOfOffence);
+                        }
+
+                        if (data.details.occurrenceBrief) {
+                            setOccurrenceBrief(data.details.occurrenceBrief);
+                        }
+
+                        // Populate Offender details
+                        const offender = data.offender || {};
+                        const category = data.details.offenderCategory || offender.offenderType || offender.category;
+
+                        if (category) {
+                            setOffenderCategory(category);
+                        }
+
+                        const details = data.details.offenderDetails || offender.offenderDetails;
+                        if (details) {
+                            setOffenderDetails(details);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching report data:", error);
+            }
+        };
+
+        const timeoutId = setTimeout(fetchReportData, 800);
+        return () => clearTimeout(timeoutId);
+    }, [reportNo]);
+
     const handleFieldChange = (field: keyof IndividualData, value: string) => {
         setCurrentIndividual((prev) => ({ ...prev, [field]: value }));
     };

@@ -20,6 +20,19 @@ export async function GET(req: NextRequest) {
         const date = searchParams.get("date");
         if (date) filters.date = date;
 
+        const reportNo = searchParams.get("reportNo");
+        if (reportNo) {
+            const register = await service.getRegisterByReportNo(reportNo);
+            // If searching by reportNo, we might just want to return that single entry or an array containing it
+            // for consistency with the frontend hook, returning the single object is better if the hook expects one.
+            // But the hook in existing implementation expects "offenceTypes" etc which matches "GeneralTrafficOffence".
+            // The user request says "fetch the record that is created by *this form data only*".
+            // "This form" creates a "Register" entry.
+            // So returning the Register entry is correct.
+            if (!register) return NextResponse.json(null);
+            return NextResponse.json(register);
+        }
+
         const data = await service.getAllRegisters(filters, { page, limit });
         return NextResponse.json(data);
     } catch (error: any) {

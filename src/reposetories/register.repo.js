@@ -10,6 +10,11 @@ export class RegisterRepository {
         return await Register.findById(id).populate('offender').lean();
     }
 
+    async findByReportNo(reportNo) {
+        // Search in details.reportNo
+        return await Register.findOne({ "details.reportNo": reportNo }).populate('offender').lean();
+    }
+
     async findAll(filters = {}, sort = { createdAt: -1 }, pagination = {}) {
         const { page = 1, limit = 10 } = pagination;
         const skip = (page - 1) * limit;

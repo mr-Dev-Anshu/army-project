@@ -84,6 +84,10 @@ export class RegisterService {
         return register;
     }
 
+    async getRegisterByReportNo(reportNo) {
+        return await repo.findByReportNo(reportNo);
+    }
+
     async getRegistersByType(type, filters = {}, pagination = {}) {
         // Ensure type is filtered
         const query = { type, ...filters };
