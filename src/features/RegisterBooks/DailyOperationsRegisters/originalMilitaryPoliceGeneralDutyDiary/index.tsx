@@ -80,7 +80,7 @@ const GeneralDutyDiaryRegisterPage = () => {
                 isOpen={isAddOpen}
                 onClose={() => setIsAddOpen(false)}
                 title={editingItem ? "Edit General Duty Diary Entry" : "Add General Duty Diary Entry"}
-                description={editingItem ? "Modify details of the duty entry." : "Record duty details"}
+                description={editingItem ? "Modify details of daily MP duty deployment and activity." : "Record daily MP duty deployment and activity"}
             >
                 <GeneralDutyDiaryForm
                     initialData={editingItem}

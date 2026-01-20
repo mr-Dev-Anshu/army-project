@@ -73,6 +73,7 @@ interface ReportFilterBarProps {
   showIndividualWorkingStatus?: boolean;
   showUnitLocation?: boolean;
   showDutyType?: boolean;
+  dutyTypeOptions?: string[];
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -84,6 +85,7 @@ export default function ReportFilterBar({
   fmnOptions,
   placeOptions,
   unitLocationOptions,
+  dutyTypeOptions,
   placeholder = "Search by report number or offence...",
   showDate = true,
   showDateRange = true,
@@ -112,6 +114,8 @@ export default function ReportFilterBar({
     (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
     (showIndividualWorkingStatus && filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") ||
     (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
+    !!filters.date ||
+    (showOffenceType && !!filters.offenceType && filters.offenceType !== "All") ||
     !!filters.fromDate ||
     !!filters.toDate ||
     !!filters.unit ||
@@ -386,12 +390,14 @@ export default function ReportFilterBar({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="All">All</SelectItem>
-                          <SelectItem value="Mobile Duty">Mobile Duty</SelectItem>
-                          <SelectItem value="MP Duty">MP Duty</SelectItem>
-                          <SelectItem value="Gate Duty">Gate Duty</SelectItem>
-                          <SelectItem value="Patrol Duty">Patrol Duty</SelectItem>
-                          <SelectItem value="Escort Duty">Escort Duty</SelectItem>
-                          <SelectItem value="Traffic Duty">Traffic Duty</SelectItem>
+                          {(dutyTypeOptions && dutyTypeOptions.length > 0
+                            ? dutyTypeOptions
+                            : ["Mobile Duty", "MP Duty", "Gate Duty", "Patrol Duty", "Escort Duty", "Traffic Duty"]
+                          ).map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

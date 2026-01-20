@@ -47,29 +47,128 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
         setFilters((prev) => ({ ...prev, [key]: value }));
     };
 
+    // Extract unique filter options from data
+    const { uniqueDutyTypes, uniqueUnits, uniqueFMNs, uniquePlaces } = useMemo(() => {
+        const dutyTypes = new Set<string>();
+        const units = new Set<string>();
+        const fmns = new Set<string>();
+        const places = new Set<string>();
+
+        data.forEach(item => {
+            const details = item.details || {};
+            const offender = item.offender || {};
+            const offenderDetails = offender.offenderDetails || details.offenderDetails || {};
+
+            // Duty Types
+            if (details.typeOfDuty) dutyTypes.add(details.typeOfDuty);
+
+            // Places (Place of Offence)
+            if (details.placeOfOffence) places.add(details.placeOfOffence);
+
+            // Units (Individuals + Offender)
+            (details.individuals || []).forEach((ind: any) => {
+                if (ind.unit) units.add(ind.unit);
+            });
+            if (offenderDetails.employeeUnit) units.add(offenderDetails.employeeUnit);
+            if (offenderDetails.shopUnit) units.add(offenderDetails.shopUnit);
+            if (offenderDetails.officersEnclave?.unit) units.add(offenderDetails.officersEnclave.unit);
+            if (offenderDetails.officersEnclave?.officersEnclaveUnit) units.add(offenderDetails.officersEnclave.officersEnclaveUnit);
+
+            // FMNs
+            if (offenderDetails.employeeFMN) fmns.add(offenderDetails.employeeFMN);
+            if (offenderDetails.officersEnclave?.fmn) fmns.add(offenderDetails.officersEnclave.fmn);
+        });
+
+        return {
+            uniqueDutyTypes: Array.from(dutyTypes).sort(),
+            uniqueUnits: Array.from(units).sort(),
+            uniqueFMNs: Array.from(fmns).sort(),
+            uniquePlaces: Array.from(places).sort(),
+        };
+    }, [data]);
+
     const filteredData = useMemo(() => {
         return data.filter((item) => {
+            const details = item.details || {};
+            const offender = item.offender || {};
+            const offenderDetails = offender.offenderDetails || details.offenderDetails || {};
+
             // Search logic
             const searchTerm = filters.search.toLowerCase();
-            const matchesSearch =
-                (item.details?.placeOfDuty?.toLowerCase() || "").includes(searchTerm) ||
-                (item.details?.briefOfDuty?.toLowerCase() || "").includes(searchTerm) ||
-                (item.details?.individuals || []).some((ind: any) =>
-                    (ind.name?.toLowerCase() || "").includes(searchTerm) ||
-                    (ind.armyNo?.toLowerCase() || "").includes(searchTerm)
-                );
+            const check = (val: any) => (val?.toString().toLowerCase() || "").includes(searchTerm);
 
-            // Date logic
-            const matchesDate = filters.date
-                ? item.date && item.date.startsWith(filters.date)
-                : true;
+            const matchesSearch =
+                check(details.placeOfDuty) ||
+                check(details.briefOfDuty) ||
+                check(details.reportNo) ||
+                check(details.placeOfOffence) ||
+                check(details.offenceType) ||
+                check(details.occurrenceBrief) ||
+                (details.individuals || []).some((ind: any) =>
+                    check(ind.name) ||
+                    check(ind.armyNo) ||
+                    check(ind.rank) ||
+                    check(ind.unit)
+                ) ||
+                check(offenderDetails.name) ||
+                check(offenderDetails.civilianName) ||
+                check(offenderDetails.civilianAadharCardNumber) ||
+                check(offenderDetails.employeeName) ||
+                check(offenderDetails.employeeServiceNumber) ||
+                check(offenderDetails.maidName) ||
+                check(offenderDetails.shopOwnerName) ||
+                check(offenderDetails.tempWorkerName);
+
+            // Date logic (Specific Date)
+            const itemDate = item.date ? new Date(item.date) : null;
+            let matchesDate = true;
+            if (filters.date && itemDate) {
+                const filterDate = new Date(filters.date);
+                matchesDate = itemDate.toDateString() === filterDate.toDateString();
+            }
+
+            // Date Range logic
+            if (matchesDate && filters.fromDate && itemDate) {
+                matchesDate = itemDate >= new Date(filters.fromDate);
+            }
+            if (matchesDate && filters.toDate && itemDate) {
+                matchesDate = itemDate <= new Date(filters.toDate);
+            }
 
             // Duty Type logic
             const matchesDutyType = filters.dutyType && filters.dutyType !== "All"
-                ? item.details?.typeOfDuty === filters.dutyType
+                ? (details.typeOfDuty || "").toLowerCase() === filters.dutyType.toLowerCase()
                 : true;
 
-            return matchesSearch && matchesDate && matchesDutyType;
+            // Unit Filter
+            let matchesUnit = true;
+            if (filters.unit) {
+                const searchUnit = filters.unit.toLowerCase();
+                const hasIndividualUnit = (details.individuals || []).some((ind: any) => (ind.unit || "").toLowerCase() === searchUnit);
+                const hasOffenderUnit =
+                    (offenderDetails.employeeUnit || "").toLowerCase() === searchUnit ||
+                    (offenderDetails.shopUnit || "").toLowerCase() === searchUnit ||
+                    (offenderDetails.officersEnclave?.unit || "").toLowerCase() === searchUnit ||
+                    (offenderDetails.officersEnclave?.officersEnclaveUnit || "").toLowerCase() === searchUnit;
+                matchesUnit = hasIndividualUnit || hasOffenderUnit;
+            }
+
+            // FMN Filter
+            let matchesFMN = true;
+            if (filters.fmn) {
+                const searchFMN = filters.fmn.toLowerCase();
+                matchesFMN =
+                    (offenderDetails.employeeFMN || "").toLowerCase() === searchFMN ||
+                    (offenderDetails.officersEnclave?.fmn || "").toLowerCase() === searchFMN;
+            }
+
+            // Place of Offence Filter
+            let matchesPlace = true;
+            if (filters.placeOfOffence) {
+                matchesPlace = (details.placeOfOffence || "").toLowerCase() === filters.placeOfOffence.toLowerCase();
+            }
+
+            return matchesSearch && matchesDate && matchesDutyType && matchesUnit && matchesFMN && matchesPlace;
         });
     }, [data, filters]);
 
@@ -83,18 +182,30 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                 onFilterChange={handleFilterChange}
                 showOffenceType={false}
                 showActionStatus={false}
-                showDateRange={false}
+                showDateRange={true}
                 showDate={true}
                 showDutyType={true}
+                showUnit={true}
+                showFmn={true}
+                showPlaceOfOffence={true}
+                dutyTypeOptions={uniqueDutyTypes}
+                unitOptions={uniqueUnits}
+                fmnOptions={uniqueFMNs}
+                placeOptions={uniquePlaces}
                 showFilter={true}
                 onReset={() => setFilters({
                     search: "",
                     dutyType: "All",
                     date: "",
+                    fromDate: "",
+                    toDate: "",
+                    unit: "",
+                    fmn: "",
+                    placeOfOffence: "",
                     sortOrder: "asc",
                 })}
                 onAddNew={onAddNew}
-                placeholder="Search by..."
+                placeholder="Search by Brief of Duty, Place, Name, Army No etc."
             />
 
             <div className="rounded-md border border-gray-300 bg-white overflow-hidden shadow-sm">
@@ -109,7 +220,7 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                     Date of Duty
                                 </th>
                                 {/* Duty Time Group */}
-                                <th className="px-4 py-2 border-r border-gray-300 text-center border-b border-gray-300 sticky top-0 z-40 bg-[#F5F5F5]" colSpan={2}>
+                                <th className="px-4 py-2 border-r  border-gray-300 text-center border-b border-gray-300 sticky top-0 z-40 bg-[#F5F5F5]" colSpan={2}>
                                     Duty Time
                                 </th>
                                 <th className="px-4 py-3 border-r border-gray-300 w-32 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
@@ -121,10 +232,10 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                 <th className="px-4 py-3 border-r border-gray-300 w-20 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Total Strength
                                 </th>
-                                <th className="px-4 py-3 border-r border-gray-300 w-72 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
+                                <th className="px-4 py-3 border-r border-gray-300 min-w-[250px] align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Assigned Individuals Particular
                                 </th>
-                                <th className="px-4 py-3 border-r border-gray-300 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
+                                <th className="px-4 py-3 border-r border-gray-300 min-w-[350px] align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Brief of Duty
                                 </th>
                                 <th className="px-4 py-3 border-r border-gray-300 w-24 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
@@ -136,7 +247,9 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                 <th className="px-4 py-3 border-r border-gray-300 w-24 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Initials of 2IC
                                 </th>
-                                <th className="px-2 py-3 w-10 text-center align-middle sticky right-0 top-0 z-50 bg-[#F5F5F5]" rowSpan={2}></th>
+                                <th className="px-4 py-3 w-[80px] text-center font-bold align-middle sticky right-0 top-0 z-50 bg-[#F5F5F5] border-l border-gray-300" rowSpan={2}>
+                                    Actions
+                                </th>
                             </tr>
                             <tr>
                                 {/* Duty Time Subcols */}
@@ -173,7 +286,7 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                             <td className="px-4 py-4 align-top border-r border-gray-300">
                                                 <div className="space-y-4">
                                                     {(item.details?.individuals || []).map((ind: any, i: number) => (
-                                                        <div key={i} className="text-xs space-y-0.5">
+                                                        <div key={i} className="text-xs space-y-0.5 pb-2 border-b border-gray-300 last:border-b-0">
                                                             <div className="grid grid-cols-[60px_1fr]">
                                                                 <span className="font-bold text-gray-900">Army no.:</span>
                                                                 <span className="text-gray-900">{ind.armyNo || "-"}</span>
@@ -194,164 +307,194 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                                     ))}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-4 align-top border-r border-gray-300 text-gray-900">
-                                                <div className="space-y-2 text-xs">
+                                            <td className="p-0 align-top border-r border-gray-300 text-gray-900">
+                                                <div className="flex flex-col text-xs divide-y divide-gray-300">
                                                     {item.details?.briefOfDuty && (
-                                                        <p>{item.details.briefOfDuty}</p>
+                                                        <div className="p-3">
+                                                            <div className="font-bold text-gray-900 mb-1">Brief of Duty</div>
+                                                            <p className="text-gray-800">{item.details.briefOfDuty}</p>
+                                                        </div>
                                                     )}
                                                     {item.details?.offenceOccurred && (
                                                         <>
-                                                            <div className="pt-2 border-t border-gray-200 mt-2 space-y-1">
-                                                                <div className="flex justify-between items-start">
-                                                                    <div className="font-bold">Report No.</div>
-                                                                    <div className="text-blue-600 cursor-pointer hover:underline">{item.details.reportNo}</div>
-                                                                </div>
+                                                            <div className="flex items-center gap-2 p-3">
+                                                                <div className="font-bold text-gray-900">Report No.</div>
+                                                                <div className="text-blue-500 font-medium cursor-pointer hover:underline">{item.details.reportNo}</div>
+                                                            </div>
 
-                                                                <div>
-                                                                    <div className="font-bold">Place of Offence:</div>
-                                                                    <div>{item.details.placeOfOffence}</div>
-                                                                </div>
+                                                            <div className="p-3">
+                                                                <div className="font-bold text-gray-900">Place of Offence:</div>
+                                                                <div className="text-gray-800">{item.details.placeOfOffence}</div>
+                                                            </div>
 
-                                                                <div>
-                                                                    <div className="font-bold">Offence Type:</div>
-                                                                    <div>{item.details.offenceType}</div>
-                                                                </div>
+                                                            <div className="p-3">
+                                                                <div className="font-bold text-gray-900">Offence Type:</div>
+                                                                <div className="text-gray-800">{item.details.offenceType}</div>
+                                                            </div>
 
-                                                                <div className="py-2">
-                                                                    <div className="font-bold border-b border-gray-200 pb-1 mb-1">Particulars of Offender / Victims:</div>
-                                                                    <div className="grid grid-cols-[80px_1fr] gap-x-2 gap-y-1">
-                                                                        {(() => {
-                                                                            const offender = item.offender || {};
-                                                                            const details = offender.offenderDetails || item.details?.offenderDetails || {};
-                                                                            const category = offender.offenderType || offender.category || item.details?.offenderCategory;
+                                                            {(() => {
+                                                                const offender = item.offender || {};
+                                                                const details = offender.offenderDetails || item.details?.offenderDetails || {};
+                                                                const category = offender.offenderType || offender.category || item.details?.offenderCategory;
 
-                                                                            if (category === 'militaryPersonnel') {
-                                                                                return (
+                                                                if (!category) return null;
+
+                                                                const content = (() => {
+                                                                    if (category === 'militaryPersonnel') {
+                                                                        // Check if any military personnel fields exist
+                                                                        const hasData = details.armyNo || details.rank || details.name || details.unit;
+                                                                        if (!hasData) return null;
+
+                                                                        return (
+                                                                            <>
+                                                                                {details.armyNo && <>
+                                                                                    <span className="text-gray-900">Army No. -</span><span>{details.armyNo || "-"}</span>
+                                                                                </>}
+                                                                                {details.rank && <>
+                                                                                    <span className="text-gray-900">Rank -</span><span>{details.rank || "-"}</span>
+                                                                                </>}
+                                                                                {details.name && <>
+                                                                                    <span className="text-gray-900">Name -</span><span>{details.name || "-"}</span>
+                                                                                </>}
+                                                                                {details.unit && <>
+                                                                                    <span className="text-gray-900">Unit -</span><span>{details.unit || "-"}</span>
+                                                                                </>}
+                                                                            </>
+                                                                        );
+                                                                    } else if (category === 'civilian') {
+                                                                        // Check if any civilian fields exist
+                                                                        const hasData = details.civilianAadharCardNumber || details.civilianName || details.civilianFathersName || details.isDependent;
+                                                                        if (!hasData) return null;
+
+                                                                        return (
+                                                                            <>
+                                                                                {details.civilianAadharCardNumber && <><span className="text-gray-900">Aadhar No. -</span><span>{details.civilianAadharCardNumber || "-"}</span></>}
+                                                                                {details.civilianName && <><span className="text-gray-900">Name -</span><span>{details.civilianName || "-"}</span></>}
+                                                                                {details.civilianFathersName && <><span className="text-gray-900">S/O Name -</span><span>{details.civilianFathersName || "-"}</span></>}
+                                                                                {details.isDependent && (
                                                                                     <>
-                                                                                        {details.armyNo && <>
-                                                                                            <span className="text-[#0A0A0A]">Army No.-</span><span>{details.armyNo || "-"}</span>
-                                                                                        </>}
-                                                                                        {details.rank && <>
-                                                                                            <span className="text-[#0A0A0A]">Rank-</span><span>{details.rank || "-"}</span>
-                                                                                        </>}
-                                                                                        {details.name && <>
-                                                                                            <span className="text-[#0A0A0A]">Name-</span><span>{details.name || "-"}</span>
-                                                                                        </>}
-                                                                                        {details.unit && <>
-                                                                                            <span className="text-[#0A0A0A]">Unit-</span><span>{details.unit || "-"}</span>
-                                                                                        </>}
-                                                                                    </>
-                                                                                );
-                                                                            } else if (category === 'civilian') {
-                                                                                return (
-                                                                                    <>
-                                                                                        {details.civilianAadharCardNumber && <><span className="text-[#0A0A0A]">Aadhar No. -</span><span>{details.civilianAadharCardNumber || "-"}</span></>}
-                                                                                        {details.civilianName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.civilianName || "-"}</span></>}
-                                                                                        {details.civilianFathersName && <><span className="text-[#0A0A0A]">S/O -</span><span>{details.civilianFathersName || "-"}</span></>}
-                                                                                        {details.isDependent && (
+                                                                                        <span className="text-gray-900 font-semibold col-span-2 pt-2 pb-1">Relative Details:</span>
+                                                                                        {details.relationName && <><span className="text-gray-900">Relation -</span><span>{details.relationName || "-"}</span></>}
+                                                                                        {details.relativeCategory === "militaryPersonnel" && (
                                                                                             <>
-                                                                                                <span className="text-[#0A0A0A] font-semibold col-span-2 pt-1">Relative Details:</span>
-                                                                                                {details.relationName && <><span className="text-[#0A0A0A]">Relation -</span><span>{details.relationName || "-"}</span></>}
-                                                                                                {details.relativeCategory === "militaryPersonnel" && (
-                                                                                                    <>
-                                                                                                        {details.relativeDetails?.armyNo && <><span className="text-[#0A0A0A]">Army No.-</span><span>{details.relativeDetails?.armyNo || "-"}</span></>}
-                                                                                                        {details.relativeDetails?.rank && <><span className="text-[#0A0A0A]">Rank-</span><span>{details.relativeDetails?.rank || "-"}</span></>}
-                                                                                                        {details.relativeDetails?.unit && <><span className="text-[#0A0A0A]">Unit-</span><span>{details.relativeDetails?.unit || "-"}</span></>}
-                                                                                                    </>
-                                                                                                )}
-                                                                                                {details.relativeCategory === "servantMaid" && (
-                                                                                                    <>
-                                                                                                        {details.relativeDetails?.maidName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.relativeDetails?.maidName || "-"}</span></>}
-                                                                                                        {details.relativeDetails?.maidPassID && <><span className="text-[#0A0A0A]">Pass Id No. -</span><span>{details.relativeDetails?.maidPassID || "-"}</span></>}
-                                                                                                        {details.relativeDetails?.officersEnclaveRank && <><span className="text-[#0A0A0A]">C/O Rank -</span><span>{details.relativeDetails?.officersEnclaveRank || "-"}</span></>}
-                                                                                                        {details.relativeDetails?.officersEnclaveName && <><span className="text-[#0A0A0A]">C/O -</span><span>{details.relativeDetails?.officersEnclaveName || "-"}</span></>}
-                                                                                                        {details.relativeDetails?.officersEnclaveUnit && <><span className="text-[#0A0A0A]">Unit -</span><span>{details.relativeDetails?.officersEnclaveUnit || "-"}</span></>}
-                                                                                                    </>
-                                                                                                )}
-
-                                                                                                {
-                                                                                                    details.relativeCategory === "shopKeeper" && (
-                                                                                                        <>
-                                                                                                            {details.relativeDetails?.shopOwnerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.relativeDetails?.shopOwnerName || "-"}</span></>}
-                                                                                                            {details.relativeDetails?.shopName && <><span className="text-[#0A0A0A]">Shop Name -</span><span>{details.relativeDetails?.shopName || "-"}</span></>}
-                                                                                                            {details.relativeDetails?.shopPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.relativeDetails?.shopPassNo || "-"}</span></>}
-                                                                                                            {details.relativeDetails?.shopAddress && <><span className="text-[#0A0A0A]">Shop Address -</span><span>{details.relativeDetails?.shopAddress || "-"}</span></>}
-                                                                                                        </>
-                                                                                                    )
-                                                                                                }
-                                                                                                {
-                                                                                                    details.relativeCategory === "tempHiredWorker" && (
-                                                                                                        <>
-                                                                                                            {details.relativeDetails?.tempWorkerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.relativeDetails?.tempWorkerName || "-"}</span></>}
-                                                                                                            {details.relativeDetails?.tempWorkerPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.relativeDetails?.tempWorkerPassNo || "-"}</span></>}
-                                                                                                            {details.relativeDetails?.tempWorkerPlaceOfStay && <><span className="text-[#0A0A0A]">Place Of Stay -</span><span>{details.relativeDetails?.tempWorkerPlaceOfStay || "-"}</span></>}
-                                                                                                            {details.relativeDetails?.tempWorkerPlaceOfWork && <><span className="text-[#0A0A0A]">Place Of Work -</span><span>{details.relativeDetails?.tempWorkerPlaceOfWork || "-"}</span></>}
-                                                                                                        </>
-                                                                                                    )
-                                                                                                }
+                                                                                                {details.relativeDetails?.armyNo && <><span className="text-gray-900">Army No. -</span><span>{details.relativeDetails?.armyNo || "-"}</span></>}
+                                                                                                {details.relativeDetails?.rank && <><span className="text-gray-900">Rank -</span><span>{details.relativeDetails?.rank || "-"}</span></>}
+                                                                                                {details.relativeDetails?.unit && <><span className="text-gray-900">Unit -</span><span>{details.relativeDetails?.unit || "-"}</span></>}
                                                                                             </>
                                                                                         )}
-                                                                                    </>
-                                                                                );
-                                                                            } else if (category === "employee") {
-                                                                                return (
-                                                                                    <>
-                                                                                        {details.employeeServiceNumber && <><span className="text-[#0A0A0A]">Service No. -</span><span>{details.employeeServiceNumber || "-"}</span></>}
-                                                                                        {details.employeeRank && <><span className="text-[#0A0A0A]">Rank -</span><span>{details.employeeRank || "-"}</span></>}
-                                                                                        {details.employeeName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.employeeName || "-"}</span></>}
-                                                                                        {details.employeeUnit && <><span className="text-[#0A0A0A]">Unit -</span><span>{details.employeeUnit || "-"}</span></>}
-                                                                                    </>
-                                                                                )
-                                                                            } else if (category === "servantMaid") {
-                                                                                const coRank = details.officersEnclave?.officersEnclaveRank || "-";
-                                                                                const coName = details.officersEnclave?.officersEnclaveName || "-";
-
-                                                                                return (
-                                                                                    <>
-                                                                                        {details.maidName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.maidName || "-"}</span></>}
-
-                                                                                        {details.maidPassID && <><span className="text-[#0A0A0A]">Pass ID -</span><span>{details.maidPassID || "-"}</span></>}
-                                                                                        {details.maidFathersName && <><span className="text-[#0A0A0A]">S/O -</span><span>{details.maidFathersName || "-"}</span></>}
-
-
-                                                                                        {(coRank !== "-" || coName !== "-") && (
+                                                                                        {details.relativeCategory === "servantMaid" && (
                                                                                             <>
-                                                                                                {coRank !== "-" && <><span className="text-[#0A0A0A]">C/O Rank -</span><span>{coRank}</span></>}
-                                                                                                {coName !== "-" && <><span className="text-[#0A0A0A]">C/O Name -</span><span>{coName}</span></>}
-
-
+                                                                                                {details.relativeDetails?.maidName && <><span className="text-gray-900">Name -</span><span>{details.relativeDetails?.maidName || "-"}</span></>}
+                                                                                                {details.relativeDetails?.maidPassID && <><span className="text-gray-900">Pass ID -</span><span>{details.relativeDetails?.maidPassID || "-"}</span></>}
+                                                                                                {details.relativeDetails?.officersEnclaveRank && <><span className="text-gray-900">C/O Rank -</span><span>{details.relativeDetails?.officersEnclaveRank || "-"}</span></>}
+                                                                                                {details.relativeDetails?.officersEnclaveName && <><span className="text-gray-900">C/O Name -</span><span>{details.relativeDetails?.officersEnclaveName || "-"}</span></>}
+                                                                                                {details.relativeDetails?.officersEnclaveUnit && <><span className="text-gray-900">Unit -</span><span>{details.relativeDetails?.officersEnclaveUnit || "-"}</span></>}
                                                                                             </>
                                                                                         )}
-                                                                                    </>
-                                                                                )
-                                                                            } else if (category === "shopKeeper") {
-                                                                                return (
-                                                                                    <>
-                                                                                        {details.shopOwnerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.shopOwnerName || "-"}</span></>}
-                                                                                        {details.shopName && <><span className="text-[#0A0A0A]">Shop Name -</span><span>{details.shopName || "-"}</span></>}
-                                                                                        {details.shopPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.shopPassNo || "-"}</span></>}
-                                                                                        {details.shopAddress && <><span className="text-[#0A0A0A]">Shop Address -</span><span>{details.shopAddress || "-"}</span></>}
-                                                                                    </>
-                                                                                )
-                                                                            } else if (category === "tempHiredWorker") {
-                                                                                return (
-                                                                                    <>
-                                                                                        {details.tempWorkerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.tempWorkerName || "-"}</span></>}
-                                                                                        {details.tempWorkerPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.tempWorkerPassNo || "-"}</span></>}
-                                                                                        {details.tempWorkerPlaceOfStay && <><span className="text-[#0A0A0A]">Place Of Stay -</span><span>{details.tempWorkerPlaceOfStay || "-"}</span></>}
-                                                                                        {details.tempWorkerPlaceOfWork && <><span className="text-[#0A0A0A]">Place Of Work -</span><span>{details.tempWorkerPlaceOfWork || "-"}</span></>}
-                                                                                    </>
-                                                                                )
-                                                                            }
 
-                                                                        })()}
+                                                                                        {
+                                                                                            details.relativeCategory === "shopKeeper" && (
+                                                                                                <>
+                                                                                                    {details.relativeDetails?.shopOwnerName && <><span className="text-gray-900">Name -</span><span>{details.relativeDetails?.shopOwnerName || "-"}</span></>}
+                                                                                                    {details.relativeDetails?.shopName && <><span className="text-gray-900">Shop Name -</span><span>{details.relativeDetails?.shopName || "-"}</span></>}
+                                                                                                    {details.relativeDetails?.shopPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.relativeDetails?.shopPassNo || "-"}</span></>}
+                                                                                                    {details.relativeDetails?.shopAddress && <><span className="text-gray-900">Shop Address -</span><span>{details.relativeDetails?.shopAddress || "-"}</span></>}
+                                                                                                </>
+                                                                                            )
+                                                                                        }
+                                                                                        {
+                                                                                            details.relativeCategory === "tempHiredWorker" && (
+                                                                                                <>
+                                                                                                    {details.relativeDetails?.tempWorkerName && <><span className="text-gray-900">Name -</span><span>{details.relativeDetails?.tempWorkerName || "-"}</span></>}
+                                                                                                    {details.relativeDetails?.tempWorkerPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.relativeDetails?.tempWorkerPassNo || "-"}</span></>}
+                                                                                                    {details.relativeDetails?.tempWorkerPlaceOfStay && <><span className="text-gray-900">Place Of Stay -</span><span>{details.relativeDetails?.tempWorkerPlaceOfStay || "-"}</span></>}
+                                                                                                    {details.relativeDetails?.tempWorkerPlaceOfWork && <><span className="text-gray-900">Place Of Work -</span><span>{details.relativeDetails?.tempWorkerPlaceOfWork || "-"}</span></>}
+                                                                                                </>
+                                                                                            )
+                                                                                        }
+                                                                                    </>
+                                                                                )}
+                                                                            </>
+                                                                        );
+                                                                    } else if (category === "employee") {
+                                                                        const hasData = details.employeeServiceNumber || details.employeeRank || details.employeeName || details.employeeUnit;
+                                                                        if (!hasData) return null;
+
+                                                                        return (
+                                                                            <>
+                                                                                {details.employeeServiceNumber && <><span className="text-gray-900">Service No. -</span><span>{details.employeeServiceNumber || "-"}</span></>}
+                                                                                {details.employeeRank && <><span className="text-gray-900">Rank -</span><span>{details.employeeRank || "-"}</span></>}
+                                                                                {details.employeeName && <><span className="text-gray-900">Name -</span><span>{details.employeeName || "-"}</span></>}
+                                                                                {details.employeeUnit && <><span className="text-gray-900">Unit -</span><span>{details.employeeUnit || "-"}</span></>}
+                                                                            </>
+                                                                        )
+                                                                    } else if (category === "servantMaid") {
+                                                                        const coRank = details.officersEnclave?.officersEnclaveRank || "-";
+                                                                        const coName = details.officersEnclave?.officersEnclaveName || "-";
+
+                                                                        const hasData = details.maidName || details.maidPassID || details.maidFathersName || (coRank !== "-" && coRank !== "") || (coName !== "-" && coName !== "");
+                                                                        if (!hasData) return null;
+
+                                                                        return (
+                                                                            <>
+                                                                                {details.maidName && <><span className="text-gray-900">Name -</span><span>{details.maidName || "-"}</span></>}
+
+                                                                                {details.maidPassID && <><span className="text-gray-900">Pass ID,No. -</span><span>{details.maidPassID || "-"}</span></>}
+                                                                                {details.maidFathersName && <><span className="text-gray-900">S/O Name -</span><span>{details.maidFathersName || "-"}</span></>}
+
+
+                                                                                {(coRank !== "-" || coName !== "-") && (
+                                                                                    <>
+                                                                                        {coRank !== "-" && <><span className="text-gray-900">C/O Rank -</span><span>{coRank}</span></>}
+                                                                                        {coName !== "-" && <><span className="text-gray-900">MP Name -</span><span>{coName}</span></>}
+
+
+                                                                                    </>
+                                                                                )}
+                                                                            </>
+                                                                        )
+                                                                    } else if (category === "shopKeeper") {
+                                                                        const hasData = details.shopOwnerName || details.shopName || details.shopPassNo || details.shopAddress;
+                                                                        if (!hasData) return null;
+
+                                                                        return (
+                                                                            <>
+                                                                                {details.shopOwnerName && <><span className="text-gray-900">Name -</span><span>{details.shopOwnerName || "-"}</span></>}
+                                                                                {details.shopName && <><span className="text-gray-900">Shop Name -</span><span>{details.shopName || "-"}</span></>}
+                                                                                {details.shopPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.shopPassNo || "-"}</span></>}
+                                                                                {details.shopAddress && <><span className="text-gray-900">Shop Address -</span><span>{details.shopAddress || "-"}</span></>}
+                                                                            </>
+                                                                        )
+                                                                    } else if (category === "tempHiredWorker") {
+                                                                        const hasData = details.tempWorkerName || details.tempWorkerPassNo || details.tempWorkerPlaceOfStay || details.tempWorkerPlaceOfWork;
+                                                                        if (!hasData) return null;
+
+                                                                        return (
+                                                                            <>
+                                                                                {details.tempWorkerName && <><span className="text-gray-900">Name -</span><span>{details.tempWorkerName || "-"}</span></>}
+                                                                                {details.tempWorkerPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.tempWorkerPassNo || "-"}</span></>}
+                                                                                {details.tempWorkerPlaceOfStay && <><span className="text-gray-900">Place Of Stay -</span><span>{details.tempWorkerPlaceOfStay || "-"}</span></>}
+                                                                                {details.tempWorkerPlaceOfWork && <><span className="text-gray-900">Place Of Work -</span><span>{details.tempWorkerPlaceOfWork || "-"}</span></>}
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                })();
+
+                                                                if (!content) return null;
+
+                                                                return (
+                                                                    <div className="p-3">
+                                                                        <div className="font-bold text-gray-900 mb-2 pb-1">Particulars of Offender / Victims:</div>
+                                                                        <div className="grid grid-cols-[110px_1fr] gap-x-2 gap-y-1">
+                                                                            {content}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
+                                                                );
+                                                            })()}
 
-                                                                <div>
-                                                                    <div className="font-bold">Occurrence Brief:</div>
-                                                                    <div>{item.details.occurrenceBrief}</div>
-                                                                </div>
+                                                            <div className="p-3">
+                                                                <div className="font-bold text-gray-900 mb-1">Occurrence Brief:</div>
+                                                                <p className="text-gray-800">{item.details.occurrenceBrief}</p>
                                                             </div>
                                                         </>
                                                     )}
@@ -368,7 +511,7 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                             </td>
 
                                             {/* Actions */}
-                                            <td className="px-2 py-4 align-top text-center sticky right-0 z-30 bg-white group-hover:bg-gray-50">
+                                            <td className="px-4 py-4 align-top text-center sticky right-0 z-30 bg-white border-l border-gray-300 group-hover:bg-gray-50">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -382,8 +525,8 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                                             <span>Edit</span>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem className="text-[#0A0A0A]" onClick={() => handleDeleteClick(item._id)}>
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            <span>Delete</span>
+                                                            <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                                            <span className="text-red-500">Delete</span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>

@@ -72,7 +72,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
 
     useEffect(() => {
         if (initialData) {
-            setDateOfDuty(initialData.date || "");
+            setDateOfDuty(initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : "");
             setDutyFrom(initialData.details?.dutyFrom || "");
             setDutyTill(initialData.details?.dutyTill || "");
             setPlaceOfDuty(initialData.details?.placeOfDuty || "");
@@ -193,20 +193,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
 
     return (
         <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
-                <div>
-                    <h2 className="text-lg font-bold text-neutral-900">
-                        {initialData ? "Edit General Duty Diary Entry" : "Add General Duty Diary Entry"}
-                    </h2>
-                    <p className="text-sm text-neutral-500">
-                        Record daily MP duty deployment and activity
-                    </p>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400" onClick={onCancel}>
-                    <X className="h-5 w-5" />
-                </Button>
-            </div>
+
 
             <div className="p-6 space-y-8">
                 {/* Duty Details Section */}
@@ -395,7 +382,6 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                     value={offenderCategory}
                                     onValueChange={(v) => {
                                         setOffenderCategory(v);
-                                        setOffenderDetails({});
                                     }}
                                     className="grid grid-cols-2 gap-3"
                                 >
@@ -717,7 +703,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                                     fieldType="name"
                                                                     placeholder="e.g. John "
                                                                     value={offenderDetails.relativeDetails?.maidName || ""}
-                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, relativeName: v } }))}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, maidName: v } }))}
                                                                 />
                                                             </div>
                                                         </div>
@@ -1381,7 +1367,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
             <FormFooter
                 onSave={handleSubmit}
                 onCancel={onCancel}
-                saveText={initialData ? "Update" : "Save"}
+                saveText={initialData?._id ? "Update" : "Save"}
                 isSaving={createMutation.isPending || updateMutation.isPending}
             />
         </div>
