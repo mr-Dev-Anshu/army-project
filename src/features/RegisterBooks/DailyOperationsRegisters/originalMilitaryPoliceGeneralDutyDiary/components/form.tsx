@@ -87,8 +87,17 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                 setOffenceType(initialData.details?.offenceType || "");
                 setPlaceOfOffence(initialData.details?.placeOfOffence || "");
                 setOccurrenceBrief(initialData.details?.occurrenceBrief || "");
-                setOffenderCategory(initialData.details?.offenderCategory || "militaryPersonnel");
-                setOffenderDetails(initialData.details?.offenderDetails || {});
+
+                const offender = initialData.offender || {};
+                const loadedCategory = offender.offenderType || offender.category || initialData.details?.offenderCategory || "militaryPersonnel";
+                setOffenderCategory(loadedCategory);
+
+                let details = (offender.offenderType || offender.category) ? offender.offenderDetails : (initialData.details?.offenderDetails || {});
+                // Fix for potentially double-nested offenderDetails caused by previous incorrect saves
+                if (details && details.offenderDetails) {
+                    details = { ...details, ...details.offenderDetails };
+                }
+                setOffenderDetails(details || {});
             }
 
             setAuthData(initialData.authentication || {
@@ -505,8 +514,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                 label="Name"
                                                 fieldType="name"
                                                 placeholder="e.g. John Apradhi"
-                                                value={offenderDetails.name || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, name: v }))}
+                                                value={offenderDetails.civilianName || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, civilianName: v }))}
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -514,8 +523,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                 label="Aadhar Card Number"
                                                 fieldType="aadharCardNumber"
                                                 placeholder="e.g. 8888 8888 8888"
-                                                value={offenderDetails.aadharCardNumber || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, aadharCardNumber: v }))}
+                                                value={offenderDetails.civilianAadharCardNumber || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, civilianAadharCardNumber: v }))}
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -523,8 +532,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                 label="Father's / Husband's Name"
                                                 fieldType="fathersName"
                                                 placeholder="e.g. Naman"
-                                                value={offenderDetails.fathersName || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, fathersName: v }))}
+                                                value={offenderDetails.civilianFathersName || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, civilianFathersName: v }))}
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -532,8 +541,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                 label="Address"
                                                 fieldType="address"
                                                 placeholder="Location"
-                                                value={offenderDetails.address || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, address: v }))}
+                                                value={offenderDetails.civilianAddress || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, civilianAddress: v }))}
                                             />
                                         </div>
 
@@ -599,50 +608,73 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                         </div>
                                                         <div className="space-y-1">
                                                             <SuggestionInput
-                                                                label="Rank"
-                                                                fieldType="rank"
-                                                                placeholder="eg. Sepoy"
-                                                                value={offenderDetails.relativeDetails?.rank || ""}
-                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, rank: v } }))}
+                                                                label="Name"
+                                                                fieldType="name"
+                                                                placeholder="eg. Naman"
+                                                                value={offenderDetails.relativeDetails?.militaryPersonnelName || ""}
+                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, militaryPersonnelName: v } }))}
                                                             />
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <SuggestionInput
-                                                                label="Unit"
-                                                                fieldType="unit"
-                                                                placeholder="eg."
-                                                                value={offenderDetails.relativeDetails?.unit || ""}
-                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, unit: v } }))}
-                                                            />
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="Rank"
+                                                                    fieldType="rank"
+                                                                    placeholder="eg. Sepoy"
+                                                                    value={offenderDetails.relativeDetails?.militaryPersonnelRank || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, militaryPersonnelRank: v } }))}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="Unit"
+                                                                    fieldType="unit"
+                                                                    placeholder="eg. 21 corps"
+                                                                    value={offenderDetails.relativeDetails?.militaryPersonnelUnit || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, militaryPersonnelUnit: v } }))}
+                                                                />
+                                                            </div>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <SuggestionInput
-                                                                label="FMN"
-                                                                fieldType="fmn"
-                                                                placeholder="eg."
-                                                                value={offenderDetails.relativeDetails?.fmn || ""}
-                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, fmn: v } }))}
-                                                            />
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="FMN"
+                                                                    fieldType="fmn"
+                                                                    placeholder="eg.21 corps"
+                                                                    value={offenderDetails.relativeDetails?.militaryPersonnelFMN || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, militaryPersonnelFMN: v } }))}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="Command"
+                                                                    fieldType="command"
+                                                                    placeholder="eg. south command"
+                                                                    value={offenderDetails.relativeDetails?.militaryPersonnelCommand || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, militaryPersonnelCommand: v } }))}
+                                                                />
+                                                            </div>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <SuggestionInput
-                                                                label="Command"
-                                                                fieldType="command"
-                                                                placeholder="eg."
-                                                                value={offenderDetails.relativeDetails?.command || ""}
-                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, command: v } }))}
-                                                            />
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="Address"
+                                                                    fieldType="address"
+                                                                    placeholder="eg. bhopal"
+                                                                    value={offenderDetails.relativeDetails?.militaryPersonnelAddress || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, militaryPersonnelAddress: v } }))}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="I Card Number"
+                                                                    fieldType="iCardNumber"
+                                                                    placeholder="eg. 123456789"
+                                                                    value={offenderDetails.relativeDetails?.militaryPersonnelICardNumber || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, militaryPersonnelICardNumber: v } }))}
+                                                                />
+                                                            </div>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <SuggestionInput
-                                                                label="I Card Number"
-                                                                fieldType="iCardNumber"
-                                                                placeholder="eg."
-                                                                value={offenderDetails.relativeDetails?.iCardNumber || ""}
-                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, iCardNumber: v } }))}
-                                                            />
-                                                        </div>
-
                                                     </div>
                                                 )}
 
@@ -653,7 +685,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                         <div className="space-y-1">
                                                             <SuggestionInput
                                                                 label={<span>Maid/Servant Pass Number <span className="text-red-500">*</span></span>}
-                                                                fieldType="maidPassNumber"
+                                                                fieldType="passNumber"
                                                                 placeholder="e.g. 12345678"
                                                                 value={offenderDetails.relativeDetails?.maidPassNumber || ""}
                                                                 onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, maidPassNumber: v } }))}
@@ -682,9 +714,9 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                             <div className="space-y-1">
                                                                 <SuggestionInput
                                                                     label="Name"
-                                                                    fieldType="ownerName"
+                                                                    fieldType="name"
                                                                     placeholder="e.g. John "
-                                                                    value={offenderDetails.relativeDetails?.relativeName || ""}
+                                                                    value={offenderDetails.relativeDetails?.maidName || ""}
                                                                     onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, relativeName: v } }))}
                                                                 />
                                                             </div>
@@ -723,7 +755,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                         <div className="space-y-1">
                                                             <SuggestionInput
                                                                 label="Name"
-                                                                fieldType="ownerName"
+                                                                fieldType="name"
                                                                 placeholder="e.g. John Apradhi"
                                                                 value={offenderDetails.relativeDetails?.officersEnclaveName || ""}
                                                                 onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, officersEnclaveName: v } }))}
@@ -736,8 +768,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                                     label="Place of QTR."
                                                                     fieldType="placeOfQtr"
                                                                     placeholder="Enter Location"
-                                                                    value={offenderDetails.relativeDetails?.maidPlaceOfQtr || ""}
-                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, maidPlaceOfQtr: v } }))}
+                                                                    value={offenderDetails.relativeDetails?.officersEnclavePlaceOfQtr || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, officersEnclavePlaceOfQtr: v } }))}
                                                                 />
                                                             </div>
                                                             <div className="space-y-1">
@@ -745,8 +777,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                                     label="Unit"
                                                                     fieldType="unit"
                                                                     placeholder="Select unit"
-                                                                    value={offenderDetails.relativeDetails?.maidUnit || ""}
-                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, maidUnit: v } }))}
+                                                                    value={offenderDetails.relativeDetails?.officersEnclaveUnit || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, officersEnclaveUnit: v } }))}
                                                                 />
                                                             </div>
                                                         </div>
@@ -757,8 +789,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                                     label="FMN"
                                                                     fieldType="fmn"
                                                                     placeholder="Select FMN"
-                                                                    value={offenderDetails.relativeDetails?.maidFmn || ""}
-                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, maidFmn: v } }))}
+                                                                    value={offenderDetails.relativeDetails?.officersEnclaveFmn || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, officersEnclaveFmn: v } }))}
                                                                 />
                                                             </div>
                                                             <div className="space-y-1">
@@ -766,29 +798,31 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                                     label="Command"
                                                                     fieldType="command"
                                                                     placeholder="Select Command"
-                                                                    value={offenderDetails.relativeDetails?.maidCommand || ""}
-                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, maidCommand: v } }))}
+                                                                    value={offenderDetails.relativeDetails?.officersEnclaveCommand || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, officersEnclaveCommand: v } }))}
                                                                 />
                                                             </div>
                                                         </div>
+                                                        <div className="grid grid-cols-2 gap-4">
 
-                                                        <div className="space-y-1">
-                                                            <SuggestionInput
-                                                                label="Address"
-                                                                fieldType="address"
-                                                                placeholder="e.g. C/O 56 APO"
-                                                                value={offenderDetails.relativeDetails?.relativeAddress || ""}
-                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, relativeAddress: v } }))}
-                                                            />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <SuggestionInput
-                                                                label="I Card Number"
-                                                                fieldType="iCardNumber"
-                                                                placeholder="e.g. A-123456"
-                                                                value={offenderDetails.relativeDetails?.maidICardNumber || ""}
-                                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, maidICardNumber: v } }))}
-                                                            />
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="Address"
+                                                                    fieldType="address"
+                                                                    placeholder="e.g. C/O 56 APO"
+                                                                    value={offenderDetails.relativeDetails?.officersEnclaveAddress || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, officersEnclaveAddress: v } }))}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <SuggestionInput
+                                                                    label="I Card Number"
+                                                                    fieldType="iCardNumber"
+                                                                    placeholder="e.g. A-123456"
+                                                                    value={offenderDetails.relativeDetails?.officersEnclaveICardNumber || ""}
+                                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, officersEnclaveICardNumber: v } }))}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 )}
@@ -800,7 +834,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                         <div className="space-y-1">
                                                             <SuggestionInput
                                                                 label="Shop Owner Name"
-                                                                fieldType="ownerName"
+                                                                fieldType="name"
                                                                 placeholder="e.g. John Keeper"
                                                                 value={offenderDetails.relativeDetails?.shopOwnerName || ""}
                                                                 onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, shopOwnerName: v } }))}
@@ -877,7 +911,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                             <div className="space-y-1">
                                                                 <SuggestionInput
                                                                     label="Name"
-                                                                    fieldType="ownerName"
+                                                                    fieldType="name"
                                                                     placeholder="e.g. John Keeper"
                                                                     value={offenderDetails.relativeDetails?.tempWorkerName || ""}
                                                                     onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, relativeDetails: { ...prev.relativeDetails, tempWorkerName: v } }))}
@@ -958,8 +992,17 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                 label={<span>Service Number <span className="text-red-500">*</span></span>}
                                                 fieldType="serviceNumber"
                                                 placeholder="e.g. MES-12345678"
-                                                value={offenderDetails.serviceNumber || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, serviceNumber: v }))}
+                                                value={offenderDetails.employeeServiceNumber || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeServiceNumber: v }))}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <SuggestionInput
+                                                label="Name"
+                                                fieldType="name"
+                                                placeholder="e.g. John Doe"
+                                                value={offenderDetails.employeeName || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeName: v }))}
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
@@ -968,8 +1011,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Rank"
                                                     fieldType="rank"
                                                     placeholder="Select rank"
-                                                    value={offenderDetails.rank || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, rank: v }))}
+                                                    value={offenderDetails.employeeRank || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeRank: v }))}
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -977,8 +1020,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Unit"
                                                     fieldType="unit"
                                                     placeholder="Select unit"
-                                                    value={offenderDetails.unit || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, unit: v }))}
+                                                    value={offenderDetails.employeeUnit || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeUnit: v }))}
                                                 />
                                             </div>
                                         </div>
@@ -988,8 +1031,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="FMN"
                                                     fieldType="fmn"
                                                     placeholder="Select FMN"
-                                                    value={offenderDetails.fmn || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, fmn: v }))}
+                                                    value={offenderDetails.employeeFMN || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeFMN: v }))}
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -997,19 +1040,31 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Command"
                                                     fieldType="command"
                                                     placeholder="Select Command"
-                                                    value={offenderDetails.command || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, command: v }))}
+                                                    value={offenderDetails.employeeCommand || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeCommand: v }))}
                                                 />
                                             </div>
                                         </div>
-                                        <div className="space-y-1">
-                                            <SuggestionInput
-                                                label="I Card Number"
-                                                fieldType="iCardNumber"
-                                                placeholder="e.g. A-123456"
-                                                value={offenderDetails.iCardNumber || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, iCardNumber: v }))}
-                                            />
+                                        <div className="grid grid-cols-2 gap-4">
+
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="Address"
+                                                    fieldType="address"
+                                                    placeholder="e.g. bhopal"
+                                                    value={offenderDetails.employeeAddress || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeAddress: v }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="I Card Number"
+                                                    fieldType="iCardNumber"
+                                                    placeholder="e.g. A-123456"
+                                                    value={offenderDetails.employeeICardNumber || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, employeeICardNumber: v }))}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -1019,7 +1074,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                         <div className="space-y-1">
                                             <SuggestionInput
                                                 label={<span>Maid/Servant Pass Number <span className="text-red-500">*</span></span>}
-                                                fieldType="maidPassNumber"
+                                                fieldType="passNumber"
                                                 placeholder="e.g. 12345678"
                                                 value={offenderDetails.maidPassNumber || ""}
                                                 onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, maidPassNumber: v }))}
@@ -1030,18 +1085,30 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                 label="Father's Name (Son of)"
                                                 fieldType="fathersName"
                                                 placeholder="e.g. Naman"
-                                                value={offenderDetails.fathersName || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, fathersName: v }))}
+                                                value={offenderDetails.maidFathersName || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, maidFathersName: v }))}
                                             />
                                         </div>
-                                        <div className="space-y-1">
-                                            <SuggestionInput
-                                                label="Pass ID"
-                                                fieldType="passID"
-                                                placeholder="e.g. 1234"
-                                                value={offenderDetails.passID || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, passID: v }))}
-                                            />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="Pass ID"
+                                                    fieldType="passID"
+                                                    placeholder="e.g. 1234"
+                                                    value={offenderDetails.maidPassID || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, maidPassID: v }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="Name"
+                                                    fieldType="name"
+                                                    placeholder="john doe"
+                                                    value={offenderDetails.maidName || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, maidName: v }))}
+                                                />
+                                            </div>
+
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1">
@@ -1049,8 +1116,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Trade"
                                                     fieldType="trade"
                                                     placeholder="Maid Servant"
-                                                    value={offenderDetails.trade || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, trade: v }))}
+                                                    value={offenderDetails.maidTrade || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, maidTrade: v }))}
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -1058,20 +1125,93 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Worked at Quarter Number"
                                                     fieldType="quarterNumber"
                                                     placeholder="e.g. DM-35/4"
-                                                    value={offenderDetails.quarterNumber || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, quarterNumber: v }))}
+                                                    value={offenderDetails.maidQuarterNumber || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, maidQuarterNumber: v }))}
                                                 />
                                             </div>
+
                                         </div>
                                         <div className="space-y-1">
                                             <SuggestionInput
-                                                label="I Card Number"
-                                                fieldType="iCardNumber"
-                                                placeholder="e.g. A-123456"
-                                                value={offenderDetails.iCardNumber || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, iCardNumber: v }))}
+                                                label="Officers Enclave C/O Rank (Army official's details)"
+                                                fieldType="rank"
+                                                placeholder="Select Rank"
+                                                value={offenderDetails.officersEnclave?.officersEnclaveRank || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, officersEnclaveRank: v } }))}
                                             />
                                         </div>
+                                        <div className="space-y-1">
+                                            <SuggestionInput
+                                                label="Name"
+                                                fieldType="name"
+                                                placeholder="e.g. John Apradhi"
+                                                value={offenderDetails.officersEnclave?.officersEnclaveName || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, officersEnclaveName: v } }))}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="Place of QTR."
+                                                    fieldType="placeOfQtr"
+                                                    placeholder="Enter Location"
+                                                    value={offenderDetails.officersEnclave?.placeOfQtr || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, placeOfQtr: v } }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="Unit"
+                                                    fieldType="unit"
+                                                    placeholder="Select unit"
+                                                    value={offenderDetails.officersEnclave?.unit || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, unit: v } }))}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="FMN"
+                                                    fieldType="fmn"
+                                                    placeholder="Select FMN"
+                                                    value={offenderDetails.officersEnclave?.fmn || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, fmn: v } }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="Command"
+                                                    fieldType="command"
+                                                    placeholder="Select Command"
+                                                    value={offenderDetails.officersEnclave?.command || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, command: v } }))}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="Address"
+                                                    fieldType="address"
+                                                    placeholder="e.g. C/O A-123456"
+                                                    value={offenderDetails.officersEnclave?.address || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, address: v } }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <SuggestionInput
+                                                    label="I Card Number"
+                                                    fieldType="iCardNumber"
+                                                    placeholder="e.g. A-123456"
+                                                    value={offenderDetails.officersEnclave?.iCardNumber || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, officersEnclave: { ...prev.officersEnclave, iCardNumber: v } }))}
+                                                />
+                                            </div>
+                                        </div>
+
+
+
                                     </div>
                                 )}
 
@@ -1111,9 +1251,27 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                 label="Pass No."
                                                 fieldType="passNumber"
                                                 placeholder="Enter Pass No."
-                                                value={offenderDetails.passNo || ""}
-                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, passNo: v }))}
+                                                value={offenderDetails.shopPassNo || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, shopPassNo: v }))}
                                             />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <Label>Pass Issue Date</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={offenderDetails.shopPassIssueDate ? new Date(offenderDetails.shopPassIssueDate).toISOString().split('T')[0] : ""}
+                                                    onChange={(e) => e.target.value && setOffenderDetails((prev: any) => ({ ...prev, shopPassIssueDate: new Date(e.target.value).toISOString() }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label>Pass Expire Date</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={offenderDetails.shopPassExpireDate ? new Date(offenderDetails.shopPassExpireDate).toISOString().split('T')[0] : ""}
+                                                    onChange={(e) => e.target.value && setOffenderDetails((prev: any) => ({ ...prev, shopPassExpireDate: new Date(e.target.value).toISOString() }))}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -1126,8 +1284,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Name"
                                                     fieldType="name"
                                                     placeholder="e.g. John Keeper"
-                                                    value={offenderDetails.name || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, name: v }))}
+                                                    value={offenderDetails.tempWorkerName || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, tempWorkerName: v }))}
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -1135,8 +1293,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Place of Stay"
                                                     fieldType="address"
                                                     placeholder="e.g. C/O 56 APO"
-                                                    value={offenderDetails.placeOfStay || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, placeOfStay: v }))}
+                                                    value={offenderDetails.tempWorkerPlaceOfStay || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, tempWorkerPlaceOfStay: v }))}
                                                 />
                                             </div>
                                         </div>
@@ -1146,8 +1304,8 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Place Of Work"
                                                     fieldType="address"
                                                     placeholder="e.g. C/O 56 APO"
-                                                    value={offenderDetails.placeOfWork || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, placeOfWork: v }))}
+                                                    value={offenderDetails.tempWorkerPlaceOfWork || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, tempWorkerPlaceOfWork: v }))}
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -1155,11 +1313,39 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                                                     label="Type of Work"
                                                     fieldType="trade"
                                                     placeholder="e.g. Cleaner"
-                                                    value={offenderDetails.typeOfWork || ""}
-                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, typeOfWork: v }))}
+                                                    value={offenderDetails.tempWorkerTypeOfWork || ""}
+                                                    onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, tempWorkerTypeOfWork: v }))}
+                                                />
+                                            </div>
+
+                                        </div>
+                                        <div className="space-y-1">
+                                            <SuggestionInput
+                                                label="Pass No."
+                                                fieldType="passNumber"
+                                                value={offenderDetails.tempWorkerPassNo || ""}
+                                                onChange={(v) => setOffenderDetails((prev: any) => ({ ...prev, tempWorkerPassNo: v }))}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <Label>Pass Issue Date</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={offenderDetails.tempWorkerPassIssueDate ? new Date(offenderDetails.tempWorkerPassIssueDate).toISOString().split('T')[0] : ""}
+                                                    onChange={(e) => e.target.value && setOffenderDetails((prev: any) => ({ ...prev, tempWorkerPassIssueDate: new Date(e.target.value).toISOString() }))}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label>Pass Expire Date</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={offenderDetails.tempWorkerPassExpireDate ? new Date(offenderDetails.tempWorkerPassExpireDate).toISOString().split('T')[0] : ""}
+                                                    onChange={(e) => e.target.value && setOffenderDetails((prev: any) => ({ ...prev, tempWorkerPassExpireDate: new Date(e.target.value).toISOString() }))}
                                                 />
                                             </div>
                                         </div>
+
                                     </div>
                                 )}
                             </div>

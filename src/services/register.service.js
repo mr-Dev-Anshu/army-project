@@ -1,5 +1,6 @@
 import { RegisterRepository } from "@/reposetories/register.repo";
 import { saveOrUpdateArmyPersonnel } from "@/services/individual.service";
+import { offenderRepo } from "@/reposetories/offender.repo";
 
 const repo = new RegisterRepository();
 
@@ -32,11 +33,48 @@ export class RegisterService {
         }
     }
 
+    async _processOffenderData(data, registerId = null) {
+        if (!data.details || !data.details.offenceOccurred || !data.details.offenderDetails || !data.details.offenderCategory) {
+            return null;
+        }
+
+        const offenderPayload = {
+            offenderDetails: data.details.offenderDetails,
+            offenderType: data.details.offenderCategory, // Mapping category to offenderType for compatibility if needed, or use category
+            category: "Offender",
+        };
+
+        if (registerId) {
+            const existingRegister = await repo.findById(registerId);
+            if (existingRegister && existingRegister.offender) {
+                // Update existing offender
+                const offenderId = typeof existingRegister.offender === 'object' ? existingRegister.offender._id : existingRegister.offender;
+                await offenderRepo.update(offenderId, offenderPayload);
+                return offenderId;
+            }
+        }
+
+        // Create new
+        const newOffender = await offenderRepo.create(offenderPayload);
+        return newOffender._id;
+    }
+
     async createRegister(data) {
         // 1. Save/Update individual if present
         await this._processIndividualData(data);
 
-        // 2. Create Register Entry
+        // 2. Process Offender
+        const offenderId = await this._processOffenderData(data);
+        if (offenderId) {
+            data.offender = offenderId;
+            // Remove redundant data from details
+            if (data.details) {
+                delete data.details.offenderCategory;
+                delete data.details.offenderDetails;
+            }
+        }
+
+        // 3. Create Register Entry
         return await repo.create(data);
     }
 
@@ -60,8 +98,20 @@ export class RegisterService {
         // 1. Save/Update individual if present in update data
         await this._processIndividualData(data);
 
-        // 2. Update Register Entry
+        // 2. Process Offender
+        const offenderId = await this._processOffenderData(data, id);
+        if (offenderId) {
+            data.offender = offenderId;
+            // Remove redundant data from details
+            if (data.details) {
+                delete data.details.offenderCategory;
+                delete data.details.offenderDetails;
+            }
+        }
+
+        // 3. Update Register Entry
         const updated = await repo.updateById(id, data);
+
         if (!updated) throw new Error("Register entry not found");
         return updated;
     }
