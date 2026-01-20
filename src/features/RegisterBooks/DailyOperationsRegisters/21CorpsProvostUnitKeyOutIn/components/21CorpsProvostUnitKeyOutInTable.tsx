@@ -174,32 +174,32 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
                                             <td className="px-4 py-4 align-middle font-medium text-gray-900 border-r border-gray-300 text-center sticky left-0 z-30 bg-white group-hover:bg-gray-50">
                                                 {item.serialNumber}
                                             </td>
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-gray-600">
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {item.date ? format(new Date(item.date), "dd/MM/yyyy") : "-"}
                                             </td>
                                             <td className="px-4 py-4 align-middle border-r border-gray-300">
                                                 <div className="flex flex-col space-y-1 text-xs">
                                                     <div className="grid grid-cols-[60px_1fr]">
                                                         <span className="font-bold text-gray-900">Army no.:</span>
-                                                        <span className="text-gray-600">{ind.armyNo || "-"}</span>
+                                                        <span className="text-[#0A0A0A]">{ind.armyNo || "-"}</span>
                                                     </div>
                                                     <div className="grid grid-cols-[60px_1fr]">
                                                         <span className="font-bold text-gray-900">Rank:</span>
-                                                        <span className="text-gray-600">{ind.rank || "-"}</span>
+                                                        <span className="text-[#0A0A0A]">{ind.rank || "-"}</span>
                                                     </div>
                                                     <div className="grid grid-cols-[60px_1fr]">
                                                         <span className="font-bold text-gray-900">Name:</span>
-                                                        <span className="text-gray-600 font-medium uppercase">{ind.name || "-"}</span>
+                                                        <span className="text-[#0A0A0A] font-medium uppercase">{ind.name || "-"}</span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-gray-600">
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {item.details?.storeName || "-"}
                                             </td>
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-gray-600">
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {ind.unit || ind.fmn || "-"}
                                             </td>
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-gray-600">
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {item.details?.keyNumber || "-"}
                                             </td>
 
@@ -244,7 +244,7 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
                                                             <Edit className="mr-2 h-4 w-4" />
                                                             <span>Edit</span>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteClick(item._id)}>
+                                                        <DropdownMenuItem className="text[#0A0A0A]" onClick={() => handleDeleteClick(item._id)}>
                                                             <Trash2 className="mr-2 h-4 w-4" />
                                                             <span>Delete</span>
                                                         </DropdownMenuItem>

@@ -39,6 +39,7 @@ export interface FilterState {
   individualWorkingStatus?: string;
   priceListStatus?: string;
   agreementStatus?: string;
+  dutyType?: string;
   sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
@@ -71,6 +72,7 @@ interface ReportFilterBarProps {
   showAgreementStatus?: boolean;
   showIndividualWorkingStatus?: boolean;
   showUnitLocation?: boolean;
+  showDutyType?: boolean;
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -102,12 +104,14 @@ export default function ReportFilterBar({
   showAgreementStatus = false,
   showIndividualWorkingStatus = false,
   showUnitLocation = false,
+  showDutyType = false,
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
     (showAgreementStatus && filters.agreementStatus && filters.agreementStatus !== "All") ||
     (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
     (showIndividualWorkingStatus && filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") ||
+    (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
     !!filters.fromDate ||
     !!filters.toDate ||
     !!filters.unit ||
@@ -367,6 +371,31 @@ export default function ReportFilterBar({
                       </Select>
                     </div>
                   )}
+
+
+                  {/* Duty Type */}
+                  {showDutyType && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Duty Type</label>
+                      <Select
+                        value={filters.dutyType || "All"}
+                        onValueChange={(value) => onFilterChange("dutyType", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Duty Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          <SelectItem value="Mobile Duty">Mobile Duty</SelectItem>
+                          <SelectItem value="MP Duty">MP Duty</SelectItem>
+                          <SelectItem value="Gate Duty">Gate Duty</SelectItem>
+                          <SelectItem value="Patrol Duty">Patrol Duty</SelectItem>
+                          <SelectItem value="Escort Duty">Escort Duty</SelectItem>
+                          <SelectItem value="Traffic Duty">Traffic Duty</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 {onReset && (
@@ -397,11 +426,6 @@ export default function ReportFilterBar({
           )}
         </div>
       </div>
-    </div >
-
-
-
-
-
+    </div>
   );
 }

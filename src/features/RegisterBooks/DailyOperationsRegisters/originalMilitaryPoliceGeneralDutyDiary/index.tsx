@@ -2,21 +2,21 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Book, ChevronRight, Printer, BookOpen } from "lucide-react";
+import { BookOpen, ChevronRight, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RightSideSheet from "@/components/common/RightSideSheet";
-import KeyOutInTable from "./components/21CorpsProvostUnitKeyOutInTable";
-import KeyOutInForm from "./components/form";
-import { useGetKeyOutInRegisters, useDeleteKeyOutInRegister } from "./hooks";
+import GeneralDutyDiaryTable from "./components/originalMilitaryPoliceGeneralDutyDiaryTable";
+import GeneralDutyDiaryForm from "./components/form";
+import { useGetGeneralDutyDiaryRegisters, useDeleteGeneralDutyDiaryRegister } from "./hooks";
 
-const KeyOutInRegisterPage = () => {
+const GeneralDutyDiaryRegisterPage = () => {
     const router = useRouter();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
 
     // Fetch Data
-    const { data: registers = [], isLoading } = useGetKeyOutInRegisters();
-    const deleteMutation = useDeleteKeyOutInRegister();
+    const { data: registers = [], isLoading } = useGetGeneralDutyDiaryRegisters();
+    const deleteMutation = useDeleteGeneralDutyDiaryRegister();
 
     const handleEdit = (item: any) => {
         setEditingItem(item);
@@ -48,7 +48,7 @@ const KeyOutInRegisterPage = () => {
                         </span>
                         <ChevronRight className="h-4 w-4 text-gray-400" />
                         <span className="font-bold text-[#0A0A0A]">
-                            21 Corps Provost Unit Key Out|In Register
+                            Original Military Police General Duty Diary
                         </span>
                     </div>
                 </div>
@@ -63,7 +63,7 @@ const KeyOutInRegisterPage = () => {
                 {isLoading ? (
                     <div>Loading...</div>
                 ) : (
-                    <KeyOutInTable
+                    <GeneralDutyDiaryTable
                         data={registers}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
@@ -79,10 +79,10 @@ const KeyOutInRegisterPage = () => {
             <RightSideSheet
                 isOpen={isAddOpen}
                 onClose={() => setIsAddOpen(false)}
-                title={editingItem ? "Edit Key Out Entry" : "Add Key Out Entry"}
-                description={editingItem ? "Modify details of the key departure." : "Record Key departure details"}
+                title={editingItem ? "Edit General Duty Diary Entry" : "Add General Duty Diary Entry"}
+                description={editingItem ? "Modify details of the duty entry." : "Record duty details"}
             >
-                <KeyOutInForm
+                <GeneralDutyDiaryForm
                     initialData={editingItem}
                     onSuccess={() => setIsAddOpen(false)}
                     onCancel={() => setIsAddOpen(false)}
@@ -92,6 +92,4 @@ const KeyOutInRegisterPage = () => {
     );
 };
 
-
-
-export default KeyOutInRegisterPage;
+export default GeneralDutyDiaryRegisterPage;
