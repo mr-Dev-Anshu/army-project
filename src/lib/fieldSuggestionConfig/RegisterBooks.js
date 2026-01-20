@@ -31,6 +31,21 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.offenceType': 'offenceType',
         'details.placeOfOffence': 'placeOfOffence',
         'details.occurrenceBrief': 'occurrenceBrief',
+        'details.totalStrength': 'totalStrength',
+        'details.reportNo': 'reportNo',
+
+        // Assigned Individuals
+        'details.individuals.armyNo': 'armyNo',
+        'details.individuals.rank': 'rank',
+        'details.individuals.name': 'name',
+        'details.individuals.unit': 'unit',
+        'details.individuals.fmn': 'fmn',
+        'details.individuals.command': 'command',
+
+        // Authentication Initials
+        'authentication.initialsMPCPNCO': 'initials',
+        'authentication.initialsQMSJCO': 'initials',
+        'authentication.initials2IC': 'initials',
 
         // Offender / Victim Details
         'details.offenderDetails.rank': 'rank',

@@ -271,15 +271,13 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                         Assigned Individuals on Duty
                     </h3>
 
-                    <div className="space-y-1.5">
-                        <Label htmlFor="totalStrength" className="text-xs font-medium text-neutral-700">
-                            Total Strength
-                        </Label>
-                        <Input
-                            id="totalStrength"
+                    <div className="space-y-1">
+                        <SuggestionInput
+                            label="Total Strength"
+                            fieldType="totalStrength"
                             placeholder="eg. 02"
                             value={totalStrength}
-                            onChange={(e) => setTotalStrength(e.target.value)}
+                            onChange={setTotalStrength}
                         />
                     </div>
 
@@ -354,15 +352,13 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
 
                     {offenceOccurred && (
                         <div className="space-y-4 pl-1">
-                            <div className="space-y-1.5">
-                                <Label htmlFor="reportNo" className="text-xs font-medium text-neutral-700">
-                                    Enter Report No.
-                                </Label>
-                                <Input
-                                    id="reportNo"
+                            <div className="space-y-1">
+                                <SuggestionInput
+                                    label="Enter Report No."
+                                    fieldType="reportNo"
                                     placeholder="New"
                                     value={reportNo}
-                                    onChange={(e) => setReportNo(e.target.value)}
+                                    onChange={setReportNo}
                                 />
                             </div>
 
