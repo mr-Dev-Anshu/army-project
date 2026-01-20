@@ -228,56 +228,64 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                                                             if (category === 'militaryPersonnel') {
                                                                                 return (
                                                                                     <>
-                                                                                        <span className="text-gray-600">Army No.-</span><span>{details.armyNo || "-"}</span>
-                                                                                        <span className="text-gray-600">Rank-</span><span>{details.rank || "-"}</span>
-                                                                                        <span className="text-gray-600">Name-</span><span>{details.name || "-"}</span>
-                                                                                        <span className="text-gray-600">Unit-</span><span>{details.unit || "-"}</span>
+                                                                                        {details.armyNo && <>
+                                                                                            <span className="text-[#0A0A0A]">Army No.-</span><span>{details.armyNo || "-"}</span>
+                                                                                        </>}
+                                                                                        {details.rank && <>
+                                                                                            <span className="text-[#0A0A0A]">Rank-</span><span>{details.rank || "-"}</span>
+                                                                                        </>}
+                                                                                        {details.name && <>
+                                                                                            <span className="text-[#0A0A0A]">Name-</span><span>{details.name || "-"}</span>
+                                                                                        </>}
+                                                                                        {details.unit && <>
+                                                                                            <span className="text-[#0A0A0A]">Unit-</span><span>{details.unit || "-"}</span>
+                                                                                        </>}
                                                                                     </>
                                                                                 );
                                                                             } else if (category === 'civilian') {
                                                                                 return (
                                                                                     <>
-                                                                                        <span className="text-gray-600">Aadhar No. -</span><span>{details.civilianAadharCardNumber || "-"}</span>
-                                                                                        <span className="text-gray-600">Name -</span><span>{details.civilianName || "-"}</span>
-                                                                                        <span className="text-gray-600">S/O -</span><span>{details.civilianFathersName || "-"}</span>
+                                                                                        {details.civilianAadharCardNumber && <><span className="text-[#0A0A0A]">Aadhar No. -</span><span>{details.civilianAadharCardNumber || "-"}</span></>}
+                                                                                        {details.civilianName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.civilianName || "-"}</span></>}
+                                                                                        {details.civilianFathersName && <><span className="text-[#0A0A0A]">S/O -</span><span>{details.civilianFathersName || "-"}</span></>}
                                                                                         {details.isDependent && (
                                                                                             <>
-                                                                                                <span className="text-gray-600 font-semibold col-span-2 pt-1">Relative Details:</span>
-                                                                                                <span className="text-gray-600">Relation -</span><span>{details.relationName || "-"}</span>
+                                                                                                <span className="text-[#0A0A0A] font-semibold col-span-2 pt-1">Relative Details:</span>
+                                                                                                {details.relationName && <><span className="text-[#0A0A0A]">Relation -</span><span>{details.relationName || "-"}</span></>}
                                                                                                 {details.relativeCategory === "militaryPersonnel" && (
                                                                                                     <>
-                                                                                                        <span className="text-gray-600">Army No.-</span><span>{details.relativeDetails?.armyNo || "-"}</span>
-                                                                                                        <span className="text-gray-600">Rank-</span><span>{details.relativeDetails?.rank || "-"}</span>
-                                                                                                        <span className="text-gray-600">Unit-</span><span>{details.relativeDetails?.unit || "-"}</span>
+                                                                                                        {details.relativeDetails?.armyNo && <><span className="text-[#0A0A0A]">Army No.-</span><span>{details.relativeDetails?.armyNo || "-"}</span></>}
+                                                                                                        {details.relativeDetails?.rank && <><span className="text-[#0A0A0A]">Rank-</span><span>{details.relativeDetails?.rank || "-"}</span></>}
+                                                                                                        {details.relativeDetails?.unit && <><span className="text-[#0A0A0A]">Unit-</span><span>{details.relativeDetails?.unit || "-"}</span></>}
                                                                                                     </>
                                                                                                 )}
                                                                                                 {details.relativeCategory === "servantMaid" && (
                                                                                                     <>
-                                                                                                        <span className="text-gray-600">Name -</span><span>{details.relativeDetails?.maidName || "-"}</span>
-                                                                                                        <span className="text-gray-600">Pass Id No. -</span><span>{details.relativeDetails?.maidPassID || "-"}</span>
-                                                                                                        <span className="text-gray-600">C/O Rank -</span><span>{details.relativeDetails?.officersEnclaveRank || "-"}</span>
-                                                                                                        <span className="text-gray-600">C/O -</span><span>{details.relativeDetails?.officersEnclaveName || "-"}</span>
-                                                                                                        <span className="text-gray-600">Unit -</span><span>{details.relativeDetails?.officersEnclaveUnit || "-"}</span>
+                                                                                                        {details.relativeDetails?.maidName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.relativeDetails?.maidName || "-"}</span></>}
+                                                                                                        {details.relativeDetails?.maidPassID && <><span className="text-[#0A0A0A]">Pass Id No. -</span><span>{details.relativeDetails?.maidPassID || "-"}</span></>}
+                                                                                                        {details.relativeDetails?.officersEnclaveRank && <><span className="text-[#0A0A0A]">C/O Rank -</span><span>{details.relativeDetails?.officersEnclaveRank || "-"}</span></>}
+                                                                                                        {details.relativeDetails?.officersEnclaveName && <><span className="text-[#0A0A0A]">C/O -</span><span>{details.relativeDetails?.officersEnclaveName || "-"}</span></>}
+                                                                                                        {details.relativeDetails?.officersEnclaveUnit && <><span className="text-[#0A0A0A]">Unit -</span><span>{details.relativeDetails?.officersEnclaveUnit || "-"}</span></>}
                                                                                                     </>
                                                                                                 )}
 
                                                                                                 {
                                                                                                     details.relativeCategory === "shopKeeper" && (
                                                                                                         <>
-                                                                                                            <span className="text-gray-600">Name -</span><span>{details.relativeDetails?.shopOwnerName || "-"}</span>
-                                                                                                            <span className="text-gray-600">Shop Name -</span><span>{details.relativeDetails?.shopName || "-"}</span>
-                                                                                                            <span className="text-gray-600">Pass No. -</span><span>{details.relativeDetails?.shopPassNo || "-"}</span>
-                                                                                                            <span className="text-gray-600">Shop Address -</span><span>{details.relativeDetails?.shopAddress || "-"}</span>
+                                                                                                            {details.relativeDetails?.shopOwnerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.relativeDetails?.shopOwnerName || "-"}</span></>}
+                                                                                                            {details.relativeDetails?.shopName && <><span className="text-[#0A0A0A]">Shop Name -</span><span>{details.relativeDetails?.shopName || "-"}</span></>}
+                                                                                                            {details.relativeDetails?.shopPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.relativeDetails?.shopPassNo || "-"}</span></>}
+                                                                                                            {details.relativeDetails?.shopAddress && <><span className="text-[#0A0A0A]">Shop Address -</span><span>{details.relativeDetails?.shopAddress || "-"}</span></>}
                                                                                                         </>
                                                                                                     )
                                                                                                 }
                                                                                                 {
                                                                                                     details.relativeCategory === "tempHiredWorker" && (
                                                                                                         <>
-                                                                                                            <span className="text-gray-600">Name -</span><span>{details.relativeDetails?.tempWorkerName || "-"}</span>
-                                                                                                            <span className="text-gray-600">Pass No. -</span><span>{details.relativeDetails?.tempWorkerPassNo || "-"}</span>
-                                                                                                            <span className="text-gray-600">Place Of Stay -</span><span>{details.relativeDetails?.tempWorkerPlaceOfStay || "-"}</span>
-                                                                                                            <span className="text-gray-600">Place Of Work -</span><span>{details.relativeDetails?.tempWorkerPlaceOfWork || "-"}</span>
+                                                                                                            {details.relativeDetails?.tempWorkerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.relativeDetails?.tempWorkerName || "-"}</span></>}
+                                                                                                            {details.relativeDetails?.tempWorkerPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.relativeDetails?.tempWorkerPassNo || "-"}</span></>}
+                                                                                                            {details.relativeDetails?.tempWorkerPlaceOfStay && <><span className="text-[#0A0A0A]">Place Of Stay -</span><span>{details.relativeDetails?.tempWorkerPlaceOfStay || "-"}</span></>}
+                                                                                                            {details.relativeDetails?.tempWorkerPlaceOfWork && <><span className="text-[#0A0A0A]">Place Of Work -</span><span>{details.relativeDetails?.tempWorkerPlaceOfWork || "-"}</span></>}
                                                                                                         </>
                                                                                                     )
                                                                                                 }
@@ -288,10 +296,10 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                                                             } else if (category === "employee") {
                                                                                 return (
                                                                                     <>
-                                                                                        <span className="text-gray-600">Service No. -</span><span>{details.employeeServiceNumber || "-"}</span>
-                                                                                        <span className="text-gray-600">Rank -</span><span>{details.employeeRank || "-"}</span>
-                                                                                        <span className="text-gray-600">Name -</span><span>{details.employeeName || "-"}</span>
-                                                                                        <span className="text-gray-600">Unit -</span><span>{details.employeeUnit || "-"}</span>
+                                                                                        {details.employeeServiceNumber && <><span className="text-[#0A0A0A]">Service No. -</span><span>{details.employeeServiceNumber || "-"}</span></>}
+                                                                                        {details.employeeRank && <><span className="text-[#0A0A0A]">Rank -</span><span>{details.employeeRank || "-"}</span></>}
+                                                                                        {details.employeeName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.employeeName || "-"}</span></>}
+                                                                                        {details.employeeUnit && <><span className="text-[#0A0A0A]">Unit -</span><span>{details.employeeUnit || "-"}</span></>}
                                                                                     </>
                                                                                 )
                                                                             } else if (category === "servantMaid") {
@@ -300,16 +308,16 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
 
                                                                                 return (
                                                                                     <>
-                                                                                        <span className="text-gray-600">Name -</span><span>{details.maidName || "-"}</span>
+                                                                                        {details.maidName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.maidName || "-"}</span></>}
 
-                                                                                        <span className="text-gray-600">Pass ID -</span><span>{details.maidPassID || "-"}</span>
-                                                                                        <span className="text-gray-600">S/O -</span><span>{details.maidFathersName || "-"}</span>
+                                                                                        {details.maidPassID && <><span className="text-[#0A0A0A]">Pass ID -</span><span>{details.maidPassID || "-"}</span></>}
+                                                                                        {details.maidFathersName && <><span className="text-[#0A0A0A]">S/O -</span><span>{details.maidFathersName || "-"}</span></>}
 
 
                                                                                         {(coRank !== "-" || coName !== "-") && (
                                                                                             <>
-                                                                                                <span className="text-gray-600">C/O Rank -</span><span>{coRank}</span>
-                                                                                                <span className="text-gray-600">C/O Name -</span><span>{coName}</span>
+                                                                                                {coRank !== "-" && <><span className="text-[#0A0A0A]">C/O Rank -</span><span>{coRank}</span></>}
+                                                                                                {coName !== "-" && <><span className="text-[#0A0A0A]">C/O Name -</span><span>{coName}</span></>}
 
 
                                                                                             </>
@@ -319,19 +327,19 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                                                             } else if (category === "shopKeeper") {
                                                                                 return (
                                                                                     <>
-                                                                                        <span className="text-gray-600">Name -</span><span>{details.shopOwnerName || "-"}</span>
-                                                                                        <span className="text-gray-600">Shop Name -</span><span>{details.shopName || "-"}</span>
-                                                                                        <span className="text-gray-600">Pass No. -</span><span>{details.shopPassNo || "-"}</span>
-                                                                                        <span className="text-gray-600">Shop Address -</span><span>{details.shopAddress || "-"}</span>
+                                                                                        {details.shopOwnerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.shopOwnerName || "-"}</span></>}
+                                                                                        {details.shopName && <><span className="text-[#0A0A0A]">Shop Name -</span><span>{details.shopName || "-"}</span></>}
+                                                                                        {details.shopPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.shopPassNo || "-"}</span></>}
+                                                                                        {details.shopAddress && <><span className="text-[#0A0A0A]">Shop Address -</span><span>{details.shopAddress || "-"}</span></>}
                                                                                     </>
                                                                                 )
                                                                             } else if (category === "tempHiredWorker") {
                                                                                 return (
                                                                                     <>
-                                                                                        <span className="text-gray-600">Name -</span><span>{details.tempWorkerName || "-"}</span>
-                                                                                        <span className="text-gray-600">Pass No. -</span><span>{details.tempWorkerPassNo || "-"}</span>
-                                                                                        <span className="text-gray-600">Place Of Stay -</span><span>{details.tempWorkerPlaceOfStay || "-"}</span>
-                                                                                        <span className="text-gray-600">Place Of Work -</span><span>{details.tempWorkerPlaceOfWork || "-"}</span>
+                                                                                        {details.tempWorkerName && <><span className="text-[#0A0A0A]">Name -</span><span>{details.tempWorkerName || "-"}</span></>}
+                                                                                        {details.tempWorkerPassNo && <><span className="text-[#0A0A0A]">Pass No. -</span><span>{details.tempWorkerPassNo || "-"}</span></>}
+                                                                                        {details.tempWorkerPlaceOfStay && <><span className="text-[#0A0A0A]">Place Of Stay -</span><span>{details.tempWorkerPlaceOfStay || "-"}</span></>}
+                                                                                        {details.tempWorkerPlaceOfWork && <><span className="text-[#0A0A0A]">Place Of Work -</span><span>{details.tempWorkerPlaceOfWork || "-"}</span></>}
                                                                                     </>
                                                                                 )
                                                                             }
