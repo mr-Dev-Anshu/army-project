@@ -1,0 +1,68 @@
+import { NextRequest, NextResponse } from "next/server";
+import { RegisterService } from "@/services/register.service";
+import { createRegisterSchema } from "@/validators/register.validator";
+import { connectDB } from "@/lib/db/mongodb";
+
+const service = new RegisterService();
+
+export async function GET(req: NextRequest) {
+    try {
+        await connectDB();
+        const { searchParams } = new URL(req.url);
+        const type = searchParams.get("type");
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "10");
+
+        const filters: any = {};
+        if (type) filters.type = type;
+
+        // Add other filters as needed (e.g. date range)
+        const date = searchParams.get("date");
+        if (date) filters.date = date;
+
+        const reportNo = searchParams.get("reportNo");
+        if (reportNo) {
+            const register = await service.getRegisterByReportNo(reportNo);
+            // If searching by reportNo, we might just want to return that single entry or an array containing it
+            // for consistency with the frontend hook, returning the single object is better if the hook expects one.
+            // But the hook in existing implementation expects "offenceTypes" etc which matches "GeneralTrafficOffence".
+            // The user request says "fetch the record that is created by *this form data only*".
+            // "This form" creates a "Register" entry.
+            // So returning the Register entry is correct.
+            if (!register) return NextResponse.json(null);
+            return NextResponse.json(register);
+        }
+
+        const data = await service.getAllRegisters(filters, { page, limit });
+        return NextResponse.json(data);
+    } catch (error: any) {
+        return NextResponse.json(
+            { error: error.message || "Failed to fetch registers" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function POST(req: NextRequest) {
+    try {
+        await connectDB();
+        const body = await req.json();
+
+        const { error, value } = createRegisterSchema.validate(body);
+        if (error) {
+            return NextResponse.json(
+                { error: error.details[0].message },
+                { status: 400 }
+            );
+        }
+
+        const newRegister = await service.createRegister(value);
+        return NextResponse.json(newRegister, { status: 201 });
+    } catch (error: any) {
+        console.error("Register creation error:", error);
+        return NextResponse.json(
+            { error: error.message || "Failed to create register entry", details: error.toString() },
+            { status: 500 }
+        );
+    }
+}

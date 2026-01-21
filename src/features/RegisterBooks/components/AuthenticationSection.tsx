@@ -1,9 +1,18 @@
 import React from "react";
-import { Pen } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
-export const AuthenticationSection = () => {
+interface AuthenticationData {
+    initialsMPCPNCO?: string;
+    initialsQMSJCO?: string;
+    initials2IC?: string;
+}
+
+interface AuthenticationSectionProps {
+    data: AuthenticationData;
+    onChange: (field: keyof AuthenticationData, value: string) => void;
+}
+
+export const AuthenticationSection = ({ data, onChange }: AuthenticationSectionProps) => {
     return (
         <section className="space-y-4 pt-4 border-t border-neutral-100">
             <h3 className="text-sm font-bold text-neutral-900">
@@ -11,42 +20,33 @@ export const AuthenticationSection = () => {
             </h3>
 
             <div className="space-y-1.5">
-                <Label
-                    htmlFor="initialsMpcr"
-                    className="text-xs font-medium text-neutral-700"
-                >
-                    Initials of MPCR NCO
-                </Label>
-                <div className="relative">
-                    <Input id="initialsMpcr" placeholder="Signature" className="pr-10" />
-                    <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                </div>
+                <SuggestionInput
+                    label="Initials of MPCR NCO"
+                    fieldType="initials"
+                    placeholder="Signature"
+                    value={data.initialsMPCPNCO || ""}
+                    onChange={(v) => onChange("initialsMPCPNCO", v)}
+                />
             </div>
 
             <div className="space-y-1.5">
-                <Label
-                    htmlFor="initialsSm"
-                    className="text-xs font-medium text-neutral-700"
-                >
-                    Initials of SM/SJCO
-                </Label>
-                <div className="relative">
-                    <Input id="initialsSm" placeholder="Signature" className="pr-10" />
-                    <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                </div>
+                <SuggestionInput
+                    label="Initials of SM/SJCO"
+                    fieldType="initials"
+                    placeholder="Signature"
+                    value={data.initialsQMSJCO || ""}
+                    onChange={(v) => onChange("initialsQMSJCO", v)}
+                />
             </div>
 
             <div className="space-y-1.5">
-                <Label
-                    htmlFor="initials2ic"
-                    className="text-xs font-medium text-neutral-700"
-                >
-                    Initials of 2IC
-                </Label>
-                <div className="relative">
-                    <Input id="initials2ic" placeholder="Signature" className="pr-10" />
-                    <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                </div>
+                <SuggestionInput
+                    label="Initials of 2IC"
+                    fieldType="initials"
+                    placeholder="Signature"
+                    value={data.initials2IC || ""}
+                    onChange={(v) => onChange("initials2IC", v)}
+                />
             </div>
         </section>
     );

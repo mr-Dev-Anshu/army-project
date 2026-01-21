@@ -1,13 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Gauge, ClipboardList, LayoutDashboard, ChevronRight } from "lucide-react";
+import { Gauge, ClipboardList, PanelLeft, Siren, Car } from "lucide-react";
+import Link from "next/link";
 import ConeIcon from "@/components/icons/ConeIcon";
 
 export default function CreateNewRecordPanel({ setCollapsed }: any) {
   const router = useRouter();
 
   const records = [
+    {
+      title: "(Initial Report) Immediate Reporting of Incident",
+      icon: <Siren className="w-6 h-6 text-white" color="white" />,
+      bgColor: "bg-[#FF9933]",
+      key: "immediate-reporting-incident",
+      path: "/create-record/immediate-reporting-incident",
+    },
     {
       title: "General & Traffic Offence Reports",
       icon: <ConeIcon className="w-6 h-6 text-white" color="white" />,
@@ -29,6 +37,13 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
       key: "mp",
       path: "/create-record/mp-investigation",
     },
+    {
+      title: "(MT Accident) Mechanical Transport Accident Report",
+      icon: <Car className="w-6 h-6 text-white" />,
+      bgColor: "bg-[#C2A14D]",
+      key: "mtAccident",
+      path: "/create-record/mt-accident",
+    },
   ];
 
   const handleSelect = (path: string) => {
@@ -37,17 +52,24 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
   };
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full ">
       {/* ---------- HEADER / BREADCRUMB ---------- */}
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-        <LayoutDashboard className="w-4 h-4" />
-        <span>Dashboard</span>
-        <ChevronRight className="w-4 h-4" />
-        <span className="font-semibold text-gray-900">Create New Record</span>
+      <div className="flex items-center gap-4 text-sm text-[#0A0A0A] mb-6 pb-4 border-b border-gray-200">
+        <PanelLeft className="w-5 h-5 text-gray-500" />
+        <div className="h-4 w-[1px] bg-gray-200"></div>
+        <div className="flex items-center gap-2">
+          <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+            Dashboard
+          </Link>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
+            <path d="M0.75 8.75L4.75 4.75L0.75 0.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="font-semibold text-[#0A0A0A]">Create New Record</span>
+        </div>
       </div>
 
-      <div className="mb-2">
-        <h2 className="text-gray-500 text-sm font-medium mb-6">Create New Record</h2>
+      <div className="space-y-1 mb-8">
+        <h1 className="text-lg font-bold text-[#404040]">Create New Record</h1>
       </div>
 
       {/* ---------- CARDS GRID ---------- */}

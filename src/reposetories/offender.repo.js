@@ -29,10 +29,18 @@ export class OffenderRepository {
   }
 
   async update(id, data) {
-    return await Offender.findByIdAndUpdate(id, data, {
+    const updated = await Offender.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
     }).lean();
+
+    if (updated) {
+      trackFieldSuggestions(updated, OFFENDER_SUGGESTION_CONFIG).catch(err => {
+        console.error("Tracking Suggestions Error (Offender Update):", err);
+      });
+    }
+
+    return updated;
   }
 
   async delete(id) {

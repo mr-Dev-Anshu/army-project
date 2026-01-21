@@ -1,4 +1,4 @@
-import MiniKoteArmsAmnInOutForm from "@/features/RegisterBooks/dailyOperationsRegisters/miniKoteArmsAmnInOut/components/form";
+import MiniKoteArmsAmnInOutForm from "@/features/RegisterBooks/DailyOperationsRegisters/miniKoteArmsAmnInOut/components/form";
 
 const Page = () => {
     return (

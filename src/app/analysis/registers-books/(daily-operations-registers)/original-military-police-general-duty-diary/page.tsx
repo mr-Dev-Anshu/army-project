@@ -1,10 +1,8 @@
-import GeneralDutyDiaryForm from "@/features/RegisterBooks/dailyOperationsRegisters/originalMilitaryPoliceGeneralDutyDiary/components/form";
+import GeneralDutyDiaryRegisterPage from "@/features/RegisterBooks/DailyOperationsRegisters/originalMilitaryPoliceGeneralDutyDiary/index";
 
 const Page = () => {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-neutral-100 p-8">
-            <GeneralDutyDiaryForm />
-        </div>
+        <GeneralDutyDiaryRegisterPage />
     );
 };
 

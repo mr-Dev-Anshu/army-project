@@ -20,8 +20,18 @@ const MobilePhoneInOutForm = () => {
         command: "",
     });
 
+    const [authentication, setAuthentication] = useState({
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: "",
+    });
+
     const handleFieldChange = (field: keyof IndividualData, value: string) => {
         setIndividual((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleAuthenticationChange = (field: string, value: string) => {
+        setAuthentication((prev) => ({ ...prev, [field]: value }));
     };
 
     return (
@@ -143,7 +153,10 @@ const MobilePhoneInOutForm = () => {
                 </section>
 
                 {/* Initials / Authentication */}
-                <AuthenticationSection />
+                <AuthenticationSection
+                    data={authentication}
+                    onChange={handleAuthenticationChange}
+                />
             </div>
 
             {/* Footer */}
