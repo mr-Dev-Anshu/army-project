@@ -30,6 +30,7 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.toLocation': 'location',
         'details.outSignature.value': 'signature',
         'details.inSignature.value': 'signature',
+        'details.vehicleBaNumber': 'vehicleBaNumber',
 
         // General Duty Diary Fields
         'details.placeOfDuty': 'placeOfDuty',
