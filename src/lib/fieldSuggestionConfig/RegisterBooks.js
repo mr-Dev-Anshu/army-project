@@ -24,6 +24,13 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'duty.from': 'location', // Suggest locations
         'duty.to': 'location',   // Suggest locations
 
+        // Vehicle Register Fields (Mapped from details)
+        'details.natureOfDuty': 'natureOfDuty',
+        'details.fromLocation': 'location',
+        'details.toLocation': 'location',
+        'details.outSignature.value': 'signature',
+        'details.inSignature.value': 'signature',
+
         // General Duty Diary Fields
         'details.placeOfDuty': 'placeOfDuty',
         'details.typeOfDuty': 'typeOfDuty',

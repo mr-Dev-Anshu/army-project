@@ -74,6 +74,8 @@ interface ReportFilterBarProps {
   showUnitLocation?: boolean;
   showDutyType?: boolean;
   dutyTypeOptions?: string[];
+  showVehicleType?: boolean;
+  vehicleTypeOptions?: string[];
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -107,6 +109,8 @@ export default function ReportFilterBar({
   showIndividualWorkingStatus = false,
   showUnitLocation = false,
   showDutyType = false,
+  showVehicleType = false,
+  vehicleTypeOptions = [],
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
@@ -114,6 +118,7 @@ export default function ReportFilterBar({
     (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
     (showIndividualWorkingStatus && filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") ||
     (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
+    (showVehicleType && filters.vehicleType && filters.vehicleType !== "All") ||
     !!filters.date ||
     (showOffenceType && !!filters.offenceType && filters.offenceType !== "All") ||
     !!filters.fromDate ||
@@ -393,6 +398,32 @@ export default function ReportFilterBar({
                           {(dutyTypeOptions && dutyTypeOptions.length > 0
                             ? dutyTypeOptions
                             : ["Mobile Duty", "MP Duty", "Gate Duty", "Patrol Duty", "Escort Duty", "Traffic Duty"]
+                          ).map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* Vehicle Type */}
+                  {showVehicleType && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Type of Vehicle</label>
+                      <Select
+                        value={filters.vehicleType || "All"}
+                        onValueChange={(value) => onFilterChange("vehicleType", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Vehicle Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          {(vehicleTypeOptions && vehicleTypeOptions.length > 0
+                            ? vehicleTypeOptions
+                            : ["Gypsy", "Truck", "ALS", "Bus", "Motorcycle", "Other"]
                           ).map((option) => (
                             <SelectItem key={option} value={option}>
                               {option}
