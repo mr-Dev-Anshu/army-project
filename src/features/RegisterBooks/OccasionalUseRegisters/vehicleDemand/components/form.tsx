@@ -15,9 +15,6 @@ const VehicleDemandForm = () => {
         armyNo: "",
         rank: "",
         name: "",
-        unit: "",
-        fmn: "",
-        command: "",
     });
 
     const handleFieldChange = (field: keyof IndividualData, value: string) => {

@@ -5,9 +5,9 @@ export interface IndividualData {
     armyNo: string;
     rank: string;
     name: string;
-    unit: string;
-    fmn: string;
-    command: string;
+    unit?: string;
+    fmn?: string;
+    command?: string;
 }
 
 export interface Individual extends IndividualData {
@@ -17,11 +17,13 @@ export interface Individual extends IndividualData {
 interface IndividualInputFieldsProps {
     data: IndividualData;
     onChange: (field: keyof IndividualData, value: string) => void;
+    showExtendedFields?: boolean;
 }
 
 export const IndividualInputFields = ({
     data,
     onChange,
+    showExtendedFields = false,
 }: IndividualInputFieldsProps) => {
     return (
         <div className="space-y-3">
@@ -55,35 +57,39 @@ export const IndividualInputFields = ({
                 />
             </div>
 
-            <div className="space-y-1.5">
-                <SuggestionInput
-                    label="Unit"
-                    fieldType="unit"
-                    placeholder="eg."
-                    value={data.unit}
-                    onChange={(v) => onChange("unit", v)}
-                />
-            </div>
+            {showExtendedFields && (
+                <>
+                    <div className="space-y-1.5">
+                        <SuggestionInput
+                            label="Unit"
+                            fieldType="unit"
+                            placeholder="eg."
+                            value={data.unit || ""}
+                            onChange={(v) => onChange("unit", v)}
+                        />
+                    </div>
 
-            <div className="space-y-1.5">
-                <SuggestionInput
-                    label="FMN"
-                    fieldType="fmn"
-                    placeholder="eg."
-                    value={data.fmn}
-                    onChange={(v) => onChange("fmn", v)}
-                />
-            </div>
+                    <div className="space-y-1.5">
+                        <SuggestionInput
+                            label="FMN"
+                            fieldType="fmn"
+                            placeholder="eg."
+                            value={data.fmn || ""}
+                            onChange={(v) => onChange("fmn", v)}
+                        />
+                    </div>
 
-            <div className="space-y-1.5">
-                <SuggestionInput
-                    label="Command"
-                    fieldType="command"
-                    placeholder="eg."
-                    value={data.command}
-                    onChange={(v) => onChange("command", v)}
-                />
-            </div>
+                    <div className="space-y-1.5">
+                        <SuggestionInput
+                            label="Command"
+                            fieldType="command"
+                            placeholder="eg."
+                            value={data.command || ""}
+                            onChange={(v) => onChange("command", v)}
+                        />
+                    </div>
+                </>
+            )}
         </div>
     );
 };

@@ -1,30 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { toast } from "react-toastify";
+import {
+    createRegisterEntry,
+    deleteRegisterEntry,
+    getAllRegisterEntries,
+    getRegisterEntryById,
+    updateRegisterEntry
+} from "@/apis";
+import type { RegisterEntry } from "@/apis/registers/types";
 
-// Generic Register Types
-export interface RegisterEntry {
-    _id?: string;
-    type: string;
-    date: string;
-    outTime?: string;
-    inTime?: string;
-    duty?: any;
-    details?: any;
-    outSignature?: any;
-    inSignature?: any;
-    authentication?: {
-        initialsMPCPNCO?: string;
-        initialsQMSJCO?: string;
-        initials2IC?: string;
-    };
-    remark?: string;
-    status?: string;
-    createdAt?: string;
-    updatedAt?: string;
-}
-
-const REGISTERS_API_BASE = "/api/registers";
+// Re-export type for compatibility with other files using it from here
+export type { RegisterEntry };
 
 // --- Generic Hooks ---
 
@@ -32,14 +18,8 @@ export const useGetAllRegisters = (type?: string, filters: Record<string, any> =
     return useQuery({
         queryKey: ["registers", type, filters],
         queryFn: async () => {
-            const params = new URLSearchParams();
-            if (type) params.append("type", type);
-            Object.keys(filters).forEach((key) => {
-                if (filters[key]) params.append(key, filters[key]);
-            });
-
-            const { data } = await axios.get(`${REGISTERS_API_BASE}?${params.toString()}`);
-            return data;
+            const params = { type, ...filters };
+            return await getAllRegisterEntries(params);
         },
         enabled: true,
     });
@@ -50,8 +30,7 @@ export const useGetRegisterById = (id: string) => {
         queryKey: ["register", id],
         queryFn: async () => {
             if (!id) return null;
-            const { data } = await axios.get(`${REGISTERS_API_BASE}/${id}`);
-            return data;
+            return await getRegisterEntryById(id);
         },
         enabled: !!id,
     });
@@ -60,10 +39,7 @@ export const useGetRegisterById = (id: string) => {
 export const useCreateRegister = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (payload: Partial<RegisterEntry>) => {
-            const { data } = await axios.post(REGISTERS_API_BASE, payload);
-            return data;
-        },
+        mutationFn: createRegisterEntry,
         onSuccess: (data, variables) => {
             // Invalidate the list for this specific type
             queryClient.invalidateQueries({ queryKey: ["registers", variables.type] });
@@ -80,8 +56,7 @@ export const useUpdateRegister = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({ id, payload }: { id: string; payload: Partial<RegisterEntry> }) => {
-            const { data } = await axios.patch(`${REGISTERS_API_BASE}/${id}`, payload);
-            return data;
+            return await updateRegisterEntry(id, payload);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["register", data._id] });
@@ -98,10 +73,7 @@ export const useUpdateRegister = () => {
 export const useDeleteRegister = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (id: string) => {
-            const { data } = await axios.delete(`${REGISTERS_API_BASE}/${id}`);
-            return data;
-        },
+        mutationFn: deleteRegisterEntry,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["registers"] });
             toast.success("Register entry deleted successfully");

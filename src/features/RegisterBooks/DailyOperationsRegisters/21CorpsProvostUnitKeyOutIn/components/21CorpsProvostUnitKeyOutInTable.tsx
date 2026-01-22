@@ -50,12 +50,13 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
 
     // Extract unique units for filter options
     const unitOptions = useMemo(() => {
-        const units = new Set<string>();
-        data.forEach((item) => {
-            const unit = item.details?.individual?.unit;
-            if (unit) units.add(unit);
-        });
-        return Array.from(units).sort();
+        // const units = new Set<string>();
+        // data.forEach((item) => {
+        //     const unit = item.details?.individual?.unit;
+        //     if (unit) units.add(unit);
+        // });
+        // return Array.from(units).sort();
+        return [];
     }, [data]);
 
     const filteredData = useMemo(() => {
@@ -77,11 +78,11 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
             // Unit logic
             let matchesUnit = true;
             if (filters.unit) {
-                const selectedUnits = filters.unit.split(",");
-                const itemUnit = ind.unit || "";
-                if (!itemUnit || !selectedUnits.includes(itemUnit)) {
-                    matchesUnit = false;
-                }
+                // const selectedUnits = filters.unit.split(",");
+                // const itemUnit = ind.unit || "";
+                // if (!itemUnit || !selectedUnits.includes(itemUnit)) {
+                //    matchesUnit = false;
+                // }
             }
 
             return matchesSearch && matchesDate && matchesUnit;
@@ -100,7 +101,7 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
                 showActionStatus={false}
                 showDateRange={false}
                 showDate={true}
-                showUnit={true}
+                showUnit={false}
                 unitOptions={unitOptions}
                 showFilter={true}
                 onReset={() => setFilters({
@@ -130,9 +131,9 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
                                 <th className="px-4 py-3 border-r border-gray-300 align-middle w-64 sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Store/Office Name
                                 </th>
-                                <th className="px-4 py-3 border-r border-gray-300 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
+                                { /* <th className="px-4 py-3 border-r border-gray-300 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Unit
-                                </th>
+                                </th> */ }
                                 <th className="px-4 py-3 border-r border-gray-300 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Key No.
                                 </th>
@@ -196,9 +197,9 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {item.details?.storeName || "-"}
                                             </td>
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
+                                            {/* <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {ind.unit || ind.fmn || "-"}
-                                            </td>
+                                            </td> */}
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {item.details?.keyNumber || "-"}
                                             </td>

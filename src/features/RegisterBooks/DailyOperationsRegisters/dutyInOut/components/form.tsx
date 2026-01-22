@@ -15,9 +15,6 @@ const DutyKeyOutInForm = () => {
         armyNo: "",
         rank: "",
         name: "",
-        unit: "",
-        fmn: "",
-        command: "",
     });
 
     const [authentication, setAuthentication] = useState({
