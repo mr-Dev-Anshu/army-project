@@ -84,6 +84,7 @@ export default function Step5WitnessList() {
       ...temp.details,
       role: "Witness",
       offenderType: "Witness",
+      vehicleInvolved: witnessVehicleStatus, // "yes" or "no"
     };
 
     dispatch({
@@ -122,7 +123,7 @@ export default function Step5WitnessList() {
       />
 
       {witnessVehicleStatus === "yes" && (
-        <VehicleDetailsForm scope="mp-main" />
+        <VehicleDetailsForm scope="mp-witness" />
       )}
 
       {witnessVehicleStatus === "no" && (

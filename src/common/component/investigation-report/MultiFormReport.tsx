@@ -112,11 +112,11 @@ export default function MultiFormReport({
             offenceTypeReference: existingReport.occurrenceDetails?.offenceTypeReference || [],
             place: existingReport.occurrenceDetails?.placeOfOccurrence,
             date: existingReport.occurrenceDetails?.dateOfOccurrence ? existingReport.occurrenceDetails.dateOfOccurrence.split("T")[0] : "",
-            time: existingReport.occurrenceDetails?.timeOfOccurrence 
-                ? (existingReport.occurrenceDetails.timeOfOccurrence.includes("T") 
-                    ? existingReport.occurrenceDetails.timeOfOccurrence.split("T")[1].substring(0, 5) 
-                    : existingReport.occurrenceDetails.timeOfOccurrence.substring(0, 5))
-                : "",
+            time: existingReport.occurrenceDetails?.timeOfOccurrence
+              ? (existingReport.occurrenceDetails.timeOfOccurrence.includes("T")
+                ? existingReport.occurrenceDetails.timeOfOccurrence.split("T")[1].substring(0, 5)
+                : existingReport.occurrenceDetails.timeOfOccurrence.substring(0, 5))
+              : "",
             description: existingReport.occurrenceDetails?.description,
           },
           individualDetails: {
@@ -152,7 +152,7 @@ export default function MultiFormReport({
               address: wit.address,
               iCardNumber: wit.iCardNumber,
               remark: wit.remark,
-              contactNumber: wit.contactNumber, 
+              contactNumber: wit.contactNumber,
               ...wit.customFields,
             }
           })),
@@ -428,6 +428,7 @@ export default function MultiFormReport({
           address: sanitize(d.address),
           iCardNumber: sanitize(d.iCardNumber),
           remark: sanitize(d.remark) || "--",
+          isVehicleInvolved: w.vehicleInvolved === "yes",
           customFields: d,
         };
       });
@@ -435,36 +436,36 @@ export default function MultiFormReport({
       /* ================= MP REPORT PAYLOAD ================= */
       const payload = {
         reportDetails: {
-          reportNumber: mp.reportDetails.reportNo || "NA",
-          command: mp.reportDetails.command || "NA",
-          firNumber: mp.reportDetails.firNo || "NA",
+          reportNumber: mp.reportDetails.reportNo || "",
+          command: mp.reportDetails.command || "",
+          firNumber: mp.reportDetails.firNo || "",
           firFileUrl: mp.reportDetails.firFile || "",
           customFields: {},
         },
 
         investigationHead: {
-          armyNumber: mp.mpParticulars.armyNo || "NA",
-          rank: mp.mpParticulars.rank || "NA",
-          name: mp.mpParticulars.name || "NA",
-          unit: mp.mpParticulars.unit || "NA",
-          fmn: mp.mpParticulars.fmn || "NA",
-          command: mp.mpParticulars.command || "NA",
-          address: mp.mpParticulars.address || "NA",
-          iCardNumber: mp.mpParticulars.icard || "NA",
+          armyNumber: mp.mpParticulars.armyNo || "",
+          rank: mp.mpParticulars.rank || "",
+          name: mp.mpParticulars.name || "",
+          unit: mp.mpParticulars.unit || "",
+          fmn: mp.mpParticulars.fmn || "",
+          command: mp.mpParticulars.command || "",
+          address: mp.mpParticulars.address || "",
+          iCardNumber: mp.mpParticulars.icard || "",
           customFields: {},
         },
 
         occurrenceDetails: {
-          offenceType: mp.occurrenceDetails.offenceType || "NA",
+          offenceType: mp.occurrenceDetails.offenceType || "",
           offenceTypes: mp.occurrenceDetails?.offenceTypes ?? [],
           offenceTypeReference: mp.occurrenceDetails?.offenceTypeReference ?? [],
-          placeOfOccurrence: mp.occurrenceDetails.place || "NA",
+          placeOfOccurrence: mp.occurrenceDetails.place || "",
           dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
           timeOfOccurrence: toISODateTime(
             mp.occurrenceDetails.date,
             mp.occurrenceDetails.time
           ),
-          description: mp.occurrenceDetails.description || "Nil",
+          description: mp.occurrenceDetails.description || "",
           customFields: {},
         },
 
@@ -473,24 +474,24 @@ export default function MultiFormReport({
         witnesses: witnessesPayload,
 
         documents: (mp.documents || []).map((d: any) => ({
-          statement: d.statement || "Nil",
-          url: d.url || "NA",
+          statement: d.statement || "",
+          url: d.url || "",
           fileName: d.fileName || "",
         })),
 
         evidences: buildEvidences(mp.evidence),
 
-        detailedOccurrenceReport: mp.detailedReport || "Nil",
+        detailedOccurrenceReport: mp.detailedReport || "",
 
         pointsFindOutDuringInvestigation: Array.isArray(mp.investigationPoints)
           ? mp.investigationPoints.join("\n")
-          : mp.investigationPoints || "Nil",
+          : mp.investigationPoints || "",
 
-        opinion: mp.opinion || "Nil",
+        opinion: mp.opinion || "",
 
         remarks: {
-          analysis: mp.remarks.analysis || "Nil",
-          recommendation: mp.remarks.recommendation || "Nil",
+          analysis: mp.remarks.analysis || "",
+          recommendation: mp.remarks.recommendation || "",
           customFields: {},
         },
 
@@ -581,6 +582,7 @@ export default function MultiFormReport({
           offenderDetails: {
             type: "Witness",
             category: "witness",
+            isVehicleInvolved: w.vehicleInvolved === "yes",
             ...d,
           },
         });

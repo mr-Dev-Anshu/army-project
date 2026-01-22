@@ -12,7 +12,7 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { cn } from "@/lib/utils";
 import CivilianWithDependent from "@/common/component/CivilianWithDependent";
 
-type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional";
+type ScopeType = "traffic" | "static" | "mp-main" | "mp-additional" | "mp-witness";
 
 interface VehicleDetailsFormProps {
   scope?: ScopeType;
@@ -42,6 +42,7 @@ export default function VehicleDetailsForm({
   if (scope === "mp-main" && mpMain.vehicleInvolved !== "yes") return null;
   // Use mpAdd for check if we are using rootPath or default
   if (scope === "mp-additional" && mpAdd?.vehicleInvolved !== "yes") return null;
+  // Note: "mp-witness" has NO guard here because it relies on local state in Step5WitnessList
 
   /* ================= VEHICLE STATE ================= */
   let vehicleState: any = {};
@@ -50,6 +51,7 @@ export default function VehicleDetailsForm({
   else if (scope === "static") vehicleState = staticSpeed.vehicleDetails;
   else if (scope === "mp-main") vehicleState = mpMain.vehicleData;
   else if (scope === "mp-additional") vehicleState = mpAdd?.vehicleData;
+  else if (scope === "mp-witness") vehicleState = mpMain.vehicleData; // Reuse temp storage
 
   const category = vehicleState?.category || "";
   const vehicleType = vehicleState?.vehicleType || "";
@@ -66,6 +68,8 @@ export default function VehicleDetailsForm({
     vehiclePath = "formData.mpReport.individualDetails.vehicleData";
   } else if (scope === "mp-additional") {
     vehiclePath = "formData.mpReport.additionalIndividual.vehicleData";
+  } else if (scope === "mp-witness") {
+    vehiclePath = "formData.mpReport.individualDetails.vehicleData";
   }
 
   /* ================= UPDATE VEHICLE ================= */

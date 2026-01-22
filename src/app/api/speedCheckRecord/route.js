@@ -45,24 +45,24 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const { error, value } = createStaticSpeedCheckRecordSchema.validate(body, {
-      abortEarly: false,
-    });
+    // const { error, value } = createStaticSpeedCheckRecordSchema.validate(body, {
+    //   abortEarly: false,
+    // });
 
-    if (error) {
-      return NextResponse.json(
-        { error: "Validation failed", details: error.details },
-        { status: 400 }
-      );
-    }
+    // if (error) {
+    //   return NextResponse.json(
+    //     { error: "Validation failed", details: error.details },
+    //     { status: 400 }
+    //   );
+    // }
 
-    const newRecord = await staticSpeedCheckRecordService.create(value);
+    const newRecord = await staticSpeedCheckRecordService.create(body);
     return NextResponse.json(newRecord, { status: 201 });
 
   } catch (error) {
     console.error("POST speed check error:", error);
     return NextResponse.json(
-      { error: "Failed to create record" },
+      { error: "Failed to create record", message: error.message },
       { status: 500 }
     );
   }

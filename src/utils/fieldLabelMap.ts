@@ -40,6 +40,22 @@ export const FIELD_LABEL_MAP: Record<string, string> = {
     // Witness / Offender
     "selectedWitness": "Selected Witness",
     "offenderWithoutVehicle.offenderType": "Offender Type",
+
+    // MP Report Fields
+    "investigationHead.armyNumber": "Investigation Head Army No",
+    "investigationHead.rank": "Investigation Head Rank",
+    "investigationHead.name": "Investigation Head Name",
+    "investigationHead.unit": "Investigation Head Unit",
+    "occurrenceDetails.placeOfOccurrence": "Place of Occurrence",
+    "occurrenceDetails.dateOfOccurrence": "Date of Occurrence",
+    "occurrenceDetails.timeOfOccurrence": "Time of Occurrence",
+    "reportDetails.firNumber": "FIR Number",
+    "reportDetails.command": "Command",
+    "detailedOccurrenceReport": "Detailed Occurrence Report",
+    "pointsFindOutDuringInvestigation": "Investigation Points",
+    "opinion": "Opinion",
+    "remarks.analysis": "Analysis",
+    "remarks.recommendation": "Recommendation",
 };
 
 export const getFieldLabel = (key: string): string => {
