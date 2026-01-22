@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { offenderFormsConfig } from "../Step1Particulars/config/OffenderConfig";
 import { useForm } from "@/context/FormContext";
 import { cn } from "@/lib/utils";
+import CivilianWithDependent from "@/common/component/CivilianWithDependent";
 
 interface OffenderDynamicFormProps {
   title: string;
@@ -87,8 +87,13 @@ export default function OffenderDynamicForm({
   useEffect(() => {
     if (!isRoot) return;
 
-    const peoplePath =
-      scope === "static"
+    // Detect if we are using the 'noVehicle' list
+    const isNoVehicle = path?.includes("noVehicleOffenderPeople");
+    const peoplePath = isNoVehicle
+      ? scope === "static"
+        ? "formData.staticSpeed.noVehicleOffenderPeople"
+        : "formData.traffic.noVehicleOffenderPeople"
+      : scope === "static"
         ? "formData.staticSpeed.offenderPeople"
         : "formData.traffic.offenderPeople";
 
@@ -160,7 +165,8 @@ export default function OffenderDynamicForm({
         if (e <= i) {
           setErrors((prev) => ({
             ...prev,
-            "Pass Expire Date": "Pass Expire Date must be later than Pass Issue Date",
+            "Pass Expire Date":
+              "Pass Expire Date must be later than Pass Issue Date",
           }));
         } else {
           setErrors((prev) => {
@@ -170,7 +176,7 @@ export default function OffenderDynamicForm({
           });
         }
       } else {
-        // If one is missing, clear error just in case? Or wait? 
+        // If one is missing, clear error just in case? Or wait?
         // Better to clear error if one is removed.
         setErrors((prev) => {
           const newErr = { ...prev };
@@ -188,17 +194,35 @@ export default function OffenderDynamicForm({
 
   /* ================= ADD OFFENDER ================= */
   const handleSelect = (stepId: number, type: string) => {
-    const peoplePath =
-      scope === "static"
+    const peoplePath = path
+      ? path.replace(/\[\d+\]\.details$/, "") // Try to infer parent array path
+      : scope === "static"
         ? "formData.staticSpeed.offenderPeople"
         : "formData.traffic.offenderPeople";
 
-    const list = getByPath(state, peoplePath) || [];
+    // Fallback if regex fails or path is weird (only valid for simple case)
+    // Actually, `addMore` / `handleSelect` inside `OffenderDynamicForm` creates NEW entries.
+    // Ideally OffenderDynamicForm should know if it's operating on `vehicleOffenders` or `noVehicleOffenders`.
+    // But it doesn't know.
+    // It uses hardcoded "formData.traffic/static.offenderPeople".
+
+    // Check if path contains "noVehicleOffenderPeople"
+    const isNoVehicle = path?.includes("noVehicleOffenderPeople");
+
+    const targetPath = isNoVehicle
+      ? scope === "static"
+        ? "formData.staticSpeed.noVehicleOffenderPeople"
+        : "formData.traffic.noVehicleOffenderPeople"
+      : scope === "static"
+        ? "formData.staticSpeed.offenderPeople"
+        : "formData.traffic.offenderPeople";
+
+    const list = getByPath(state, targetPath) || [];
     const newIndex = list.length;
 
     dispatch({
       type: "SET_PATH",
-      path: peoplePath,
+      path: targetPath,
       value: [
         ...list,
         {
@@ -210,23 +234,23 @@ export default function OffenderDynamicForm({
     });
 
     setSteps((prev) =>
-      prev.map((s) =>
-        s.id === stepId ? { ...s, type, index: newIndex } : s
-      )
+      prev.map((s) => (s.id === stepId ? { ...s, type, index: newIndex } : s)),
     );
   };
 
   /* ================= ENSURE CO-DRIVER ================= */
   const ensureCoDriverSlot = (type: string) => {
-    const peoplePath =
-      scope === "static"
+    const isNoVehicle = path?.includes("noVehicleOffenderPeople");
+    const peoplePath = isNoVehicle
+      ? scope === "static"
+        ? "formData.staticSpeed.noVehicleOffenderPeople"
+        : "formData.traffic.noVehicleOffenderPeople"
+      : scope === "static"
         ? "formData.staticSpeed.offenderPeople"
         : "formData.traffic.offenderPeople";
 
     const list = getByPath(state, peoplePath) || [];
-    const existingIndex = list.findIndex(
-      (p: any) => p.whoIsIt === "Co-Driver"
-    );
+    const existingIndex = list.findIndex((p: any) => p.whoIsIt === "Co-Driver");
 
     let newList = [...list];
     let index = existingIndex;
@@ -339,19 +363,41 @@ export default function OffenderDynamicForm({
                   ))}
                 </RadioGroup>
 
-                {coDriverType && coDriverIndex !== null && (
-                  <OffenderDynamicForm
-                    title={`${coDriverType} (Co-Driver) Details`}
-                    fields={offenderFormsConfig[coDriverType].fields}
-                    scope={scope}
-                    path={
-                      scope === "static"
-                        ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
-                        : `formData.traffic.offenderPeople[${coDriverIndex}].details`
-                    }
-                    isRoot={false}
-                  />
-                )}
+                {coDriverType &&
+                  coDriverIndex !== null &&
+                  (coDriverType === "Civilian" ? (
+                    <CivilianWithDependent
+                      id={`codriver-root`}
+                      scope={scope}
+                      path={
+                        scope === "static"
+                          ? path?.includes("noVehicle")
+                            ? `formData.staticSpeed.noVehicleOffenderPeople[${coDriverIndex}].details`
+                            : `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
+                          : path?.includes("noVehicle")
+                            ? `formData.traffic.noVehicleOffenderPeople[${coDriverIndex}].details`
+                            : `formData.traffic.offenderPeople[${coDriverIndex}].details`
+                      }
+                      showCoDriver={false}
+                      customTitle="Civilian (Co-Driver) Details"
+                    />
+                  ) : (
+                    <OffenderDynamicForm
+                      title={`${coDriverType} (Co-Driver) Details`}
+                      fields={offenderFormsConfig[coDriverType].fields}
+                      scope={scope}
+                      path={
+                        scope === "static"
+                          ? path?.includes("noVehicle")
+                            ? `formData.staticSpeed.noVehicleOffenderPeople[${coDriverIndex}].details`
+                            : `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
+                          : path?.includes("noVehicle")
+                            ? `formData.traffic.noVehicleOffenderPeople[${coDriverIndex}].details`
+                            : `formData.traffic.offenderPeople[${coDriverIndex}].details`
+                      }
+                      isRoot={false}
+                    />
+                  ))}
               </div>
             )}
           </>
@@ -362,7 +408,32 @@ export default function OffenderDynamicForm({
         <div key={step.id} className="mt-8 border-t pt-6">
           <p className="font-semibold mb-3">Additional Person Details</p>
 
-          {!step.type ? (
+          {step.type ? (
+            step.type === "Civilian" ? (
+              <CivilianWithDependent
+                id={step.id}
+                scope={scope}
+                path={
+                  scope === "static"
+                    ? `formData.staticSpeed.offenderPeople[${step.index}].details`
+                    : `formData.traffic.offenderPeople[${step.index}].details`
+                }
+                showCoDriver={false}
+              />
+            ) : (
+              <OffenderDynamicForm
+                title={`${step.type} Details`}
+                fields={offenderFormsConfig[step.type].fields}
+                scope={scope}
+                path={
+                  scope === "static"
+                    ? `formData.staticSpeed.offenderPeople[${step.index}].details`
+                    : `formData.traffic.offenderPeople[${step.index}].details`
+                }
+                isRoot={false}
+              />
+            )
+          ) : (
             <RadioGroup
               onValueChange={(v) => handleSelect(step.id, v)}
               className="grid sm:grid-cols-2 gap-3"
@@ -377,18 +448,6 @@ export default function OffenderDynamicForm({
                 </label>
               ))}
             </RadioGroup>
-          ) : (
-            <OffenderDynamicForm
-              title={`${step.type} Details`}
-              fields={offenderFormsConfig[step.type].fields}
-              scope={scope}
-              path={
-                scope === "static"
-                  ? `formData.staticSpeed.offenderPeople[${step.index}].details`
-                  : `formData.traffic.offenderPeople[${step.index}].details`
-              }
-              isRoot={false}
-            />
           )}
         </div>
       ))}

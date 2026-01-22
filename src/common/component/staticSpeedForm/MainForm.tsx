@@ -10,7 +10,11 @@ import StaticSpeedStep1Particulars from "./steps/Step1";
 import Step2Statement from "./steps/step2";
 import Step3Offence from "./steps/step3";
 import { toast } from "react-toastify";
-import { useCreateStaticSpeedRecord, useGetStaticSpeedRecordById, useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+import {
+  useCreateStaticSpeedRecord,
+  useGetStaticSpeedRecordById,
+  useUpdateStaticSpeedRecord,
+} from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
@@ -33,7 +37,8 @@ export default function StaticSpeedForm({
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
 
-  const { data: existingRecord, isLoading: isLoadingRecord } = useGetStaticSpeedRecordById(recordId || "");
+  const { data: existingRecord, isLoading: isLoadingRecord } =
+    useGetStaticSpeedRecordById(recordId || "");
 
   useEffect(() => {
     if (recordId && existingRecord) {
@@ -52,39 +57,51 @@ export default function StaticSpeedForm({
             vehicleName: existingRecord.vehicleName,
           },
           dutyBlock: {
-            dateOfDuty: existingRecord.onDutyDetails?.dateOfDuty ? existingRecord.onDutyDetails.dateOfDuty.split("T")[0] : "",
+            dateOfDuty: existingRecord.onDutyDetails?.dateOfDuty
+              ? existingRecord.onDutyDetails.dateOfDuty.split("T")[0]
+              : "",
             startTime: existingRecord.onDutyDetails?.startTime
-              ? (existingRecord.onDutyDetails.startTime.includes("T")
-                ? existingRecord.onDutyDetails.startTime.split("T")[1].substring(0, 5)
-                : existingRecord.onDutyDetails.startTime.substring(0, 5))
+              ? existingRecord.onDutyDetails.startTime.includes("T")
+                ? existingRecord.onDutyDetails.startTime
+                    .split("T")[1]
+                    .substring(0, 5)
+                : existingRecord.onDutyDetails.startTime.substring(0, 5)
               : "",
             endTime: existingRecord.onDutyDetails?.endTime
-              ? (existingRecord.onDutyDetails.endTime.includes("T")
-                ? existingRecord.onDutyDetails.endTime.split("T")[1].substring(0, 5)
-                : existingRecord.onDutyDetails.endTime.substring(0, 5))
+              ? existingRecord.onDutyDetails.endTime.includes("T")
+                ? existingRecord.onDutyDetails.endTime
+                    .split("T")[1]
+                    .substring(0, 5)
+                : existingRecord.onDutyDetails.endTime.substring(0, 5)
               : "",
             dutyLocation: existingRecord.onDutyDetails?.dutyLocation,
             dutyType: existingRecord.onDutyDetails?.dutyType,
           },
           reportingBlock: {
-            nameReportingMP: existingRecord.onDutyDetailsMPReporting?.nameReportingMP,
+            nameReportingMP:
+              existingRecord.onDutyDetailsMPReporting?.nameReportingMP,
             rank: existingRecord.onDutyDetailsMPReporting?.rank,
             unit: existingRecord.onDutyDetailsMPReporting?.unit,
             armyNumber: existingRecord.onDutyDetailsMPReporting?.armyNumber,
-            contactNumber: existingRecord.onDutyDetailsMPReporting?.contactNumber,
+            contactNumber:
+              existingRecord.onDutyDetailsMPReporting?.contactNumber,
           },
           offenceBlock: {
             timeOfOffence: existingRecord.offenceOccurenceDetails?.time,
             time: existingRecord.offenceOccurenceDetails?.time,
-            incidentLocation: existingRecord.offenceOccurenceDetails?.incidentLocation,
+            incidentLocation:
+              existingRecord.offenceOccurenceDetails?.incidentLocation,
             description: existingRecord.offenceOccurenceDetails?.description,
-            briefDescription: existingRecord.offenceOccurenceDetails?.briefDescription,
+            briefDescription:
+              existingRecord.offenceOccurenceDetails?.briefDescription,
             // description2 might be merged in description string, tough to separate
             authSpeed: existingRecord.offenceOccurenceDetails?.authSpeed,
-            actualSpeedNoted: existingRecord.offenceOccurenceDetails?.actualSpeedNoted,
-            overSpeedCalculated: existingRecord.offenceOccurenceDetails?.overSpeedCalculated,
+            actualSpeedNoted:
+              existingRecord.offenceOccurenceDetails?.actualSpeedNoted,
+            overSpeedCalculated:
+              existingRecord.offenceOccurenceDetails?.overSpeedCalculated,
           },
-          // Mapping witnesses and offenders back 
+          // Mapping witnesses and offenders back
           witnesses: (existingRecord.witnesses || []).map((w: any) => ({
             reportingBlock: {
               armyNumber: w.armyNumber || w.ArmyNo,
@@ -92,16 +109,23 @@ export default function StaticSpeedForm({
               nameReportingMP: w.name,
               unit: w.unit,
               contactNumber: w.contactNumber,
-            }
+            },
           })),
           selectedWitness: existingRecord.customFields?.selectedWitness,
           offenderDetails: {},
-          offenderPeople: (existingRecord.offenders || existingRecord.individuals || []).map((p: any) => ({
+          offenderPeople: (
+            existingRecord.offenders ||
+            existingRecord.individuals ||
+            []
+          ).map((p: any) => ({
             whoIsIt: p.offenderDetails?.type || p.type || "Offender", // "Driver", "Co-Driver", etc.
             type: p.offenderType || "Military", // "Military", "Civilian"
             role: p.offenderDetails?.role || p.role,
             details: {
-              armyNumber: p.armyNumber || p.offenderDetails?.armyNumber || p.offenderDetails?.armyNo,
+              armyNumber:
+                p.armyNumber ||
+                p.offenderDetails?.armyNumber ||
+                p.offenderDetails?.armyNo,
               rank: p.rank || p.offenderDetails?.rank,
               name: p.name || p.offenderDetails?.name,
               unit: p.unit || p.offenderDetails?.unit,
@@ -111,9 +135,9 @@ export default function StaticSpeedForm({
               iCardNumber: p.iCardNumber || p.offenderDetails?.iCardNumber,
               ...p.customFields,
               ...p.offenderDetails,
-            }
+            },
           })),
-        }
+        },
       };
       dispatch({ type: "SET_FORM_DATA", payload: mappedData });
     }
@@ -139,7 +163,8 @@ export default function StaticSpeedForm({
 
     const rider = {
       armyNo: val(
-        riderDetails["armyNumber"] || riderDetails["Army Rider / Driver Number"]
+        riderDetails["armyNumber"] ||
+          riderDetails["Army Rider / Driver Number"],
       ),
       name: val(riderDetails["name"] || riderDetails["Full Name"]),
       rank: val(riderDetails["rank"] || riderDetails["Select Rank"]),
@@ -148,7 +173,7 @@ export default function StaticSpeedForm({
       command: val(riderDetails["command"] || riderDetails["Command"]),
       address: val(riderDetails["address"] || riderDetails["Address"]),
       iCardNo: val(
-        riderDetails["iCardNumber"] || riderDetails["ID Card Number"]
+        riderDetails["iCardNumber"] || riderDetails["ID Card Number"],
       ),
     };
 
@@ -207,12 +232,12 @@ export default function StaticSpeedForm({
       offence: {
         actualSpeed: val(
           data?.offenceBlock?.actualSpeedNoted ||
-          data?.offenceBlock?.actualSpeed
+            data?.offenceBlock?.actualSpeed,
         ),
         authSpeed: val(data?.offenceBlock?.authSpeed),
         overSpeed: val(
           data?.offenceBlock?.overSpeedCalculated ||
-          data?.offenceBlock?.overSpeed
+            data?.offenceBlock?.overSpeed,
         ),
       },
 
@@ -294,13 +319,13 @@ export default function StaticSpeedForm({
           dutyType: staticData.dutyBlock?.dutyType || undefined,
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
-            ).toISOString()
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`,
+              ).toISOString()
             : undefined,
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
-            ).toISOString()
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`,
+              ).toISOString()
             : undefined,
         },
 
@@ -370,7 +395,11 @@ export default function StaticSpeedForm({
 
       /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
 
-      const people = staticData.offenderPeople || [];
+      const people =
+        staticData.vehicleInvolved === "yes"
+          ? staticData.offenderPeople || []
+          : staticData.noVehicleOffenderPeople || [];
+
       console.log("👥 Offender People Array:", JSON.stringify(people, null, 2));
 
       for (const person of people) {
@@ -397,7 +426,7 @@ export default function StaticSpeedForm({
 
         console.log(
           "👮 Creating Offender Payload ===>",
-          JSON.stringify(offenderPayload, null, 2)
+          JSON.stringify(offenderPayload, null, 2),
         );
 
         try {
@@ -405,7 +434,7 @@ export default function StaticSpeedForm({
         } catch (err: any) {
           console.error(
             "❌ Offender Creation Failed ===>",
-            err?.response?.data || err
+            err?.response?.data || err,
           );
           toast.error("One offender failed to save");
         }
@@ -435,7 +464,7 @@ export default function StaticSpeedForm({
         };
         console.log(
           "👮 REQ CO-DRIVER PAYLOAD:",
-          JSON.stringify(coDriverPayload, null, 2)
+          JSON.stringify(coDriverPayload, null, 2),
         );
 
         try {
@@ -464,7 +493,9 @@ export default function StaticSpeedForm({
 
         try {
           const witnessResponses = await Promise.all(
-            witnessPayload.map((w: any) => createWitnessMutation.mutateAsync(w))
+            witnessPayload.map((w: any) =>
+              createWitnessMutation.mutateAsync(w),
+            ),
           );
 
           console.log("✅ WITNESS BACKEND RESPONSES ===>", witnessResponses);
@@ -473,7 +504,7 @@ export default function StaticSpeedForm({
         } catch (err: any) {
           console.error(
             "❌ WITNESS BACKEND ERROR ===>",
-            err?.response?.data || err
+            err?.response?.data || err,
           );
           throw err;
         }
@@ -498,7 +529,7 @@ export default function StaticSpeedForm({
     } catch (error: any) {
       console.error(
         "❌ FINAL STATIC SPEED ERROR ===>",
-        error?.response?.data || error
+        error?.response?.data || error,
       );
 
       const msg =
@@ -521,7 +552,11 @@ export default function StaticSpeedForm({
             steps={steps}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
-            title={recordId ? "Edit Static Speed Check Record" : "Create New Static Speed Check Record"}
+            title={
+              recordId
+                ? "Edit Static Speed Check Record"
+                : "Create New Static Speed Check Record"
+            }
             reportNo={reportNo}
             onCreate={handleFinalSubmit}
             onCancel={() => {

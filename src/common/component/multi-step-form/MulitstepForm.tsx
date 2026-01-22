@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useForm, initialState } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
-import { useCreateTrafficOffence, useGetTrafficOffenceById, useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
+import {
+  useCreateTrafficOffence,
+  useGetTrafficOffenceById,
+  useUpdateTrafficOffence,
+} from "@/features/generalTraficOffence/hooks";
 import { toast } from "react-toastify";
 
 import Step1Particulars from "./steps/Step1Particulars";
@@ -16,7 +20,13 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
-export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () => void, recordId?: string }) {
+export default function MultiStepForm({
+  onCancel,
+  recordId,
+}: {
+  onCancel?: () => void;
+  recordId?: string;
+}) {
   const { state, dispatch } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,7 +35,8 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
   const { mutateAsync: createOffender } = useCreateOffender();
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
 
-  const { data: existingOffence, isLoading: isLoadingOffence } = useGetTrafficOffenceById(recordId || "");
+  const { data: existingOffence, isLoading: isLoadingOffence } =
+    useGetTrafficOffenceById(recordId || "");
 
   useEffect(() => {
     if (recordId && existingOffence) {
@@ -36,8 +47,12 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
           reportNo: existingOffence.reportNo || existingOffence.reportId,
           vehicleInvolved: existingOffence.isVehicleInvolved ? "yes" : "no",
           vehicleDetails: {
-            category: existingOffence.vehicleCategory === "2-Wheeler" ? "2w" : "4w",
-            vehicleType: existingOffence.vehicleType === "Civilian Vehicle" ? "civilian" : "army",
+            category:
+              existingOffence.vehicleCategory === "2-Wheeler" ? "2w" : "4w",
+            vehicleType:
+              existingOffence.vehicleType === "Civilian Vehicle"
+                ? "civilian"
+                : "army",
             driverType: existingOffence.driverType,
             vehicleName: existingOffence.vehicleName,
             vehicleNumber: existingOffence.vehicleNumber,
@@ -45,7 +60,8 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
           offenderWithoutVehicle: {
             // Mapping back from offenders list if vehicleInvolved is no
             offenderType: "",
-            military: { // Basic mapping, heavily relies on offender list order
+            military: {
+              // Basic mapping, heavily relies on offender list order
               armyNumber: "",
               rank: "",
               name: "",
@@ -54,76 +70,113 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
               command: "",
               address: "",
               iCardNumber: "",
-            }
+            },
           },
           offenderDetails: {},
           onDutyDetails: {
-            dateOfDuty: existingOffence.onDutyDetails?.dateOfDuty ? existingOffence.onDutyDetails.dateOfDuty.split("T")[0] : "",
+            dateOfDuty: existingOffence.onDutyDetails?.dateOfDuty
+              ? existingOffence.onDutyDetails.dateOfDuty.split("T")[0]
+              : "",
             startTime: existingOffence.onDutyDetails?.startTime
-              ? (existingOffence.onDutyDetails.startTime.includes("T")
-                ? existingOffence.onDutyDetails.startTime.split("T")[1].substring(0, 5)
-                : existingOffence.onDutyDetails.startTime.substring(0, 5))
+              ? existingOffence.onDutyDetails.startTime.includes("T")
+                ? existingOffence.onDutyDetails.startTime
+                    .split("T")[1]
+                    .substring(0, 5)
+                : existingOffence.onDutyDetails.startTime.substring(0, 5)
               : "",
             endTime: existingOffence.onDutyDetails?.endTime
-              ? (existingOffence.onDutyDetails.endTime.includes("T")
-                ? existingOffence.onDutyDetails.endTime.split("T")[1].substring(0, 5)
-                : existingOffence.onDutyDetails.endTime.substring(0, 5))
+              ? existingOffence.onDutyDetails.endTime.includes("T")
+                ? existingOffence.onDutyDetails.endTime
+                    .split("T")[1]
+                    .substring(0, 5)
+                : existingOffence.onDutyDetails.endTime.substring(0, 5)
               : "",
             dutyLocation: existingOffence.onDutyDetails?.dutyLocation,
             dutyType: existingOffence.onDutyDetails?.dutyType,
           },
           onDutyDetailsMPReporting: {
-            nameReportingMP: existingOffence.onDutyDetailsMPReporting?.nameReportingMP,
+            nameReportingMP:
+              existingOffence.onDutyDetailsMPReporting?.nameReportingMP,
             rank: existingOffence.onDutyDetailsMPReporting?.rank,
             unit: existingOffence.onDutyDetailsMPReporting?.unit,
             armyNumber: existingOffence.onDutyDetailsMPReporting?.armyNumber,
-            contactNumber: existingOffence.onDutyDetailsMPReporting?.contactNumber,
+            contactNumber:
+              existingOffence.onDutyDetailsMPReporting?.contactNumber,
           },
           offenceOccurenceDetails: {
-            timeOfOffence: existingOffence.offenceOccurenceDetails?.timeOfOffence
-              ? (existingOffence.offenceOccurenceDetails.timeOfOffence.includes("T")
-                ? existingOffence.offenceOccurenceDetails.timeOfOffence.split("T")[1].substring(0, 5)
-                : existingOffence.offenceOccurenceDetails.timeOfOffence.substring(0, 5))
+            timeOfOffence: existingOffence.offenceOccurenceDetails
+              ?.timeOfOffence
+              ? existingOffence.offenceOccurenceDetails.timeOfOffence.includes(
+                  "T",
+                )
+                ? existingOffence.offenceOccurenceDetails.timeOfOffence
+                    .split("T")[1]
+                    .substring(0, 5)
+                : existingOffence.offenceOccurenceDetails.timeOfOffence.substring(
+                    0,
+                    5,
+                  )
               : "",
-            incidentLocation: existingOffence.offenceOccurenceDetails?.incidentLocation,
+            incidentLocation:
+              existingOffence.offenceOccurenceDetails?.incidentLocation,
             description: existingOffence.offenceOccurenceDetails?.description,
-            briefDescription: existingOffence.offenceOccurenceDetails?.briefDescription,
+            briefDescription:
+              existingOffence.offenceOccurenceDetails?.briefDescription,
             time: "",
           },
           offenceTypes: existingOffence.offenceTypes || [],
           // Ensure existing code doesn't break if offenceTypeReference is string[] or object[]
-          offenceCode: (existingOffence.offenceTypeReference || []).map((r: any) => typeof r === 'string' ? r : r.reference || r.code),
+          offenceCode: (existingOffence.offenceTypeReference || []).map(
+            (r: any) => (typeof r === "string" ? r : r.reference || r.code),
+          ),
           offenceRefList: existingOffence.offenceRefList || [],
           witnesses: (existingOffence.witnesses || []).map((w: any) => ({
             reportingBlock: {
-              armyNumber: w.armyNumber || w.ArmyNo || w.details?.armyNumber || w.details?.armyNo,
+              armyNumber:
+                w.armyNumber ||
+                w.ArmyNo ||
+                w.details?.armyNumber ||
+                w.details?.armyNo,
               rank: w.rank || w.details?.rank,
               nameReportingMP: w.name || w.details?.name,
               unit: w.unit || w.details?.unit,
               contactNumber: w.contactNumber || w.details?.contactNumber,
-            }
+            },
           })),
           selectedWitness: existingOffence.customFields?.selectedWitness,
-          offenderPeople: (existingOffence.offenders || existingOffence.individuals || []).map((p: any) => ({
+          offenderPeople: (
+            existingOffence.offenders ||
+            existingOffence.individuals ||
+            []
+          ).map((p: any) => ({
             whoIsIt: p.offenderDetails?.type || p.type || "Offender",
             type: p.offenderType || "Military",
             // If p.details exists (flat list from some APIs) or if p itself is the detail
             details: {
-              armyNumber: p.armyNumber || p.offenderDetails?.armyNumber || p.offenderDetails?.armyNo || p.details?.armyNumber,
+              armyNumber:
+                p.armyNumber ||
+                p.offenderDetails?.armyNumber ||
+                p.offenderDetails?.armyNo ||
+                p.details?.armyNumber,
               rank: p.rank || p.offenderDetails?.rank || p.details?.rank,
               name: p.name || p.offenderDetails?.name || p.details?.name,
               unit: p.unit || p.offenderDetails?.unit || p.details?.unit,
               fmn: p.fmn || p.offenderDetails?.fmn || p.details?.fmn,
-              command: p.command || p.offenderDetails?.command || p.details?.command,
-              address: p.address || p.offenderDetails?.address || p.details?.address,
-              iCardNumber: p.iCardNumber || p.offenderDetails?.iCardNumber || p.details?.iCardNumber,
+              command:
+                p.command || p.offenderDetails?.command || p.details?.command,
+              address:
+                p.address || p.offenderDetails?.address || p.details?.address,
+              iCardNumber:
+                p.iCardNumber ||
+                p.offenderDetails?.iCardNumber ||
+                p.details?.iCardNumber,
               ...p.customFields,
               ...p.offenderDetails,
-              ...p.details
-            }
+              ...p.details,
+            },
           })),
           remarks: existingOffence.remarks,
-        }
+        },
       };
       dispatch({ type: "SET_FORM_DATA", payload: mappedData });
     }
@@ -172,7 +225,7 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
 
     const secondaryPerson =
       Array.isArray(traffic?.offenderPeople) &&
-        traffic.offenderPeople.length > 1
+      traffic.offenderPeople.length > 1
         ? traffic.offenderPeople[1]
         : null;
 
@@ -203,13 +256,13 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
         vehicle:
           traffic.vehicleInvolved === "yes"
             ? {
-              baNo: val(v.vehicleNumber),
-              makeAndTake: val(v.vehicleName),
-              vehicleNumber:
-                v.vehicleType === "DD Vehicle"
-                  ? "DD Veh. BA No."
-                  : "Registration No.",
-            }
+                baNo: val(v.vehicleNumber),
+                makeAndTake: val(v.vehicleName),
+                vehicleNumber:
+                  v.vehicleType === "DD Vehicle"
+                    ? "DD Veh. BA No."
+                    : "Registration No.",
+              }
             : undefined,
       },
 
@@ -241,10 +294,20 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
       },
 
       witnessSig: {
-        armyNo: val(traffic.selectedWitness?.armyNumber || witnesses[0]?.reportingBlock?.armyNumber),
-        rank: val(traffic.selectedWitness?.rank || witnesses[0]?.reportingBlock?.rank),
-        name: val(traffic.selectedWitness?.nameReportingMP || witnesses[0]?.reportingBlock?.nameReportingMP),
-        unit: val(traffic.selectedWitness?.unit || witnesses[0]?.reportingBlock?.unit),
+        armyNo: val(
+          traffic.selectedWitness?.armyNumber ||
+            witnesses[0]?.reportingBlock?.armyNumber,
+        ),
+        rank: val(
+          traffic.selectedWitness?.rank || witnesses[0]?.reportingBlock?.rank,
+        ),
+        name: val(
+          traffic.selectedWitness?.nameReportingMP ||
+            witnesses[0]?.reportingBlock?.nameReportingMP,
+        ),
+        unit: val(
+          traffic.selectedWitness?.unit || witnesses[0]?.reportingBlock?.unit,
+        ),
       },
 
       mpSig: {
@@ -273,14 +336,12 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
       const traffic = state.formData.traffic;
       console.log("🚔 RAW TRAFFIC ===>", traffic);
 
-
-
       /* ================= CREATE / UPDATE OFFENCE ================= */
       let offenceRes;
       if (recordId) {
         // Fix reportId in payload if missing during edit
         const payload = { ...traffic, reportId: reportNo };
-        // Adjust nested payload as constructed above... 
+        // Adjust nested payload as constructed above...
         // Since createOffence above is constructing payload directly in call, I should extract payload construction.
         // Or just call updateOffence with same structure.
 
@@ -305,11 +366,11 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
             ...traffic.onDutyDetails,
             startTime: toISO(
               traffic.onDutyDetails?.dateOfDuty,
-              traffic.onDutyDetails?.startTime
+              traffic.onDutyDetails?.startTime,
             ),
             endTime: toISO(
               traffic.onDutyDetails?.dateOfDuty,
-              traffic.onDutyDetails?.endTime
+              traffic.onDutyDetails?.endTime,
             ),
           },
           onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
@@ -317,7 +378,7 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
             ...traffic.offenceOccurenceDetails,
             timeOfOffence: toISO(
               traffic.onDutyDetails?.dateOfDuty,
-              traffic.offenceOccurenceDetails?.timeOfOffence
+              traffic.offenceOccurenceDetails?.timeOfOffence,
             ),
             briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
           },
@@ -335,7 +396,6 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
         await updateOffence({ id: recordId, data: apiPayload });
         offenceRes = { _id: recordId };
         toast.success("Traffic Offence Updated 🎉");
-
       } else {
         offenceRes = await createOffence({
           reportId: reportNo,
@@ -358,11 +418,11 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
             ...traffic.onDutyDetails,
             startTime: toISO(
               traffic.onDutyDetails?.dateOfDuty,
-              traffic.onDutyDetails?.startTime
+              traffic.onDutyDetails?.startTime,
             ),
             endTime: toISO(
               traffic.onDutyDetails?.dateOfDuty,
-              traffic.onDutyDetails?.endTime
+              traffic.onDutyDetails?.endTime,
             ),
           },
           onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
@@ -370,7 +430,7 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
             ...traffic.offenceOccurenceDetails,
             timeOfOffence: toISO(
               traffic.onDutyDetails?.dateOfDuty,
-              traffic.offenceOccurenceDetails?.timeOfOffence
+              traffic.offenceOccurenceDetails?.timeOfOffence,
             ),
             briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
           },
@@ -397,14 +457,27 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
       const offenders: any[] = [];
 
       /* 1️⃣ Vehicle / normal offenders */
-      if (Array.isArray(traffic.offenderPeople)) {
+      if (
+        traffic.vehicleInvolved === "yes" &&
+        Array.isArray(traffic.offenderPeople)
+      ) {
         offenders.push(...traffic.offenderPeople);
       }
 
-      /* 2️⃣ No-vehicle offender flow */
+      /* 2️⃣ No-vehicle offender flow (NEW ARRAY) */
       if (
         traffic.vehicleInvolved === "no" &&
-        traffic.offenderWithoutVehicle?.military
+        Array.isArray(traffic.noVehicleOffenderPeople)
+      ) {
+        offenders.push(...traffic.noVehicleOffenderPeople);
+      }
+
+      /* Old Legacy No-Vehicle Logic (Just in case, though likely replaced by OffenderWithoutVehicleForm usage above) */
+      if (
+        traffic.vehicleInvolved === "no" &&
+        traffic.offenderWithoutVehicle?.military &&
+        (!traffic.noVehicleOffenderPeople ||
+          traffic.noVehicleOffenderPeople.length === 0)
       ) {
         const m = traffic.offenderWithoutVehicle.military;
 
@@ -527,7 +600,11 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
             ]}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
-            title={recordId ? "Edit General & Traffic Offence Record" : "Create New General & Traffic Offence Record"}
+            title={
+              recordId
+                ? "Edit General & Traffic Offence Record"
+                : "Create New General & Traffic Offence Record"
+            }
             reportNo={reportNo || "PRO/21 CPU/00042/106/25"}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             onCreate={onSubmitFinal}

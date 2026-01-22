@@ -472,15 +472,18 @@ export default function OffenderWithoutVehicleForm({
     if (scope === "traffic" || scope === "static") {
       const list =
         scope === "static"
-          ? state.formData.staticSpeed?.offenderPeople || []
-          : state.formData.traffic?.offenderPeople || [];
+          ? state.formData.staticSpeed?.noVehicleOffenderPeople || []
+          : state.formData.traffic?.noVehicleOffenderPeople || [];
 
       if (list.length > 0) {
-        const restored = list.map((p: any, i: number) => ({
-          id: Date.now() + i,
-          type: p.type,
-          index: i,
-        }));
+        const restored: Block[] = [];
+        list.forEach((p: any, i: number) => {
+            restored.push({
+              id: Date.now() + i,
+              type: p.type,
+              index: i,
+            });
+        });
         setBlocks(restored);
       }
     }
@@ -522,13 +525,13 @@ export default function OffenderWithoutVehicleForm({
     if (scope === "traffic" || scope === "static") {
       const peoplePath =
         scope === "static"
-          ? "formData.staticSpeed.offenderPeople"
-          : "formData.traffic.offenderPeople";
+          ? "formData.staticSpeed.noVehicleOffenderPeople"
+          : "formData.traffic.noVehicleOffenderPeople";
 
       const existing =
         scope === "static"
-          ? state.formData.staticSpeed?.offenderPeople || []
-          : state.formData.traffic?.offenderPeople || [];
+          ? state.formData.staticSpeed?.noVehicleOffenderPeople || []
+          : state.formData.traffic?.noVehicleOffenderPeople || [];
 
       const currentBlock = blocks.find((b) => b.id === blockId);
       let newList = [...existing];
@@ -599,9 +602,9 @@ export default function OffenderWithoutVehicleForm({
   /* ================= PATH HELPER FOR RENDER ================= */
   const getRenderPath = (block: Block) => {
     if (scope === "traffic")
-      return `formData.traffic.offenderPeople[${block.index}].details`;
+      return `formData.traffic.noVehicleOffenderPeople[${block.index}].details`;
     if (scope === "static")
-      return `formData.staticSpeed.offenderPeople[${block.index}].details`;
+      return `formData.staticSpeed.noVehicleOffenderPeople[${block.index}].details`;
 
     if (rootPath) return `${rootPath}.tempOffender.details`;
 
@@ -651,6 +654,7 @@ export default function OffenderWithoutVehicleForm({
                 id={block.id}
                 scope={scope}
                 path={getRenderPath(block)}
+                showCoDriver={false}
               />
             ) : (
               <OffenderDynamicForm
