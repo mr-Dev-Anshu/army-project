@@ -1,3 +1,6 @@
+// Optional fields to skip
+const OPTIONAL_FIELDS = ["remarks", "time", "customFields.remarks"];
+
 export const getMissingFields = (data: any, parentKey = ""): string[] => {
     if (!data || typeof data !== "object") return [];
 
@@ -9,6 +12,11 @@ export const getMissingFields = (data: any, parentKey = ""): string[] => {
     Object.keys(data).forEach((key) => {
         const value = data[key];
         const currentKey = parentKey ? `${parentKey}.${key}` : key;
+
+        // Skip optional fields
+        if (OPTIONAL_FIELDS.some(field => currentKey.endsWith(field))) {
+            return;
+        }
 
         // Check for empty values
         if (

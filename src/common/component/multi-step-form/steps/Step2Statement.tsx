@@ -457,7 +457,7 @@ export default function Step2Statement() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-3 gap-4 mt-4">
           <div>
             <Label className="mb-2 font-semibold">Unit</Label>
             <SuggestionInput
@@ -478,6 +478,20 @@ export default function Step2Statement() {
               onChange={(e) =>
                 set(
                   "formData.traffic.onDutyDetailsMPReporting.armyNumber",
+                  e.target.value
+                )
+              }
+            />
+          </div>
+
+          <div>
+            <Label className="mb-2 font-semibold">Contact No.</Label>
+            <Input
+              placeholder="Contact Number"
+              value={d.onDutyDetailsMPReporting.contactNumber || ""}
+              onChange={(e) =>
+                set(
+                  "formData.traffic.onDutyDetailsMPReporting.contactNumber",
                   e.target.value
                 )
               }

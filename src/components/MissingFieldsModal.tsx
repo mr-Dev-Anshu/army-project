@@ -2,11 +2,23 @@
 import { useValidation } from "@/context/ValidationContext";
 import { resetValidation } from "@/context/validationDispatcher";
 import { getFieldLabel } from "@/utils/fieldLabelMap";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, XCircle } from "lucide-react";
+
 
 const MissingFieldsModal = () => {
     const { state } = useValidation();
 
-    if (state.missingFields.length === 0) return null;
+    // Determine if the modal should be open
+    const isOpen = state.missingFields.length > 0;
 
     const handleConfirm = () => {
         state.onConfirm?.();
@@ -19,41 +31,41 @@ const MissingFieldsModal = () => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded w-[400px]">
-                <h2 className="text-lg font-bold text-red-600">
-                    Missing Required Fields
-                </h2>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <div className="flex items-center gap-2 text-destructive mb-2">
+                        <AlertTriangle className="h-6 w-6" />
+                        <DialogTitle className="text-xl">Incomplete Submission</DialogTitle>
+                    </div>
+                    <DialogDescription>
+                        The following required fields are missing. Please review them before continuing.
+                    </DialogDescription>
+                </DialogHeader>
 
-                <p className="text-sm text-gray-600 mt-1">
-                    Please review the following fields before continuing:
-                </p>
-
-                <ul className="list-disc ml-6 mt-3 text-sm max-h-60 overflow-y-auto w-full">
-                    {state.missingFields.map((field: string) => (
-                        <li key={field} className="text-gray-800 font-medium">
-                            {getFieldLabel(field)}
-                        </li>
-                    ))}
-                </ul>
-
-                <div className="flex justify-end gap-3 mt-5">
-                    <button
-                        onClick={handleCancel}
-                        className="px-3 py-1 border rounded text-sm hover:bg-gray-50"
-                    >
-                        Cancel
-                    </button>
-
-                    <button
-                        onClick={handleConfirm}
-                        className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                    >
-                        Continue Anyway
-                    </button>
+                <div className="py-4">
+                    <div className="rounded-md border p-4 bg-muted/30 max-h-[240px] overflow-y-auto custom-scrollbar">
+                        <ul className="space-y-2">
+                            {state.missingFields.map((field: string) => (
+                                <li key={field} className="flex items-start gap-2 text-sm text-foreground/90">
+                                    <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                                    <span>{getFieldLabel(field)}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={handleCancel}>
+                        Cancel
+                    </Button>
+                    <Button variant="destructive" onClick={handleConfirm}>
+                        Continue Anyway
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 

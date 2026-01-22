@@ -20,7 +20,7 @@ export const FIELD_LABEL_MAP: Record<string, string> = {
     "offenceOccurenceDetails.briefDescription": "Brief Description",
     "offenceOccurenceDetails.description": "Detailed Description",
     "offenceOccurenceDetails.incidentLocation": "Incident Location",
-    "offenceOccurenceDetails.time": "Time",
+    // "offenceOccurenceDetails.time": "Time",
     "offenceOccurenceDetails.timeOfOffence": "Time of Offence",
     "offenceTypeReference": "Offence Type Reference",
     // Duty Details
