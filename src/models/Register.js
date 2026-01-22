@@ -92,6 +92,11 @@ const DutyAndAssetMovementSchema = new Schema(
       default: {},
     },
 
+    offender: {
+      type: Schema.Types.ObjectId,
+      ref: 'Offender',
+    },
+
     remark: {
       type: String,
       default: '',

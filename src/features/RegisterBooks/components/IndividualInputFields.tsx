@@ -1,6 +1,5 @@
 import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 export interface IndividualData {
     armyNo: string;
@@ -27,74 +26,62 @@ export const IndividualInputFields = ({
     return (
         <div className="space-y-3">
             <div className="space-y-1.5">
-                <Label htmlFor="armyNo" className="text-xs font-medium text-neutral-700">
-                    Army No.
-                </Label>
-                <Input
-                    id="armyNo"
+                <SuggestionInput
+                    label="Army No."
+                    fieldType="armyNo"
                     placeholder="eg. 11223344F"
                     value={data.armyNo}
-                    onChange={(e) => onChange("armyNo", e.target.value)}
+                    onChange={(v) => onChange("armyNo", v)}
                 />
             </div>
 
             <div className="space-y-1.5">
-                <Label htmlFor="rank" className="text-xs font-medium text-neutral-700">
-                    Rank
-                </Label>
-                <Input
-                    id="rank"
+                <SuggestionInput
+                    label="Rank"
+                    fieldType="rank"
                     placeholder="eg."
                     value={data.rank}
-                    onChange={(e) => onChange("rank", e.target.value)}
+                    onChange={(v) => onChange("rank", v)}
                 />
             </div>
 
             <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-xs font-medium text-neutral-700">
-                    Name
-                </Label>
-                <Input
-                    id="name"
+                <SuggestionInput
+                    label="Name"
+                    fieldType="name"
                     placeholder="eg."
                     value={data.name}
-                    onChange={(e) => onChange("name", e.target.value)}
+                    onChange={(v) => onChange("name", v)}
                 />
             </div>
 
             <div className="space-y-1.5">
-                <Label htmlFor="unit" className="text-xs font-medium text-neutral-700">
-                    Unit
-                </Label>
-                <Input
-                    id="unit"
+                <SuggestionInput
+                    label="Unit"
+                    fieldType="unit"
                     placeholder="eg."
                     value={data.unit}
-                    onChange={(e) => onChange("unit", e.target.value)}
+                    onChange={(v) => onChange("unit", v)}
                 />
             </div>
 
             <div className="space-y-1.5">
-                <Label htmlFor="fmn" className="text-xs font-medium text-neutral-700">
-                    FMN
-                </Label>
-                <Input
-                    id="fmn"
+                <SuggestionInput
+                    label="FMN"
+                    fieldType="fmn"
                     placeholder="eg."
                     value={data.fmn}
-                    onChange={(e) => onChange("fmn", e.target.value)}
+                    onChange={(v) => onChange("fmn", v)}
                 />
             </div>
 
             <div className="space-y-1.5">
-                <Label htmlFor="command" className="text-xs font-medium text-neutral-700">
-                    Command
-                </Label>
-                <Input
-                    id="command"
+                <SuggestionInput
+                    label="Command"
+                    fieldType="command"
                     placeholder="eg."
                     value={data.command}
-                    onChange={(e) => onChange("command", e.target.value)}
+                    onChange={(v) => onChange("command", v)}
                 />
             </div>
         </div>

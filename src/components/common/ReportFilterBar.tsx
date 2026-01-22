@@ -39,6 +39,7 @@ export interface FilterState {
   individualWorkingStatus?: string;
   priceListStatus?: string;
   agreementStatus?: string;
+  dutyType?: string;
   sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
@@ -71,6 +72,8 @@ interface ReportFilterBarProps {
   showAgreementStatus?: boolean;
   showIndividualWorkingStatus?: boolean;
   showUnitLocation?: boolean;
+  showDutyType?: boolean;
+  dutyTypeOptions?: string[];
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -82,6 +85,7 @@ export default function ReportFilterBar({
   fmnOptions,
   placeOptions,
   unitLocationOptions,
+  dutyTypeOptions,
   placeholder = "Search by report number or offence...",
   showDate = true,
   showDateRange = true,
@@ -102,12 +106,16 @@ export default function ReportFilterBar({
   showAgreementStatus = false,
   showIndividualWorkingStatus = false,
   showUnitLocation = false,
+  showDutyType = false,
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
     (showAgreementStatus && filters.agreementStatus && filters.agreementStatus !== "All") ||
     (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
     (showIndividualWorkingStatus && filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") ||
+    (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
+    !!filters.date ||
+    (showOffenceType && !!filters.offenceType && filters.offenceType !== "All") ||
     !!filters.fromDate ||
     !!filters.toDate ||
     !!filters.unit ||
@@ -367,6 +375,33 @@ export default function ReportFilterBar({
                       </Select>
                     </div>
                   )}
+
+
+                  {/* Duty Type */}
+                  {showDutyType && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Duty Type</label>
+                      <Select
+                        value={filters.dutyType || "All"}
+                        onValueChange={(value) => onFilterChange("dutyType", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Duty Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          {(dutyTypeOptions && dutyTypeOptions.length > 0
+                            ? dutyTypeOptions
+                            : ["Mobile Duty", "MP Duty", "Gate Duty", "Patrol Duty", "Escort Duty", "Traffic Duty"]
+                          ).map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 {onReset && (
@@ -397,11 +432,6 @@ export default function ReportFilterBar({
           )}
         </div>
       </div>
-    </div >
-
-
-
-
-
+    </div>
   );
 }
