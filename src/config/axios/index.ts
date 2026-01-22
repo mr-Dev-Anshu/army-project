@@ -1,11 +1,9 @@
 // config/axios.ts
 import axios from "axios";
-
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 
 const publicRoutes = ["/login", "/register", "/"] as const;
-
 // Updated: Check if path starts with these instead of exact match
 const isPublicRoute = (path: string) => {
   if (!path) return false;
@@ -25,6 +23,40 @@ const api = axios.create({
   withCredentials: true,
   validateStatus: (status) => status >= 200 && status < 300,
 });
+
+
+api.interceptors.request.use(
+  (config) => {
+    const method = config.method?.toUpperCase()||"unkonwn";
+    if (['POST', 'PUT', 'PATCH'].includes(method) && config.data) {
+      const emptyFields = findEmptyOrNullFields(config.data);
+
+      if (emptyFields.length > 0) {
+        const message = 
+          `⚠️ Ye fields khali ya null hain:\n\n` +
+          emptyFields.join('\n') +
+          `\n\nKya aap fir bhi request bhejna chahte hain?\n\n` +
+          `OK → Bhej do (ignore karo)\n` +
+          `Cancel → Wapas jaao aur fill karo`;
+
+        const userWantsToProceed = confirm(message);
+
+        if (!userWantsToProceed) {
+          throw new axios.Cancel('User ne empty fields ke karan request cancel ki');
+        }
+       
+      }
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Request body:', config.data);
+      console.log('Empty fields:', findEmptyOrNullFields(config.data));
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 api.interceptors.response.use(
   (response) => response,
@@ -76,3 +108,29 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+
+
+
+
+
+function findEmptyOrNullFields(obj, prefix = "", result = []) {
+  for (const key in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+
+    const value = obj[key];
+    const currentPath = prefix ? `${prefix}.${key}` : key;
+
+    if (value === null || value === undefined || value === "") {
+      result.push(currentPath);
+    }
+    // If it's an object (but not array) → recurse
+    else if (value && typeof value === "object" && !Array.isArray(value)) {
+      findEmptyOrNullFields(value, currentPath, result);
+    }
+    // If it's array → you can decide whether to recurse or skip
+    // (most form data arrays are usually not empty-check candidates)
+  }
+
+  return result;
+}
