@@ -71,6 +71,19 @@ const ConvoyInOutTable = ({ data, onEdit, onDelete, onAddNew }: ConvoyInOutTable
 
     return (
         <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="24" fill="#E5E5E5" />
+                        <path d="M32.1673 29.8359H34.5007L35.2473 26.8726C35.5273 25.7538 35.5273 24.5836 35.2473 23.4659L33.999 18.4843C33.8092 17.7276 33.372 17.0561 32.7569 16.5763C32.1418 16.0965 31.3841 15.8359 30.604 15.8359H14.6673C14.0485 15.8359 13.455 16.0818 13.0174 16.5194C12.5798 16.9569 12.334 17.5504 12.334 18.1693V29.8359H14.6673" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M26.3333 29.8359H20.5" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M17.5827 33.3333C19.1935 33.3333 20.4993 32.0275 20.4993 30.4167C20.4993 28.8058 19.1935 27.5 17.5827 27.5C15.9719 27.5 14.666 28.8058 14.666 30.4167C14.666 32.0275 15.9719 33.3333 17.5827 33.3333Z" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M29.2507 33.3333C30.8615 33.3333 32.1673 32.0275 32.1673 30.4167C32.1673 28.8058 30.8615 27.5 29.2507 27.5C27.6398 27.5 26.334 28.8058 26.334 30.4167C26.334 32.0275 27.6398 33.3333 29.2507 33.3333Z" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <h2 className="text-lg font-semibold text-[#404040]">Convoy In | Out Register</h2>
+                </div>
+                <span className="text-sm font-medium  text-[#0A0A0A]">{filteredData.length} Reports</span>
+            </div>
             <ReportFilterBar
                 filters={filters}
                 onFilterChange={handleFilterChange}

@@ -116,6 +116,12 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
 
         // Other specific fields that might arise
         'details.remarks': 'remarks',
+
+        // Mini Kote Arms / AMN Register
+        'details.typeOfArms': 'typeOfArms',
+        'details.buttNo': 'buttNo',
+        'details.registrationNo': 'registrationNo',
+        'details.typeOfAmn': 'typeOfAmn',
     },
 
     trackCustomFields: 'specific',

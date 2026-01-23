@@ -97,6 +97,18 @@ const VehicleInOutTable = ({ data, onEdit, onDelete, onAddNew }: VehicleInOutTab
 
     return (
         <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="24" fill="#E5E5E5" />
+                        <path d="M26.334 28.6641H20.5007M32.1673 28.6641H35.6673V24.9891C35.6681 24.7115 35.5699 24.4427 35.3903 24.2309C35.2106 24.0192 34.9614 23.8785 34.6873 23.8341L28.6673 22.8308L25.5173 18.6308C25.4086 18.4859 25.2677 18.3683 25.1057 18.2873C24.9437 18.2063 24.7651 18.1641 24.584 18.1641H16.114C15.6791 18.1611 15.2521 18.2796 14.881 18.5064C14.51 18.7332 14.2097 19.0591 14.014 19.4475L13.0807 21.3491C12.5908 22.3228 12.3351 23.3975 12.334 24.4875V28.6641H14.6673" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M17.5827 32.1693C19.1935 32.1693 20.4993 30.8634 20.4993 29.2526C20.4993 27.6418 19.1935 26.3359 17.5827 26.3359C15.9719 26.3359 14.666 27.6418 14.666 29.2526C14.666 30.8634 15.9719 32.1693 17.5827 32.1693Z" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M29.2507 32.1693C30.8615 32.1693 32.1673 30.8634 32.1673 29.2526C32.1673 27.6418 30.8615 26.3359 29.2507 26.3359C27.6398 26.3359 26.334 27.6418 26.334 29.2526C26.334 30.8634 27.6398 32.1693 29.2507 32.1693Z" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <h2 className="text-lg font-semibold text-[#404040]">Vehicle In | Out Register</h2>
+                </div>
+                <span className="text-sm font-medium  text-[#0A0A0A]">{filteredData.length} Reports</span>
+            </div>
             <ReportFilterBar
                 filters={filters}
                 onFilterChange={handleFilterChange}

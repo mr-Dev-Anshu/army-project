@@ -94,6 +94,16 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
 
     return (
         <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="24" fill="#E5E5E5" />
+                        <path d="M34.4993 12.3359L32.166 14.6693M32.166 14.6693L35.666 18.1693L31.5827 22.2526L28.0827 18.7526M32.166 14.6693L28.0827 18.7526M23.2877 23.5476C23.8901 24.142 24.3689 24.8496 24.6967 25.6299C25.0245 26.4101 25.1947 27.2474 25.1975 28.0937C25.2004 28.9399 25.0358 29.7784 24.7132 30.5608C24.3907 31.3432 23.9166 32.054 23.3182 32.6524C22.7198 33.2508 22.0089 33.725 21.2265 34.0475C20.4441 34.37 19.6057 34.5346 18.7594 34.5318C17.9132 34.529 17.0758 34.3588 16.2956 34.031C15.5154 33.7032 14.8077 33.2243 14.2133 32.6219C13.0445 31.4117 12.3977 29.7909 12.4124 28.1084C12.427 26.426 13.1018 24.8166 14.2915 23.6269C15.4812 22.4372 17.0906 21.7624 18.773 21.7478C20.4554 21.7332 22.0763 22.3799 23.2865 23.5488L23.2877 23.5476ZM23.2877 23.5476L28.0827 18.7526" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <h2 className="text-lg font-semibold text-[#404040]">21 Corps Provost Unit Key Out | In Register</h2>
+                </div>
+                <span className="text-sm font-medium  text-[#0A0A0A]">{filteredData.length} Reports</span>
+            </div>
             <ReportFilterBar
                 filters={filters}
                 onFilterChange={handleFilterChange}
