@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,17 +10,33 @@ import { Textarea } from "@/components/ui/textarea";
 import { IndividualInputFields, IndividualData } from "@/features/RegisterBooks/components/IndividualInputFields";
 import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
 import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
+import { useCreateDutyRosterRegister, useUpdateDutyRosterRegister } from "@/features/RegisterBooks/DailyOperationsRegisters/dutyRoster/hooks";
+import { formatDateForInput } from "@/utils/dateUtils";
 
-const DutyRosterForm = () => {
+interface DutyRosterFormProps {
+    initialData?: any;
+    onSuccess?: () => void;
+    onCancel?: () => void;
+}
+
+const DutyRosterForm = ({ initialData, onSuccess, onCancel }: DutyRosterFormProps) => {
+    const createMutation = useCreateDutyRosterRegister();
+    const updateMutation = useUpdateDutyRosterRegister();
+
+    // Form States
     const [individual, setIndividual] = useState<IndividualData>({
         armyNo: "",
         rank: "",
         name: "",
     });
 
-    const handleFieldChange = (field: keyof IndividualData, value: string) => {
-        setIndividual((prev) => ({ ...prev, [field]: value }));
-    };
+    const [dateOfDuty, setDateOfDuty] = useState("");
+
+    // Time Slots
+    const [morningDutyFrom, setMorningDutyFrom] = useState("");
+    const [morningDutyTill, setMorningDutyTill] = useState("");
+    const [eveningDutyFrom, setEveningDutyFrom] = useState("");
+    const [eveningDutyTill, setEveningDutyTill] = useState("");
 
     const [authData, setAuthData] = useState({
         initialsMPCPNCO: "",
@@ -27,28 +44,98 @@ const DutyRosterForm = () => {
         initials2IC: "",
     });
 
+    const [remark, setRemark] = useState("");
+
+    // Load initial data for editing
+    useEffect(() => {
+        if (initialData) {
+            if (initialData.details?.individual) {
+                setIndividual({
+                    armyNo: initialData.details.individual.armyNo || "",
+                    rank: initialData.details.individual.rank || "",
+                    name: initialData.details.individual.name || "",
+                });
+            }
+            if (initialData.date) {
+                setDateOfDuty(formatDateForInput(initialData.date));
+            }
+            if (initialData.details?.morningSlot) {
+                setMorningDutyFrom(initialData.details.morningSlot.from || "");
+                setMorningDutyTill(initialData.details.morningSlot.to || "");
+            }
+            if (initialData.details?.eveningSlot) {
+                setEveningDutyFrom(initialData.details.eveningSlot.from || "");
+                setEveningDutyTill(initialData.details.eveningSlot.to || "");
+            }
+            if (initialData.authentication) {
+                setAuthData({
+                    initialsMPCPNCO: initialData.authentication.initialsMPCPNCO || "",
+                    initialsQMSJCO: initialData.authentication.initialsQMSJCO || "",
+                    initials2IC: initialData.authentication.initials2IC || "",
+                });
+            }
+            if (initialData.remark) {
+                setRemark(initialData.remark || "");
+            }
+        }
+    }, [initialData]);
+
+    const handleFieldChange = (field: keyof IndividualData, value: string) => {
+        setIndividual((prev) => ({ ...prev, [field]: value }));
+    };
+
     const handleAuthChange = (field: string, value: string) => {
         setAuthData(prev => ({ ...prev, [field]: value }));
     };
 
-    return (
-        <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
-                <div>
-                    <h2 className="text-lg font-bold text-neutral-900">
-                        Add Duty Roster Entry
-                    </h2>
-                    <p className="text-sm text-neutral-500">
-                        Record duty details
-                    </p>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400">
-                    <X className="h-5 w-5" />
-                </Button>
-            </div>
+    const handleSubmit = async () => {
+        // Validation
+        const requiredFields = [
+            { field: dateOfDuty, message: "Date of Duty is required" },
+            { field: individual.armyNo, message: "Army Number is required" },
+        ];
 
-            <div className="p-6 space-y-8">
+        for (const { field, message } of requiredFields) {
+            if (!field) {
+                toast.error(message);
+                return;
+            }
+        }
+
+        try {
+            const payload = {
+                date: dateOfDuty,
+                details: {
+                    individual,
+                    morningSlot: {
+                        from: morningDutyFrom,
+                        to: morningDutyTill,
+                    },
+                    eveningSlot: {
+                        from: eveningDutyFrom,
+                        to: eveningDutyTill,
+                    },
+                },
+                authentication: authData,
+                remark,
+                type: "duty_roster",
+            };
+
+            if (initialData?._id) {
+                await updateMutation.mutateAsync({ id: initialData._id, payload: payload });
+            } else {
+                await createMutation.mutateAsync(payload);
+            }
+
+            if (onSuccess) onSuccess();
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        }
+    };
+
+    return (
+        <div className="mx-auto w-full max-w-4xl font-inter">
+            <div className="space-y-8">
                 {/* Individual Details Section */}
                 <section className="space-y-4">
                     <h3 className="text-sm font-bold text-neutral-900">
@@ -71,6 +158,8 @@ const DutyRosterForm = () => {
                             id="dateOfDuty"
                             type="date"
                             className="block w-full max-w-md"
+                            value={dateOfDuty}
+                            onChange={(e) => setDateOfDuty(e.target.value)}
                         />
                     </div>
 
@@ -85,6 +174,8 @@ const DutyRosterForm = () => {
                                     id="morningDutyFrom"
                                     type="time"
                                     className="block w-full"
+                                    value={morningDutyFrom}
+                                    onChange={(e) => setMorningDutyFrom(e.target.value)}
                                 />
                             </div>
                             <div className="space-y-1.5">
@@ -95,6 +186,8 @@ const DutyRosterForm = () => {
                                     id="morningDutyTill"
                                     type="time"
                                     className="block w-full"
+                                    value={morningDutyTill}
+                                    onChange={(e) => setMorningDutyTill(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -111,6 +204,8 @@ const DutyRosterForm = () => {
                                     id="eveningDutyFrom"
                                     type="time"
                                     className="block w-full"
+                                    value={eveningDutyFrom}
+                                    onChange={(e) => setEveningDutyFrom(e.target.value)}
                                 />
                             </div>
                             <div className="space-y-1.5">
@@ -121,6 +216,8 @@ const DutyRosterForm = () => {
                                     id="eveningDutyTill"
                                     type="time"
                                     className="block w-full"
+                                    value={eveningDutyTill}
+                                    onChange={(e) => setEveningDutyTill(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -138,13 +235,22 @@ const DutyRosterForm = () => {
                             id="remark"
                             placeholder="Enter remark"
                             className="resize-none min-h-[80px]"
+                            value={remark}
+                            onChange={(e) => setRemark(e.target.value)}
                         />
                     </div>
                 </section>
             </div>
 
             {/* Footer */}
-            <FormFooter />
+            <div className="mt-8">
+                <FormFooter
+                    onSave={handleSubmit}
+                    onCancel={onCancel}
+                    isLoading={createMutation.isPending || updateMutation.isPending}
+                    saveLabel={initialData?._id ? "Update Entry" : "Save & Add Another"}
+                />
+            </div>
         </div>
     );
 };

@@ -47,7 +47,8 @@ export const useCreateRegister = () => {
             toast.success("Register entry created successfully");
         },
         onError: (error: any) => {
-            toast.error("Failed to create register entry");
+            const message = error.response?.data?.error || "Failed to create register entry";
+            toast.error(message);
         },
     });
 };
@@ -65,7 +66,8 @@ export const useUpdateRegister = () => {
             toast.success("Register entry updated successfully");
         },
         onError: (error: any) => {
-            toast.error("Failed to update register entry");
+            const message = error.response?.data?.error || "Failed to update register entry";
+            toast.error(message);
         },
     });
 };
@@ -79,7 +81,8 @@ export const useDeleteRegister = () => {
             toast.success("Register entry deleted successfully");
         },
         onError: (error: any) => {
-            toast.error("Failed to delete register entry");
+            const message = error.response?.data?.error || "Failed to delete register entry";
+            toast.error(message);
         },
     });
 };
