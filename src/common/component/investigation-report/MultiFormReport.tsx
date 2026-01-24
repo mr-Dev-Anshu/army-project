@@ -164,6 +164,7 @@ export default function MultiFormReport({
             videos: existingReport.evidences?.filter((e: any) => e.type === "Video") || [],
           },
           documents: existingReport.documents || [],
+          certificates: existingReport.certificates || [],
           additionalIndividual: {
             vehicleInvolved: "",
             vehicleData: {},
@@ -477,6 +478,12 @@ export default function MultiFormReport({
           statement: d.statement || "",
           url: d.url || "",
           fileName: d.fileName || "",
+        })),
+
+        certificates: (mp.certificates || []).map((c: any) => ({
+          statement: c.statement || "",
+          url: c.url || "",
+          fileName: c.fileName || "",
         })),
 
         evidences: buildEvidences(mp.evidence),

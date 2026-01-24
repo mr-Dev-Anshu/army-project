@@ -143,6 +143,7 @@ const mpReportSchema = new Schema(
     },
 
     evidences: [evidenceSchema],
+    certificates: [documentSchema],
     customFields: {
       type: Schema.Types.Mixed,
       default: {},

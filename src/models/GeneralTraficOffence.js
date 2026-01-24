@@ -74,6 +74,10 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     actionStatusRemark: {
       type: String,
     },
+    certificates: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: []
+    },
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},

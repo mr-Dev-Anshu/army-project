@@ -1,8 +1,11 @@
 "use client";
-import { Check, Edit2, Save } from "lucide-react";
+import { Check, Edit2, Save, Paperclip } from "lucide-react";
+import { uploadFile } from "@/lib/uploadFile";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@/context/FormContext";
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { AttachCertificateModal } from "./AttachCertificateModal";
 
 interface Step {
   id: number;
@@ -60,6 +63,39 @@ export const LeftStepper = ({
     setEditing(false);
     console.log("Saved Report No:", reportValue);
     // Already synced via onChange
+  };
+
+  /* ================= CERTIFICATE UPLOAD ================= */
+  const [uploadingCert, setUploadingCert] = useState(false);
+  const [attachModalOpen, setAttachModalOpen] = useState(false);
+
+  const handleSaveCertificate = async (file: File, type: "certificate" | "letter") => {
+    setUploadingCert(true);
+    try {
+      const res = await uploadFile(file);
+
+      // Add to certificates list in global state
+      const currentCerts = state.formData.mpReport?.certificates || [];
+      const newCert = {
+        statement: file.name,
+        type: type,
+        url: res.url,
+        fileName: file.name,
+      };
+
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.mpReport.certificates",
+        value: [...currentCerts, newCert],
+      });
+
+      toast.success(`${type === 'certificate' ? 'Certificate' : 'Letter'} Attached Successfully!`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload file");
+    } finally {
+      setUploadingCert(false);
+    }
   };
 
   return (
@@ -188,22 +224,69 @@ export const LeftStepper = ({
       </div>
 
       {/* FOOTER */}
-      <div className="mt-4 flex flex-col sm:flex-row gap-2">
-        <Button
-          className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base"
-          onClick={() => onCancel && onCancel()}
-        >
-          Cancel
-        </Button>
+      <div className="mt-4 flex flex-col gap-2">
+        {/* ATTACH OPTION */}
+        {/* ATTACH OPTION */}
+        {/* ATTACH OPTION - Only Step 4 */}
+        {currentStep === 4 && (
+          <>
+            <AttachCertificateModal
+              open={attachModalOpen}
+              onOpenChange={setAttachModalOpen}
+              onSave={handleSaveCertificate}
+            />
 
-        <Button
-          className={`w-full sm:flex-1 text-sm sm:text-base ${state.preview ? "bg-blue-600" : "bg-gray-600 cursor-not-allowed"
-            }`}
-          disabled={!state.preview || isSubmitting}
-          onClick={() => onCreate && onCreate()}
-        >
-          {isSubmitting ? "Saving..." : "Save Report"}
-        </Button>
+            <Button
+              className="w-full bg-white text-black hover:bg-gray-200 flex items-center justify-center gap-2 text-sm sm:text-base mb-2"
+              onClick={() => setAttachModalOpen(true)}
+              disabled={uploadingCert}
+            >
+              <Paperclip className="w-4 h-4" />
+              {uploadingCert ? "Uploading..." : "Attach Certificates/Form/Letters"}
+            </Button>
+
+            {/* LIST ATTACHMENTS */}
+            {state.formData.mpReport?.certificates?.length > 0 && (
+              <div className="flex flex-col gap-2 mt-2 mb-4 max-h-[150px] overflow-y-auto custom-scrollbar">
+                {state.formData.mpReport.certificates.map((cert: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2 text-xs bg-[#262626] p-2 rounded-md border border-gray-700">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${cert.type === 'letter' ? 'bg-purple-900 text-purple-200' : 'bg-blue-900 text-blue-200'
+                      }`}>
+                      {cert.type === 'letter' ? 'L' : 'C'}
+                    </span>
+                    <a
+                      href={cert.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 truncate hover:text-blue-400 underline decoration-dotted underline-offset-2"
+                      title={cert.fileName}
+                    >
+                      {cert.fileName || "File"}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base"
+            onClick={() => onCancel && onCancel()}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            className={`w-full sm:flex-1 text-sm sm:text-base ${state.preview ? "bg-blue-600" : "bg-gray-600 cursor-not-allowed"
+              }`}
+            disabled={!state.preview || isSubmitting}
+            onClick={() => onCreate && onCreate()}
+          >
+            {isSubmitting ? "Saving..." : "Save Report"}
+          </Button>
+        </div>
       </div>
     </div>
   );

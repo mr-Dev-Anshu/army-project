@@ -45,6 +45,7 @@ export const createGeneralTrafficOffenceSchema = Joi.object({
   offenceTypeReference: Joi.array().items(Joi.string()).optional(),
   actionStatus: Joi.boolean().optional(),
   actionStatusRemark: Joi.string().optional(),
+  certificates: Joi.array().optional(),
 
   customFields: Joi.object()
     .unknown(true)

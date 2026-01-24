@@ -123,6 +123,10 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
             }
           })),
           remarks: existingOffence.remarks,
+        },
+        mpReport: {
+          ...initialState.formData.mpReport,
+          certificates: existingOffence.certificates || [],
         }
       };
       dispatch({ type: "SET_FORM_DATA", payload: mappedData });
@@ -286,6 +290,7 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
 
         const apiPayload = {
           reportId: reportNo,
+          certificates: state.formData.mpReport?.certificates || [],
           isVehicleInvolved: traffic.vehicleInvolved === "yes",
           // Mapped Vehicle Details
           ...(traffic.vehicleInvolved === "yes" && {
@@ -339,6 +344,7 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
       } else {
         offenceRes = await createOffence({
           reportId: reportNo,
+          certificates: state.formData.mpReport?.certificates || [],
           isVehicleInvolved: traffic.vehicleInvolved === "yes",
           // Mapped Vehicle Details
           ...(traffic.vehicleInvolved === "yes" && {

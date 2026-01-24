@@ -177,6 +177,7 @@ export const initialState: GlobalFormState = {
       },
 
       documents: [],
+      certificates: [],
 
       additionalIndividual: {
         vehicleInvolved: "",

@@ -120,6 +120,7 @@ export interface MpReportState {
   };
 
   documents: any[];
+  certificates: any[];
 
   additionalIndividual: {
     vehicleInvolved: "yes" | "no" | "";
