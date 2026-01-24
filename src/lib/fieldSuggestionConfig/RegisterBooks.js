@@ -28,6 +28,8 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.natureOfDuty': 'natureOfDuty',
         'details.fromLocation': 'location',
         'details.toLocation': 'location',
+        'details.typeOfVehicle': 'typeOfVehicle',
+        'details.purposeOfDemand': 'purposeOfDemand',
         'details.outSignature.value': 'signature',
         'details.inSignature.value': 'signature',
         'details.vehicleBaNumber': 'vehicleBaNumber',
