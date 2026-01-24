@@ -1,7 +1,7 @@
 import React from "react";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 
-interface AuthenticationData {
+export interface AuthenticationData {
     initialsMPCPNCO?: string;
     initialsQMSJCO?: string;
     initials2IC?: string;
@@ -10,14 +10,29 @@ interface AuthenticationData {
 interface AuthenticationSectionProps {
     data: AuthenticationData;
     onChange: (field: keyof AuthenticationData, value: string) => void;
+    title?: string;
+    description?: string;
+    variant?: 'default' | 'minimal';
 }
 
-export const AuthenticationSection = ({ data, onChange }: AuthenticationSectionProps) => {
+export const AuthenticationSection = ({ data, onChange, title, description, variant = 'default' }: AuthenticationSectionProps) => {
+    const isMinimal = variant === 'minimal';
+    const Wrapper = isMinimal ? 'div' : 'section';
+
     return (
-        <section className="space-y-4 pt-4 border-t border-neutral-100">
-            <h3 className="text-sm font-bold text-neutral-900">
-                Initials / Authentication
-            </h3>
+        <Wrapper className={`space-y-4 ${isMinimal ? "" : "pt-4 border-t border-neutral-100"}`}>
+            {!isMinimal && (
+                <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-neutral-900">
+                        {title || "Initials / Authentication"}
+                    </h3>
+                    {description && (
+                        <p className="text-xs text-neutral-500">
+                            {description}
+                        </p>
+                    )}
+                </div>
+            )}
 
             <div className="space-y-1.5 relative">
                 <SuggestionInput
@@ -64,6 +79,6 @@ export const AuthenticationSection = ({ data, onChange }: AuthenticationSectionP
                     </svg>
                 </div>
             </div>
-        </section>
+        </Wrapper>
     );
 };
