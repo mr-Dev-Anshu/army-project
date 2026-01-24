@@ -119,6 +119,16 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         // Other specific fields that might arise
         'details.remarks': 'remarks',
 
+        // Lost and Found Register
+        'details.itemName': 'itemName',
+        'details.place': 'place',
+        'details.handedByName': 'name',
+        'details.caseDetails': 'caseDetails',
+        'details.takeoverBy': 'name',
+        'details.takeoverAuth.initialsMPCPNCO': 'initials',
+        'details.takeoverAuth.initialsQMSJCO': 'initials',
+        'details.takeoverAuth.initials2IC': 'initials',
+
         // Mini Kote Arms / AMN Register
         'details.typeOfArms': 'typeOfArms',
         'details.buttNo': 'buttNo',

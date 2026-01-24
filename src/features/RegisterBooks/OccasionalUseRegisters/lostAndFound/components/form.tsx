@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
+import { SuggestionTextarea } from "@/common/component/SuggestionTextarea";
 import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
 import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
 import { useCreateLostAndFoundRegister, useUpdateLostAndFoundRegister } from "../hooks";
@@ -135,7 +137,6 @@ const LostAndFoundForm = ({ initialData, onSuccess, onCancel }: LostAndFoundForm
     return (
         <div className="mx-auto w-full max-w-4xl bg-white font-inter">
             <div className="p-6 space-y-8">
-                {/* Incident & Item Details */}
                 <section className="space-y-4">
                     <div className="space-y-1">
                         <h3 className="text-sm font-bold text-neutral-900">
@@ -173,51 +174,45 @@ const LostAndFoundForm = ({ initialData, onSuccess, onCancel }: LostAndFoundForm
                         </div>
                     </div>
 
+
+
                     <div className="space-y-1.5">
-                        <Label htmlFor="itemName" className="text-xs font-medium text-neutral-700">
-                            Item Name
-                        </Label>
-                        <Input
-                            id="itemName"
+                        <SuggestionInput
+                            label="Item Name"
+                            fieldType="itemName"
                             placeholder="Enter Name of Item Found"
                             value={formData.itemName}
-                            onChange={(e) => handleFormChange("itemName", e.target.value)}
+                            onChange={(val) => handleFormChange("itemName", val)}
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <Label htmlFor="place" className="text-xs font-medium text-neutral-700">
-                            Place
-                        </Label>
-                        <Input
-                            id="place"
+                        <SuggestionInput
+                            label="Place"
+                            fieldType="place"
                             placeholder="Enter Location"
                             value={formData.place}
-                            onChange={(e) => handleFormChange("place", e.target.value)}
+                            onChange={(val) => handleFormChange("place", val)}
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <Label htmlFor="handedByName" className="text-xs font-medium text-neutral-700">
-                            Handed by (Name)
-                        </Label>
-                        <Input
-                            id="handedByName"
+                        <SuggestionInput
+                            label="Handed by (Name)"
+                            fieldType="name"
                             placeholder="Enter Location"
                             value={formData.handedByName}
-                            onChange={(e) => handleFormChange("handedByName", e.target.value)}
+                            onChange={(val) => handleFormChange("handedByName", val)}
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <Label htmlFor="caseDetails" className="text-xs font-medium text-neutral-700">
-                            Case Details
-                        </Label>
-                        <Input
-                            id="caseDetails"
+                        <SuggestionInput
+                            label="Case Details"
+                            fieldType="caseDetails"
                             placeholder="Enter Case Details"
                             value={formData.caseDetails}
-                            onChange={(e) => handleFormChange("caseDetails", e.target.value)}
+                            onChange={(val) => handleFormChange("caseDetails", val)}
                         />
                     </div>
                 </section>
@@ -243,14 +238,12 @@ const LostAndFoundForm = ({ initialData, onSuccess, onCancel }: LostAndFoundForm
 
                     <div className="space-y-4">
                         <div className="space-y-1.5">
-                            <Label htmlFor="takeoverBy" className="text-xs font-medium text-neutral-700">
-                                Takeover By (Name)
-                            </Label>
-                            <Input
-                                id="takeoverBy"
+                            <SuggestionInput
+                                label="Takeover By (Name)"
+                                fieldType="name"
                                 placeholder="Enter Name of Item Found"
                                 value={formData.takeoverBy}
-                                onChange={(e) => handleFormChange("takeoverBy", e.target.value)}
+                                onChange={(val) => handleFormChange("takeoverBy", val)}
                             />
                         </div>
 
@@ -293,12 +286,13 @@ const LostAndFoundForm = ({ initialData, onSuccess, onCancel }: LostAndFoundForm
                 <section className="space-y-4 pt-4 border-t border-neutral-100">
                     <h3 className="text-sm font-bold text-neutral-900">Add Remark</h3>
                     <div className="space-y-1.5">
-                        <Textarea
-                            id="remark"
+                        <SuggestionTextarea
+                            label=""
+                            fieldType="remarks"
                             placeholder="Enter remark"
                             className="resize-none min-h-[80px]"
                             value={formData.remark}
-                            onChange={(e) => handleFormChange("remark", e.target.value)}
+                            onChange={(val) => handleFormChange("remark", val)}
                         />
                     </div>
                 </section>
