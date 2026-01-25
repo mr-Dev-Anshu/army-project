@@ -54,7 +54,7 @@ const individualSchema = Joi.object({
 
 export const createRegisterSchema = Joi.object({
     type: Joi.string().valid(...registerTypes).required(),
-    date: Joi.date().required(),
+    date: Joi.date().optional(),
 
     outTime: Joi.date().optional(),
     inTime: Joi.date().optional(),

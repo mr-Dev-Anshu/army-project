@@ -51,7 +51,7 @@ const DutyAndAssetMovementSchema = new Schema(
 
     date: {
       type: Date,
-      required: [true, 'Date is required'],
+      required: false, // Not required for contact registers
     },
     outTime: {
       type: Date,

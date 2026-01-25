@@ -40,6 +40,9 @@ export interface FilterState {
   priceListStatus?: string;
   agreementStatus?: string;
   dutyType?: string;
+  rank?: string;
+  appointment?: string;
+  postingLocation?: string;
   sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
@@ -77,6 +80,12 @@ interface ReportFilterBarProps {
   dutyTypeOptions?: string[];
   showVehicleType?: boolean;
   vehicleTypeOptions?: string[];
+  showRank?: boolean;
+  rankOptions?: string[];
+  showAppointment?: boolean;
+  appointmentOptions?: string[];
+  showPostingLocation?: boolean;
+  postingLocationOptions?: string[];
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -113,6 +122,12 @@ export default function ReportFilterBar({
   showDutyType = false,
   showVehicleType = false,
   vehicleTypeOptions = [],
+  showRank = false,
+  rankOptions = [],
+  showAppointment = false,
+  appointmentOptions = [],
+  showPostingLocation = false,
+  postingLocationOptions = [],
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
@@ -120,7 +135,11 @@ export default function ReportFilterBar({
     (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
     (showIndividualWorkingStatus && filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") ||
     (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
+    (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
     (showVehicleType && filters.vehicleType && filters.vehicleType !== "All") ||
+    (showRank && filters.rank && filters.rank !== "All") ||
+    (showAppointment && filters.appointment && filters.appointment !== "All") ||
+    (showPostingLocation && filters.postingLocation && filters.postingLocation !== "All") ||
     !!filters.date ||
     (showOffenceType && !!filters.offenceType && filters.offenceType !== "All") ||
     !!filters.fromDate ||
@@ -433,6 +452,53 @@ export default function ReportFilterBar({
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                  )}
+                  {/* Appointment */}
+                  {showAppointment && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Appointment</label>
+                      <AsyncSearchableSelect
+                        fieldType="appointment"
+                        value={filters.appointment || ""}
+                        onValueChange={(v) => onFilterChange("appointment", v)}
+                        placeholder="Search Appointment..."
+                        className="w-full"
+                        defaultOptions={appointmentOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Rank */}
+                  {showRank && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Rank</label>
+                      <AsyncSearchableSelect
+                        fieldType="rank"
+                        value={filters.rank || ""}
+                        onValueChange={(v) => onFilterChange("rank", v)}
+                        placeholder="Search Rank..."
+                        className="w-full"
+                        defaultOptions={rankOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Posting Location */}
+                  {showPostingLocation && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Posting Location</label>
+                      <AsyncSearchableSelect
+                        fieldType="postingLocation"
+                        value={filters.postingLocation || ""}
+                        onValueChange={(v) => onFilterChange("postingLocation", v)}
+                        placeholder="Search Location..."
+                        className="w-full"
+                        defaultOptions={postingLocationOptions}
+                        mode="list-checkbox"
+                      />
                     </div>
                   )}
                 </div>
