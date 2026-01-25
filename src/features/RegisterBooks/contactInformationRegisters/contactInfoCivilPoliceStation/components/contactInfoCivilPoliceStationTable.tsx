@@ -178,7 +178,7 @@ const ContactInfoCivilPoliceStationTable = ({ data, onEdit, onDelete, onAddNew }
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-40 align-middle sticky top-0 z-40 bg-[#F5F5F5]">
                                     Head of Station (SHO) Name
                                 </th>
-                                <th colSpan={2} className="px-4 py-2 border-r border-b border-gray-300 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5] text-sm md:text-base">
+                                <th colSpan={2} className="px-4 py-2 border-r border-b border-gray-300 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5]">
                                     Contact Number
                                 </th>
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-48 align-middle sticky top-0 z-40 bg-[#F5F5F5]">
