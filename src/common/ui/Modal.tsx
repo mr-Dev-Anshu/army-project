@@ -11,6 +11,7 @@ interface ModalProps {
   className?: string;
   maxWidth?: "sm" | "md" | "lg" | "xl";
   showCloseButton?: boolean;
+  disableBackdropClose?: boolean;
 }
 
 const maxWidthClasses = {
@@ -28,13 +29,19 @@ export default function Modal({
   className = "",
   maxWidth = "lg",
   showCloseButton = true,
+  disableBackdropClose = false,
 }: ModalProps) {
   if (!isOpen) return null;
 
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={(e) => {
+        // 🔵 Only close if backdrop click is enabled
+        if (!disableBackdropClose) {
+          onClose();
+        }
+      }}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
