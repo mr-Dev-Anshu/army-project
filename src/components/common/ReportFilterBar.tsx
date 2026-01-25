@@ -43,6 +43,9 @@ export interface FilterState {
   rank?: string;
   appointment?: string;
   postingLocation?: string;
+  district?: string;
+  state?: string;
+  rankOfStation?: string;
   sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
@@ -86,6 +89,12 @@ interface ReportFilterBarProps {
   appointmentOptions?: string[];
   showPostingLocation?: boolean;
   postingLocationOptions?: string[];
+  showDistrict?: boolean;
+  districtOptions?: string[];
+  showState?: boolean;
+  stateOptions?: string[];
+  showRankOfStation?: boolean; // Rank of Station (Civil Police)
+  rankOfStationOptions?: string[];
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -128,6 +137,12 @@ export default function ReportFilterBar({
   appointmentOptions = [],
   showPostingLocation = false,
   postingLocationOptions = [],
+  showDistrict = false,
+  districtOptions = [],
+  showState = false,
+  stateOptions = [],
+  showRankOfStation = false,
+  rankOfStationOptions = [],
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
@@ -140,6 +155,9 @@ export default function ReportFilterBar({
     (showRank && filters.rank && filters.rank !== "All") ||
     (showAppointment && filters.appointment && filters.appointment !== "All") ||
     (showPostingLocation && filters.postingLocation && filters.postingLocation !== "All") ||
+    (showDistrict && filters.district && filters.district !== "All") ||
+    (showState && filters.state && filters.state !== "All") ||
+    (showRankOfStation && filters.rankOfStation && filters.rankOfStation !== "All") ||
     !!filters.date ||
     (showOffenceType && !!filters.offenceType && filters.offenceType !== "All") ||
     !!filters.fromDate ||
@@ -497,6 +515,54 @@ export default function ReportFilterBar({
                         placeholder="Search Location..."
                         className="w-full"
                         defaultOptions={postingLocationOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* District */}
+                  {showDistrict && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">District</label>
+                      <AsyncSearchableSelect
+                        fieldType="district"
+                        value={filters.district || ""}
+                        onValueChange={(v) => onFilterChange("district", v)}
+                        placeholder="Search District..."
+                        className="w-full"
+                        defaultOptions={districtOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* State */}
+                  {showState && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">State</label>
+                      <AsyncSearchableSelect
+                        fieldType="state"
+                        value={filters.state || ""}
+                        onValueChange={(v) => onFilterChange("state", v)}
+                        placeholder="Search State..."
+                        className="w-full"
+                        defaultOptions={stateOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Rank of Station */}
+                  {showRankOfStation && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Rank of Station</label>
+                      <AsyncSearchableSelect
+                        fieldType="rankOfStation"
+                        value={filters.rankOfStation || ""}
+                        onValueChange={(v) => onFilterChange("rankOfStation", v)}
+                        placeholder="Search Rank of Station..."
+                        className="w-full"
+                        defaultOptions={rankOfStationOptions}
                         mode="list-checkbox"
                       />
                     </div>

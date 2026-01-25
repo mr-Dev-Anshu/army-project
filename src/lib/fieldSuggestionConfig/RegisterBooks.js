@@ -149,6 +149,16 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.postedAt': 'unitLocation',
         'details.officeLandlineNumber': 'landlineNumber',
         'details.residencyNo': 'landlineNumber',
+
+        // Contact Info Civil Police
+        'details.policeStationName': 'policeStation',
+        'details.rankOfStation': 'rankOfStation',
+        'details.shoName': 'shoName',
+        'details.addressOfStation': 'address',
+        'details.landmark': 'landmark',
+        'details.district': 'district',
+        'details.state': 'state',
+        'details.stationEmailId': 'email',
     },
 
     trackCustomFields: 'specific',
