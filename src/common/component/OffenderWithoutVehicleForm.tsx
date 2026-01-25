@@ -638,7 +638,7 @@ export default function OffenderWithoutVehicleForm({
                   )}
                 >
                   <RadioGroupItem value={item} />
-                  {item}
+                  {item === "Civilian" ? "Civilian / Dependent" : item}
                 </label>
               ))}
             </RadioGroup>

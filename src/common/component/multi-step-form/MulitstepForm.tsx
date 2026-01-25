@@ -119,7 +119,12 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
               iCardNumber: p.iCardNumber || p.offenderDetails?.iCardNumber || p.details?.iCardNumber,
               ...p.customFields,
               ...p.offenderDetails,
-              ...p.details
+              ...p.details,
+
+              // Explicitly map complex/nested fields to ensure hydration
+              relation: p.relation || p.offenderDetails?.relation || p.details?.relation || p.customFields?.relation,
+              relativeType: p.relativeType || p.offenderDetails?.relativeType || p.details?.relativeType || p.customFields?.relativeType,
+              relativeDetails: p.relativeDetails || p.offenderDetails?.relativeDetails || p.details?.relativeDetails || p.customFields?.relativeDetails,
             }
           })),
           remarks: existingOffence.remarks,
@@ -519,6 +524,14 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
       ),
     },
   };
+
+  if (recordId && isLoadingOffence) {
+    return (
+      <div className="h-[calc(100vh-40px)] w-full flex items-center justify-center bg-gray-100">
+        <div className="text-xl font-semibold text-gray-500">Loading Record...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 w-full px-6">

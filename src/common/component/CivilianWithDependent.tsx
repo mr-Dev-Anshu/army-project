@@ -165,6 +165,9 @@ export default function CivilianWithDependent({
                         if (!v) {
                             setRelation("");
                             setRelativeType("");
+                            dispatch({ type: "SET_PATH", path: `${path}.relation`, value: "" });
+                            dispatch({ type: "SET_PATH", path: `${path}.relativeType`, value: "" });
+                            dispatch({ type: "SET_PATH", path: `${path}.relativeDetails`, value: {} });
                         }
                     }}
                     id={`dep-${id}`}
@@ -173,7 +176,7 @@ export default function CivilianWithDependent({
                     htmlFor={`dep-${id}`}
                     className="font-semibold text-sm cursor-pointer select-none"
                 >
-                    Is this person Dependent / Relative of Military Personnel or Other
+                    Is this person <span className="font-extrabold">Dependent / Relative</span> of Military Personnel or Other
                     Registered?
                 </label>
             </div>
@@ -197,11 +200,11 @@ export default function CivilianWithDependent({
                     <div>
                         <p className="text-sm font-medium mb-2">Who is it?</p>
                         <RadioGroup
-                            value={relativeType}
+                            value={relativeType as string}
                             onValueChange={(v) => handleRelativeTypeChange(v as OffenderKey)}
                             className="grid grid-cols-2 gap-3"
                         >
-                            {["Military Person", "Servant/Maid", "Shop Keeper", "Temporary Hired Worker"].map((item) => (
+                            {["Military Person", "Servant/Maid", "Shop Keeper", "Temporary Hired Worker", "Employee"].map((item) => (
                                 <label
                                     key={item}
                                     className={cn(
@@ -246,10 +249,17 @@ export default function CivilianWithDependent({
                             onCheckedChange={(v) => {
                                 setHasCoDriver(Boolean(v));
                                 if (!v) {
-                                    // Optional: remove co-driver from array?
-                                    // For now just hide UI state.
                                     setCoDriverType("");
                                     setCoDriverIndex(null);
+
+                                    // Remove Co-Driver from global state
+                                    const peoplePath =
+                                        scope === "static"
+                                            ? "formData.staticSpeed.offenderPeople"
+                                            : "formData.traffic.offenderPeople";
+                                    const list = getByPath(state, peoplePath) || [];
+                                    const newList = list.filter((p: any) => p.whoIsIt !== "Co-Driver");
+                                    dispatch({ type: "SET_PATH", path: peoplePath, value: newList });
                                 }
                             }}
                             id={`codriver-${id}`}
@@ -279,7 +289,7 @@ export default function CivilianWithDependent({
                                         )}
                                     >
                                         <RadioGroupItem value={item} id={`codriver-type-${id}-${item}`} />
-                                        <span className="text-sm">{item}</span>
+                                        <span className="text-sm">{item === "Civilian" ? "Civilian / Dependent" : item}</span>
                                     </label>
                                 ))}
                             </RadioGroup>

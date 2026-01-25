@@ -246,7 +246,7 @@ export default function VehicleDetailsForm({
               )}
             >
               <RadioGroupItem value={item} />
-              {item}
+              {item === "Civilian" ? "Civilian / Dependent" : item}
             </label>
           ))}
         </RadioGroup>

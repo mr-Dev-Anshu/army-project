@@ -81,7 +81,8 @@ export default function OffenderDynamicForm({
   useEffect(() => {
     setLocalData(structuredClone(globalData || {}));
     setErrors({}); // ✅ Clear errors on form switch
-  }, [path, globalData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, JSON.stringify(globalData)]);
 
   /* ================= HYDRATE UI STATE (Fix Back Navigation) ================= */
   useEffect(() => {
@@ -334,7 +335,7 @@ export default function OffenderDynamicForm({
                       className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
                     >
                       <RadioGroupItem value={item} />
-                      {item}
+                      {item === "Civilian" ? "Civilian / Dependent" : item}
                     </label>
                   ))}
                 </RadioGroup>
@@ -373,7 +374,7 @@ export default function OffenderDynamicForm({
                   className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
                 >
                   <RadioGroupItem value={item} />
-                  {item}
+                  {item === "Civilian" ? "Civilian / Dependent" : item}
                 </label>
               ))}
             </RadioGroup>

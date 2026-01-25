@@ -1,5 +1,5 @@
 "use client";
-import { Check, Edit2, Save, Paperclip } from "lucide-react";
+import { Check, Edit2, Save, Paperclip, X } from "lucide-react";
 import { uploadFile } from "@/lib/uploadFile";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@/context/FormContext";
@@ -96,6 +96,18 @@ export const LeftStepper = ({
     } finally {
       setUploadingCert(false);
     }
+  };
+
+  const handleDeleteCertificate = (index: number) => {
+    const currentCerts = state.formData.mpReport?.certificates || [];
+    const newCerts = currentCerts.filter((_: any, i: number) => i !== index);
+
+    dispatch({
+      type: "SET_PATH",
+      path: "formData.mpReport.certificates",
+      value: newCerts,
+    });
+    toast.success("Attachment removed");
   };
 
   return (
@@ -221,15 +233,10 @@ export const LeftStepper = ({
             </div>
           );
         })}
-      </div>
 
-      {/* FOOTER */}
-      <div className="mt-4 flex flex-col gap-2">
-        {/* ATTACH OPTION */}
-        {/* ATTACH OPTION */}
-        {/* ATTACH OPTION - Only Step 4 */}
-        {currentStep === 4 && (
-          <>
+        {/* ATTACH OPTION - Only Last Step */}
+        {currentStep === steps[steps.length - 1].id && (
+          <div className="pt-2">
             <AttachCertificateModal
               open={attachModalOpen}
               onOpenChange={setAttachModalOpen}
@@ -247,7 +254,7 @@ export const LeftStepper = ({
 
             {/* LIST ATTACHMENTS */}
             {state.formData.mpReport?.certificates?.length > 0 && (
-              <div className="flex flex-col gap-2 mt-2 mb-4 max-h-[150px] overflow-y-auto custom-scrollbar">
+              <div className="flex flex-col gap-2 mt-2 mb-4 overflow-y-auto custom-scrollbar">
                 {state.formData.mpReport.certificates.map((cert: any, i: number) => (
                   <div key={i} className="flex items-center gap-2 text-xs bg-[#262626] p-2 rounded-md border border-gray-700">
                     <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${cert.type === 'letter' ? 'bg-purple-900 text-purple-200' : 'bg-blue-900 text-blue-200'
@@ -263,12 +270,25 @@ export const LeftStepper = ({
                     >
                       {cert.fileName || "File"}
                     </a>
+
+                    <button
+                      onClick={() => handleDeleteCertificate(i)}
+                      className="text-gray-400 hover:text-red-400 transition p-1"
+                      title="Remove attachment"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 ))}
               </div>
             )}
-          </>
+          </div>
         )}
+      </div>
+
+      {/* FOOTER */}
+      <div className="mt-4 flex flex-col gap-2">
+
 
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
