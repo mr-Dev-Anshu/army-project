@@ -139,6 +139,16 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.buttNo': 'buttNo',
         'details.registrationNo': 'registrationNo',
         'details.typeOfAmn': 'typeOfAmn',
+
+        // Contact Info Army
+        'details.rank': 'rank',
+        'details.name': 'name',
+        'details.mobileNumber': 'mobileNumber',
+        'details.appointment': 'appointment',
+        'details.unit': 'unit',
+        'details.postedAt': 'unitLocation',
+        'details.officeLandlineNumber': 'landlineNumber',
+        'details.residencyNo': 'landlineNumber',
     },
 
     trackCustomFields: 'specific',

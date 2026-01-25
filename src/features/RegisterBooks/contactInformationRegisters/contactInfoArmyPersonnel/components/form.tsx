@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
 import { useCreateContactInfoArmyPersonnelRegister, useUpdateContactInfoArmyPersonnelRegister } from "../hooks";
 
@@ -107,11 +108,12 @@ const ContactInfoArmyPersonnelForm = ({ initialData, onSuccess, onCancel }: Cont
                         <Label htmlFor="rank" className="text-sm font-medium text-neutral-700">
                             Rank
                         </Label>
-                        <Input
+                        <SuggestionInput
                             id="rank"
+                            fieldType="rank"
                             placeholder="Lt Col, Maj, Sub Maj, Hav (MP)"
                             value={formData.rank}
-                            onChange={(e) => handleChange("rank", e.target.value)}
+                            onChange={(val) => handleChange("rank", val)}
                         />
                     </div>
 
@@ -120,31 +122,30 @@ const ContactInfoArmyPersonnelForm = ({ initialData, onSuccess, onCancel }: Cont
                             <Label htmlFor="name" className="text-sm font-medium text-neutral-700">
                                 Name of Individual
                             </Label>
-                            <Input
+                            <SuggestionInput
                                 id="name"
+                                fieldType="name"
                                 placeholder="e.g. Roger"
                                 value={formData.name}
-                                onChange={(e) => handleChange("name", e.target.value)}
+                                onChange={(val) => handleChange("name", val)}
                             />
                         </div>
                         <div className="space-y-1.5">
                             <Label htmlFor="mobileNumber" className="text-sm font-medium text-neutral-700">
                                 Mobile Number
                             </Label>
-                            <div className="relative">
-                                <Input
-                                    id="mobileNumber"
-                                    placeholder="+91"
-                                    className="pr-10"
-                                    value={formData.mobileNumber}
-                                    onChange={(e) => handleChange("mobileNumber", e.target.value)}
-                                />
-                                <div className="absolute right-3 top-2 h-4 w-4 text-neutral-400">
+                            <SuggestionInput
+                                id="mobileNumber"
+                                fieldType="mobileNumber"
+                                placeholder="+91"
+                                value={formData.mobileNumber}
+                                onChange={(val) => handleChange("mobileNumber", val)}
+                                icon={
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M13.333 2.83301C14.3453 2.83301 15.1657 3.65379 15.166 4.66602V15.333C15.166 16.3455 14.3455 17.166 13.333 17.166H6.66602C5.65379 17.1657 4.83301 16.3453 4.83301 15.333V4.66602C4.83336 3.65401 5.65401 2.83336 6.66602 2.83301H13.333ZM6.66602 3.83301C6.20629 3.83336 5.83336 4.20629 5.83301 4.66602V15.333C5.83301 15.793 6.20608 16.1657 6.66602 16.166H13.333C13.7932 16.166 14.166 15.7932 14.166 15.333V4.66602C14.1657 4.20608 13.793 3.83301 13.333 3.83301H6.66602ZM10.0068 13.5C10.2829 13.5001 10.5068 13.7239 10.5068 14C10.5068 14.2761 10.2829 14.4999 10.0068 14.5H10C9.72386 14.5 9.5 14.2761 9.5 14C9.5 13.7239 9.72386 13.5 10 13.5H10.0068ZM2.00977 2.00977H2V2H2.00977V2.00977Z" fill="#737373" />
                                     </svg>
-                                </div>
-                            </div>
+                                }
+                            />
                         </div>
                     </div>
 
@@ -152,11 +153,12 @@ const ContactInfoArmyPersonnelForm = ({ initialData, onSuccess, onCancel }: Cont
                         <Label htmlFor="appointment" className="text-sm font-medium text-neutral-700">
                             Appointment
                         </Label>
-                        <Input
+                        <SuggestionInput
                             id="appointment"
+                            fieldType="appointment"
                             placeholder="Deputy Provost Marshal, Regimental JCO, MP Duty In-charge"
                             value={formData.appointment}
-                            onChange={(e) => handleChange("appointment", e.target.value)}
+                            onChange={(val) => handleChange("appointment", val)}
                         />
                     </div>
                 </section>
@@ -171,11 +173,12 @@ const ContactInfoArmyPersonnelForm = ({ initialData, onSuccess, onCancel }: Cont
                         <Label htmlFor="unit" className="text-sm font-medium text-neutral-700">
                             Unit
                         </Label>
-                        <Input
+                        <SuggestionInput
                             id="unit"
+                            fieldType="unit"
                             placeholder="e.g. HQ 21 Corps, 36 RAPID Div"
                             value={formData.unit}
-                            onChange={(e) => handleChange("unit", e.target.value)}
+                            onChange={(val) => handleChange("unit", val)}
                         />
                     </div>
 
@@ -183,11 +186,12 @@ const ContactInfoArmyPersonnelForm = ({ initialData, onSuccess, onCancel }: Cont
                         <Label htmlFor="postedAt" className="text-sm font-medium text-neutral-700">
                             Posted At (Location)
                         </Label>
-                        <Input
+                        <SuggestionInput
                             id="postedAt"
+                            fieldType="unitLocation"
                             placeholder="e.g. Bhopal (Corps HQ), Jhansi"
                             value={formData.postedAt}
-                            onChange={(e) => handleChange("postedAt", e.target.value)}
+                            onChange={(val) => handleChange("postedAt", val)}
                         />
                     </div>
                 </section>
@@ -203,39 +207,35 @@ const ContactInfoArmyPersonnelForm = ({ initialData, onSuccess, onCancel }: Cont
                             <Label htmlFor="officeLandlineNumber" className="text-sm font-medium text-neutral-700">
                                 Office Landline Number
                             </Label>
-                            <div className="relative">
-                                <Input
-                                    id="officeLandlineNumber"
-                                    placeholder="STD code allowed"
-                                    className="pr-10"
-                                    value={formData.officeLandlineNumber}
-                                    onChange={(e) => handleChange("officeLandlineNumber", e.target.value)}
-                                />
-                                <div className="absolute right-3 top-2 h-4 w-4 text-neutral-400">
+                            <SuggestionInput
+                                id="officeLandlineNumber"
+                                fieldType="landlineNumber"
+                                placeholder="STD code allowed"
+                                value={formData.officeLandlineNumber}
+                                onChange={(val) => handleChange("officeLandlineNumber", val)}
+                                icon={
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M13.333 2.83301C14.3453 2.83301 15.1657 3.65379 15.166 4.66602V15.333C15.166 16.3455 14.3455 17.166 13.333 17.166H6.66602C5.65379 17.1657 4.83301 16.3453 4.83301 15.333V4.66602C4.83336 3.65401 5.65401 2.83336 6.66602 2.83301H13.333ZM6.66602 3.83301C6.20629 3.83336 5.83336 4.20629 5.83301 4.66602V15.333C5.83301 15.793 6.20608 16.1657 6.66602 16.166H13.333C13.7932 16.166 14.166 15.7932 14.166 15.333V4.66602C14.1657 4.20608 13.793 3.83301 13.333 3.83301H6.66602ZM10.0068 13.5C10.2829 13.5001 10.5068 13.7239 10.5068 14C10.5068 14.2761 10.2829 14.4999 10.0068 14.5H10C9.72386 14.5 9.5 14.2761 9.5 14C9.5 13.7239 9.72386 13.5 10 13.5H10.0068ZM2.00977 2.00977H2V2H2.00977V2.00977Z" fill="#737373" />
                                     </svg>
-                                </div>
-                            </div>
+                                }
+                            />
                         </div>
                         <div className="space-y-1.5">
                             <Label htmlFor="residencyNo" className="text-sm font-medium text-neutral-700">
                                 Residency No.
                             </Label>
-                            <div className="relative">
-                                <Input
-                                    id="residencyNo"
-                                    placeholder="STD code allowed"
-                                    className="pr-10"
-                                    value={formData.residencyNo}
-                                    onChange={(e) => handleChange("residencyNo", e.target.value)}
-                                />
-                                <div className="absolute right-3 top-2 h-4 w-4 text-neutral-400">
+                            <SuggestionInput
+                                id="residencyNo"
+                                fieldType="landlineNumber"
+                                placeholder="STD code allowed"
+                                value={formData.residencyNo}
+                                onChange={(val) => handleChange("residencyNo", val)}
+                                icon={
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M13.333 2.83301C14.3453 2.83301 15.1657 3.65379 15.166 4.66602V15.333C15.166 16.3455 14.3455 17.166 13.333 17.166H6.66602C5.65379 17.1657 4.83301 16.3453 4.83301 15.333V4.66602C4.83336 3.65401 5.65401 2.83336 6.66602 2.83301H13.333ZM6.66602 3.83301C6.20629 3.83336 5.83336 4.20629 5.83301 4.66602V15.333C5.83301 15.793 6.20608 16.1657 6.66602 16.166H13.333C13.7932 16.166 14.166 15.7932 14.166 15.333V4.66602C14.1657 4.20608 13.793 3.83301 13.333 3.83301H6.66602ZM10.0068 13.5C10.2829 13.5001 10.5068 13.7239 10.5068 14C10.5068 14.2761 10.2829 14.4999 10.0068 14.5H10C9.72386 14.5 9.5 14.2761 9.5 14C9.5 13.7239 9.72386 13.5 10 13.5H10.0068ZM2.00977 2.00977H2V2H2.00977V2.00977Z" fill="#737373" />
                                     </svg>
-                                </div>
-                            </div>
+                                }
+                            />
                         </div>
                     </div>
                 </section>
