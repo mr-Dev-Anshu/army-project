@@ -129,6 +129,11 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.takeoverAuth.initialsQMSJCO': 'initials',
         'details.takeoverAuth.initials2IC': 'initials',
 
+        // Army Help Line Complaints
+        'details.relatedPoliceStation': 'relatedPoliceStation',
+        'details.mobileNo': 'mobileNumber',
+        'details.civilAddress': 'civilAddress',
+
         // Mini Kote Arms / AMN Register
         'details.typeOfArms': 'typeOfArms',
         'details.buttNo': 'buttNo',

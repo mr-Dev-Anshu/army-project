@@ -58,6 +58,7 @@ interface ReportFilterBarProps {
   showActionStatus?: boolean;
   statusLabel?: string;
   placeLabel?: string;
+  dateLabel?: string;
   dateRangeLabel?: string;
   actionStatusOptions?: string[];
   showOffenceType?: boolean;
@@ -94,6 +95,7 @@ export default function ReportFilterBar({
   showActionStatus = true,
   statusLabel = "Action Status",
   placeLabel = "Place of Offence",
+  dateLabel,
   dateRangeLabel = "Offence Date",
   actionStatusOptions = ["Pending", "Taken"], // "All" is handled by placeholder
   showOffenceType = true,
@@ -218,7 +220,7 @@ export default function ReportFilterBar({
                   {/* Specific Date */}
                   {showDate && (
                     <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium text-gray-700">Specific Date</label>
+                      <label className="text-sm font-medium text-gray-700">{dateLabel || "Specific Date"}</label>
                       <Input
                         type="date"
                         className="w-full text-sm"
