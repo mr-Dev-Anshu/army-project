@@ -25,25 +25,25 @@ export async function POST(request: Request) {
         await connectDB();
         const body = await request.json();
 
-        const { error, value } = createVehiclesSecurityPassSchema.validate(body, {
-            abortEarly: false,
-            stripUnknown: true,
-        });
+        // const { error, value } = createVehiclesSecurityPassSchema.validate(body, {
+        //     abortEarly: false,
+        //     stripUnknown: true,
+        // });
 
-        if (error) {
-            return NextResponse.json(
-                {
-                    error: "Validation failed",
-                    details: error.details.map((d: any) => ({
-                        path: d.path,
-                        message: d.message,
-                    })),
-                },
-                { status: 400 }
-            );
-        }
+        // if (error) {
+        //     return NextResponse.json(
+        //         {
+        //             error: "Validation failed",
+        //             details: error.details.map((d: any) => ({
+        //                 path: d.path,
+        //                 message: d.message,
+        //             })),
+        //         },
+        //         { status: 400 }
+        //     );
+        // }
 
-        const newPass = await createVehiclesSecurityPass(value);
+        const newPass = await createVehiclesSecurityPass(body);
         return NextResponse.json(newPass, { status: 201 });
 
     } catch (error: any) {

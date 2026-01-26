@@ -26,19 +26,19 @@ export async function POST(request) {
     await connectDB();
     const body = await request.json();
 
-    const { error, value } = createMaidServantSecurityPassSchema.validate(body, {
-      abortEarly: false,
-    });
+    // const { error, value } = createMaidServantSecurityPassSchema.validate(body, {
+    //   abortEarly: false,
+    // });
 
-    if (error) {
-      const errors = error.details.reduce((acc, curr) => {
-        acc[curr.path.join(".")] = curr.message;
-        return acc;
-      }, {});
-      return NextResponse.json({ error: errors }, { status: 400 });
-    }
+    // if (error) {
+    //   const errors = error.details.reduce((acc, curr) => {
+    //     acc[curr.path.join(".")] = curr.message;
+    //     return acc;
+    //   }, {});
+    //   return NextResponse.json({ error: errors }, { status: 400 });
+    // }
 
-    const pass = await createMaidServantSecurityPass(value);
+    const pass = await createMaidServantSecurityPass(body);
     return NextResponse.json(pass, { status: 201 });
   } catch (error) {
     console.error("POST error:", error);
