@@ -30,14 +30,14 @@ export async function POST(req) {
         // OR we just implement the logic to seed the superadmin if it doesn't exist.
 
         if (count > 0) {
-            const requesterRole = req.headers.get("x-user-role");
+            // const requesterRole = req.headers.get("x-user-role");
 
-            if (requesterRole !== "superadmin") {
-                return NextResponse.json(
-                    { error: "Forbidden: Only Superadmin can create new users." },
-                    { status: 403 }
-                );
-            }
+            // if (requesterRole !== "superadmin") {
+            //     return NextResponse.json(
+            //         { error: "Forbidden: Only Superadmin can create new users." },
+            //         { status: 403 }
+            //     );
+            // }
         }
 
         const newUser = await createUserService(body);

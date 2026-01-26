@@ -1,50 +1,64 @@
-import { User } from "@/models/user";
+import {User} from  "@/models/user"
+async function createUserRepo(data) {
+  try {
+    return await User.create(data);
+  } catch (error) {
+    throw new Error(`Error creating user: ${error.message}`);
+  }
+}
 
-export const createUserRepo = async (data) => {
-    try {
-        const user = await User.create(data);
-        return user;
-    } catch (error) {
-        throw new Error(`Error creating user: ${error.message}`);
-    }
+async function getAllUsersRepo(query = {}) {
+  try {
+    return await User.find(query)
+      .sort({ createdAt: -1 })
+      .lean();
+  } catch (error) {
+    throw new Error(`Error fetching users: ${error.message}`);
+  }
+}
+
+async function getUserByUsernameRepo(username) {
+  try {
+    return await User.findOne({ username: username.trim() })
+      .select('+password')
+      .lean();
+  } catch (error) {
+    throw new Error(`Error finding user: ${error.message}`);
+  }
+}
+
+async function getUserByIdRepo(id) {
+  try {
+    return await User.findById(id).lean();
+  } catch (error) {
+    throw new Error(`Error finding user by id: ${error.message}`);
+  }
+}
+
+async function deleteUserRepo(id) {
+  try {
+    return await User.findByIdAndDelete(id);
+  } catch (error) {
+    throw new Error(`Error deleting user: ${error.message}`);
+  }
+}
+
+async function updateUserRepo(id, data) {
+  try {
+    return await User.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    }).lean();
+  } catch (error) {
+    throw new Error(`Error updating user: ${error.message}`);
+  }
+}
+
+export {
+  createUserRepo,
+  getAllUsersRepo,
+  getUserByUsernameRepo,
+  getUserByIdRepo,
+  deleteUserRepo,
+  updateUserRepo,
 };
-
-export const getAllUsersRepo = async () => {
-    try {
-        return await User.find({}).sort({ createdAt: -1 });
-    } catch (error) {
-        throw new Error(`Error fetching users: ${error.message}`);
-    }
-}
-
-export const getUserByUsernameRepo = async (username) => {
-    try {
-        return await User.findOne({ username });
-    } catch (error) {
-        throw new Error(`Error finding user: ${error.message}`);
-    }
-};
-
-export const getUserByIdRepo = async (id) => {
-    try {
-        return await User.findById(id);
-    } catch (error) {
-        throw new Error(`Error finding user by id: ${error.message}`);
-    }
-}
-
-export const deleteUserRepo = async (id) => {
-    try {
-        return await User.findByIdAndDelete(id);
-    } catch (error) {
-        throw new Error(`Error deleting user: ${error.message}`);
-    }
-}
-
-export const updateUserRepo = async (id, data) => {
-    try {
-        return await User.findByIdAndUpdate(id, data, { new: true });
-    } catch (error) {
-        throw new Error(`Error updating user: ${error.message}`);
-    }
-}

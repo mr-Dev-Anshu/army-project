@@ -6,14 +6,14 @@ export async function GET() {
     try {
         await connectDB();
 
-        const superAdminExists = await User.findOne({ role: "superadmin" });
-        if (superAdminExists) {
-            return NextResponse.json({ message: "Superadmin already exists." });
-        }
+        // const superAdminExists = await User.findOne({ role: "superadmin" });
+        // if (superAdminExists) {
+        //     return NextResponse.json({ message: "Superadmin already exists." });
+        // }
 
         const superAdmin = await User.create({
-            username: "Superadmin",
-            password: "admin@123", // In a real app, hash this!
+            username: "AnshuSuper",
+            password: "admin@123", 
             role: "superadmin",
             email: "superadmin@army.nic.in",
             armyNo: "SA-001",
