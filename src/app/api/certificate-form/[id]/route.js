@@ -16,19 +16,20 @@ export async function GET(req, { params }) {
   }
 }
 
+
 export async function PATCH(req, { params }) {
   try {
     await connectDB();
     const { id } = await params;
     const data =await  req.json();
-    console.log("this",data);
+    // console.log("this",data);
     
 
-    const updatetData = await CertificateService.updateCertificate(id, data);
+    const updatedData = await CertificateService.updateCertificate(id, data);
 
     return NextResponse.json({
       message: "Updated successfully",
-      data,
+      updatedData,
     });
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 400 });

@@ -133,11 +133,17 @@ export default function AddDocumentModal({
     }
   };
 
+  const modalTitle = isRename
+  ? "Rename Document"
+  : isReupload
+  ? `Re-upload ${type}`
+  : `Add New ${type}`;
+
   return (
     <Modal
       isOpen={open}
       onClose={onClose}
-      title={isRename ? "Rename Document" : `Add New ${type}`}
+      title={modalTitle}
       maxWidth="md"
       disableBackdropClose={true}
     >

@@ -81,10 +81,41 @@ export class CertificateAndFormService {
     return updated;
   }
 
-  async deleteCertificate(id) {
-    const deleted = await CertificateRepo.deleteById(id);
-    if (!deleted) throw new Error("Certificate not found");
+async deleteCertificate(id) {
+  // 1️⃣ Get certificate first (to access file url)
+  const cert = await CertificateRepo.findById(id);
+  if (!cert) {
+    throw new Error("Certificate not found");
   }
+
+  // 2️⃣ Delete file from local storage (if exists)
+  try {
+    if (cert.url) {
+      // expected: /uploads/filename.ext
+      const relativePath = cert.url.startsWith("/")
+        ? cert.url.slice(1)
+        : cert.url;
+
+      const filePath = path.join(process.cwd(), "public", relativePath);
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+  } catch (err) {
+    // File delete failure should NOT block DB deletion
+    console.error("Failed to delete file:", err);
+  }
+
+  // 3️⃣ Delete DB record
+  const deleted = await CertificateRepo.deleteById(id);
+  if (!deleted) {
+    throw new Error("Certificate not found");
+  }
+
+  return deleted;
+}
+
 }
 
 export const CertificateService = new CertificateAndFormService();

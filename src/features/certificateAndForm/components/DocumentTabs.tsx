@@ -53,7 +53,7 @@ export default function DocumentTabs({
   );
 
   return (
-    <div className="flex gap-6 border-b mb-4 color-[#188FFA]">
+    <div className="flex gap-6 mb-4 color-[#188FFA]">
       <TabButton
         type="certificate"
         label="Certificates"

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { CertificateService } from "@/services/certificateAndForm.service";
-// import { createCertificateValidator } from "@/validators/certificateAndForm";
+import { certificateValidator } from "@/validators/certificateAndForm";
+
 
 
 export async function POST(req) {
@@ -9,29 +10,26 @@ export async function POST(req) {
     await connectDB();
     const body = await req.json();
 
-    // const { error, value } = createCertificateValidator.validate(body, {
-    //   abortEarly: false,
-    // });
+    // ✅ Validate request body
+    const { error, value } = certificateValidator.validate(body, { abortEarly: false });
+    if (error) {
+      return NextResponse.json(
+        { message: "Validation failed", errors: error.details.map(e => e.message) },
+        { status: 400 }
+      );
+    }
 
-    // if (error) {
-    //   const errors = error.details.reduce((acc, curr) => {
-    //     acc[curr.path.join(".")] = curr.message;
-    //     return acc;
-    //   }, {});
-    //   return NextResponse.json({ error: errors }, { status: 400 });
-    // }
-
-    const data = await CertificateService.create(body);
+    const data = await CertificateService.create(value);
 
     return NextResponse.json(
-      {
-        message: "created successfully",
-        data,
-      },
-      { status: 201 },
+      { message: "Created successfully", data },
+      { status: 201 }
     );
   } catch (error) {
-    return NextResponse.json({ message: error.message || "something went wrong"}, { status: 400 });
+    return NextResponse.json(
+      { message: error.message || "Something went wrong" },
+      { status: 400 }
+    );
   }
 }
 

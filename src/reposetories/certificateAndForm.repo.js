@@ -9,11 +9,11 @@ export const findById = (id) => {
 };
 
 export const findByType = (type) => {
-  return certificateModel.find({ type });
+  return certificateModel.find({ type }).lean().sort({createdAt:-1});
 };
 
 export const getAllCertificate = () => {
-  return certificateModel.find();
+  return certificateModel.find().sort({createdAt:-1});
 }
 
 export const updateById = (id, updateData) => {

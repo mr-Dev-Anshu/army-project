@@ -31,7 +31,7 @@ export default function DocumentList({
         <div
         onClick={()=>router.push(`/form-certificate/${type}/${doc._id}`)}
           key={doc._id}
-          className="border rounded px-4 py-3 hover:bg-gray-50 cursor-pointer"
+          className="border shadow rounded-lg px-4 py-3 hover:bg-gray-50 cursor-pointer"
         >
           <p className="text-sm">{doc.name}</p>
         </div>

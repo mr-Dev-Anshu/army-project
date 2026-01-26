@@ -1,14 +1,16 @@
 "use client";
 
 import { notFound, useParams, useRouter } from "next/navigation";
-import { DocumentType } from "@/features/certificateAndForm/types";
+import { useState } from "react";
+import { Plus,FileBadge } from "lucide-react";
+
+import Breadcrumb from "@/common/component/Breadcrumb";
 import DocumentTabs from "@/features/certificateAndForm/components/DocumentTabs";
 import DocumentList from "@/features/certificateAndForm/components/DocumentList";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import AddDocumentModal from "@/features/certificateAndForm/components/AddDocumentModel";
-import { ChevronRight, FileText, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useDocumentCounts } from "@/features/certificateAndForm/hook";
+import { DocumentType } from "@/features/certificateAndForm/types";
 
 const VALID_TYPES: DocumentType[] = ["certificate", "form", "letter"];
 
@@ -27,26 +29,35 @@ export default function DocumentsPage() {
   const displayTitle = type.charAt(0).toUpperCase() + type.slice(1) + "s";
   const buttonLabel = type.charAt(0).toUpperCase() + type.slice(1);
 
+  const breadcrumbItems = [
+    {
+      label: (
+       <span className="flex items-center gap-2">
+        {/* Icon wrapper provides height for border */}
+        <span className="flex items-center pr-3 mr-2 border-r border-gray-300">
+          <FileBadge className="w-4 h-4 text-gray-500" />
+        </span>
+
+        <span>Forms & Certificates</span>
+      </span>
+      ),
+      href: `/form-certificate/${type}`,
+    },
+    {
+      label: displayTitle,
+    },
+  ];
+
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-50/50 sm:bg-white overflow-hidden">
       {/* 🔝 TOP SECTION */}
       <div className="flex-none pt-4 sm:pt-6 px-4 sm:px-6 bg-white">
-        {/* Breadcrumb - Now scrollable on tiny screens so it never breaks layout */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 sm:mb-6 overflow-x-auto whitespace-nowrap no-scrollbar">
-          <FileText className="w-4 h-4 flex-shrink-0" />
-          <span
-            className="cursor-pointer hover:text-primary transition-colors"
-            onClick={() => router.push("/")}
-          >
-            Forms & Certificates
-          </span>
-          <ChevronRight className="w-4 h-4 flex-shrink-0" />
-          <span className="font-semibold text-gray-900 capitalize">
-            {type}s
-          </span>
+        {/* Breadcrumb */}
+        <div className="mb-4 sm:mb-6 overflow-x-auto whitespace-nowrap no-scrollbar border-b pb-3">
+          <Breadcrumb items={breadcrumbItems} className="text-sm" />
         </div>
 
-        {/* Tabs - Ensure these handle overflow internally */}
+        {/* Tabs */}
         <DocumentTabs
           activeType={type}
           onChange={(t) => router.push(`/form-certificate/${t}`)}
@@ -59,17 +70,16 @@ export default function DocumentsPage() {
       </div>
 
       {/* Divider */}
-      <div className="flex-none w-full h-[1px] bg-gray-200" />
 
       {/* 🔽 CONTENT SECTION */}
       <div className="flex flex-col flex-1 overflow-hidden relative">
-        {/* Header - Optimized for Mobile spacing */}
+        {/* Header */}
         <div className="flex-none px-4 sm:px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-          <h1 className="text-gray-700 font-bold text-lg sm:text-base tracking-tight">
+          <h1 className="text-gray-500 font-normal text-lg sm:text-base tracking-tight">
             {displayTitle}
           </h1>
 
-          {/* Desktop/Tablet Button */}
+          {/* Desktop Button */}
           <Button
             onClick={() => setOpen(true)}
             className="hidden sm:flex bg-[#188FFA]"
@@ -80,16 +90,17 @@ export default function DocumentsPage() {
           </Button>
         </div>
 
-        {/* List Container */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 sm:pb-6 pt-2 
-          [&::-webkit-scrollbar]:hidden 
-          [-ms-overflow-style:none] 
-          [scrollbar-width:none]">
+        {/* List */}
+        <div
+          className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 sm:pb-6 pt-2
+          [&::-webkit-scrollbar]:hidden
+          [-ms-overflow-style:none]
+          [scrollbar-width:none]"
+        >
           <DocumentList type={type} />
         </div>
 
-        {/* 📱 Mobile Floating Action Button (FAB) 
-            Better UX for mobile than a top-aligned wide button */}
+        {/* 📱 Mobile FAB */}
         <div className="fixed bottom-6 right-4 sm:hidden z-20">
           <Button
             onClick={() => setOpen(true)}
@@ -101,6 +112,7 @@ export default function DocumentsPage() {
         </div>
       </div>
 
+      {/* Add Document Modal */}
       <AddDocumentModal
         open={open}
         onClose={() => setOpen(false)}
