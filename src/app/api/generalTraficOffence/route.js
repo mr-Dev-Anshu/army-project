@@ -58,25 +58,25 @@ export async function POST(request) {
     await connectDB();
     const body = await request.json();
 
-    const { error, value } = createGeneralTrafficOffenceSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
+    // const { error, value } = createGeneralTrafficOffenceSchema.validate(body, {
+    //   abortEarly: false,
+    //   stripUnknown: true,
+    // });
 
-    if (error) {
-      return NextResponse.json(
-        {
-          error: "Validation failed",
-          details: error.details.map(d => ({
-            path: d.path,
-            message: d.message
-          }))
-        },
-        { status: 400 }
-      );
-    }
+    // if (error) {
+    //   return NextResponse.json(
+    //     {
+    //       error: "Validation failed",
+    //       details: error.details.map(d => ({
+    //         path: d.path,
+    //         message: d.message
+    //       }))
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
 
-    const newOffence = await generalTrafficOffenceService.create(value);
+    const newOffence = await generalTrafficOffenceService.create(body);
 
     return NextResponse.json(newOffence, { status: 201 });
   } catch (error) {

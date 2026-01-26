@@ -1,4 +1,7 @@
 // config/axios.ts
+
+import { setMissingFields } from "@/context/validationDispatcher";
+import { getMissingFields } from "@/utils/getEmptyFields";
 import axios from "axios";
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -73,6 +76,38 @@ api.interceptors.response.use(
 
     return Promise.reject(error);
   }
+);
+
+//  REQUEST INTERCEPTOR
+
+api.interceptors.request.use(
+  (config) => {
+    const url = config.url || "";
+    const data = config.data;
+    console.log("missing fields data", data);
+
+    // 🧠 Extract missing fields from request body
+    const missingFields = getMissingFields(data);
+
+    if (missingFields.length > 0) {
+      // Pause request and prompt user
+      return new Promise((resolve, reject) => {
+        setMissingFields(
+          url,
+          missingFields,
+          () => resolve(config), // onConfirm: proceed with request
+          () =>
+            reject({ // onCancel: abort request
+              isClientValidationError: true,
+              message: "Request cancelled by user due to missing fields",
+            })
+        );
+      });
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
 export default api;
