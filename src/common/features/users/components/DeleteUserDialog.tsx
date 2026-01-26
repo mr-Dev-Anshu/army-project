@@ -10,7 +10,7 @@ import {
     DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useDeleteUser } from "@/hooks/useUser";
+import { useDeleteUser } from "../hooks/useUser";
 
 interface DeleteUserDialogProps {
     open: boolean;

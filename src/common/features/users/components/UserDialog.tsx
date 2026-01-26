@@ -22,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useCreateUser, useUpdateUser } from "@/hooks/useUser";
+import { useCreateUser, useUpdateUser } from "../hooks/useUser";
 
 const baseSchema = z.object({
     username: z.string().min(2, "Full Name is required"),
