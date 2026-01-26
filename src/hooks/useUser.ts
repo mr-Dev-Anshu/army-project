@@ -26,8 +26,8 @@ export const useCreateUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: createUser,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["users"] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["users"] });
         },
     });
 };
@@ -36,9 +36,9 @@ export const useUpdateUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: updateUser,
-        onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ["users"] });
-            queryClient.invalidateQueries({ queryKey: ["users", variables.id] });
+        onSuccess: async (data, variables) => {
+            await queryClient.invalidateQueries({ queryKey: ["users"] });
+            await queryClient.invalidateQueries({ queryKey: ["users", variables.id] });
         },
     });
 };
@@ -47,8 +47,8 @@ export const useDeleteUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: deleteUser,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["users"] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["users"] });
         },
     });
 };

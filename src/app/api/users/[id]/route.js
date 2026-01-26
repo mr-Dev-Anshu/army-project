@@ -9,7 +9,7 @@ import { connectDB } from "@/lib/db/mongodb";
 export async function GET(req, { params }) {
     try {
         await connectDB();
-        const { id } = params;
+        const { id } = await params;
         const user = await getUserByIdService(id);
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -23,7 +23,7 @@ export async function GET(req, { params }) {
 export async function PUT(req, { params }) {
     try {
         await connectDB();
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
         const updatedUser = await updateUserService(id, body);
         return NextResponse.json(updatedUser);
@@ -35,7 +35,7 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
     try {
         await connectDB();
-        const { id } = params;
+        const { id } = await params;
         await deleteUserService(id);
         return NextResponse.json({ message: "User deleted successfully" });
     } catch (error) {
