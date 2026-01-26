@@ -24,17 +24,26 @@ import {
 } from "@/components/ui/select";
 import { useCreateUser, useUpdateUser } from "@/hooks/useUser";
 
-const userSchema = z.object({
+const baseSchema = z.object({
     username: z.string().min(2, "Full Name is required"),
-    armyNo: z.string().min(1, "Army Number is required"),
-    rank: z.string().min(1, "Rank is required"),
-    unit: z.string().min(1, "Unit is required"),
+    armyNo: z.string().optional().or(z.literal("")),
+    rank: z.string().optional().or(z.literal("")),
+    unit: z.string().optional().or(z.literal("")),
     email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
-    role: z.string().min(1, "Role is required"),
+    role: z.string().optional().or(z.literal("")),
+});
+
+// Schema for Creating a User (Password Required)
+const createUserSchema = baseSchema.extend({
+    password: z.string().min(6, "Password is required (min 6 chars)"),
+});
+
+// Schema for Editing a User (Password Optional)
+const editUserSchema = baseSchema.extend({
     password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
 });
 
-type UserFormValues = z.infer<typeof userSchema>;
+type UserFormValues = z.infer<typeof createUserSchema>;
 
 interface UserDialogProps {
     open: boolean;
@@ -47,8 +56,11 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
     const { mutate: createUser, isPending: isCreating } = useCreateUser();
     const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
 
+    // Select the correct schema based on whether we are editing or creating
+    const schema = user ? editUserSchema : createUserSchema;
+
     const form = useForm<UserFormValues>({
-        resolver: zodResolver(userSchema),
+        resolver: zodResolver(schema),
         defaultValues: {
             username: "",
             armyNo: "",
@@ -103,12 +115,15 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
 
         const finalData = {
             ...data,
-            role: roleMap[data.role] || data.role.toLowerCase().replace(" ", "")
+            role: (data.role && roleMap[data.role]) ? roleMap[data.role] : (data.role || "user").toLowerCase().replace(" ", "")
         };
 
         if (user) {
             const updateData = { ...finalData };
-            if (!updateData.password) delete updateData.password;
+            if (!updateData.password) {
+                // @ts-ignore
+                delete updateData.password;
+            }
             updateUser({ id: user._id, data: updateData }, {
                 onSuccess: () => onOpenChange(false)
             });
