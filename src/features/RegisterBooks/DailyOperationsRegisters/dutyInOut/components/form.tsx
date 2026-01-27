@@ -10,6 +10,7 @@ import { IndividualInputFields, IndividualData } from "@/features/RegisterBooks/
 import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
 import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
 import { useCreateDutyInOutRegister, useUpdateDutyInOutRegister } from "@/features/RegisterBooks/DailyOperationsRegisters/dutyInOut/hooks";
+import { createRegisterEntry } from "@/apis";
 import { toast } from "react-toastify";
 import { formatDateForInput } from "@/utils/dateUtils";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
@@ -171,7 +172,28 @@ const DutyKeyOutInForm = ({ initialData, onSuccess, onCancel }: DutyKeyOutInForm
             if (initialData?._id) {
                 await updateMutation.mutateAsync({ id: initialData._id, payload });
             } else {
+                // Create Duty In/Out Record
                 await createMutation.mutateAsync(payload);
+
+                // AUTOMATION: Also create Mobile Phone In/Out Record
+                const mobilePayload = {
+                    date: payload.date,
+                    details: {
+                        individual: payload.details.individual,
+                        dutyType: payload.details.dutyType,
+                        placeOfDuty: payload.details.placeOfDuty,
+                    },
+                    type: "mobile_phone",
+                };
+
+                // Fire and forget or await? Safe to await to ensure both are created.
+                // Converting potential failure in mobile record to a non-blocking console error to avoid stopping main flow?
+                // User said "automatically in both".
+                try {
+                    await createRegisterEntry(mobilePayload);
+                } catch (e) {
+                    console.error("Failed to auto-create mobile phone record", e);
+                }
             }
 
             if (onSuccess) onSuccess();
