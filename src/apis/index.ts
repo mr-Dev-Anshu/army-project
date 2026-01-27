@@ -93,3 +93,7 @@ export * from "@/apis/immediateReportingIncident/getById";
 export * from "@/apis/immediateReportingIncident/update";
 export * from "@/apis/immediateReportingIncident/delete";
 
+
+
+export * from "@/apis/certificateAndForm";
+

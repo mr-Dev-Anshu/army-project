@@ -259,7 +259,7 @@ export default function Dashboard() {
           />
         </svg>
       ),
-      href: "/forms",
+      href: "/form-certificate/certificate",
     },
     {
       title: "MP General Diary & Daily Occurrence Book",
