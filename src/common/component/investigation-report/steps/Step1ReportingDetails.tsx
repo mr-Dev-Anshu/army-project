@@ -11,7 +11,7 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { uploadFile } from "@/lib/uploadFile";
 import { toast } from "react-toastify";
 
-export default function Step1ReportDetails() {
+export default function Step1ReportDetails({ errors }: { errors?: any }) {
   const { state, dispatch } = useForm();
   const mp = state.formData.mpReport.reportDetails;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,6 +64,7 @@ export default function Step1ReportDetails() {
         placeholder="PRO/21CPU/00082/106/25"
         value={mp.reportNo}
         onChange={(v) => set("reportNo", v)}
+        error={errors?.reportNo}
       />
 
       <SuggestionInput

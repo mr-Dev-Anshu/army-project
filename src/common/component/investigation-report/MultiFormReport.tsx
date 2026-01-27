@@ -76,6 +76,7 @@ export default function MultiFormReport({
   const { state, dispatch } = useForm();
   const [mode] = useState("mp");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { mutateAsync: createReportAsync } = useCreateMPReport();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
 
@@ -481,9 +482,19 @@ export default function MultiFormReport({
       dispatch({ type: "SET_STEP", payload: 1 });
       dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
       if (onCancel) onCancel(); // Return to dashboard
-    } catch (err) {
+    } catch (err: any) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
-      toast.error("Failed to create report");
+
+      if (
+        err?.response?.data?.message?.includes("E11000 duplicate key error") &&
+        err?.response?.data?.message?.includes("reportDetails.reportNumber")
+      ) {
+        setFormErrors({ reportNo: "Report Number already exists" });
+        dispatch({ type: "SET_STEP", payload: 1 });
+        toast.error("Duplicate Report Number");
+      } else {
+        toast.error("Failed to create report");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -494,7 +505,7 @@ export default function MultiFormReport({
   const stepsConfig = {
     1: {
       title: "1. REPORT DETAILS",
-      component: <Step1ReportDetails />,
+      component: <Step1ReportDetails errors={formErrors} />,
     },
     2: {
       title: "2. MP PARTICULARS",

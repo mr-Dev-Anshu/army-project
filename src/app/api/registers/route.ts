@@ -48,15 +48,15 @@ export async function POST(req: NextRequest) {
         await connectDB();
         const body = await req.json();
 
-        const { error, value } = createRegisterSchema.validate(body);
-        if (error) {
-            return NextResponse.json(
-                { error: error.details[0].message },
-                { status: 400 }
-            );
-        }
+        // const { error, value } = createRegisterSchema.validate(body);
+        // if (error) {
+        //     return NextResponse.json(
+        //         { error: error.details[0].message },
+        //         { status: 400 }
+        //     );
+        // }
 
-        const newRegister = await service.createRegister(value);
+        const newRegister = await service.createRegister(body);
         return NextResponse.json(newRegister, { status: 201 });
     } catch (error: any) {
         console.error("Register creation error:", error);

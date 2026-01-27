@@ -56,24 +56,24 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const { error, value } = createMPReportSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: false,
-    });
+    // const { error, value } = createMPReportSchema.validate(body, {
+    //   abortEarly: false,
+    //   stripUnknown: false,
+    // });
 
-    if (error) {
-      const errors = error.details.map((d) => ({
-        field: d.path.join("."),
-        message: d.message,
-      }));
+    // if (error) {
+    //   const errors = error.details.map((d) => ({
+    //     field: d.path.join("."),
+    //     message: d.message,
+    //   }));
 
-      return NextResponse.json(
-        { success: false, message: "Validation failed", errors },
-        { status: 400 }
-      );
-    }
+    //   return NextResponse.json(
+    //     { success: false, message: "Validation failed", errors },
+    //     { status: 400 }
+    //   );
+    // }
 
-    const report = await service.createReport(value);
+    const report = await service.createReport(body);
 
     return NextResponse.json(
       { success: true, data: report },
