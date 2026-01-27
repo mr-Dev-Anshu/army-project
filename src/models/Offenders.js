@@ -1,5 +1,6 @@
 
 import mongoose from "mongoose";
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields";
 
 const offenderSchema = new mongoose.Schema(
   {
@@ -44,6 +45,8 @@ const offenderSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+offenderSchema.plugin(auditFieldsPlugin, {});
 
 offenderSchema.index({ offenceId: 1 });
 

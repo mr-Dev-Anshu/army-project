@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generalTrafficOffenceService } from "@/services/generalTrafficOffence.service";
 import { createGeneralTrafficOffenceSchema } from "@/validators/generalTrafficOffence.validator";
 import { connectDB } from "@/lib/db/mongodb";
+import jwt from "jsonwebtoken";
 
 export async function GET(request) {
   try {
@@ -77,7 +78,24 @@ export async function POST(request) {
       );
     }
 
-    const newOffence = await generalTrafficOffenceService.create(value);
+    // Extract user from auth token (same logic as middleware)
+    let requestContext = { userId: null, userRole: null };
+    try {
+      const token = request.cookies.get("auth_token")?.value;
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        requestContext = {
+          userId: decoded.userId,
+          userRole: decoded.role,
+        };
+      }
+    } catch (err) {
+      console.error("POST /api/generalTraficOffence - Failed to read user from token:", err.message);
+    }
+
+    console.log("API Route - Request Context:", requestContext);
+
+    const newOffence = await generalTrafficOffenceService.create(value, requestContext);
 
     return NextResponse.json(newOffence, { status: 201 });
   } catch (error) {

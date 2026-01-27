@@ -22,19 +22,24 @@ function auditFieldsPlugin(schema, options = {}) {
   schema.pre('save', function(next) {
     try {
       const userId = getCurrentUserId(); 
+      console.log('Audit Plugin - Current User ID:', userId);
+      console.log('Audit Plugin - Is New:', this.isNew);
 
       if (this.isNew && userId) {
         this[createdByField] = userId;
+        console.log('Audit Plugin - Set createdBy:', userId);
       }
 
       if (userId) {
         this[updatedByField] = userId;
+        console.log('Audit Plugin - Set updatedBy:', userId);
       }
 
       if (typeof next === 'function') {
         next();
       }
     } catch (error) {
+      console.error('Audit Plugin Error:', error);
       if (typeof next === 'function') {
         next(error);
       }

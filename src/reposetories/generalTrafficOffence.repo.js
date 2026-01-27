@@ -2,6 +2,7 @@ import trackFieldSuggestions from "@/lib/fieldSuggestionTracker.js";
 import { GeneralTrafficOffence } from "../models/GeneralTraficOffence.js";
 import mongoose from "mongoose";
 import { GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/GeneralTraficOffence.js";
+import { setCurrentUserId } from "@/lib/mongoose-plugins/auditsFields.js";
 
 export class GeneralTrafficOffenceRepository {
   async getAll() {
@@ -408,11 +409,27 @@ export class GeneralTrafficOffenceRepository {
     return await GeneralTrafficOffence.aggregate(pipeline);
   }
 
-
-
-  async create(data) {
+  async create(data, requestContext = null) {
     console.log(data);
+    console.log('Repository - Request Context:', requestContext);
+    
     const offence = new GeneralTrafficOffence(data);
+    
+    // If we have request context with user ID, set it directly on the document
+    if (requestContext && requestContext.userId) {
+      offence.createdBy = requestContext.userId;
+      offence.updatedBy = requestContext.userId;
+      console.log('Repository - Set audit fields from context:', requestContext.userId);
+      
+      // Ensure audit plugin also sees the same user ID
+      try {
+        setCurrentUserId(requestContext.userId);
+        console.log('Repository - setCurrentUserId called for audit plugin:', requestContext.userId);
+      } catch (err) {
+        console.error('Repository - Failed to setCurrentUserId for audit plugin:', err);
+      }
+    }
+    
     await offence.save();
     const savedOffence = offence.toObject();
 
@@ -423,7 +440,16 @@ export class GeneralTrafficOffenceRepository {
         console.error("Suggestions track karne mein error:", err);
       });
 
-    return savedOffence;
+    // Return with audit information
+    return {
+      ...savedOffence,
+      auditInfo: {
+        createdBy: savedOffence.createdBy,
+        updatedBy: savedOffence.updatedBy,
+        createdAt: savedOffence.createdAt,
+        updatedAt: savedOffence.updatedAt
+      }
+    };
   }
 
   async update(id, data) {

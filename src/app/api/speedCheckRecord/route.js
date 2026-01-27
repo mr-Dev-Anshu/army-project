@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { staticSpeedCheckRecordService } from "@/services/speedCheckRecord.service";
 import { createStaticSpeedCheckRecordSchema } from "@/validators/speedCheckRecord.validator";
+import jwt from "jsonwebtoken";
 
 /* ========================= GET ========================= */
 
@@ -56,7 +57,25 @@ export async function POST(request) {
       );
     }
 
-    const newRecord = await staticSpeedCheckRecordService.create(value);
+    // Build request context from auth token, similar to other routes
+    let requestContext = { userId: null, userRole: null };
+    try {
+      const token = request.cookies.get("auth_token")?.value;
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        requestContext = {
+          userId: decoded.userId,
+          userRole: decoded.role,
+        };
+      }
+    } catch (err) {
+      console.error("POST /api/speedCheckRecord - Failed to read user from token:", err.message);
+    }
+
+    const newRecord = await staticSpeedCheckRecordService.create(
+      value,
+      requestContext
+    );
     return NextResponse.json(newRecord, { status: 201 });
 
   } catch (error) {
