@@ -57,6 +57,7 @@ export async function POST(request) {
   try {
     await connectDB();
     const body = await request.json();
+    console.log("POST /api/generalTraficOffence body:", JSON.stringify(body, null, 2));
 
     const { error, value } = createGeneralTrafficOffenceSchema.validate(body, {
       abortEarly: false,
@@ -80,9 +81,17 @@ export async function POST(request) {
 
     return NextResponse.json(newOffence, { status: 201 });
   } catch (error) {
-    console.error(error);
+    console.error("DEBUG ERROR in POST /api/generalTraficOffence:", error);
     return NextResponse.json(
-      { error: "Failed to create offence", message: error.message },
+      {
+        error: "Failed to create offence",
+        message: error.message,
+        stack: error.stack,
+        details: error.errors ? Object.keys(error.errors).map(key => ({
+          field: key,
+          message: error.errors[key].message
+        })) : null
+      },
       { status: 500 }
     );
   }

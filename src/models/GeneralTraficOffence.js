@@ -1,4 +1,4 @@
-import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields";
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields.js";
 import mongoose from "mongoose";
 
 export const onDutyDetailsSchema = new mongoose.Schema({
@@ -84,9 +84,7 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
   }
 );
 
-generalTrafficOffenceSchema.plugin(auditFieldsPlugin, {
-
-});
+generalTrafficOffenceSchema.plugin(auditFieldsPlugin, {});
 
 // Export model
 export const GeneralTrafficOffence =
