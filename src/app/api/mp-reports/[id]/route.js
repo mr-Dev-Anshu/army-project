@@ -21,6 +21,8 @@ export async function PUT(request, { params }) {
   try {
     const { id } = await  params;
     const body = await request.json();
+    console.log(body);
+    
 
     const { error, value } = updateMPReportSchema.validate(body, {
       abortEarly: false,
@@ -38,7 +40,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const updated = await service.updateReport(id, value);
+    const updated = await service.updateReport(id, body);
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
     return NextResponse.json(

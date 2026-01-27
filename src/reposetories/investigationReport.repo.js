@@ -270,4 +270,17 @@ export class MPReportRepository {
   async deleteById(id) {
     return await MPReport.findByIdAndDelete(id);
   }
+  async appendCertificates(id, certificates) {
+  return await MPReport.findByIdAndUpdate(
+    id,
+    {
+      $push: {
+        certificates: { $each: certificates },
+      },
+    },
+    { new: true, runValidators: true }
+  );
 }
+}
+
+

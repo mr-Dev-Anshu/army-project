@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+const { Schema } = mongoose;
+
+
 export const onDutyDetailsSchema = new mongoose.Schema({
   dateOfDuty: { type: Date },
   startTime: { type: Date },
@@ -37,6 +40,16 @@ export const offenceOccurenceDetails = new mongoose.Schema({
   },
 });
 
+export const documentSchema = new Schema({
+  statement: { type: String },
+  url: { type: String },
+  type: { type: String },
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
 const generalTrafficOffenceSchema = new mongoose.Schema(
   {
     reportId: {
@@ -56,10 +69,10 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     },
     vehicleNumber: { type: String },
     vehicleName: {
-      type: String
+      type: String,
     },
     driverType: {
-      type: String
+      type: String,
     },
     onDutyDetails: onDutyDetailsSchema,
     onDutyDetailsMPReporting: onDutyDetailsMPReporting,
@@ -74,6 +87,8 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     actionStatusRemark: {
       type: String,
     },
+    certificates: [documentSchema],
+
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
@@ -81,12 +96,9 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    strict: false
-
-  }
+    strict: false,
+  },
 );
-
-
 
 export const GeneralTrafficOffence =
   mongoose.models.GeneralTrafficOffence ||

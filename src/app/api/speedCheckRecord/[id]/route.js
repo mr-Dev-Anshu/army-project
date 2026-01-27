@@ -43,18 +43,18 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
 
-    const { error: validationError, value } = updateStaticSpeedCheckRecordSchema.validate(body, {
-      abortEarly: false,
-    });
+    // const { error: validationError, value } = updateStaticSpeedCheckRecordSchema.validate(body, {
+    //   abortEarly: false,
+    // });
 
-    if (validationError) {
-      return NextResponse.json(
-        { error: "Validation failed", details: validationError.details },
-        { status: 400 }
-      );
-    }
+    // if (validationError) {
+    //   return NextResponse.json(
+    //     { error: "Validation failed", details: validationError.details },
+    //     { status: 400 }
+    //   );
+    // }
 
-    const updated = await staticSpeedCheckRecordService.update(id, value);
+    const updated = await staticSpeedCheckRecordService.update(id, body);
 
     return NextResponse.json(updated);
   } catch (error) {

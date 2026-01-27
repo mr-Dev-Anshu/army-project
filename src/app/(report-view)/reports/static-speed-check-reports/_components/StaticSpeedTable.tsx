@@ -9,6 +9,7 @@ import {
   Copy,
   Trash,
   Download,
+  Paperclip,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,9 @@ import {
 import { toast } from "react-toastify";
 
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+
+import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
+
 
 interface StaticSpeedTableProps {
   data: any[];
@@ -61,6 +65,8 @@ export default function StaticSpeedTable({
   });
 
   const [remarkError, setRemarkError] = React.useState("");
+    const [attachModalOpen, setAttachModalOpen] = React.useState(false);
+  const [selectedReport, setSelectedReport] = React.useState<any>(null);
 
   const handleStatusClick = (recordId: string, currentStatus: boolean) => {
     setActionRemark(""); // Reset
@@ -72,6 +78,11 @@ export default function StaticSpeedTable({
       newStatus: !currentStatus,
     });
   };
+
+    const handleAttachCertificate = (item: any) => {
+  setSelectedReport(item);
+  setAttachModalOpen(true);
+};
 
   const handleDeleteClick = (recordId: string) => {
     setModalState({
@@ -322,6 +333,13 @@ export default function StaticSpeedTable({
                 Duplicate Report
               </DropdownMenuItem> */}
               <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => handleAttachCertificate(item)}
+              >
+                <Paperclip className="w-4 h-4" />
+                Attach Signed Certificates / Letters
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 onSelect={() => {
                   if (item._id) {
@@ -398,6 +416,20 @@ export default function StaticSpeedTable({
           </div>
         )}
       </ConfirmationModal>
+      <AttachCertificateModal
+        isOpen={attachModalOpen}
+        reportId={selectedReport?._id}
+        reportType="speed"
+        onClose={() => {
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+        onSave={() => {
+          toast.success("Certificate attached successfully");
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+      />
     </>
   );
 }

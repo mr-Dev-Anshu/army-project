@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  onFileSelect: (files: File[]) => void;
+  onFileSelect: (file: File) => void;
 }
 
 export default function FileDropZone({ onFileSelect }: Props) {
@@ -15,12 +15,11 @@ export default function FileDropZone({ onFileSelect }: Props) {
       <input
         ref={inputRef}
         type="file"
-        multiple
         accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
         hidden
         onChange={(e) => {
-          if (e.target.files) {
-            onFileSelect(Array.from(e.target.files));
+          if (e.target.files?.[0]) {
+            onFileSelect(e.target.files[0]);
           }
         }}
       />
@@ -31,16 +30,14 @@ export default function FileDropZone({ onFileSelect }: Props) {
         size="sm"
         onClick={() => inputRef.current?.click()}
       >
-        Select Files
+        Select File
       </Button>
 
       <p className="text-sm font-medium text-gray-700">
-        Upload Images, Word files or PDFs
+        Upload an Image, Word or PDF
       </p>
 
-      <p className="text-xs text-gray-400">
-        You can select multiple files or drop them here
-      </p>
+      <p className="text-xs text-gray-400">or drop a file</p>
     </div>
   );
 }

@@ -29,6 +29,7 @@ export async function PUT(request, { params }) {
     // 1. Unwrapping params
     const { id } = await params;
     const body = await request.json();
+    
 
     const { error, value } = updateGeneralTrafficOffenceSchema.validate(body, {
       abortEarly: false,
@@ -43,7 +44,7 @@ export async function PUT(request, { params }) {
     }
 
     // 2. Using the unwrapped id
-    const updatedOffence = await generalTrafficOffenceService.update(id, value);
+    const updatedOffence = await generalTrafficOffenceService.update(id,body);
 
     if (!updatedOffence) {
       return NextResponse.json({ error: "Offence not found" }, { status: 404 });

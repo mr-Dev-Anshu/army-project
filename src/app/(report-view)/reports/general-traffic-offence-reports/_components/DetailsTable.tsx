@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { MoreVertical, Eye, Printer, Edit, Copy, Trash } from "lucide-react";
+import { MoreVertical, Eye, Printer, Edit, Copy, Trash, Download, Paperclip } from "lucide-react";
 import {
   useUpdateTrafficOffence,
   useDeleteTrafficOffence,
@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OffenderDetailsCell from "./OffenderDetailsCell";
+import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
 
 interface DetailsTableProps {
   offences: any[];
@@ -53,6 +54,8 @@ export default function DetailsTable({
   });
 
   const [remarkError, setRemarkError] = React.useState("");
+    const [attachModalOpen, setAttachModalOpen] = React.useState(false);
+  const [selectedReport, setSelectedReport] = React.useState<any>(null);
 
   const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
     setActionRemark(""); // Reset remark
@@ -72,6 +75,11 @@ export default function DetailsTable({
       type: "delete",
     });
   };
+
+    const handleAttachCertificate = (offence:any) => {
+  setSelectedReport(offence);
+  setAttachModalOpen(true);
+};
 
   const handleConfirm = async () => {
     if (!modalState.offenceId) return;
@@ -405,6 +413,13 @@ export default function DetailsTable({
                 Duplicate Report
               </DropdownMenuItem> */}
               <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => handleAttachCertificate(offence)}
+              >
+                <Paperclip className="w-4 h-4" />
+                Attach Signed Certificates / Letters
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 onClick={() => {
                   if (offence._id) {
@@ -490,6 +505,20 @@ export default function DetailsTable({
           </div>
         )}
       </ConfirmationModal>
+      <AttachCertificateModal
+        isOpen={attachModalOpen}
+        reportId={selectedReport?._id}
+        reportType="traffic"
+        onClose={() => {
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+        onSave={() => {
+          toast.success("Certificate attached successfully");
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+      />
     </>
   );
 }
