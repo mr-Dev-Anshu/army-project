@@ -28,10 +28,13 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.natureOfDuty': 'natureOfDuty',
         'details.fromLocation': 'location',
         'details.toLocation': 'location',
+        'details.dutyType': 'natureOfDuty',
         'details.typeOfVehicle': 'typeOfVehicle',
         'details.purposeOfDemand': 'purposeOfDemand',
         'details.outSignature.value': 'signature',
         'details.inSignature.value': 'signature',
+        'details.outSignature': 'signature',
+        'details.inSignature': 'signature',
         'details.vehicleBaNumber': 'vehicleBaNumber',
 
         // General Duty Diary Fields
@@ -177,6 +180,11 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'details.mpcrMobileNumber': 'mobileNumber',
         'details.mpcrArmyLandline': 'landlineNumber',
         'details.mpcrBsnlLandline': 'landlineNumber',
+    },
+
+    arrayFields: {
+        'details.assignedDevices.motorolas': 'motorolaId',
+        'details.assignedDevices.cameras': 'cameraId',
     },
 
     trackCustomFields: 'specific',

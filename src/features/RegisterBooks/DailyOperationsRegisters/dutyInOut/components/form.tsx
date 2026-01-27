@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Pen, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Pen, X, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +9,42 @@ import { Textarea } from "@/components/ui/textarea";
 import { IndividualInputFields, IndividualData } from "@/features/RegisterBooks/components/IndividualInputFields";
 import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
 import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
+import { useCreateDutyInOutRegister, useUpdateDutyInOutRegister } from "@/features/RegisterBooks/DailyOperationsRegisters/dutyInOut/hooks";
+import { toast } from "react-toastify";
+import { formatDateForInput } from "@/utils/dateUtils";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
-const DutyKeyOutInForm = () => {
+interface DutyKeyOutInFormProps {
+    initialData?: any;
+    onSuccess?: () => void;
+    onCancel?: () => void;
+}
+
+const DutyKeyOutInForm = ({ initialData, onSuccess, onCancel }: DutyKeyOutInFormProps) => {
+    const createMutation = useCreateDutyInOutRegister();
+    const updateMutation = useUpdateDutyInOutRegister();
+
+    // Form States
     const [individual, setIndividual] = useState<IndividualData>({
         armyNo: "",
         rank: "",
         name: "",
     });
+
+    const [dutyOutTime, setDutyOutTime] = useState("");
+    const [outSignature, setOutSignature] = useState("");
+    const [dateOfDuty, setDateOfDuty] = useState("");
+    const [dutyFrom, setDutyFrom] = useState("");
+    const [dutyTill, setDutyTill] = useState("");
+    const [placeOfDuty, setPlaceOfDuty] = useState("");
+    const [typeOfDuty, setTypeOfDuty] = useState("");
+
+    const [motorolas, setMotorolas] = useState<string[]>([""]);
+    const [cameras, setCameras] = useState<string[]>([""]);
+
+    const [dutyInTime, setDutyInTime] = useState("");
+    const [inSignature, setInSignature] = useState("");
+    const [remark, setRemark] = useState("");
 
     const [authentication, setAuthentication] = useState({
         initialsMPCPNCO: "",
@@ -23,6 +52,47 @@ const DutyKeyOutInForm = () => {
         initials2IC: "",
     });
 
+    // Load Initial Data
+    useEffect(() => {
+        if (initialData) {
+            if (initialData.details?.individual) {
+                setIndividual({
+                    armyNo: initialData.details.individual.armyNo || "",
+                    rank: initialData.details.individual.rank || "",
+                    name: initialData.details.individual.name || "",
+                });
+            }
+            if (initialData.date) {
+                setDateOfDuty(formatDateForInput(initialData.date));
+            }
+
+            // Details
+            const d = initialData.details || {};
+            setDutyOutTime(d.dutyOutTime || "");
+            setOutSignature(d.outSignature || "");
+            setDutyFrom(d.dutyFrom || "");
+            setDutyTill(d.dutyTill || "");
+            setPlaceOfDuty(d.placeOfDuty || "");
+            setTypeOfDuty(d.dutyType || ""); // Mapped to dutyType in payload
+            setDutyInTime(d.dutyInTime || "");
+            setInSignature(d.inSignature || "");
+
+            // Devices
+            if (d.assignedDevices?.motorolas?.length) setMotorolas(d.assignedDevices.motorolas);
+            if (d.assignedDevices?.cameras?.length) setCameras(d.assignedDevices.cameras);
+
+            if (initialData.authentication) {
+                setAuthentication({
+                    initialsMPCPNCO: initialData.authentication.initialsMPCPNCO || "",
+                    initialsQMSJCO: initialData.authentication.initialsQMSJCO || "",
+                    initials2IC: initialData.authentication.initials2IC || "",
+                });
+            }
+            if (initialData.remark) setRemark(initialData.remark);
+        }
+    }, [initialData]);
+
+    // Handlers
     const handleFieldChange = (field: keyof IndividualData, value: string) => {
         setIndividual((prev) => ({ ...prev, [field]: value }));
     };
@@ -31,50 +101,120 @@ const DutyKeyOutInForm = () => {
         setAuthentication((prev) => ({ ...prev, [field]: value }));
     };
 
-    return (
-        <div className="mx-auto w-full max-w-4xl rounded-xl bg-white shadow-sm border border-neutral-200 overflow-hidden font-inter">
-            {/* ... keeping header ... */}
-            <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
-                <div>
-                    <h2 className="text-lg font-bold text-neutral-900">
-                        Add Duty Out Entry
-                    </h2>
-                    <p className="text-sm text-neutral-500">
-                        Record individual duty departure details
-                    </p>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400">
-                    <X className="h-5 w-5" />
-                </Button>
-            </div>
+    const handleAddDevice = (type: 'motorola' | 'camera') => {
+        if (type === 'motorola') {
+            setMotorolas([...motorolas, ""]);
+        } else {
+            setCameras([...cameras, ""]);
+        }
+    };
 
-            <div className="p-6 space-y-8">
+    const handleRemoveDevice = (type: 'motorola' | 'camera', index: number) => {
+        if (type === 'motorola') {
+            const newMotorolas = motorolas.filter((_, i) => i !== index);
+            setMotorolas(newMotorolas.length ? newMotorolas : [""]);
+        } else {
+            const newCameras = cameras.filter((_, i) => i !== index);
+            setCameras(newCameras.length ? newCameras : [""]);
+        }
+    };
+
+    const handleDeviceChange = (type: 'motorola' | 'camera', index: number, value: string) => {
+        if (type === 'motorola') {
+            const newMotorolas = [...motorolas];
+            newMotorolas[index] = value;
+            setMotorolas(newMotorolas);
+        } else {
+            const newCameras = [...cameras];
+            newCameras[index] = value;
+            setCameras(newCameras);
+        }
+    };
+
+    const handleSubmit = async () => {
+        // Validation
+        const requiredFields = [
+            { field: dateOfDuty, message: "Date of Duty is required" },
+            { field: individual.armyNo, message: "Army Number is required" },
+        ];
+
+        for (const { field, message } of requiredFields) {
+            if (!field) {
+                toast.error(message);
+                return;
+            }
+        }
+
+        try {
+            const payload = {
+                date: dateOfDuty,
+                details: {
+                    individual,
+                    dutyOutTime,
+                    outSignature,
+                    dutyFrom,
+                    dutyTill,
+                    placeOfDuty,
+                    dutyType: typeOfDuty,
+                    dutyInTime,
+                    inSignature,
+                    assignedDevices: {
+                        motorolas: motorolas.filter(id => id.trim() !== ""),
+                        cameras: cameras.filter(id => id.trim() !== "")
+                    }
+                },
+                authentication,
+                remark,
+                type: "duty_out",
+            };
+
+            if (initialData?._id) {
+                await updateMutation.mutateAsync({ id: initialData._id, payload });
+            } else {
+                await createMutation.mutateAsync(payload);
+            }
+
+            if (onSuccess) onSuccess();
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        }
+    };
+
+    return (
+        <div className="mx-auto w-full max-w-4xl font-inter">
+            <div className="space-y-8">
                 {/* Duty OUT Details */}
                 <section className="space-y-4">
                     <h3 className="text-sm font-bold text-neutral-900">Duty OUT Details</h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-1.5">
-                            <Label htmlFor="dutyOutTime" className="text-xs font-medium text-neutral-700">
+                            <Label htmlFor="dutyOutTime" className="text-sm font-medium text-neutral-700">
                                 Duty OUT Time
                             </Label>
                             <Input
                                 id="dutyOutTime"
                                 type="time"
                                 className="block w-full"
+                                value={dutyOutTime}
+                                onChange={(e) => setDutyOutTime(e.target.value)}
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="outSignature" className="text-xs font-medium text-neutral-700">
+                            <Label htmlFor="outSignature" className="text-sm font-medium text-neutral-700">
                                 OUT Signature
                             </Label>
-                            <div className="relative">
-                                <Input
-                                    id="outSignature"
-                                    placeholder="Text / Digital"
-                                    className="pr-10"
-                                />
-                                <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                            </div>
+                            <SuggestionInput
+                                fieldType="signature"
+                                placeholder="Text / Digital"
+                                className="pr-10"
+                                value={outSignature}
+                                onChange={setOutSignature}
+                                icon={
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M16 15.5C16.2761 15.5 16.5 15.7239 16.5 16C16.5 16.2761 16.2761 16.5 16 16.5H4C3.72386 16.5 3.5 16.2761 3.5 16C3.5 15.7239 3.72386 15.5 4 15.5H16ZM10.5928 2.87207C10.9385 2.80607 11.2952 2.82593 11.6318 2.92871C11.9685 3.03153 12.2755 3.21498 12.5254 3.46289C12.7751 3.71076 12.961 4.01587 13.0664 4.35156C13.1718 4.68736 13.1941 5.0444 13.1309 5.39062C13.0675 5.73671 12.9204 6.06216 12.7031 6.33887C12.4857 6.61568 12.2042 6.83596 11.8828 6.97949C11.6307 7.09207 11.3343 6.97871 11.2217 6.72656C11.1092 6.47455 11.2227 6.17908 11.4746 6.06641C11.6477 5.98913 11.7999 5.8707 11.917 5.72168C12.034 5.57263 12.1124 5.39639 12.1465 5.20996C12.1804 5.02374 12.169 4.83198 12.1123 4.65137C12.0556 4.47075 11.9556 4.30625 11.8213 4.17285C11.6867 4.03938 11.5211 3.94012 11.3398 3.88477C11.1586 3.82944 10.9664 3.81896 10.7803 3.85449C10.5942 3.89003 10.4196 3.9707 10.2715 4.08887C10.1235 4.20702 10.0066 4.35971 9.93066 4.5332C9.87134 4.66904 9.80282 4.90625 9.72559 5.25098C9.65021 5.58744 9.57276 5.99388 9.4873 6.45117C9.3177 7.3588 9.11883 8.45591 8.85156 9.50781C8.81991 9.63238 8.7859 9.75675 8.75195 9.88086C9.13618 9.98267 9.49717 10.1032 9.82617 10.2461C10.924 10.7229 11.8329 11.5115 11.833 12.667C11.8331 12.7109 11.8509 12.7531 11.8818 12.7842C11.9131 12.8154 11.9558 12.833 12 12.833H13.333C13.3772 12.833 13.4199 12.8154 13.4512 12.7842C13.4822 12.7531 13.4999 12.7109 13.5 12.667V12.333C13.4994 12.1713 13.5459 12.0128 13.6338 11.877L13.707 11.7793C13.7874 11.6878 13.8875 11.6145 14 11.5654C14.1126 11.5163 14.2346 11.4937 14.3564 11.4971L14.4775 11.5088L14.5957 11.5391C14.7039 11.575 14.8033 11.6335 14.8887 11.71H14.8896L16.3271 12.9551C16.5357 13.1358 16.5584 13.4514 16.3779 13.6602C16.1971 13.8688 15.8816 13.8917 15.6729 13.7109L14.498 12.6934C14.4911 12.993 14.3706 13.2788 14.1582 13.4912C13.9394 13.71 13.6424 13.833 13.333 13.833H12C11.6906 13.833 11.3936 13.71 11.1748 13.4912C10.9563 13.2726 10.8331 12.9761 10.833 12.667C10.8329 12.126 10.4116 11.5904 9.42773 11.1631C9.13742 11.037 8.81129 10.9297 8.45801 10.8379C8.26315 11.4058 8.03765 11.9395 7.76758 12.3906C7.29792 13.175 6.62269 13.8329 5.66699 13.833C5.09236 13.833 4.54109 13.6046 4.13477 13.1982C3.72865 12.792 3.50013 12.2414 3.5 11.667C3.50004 11.0924 3.72852 10.5411 4.13477 10.1348C4.54109 9.72848 5.09239 9.5 5.66699 9.5H5.66992C6.39354 9.50481 7.10453 9.56357 7.77148 9.67285C7.80892 9.53771 7.84653 9.40066 7.88184 9.26172C8.13954 8.24746 8.33342 7.18518 8.50488 6.26758C8.58992 5.81252 8.67014 5.38874 8.75 5.03223C8.82797 4.68424 8.91258 4.36429 9.01367 4.13281C9.15464 3.81035 9.37243 3.5272 9.64746 3.30762C9.92257 3.08802 10.247 2.93809 10.5928 2.87207ZM5.66504 10.5C5.35624 10.5004 5.0602 10.6234 4.8418 10.8418C4.62309 11.0605 4.50004 11.3577 4.5 11.667C4.50013 11.9762 4.62322 12.2725 4.8418 12.4912C5.06059 12.71 5.35757 12.833 5.66699 12.833C6.09521 12.8329 6.50723 12.55 6.91016 11.877C7.11861 11.5287 7.30295 11.1072 7.46973 10.6387C6.9041 10.5536 6.2956 10.5043 5.66504 10.5ZM2.00977 2.00977H2V2H2.00977V2.00977Z" fill="#737373" />
+                                    </svg>
+                                }
+                            />
                         </div>
                     </div>
                 </section>
@@ -95,47 +235,138 @@ const DutyKeyOutInForm = () => {
                     <h3 className="text-sm font-bold text-neutral-900">Duty Details</h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div className="space-y-1.5">
-                            <Label htmlFor="dateOfDuty" className="text-xs font-medium text-neutral-700">
+                            <Label htmlFor="dateOfDuty" className="text-sm font-medium text-neutral-700">
                                 Date of Duty
                             </Label>
                             <Input
                                 id="dateOfDuty"
                                 type="date"
                                 className="block w-full"
+                                value={dateOfDuty}
+                                onChange={(e) => setDateOfDuty(e.target.value)}
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="dutyFrom" className="text-xs font-medium text-neutral-700">
+                            <Label htmlFor="dutyFrom" className="text-sm font-medium text-neutral-700">
                                 Duty From
                             </Label>
                             <Input
                                 id="dutyFrom"
                                 type="time"
                                 className="block w-full"
+                                value={dutyFrom}
+                                onChange={(e) => setDutyFrom(e.target.value)}
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="dutyTill" className="text-xs font-medium text-neutral-700">
+                            <Label htmlFor="dutyTill" className="text-sm font-medium text-neutral-700">
                                 Duty Till
                             </Label>
                             <Input
                                 id="dutyTill"
                                 type="time"
                                 className="block w-full"
+                                value={dutyTill}
+                                onChange={(e) => setDutyTill(e.target.value)}
                             />
                         </div>
                     </div>
                     <div className="space-y-1.5">
-                        <Label htmlFor="placeOfDuty" className="text-xs font-medium text-neutral-700">
-                            Place of Duty
-                        </Label>
-                        <Input id="placeOfDuty" placeholder="Location" />
+                        <SuggestionInput
+                            label="Place of Duty"
+                            fieldType="placeOfDuty"
+                            placeholder="Location"
+                            value={placeOfDuty}
+                            onChange={setPlaceOfDuty}
+                        />
                     </div>
                     <div className="space-y-1.5">
-                        <Label htmlFor="typeOfDuty" className="text-xs font-medium text-neutral-700">
-                            Type of Duty/Event
-                        </Label>
-                        <Input id="typeOfDuty" placeholder="eg. Mobile duty" />
+                        <SuggestionInput
+                            label="Type of Duty/Event"
+                            fieldType="natureOfDuty"
+                            placeholder="eg. Mobile duty"
+                            value={typeOfDuty}
+                            onChange={setTypeOfDuty}
+                        />
+                    </div>
+                </section>
+
+                {/* Assigned Devices */}
+                <section className="space-y-6 pt-4 border-t border-neutral-100">
+                    <h3 className="text-sm font-bold text-neutral-900">Assigned Devices</h3>
+
+                    {/* Motorola Section */}
+                    <div className="space-y-3">
+                        <Label className="text-sm font-medium text-neutral-700">ID No. of Motorola</Label>
+                        {motorolas.map((id, index) => (
+                            <div key={`motorola-${index}`} className="flex gap-2">
+                                <SuggestionInput
+                                    label=""
+                                    fieldType="motorolaId"
+                                    placeholder="Enter ID Number"
+                                    value={id}
+                                    onChange={(val) => handleDeviceChange('motorola', index, val)}
+                                />
+                                {motorolas.length > 1 && (
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => handleRemoveDevice('motorola', index)}
+                                        className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
+                        ))}
+                        <div className="flex justify-end">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                className="bg-neutral-100 hover:bg-neutral-200 text-neutral-600"
+                                onClick={() => handleAddDevice('motorola')}
+                            >
+                                <Plus className="mr-2 h-3 w-3" /> Add more motorola
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Body Camera Section */}
+                    <div className="space-y-3">
+                        <Label className="text-sm font-medium text-neutral-700">ID No. of Body Worn Camera</Label>
+                        {cameras.map((id, index) => (
+                            <div key={`camera-${index}`} className="flex gap-2">
+                                <SuggestionInput
+                                    label=""
+                                    fieldType="cameraId"
+                                    placeholder="Enter ID Number"
+                                    value={id}
+                                    onChange={(val) => handleDeviceChange('camera', index, val)}
+                                />
+                                {cameras.length > 1 && (
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => handleRemoveDevice('camera', index)}
+                                        className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
+                        ))}
+                        <div className="flex justify-end">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                className="bg-neutral-100 hover:bg-neutral-200 text-neutral-600"
+                                onClick={() => handleAddDevice('camera')}
+                            >
+                                <Plus className="mr-2 h-3 w-3" /> Add more camera
+                            </Button>
+                        </div>
                     </div>
                 </section>
 
@@ -144,27 +375,31 @@ const DutyKeyOutInForm = () => {
                     <h3 className="text-sm font-bold text-neutral-900">Duty IN Details</h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-1.5">
-                            <Label htmlFor="dutyInTime" className="text-xs font-medium text-neutral-700">
+                            <Label htmlFor="dutyInTime" className="text-sm font-medium text-neutral-700">
                                 Duty IN Time
                             </Label>
                             <Input
                                 id="dutyInTime"
                                 type="time"
                                 className="block w-full"
+                                value={dutyInTime}
+                                onChange={(e) => setDutyInTime(e.target.value)}
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="inSignature" className="text-xs font-medium text-neutral-700">
+                            <Label htmlFor="inSignature" className="text-sm font-medium text-neutral-700">
                                 IN Signature
                             </Label>
-                            <div className="relative">
-                                <Input
-                                    id="inSignature"
-                                    placeholder="Text / Digital"
-                                    className="pr-10"
-                                />
-                                <Pen className="absolute right-3 top-2.5 h-4 w-4 text-neutral-400" />
-                            </div>
+                            <SuggestionInput
+                                fieldType="signature"
+                                placeholder="Text / Digital"
+                                className="pr-10"
+                                value={inSignature}
+                                onChange={setInSignature}
+                                icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16 15.5C16.2761 15.5 16.5 15.7239 16.5 16C16.5 16.2761 16.2761 16.5 16 16.5H4C3.72386 16.5 3.5 16.2761 3.5 16C3.5 15.7239 3.72386 15.5 4 15.5H16ZM10.5928 2.87207C10.9385 2.80607 11.2952 2.82593 11.6318 2.92871C11.9685 3.03153 12.2755 3.21498 12.5254 3.46289C12.7751 3.71076 12.961 4.01587 13.0664 4.35156C13.1718 4.68736 13.1941 5.0444 13.1309 5.39062C13.0675 5.73671 12.9204 6.06216 12.7031 6.33887C12.4857 6.61568 12.2042 6.83596 11.8828 6.97949C11.6307 7.09207 11.3343 6.97871 11.2217 6.72656C11.1092 6.47455 11.2227 6.17908 11.4746 6.06641C11.6477 5.98913 11.7999 5.8707 11.917 5.72168C12.034 5.57263 12.1124 5.39639 12.1465 5.20996C12.1804 5.02374 12.169 4.83198 12.1123 4.65137C12.0556 4.47075 11.9556 4.30625 11.8213 4.17285C11.6867 4.03938 11.5211 3.94012 11.3398 3.88477C11.1586 3.82944 10.9664 3.81896 10.7803 3.85449C10.5942 3.89003 10.4196 3.9707 10.2715 4.08887C10.1235 4.20702 10.0066 4.35971 9.93066 4.5332C9.87134 4.66904 9.80282 4.90625 9.72559 5.25098C9.65021 5.58744 9.57276 5.99388 9.4873 6.45117C9.3177 7.3588 9.11883 8.45591 8.85156 9.50781C8.81991 9.63238 8.7859 9.75675 8.75195 9.88086C9.13618 9.98267 9.49717 10.1032 9.82617 10.2461C10.924 10.7229 11.8329 11.5115 11.833 12.667C11.8331 12.7109 11.8509 12.7531 11.8818 12.7842C11.9131 12.8154 11.9558 12.833 12 12.833H13.333C13.3772 12.833 13.4199 12.8154 13.4512 12.7842C13.4822 12.7531 13.4999 12.7109 13.5 12.667V12.333C13.4994 12.1713 13.5459 12.0128 13.6338 11.877L13.707 11.7793C13.7874 11.6878 13.8875 11.6145 14 11.5654C14.1126 11.5163 14.2346 11.4937 14.3564 11.4971L14.4775 11.5088L14.5957 11.5391C14.7039 11.575 14.8033 11.6335 14.8887 11.71H14.8896L16.3271 12.9551C16.5357 13.1358 16.5584 13.4514 16.3779 13.6602C16.1971 13.8688 15.8816 13.8917 15.6729 13.7109L14.498 12.6934C14.4911 12.993 14.3706 13.2788 14.1582 13.4912C13.9394 13.71 13.6424 13.833 13.333 13.833H12C11.6906 13.833 11.3936 13.71 11.1748 13.4912C10.9563 13.2726 10.8331 12.9761 10.833 12.667C10.8329 12.126 10.4116 11.5904 9.42773 11.1631C9.13742 11.037 8.81129 10.9297 8.45801 10.8379C8.26315 11.4058 8.03765 11.9395 7.76758 12.3906C7.29792 13.175 6.62269 13.8329 5.66699 13.833C5.09236 13.833 4.54109 13.6046 4.13477 13.1982C3.72865 12.792 3.50013 12.2414 3.5 11.667C3.50004 11.0924 3.72852 10.5411 4.13477 10.1348C4.54109 9.72848 5.09239 9.5 5.66699 9.5H5.66992C6.39354 9.50481 7.10453 9.56357 7.77148 9.67285C7.80892 9.53771 7.84653 9.40066 7.88184 9.26172C8.13954 8.24746 8.33342 7.18518 8.50488 6.26758C8.58992 5.81252 8.67014 5.38874 8.75 5.03223C8.82797 4.68424 8.91258 4.36429 9.01367 4.13281C9.15464 3.81035 9.37243 3.5272 9.64746 3.30762C9.92257 3.08802 10.247 2.93809 10.5928 2.87207ZM5.66504 10.5C5.35624 10.5004 5.0602 10.6234 4.8418 10.8418C4.62309 11.0605 4.50004 11.3577 4.5 11.667C4.50013 11.9762 4.62322 12.2725 4.8418 12.4912C5.06059 12.71 5.35757 12.833 5.66699 12.833C6.09521 12.8329 6.50723 12.55 6.91016 11.877C7.11861 11.5287 7.30295 11.1072 7.46973 10.6387C6.9041 10.5536 6.2956 10.5043 5.66504 10.5ZM2.00977 2.00977H2V2H2.00977V2.00977Z" fill="#737373" />
+                                </svg>}
+                            />
                         </div>
                     </div>
                 </section>
@@ -177,6 +412,8 @@ const DutyKeyOutInForm = () => {
                             id="remark"
                             placeholder="Enter remark"
                             className="resize-none min-h-[80px]"
+                            value={remark}
+                            onChange={(e) => setRemark(e.target.value)}
                         />
                     </div>
                 </section>
@@ -189,7 +426,14 @@ const DutyKeyOutInForm = () => {
             </div>
 
             {/* Footer */}
-            <FormFooter />
+            <div className="mt-8">
+                <FormFooter
+                    onSave={handleSubmit}
+                    onCancel={onCancel}
+                    isLoading={createMutation.isPending || updateMutation.isPending}
+                    saveLabel={initialData?._id ? "Update Entry" : "Save & Add Another"}
+                />
+            </div>
         </div>
     );
 };
