@@ -69,7 +69,6 @@ const Page = () => {
             if (id) {
                 // Update existing
                 await updateMutation.mutateAsync({ id, payload });
-                toast.success("Record updated successfully");
             } else {
                 // Create new
                 // We must structure the payload for creation as expected by the generic register API
@@ -84,7 +83,6 @@ const Page = () => {
                     status: "pending_out"
                 };
                 await createMutation.mutateAsync(newRecord);
-                toast.success("New record created successfully");
             }
             setIsSheetOpen(false);
             setSelectedRecord(null);
@@ -233,7 +231,7 @@ const Page = () => {
                         </span>
                         <ChevronRight className="h-4 w-4 text-gray-400" />
                         <span className="font-bold text-[#0A0A0A]">
-                            MP Gen. Diary & Daily Occu. Book
+                            MP General Diary & Daily Occurrence Book
                         </span>
                     </div>
                 </div>

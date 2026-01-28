@@ -35,13 +35,7 @@ export default function MpGeneralDiaryForm({
         },
         brief: "",
         documents: "",
-        assignedMP: {
-            armyNo: "",
-            rank: "",
-            name: "",
-            unit: "",
-            fmn: ""
-        },
+        assignedMPs: [], // Changed to array
         remark: "",
         authentication: {
             initialsMPCPNCO: "",
@@ -61,14 +55,31 @@ export default function MpGeneralDiaryForm({
                 docsStr = d.documents.map((doc: any, i: number) => `${i + 1}. ${typeof doc === 'string' ? doc : (doc.statement || doc.name)}`).join("\n");
             }
 
+            // Handle legacy single assignedMP vs new array
+            let mps = [];
+            if (d.assignedMPs && Array.isArray(d.assignedMPs)) {
+                mps = d.assignedMPs;
+            } else if (d.assignedMP) {
+                mps = [d.assignedMP];
+            } else {
+                mps = [{ armyNo: "", rank: "", name: "", unit: "", fmn: "" }];
+            }
+
             setFormData((prev: any) => ({
                 ...prev,
                 ...d,
                 displayDocuments: docsStr,
                 individual: d.individual || { armyNo: "", rank: "", name: "", unit: "" },
-                assignedMP: d.assignedMP || { armyNo: "", rank: "", name: "", unit: "" },
+                assignedMPs: mps,
                 authentication: initialData.authentication || { initialsMPCPNCO: "", initialsQMSJCO: "", initials2IC: "" },
-                remark: initialData.remark || d.remark || ""
+                remark: initialData.remark || d.remark || "",
+                offenceType: (Array.isArray(d.offenceTypes) && d.offenceTypes.length > 0) ? d.offenceTypes.join(", ") : (d.offenceType || "")
+            }));
+        } else {
+            // Default init for new form
+            setFormData((prev: any) => ({
+                ...prev,
+                assignedMPs: [{ armyNo: "", rank: "", name: "", unit: "", fmn: "" }]
             }));
         }
     }, [initialData]);
@@ -87,6 +98,26 @@ export default function MpGeneralDiaryForm({
         }));
     };
 
+    const handleAssignedMPChange = (index: number, field: string, value: string) => {
+        const newMPs = [...formData.assignedMPs];
+        newMPs[index] = { ...newMPs[index], [field]: value };
+        setFormData((prev: any) => ({ ...prev, assignedMPs: newMPs }));
+    };
+
+    const handleAddMP = () => {
+        setFormData((prev: any) => ({
+            ...prev,
+            assignedMPs: [...prev.assignedMPs, { armyNo: "", rank: "", name: "", unit: "", fmn: "" }]
+        }));
+    };
+
+    const handleRemoveMP = (index: number) => {
+        if (formData.assignedMPs.length > 1) {
+            const newMPs = formData.assignedMPs.filter((_: any, i: number) => i !== index);
+            setFormData((prev: any) => ({ ...prev, assignedMPs: newMPs }));
+        }
+    };
+
     const handleSubmit = async () => {
         try {
             const docArray = formData.displayDocuments.split('\n').filter((l: string) => l.trim().length > 0).map((l: string) => l.replace(/^\d+\.\s*/, ''));
@@ -102,7 +133,8 @@ export default function MpGeneralDiaryForm({
                     individual: formData.individual,
                     brief: formData.brief,
                     documents: docArray,
-                    assignedMP: formData.assignedMP,
+                    assignedMPs: formData.assignedMPs,
+                    assignedMP: formData.assignedMPs[0] || {}, // Backward compatibility
                 },
                 remark: formData.remark,
                 authentication: formData.authentication
@@ -122,11 +154,12 @@ export default function MpGeneralDiaryForm({
                 <h3 className="font-bold text-gray-900 border-b pb-2">Occurrence Details</h3>
 
                 <div className="space-y-1.5">
-                    <SuggestionInput
-                        label="Report No."
-                        fieldType="reportNo"
-                        value={formData.caseNo}
-                        onChange={(v) => handleChange("caseNo", v)}
+                    <label className="text-sm font-semibold text-gray-700">Report No.</label>
+                    <input
+                        type="text"
+                        className="flex h-10 w-full rounded-md border border-blue-400 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        value={formData.caseNo || ""}
+                        readOnly
                     />
                 </div>
 
@@ -134,53 +167,50 @@ export default function MpGeneralDiaryForm({
                     <div className="space-y-1.5">
                         <label className="text-sm font-semibold text-gray-700">Date of Occurrence</label>
                         <input
-                            type="date"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={formData.dateOfOccurrence ? (new Date(formData.dateOfOccurrence).toISOString().split('T')[0]) : ""}
-                            onChange={(e) => handleChange("dateOfOccurrence", e.target.value)}
+                            type="text"
+                            className="flex h-10 w-full rounded-md border border-blue-400 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                            value={formData.dateOfOccurrence ? new Date(formData.dateOfOccurrence).toLocaleDateString("en-GB") : ""}
+                            readOnly
                         />
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-sm font-semibold text-gray-700">Time of Occurrence</label>
                         <input
-                            type="time"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={formData.timeOfOccurrence ? (new Date(formData.timeOfOccurrence).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })) : ""}
-                            onChange={(e) => {
-                                const [h, m] = e.target.value.split(':');
-                                const d = new Date(formData.timeOfOccurrence || new Date());
-                                d.setHours(parseInt(h));
-                                d.setMinutes(parseInt(m));
-                                handleChange("timeOfOccurrence", d.toISOString());
-                            }}
+                            type="text"
+                            className="flex h-10 w-full rounded-md border border-blue-400 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                            value={formData.timeOfOccurrence ? new Date(formData.timeOfOccurrence).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ""}
+                            readOnly
                         />
                     </div>
                 </div>
 
                 <div className="space-y-1.5">
-                    <SuggestionInput
-                        label="Place of Offence"
-                        fieldType="place"
-                        value={formData.placeOfOccurrence}
-                        onChange={(v) => handleChange("placeOfOccurrence", v)}
+                    <label className="text-sm font-semibold text-gray-700">Place of Offence</label>
+                    <input
+                        type="text"
+                        className="flex h-10 w-full rounded-md border border-blue-400 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        value={formData.placeOfOccurrence || ""}
+                        readOnly
                     />
                 </div>
 
                 <div className="space-y-1.5">
-                    <SuggestionInput
-                        label="Unit of Occurrence Location"
-                        fieldType="unit"
-                        value={formData.unitOfOccurrence}
-                        onChange={(v) => handleChange("unitOfOccurrence", v)}
+                    <label className="text-sm font-semibold text-gray-700">Unit of Occurrence Location</label>
+                    <input
+                        type="text"
+                        className="flex h-10 w-full rounded-md border border-blue-400 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        value={formData.unitOfOccurrence || ""}
+                        readOnly
                     />
                 </div>
 
                 <div className="space-y-1.5">
-                    <SuggestionInput
-                        label="Offence Type"
-                        fieldType="offenceType"
-                        value={formData.offenceType}
-                        onChange={(v) => handleChange("offenceType", v)}
+                    <label className="text-sm font-semibold text-gray-700">Offence Type</label>
+                    <input
+                        type="text"
+                        className="flex h-10 w-full rounded-md border border-blue-400 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        value={formData.offenceType || ""}
+                        readOnly
                     />
                 </div>
             </section>
@@ -223,7 +253,7 @@ export default function MpGeneralDiaryForm({
                                     </div>
                                 </td>
                                 <td className="px-4 py-3 border-r border-gray-300 align-top">
-                                    {formData.individual.identityCard || "-"}
+                                    {formData.individual.iCardNumber || "-"}
                                 </td>
                                 <td className="px-4 py-3 border-r border-gray-300 align-top">
                                     <div className="flex flex-col space-y-1">
@@ -245,7 +275,6 @@ export default function MpGeneralDiaryForm({
                                     --
                                 </td>
                             </tr>
-                            {/* Potential placeholders for multiple offenders if needed */}
                         </tbody>
                     </table>
                 </div>
@@ -255,7 +284,7 @@ export default function MpGeneralDiaryForm({
             <section className="space-y-2">
                 <h3 className="font-bold text-gray-900">Brief of Occurrence</h3>
                 <textarea
-                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex min-h-[200px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={formData.brief}
                     onChange={(e) => handleChange("brief", e.target.value)}
                 />
@@ -263,25 +292,109 @@ export default function MpGeneralDiaryForm({
 
             {/* Documents */}
             <section className="space-y-2">
-                <h3 className="font-bold text-gray-900">List of Attached Documents & Statements</h3>
+                <h3 className="font-bold text-gray-900 mb-2">List of Attached Documents & Statements</h3>
                 <textarea
-                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex min-h-[200px] w-full rounded-md border border-blue-400 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     value={formData.displayDocuments}
-                    onChange={(e) => handleChange("displayDocuments", e.target.value)}
-                    placeholder="1. Copy of FIR...&#10;2. Statement of..."
+                    readOnly
                 />
             </section>
 
-            {/* Assigned MPs */}
+            {/* Assigned Individuals on Duty */}
             <section className="space-y-4">
                 <h3 className="font-bold text-gray-900 border-b pb-2">Assigned Individuals on Duty</h3>
-                <div className="p-4 border rounded-md bg-gray-50">
-                    <h4 className="font-semibold text-sm mb-3">Assigned MP Details</h4>
-                    <IndividualInputFields
-                        data={formData.assignedMP}
-                        onChange={(field, value) => handleNestedChange("assignedMP", field, value)}
-                        showExtendedFields
+
+                <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-gray-700">Total Strength</label>
+                    <input
+                        type="text"
+                        className="flex h-10 w-full rounded-md border border-blue-500 bg-white px-3 py-2 text-sm focus-visible:outline-none"
+                        value={formData.assignedMPs?.length.toString().padStart(2, '0') || "00"}
+                        readOnly
                     />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-900">List of Assigned MPs on Duty:</label>
+                    <div className="overflow-hidden border border-gray-300 rounded-md mt-2">
+                        <table className="w-full text-sm text-left">
+                            <thead>
+                                <tr className="text-gray-900 border-b border-gray-300 bg-gray-50">
+                                    <th className="py-2 pl-4 pr-4 font-medium w-12 border-r border-gray-300">Sr no.</th>
+                                    <th className="py-2 px-4 font-medium w-32 border-r border-gray-300">Army No.</th>
+                                    <th className="py-2 px-4 font-medium w-24 border-r border-gray-300">Rank</th>
+                                    <th className="py-2 px-4 font-medium w-40 border-r border-gray-300">Name</th>
+                                    <th className="py-2 px-4 font-medium w-32 border-r border-gray-300">Unit</th>
+                                    <th className="py-2 px-4 font-medium border-r border-gray-300">FMN</th>
+                                    <th className="py-2 px-4 font-medium w-10"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {formData.assignedMPs?.map((mp: any, index: number) => (
+                                    <tr key={index} className="group bg-white">
+                                        <td className="py-3 pl-4 pr-4 align-top text-gray-900 font-medium border-r border-gray-300">{index + 1}.</td>
+                                        <td className="py-2 px-2 align-top text-gray-700 border-r border-gray-300">
+                                            <input
+                                                className="w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1"
+                                                value={mp.armyNo || ""}
+                                                onChange={(e) => handleAssignedMPChange(index, 'armyNo', e.target.value)}
+                                                placeholder="Army No"
+                                            />
+                                        </td>
+                                        <td className="py-2 px-2 align-top text-gray-700 border-r border-gray-300">
+                                            <input
+                                                className="w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1"
+                                                value={mp.rank || ""}
+                                                onChange={(e) => handleAssignedMPChange(index, 'rank', e.target.value)}
+                                                placeholder="Rank"
+                                            />
+                                        </td>
+                                        <td className="py-2 px-2 align-top text-gray-700 border-r border-gray-300">
+                                            <input
+                                                className="w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1"
+                                                value={mp.name || ""}
+                                                onChange={(e) => handleAssignedMPChange(index, 'name', e.target.value)}
+                                                placeholder="Name"
+                                            />
+                                        </td>
+                                        <td className="py-2 px-2 align-top text-gray-700 border-r border-gray-300">
+                                            <input
+                                                className="w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1"
+                                                value={mp.unit || ""}
+                                                onChange={(e) => handleAssignedMPChange(index, 'unit', e.target.value)}
+                                                placeholder="Unit"
+                                            />
+                                        </td>
+                                        <td className="py-2 px-2 align-top text-gray-700 border-r border-gray-300">
+                                            <input
+                                                className="w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-1"
+                                                value={mp.fmn || ""}
+                                                onChange={(e) => handleAssignedMPChange(index, 'fmn', e.target.value)}
+                                                placeholder="FMN"
+                                            />
+                                        </td>
+                                        <td className="py-2 px-2 align-middle text-center">
+                                            {formData.assignedMPs.length > 1 && (
+                                                <button
+                                                    onClick={() => handleRemoveMP(index)}
+                                                    className="text-red-400 hover:text-red-600 p-1"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="flex justify-end pt-2">
+                        <Button variant="secondary" onClick={handleAddMP} className="bg-gray-100 hover:bg-gray-200 text-gray-900 gap-2 text-xs font-medium h-9">
+                            <Plus className="w-3.5 h-3.5" />
+                            Add more individual to list
+                        </Button>
+                    </div>
                 </div>
             </section>
 
