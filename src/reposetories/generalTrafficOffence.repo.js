@@ -158,7 +158,16 @@ export class GeneralTrafficOffenceRepository {
     /* ================= VEHICLE / STATUS FILTERS ================= */
 
     if (filters.isVehicleInvolved !== undefined) {
-      matchStage.isVehicleInvolved = filters.isVehicleInvolved === "true";
+      // FIX: Handle "false" to include null/undefined values
+      if (filters.isVehicleInvolved === "true") {
+        matchStage.isVehicleInvolved = true;
+      } else {
+        matchStage.$or = [
+          { isVehicleInvolved: false },
+          { isVehicleInvolved: null },
+          { isVehicleInvolved: { $exists: false } }
+        ];
+      }
     }
 
     if (filters.status !== undefined) {
@@ -170,8 +179,7 @@ export class GeneralTrafficOffenceRepository {
       }
     }
 
-    /* 
-       NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
+    /* NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
        because they might depend on looked-up fields (e.g., offenders).
     */
 
@@ -224,8 +232,6 @@ export class GeneralTrafficOffenceRepository {
         },
       ];
     }
-
-    /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
 
     /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
 
@@ -407,8 +413,6 @@ export class GeneralTrafficOffenceRepository {
 
     return await GeneralTrafficOffence.aggregate(pipeline);
   }
-
-
 
   async create(data) {
     console.log(data);

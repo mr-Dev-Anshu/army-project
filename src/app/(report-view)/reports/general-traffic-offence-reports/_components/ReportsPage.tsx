@@ -23,6 +23,69 @@ import MilitaryPoliceReport, {
 
 import { generateWordReport } from "@/utils/generateWordReport";
 
+/* ================= KEY MAPPING UTILS ================= */
+
+const KEY_MAPPING: Record<string, string> = {
+  "Offence Type": "offenceType",
+  "Vehicle Number": "vehicleNumber",
+  "Vehicle No": "vehicleNumber",
+  "Vehicle Type": "vehicleType",
+  "Place of Offence": "offenceOccurenceDetails.incidentLocation",
+  "Incident Location": "offenceOccurenceDetails.incidentLocation",
+  "Date": "offenceOccurenceDetails.timeOfOffence",
+  "Time": "offenceOccurenceDetails.timeOfOffence",
+  "Description": "offenceOccurenceDetails.description",
+  "Army No": "offenders[0].offenderDetails.armyNumber",
+  "Rank": "offenders[0].offenderDetails.rank",
+  "Name": "offenders[0].offenderDetails.name",
+  "Unit": "offenders[0].offenderDetails.unit",
+  "FMN": "offenders[0].offenderDetails.fmn",
+  "Father Name": "offenders[0].offenderDetails.fatherName",
+  "Relation": "offenders[0].offenderDetails.relation",
+  "Address": "offenders[0].offenderDetails.address",
+  "Reporting MP Name": "onDutyDetailsMPReporting.nameReportingMP",
+  "Reporting MP Rank": "onDutyDetailsMPReporting.rank",
+  "Reporting MP Army No": "onDutyDetailsMPReporting.armyNumber",
+  "Reporting MP Unit": "onDutyDetailsMPReporting.unit",
+};
+
+const setNestedValue = (obj: any, path: string, value: any) => {
+  const keys = path.replace(/\]/g, "").split(/[.\[]/);
+  let current = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    const nextKey = keys[i + 1];
+    const isArray = !isNaN(Number(nextKey));
+
+    if (!current[key]) {
+      current[key] = isArray ? [] : {};
+    }
+    current = current[key];
+  }
+  current[keys[keys.length - 1]] = value;
+};
+
+const mapData = (data: any[]) => {
+  return data.map((item) => {
+    const newItem: any = {};
+    Object.keys(item).forEach((key) => {
+      const mappedKey = KEY_MAPPING[key.trim()] || key.trim();
+      if (item[key] !== null && item[key] !== undefined && item[key] !== "") {
+        setNestedValue(newItem, mappedKey, item[key]);
+      }
+    });
+
+    // FIX: Explicitly handle isVehicleInvolved logic during import
+    if (newItem.vehicleNumber) {
+        newItem.isVehicleInvolved = true;
+    } else if (newItem.isVehicleInvolved === undefined) {
+        newItem.isVehicleInvolved = false;
+    }
+
+    return newItem;
+  });
+};
+
 /* ================= TABLE SECTION ================= */
 
 const TableSection = ({
@@ -96,25 +159,17 @@ export default function ReportsPage({
           json = csvToJsonWithHiddenKeys(result);
         }
 
-        // const dataToValidate = Array.isArray(json) ? json : [json];
-        // // const validation = validateTrafficOffenceData(dataToValidate);
-        // if (!validation.isValid) {
-        //   // Show all validation errors instead of just the first one
-        //   validation.errors.slice(0, 3).forEach(errorMsg => {
-        //     toast.error(errorMsg, { autoClose: 5000 });
-        //   });
-        //   if (validation.errors.length > 3) {
-        //     toast.error(`And ${validation.errors.length - 3} more errors found in the file.`);
-        //   }
-        //   return;
-        // }
+        const dataArray = Array.isArray(json) ? json : [json];
+        const mappedData = mapData(dataArray);
 
-        await processImport(json, createTrafficOffence);
+        // await processImport(json, createTrafficOffence); 
+        // Using mappedData ensures the isVehicleInvolved fix is applied
+        await processImport(mappedData, createTrafficOffence);
+        
         toast.success("Records imported successfully!");
-        refetch();
+        await refetch();
       } catch (error: any) {
         console.error("Error importing file:", error);
-        // Check if the error response is HTML (indicates 404 Not Found or 500 Server Error)
         if (error?.response?.data && typeof error.response.data === "string" && error.response.data.includes("<!DOCTYPE html>")) {
           toast.error("API Error: Endpoint not found (404). Please check 'src/apis/generalTraficOffence/create.tsx' and fix the URL typo (likely 'Traffic' instead of 'Trafic').");
         } else {
@@ -281,14 +336,15 @@ export default function ReportsPage({
     const nvg: any[] = [];
 
     data.forEach((group: any) => {
+      // FIX: Also check if o.isVehicleInvolved is null/undefined and treat as false
       const v =
         group.offences?.filter(
-          (o: any) => o.isVehicleInvolved && filterRecord(o)
+          (o: any) => o.isVehicleInvolved === true && filterRecord(o)
         ) || [];
 
       const nv =
         group.offences?.filter(
-          (o: any) => !o.isVehicleInvolved && filterRecord(o)
+          (o: any) => (o.isVehicleInvolved === false || o.isVehicleInvolved === null || o.isVehicleInvolved === undefined) && filterRecord(o)
         ) || [];
 
       if (v.length) vg.push({ ...group, offences: v });
@@ -297,8 +353,6 @@ export default function ReportsPage({
 
     return { vehicleGroups: vg, noVehicleGroups: nvg };
   }, [data, filters]);
-
-  /* ================= REPORT HELPERS ================= */
 
   /* ================= DOWNLOAD STATE ================= */
   const [isDownloading, setIsDownloading] = useState(false);
