@@ -16,6 +16,7 @@ import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/ty
 import { Loader2, Upload, X, Plus, Trash2, CheckCheck, PanelLeft } from "lucide-react";
 import { uploadFile, uploadMultipleFiles } from "@/lib/uploadFile";
 import Link from "next/link";
+import { FileUpload } from "@/components/common/FileUpload";
 
 const INITIAL_STATE = {
     individuals: [{
@@ -60,18 +61,47 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
     const isPending = isCreating || isUpdating;
 
     useEffect(() => {
-
         if (initialData) {
+            const mappedData = JSON.parse(JSON.stringify({ ...INITIAL_STATE }));
+
+            // Map Root Fields
+            mappedData.incidentPlace = initialData.incidentPlace || "";
+            mappedData.incidentDate = initialData.incidentDate ? initialData.incidentDate.split('T')[0] : "";
+            mappedData.incidentTime = initialData.incidentTime || "";
+            mappedData.incidentBrief = initialData.incidentBrief || "";
+            mappedData.coordinationWithPolice = initialData.coordinationWithPolice || "";
+            mappedData.incidentCoveredBy = initialData.incidentCoveredBy || "";
+
+            // Map Photos with deep copy
+            mappedData.relevantPhotos = initialData.relevantPhotos ? [...initialData.relevantPhotos] : [];
+
+            // Map Individuals with Robust logic
+            if (initialData.individuals && initialData.individuals.length > 0) {
+                mappedData.individuals = initialData.individuals.map((ind: any) => ({
+                    armyNo: ind.armyNo || ind.ArmyNo || "",
+                    rank: ind.rank || ind.Rank || "",
+                    name: ind.name || ind.Name || "",
+                    age: ind.age || "",
+                    totalServiceDuration: ind.totalServiceDuration || "",
+                    unit: ind.unit || ind.Unit || "",
+                    unitLocation: ind.unitLocation || "",
+                    fmn: ind.fmn || ind.FMN || "",
+                    individualWorkingStatus: ind.individualWorkingStatus || "",
+                }));
+            } else {
+                mappedData.individuals = [...INITIAL_STATE.individuals];
+            }
+
             dispatch({
                 type: "SET_PATH",
                 path: "formData.immediateReportingIncident",
-                value: { ...INITIAL_STATE, ...initialData },
+                value: mappedData,
             });
         } else {
             dispatch({
                 type: "SET_PATH",
                 path: "formData.immediateReportingIncident",
-                value: INITIAL_STATE,
+                value: JSON.parse(JSON.stringify(INITIAL_STATE)),
             });
         }
     }, [initialData, dispatch]);
@@ -455,66 +485,19 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                     </div>
                 </div>
 
-                {/* ROW 10: Photos */}
+                {/* ROW 10: Photos / Documents */}
                 <div className="grid grid-cols-1 gap-6 pl-6">
                     <div className="space-y-2 relative">
                         <span className="absolute -left-6 top-0 text-sm font-semibold">{(reportData.individuals?.length || 0) + 5}.</span>
-                        <Label>Note: Relevant Photos if any may also be attached/shared</Label>
-                        <div className="space-y-4 pt-2">
-                            <Label className="text-sm text-gray-500 font-normal">Attach Relevant Photos (Optional)</Label>
-                            <div className="flex gap-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="gap-2"
-                                    disabled={isUploading}
-                                    onClick={() => document.getElementById("photo-upload")?.click()}
-                                >
-                                    {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                    Upload File
-                                </Button>
-                                <input
-                                    id="photo-upload"
-                                    type="file"
-                                    multiple
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleFileUpload}
-                                />
+                        <Label>Relevant Photos / Documents</Label>
+                        <p className="text-sm text-gray-500 font-normal">Attach Relevant Photos, PDFs, or Word Documents (Optional)</p>
 
-                                <Input
-                                    placeholder="Enter URL"
-                                    className="flex-1"
-                                    value={photoUrlInput}
-                                    onChange={(e) => setPhotoUrlInput(e.target.value)}
-                                    onBlur={addPhotoUrl}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            addPhotoUrl();
-                                        }
-                                    }}
-                                />
-                            </div>
-
-                            {/* Photo Previews */}
-                            {reportData.relevantPhotos && reportData.relevantPhotos.length > 0 && (
-                                <div className="grid grid-cols-4 gap-4 mt-4">
-                                    {reportData.relevantPhotos.map((url: string, idx: number) => (
-                                        <div key={idx} className="relative group border rounded-md overflow-hidden aspect-video bg-gray-100 flex items-center justify-center">
-                                            <img src={url} alt={`Evidence ${idx}`} className="w-full h-full object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={() => removePhoto(idx)}
-                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
+                        <div className="pt-2">
+                            <FileUpload
+                                value={reportData.relevantPhotos}
+                                onChange={(files) => setField("relevantPhotos", files)}
+                                label="Attach Files"
+                            />
                         </div>
                     </div>
                 </div>

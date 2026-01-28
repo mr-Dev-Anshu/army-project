@@ -15,6 +15,7 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 import { useEffect } from "react";
+import { FileUpload } from "@/components/common/FileUpload";
 
 export default function StaticSpeedForm({
   onCancel,
@@ -85,36 +86,70 @@ export default function StaticSpeedForm({
             overSpeedCalculated: existingRecord.offenceOccurenceDetails?.overSpeedCalculated,
           },
           // Mapping witnesses and offenders back 
-          witnesses: (existingRecord.witnesses || []).map((w: any) => ({
-            reportingBlock: {
-              armyNumber: w.armyNumber || w.ArmyNo,
-              rank: w.rank,
-              nameReportingMP: w.name,
-              unit: w.unit,
-              contactNumber: w.contactNumber,
-            }
-          })),
+          witnesses: (existingRecord.witnesses || []).map((w: any) => {
+            const wb = w.reportingBlock || {};
+            const wd = w.details || {};
+            return {
+              reportingBlock: {
+                armyNumber: w.ArmyNo || w.armyNo || wb.armyNumber || wb.ArmyNo || wd.armyNumber || wd.ArmyNo || "",
+                rank: w.rank || wb.rank || wd.rank || "",
+                nameReportingMP: w.name || w.nameReportingMP || wb.nameReportingMP || wb.name || wd.name || "",
+                unit: w.unit || wb.unit || wd.unit || "",
+                contactNumber: w.contactNumber || wb.contactNumber || wd.contactNumber || "",
+              }
+            };
+          }),
           selectedWitness: existingRecord.customFields?.selectedWitness,
           offenderDetails: {},
-          offenderPeople: (existingRecord.offenders || existingRecord.individuals || []).map((p: any) => ({
-            whoIsIt: p.offenderDetails?.type || p.type || "Offender", // "Driver", "Co-Driver", etc.
-            type: p.offenderType || "Military", // "Military", "Civilian"
-            role: p.offenderDetails?.role || p.role,
-            details: {
-              armyNumber: p.armyNumber || p.offenderDetails?.armyNumber || p.offenderDetails?.armyNo,
-              rank: p.rank || p.offenderDetails?.rank,
-              name: p.name || p.offenderDetails?.name,
-              unit: p.unit || p.offenderDetails?.unit,
-              fmn: p.fmn || p.offenderDetails?.fmn,
-              command: p.command || p.offenderDetails?.command,
-              address: p.address || p.offenderDetails?.address,
-              iCardNumber: p.iCardNumber || p.offenderDetails?.iCardNumber,
-              ...p.customFields,
-              ...p.offenderDetails,
-            }
-          })),
+          offenderPeople: (existingRecord.offenders || existingRecord.individuals || []).map((p: any) => {
+            // 1. Determine Type
+            let type = p.offenderType || p.type || "Military Person";
+            if (type === "Military") type = "Military Person";
+
+            // 2. Flatten Details
+            // Prioritize root properties (flat) then nested `details` or `offenderDetails`
+            const props = { ...p, ...p.offenderDetails, ...p.details };
+
+            return {
+              whoIsIt: props.type || props.whoIsIt || "Offender",
+              type,
+              role: props.role,
+              details: {
+                // Common Fields
+                armyNumber: props.armyNumber || props.armyNo || props["Army Rider / Driver Number"],
+                rank: props.rank || props["Select Rank"],
+                name: props.name || props["Name"] || props["Full Name"],
+                unit: props.unit || props["Unit"],
+                fmn: props.fmn || props["FMN"],
+                command: props.command || props["Command"],
+                address: props.address || props["Address"],
+                iCardNumber: props.iCardNumber || props.iCardNo || props["ID Card Number"] || props["I Card Number"],
+
+                // Specifics
+                aadharCardNo: props.aadharCardNo || props["Aadhar Card Number"],
+                so: props.so || props["Father's Name (Son of)"] || props["Father's / Husband's Name"],
+                passNo: props.passNo || props["Pass No."] || props["Maid/Servant Pass Number"],
+                passIssueDate: props.passIssueDate,
+                passExpireDate: props.passExpireDate,
+
+                // Keep everything else just in case
+                ...props
+              }
+            };
+          }),
+          documents: existingRecord.documents || [],
         }
       };
+
+      // Ensure documents array is valid
+      if (!existingRecord.documents) {
+        // @ts-ignore
+        mappedData.staticSpeed.documents = [];
+      } else {
+        // @ts-ignore
+        mappedData.staticSpeed.documents = [...existingRecord.documents];
+      }
+
       dispatch({ type: "SET_FORM_DATA", payload: mappedData });
     }
   }, [recordId, existingRecord, dispatch]);
@@ -270,6 +305,14 @@ export default function StaticSpeedForm({
               value: v,
             })
           }
+          files={state.formData.staticSpeed?.documents || []}
+          onFilesChange={(files) =>
+            dispatch({
+              type: "SET_PATH",
+              path: "formData.staticSpeed.documents",
+              value: files,
+            })
+          }
         />
       ),
     },
@@ -331,6 +374,7 @@ export default function StaticSpeedForm({
 
         // ✅ ADDED REMARK
         remark: staticData.remarks,
+        documents: staticData.documents, // Add documents to payload
         customFields: {
           selectedWitness: staticData.selectedWitness,
         },
@@ -531,6 +575,16 @@ export default function StaticSpeedForm({
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
             onReportNoChange={handleReportNoChange}
+            fileUploadProps={{
+              value: state.formData.staticSpeed?.documents || [],
+              onChange: (files: string[]) =>
+                dispatch({
+                  type: "SET_PATH",
+                  path: "formData.staticSpeed.documents",
+                  value: files,
+                }),
+              label: "Attach Certificates/Form/Letters"
+            }}
           />
 
           <RightPanel

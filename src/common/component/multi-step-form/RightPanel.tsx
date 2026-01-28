@@ -25,6 +25,7 @@ interface RightPanelProps {
   mode: "traffic" | "static" | "mp";
 
   mapReport?: (data: any) => any;
+  extraButtons?: React.ReactNode;
 }
 
 export const RightPanel = ({
@@ -35,6 +36,7 @@ export const RightPanel = ({
   stepsConfig,
   mode,
   mapReport,
+  extraButtons,
 }: RightPanelProps) => {
   const { state, dispatch } = useForm();
 
@@ -211,14 +213,17 @@ export const RightPanel = ({
 
           {/* ================= FOOTER ================= */}
           {!state.preview && (
-            <div className="border-t px-4 py-3 bg-white flex justify-between gap-2">
-              <Button
-                className="py-6 px-14 text-white"
-                disabled={step === 1}
-                onClick={onPrev}
-              >
-                <FaArrowLeftLong className="mr-2 " /> Back
-              </Button>
+            <div className="border-t px-4 py-3 bg-white flex justify-between gap-2 items-center">
+              <div className="flex gap-2">
+                <Button
+                  className="py-6 px-14 text-white"
+                  disabled={step === 1}
+                  onClick={onPrev}
+                >
+                  <FaArrowLeftLong className="mr-2 " /> Back
+                </Button>
+                {extraButtons}
+              </div>
 
               {!isLastStep ? (
                 <Button className="bg-[#0088FF] p-6 px-10" onClick={onNext} disabled={isNextDisabled()}>

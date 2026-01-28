@@ -252,8 +252,7 @@ export interface StaticSpeedFormState {
 
   offenderDetails: any;
   offenderPeople: any[];
-
-
+  documents?: string[];
 }
 
 // ---------- FORM ROOT ----------

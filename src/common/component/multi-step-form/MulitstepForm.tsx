@@ -15,6 +15,7 @@ import Step4Remarks from "./steps/Step4Remarks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
+import { FileUpload } from "@/components/common/FileUpload";
 
 export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () => void, recordId?: string }) {
   const { state, dispatch } = useForm();
@@ -94,46 +95,74 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
           // Ensure existing code doesn't break if offenceTypeReference is string[] or object[]
           offenceCode: (existingOffence.offenceTypeReference || []).map((r: any) => typeof r === 'string' ? r : r.reference || r.code),
           offenceRefList: existingOffence.offenceRefList || [],
-          witnesses: (existingOffence.witnesses || []).map((w: any) => ({
-            reportingBlock: {
-              armyNumber: w.armyNumber || w.ArmyNo || w.details?.armyNumber || w.details?.armyNo,
-              rank: w.rank || w.details?.rank,
-              nameReportingMP: w.name || w.details?.name,
-              unit: w.unit || w.details?.unit,
-              contactNumber: w.contactNumber || w.details?.contactNumber,
-            }
-          })),
-          selectedWitness: existingOffence.customFields?.selectedWitness,
-          offenderPeople: (existingOffence.offenders || existingOffence.individuals || []).map((p: any) => ({
-            whoIsIt: p.offenderDetails?.type || p.type || "Offender",
-            type: p.offenderType || "Military",
-            // If p.details exists (flat list from some APIs) or if p itself is the detail
-            details: {
-              armyNumber: p.armyNumber || p.offenderDetails?.armyNumber || p.offenderDetails?.armyNo || p.details?.armyNumber,
-              rank: p.rank || p.offenderDetails?.rank || p.details?.rank,
-              name: p.name || p.offenderDetails?.name || p.details?.name,
-              unit: p.unit || p.offenderDetails?.unit || p.details?.unit,
-              fmn: p.fmn || p.offenderDetails?.fmn || p.details?.fmn,
-              command: p.command || p.offenderDetails?.command || p.details?.command,
-              address: p.address || p.offenderDetails?.address || p.details?.address,
-              iCardNumber: p.iCardNumber || p.offenderDetails?.iCardNumber || p.details?.iCardNumber,
-              ...p.customFields,
-              ...p.offenderDetails,
-              ...p.details,
+          witnesses: (existingOffence.witnesses || []).map((w: any) => {
+            // Handle flat or nested structures
+            const wb = w.reportingBlock || {};
+            const wd = w.details || {};
 
-              // Explicitly map complex/nested fields to ensure hydration
-              relation: p.relation || p.offenderDetails?.relation || p.details?.relation || p.customFields?.relation,
-              relativeType: p.relativeType || p.offenderDetails?.relativeType || p.details?.relativeType || p.customFields?.relativeType,
-              relativeDetails: p.relativeDetails || p.offenderDetails?.relativeDetails || p.details?.relativeDetails || p.customFields?.relativeDetails,
-            }
-          })),
+            return {
+              reportingBlock: {
+                armyNumber: w.ArmyNo || w.armyNo || wb.armyNumber || wb.ArmyNo || wd.armyNumber || wd.ArmyNo || "",
+                rank: w.rank || wb.rank || wd.rank || "",
+                nameReportingMP: w.name || w.nameReportingMP || wb.nameReportingMP || wb.name || wd.name || "",
+                unit: w.unit || wb.unit || wd.unit || "",
+                contactNumber: w.contactNumber || wb.contactNumber || wd.contactNumber || "",
+              }
+            };
+          }),
+          selectedWitness: existingOffence.customFields?.selectedWitness,
+          offenderPeople: (existingOffence.offenders || existingOffence.individuals || []).map((p: any) => {
+            // 1. Determine Type
+            let type = p.offenderType || p.type || "Military Person";
+            if (type === "Military") type = "Military Person";
+
+            // 2. Flatten Details
+            // Prioritize root properties (flat) then nested `details` or `offenderDetails`
+            const props = { ...p, ...p.offenderDetails, ...p.details };
+
+            return {
+              whoIsIt: props.type || props.whoIsIt || "Offender",
+              type,
+              role: props.role,
+              details: {
+                // Common Fields
+                armyNumber: props.armyNumber || props.armyNo || props["Army Rider / Driver Number"],
+                rank: props.rank || props["Select Rank"],
+                name: props.name || props["Name"] || props["Full Name"],
+                unit: props.unit || props["Unit"],
+                fmn: props.fmn || props.FMN,
+                command: props.command || props.Command,
+                address: props.address || props.Address,
+                iCardNumber: props.iCardNumber || props.iCardNo || props["ID Card Number"] || props["I Card Number"],
+
+                // Specifics
+                aadharCardNo: props.aadharCardNo || props["Aadhar Card Number"],
+                so: props.so || props["Father's Name (Son of)"] || props["Father's / Husband's Name"],
+                passNo: props.passNo || props["Pass No."] || props["Maid/Servant Pass Number"],
+                passIssueDate: props.passIssueDate,
+                passExpireDate: props.passExpireDate,
+
+                // Keep everything else just in case
+                ...props
+              }
+            };
+          }),
           remarks: existingOffence.remarks,
         },
         mpReport: {
           ...initialState.formData.mpReport,
-          certificates: existingOffence.certificates || [],
+          certificates: existingOffence.certificates ? [...existingOffence.certificates] : [],
         }
       };
+
+      // Ensure array deep copies for other critical lists
+      // @ts-ignore
+      mappedData.traffic.offenceTypes = [...(existingOffence.offenceTypes || [])];
+      // @ts-ignore
+      mappedData.traffic.witnesses = (existingOffence.witnesses || []).map(w => ({ ...w }));
+      // @ts-ignore
+      mappedData.traffic.offenderPeople = (existingOffence.offenders || existingOffence.individuals || []).map(p => ({ ...p }));
+
       dispatch({ type: "SET_FORM_DATA", payload: mappedData });
     }
   }, [recordId, existingOffence, dispatch]);
@@ -520,6 +549,14 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
               value: v,
             })
           }
+          files={state.formData.mpReport?.certificates || []}
+          onFilesChange={(files) =>
+            dispatch({
+              type: "SET_PATH",
+              path: "formData.mpReport.certificates",
+              value: files,
+            })
+          }
         />
       ),
     },
@@ -559,6 +596,16 @@ export default function MultiStepForm({ onCancel, recordId }: { onCancel?: () =>
                 value: val,
               })
             }
+            fileUploadProps={{
+              value: state.formData.mpReport?.certificates || [],
+              onChange: (files: string[]) =>
+                dispatch({
+                  type: "SET_PATH",
+                  path: "formData.mpReport.certificates",
+                  value: files,
+                }),
+              label: "Attach Certificates/Form/Letters"
+            }}
           />
 
           <RightPanel

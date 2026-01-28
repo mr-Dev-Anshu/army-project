@@ -72,6 +72,7 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
     actionStatusRemark: {
       type: String,
     },
+    documents: [{ type: String }],
   },
   {
     timestamps: true,

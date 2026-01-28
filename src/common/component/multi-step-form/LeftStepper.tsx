@@ -6,6 +6,7 @@ import { useForm } from "@/context/FormContext";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { AttachCertificateModal } from "./AttachCertificateModal";
+import { FileUpload } from "@/components/common/FileUpload";
 
 interface Step {
   id: number;
@@ -27,6 +28,7 @@ interface LeftStepperProps {
   onReportNoChange?: (val: string) => void;
   hideReportNo?: boolean;
   isSubmitting?: boolean;
+  fileUploadProps?: any; // Replace 'any' with FileUploadProps if exported
 }
 
 export const LeftStepper = ({
@@ -41,6 +43,7 @@ export const LeftStepper = ({
   onReportNoChange,
   hideReportNo = false,
   isSubmitting = false,
+  fileUploadProps,
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
@@ -235,53 +238,16 @@ export const LeftStepper = ({
         })}
 
         {/* ATTACH OPTION - Only Last Step */}
-        {currentStep === steps[steps.length - 1].id && (
+        {currentStep === steps[steps.length - 1].id && fileUploadProps && (
           <div className="pt-2">
-            <AttachCertificateModal
-              open={attachModalOpen}
-              onOpenChange={setAttachModalOpen}
-              onSave={handleSaveCertificate}
-            />
-
-            <Button
-              className="w-full bg-white text-black hover:bg-gray-200 flex items-center justify-center gap-2 text-sm sm:text-base mb-2"
-              onClick={() => setAttachModalOpen(true)}
-              disabled={uploadingCert}
-            >
-              <Paperclip className="w-4 h-4" />
-              {uploadingCert ? "Uploading..." : "Attach Certificates/Form/Letters"}
-            </Button>
-
-            {/* LIST ATTACHMENTS */}
-            {state.formData.mpReport?.certificates?.length > 0 && (
-              <div className="flex flex-col gap-2 mt-2 mb-4 overflow-y-auto custom-scrollbar">
-                {state.formData.mpReport.certificates.map((cert: any, i: number) => (
-                  <div key={i} className="flex items-center gap-2 text-xs bg-[#262626] p-2 rounded-md border border-gray-700">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${cert.type === 'letter' ? 'bg-purple-900 text-purple-200' : 'bg-blue-900 text-blue-200'
-                      }`}>
-                      {cert.type === 'letter' ? 'L' : 'C'}
-                    </span>
-                    <a
-                      href={cert.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1 truncate hover:text-blue-400 underline decoration-dotted underline-offset-2"
-                      title={cert.fileName}
-                    >
-                      {cert.fileName || "File"}
-                    </a>
-
-                    <button
-                      onClick={() => handleDeleteCertificate(i)}
-                      className="text-gray-400 hover:text-red-400 transition p-1"
-                      title="Remove attachment"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="mb-2">
+              <FileUpload
+                {...fileUploadProps}
+                mode="button"
+              // Force button style to match sidebar theme
+              // We might need to adjust FileUpload styling or accept className overrides
+              />
+            </div>
           </div>
         )}
       </div>

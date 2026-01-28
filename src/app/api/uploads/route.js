@@ -1,4 +1,4 @@
-export const runtime = 'nodejs'; 
+export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
 import fs from 'fs';
@@ -19,17 +19,19 @@ export async function POST(req) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    const maxSize = 100 * 1024 * 1024; 
+    const maxSize = 100 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json({ error: 'File too large (max 100MB)' }, { status: 400 });
     }
 
     const allowedTypes = [
-      'image/',       
+      'image/',
       'application/pdf',
       'video/mp4',
       'video/webm',
-      'video/quicktime', 
+      'video/quicktime',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
     const isAllowed = allowedTypes.some(type => file.type.startsWith(type));
     if (!isAllowed) {

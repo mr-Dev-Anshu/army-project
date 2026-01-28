@@ -128,6 +128,7 @@ export const initialState: GlobalFormState = {
 
       offenderDetails: {},
       offenderPeople: [],
+      documents: [],
     },
 
     mpReport: {

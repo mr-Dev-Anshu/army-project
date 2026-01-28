@@ -7,7 +7,7 @@ export interface AffectedIndividual {
     unit: string;
     unitLocation: string;
     fmn: string;
-    individualWorkingStatus: "Leave" | "Duty" | "";
+    individualWorkingStatus: "Leave" | "Duty" | "" | string;
 }
 export interface ImmediateReportingIncident {
     _id: string;

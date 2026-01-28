@@ -98,13 +98,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { FileUpload } from "@/components/common/FileUpload";
 
 interface Step4RemarksProps {
   value?: string;
   onChange?: (value: string) => void;
+  files?: string[];
+  onFilesChange?: (files: string[]) => void;
 }
 
-export default function Step4Remarks({ value, onChange }: Step4RemarksProps) {
+export default function Step4Remarks({ value, onChange, files, onFilesChange }: Step4RemarksProps) {
   const remarkOptions = [
     "The indl committed offence...",
     "Suitable disciplinary action...",
@@ -123,20 +126,38 @@ export default function Step4Remarks({ value, onChange }: Step4RemarksProps) {
         value={value || ""}
         onChange={(e) => set(e.target.value)}
         className="min-h-[140px]"
+        placeholder="Enter remarks here..."
       />
 
-      {remarkOptions.map((text, i) => (
-        <label key={i} className="flex gap-2">
-          <Checkbox
-            checked={selected === i}
-            onCheckedChange={() => {
-              setSelected(i);
-              set(text);
-            }}
-          />
-          {text}
-        </label>
-      ))}
+
+
+      <div className="pt-4 border-t">
+        <Label className="text-sm font-semibold mb-3 block">Pre-Written Remarks</Label>
+        <div className="space-y-3">
+          {remarkOptions.map((text, i) => (
+            <label key={i} className="flex gap-2 items-start cursor-pointer">
+              <Checkbox
+                checked={selected === i}
+                onCheckedChange={() => {
+                  setSelected(i);
+                  set(text);
+                }}
+                className="mt-0.5"
+              />
+              <span className="text-sm leading-snug text-gray-600">{text}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2 mt-4 pt-4 border-t">
+        <Label className="font-semibold text-sm text-gray-700">Attached Documents</Label>
+        <FileUpload
+          value={files}
+          onChange={onFilesChange}
+          mode="list"
+        />
+      </div>
     </div>
   );
 }
