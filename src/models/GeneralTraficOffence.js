@@ -44,7 +44,7 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     },
     isVehicleInvolved: {
       type: Boolean,
-      required: true,
+      // required: true,
     },
     vehicleCategory: {
       type: String,
