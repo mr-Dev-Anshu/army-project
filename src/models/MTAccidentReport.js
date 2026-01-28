@@ -1,43 +1,88 @@
 import mongoose from "mongoose";
 
+const individualSchema = new mongoose.Schema(
+    {
+        individualType: {
+            type: String,
+            enum: [
+                "militaryPersonnel", "employee", "civilian", "servantMaid",
+                "shopKeeper", "tempHiredWorker",
+            ]
+        },
+        individualDetails: {
+            type: Schema.Types.Mixed,
+            default: {}
+        },
+    }, { _id: false }
+);
+
+const accidentSchema = new mongoose.Schema(
+    {
+        accidentTime: Date,
+        accidentDate: Date,
+        placeOfAccident: String,
+        accidentType: {
+            type: String,
+            enum: [
+                "normal", "serious", "fatal", "verySerious"
+            ]
+        },
+        causeOfAccident: String,
+    }, { _id: false }
+);
+
+const vehicleSchema = new mongoose.Schema(
+    {
+        vehicleNumber: String,
+        vehicleModel: String,
+    }, { _id: false }
+);
+
+const casualtySchema = new mongoose.Schema(
+    {
+        injuredCivil: { type: Number, default: 0 },
+        injuredMilitary: { type: Number, default: 0 },
+        diedCivil: { type: Number, default: 0 },
+        diedMilitary: { type: Number, default: 0 },
+    }, { _id: false }
+);
+const firMactSchema = new mongoose.Schema(
+    {
+        firMactNumber: String,
+        firDate: Date,
+        firPoliceStation: String,
+    }, { _id: false }
+);
 const mtAccidentReportSchema = new mongoose.Schema(
     {
-        station: { type: String },
-        date: { type: Date },
-        time: { type: String },
-        place: { type: String },
-
-        // Vehicle Details
-        vehicleNo: { type: String },
-        vehicleType: { type: String },
-        vehicleMake: { type: String },
-
-        // Driver Details
-        driverName: { type: String },
-        driverRank: { type: String },
-        driverUnit: { type: String },
-        driverArmyNo: { type: String },
-
-        // Casualties
-        casualties: {
-            fatal: { type: Number, default: 0 },
-            nonFatal: { type: Number, default: 0 }
+        individualDetails: {
+            type: individualSchema,
+            default: {},
         },
-
-        // Occurrence Brief
-        brief: { type: String },
-
+        accidentDetails: {
+            type: accidentSchema,
+            default: {},
+        },
+        vehicleDetails: { type: vehicleSchema, default: {} },
+        casualtyDetails: { type: casualtySchema, default: {} },
+        firMactDetails: { type: firMactSchema, default: {} },
         actionStatus: {
-            type: Boolean,
-            default: false,
-        },
-        actionStatusRemark: {
             type: String,
+            enum: [
+                "pending", "taken"
+            ],
+            default: "pending"
+        },
+        actionStatusRemark: String,
+        remark: String,
+        customFields: {
+            type: Schema.Types.Mixed,
+            default: {}
         },
     },
+
     {
         timestamps: true,
-        strict: false
     }
 );
 
