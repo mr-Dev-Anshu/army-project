@@ -38,6 +38,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const checkAuth = async () => {
     try {
+      // First check localStorage for saved credentials
+      const savedCredentials = localStorage.getItem('userCredentials');
+      if (savedCredentials) {
+        try {
+          const credentials = JSON.parse(savedCredentials);
+          if (credentials.token && credentials.user) {
+            setUser(credentials.user);
+            setIsLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Error parsing saved credentials:", error);
+          localStorage.removeItem('userCredentials');
+        }
+      }
+
+      // Fallback to API check
       const response = await axios.get("/api/auth/whoami");
       if (response.data.success && response.data.user) {
         setUser(response.data.user);
@@ -59,6 +76,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (response.data.success) {
         const userData = response.data.user;
+        const token = response.data.token;
+        
+        // Save credentials to localStorage
+        localStorage.setItem('userCredentials', JSON.stringify({
+          username,
+          token,
+          user: userData,
+          loginTime: new Date().toISOString()
+        }));
+        
         setUser(userData);
         toast.success("Login successful!");
       } else {
@@ -78,6 +105,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      // Clear localStorage credentials
+      localStorage.removeItem('userCredentials');
       setUser(null);
       toast.success("Logged out successfully");
       // Redirect to login page
