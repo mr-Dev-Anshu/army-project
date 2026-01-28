@@ -18,6 +18,7 @@ interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onCh
   className?: string;
   defaultOptions?: (string | { label: string; value: string })[];
   icon?: React.ReactNode;
+  error?: string;
 }
 
 export function SuggestionInput({
@@ -85,7 +86,11 @@ export function SuggestionInput({
           value={safeValue}
           onChange={handleChange}
           onFocus={() => setShowSuggestions(true)}
-          className={cn("bg-white", icon && "pr-10")}
+          className={cn(
+            "bg-white",
+            icon && "pr-10",
+            props.error ? "border-red-500 bg-red-50" : ""
+          )}
           autoComplete="off"
           {...props}
         />
@@ -114,6 +119,7 @@ export function SuggestionInput({
           ))}
         </div>
       )}
+      {props.error && <p className="text-xs text-red-500">{props.error}</p>}
     </div>
   );
 }

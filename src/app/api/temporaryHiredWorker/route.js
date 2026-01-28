@@ -24,19 +24,19 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const { error, value } = createTemporaryHiredWorkerSchema.validate(body, {
-      abortEarly: false,
-    });
+    // const { error, value } = createTemporaryHiredWorkerSchema.validate(body, {
+    //   abortEarly: false,
+    // });
 
-    if (error) {
-      const errors = error.details.reduce((acc, curr) => {
-        acc[curr.path.join(".")] = curr.message;
-        return acc;
-      }, {});
-      return NextResponse.json({ error: errors }, { status: 400 });
-    }
+    // if (error) {
+    //   const errors = error.details.reduce((acc, curr) => {
+    //     acc[curr.path.join(".")] = curr.message;
+    //     return acc;
+    //   }, {});
+    //   return NextResponse.json({ error: errors }, { status: 400 });
+    // }
 
-    const worker = await createTemporaryHiredWorker(value);
+    const worker = await createTemporaryHiredWorker(body);
     return NextResponse.json(worker, { status: 201 });
   } catch (error) {
     console.error("POST error:", error);

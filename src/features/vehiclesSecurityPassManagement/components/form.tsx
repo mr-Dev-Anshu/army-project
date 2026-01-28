@@ -57,6 +57,9 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
 
     const isPending = isCreating || isUpdating;
 
+
+    const [errors, setErrors] = React.useState<Record<string, string>>({});
+
     useEffect(() => {
         if (initialData) {
             dispatch({
@@ -102,6 +105,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
     };
 
     const handleSave = async () => {
+        setErrors({}); // Clear previous errors
         try {
             // Basic Validation
             if (!vehiclePass.vehicleIdentification.registrationNumber) {
@@ -162,7 +166,13 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
         } catch (error: any) {
             console.error(error);
             const msg = error?.response?.data?.message || "Operation failed";
-            toast.error(msg);
+
+            if (msg.includes("E11000 duplicate key error") && msg.includes("vehicleIdentification.registrationNumber")) {
+                setErrors((prev) => ({ ...prev, registrationNumber: "Registration Number already exists" }));
+                toast.error("Duplicate Registration Number");
+            } else {
+                toast.error(msg);
+            }
         }
     };
 
@@ -181,6 +191,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                 placeholder="eg. --"
                                 value={vehiclePass.vehicleIdentification.registrationNumber}
                                 onChange={(v) => setField("vehicleIdentification.registrationNumber", v)}
+                                error={errors.registrationNumber}
                             />
                         </div>
                         <div className="space-y-1">
