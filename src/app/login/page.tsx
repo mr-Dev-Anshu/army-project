@@ -46,7 +46,7 @@ export default function LoginPage() {
     try {
       await login(data.username, data.password);
       router.push("/");
-      router.refresh();
+
     } catch (error) {
       // Error is already handled by AuthContext
       console.error("Login failed:", error);
@@ -57,15 +57,15 @@ export default function LoginPage() {
 
   return (
     <main className="flex h-screen w-full bg-white font-sans overflow-hidden">
-      
+
       {/* LEFT SIDE: Hero Section */}
       {/* LEFT SIDE: Hero Section */}
       <section className="relative hidden w-3/5 flex-col justify-between p-12 lg:flex overflow-hidden">
-        
+
         {/* Background Image Layer */}
-        <div 
+        <div
           className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[20000ms] hover:scale-110"
-          style={{ 
+          style={{
             backgroundImage: "url('/military.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center'
@@ -75,58 +75,58 @@ export default function LoginPage() {
         {/* TACTICAL BLUE FILTER OVERLAYS */}
         {/* 1. Deep Blue Tint (Multiplication layer for that "Night Vision/Tactical" look) */}
         <div className="absolute inset-0 z-[1] bg-[#001a3d] opacity-70 mix-blend-multiply"></div>
-        
+
         {/* 2. Gradient Overlay (Ensures text readability on the left) */}
         <div className="absolute inset-0 z-[2] bg-gradient-to-r from-[#000d1a] via-transparent to-[#001a3d]/40"></div>
-        
+
         {/* 3. Subtle Cyan Glow (Optional: Adds a high-tech sheen) */}
         <div className="absolute inset-0 z-[3] bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent"></div>
-  <div className="absolute inset-0 z-[3] bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 z-[3] bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent"></div>
 
-  {/* Branding Header */}
-  <div className="relative z-10 flex items-center gap-4">
-    <div className="bg-white p-1.5 rotate-45 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-      <div className="w-4 h-4 bg-slate-900"></div>
-    </div>
-    <div className="flex flex-col">
-      <h2 className="text-[40px] font-bold tracking-tighter text-white uppercase leading-none">
-        Provost | 21 Corps
-      </h2>
-      <span className="text-[10px] text-cyan-400 font-bold tracking-[0.3em] uppercase">
-        Central Command
-      </span>
-    </div>
-  </div>
+        {/* Branding Header */}
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="bg-white p-1.5 rotate-45 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <div className="w-4 h-4 bg-slate-900"></div>
+          </div>
+          <div className="flex flex-col">
+            <h2 className="text-[40px] font-bold tracking-tighter text-white uppercase leading-none">
+              Provost | 21 Corps
+            </h2>
+            <span className="text-[10px] text-cyan-400 font-bold tracking-[0.3em] uppercase">
+              Central Command
+            </span>
+          </div>
+        </div>
 
-  {/* Hero Content */}
-  <div className="relative z-1 max-w-xl">
-    <h1 className="mb-6 text-2xl font-black leading-[0.95] text-white tracking-tighter drop-shadow-xl">
-      SECURING 
-      STRATEGIC <br /> 
-      OPERATIONS
-      GLOBALLY.
-    </h1>
-    <p className="text-xl text-blue-100/70 leading-relaxed font-light border-l-2 border-cyan-500/50 pl-6">
-      Integrated intelligence, surveillance, and tactical management platform 
-      for authorized personnel only.
-    </p>
-  </div>
+        {/* Hero Content */}
+        <div className="relative z-1 max-w-xl">
+          <h1 className="mb-6 text-2xl font-black leading-[0.95] text-white tracking-tighter drop-shadow-xl">
+            SECURING
+            STRATEGIC <br />
+            OPERATIONS
+            GLOBALLY.
+          </h1>
+          <p className="text-xl text-blue-100/70 leading-relaxed font-light border-l-2 border-cyan-500/50 pl-6">
+            Integrated intelligence, surveillance, and tactical management platform
+            for authorized personnel only.
+          </p>
+        </div>
 
-  {/* Footer Info */}
-  <div className="relative z-10 flex gap-8 text-[10px] font-bold tracking-[0.2em] text-blue-300/50 uppercase">
-    <div className="flex items-center gap-3">
-      <div className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-      </div>
-      <span>Network Status: Online</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <ShieldCheck className="w-3.5 h-3.5 text-cyan-500/50" />
-      <span>Encrypted: AES-256</span>
-    </div>
-  </div>
-</section>
+        {/* Footer Info */}
+        <div className="relative z-10 flex gap-8 text-[10px] font-bold tracking-[0.2em] text-blue-300/50 uppercase">
+          <div className="flex items-center gap-3">
+            <div className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </div>
+            <span>Network Status: Online</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-cyan-500/50" />
+            <span>Encrypted: AES-256</span>
+          </div>
+        </div>
+      </section>
 
       {/* RIGHT SIDE: Login Form */}
       <section className="flex w-full flex-col justify-center px-8 sm:px-16 lg:w-2/5 overflow-y-auto">
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                   className={`w-full border ${errors.password ? 'border-red-500' : 'border-slate-200'} rounded-md py-3.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all`}
                 />
-                <button 
+                <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
@@ -187,9 +187,9 @@ export default function LoginPage() {
 
             {/* Session Stay */}
             <div className="flex items-center gap-3">
-              <input 
-                type="checkbox" 
-                id="session" 
+              <input
+                type="checkbox"
+                id="session"
                 className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
               />
               <label htmlFor="session" className="text-xs font-medium text-slate-500 cursor-pointer">
@@ -198,7 +198,7 @@ export default function LoginPage() {
             </div>
 
             {/* Submit Button */}
-            <button 
+            <button
               disabled={isLoading}
               className="flex w-full items-center justify-center gap-3 rounded-md bg-[#003eb3] py-4 text-xs font-bold tracking-[0.15em] text-white uppercase transition-all hover:bg-blue-800 active:scale-[0.98] shadow-xl shadow-blue-900/20 disabled:opacity-70"
             >
@@ -227,7 +227,7 @@ export default function LoginPage() {
 
           {/* Disclaimer */}
           <p className="mt-10 text-center text-[9px] uppercase leading-relaxed tracking-widest text-slate-400">
-            Authorized personnel only. All activities within this portal are monitored and logged. 
+            Authorized personnel only. All activities within this portal are monitored and logged.
             Unauthorized access is subject to military prosecution.
           </p>
         </div>
