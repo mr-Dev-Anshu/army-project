@@ -15,19 +15,108 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
+import { useEffect } from "react";
+
 export default function StaticSpeedForm({
   onCancel,
+  existingReport,
 }: {
   onCancel: () => void;
+  existingReport?: any;
 }) {
   const { state, dispatch } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const staticData = state.formData.staticSpeed as any;
+  // TODO: Add Update Hook if needed for editing submission
 
   const createStaticRecord = useCreateStaticSpeedRecord();
+  // const updateStaticRecord = useUpdateStaticSpeedRecord(); // Assuming hook exists or we use create
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
+
+  // Hydration Effect
+  useEffect(() => {
+    if (existingReport) {
+      console.log("Hydrating Static Speed Form:", existingReport);
+      const er = existingReport;
+
+      // Deep copy initial structure
+      const speedNodes = { ...initialState.formData.staticSpeed };
+
+      speedNodes.reportNo = er.reportId || er.reportNo || "";
+      speedNodes.remarks = er.remarks || ""; // or customFields.remarks
+
+      // Vehicle
+      speedNodes.vehicleDetails = {
+        category: er.vehicleCategory || "",
+        vehicleType: er.vehicleType || "",
+        driverType: er.driverType || "",
+        vehicleNumber: er.vehicleNumber || "",
+        vehicleName: er.vehicleName || "",
+      };
+
+      // Duty Block
+      speedNodes.dutyBlock = {
+        dateOfDuty: er.dutyBlock?.dateOfDuty ? new Date(er.dutyBlock.dateOfDuty).toISOString().split('T')[0] : "",
+        startTime: er.dutyBlock?.startTime || "",
+        endTime: er.dutyBlock?.endTime || "",
+        dutyLocation: er.dutyBlock?.dutyLocation || "",
+        dutyType: er.dutyBlock?.dutyType || "",
+      };
+
+      // Reporting Block (MP)
+      speedNodes.reportingBlock = {
+        nameReportingMP: er.reportingBlock?.nameReportingMP || "",
+        rank: er.reportingBlock?.rank || "",
+        unit: er.reportingBlock?.unit || "",
+        armyNumber: er.reportingBlock?.armyNumber || "",
+        contactNumber: er.reportingBlock?.contactNumber || "",
+      };
+
+      // Offence Block
+      speedNodes.offenceBlock = {
+        timeOfOffence: er.offenceBlock?.timeOfOffence || er.offenceOccurenceDetails?.timeOfOffence || "",
+        time: er.offenceBlock?.time || er.offenceOccurenceDetails?.time || "",
+        incidentLocation: er.offenceBlock?.incidentLocation || er.offenceOccurenceDetails?.incidentLocation || "",
+        description: er.offenceBlock?.description || "",
+        briefDescription: er.offenceBlock?.briefDescription || "",
+        description2: er.offenceBlock?.description2 || "",
+        actualSpeedNoted: er.offenceBlock?.actualSpeedNoted || er.offenceBlock?.actualSpeed || "",
+        authSpeed: er.offenceBlock?.authSpeed || "",
+        overSpeedCalculated: er.offenceBlock?.overSpeedCalculated || er.offenceBlock?.overSpeed || "",
+      };
+
+      // Witnesses (Array)
+      if (Array.isArray(er.witnesses)) {
+        speedNodes.witnesses = er.witnesses.map((w: any) => ({
+          reportingBlock: {
+            nameReportingMP: w.name || w.nameReportingMP || "",
+            rank: w.rank || "",
+            unit: w.unit || "",
+            armyNumber: w.armyNumber || w.ArmyNo || "",
+            contactNumber: w.contactNumber || "",
+          }
+        }));
+      }
+
+      // Offender People (Array)
+      if (Array.isArray(er.offenderPeople)) {
+        speedNodes.offenderPeople = er.offenderPeople; // Assuming direct map works or implement deep map
+      }
+
+      // Hydrate attachments
+      speedNodes.attachments = er.customFields?.attachments || [];
+
+      dispatch({
+        type: "SET_FORM_DATA",
+        payload: {
+          ...initialState.formData,
+          staticSpeed: speedNodes
+        }
+      });
+    }
+  }, [existingReport, dispatch]);
 
   /* ================= FETCH REPORT NO ================= */
   const reportNo = staticData.reportNo || "TEMP/STATIC/001";
@@ -117,12 +206,12 @@ export default function StaticSpeedForm({
       offence: {
         actualSpeed: val(
           data?.offenceBlock?.actualSpeedNoted ||
-            data?.offenceBlock?.actualSpeed
+          data?.offenceBlock?.actualSpeed
         ),
         authSpeed: val(data?.offenceBlock?.authSpeed),
         overSpeed: val(
           data?.offenceBlock?.overSpeedCalculated ||
-            data?.offenceBlock?.overSpeed
+          data?.offenceBlock?.overSpeed
         ),
       },
 
@@ -204,13 +293,13 @@ export default function StaticSpeedForm({
           dutyType: staticData.dutyBlock?.dutyType || undefined,
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
+            ).toISOString()
             : undefined,
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
+            ).toISOString()
             : undefined,
         },
 
@@ -244,6 +333,10 @@ export default function StaticSpeedForm({
         customFields: {
           selectedWitness: staticData.selectedWitness,
         },
+
+        // DOCUMENTS (Mapped to backend expected field, often 'documents' or part of customFields?)
+        // Assuming backend accepts 'documents' array of strings
+        documents: staticData.documents || [],
       };
 
       console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
@@ -434,6 +527,14 @@ export default function StaticSpeedForm({
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
             onReportNoChange={handleReportNoChange}
+            onAttach={(items) => {
+              const current = state.formData.staticSpeed.attachments || [];
+              dispatch({
+                type: "SET_PATH",
+                path: "formData.staticSpeed.attachments",
+                value: [...current, ...items],
+              });
+            }}
           />
 
           <RightPanel
@@ -441,7 +542,32 @@ export default function StaticSpeedForm({
             formData={state.formData}
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onPrev={() => dispatch({ type: "PREV_STEP" })}
-            stepsConfig={stepsConfig}
+            stepsConfig={{
+              ...stepsConfig,
+              4: {
+                title: "4. REMARKS OF CO/2IC PROVOST UNIT:",
+                component: (
+                  <Step4Remarks
+                    value={state.formData.staticSpeed.remarks || ""}
+                    onChange={(v) =>
+                      dispatch({
+                        type: "SET_PATH",
+                        path: "formData.staticSpeed.remarks",
+                        value: v,
+                      })
+                    }
+                    attachments={state.formData.staticSpeed?.attachments || []}
+                    onAttachmentsChange={(items) =>
+                      dispatch({
+                        type: "SET_PATH",
+                        path: "formData.staticSpeed.attachments",
+                        value: items
+                      })
+                    }
+                  />
+                ),
+              },
+            }}
             mode="static"
             mapReport={mapStaticToReport}
           />

@@ -25,11 +25,13 @@ const TableSection = ({
   isVehicleInvolved,
   onView,
   onPrint,
+  onEdit,
 }: {
   groups: any[];
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
+  onEdit?: (offence: any) => void;
 }) => {
   return (
     <div className="bg-white rounded-lg shadow border mt-6 overflow-hidden">
@@ -44,6 +46,7 @@ const TableSection = ({
         isVehicleInvolved={isVehicleInvolved}
         onView={onView}
         onPrint={onPrint}
+        onEdit={onEdit}
       />
     </div>
   );
@@ -57,6 +60,7 @@ export default function ReportsPage({
   viewType?: "vehicle" | "no-vehicle";
 }) {
   const [isCreating, setIsCreating] = useState(false);
+  const [editingReport, setEditingReport] = useState<any>(null); // State for editing
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
@@ -300,10 +304,10 @@ export default function ReportsPage({
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100">
-        <Button onClick={() => setIsCreating(false)} className="m-4">
+        <Button onClick={() => { setIsCreating(false); setEditingReport(null); }} className="m-4">
           <ArrowLeft /> Back
         </Button>
-        <MultiStepForm />
+        <MultiStepForm existingOffence={editingReport} />
       </div>
     );
   }
@@ -321,6 +325,12 @@ export default function ReportsPage({
         onDownloadWord={() => handleDownloadReport(viewingReport)}
         onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
+        onEdit={() => {
+          setEditingReport(viewingReport);
+          setIsCreating(true);
+          setViewingReport(null);
+        }}
+        onViewEvidences={() => console.log("View Evidence Clicked")}
       >
         <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
       </ReportViewerWrapper>
@@ -376,6 +386,10 @@ export default function ReportsPage({
           isVehicleInvolved={viewType === "vehicle"}
           onView={setViewingReport}
           onPrint={handlePrintReport}
+          onEdit={(offense) => {
+            setEditingReport(offense);
+            setIsCreating(true);
+          }}
         />
       ) : (
         <div className="text-center text-gray-500 mt-10">No records found</div>

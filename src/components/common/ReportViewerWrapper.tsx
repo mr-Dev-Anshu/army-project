@@ -11,6 +11,8 @@ interface ReportViewerWrapperProps {
     downloadType?: "PDF" | "Word" | null;
     onDownloadWord?: () => void;
     onDownloadPdf?: () => void;
+    onViewAttachments?: () => void;
+    onViewEvidences?: () => void;
     children: React.ReactNode;
 }
 
@@ -23,6 +25,8 @@ export default function ReportViewerWrapper({
     downloadType,
     onDownloadWord,
     onDownloadPdf,
+    onViewAttachments,
+    onViewEvidences,
     children,
 }: ReportViewerWrapperProps) {
     return (
@@ -42,30 +46,59 @@ export default function ReportViewerWrapper({
                     <span className="font-semibold text-sm tracking-wide uppercase">{title}</span>
                 </div>
 
-                {/* Center: Actions */}
+                {/* Center: View Modes */}
                 <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
-                    {/* Edit Report */}
+                    {/* View Final Report (Active) */}
+                    <Button
+                        variant="default"
+                        className="bg-blue-600 text-white hover:bg-blue-700 h-9 px-4 gap-2 rounded text-sm font-medium transition-all"
+                    >
+                        View Final Report <FileText className="w-4 h-4" />
+                    </Button>
+
+                    {/* View Signed Attachments */}
                     <Button
                         variant="outline"
                         className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
-                        onClick={onEdit}
-                        disabled={!onEdit}
+                        onClick={onViewAttachments}
                     >
-                        Edit Report <Edit className="w-3.5 h-3.5" />
+                        View Signed Attachments <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🔒</div>
                     </Button>
 
-                    {/* Print Report */}
+                    {/* View Evidences */}
                     <Button
-                        variant="secondary"
-                        className="bg-white text-black hover:bg-gray-200 h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
-                        onClick={() => onPrint ? onPrint() : window.print()}
+                        variant="outline"
+                        className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
+                        onClick={onViewEvidences}
                     >
-                        Print Report <Printer className="w-3.5 h-3.5" />
+                        View Evidences <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🖼️</div>
+                        {/* Use Lucide icon if available below, sticking to generic for now if Import missing. I will add imports */}
                     </Button>
                 </div>
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2">
+                    {/* Edit Report */}
+                    <Button
+                        variant="ghost"
+                        className="text-white/70 hover:text-white hover:bg-white/10 h-9 px-3 gap-2 rounded text-sm font-normal transition-all"
+                        onClick={onEdit}
+                        disabled={!onEdit}
+                    >
+                        <Edit className="w-4 h-4" />
+                    </Button>
+
+                    {/* Print Report */}
+                    <Button
+                        variant="ghost"
+                        className="text-white/70 hover:text-white hover:bg-white/10 h-9 px-3 gap-2 rounded text-sm font-normal transition-all"
+                        onClick={() => onPrint ? onPrint() : window.print()}
+                    >
+                        <Printer className="w-4 h-4" />
+                    </Button>
+
+                    <div className="w-px h-6 bg-white/20 mx-2" />
+
                     {onDownloadWord && (
                         <Button
                             variant="ghost"
@@ -106,9 +139,29 @@ export default function ReportViewerWrapper({
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-auto p-8 flex justify-center">
+            <div className="flex-1 overflow-auto p-8 pb-32 flex justify-center relative">
                 {/* The child component (Report) should carry its own background (usually white) and shadow */}
                 {children}
+
+                {/* FLOATING ACTION BUTTONS */}
+                {/* FLOATING ACTION BUTTONS */}
+                <div className="fixed bottom-0 left-0 w-full bg-black py-4 flex justify-center items-center gap-4 z-50 print:hidden border-t border-white/10">
+                    {onEdit && (
+                        <Button
+                            className="bg-white text-black hover:bg-gray-200 border border-gray-200 h-10 px-6 rounded font-semibold text-sm transition-all"
+                            onClick={onEdit}
+                        >
+                            Edit Report <Edit className="w-4 h-4 ml-2" />
+                        </Button>
+                    )}
+
+                    <Button
+                        className="bg-white text-black hover:bg-gray-200 border border-gray-200 h-10 px-6 rounded font-semibold text-sm transition-all"
+                        onClick={() => onPrint ? onPrint() : window.print()}
+                    >
+                        Print Report <Printer className="w-4 h-4 ml-2" />
+                    </Button>
+                </div>
             </div>
 
             {/* DOWNLOAD LOADER OVERLAY */}

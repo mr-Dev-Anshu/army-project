@@ -38,6 +38,7 @@ interface StaticSpeedTableProps {
   onView?: (item: any) => void;
   onPrint?: (item: any) => void;
   onDownload?: (item: any) => void;
+  onEdit?: (item: any) => void;
 }
 
 export default function StaticSpeedTable({
@@ -45,6 +46,7 @@ export default function StaticSpeedTable({
   onView,
   onPrint,
   onDownload,
+  onEdit,
 }: StaticSpeedTableProps) {
   const { mutateAsync: updateRecord, isPending: isUpdating } =
     useUpdateStaticSpeedRecord();
@@ -65,7 +67,7 @@ export default function StaticSpeedTable({
   });
 
   const [remarkError, setRemarkError] = React.useState("");
-    const [attachModalOpen, setAttachModalOpen] = React.useState(false);
+  const [attachModalOpen, setAttachModalOpen] = React.useState(false);
   const [selectedReport, setSelectedReport] = React.useState<any>(null);
 
   const handleStatusClick = (recordId: string, currentStatus: boolean) => {
@@ -79,10 +81,10 @@ export default function StaticSpeedTable({
     });
   };
 
-    const handleAttachCertificate = (item: any) => {
-  setSelectedReport(item);
-  setAttachModalOpen(true);
-};
+  const handleAttachCertificate = (item: any) => {
+    setSelectedReport(item);
+    setAttachModalOpen(true);
+  };
 
   const handleDeleteClick = (recordId: string) => {
     setModalState({
@@ -272,14 +274,12 @@ export default function StaticSpeedTable({
               }}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${
-                  isTaken ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
+                  }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
-                    isTaken ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
+                    }`}
                 ></div>
               </div>
               <span className="text-[10px] text-gray-500 font-medium uppercase">
@@ -324,7 +324,10 @@ export default function StaticSpeedTable({
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onSelect={() => onEdit && onEdit(item.originalData || item)}
+              >
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
@@ -382,9 +385,8 @@ export default function StaticSpeedTable({
         }
         message={
           modalState.type === "status"
-            ? `Are you sure you want to change the status to ${
-                modalState.newStatus ? "Taken" : "Pending"
-              }?`
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
+            }?`
             : "Are you sure you want to delete this report? This action cannot be undone."
         }
         confirmLabel={

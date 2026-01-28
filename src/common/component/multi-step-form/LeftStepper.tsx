@@ -3,6 +3,9 @@ import { Check, Edit2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@/context/FormContext";
 import React, { useState, useEffect } from "react";
+import { AttachDocumentDialog } from "@/components/common/AttachDocumentDialog";
+import { AttachmentItem } from "@/common/types/form.types";
+// import { AttachCertificateModal } from "./AttachCertificateModal"; // No longer needed if we use generic FileUpload
 
 interface Step {
   id: number;
@@ -17,13 +20,15 @@ interface LeftStepperProps {
   title?: string;
   reportNo?: string;
   onStepClick: (id: number) => void;
-
-  // ⭐ ADD THIS
   onCreate?: () => void;
   onCancel?: () => void;
   onReportNoChange?: (val: string) => void;
   hideReportNo?: boolean;
   isSubmitting?: boolean;
+
+  // New Prop for Attachments
+  onAttach?: (items: AttachmentItem[]) => void;
+
 }
 
 export const LeftStepper = ({
@@ -38,6 +43,7 @@ export const LeftStepper = ({
   onReportNoChange,
   hideReportNo = false,
   isSubmitting = false,
+  onAttach,
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
@@ -49,6 +55,7 @@ export const LeftStepper = ({
 
   const [editing, setEditing] = useState(false);
   const [reportValue, setReportValue] = useState(reportNo || "");
+  const [isAttachOpen, setIsAttachOpen] = useState(false);
 
   useEffect(() => {
     if (!editing) {
@@ -58,7 +65,6 @@ export const LeftStepper = ({
 
   const saveReportNo = () => {
     setEditing(false);
-    console.log("Saved Report No:", reportValue);
     // Already synced via onChange
   };
 
@@ -185,6 +191,25 @@ export const LeftStepper = ({
             </div>
           );
         })}
+
+        {/* ATTACH OPTION - Only Last Step */}
+        {currentStep === steps[steps.length - 1].id && onAttach && (
+          <div className="pt-2">
+            <Button
+              onClick={() => setIsAttachOpen(true)}
+              className="w-full bg-white text-black hover:bg-gray-200"
+            >
+              Attach Signed Certificates/Form/Letters
+            </Button>
+
+            <AttachDocumentDialog
+              open={isAttachOpen}
+              onOpenChange={setIsAttachOpen}
+              onSave={onAttach}
+            />
+          </div>
+        )}
+
       </div>
 
       {/* FOOTER */}

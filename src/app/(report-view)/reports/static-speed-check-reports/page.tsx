@@ -32,6 +32,7 @@ export default function StaticSpeedCheckReportsPage() {
   });
 
   const [isCreating, setIsCreating] = useState(false);
+  const [editingReport, setEditingReport] = useState<any>(null);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
@@ -393,6 +394,17 @@ export default function StaticSpeedCheckReportsPage() {
     );
   }
 
+  if (isCreating) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Button onClick={() => { setIsCreating(false); setEditingReport(null); }} className="m-4">
+          <ArrowLeft /> Back
+        </Button>
+        <StaticSpeedForm onCancel={() => { setIsCreating(false); setEditingReport(null); }} existingReport={editingReport} />
+      </div>
+    );
+  }
+
   if (viewingReport) {
     return (
       <ReportViewerWrapper
@@ -406,6 +418,11 @@ export default function StaticSpeedCheckReportsPage() {
         onDownloadWord={() => handleDownloadReport(viewingReport)}
         onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
+        onEdit={() => {
+          setEditingReport(viewingReport);
+          setIsCreating(true);
+          setViewingReport(null);
+        }}
       >
         <StaticSpeedReport {...mapToReportProps(viewingReport)} />
       </ReportViewerWrapper>
@@ -451,6 +468,10 @@ export default function StaticSpeedCheckReportsPage() {
           onView={setViewingReport}
           onPrint={handlePrintReport}
           onDownload={handleDownloadReport}
+          onEdit={(report) => {
+            setEditingReport(report);
+            setIsCreating(true);
+          }}
         />
       )}
     </div>
