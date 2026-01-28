@@ -1,11 +1,11 @@
 // lib/mongoose-plugins/auditFields.js
 
-const { Schema } = require('mongoose');
+import { Schema } from 'mongoose';
 
-function auditFieldsPlugin(schema, options = {}) {
+export function auditFieldsPlugin(schema, options = {}) {
   const createdByField = options.createdByField || 'createdBy';
   const updatedByField = options.updatedByField || 'updatedBy';
-  
+
   if (!schema.paths[createdByField]) {
     schema.add({
       [createdByField]: { type: Schema.Types.ObjectId, ref: 'User', required: false },
@@ -18,52 +18,35 @@ function auditFieldsPlugin(schema, options = {}) {
     });
   }
 
-  // Pre-save hook
-  schema.pre('save', function(next) {
+  // Pre-save hook using async/await (no next callback)
+  schema.pre('save', async function () {
     try {
-      const userId = getCurrentUserId(); 
-      console.log('Audit Plugin - Current User ID:', userId);
-      console.log('Audit Plugin - Is New:', this.isNew);
-
+      const userId = getCurrentUserId();
       if (this.isNew && userId) {
         this[createdByField] = userId;
-        console.log('Audit Plugin - Set createdBy:', userId);
       }
-
       if (userId) {
         this[updatedByField] = userId;
-        console.log('Audit Plugin - Set updatedBy:', userId);
-      }
-
-      if (typeof next === 'function') {
-        next();
       }
     } catch (error) {
-      console.error('Audit Plugin Error:', error);
-      if (typeof next === 'function') {
-        next(error);
-      }
+      console.error('Audit Plugin pre-save Error:', error);
+      throw error;
     }
   });
 
-  // Pre-update hooks
+  // Pre-update hooks using async/await (no next callback)
   const updateOps = ['updateOne', 'findOneAndUpdate', 'updateMany', 'findByIdAndUpdate'];
 
   updateOps.forEach((method) => {
-    schema.pre(method, function(next) {
+    schema.pre(method, async function () {
       try {
         const userId = getCurrentUserId();
         if (userId) {
           this.set(`${updatedByField}`, userId);
         }
-        
-        if (typeof next === 'function') {
-          next();
-        }
       } catch (error) {
-        if (typeof next === 'function') {
-          next(error);
-        }
+        console.error(`Audit Plugin ${method} Error:`, error);
+        throw error;
       }
     });
   });
@@ -71,16 +54,10 @@ function auditFieldsPlugin(schema, options = {}) {
 
 let currentUserId = null;
 
-function setCurrentUserId(id) {
+export function setCurrentUserId(id) {
   currentUserId = id;
 }
 
-function getCurrentUserId() {
+export function getCurrentUserId() {
   return currentUserId;
 }
-
-module.exports = {
-  auditFieldsPlugin,
-  setCurrentUserId,
-  getCurrentUserId
-};

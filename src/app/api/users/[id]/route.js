@@ -28,6 +28,7 @@ export async function PUT(req, { params }) {
         const updatedUser = await updateUserService(id, body);
         return NextResponse.json(updatedUser);
     } catch (error) {
+        console.error("User Update Route Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

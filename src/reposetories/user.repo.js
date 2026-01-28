@@ -1,4 +1,4 @@
-import {User} from  "@/models/user"
+import { User } from "@/models/user"
 async function createUserRepo(data) {
   try {
     return await User.create(data);
@@ -27,6 +27,21 @@ async function getUserByUsernameRepo(username) {
   }
 }
 
+// Return a full mongoose document (not lean) for authentication flows
+async function getUserByUsernameForAuth(usernameOrEmail) {
+  try {
+    const trimmed = usernameOrEmail.trim();
+    return await User.findOne({
+      $or: [
+        { username: { $regex: new RegExp(`^${trimmed}$`, 'i') } },
+        { email: { $regex: new RegExp(`^${trimmed}$`, 'i') } }
+      ]
+    }).select('+password');
+  } catch (error) {
+    throw new Error(`Error finding user for auth: ${error.message}`);
+  }
+}
+
 async function getUserByIdRepo(id) {
   try {
     return await User.findById(id).lean();
@@ -45,6 +60,13 @@ async function deleteUserRepo(id) {
 
 async function updateUserRepo(id, data) {
   try {
+    if (data.password) {
+      const user = await User.findById(id);
+      if (!user) throw new Error("User not found");
+      Object.assign(user, data);
+      await user.save();
+      return user.toObject();
+    }
     return await User.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
@@ -58,6 +80,7 @@ export {
   createUserRepo,
   getAllUsersRepo,
   getUserByUsernameRepo,
+  getUserByUsernameForAuth,
   getUserByIdRepo,
   deleteUserRepo,
   updateUserRepo,

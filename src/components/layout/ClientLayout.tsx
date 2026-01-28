@@ -18,7 +18,22 @@ export default function ClientLayout({
     const isLogin = pathname === "/login";
 
     if (isPrint || isLogin) {
-        return <>{children}</>;
+        return (
+            <>
+                {children}
+                <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
+            </>
+        );
     }
 
     return (

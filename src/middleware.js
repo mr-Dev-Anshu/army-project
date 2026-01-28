@@ -61,16 +61,23 @@ async function middleware(request) {
     }
 
     setCurrentUserId(user.id);
-    console.log("Middleware - Set User ID:", user.id);
-
     const method = request.method;
     const response = NextResponse.next();
 
-    if (["PUT", "PATCH", "DELETE"].includes(method) && user.role !== "superadmin") {
-      return NextResponse.json(
-        { success: false, error: "Forbidden — only superadmin allowed" },
-        { status: 403 }
-      );
+    // Permissions check for PUT, PATCH, DELETE
+    if (["PUT", "PATCH", "DELETE"].includes(method)) {
+      const isAdmin = user.role?.toLowerCase() === "superadmin" || user.role?.toLowerCase() === "admin";
+
+      // Extract ID from /api/users/[id]
+      const pathParts = pathname.split('/');
+      const isSelfUpdate = pathParts[2] === 'users' && pathParts[3] === user.id;
+
+      if (!isAdmin && !isSelfUpdate) {
+        return NextResponse.json(
+          { success: false, error: "Forbidden — insufficient permissions" },
+          { status: 403 }
+        );
+      }
     }
 
     return response;

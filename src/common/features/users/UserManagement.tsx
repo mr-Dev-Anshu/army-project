@@ -75,10 +75,10 @@ export default function UserManagement() {
                         <span className="mx-1">/</span>
                         <span className="text-gray-900 font-medium">User Management</span>
                     </div>
-                    <Button variant="outline" className="bg-[#1e293b] text-white hover:bg-[#334155] border-none gap-2 rounded-lg">
+                    {/* <Button variant="outline" className="bg-[#1e293b] text-white hover:bg-[#334155] border-none gap-2 rounded-lg">
                         <Download className="h-4 w-4" />
                         Download & Print Report
-                    </Button>
+                    </Button> */}
                 </div>
 
                 {/* Directory Title */}
@@ -106,10 +106,10 @@ export default function UserManagement() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <Button variant="outline" className="h-11 px-6 border-gray-200 text-gray-600 gap-2">
+                    {/* <Button variant="outline" className="h-11 px-6 border-gray-200 text-gray-600 gap-2">
                         <Filter className="h-4 w-4" />
                         Filter
-                    </Button>
+                    </Button> */}
                     <Button className="h-11 px-6 bg-[#0070f3] hover:bg-blue-700 text-white gap-2 rounded-lg" onClick={handleCreate}>
                         <Plus className="h-5 w-5" />
                         Add New User

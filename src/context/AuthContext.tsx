@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (response.data.success) {
         const userData = response.data.user;
         const token = response.data.token;
-        
+
         // Save credentials to localStorage
         localStorage.setItem('userCredentials', JSON.stringify({
           username,
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           user: userData,
           loginTime: new Date().toISOString()
         }));
-        
+
         setUser(userData);
         toast.success("Login successful!");
       } else {
@@ -93,7 +93,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      const errorMessage = error.response?.data?.error || "Login failed";
+      let errorMessage = "Login failed (network/server error)";
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          errorMessage = error.response.data?.error || "Invalid username or password";
+        } else if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       toast.error(errorMessage);
       throw error;
     }

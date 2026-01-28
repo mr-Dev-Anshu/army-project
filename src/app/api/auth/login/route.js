@@ -24,11 +24,14 @@ export async function POST(req) {
       role: user.role,
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET);
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     const response = NextResponse.json({
       success: true,
       message: "Login successful",
+      token: token,
       user: {
         id: user._id.toString(),
         username: user.username,

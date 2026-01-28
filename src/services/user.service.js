@@ -1,14 +1,15 @@
 // services/user.service.js
 import bcrypt from 'bcryptjs';
 
-import  {
+import {
   createUserRepo,
   getAllUsersRepo,
   getUserByUsernameRepo,
+  getUserByUsernameForAuth,
   getUserByIdRepo,
   deleteUserRepo,
   updateUserRepo,
-}  from '@/reposetories/user.repo'; 
+} from '@/reposetories/user.repo';
 import { hashPassword } from '@/utils/hashPassword';
 
 export async function createUserService(userData) {
@@ -32,9 +33,7 @@ export async function createUserService(userData) {
 
     const dataToSave = { ...userData };
 
-    if (dataToSave.password) {
-      dataToSave.password = await hashPassword(dataToSave.password);
-    }
+
 
     if (dataToSave.email && typeof dataToSave.email === 'string') {
       dataToSave.email = dataToSave.email.trim().toLowerCase();
@@ -85,23 +84,41 @@ async function updateUserService(id, data) {
 }
 
 async function loginUserService(username, password) {
-  const user = await getUserByUsernameService(username);
-   console.log(user , "this is user")
-  if (!user) {
+  // Fetch full mongoose document to allow migrating legacy/plaintext passwords
+  const userDoc = await getUserByUsernameForAuth(username);
+  if (!userDoc) {
     throw new Error('Invalid username or password');
   }
 
-  const passwordMatch = await bcrypt.compare(password, user.password);
+  const storedPassword = userDoc.password;
+  let passwordMatch = false;
+
+  try {
+    // If password looks like a bcrypt hash, compare normally
+    if (typeof storedPassword === 'string' && storedPassword.startsWith('$2')) {
+      passwordMatch = await bcrypt.compare(password, storedPassword);
+    } else {
+      // Legacy / un-hashed password fallback: compare directly and migrate
+      passwordMatch = password === storedPassword;
+      if (passwordMatch) {
+        // Just save it plain - the pre-save hook in the model will hash it
+        userDoc.password = password;
+        await userDoc.save();
+      }
+    }
+  } catch (err) {
+    console.error('Error while comparing password:', err);
+    throw new Error('Invalid username or password');
+  }
 
   if (!passwordMatch) {
     throw new Error('Invalid username or password');
   }
 
-//   const { password, ...safeUser } = user;
-  return user;
+  return userDoc;
 }
 
- export  {
+export {
   createUserService,
   getAllUsersService,
   getUserByUsernameService,
