@@ -14,21 +14,21 @@ import { hashPassword } from '@/utils/hashPassword';
 
 export async function createUserService(userData) {
   try {
-    if (!userData.username || !userData.password) {
-      throw new Error('Username and password are required');
+    if (!userData.username || !userData.password || !userData.role) {
+      throw new Error('Username, password and role are required');
     }
 
     if (typeof userData.username !== 'string' || userData.username.trim().length < 3) {
       throw new Error('Username must be at least 3 characters long');
     }
 
-    if (typeof userData.password !== 'string' || userData.password.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
+    if (typeof userData.password !== 'string' || userData.password.length < 8) {
+      throw new Error('Password must be at least 8 characters long');
     }
 
     const existing = await getUserByUsernameRepo(userData.username);
     if (existing) {
-      throw new Error('Username already taken');
+      throw new Error('Username already exists');
     }
 
     const dataToSave = { ...userData };
@@ -59,6 +59,11 @@ export async function createUserService(userData) {
 
     return safeUser;
   } catch (err) {
+    // If it's a known error (like "Username already exists"), throw it directly
+    if (err.message === 'Username already exists' || err.message.includes('required') || err.message.includes('long')) {
+      throw err;
+    }
+    console.error("Create User Service Error:", err);
     throw new Error(err.message || 'Failed to create user');
   }
 }

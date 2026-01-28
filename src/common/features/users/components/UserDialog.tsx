@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Eye, EyeOff, X } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
 import {
     Sheet,
     SheetContent,
     SheetHeader,
     SheetTitle,
-    SheetFooter,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useCreateUser, useUpdateUser } from "../hooks/useUser";
+import { SuggestionInput } from "@/common/component/SuggestionInput";
 
 const baseSchema = z.object({
     username: z.string().min(2, "Full Name is required"),
@@ -30,17 +31,17 @@ const baseSchema = z.object({
     rank: z.string().optional().or(z.literal("")),
     unit: z.string().optional().or(z.literal("")),
     email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
-    role: z.string().optional().or(z.literal("")),
+    role: z.string().min(1, "Role is required"),
 });
 
 // Schema for Creating a User (Password Required)
 const createUserSchema = baseSchema.extend({
-    password: z.string().min(6, "Password is required (min 6 chars)"),
+    password: z.string().min(8, "Password is required (min 8 chars)"),
 });
 
 // Schema for Editing a User (Password Optional)
 const editUserSchema = baseSchema.extend({
-    password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
+    password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal("")),
 });
 
 type UserFormValues = z.infer<typeof createUserSchema>;
@@ -59,7 +60,7 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
     // Select the correct schema based on whether we are editing or creating
     const schema = user ? editUserSchema : createUserSchema;
 
-    const form = useForm<UserFormValues>({
+    const form = useForm<any>({
         resolver: zodResolver(schema),
         defaultValues: {
             username: "",
@@ -125,11 +126,23 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
                 delete updateData.password;
             }
             updateUser({ id: user._id, data: updateData }, {
-                onSuccess: () => onOpenChange(false)
+                onSuccess: () => {
+                    toast.success("User updated successfully");
+                    onOpenChange(false);
+                },
+                onError: (error: any) => {
+                    toast.error(error.message || "Failed to update user");
+                }
             });
         } else {
             createUser(finalData, {
-                onSuccess: () => onOpenChange(false)
+                onSuccess: () => {
+                    toast.success("User created successfully");
+                    onOpenChange(false);
+                },
+                onError: (error: any) => {
+                    toast.error(error.message || "Failed to create user");
+                }
             });
         }
     };
@@ -154,9 +167,9 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
                 {/* Form Body - Scrollable */}
                 <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-6 space-y-6">
                     <div className="space-y-2">
-                        <Label htmlFor="username" className="text-sm font-semibold text-gray-700">Full Name</Label>
-                        <Input id="username" placeholder="Enter full name" className="h-11 bg-gray-50/30" {...register("username")} />
-                        {errors.username && <p className="text-red-500 text-xs">{errors.username.message}</p>}
+                        <Label htmlFor="username" className="text-sm font-semibold text-gray-700">Username</Label>
+                        <Input id="username" placeholder="Enter username" className="h-11 bg-gray-50/30" {...register("username")} />
+                        {errors.username?.message && <p className="text-red-500 text-xs">{errors.username.message as string}</p>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -166,28 +179,29 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="rank" className="text-sm font-semibold text-gray-700">Rank</Label>
-                            <Select onValueChange={(val) => setValue("rank", val)} value={watch("rank")}>
-                                <SelectTrigger className="h-11 bg-gray-50/30">
-                                    <SelectValue placeholder="Select Rank" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Lieutenant">Lieutenant</SelectItem>
-                                    <SelectItem value="Captain">Captain</SelectItem>
-                                    <SelectItem value="Major">Major</SelectItem>
-                                    <SelectItem value="Colonel">Colonel</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <SuggestionInput
+                                placeholder="Select Rank"
+                                value={watch("rank") || ""}
+                                onChange={(val) => setValue("rank", val)}
+                                fieldType="rank"
+                            />
                         </div>
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="unit" className="text-sm font-semibold text-gray-700">Unit / Department</Label>
-                        <Input id="unit" placeholder="e.g. 15 Rajput" className="h-11 bg-gray-50/30" {...register("unit")} />
+                        <SuggestionInput
+                            placeholder="e.g. 15 Rajput"
+                            value={watch("unit") || ""}
+                            onChange={(val) => setValue("unit", val)}
+                            fieldType="unit"
+                        />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Official Email</Label>
                         <Input id="email" type="email" placeholder="example@army.nic.in" className="h-11 bg-gray-50/30" {...register("email")} />
+                        {errors.email?.message && <p className="text-red-500 text-xs">{errors.email.message as string}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -224,6 +238,7 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
                                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                             </button>
                         </div>
+                        {errors.password?.message && <p className="text-red-500 text-xs">{errors.password.message as string}</p>}
                         <p className="text-[11px] text-gray-400 italic">
                             The user will be prompted to change this upon first login.
                         </p>

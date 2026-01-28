@@ -61,17 +61,23 @@ async function deleteUserRepo(id) {
 async function updateUserRepo(id, data) {
   try {
     if (data.password) {
-      const user = await User.findById(id);
+      const user = await User.findById(id).select('+password');
       if (!user) throw new Error("User not found");
-      Object.assign(user, data);
+
+      const { _id, createdAt, updatedAt, __v, ...updateData } = data;
+      Object.assign(user, updateData);
+
       await user.save();
-      return user.toObject();
+      const result = user.toObject();
+      delete result.password;
+      return result;
     }
     return await User.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
     }).lean();
   } catch (error) {
+    console.error("Error updating user:", error);
     throw new Error(`Error updating user: ${error.message}`);
   }
 }

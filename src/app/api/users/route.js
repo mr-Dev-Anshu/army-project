@@ -43,6 +43,9 @@ export async function POST(req) {
         const newUser = await createUserService(body);
         return NextResponse.json(newUser, { status: 201 });
     } catch (error) {
+        if (error.message.includes("required") || error.message.includes("taken") || error.message.includes("exists") || error.message.includes("long")) {
+            return NextResponse.json({ error: error.message }, { status: 400 });
+        }
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
