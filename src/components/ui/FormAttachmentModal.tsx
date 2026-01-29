@@ -130,48 +130,48 @@ export default function FormAttachmentModal({
                     <FileDropZone onFileSelect={(newFiles) => setFiles((prev) => [...prev, ...newFiles])} />
                 </div>
 
-                {/* 🔹 Selected file preview & Naming */}
-                {files.length > 0 && (
-                    <div className="space-y-4">
-                        {/* Name Prefix Input - Only show if files are selected, as per user flow intuition */}
-                        <div>
-                            <Label className="text-gray-700 mb-1 block">
-                                Name of Attachment (Prefix)
-                            </Label>
-                            <Input
-                                placeholder="Enter Name e.g. 'Leave Certificate'"
-                                value={prefixName}
-                                onChange={(e) => setPrefixName(e.target.value)}
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                If multiple files, sequential numbers will be appended.
-                            </p>
-                        </div>
+                {/* 🔹 Name of Attachment - Always visible */}
+                <div>
+                    <Label className="text-gray-700 mb-2 block font-medium">
+                        Name of Attachment
+                    </Label>
+                    <Input
+                        placeholder="Enter Name"
+                        value={prefixName}
+                        onChange={(e) => setPrefixName(e.target.value)}
+                        className="h-11 text-sm text-gray-900"
+                    />
+                </div>
 
-                        <div className="max-h-[150px] overflow-y-auto space-y-2 pr-1">
-                            {files.map((file, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center justify-between border rounded-lg px-3 py-2 bg-gray-50 text-sm"
+                {/* 🔹 Selected file preview - Only when files exist */}
+                {files.length > 0 && (
+                    <div className="max-h-[150px] overflow-y-auto space-y-2 pr-1">
+                        {files.map((file, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center justify-between border rounded-lg px-3 py-2 bg-gray-50 text-sm"
+                            >
+                                <span className="text-gray-700 truncate max-w-[80%]">
+                                    {file.name}
+                                </span>
+                                <button
+                                    onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))}
+                                    className="text-gray-400 hover:text-red-500"
                                 >
-                                    <span className="text-gray-700 truncate max-w-[80%]">
-                                        {file.name}
-                                    </span>
-                                    <button
-                                        onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))}
-                                        className="text-gray-400 hover:text-red-500"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 )}
 
                 {/* 🔹 Footer */}
                 <div className="flex items-center justify-end gap-3 pt-4">
-                    <Button variant="outline" onClick={handleClose} disabled={isUploading}>
+                    <Button
+                        onClick={handleClose}
+                        disabled={isUploading}
+                        className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+                    >
                         Cancel
                     </Button>
 

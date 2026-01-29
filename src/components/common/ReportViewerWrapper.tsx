@@ -35,8 +35,7 @@ export default function ReportViewerWrapper({
 }: ReportViewerWrapperProps) {
     return (
         <div className="fixed inset-0 z-50 bg-[#333333] flex flex-col animate-in fade-in duration-200">
-            {/* Header */}
-            <div className="bg-[#0A0A0A] text-white px-6 py-4 flex items-center justify-between shadow-md print:hidden border-b border-white/10">
+            <div className="bg-black text-white px-6 py-4 flex items-center justify-between shadow-md print:hidden border-b border-white/10 h-16">
                 {/* Left: Back + Title */}
                 <div className="flex items-center gap-4">
                     <Button
@@ -47,15 +46,15 @@ export default function ReportViewerWrapper({
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
-                    <span className="font-semibold text-sm tracking-wide uppercase">{title}</span>
+                    <span className="font-semibold text-sm tracking-wide uppercase text-white">{title}</span>
                 </div>
 
                 {/* Center: View Modes */}
-                <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+                <div className="flex items-center gap-3 absolute left-1/2 transform -translate-x-1/2">
                     {/* View Final Report */}
                     <Button
-                        variant={activeView === "report" ? "default" : "outline"}
-                        className={`${activeView === "report" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-transparent border-white/20 text-white hover:bg-white/10"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all`}
+                        variant={activeView === "report" ? "default" : "secondary"}
+                        className={`${activeView === "report" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-white text-black hover:bg-gray-100"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all border-none`}
                         onClick={onViewReport}
                     >
                         View Final Report <FileText className="w-4 h-4" />
@@ -64,82 +63,33 @@ export default function ReportViewerWrapper({
                     {/* View Signed Attachments */}
                     {onViewAttachments && (
                         <Button
-                            variant={activeView === "attachments" ? "default" : "outline"}
-                            className={`${activeView === "attachments" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-transparent border-white/20 text-white hover:bg-white/10"} h-9 px-4 gap-2 rounded text-sm font-normal transition-all`}
+                            variant={activeView === "attachments" ? "default" : "secondary"}
+                            className={`${activeView === "attachments" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-white text-black hover:bg-gray-100"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all border-none`}
                             onClick={onViewAttachments}
                         >
-                            View Signed Attachments <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🔒</div>
+                            View Signed Attachments <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px] font-bold">A</div>
                         </Button>
                     )}
 
                     {/* View Evidences */}
                     {onViewEvidences && (
                         <Button
-                            variant={activeView === "evidences" ? "default" : "outline"}
-                            className={`${activeView === "evidences" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-transparent border-white/20 text-white hover:bg-white/10"} h-9 px-4 gap-2 rounded text-sm font-normal transition-all`}
+                            variant={activeView === "evidences" ? "default" : "secondary"}
+                            className={`${activeView === "evidences" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-white text-black hover:bg-gray-100"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all border-none`}
                             onClick={onViewEvidences}
                         >
-                            View Evidences <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🖼️</div>
+                            View Evidences <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px] font-bold">E</div>
                         </Button>
                     )}
                 </div>
 
-                {/* Right: Actions */}
+                {/* Right: Close Button Only */}
                 <div className="flex items-center gap-2">
-                    {/* Edit Report */}
-                    <Button
-                        variant="ghost"
-                        className="text-white/70 hover:text-white hover:bg-white/10 h-9 px-3 gap-2 rounded text-sm font-normal transition-all"
-                        onClick={onEdit}
-                        disabled={!onEdit}
-                    >
-                        <Edit className="w-4 h-4" />
-                    </Button>
-
-                    {/* Print Report */}
-                    <Button
-                        variant="ghost"
-                        className="text-white/70 hover:text-white hover:bg-white/10 h-9 px-3 gap-2 rounded text-sm font-normal transition-all"
-                        onClick={() => onPrint ? onPrint() : window.print()}
-                    >
-                        <Printer className="w-4 h-4" />
-                    </Button>
-
-                    <div className="w-px h-6 bg-white/20 mx-2" />
-
-                    {onDownloadWord && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-white/70 hover:text-white hover:bg-white/10 w-9 h-9"
-                            onClick={onDownloadWord}
-                            disabled={isDownloading}
-                            title="Download Word"
-                        >
-                            {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                        </Button>
-                    )}
-
-                    {onDownloadPdf && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-white/70 hover:text-white hover:bg-white/10 w-9 h-9"
-                            onClick={onDownloadPdf}
-                            disabled={isDownloading}
-                            title="Download PDF"
-                        >
-                            {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <FileDown className="w-4 h-4" />}
-                        </Button>
-                    )}
-
-                    <div className="w-px h-6 bg-white/20 mx-2" />
-
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={onBack}
-                        className="text-white/70 hover:text-white hover:bg-white/10 rounded-full w-8 h-8"
+                        className="bg-white text-black hover:bg-gray-200 rounded text-black w-8 h-8 flex items-center justify-center"
                     >
                         <X className="w-5 h-5" />
                     </Button>

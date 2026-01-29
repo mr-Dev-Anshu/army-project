@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, Upload, Download, Printer, Trash2, X } from "lucide-react";
 
 interface Attachment {
     type: string; // "Certificate" | "Forms" | "Letter"
@@ -146,61 +146,184 @@ export default function SignedAttachmentsViewer({ attachments = [], record, onAt
         };
     }, [categorizedAttachments]);
 
-    return (
-        <div className="w-full max-w-5xl bg-white rounded-xl shadow-sm p-8 min-h-[400px]">
-            <h2 className="text-xl font-bold mb-6 text-black">View Signed Attachments</h2>
+    const [previewItem, setPreviewItem] = useState<Attachment | null>(null);
 
-            <div className="flex items-center justify-between mb-8 p-1 bg-gray-50 rounded-lg">
-                {/* Filter Tabs */}
-                <div className="flex items-center gap-1">
-                    {(["Certificate", "Forms", "Letter"] as const).map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setActiveTab(type)}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === type ? "bg-white shadow-sm text-black" : "text-gray-500 hover:text-gray-700"
-                                }`}
-                        >
-                            {type}s
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center ${activeTab === type ? "bg-black text-white" : "bg-gray-200 text-gray-600"
-                                }`}>
-                                {counts[type]}
-                            </span>
-                        </button>
-                    ))}
+    // Helper to check if url is an image
+    const isImage = (url?: string) => {
+        if (!url) return false;
+        return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+    };
+
+    const handleView = (item: Attachment) => {
+        if (onViewFor) {
+            onViewFor(item);
+            return;
+        }
+
+        if (item.url) {
+            if (isImage(item.url)) {
+                setPreviewItem(item);
+            } else {
+                window.open(item.url, "_blank");
+            }
+        }
+    };
+
+    const handleDownload = () => {
+        if (previewItem?.url) {
+            const a = document.createElement('a');
+            a.href = previewItem.url;
+            a.download = previewItem.name || 'download';
+            a.target = "_blank";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    };
+
+    const handlePrint = () => {
+        if (previewItem?.url) {
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(`<html><head><title>Print ${previewItem.name}</title></head><body style="margin:0; text-align:center;"><img src="${previewItem.url}" style="max-width:100%;" onload="window.print()" /></body></html>`);
+                printWindow.document.close();
+            }
+        }
+    };
+
+    return (
+        <>
+            <div className="w-full max-w-5xl bg-white rounded-xl shadow-sm p-8 min-h-[400px]">
+                <h2 className="text-xl font-bold mb-6 text-black">View Signed Attachments</h2>
+
+                <div className="flex items-center justify-between mb-8 p-1 bg-gray-50 rounded-lg">
+                    {/* Filter Tabs */}
+                    <div className="flex items-center gap-1">
+                        {(["Certificate", "Forms", "Letter"] as const).map((type) => (
+                            <button
+                                key={type}
+                                onClick={() => setActiveTab(type)}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === type ? "bg-white shadow-sm text-black" : "text-gray-500 hover:text-gray-700"
+                                    }`}
+                            >
+                                {type}s
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center ${activeTab === type ? "bg-black text-white" : "bg-gray-200 text-gray-600"
+                                    }`}>
+                                    {counts[type]}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Attach More */}
+                    {onAttachMore && (
+                        <Button onClick={onAttachMore} className="bg-black hover:bg-gray-800 text-white gap-2 h-9 px-4 rounded-md mr-1">
+                            Attach More <Plus className="w-4 h-4" />
+                        </Button>
+                    )}
                 </div>
 
-                {/* Attach More */}
-                {onAttachMore && (
-                    <Button onClick={onAttachMore} className="bg-black hover:bg-gray-800 text-white gap-2 h-9 px-4 rounded-md mr-1">
-                        Attach More <Plus className="w-4 h-4" />
-                    </Button>
-                )}
+                {/* List */}
+                <div className="space-y-0 divide-y divide-gray-100 max-h-[280px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    {filtered.length === 0 ? (
+                        <div className="text-center py-20 text-gray-400">
+                            No {activeTab}s attached yet.
+                        </div>
+                    ) : (
+                        filtered.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between py-4 group">
+                                <div className="flex items-center gap-6">
+                                    <span className="font-bold text-gray-900 w-6">{idx + 1}.</span>
+                                    <span
+                                        className="font-bold text-gray-900 text-sm hover:text-blue-600 hover:underline cursor-pointer transition-colors"
+                                        onClick={() => handleView(item)}
+                                    >
+                                        {item.name}
+                                    </span>
+                                </div>
+                                <Button
+                                    size="icon"
+                                    className="bg-black text-white hover:bg-gray-800 h-10 w-10 min-w-[2.5rem] rounded-lg shadow-sm"
+                                    onClick={() => handleView(item)}
+                                >
+                                    <FileText className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
 
-            {/* List */}
-            <div className="space-y-0 divide-y divide-gray-100 max-h-[280px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {filtered.length === 0 ? (
-                    <div className="text-center py-20 text-gray-400">
-                        No {activeTab}s attached yet.
+            {/* Image Preview Detail Overlay */}
+            {previewItem && (
+                <div
+                    className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+                    onClick={() => setPreviewItem(null)}
+                >
+                    {/* Top Header Bar */}
+                    <div
+                        className="w-full bg-black text-white px-6 py-4 flex items-center justify-between shadow-2xl z-20"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="text-md font-semibold truncate max-w-4xl">{previewItem.name}</h2>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="bg-transparent text-white hover:bg-white/20 rounded-full w-8 h-8"
+                            onClick={() => setPreviewItem(null)}
+                        >
+                            <X className="w-5 h-5" />
+                        </Button>
                     </div>
-                ) : (
-                    filtered.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between py-4 group">
-                            <div className="flex items-center gap-6">
-                                <span className="font-bold text-gray-900 w-6">{idx + 1}.</span>
-                                <span className="font-bold text-gray-900 text-sm">{item.name}</span>
-                            </div>
-                            <Button
-                                size="icon"
-                                className="bg-black text-white hover:bg-gray-800 h-9 w-9 rounded-lg"
-                                onClick={() => onViewFor?.(item)}
-                            >
-                                <FileText className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    ))
-                )}
-            </div>
-        </div>
+
+                    {/* Image Container */}
+                    <div
+                        className="flex-1 w-full flex items-center justify-center overflow-hidden p-8 relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={previewItem.url}
+                            alt={previewItem.name}
+                            className="max-w-[85%] max-h-[85vh] object-contain shadow-2xl bg-white"
+                        />
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div
+                        className="w-full bg-black px-6 py-4 flex items-center justify-center gap-4 shadow-[0_-5px_20px_rgba(0,0,0,0.3)] z-20"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Button
+                            className="bg-white text-black hover:bg-gray-200 h-9 gap-2 font-medium min-w-[120px]"
+                            onClick={() => alert("Re-Upload feature is not connected.")}
+                        >
+                            Re-Upload <Upload className="w-4 h-4" />
+                        </Button>
+
+                        <Button
+                            className="bg-white text-black hover:bg-gray-200 h-9 gap-2 font-medium min-w-[120px]"
+                            onClick={handleDownload}
+                        >
+                            Download <Download className="w-4 h-4" />
+                        </Button>
+
+                        <Button
+                            className="bg-white text-black hover:bg-gray-200 h-9 gap-2 font-medium min-w-[120px]"
+                            onClick={handlePrint}
+                        >
+                            Print <Printer className="w-4 h-4" />
+                        </Button>
+
+                        <Button
+                            className="bg-[#EF4444] text-white hover:bg-red-600 h-9 gap-2 font-medium min-w-[120px]"
+                            onClick={() => alert("Delete feature is not connected.")}
+                        >
+                            Delete <Trash2 className="w-4 h-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }

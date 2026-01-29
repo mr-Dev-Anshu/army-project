@@ -186,19 +186,19 @@ export const LeftStepper = ({
           );
         })}
 
+        {/* ATTACH BUTTON - INLINE */}
+        {onAttach && currentStep === steps.length && (
+          <div className="mt-8 mb-6 px-1">
+            <Button
+              onClick={() => setIsAttachOpen(true)}
+              className="w-full bg-white text-black hover:bg-gray-200 h-10 text-[13px] font-medium rounded-md shadow-none flex items-center justify-center gap-2"
+            >
+              <Paperclip className="w-4 h-4" />
+              Attach Signed Certificates/Form/Letters
+            </Button>
+          </div>
+        )}
       </div>
-
-      {/* ATTACH BUTTON - STICKY AT BOTTOM OF SIDEBAR */}
-      {onAttach && (
-        <div className="pt-4 mt-auto pb-4">
-          <Button
-            onClick={() => setIsAttachOpen(true)}
-            className="w-full bg-white text-black hover:bg-gray-200 h-10 text-xs sm:text-sm font-semibold rounded-md shadow-sm"
-          >
-            Attach Signed Certificates/Form/Letters
-          </Button>
-        </div>
-      )}
 
       <FormAttachmentModal
         isOpen={isAttachOpen}
@@ -232,6 +232,6 @@ export const LeftStepper = ({
           {isSubmitting ? "Saving..." : "Save Report"}
         </Button>
       </div>
-    </div>
+    </div >
   );
 };

@@ -26,20 +26,20 @@ export default function FileDropZone({ onFileSelect }: Props) {
       />
 
       <Button
-        className="bg-black text-white hover:bg-black rounded-full"
+        className="bg-black text-white hover:bg-gray-800 rounded-full px-6"
         variant="secondary"
         size="sm"
         onClick={() => inputRef.current?.click()}
       >
-        Select Files
+        Select File
       </Button>
 
-      <p className="text-sm font-medium text-gray-700">
-        Upload Images, Word files or PDFs
+      <p className="text-sm font-semibold text-gray-900">
+        Upload an Image, Word or PDF
       </p>
 
-      <p className="text-xs text-gray-400">
-        You can select multiple files or drop them here
+      <p className="text-xs text-gray-500">
+        or drop a file
       </p>
     </div>
   );
