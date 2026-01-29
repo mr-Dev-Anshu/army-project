@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
+// Connection ready
 
-// Directly read from process.env (Next.js automatically loads .env.local)
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
@@ -9,11 +9,6 @@ if (!MONGODB_URI) {
   );
 }
 
-/**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections from growing exponentially
- * during API route usage.
- */
 let cached = global.mongoose;
 
 if (!cached) {
@@ -27,9 +22,8 @@ export async function connectDB() {
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false, // Disable mongoose buffering
-      // socketTimeoutMS: 5000,
-      family: 4, // Force IPv4 to avoid some nodejs timeouts with IPv6
+      bufferCommands: false,
+      family: 4,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
@@ -42,8 +36,7 @@ export async function connectDB() {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    console.error("MongoDB connection error:", e);
-    throw e; // Let the caller handle it (e.g., show error page)
+    throw e;
   }
 
   return cached.conn;
