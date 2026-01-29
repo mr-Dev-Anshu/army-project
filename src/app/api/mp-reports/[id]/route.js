@@ -1,5 +1,5 @@
 import { MPReportService } from "@/services/investigationReport.repo";
-import { updateMPReportSchema } from "@/validators/investigationReport";
+// import { updateMPReportSchema } from "@/validators/investigationReport"; // validation commented out
 import { NextResponse } from "next/server";
 
 const service = new MPReportService();

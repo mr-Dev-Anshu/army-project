@@ -1,7 +1,7 @@
 // app/api/offences/[id]/route.ts
 import { NextResponse } from "next/server";
 import { generalTrafficOffenceService } from "@/services/generalTrafficOffence.service";
-import { updateGeneralTrafficOffenceSchema } from "@/validators/generalTrafficOffence.validator";
+// import { updateGeneralTrafficOffenceSchema } from "@/validators/generalTrafficOffence.validator"; // validation commented out
 import { connectDB } from "../../../../lib/db/mongodb";
 
 export async function GET(request, { params }) {
@@ -30,17 +30,8 @@ export async function PUT(request, { params }) {
     const { id } = await params;
     const body = await request.json();
 
-    const { error, value } = updateGeneralTrafficOffenceSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) {
-      return NextResponse.json({ 
-        error: "Validation failed", 
-        details: error.details.map(d => ({ path: d.path, message: d.message }))
-      }, { status: 400 });
-    }
+    // Validation commented out to allow empty/partial updates from frontend.
+    const value = body;
 
     // 2. Using the unwrapped id
     const updatedOffence = await generalTrafficOffenceService.update(id, value);

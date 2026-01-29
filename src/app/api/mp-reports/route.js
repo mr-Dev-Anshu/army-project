@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { MPReportService } from "@/services/investigationReport.repo";
-import { createMPReportSchema } from "@/validators/investigationReport";
+// import { createMPReportSchema } from "@/validators/investigationReport"; // validation commented out
 import jwt from "jsonwebtoken";
 
 const service = new MPReportService();
