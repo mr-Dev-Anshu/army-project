@@ -14,9 +14,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
-<!--       <body className="font-sans h-full bg-[#f5f5f7] overflow-hidden" suppressHydrationWarning> -->
+     
         
-      <body className={`${inter.className} h-full bg-[#f5f5f7] overflow-hidden`} suppressHydrationWarning>
+      <body className={" font-inter h-full bg-[#f5f5f7] overflow-hidden"} suppressHydrationWarning>
         <AuthProvider>
         <ValidationProvider>
           <FormProvider>
@@ -26,8 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </ClientLayout>
             </Wrapper>
           </FormProvider>
-        </AuthProvider>
         </ValidationProvider>
+        </AuthProvider>
       </body>
     </html>
   );
