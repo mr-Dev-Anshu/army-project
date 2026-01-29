@@ -2,6 +2,7 @@ import { StaticSpeedCheckRecord } from "@/models/StaticSpeedCheckRecord";
 import mongoose from "mongoose";
 import trackFieldSuggestions from "@/lib/fieldSuggestionTracker.js";
 import { STATIC_SPEED_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/staticSpeedReport.js";
+import { setCurrentUserId } from "@/lib/mongoose-plugins/auditsFields.js";
 
 export class StaticSpeedCheckRecordRepository {
 
@@ -518,10 +519,30 @@ export class StaticSpeedCheckRecordRepository {
     return await StaticSpeedCheckRecord.aggregate(pipeline);
   }
 
-  /* ========================= CREATE (UNCHANGED) ========================= */
+  /* ========================= CREATE ========================= */
 
-  async create(data) {
+  async create(data, requestContext = null) {
     const record = new StaticSpeedCheckRecord(data);
+
+    // If we have request context with user ID, set audit fields and plugin context
+    if (requestContext && requestContext.userId) {
+      record.createdBy = requestContext.userId;
+      record.updatedBy = requestContext.userId;
+
+      try {
+        setCurrentUserId(requestContext.userId);
+        console.log(
+          "StaticSpeedCheckRecordRepository - setCurrentUserId:",
+          requestContext.userId
+        );
+      } catch (err) {
+        console.error(
+          "StaticSpeedCheckRecordRepository - Failed to setCurrentUserId:",
+          err
+        );
+      }
+    }
+
     await record.save();
     const savedRecord = record.toObject();
 

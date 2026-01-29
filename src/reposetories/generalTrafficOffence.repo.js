@@ -2,6 +2,7 @@ import trackFieldSuggestions from "@/lib/fieldSuggestionTracker.js";
 import { GeneralTrafficOffence } from "../models/GeneralTraficOffence.js";
 import mongoose from "mongoose";
 import { GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/GeneralTraficOffence.js";
+import { setCurrentUserId } from "@/lib/mongoose-plugins/auditsFields.js";
 
 export class GeneralTrafficOffenceRepository {
   async getAll() {
@@ -405,25 +406,8 @@ export class GeneralTrafficOffenceRepository {
 
     /* ================= EXECUTE ================= */
 
-    return await GeneralTrafficOffence.aggregate(pipeline);
-  }
-
-
-
-  async create(data) {
-    console.log(data);
-    const offence = new GeneralTrafficOffence(data);
-    await offence.save();
-    const savedOffence = offence.toObject();
-
-    // Track field suggestions (from feature branch)
-    trackFieldSuggestions(data, GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG)
-      .then((res) => console.log(res, "suggestions tracked on create"))
-      .catch((err) => {
-        console.error("Suggestions track karne mein error:", err);
-      });
-
-    return savedOffence;
+    const results = await GeneralTrafficOffence.aggregate(pipeline);
+    return results;
   }
 
   async update(id, data) {
@@ -433,6 +417,39 @@ export class GeneralTrafficOffenceRepository {
       new: true,
       runValidators: true,
     }).lean();
+  }
+
+  /* ========================= CREATE ========================= */
+
+  async create(data, requestContext = null) {
+    const record = new GeneralTrafficOffence(data);
+
+    if (requestContext && requestContext.userId) {
+      record.createdBy = requestContext.userId;
+      record.updatedBy = requestContext.userId;
+
+      try {
+        setCurrentUserId(requestContext.userId);
+        console.log(
+          "GeneralTrafficOffenceRepository - setCurrentUserId:",
+          requestContext.userId
+        );
+      } catch (err) {
+        console.error(
+          "GeneralTrafficOffenceRepository - Failed to setCurrentUserId:",
+          err
+        );
+      }
+    }
+
+    await record.save();
+    const saved = record.toObject();
+
+    trackFieldSuggestions(data, GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG)
+      .then((res) => console.log(res, "suggestions tracked on general offence create"))
+      .catch((err) => console.error("Suggestion tracking error (GeneralOffence):", err));
+
+    return saved;
   }
 
   async delete(id) {

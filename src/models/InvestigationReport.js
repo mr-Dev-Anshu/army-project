@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields.js";
 
 const { Schema } = mongoose;
 
@@ -157,6 +158,9 @@ const mpReportSchema = new Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Attach common audit fields plugin to MP reports
+mpReportSchema.plugin(auditFieldsPlugin, {});
 
 mpReportSchema.virtual("offenders").get(function () {
   return this.individuals ? this.individuals.filter((ind) => ind.role === "Offender") : [];

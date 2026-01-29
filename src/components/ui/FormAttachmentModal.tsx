@@ -93,30 +93,30 @@ export default function FormAttachmentModal({
             <div className="space-y-6">
                 {/* 🔹 Attachment Type */}
                 <div>
-                    <Label className="text-gray-700 mb-3 block">
+                    <Label className="text-gray-800 mb-3 block font-medium text-base">
                         Select Attachment Type
                     </Label>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                         {(["Certificate", "Forms", "Letter"] as AttachmentType[]).map((item) => (
                             <button
                                 key={item}
                                 onClick={() => setSelectedType(item)}
                                 className={clsx(
-                                    "flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition",
+                                    "flex items-center gap-2.5 px-5 py-2.5 rounded-full border-2 text-sm font-medium transition-all",
                                     selectedType === item
-                                        ? "border-black bg-white text-black ring-1 ring-black"
-                                        : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
+                                        ? "border-black bg-white text-black"
+                                        : "border-gray-300 text-gray-600 hover:border-gray-400 bg-white"
                                 )}
                             >
                                 <div
                                     className={clsx(
-                                        "w-4 h-4 rounded-full border flex items-center justify-center",
-                                        selectedType === item ? "border-black" : "border-gray-300"
+                                        "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                                        selectedType === item ? "border-black bg-black" : "border-gray-400"
                                     )}
                                 >
                                     {selectedType === item && (
-                                        <div className="w-2 h-2 bg-black rounded-full" />
+                                        <div className="w-2 h-2 bg-white rounded-full" />
                                     )}
                                 </div>
                                 {item}
@@ -132,14 +132,14 @@ export default function FormAttachmentModal({
 
                 {/* 🔹 Name of Attachment - Always visible */}
                 <div>
-                    <Label className="text-gray-700 mb-2 block font-medium">
+                    <Label className="text-gray-800 mb-2 block font-medium text-base">
                         Name of Attachment
                     </Label>
                     <Input
                         placeholder="Enter Name"
                         value={prefixName}
                         onChange={(e) => setPrefixName(e.target.value)}
-                        className="h-11 text-sm text-gray-900"
+                        className="h-12 text-sm text-gray-900 border-gray-300"
                     />
                 </div>
 
@@ -166,11 +166,11 @@ export default function FormAttachmentModal({
                 )}
 
                 {/* 🔹 Footer */}
-                <div className="flex items-center justify-end gap-3 pt-4">
+                <div className="flex items-center justify-end gap-3 pt-2">
                     <Button
                         onClick={handleClose}
                         disabled={isUploading}
-                        className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+                        className="border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 px-6 h-11"
                     >
                         Cancel
                     </Button>
@@ -178,7 +178,7 @@ export default function FormAttachmentModal({
                     <Button
                         disabled={!files.length || isUploading}
                         onClick={handleSave}
-                        className="bg-blue-600 hover:bg-blue-700 min-w-[100px]"
+                        className="bg-blue-500 hover:bg-blue-600 text-white min-w-[100px] px-6 h-11"
                     >
                         {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
                     </Button>

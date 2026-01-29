@@ -1,3 +1,4 @@
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields.js";
 import mongoose from "mongoose";
 
 const { Schema } = mongoose;
@@ -80,6 +81,7 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
 
     offenceTypes: [{ type: String }],
     offenceTypeReference: [{ type: String }],
+
     actionStatus: {
       type: Boolean,
       default: false,

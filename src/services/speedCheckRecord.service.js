@@ -27,8 +27,8 @@ export class StaticSpeedCheckRecordService {
   }
 
 
-  async create(data) {
-    return await staticSpeedCheckRecordRepo.create(data);
+  async create(data, requestContext = null) {
+    return await staticSpeedCheckRecordRepo.create(data, requestContext);
   }
 
   async update(id, data) {

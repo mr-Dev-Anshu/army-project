@@ -15,6 +15,7 @@ import {
   Gauge,
   Shield,
   Siren,
+  LogOut,
   FileBadge,
 } from "lucide-react";
 
@@ -29,6 +30,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import ConeIcon from "@/components/icons/ConeIcon";
 import { useForm } from "@/context/FormContext";
+import { useAuth } from "@/context/AuthContext";
 
 const cn = (...classes: (string | boolean | undefined)[]) =>
   classes.filter(Boolean).join(" ");
@@ -43,6 +45,7 @@ interface MenuItem {
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openMenus, setOpenMenus] = useState<string[]>([
     "Forms & Certificates",
@@ -404,6 +407,42 @@ const Sidebar = () => {
           </div>
         </div>
       </nav>
+
+      {/* USER PROFILE & LOGOUT */}
+      <div className="p-4 border-t border-gray-200">
+        {!isCollapsed ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.username || "User"}
+                </p>
+                <p className="text-xs text-gray-500 capitalize">
+                  {user?.role || "Role"}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={logout}
+            className="w-full flex items-center justify-center p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Logout"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        )}
+      </div>
     </div>
   );
 };

@@ -14,6 +14,7 @@ import Step4Remarks from "./steps/Step4Remarks";
 
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
+import { setMissingFields } from "@/context/validationDispatcher";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
 import { useEffect } from "react";

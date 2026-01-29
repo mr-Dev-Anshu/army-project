@@ -2,13 +2,34 @@ import { MPReport } from "@/models/InvestigationReport";
 import mongoose from "mongoose";
 import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
 import { INVESTIGATION_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/investigationReport";
+import { setCurrentUserId } from "@/lib/mongoose-plugins/auditsFields.js";
 
 export class MPReportRepository {
 
   /* ================= CREATE ================= */
 
-  async create(data) {
+  async create(data, requestContext = null) {
     const report = new MPReport(data);
+
+    // Attach audit information from request context if available
+    if (requestContext && requestContext.userId) {
+      report.createdBy = requestContext.userId;
+      report.updatedBy = requestContext.userId;
+
+      try {
+        setCurrentUserId(requestContext.userId);
+        console.log(
+          "MPReportRepository - setCurrentUserId:",
+          requestContext.userId
+        );
+      } catch (err) {
+        console.error(
+          "MPReportRepository - Failed to setCurrentUserId:",
+          err
+        );
+      }
+    }
+
     const saved = await report.save();
 
     trackFieldSuggestions(

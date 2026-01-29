@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields.js";
 import {
   onDutyDetailsMPReporting,
   onDutyDetailsSchema,
@@ -93,8 +94,10 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
     timestamps: true,
     collection: "staticspeedcheckrecords",
   }
-
 );
+
+// Attach common audit fields plugin (createdBy, updatedBy, etc.)
+staticSpeedCheckRecordSchema.plugin(auditFieldsPlugin, {});
 
 staticSpeedCheckRecordSchema.index({ vehicleNumber: 1 });
 staticSpeedCheckRecordSchema.index({ "offenceOccurenceDetails.time": -1 });

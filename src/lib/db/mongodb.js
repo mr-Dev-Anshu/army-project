@@ -55,11 +55,10 @@ async function tryResolveSrvToNonSrv(srvUri) {
 }
 
 export async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
+    // Conservative connection options for production
     const opts = {
       bufferCommands: false,
       serverSelectionTimeoutMS: 5000,

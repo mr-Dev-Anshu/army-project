@@ -3,8 +3,8 @@ import { MPReportRepository } from "@/reposetories/investigationReport.repo";
 const repo = new MPReportRepository();
 
 export class MPReportService {
-  async createReport(data) {
-    return await repo.create(data);
+  async createReport(data, requestContext = null) {
+    return await repo.create(data, requestContext);
   }
 
   async getReportById(id) {
