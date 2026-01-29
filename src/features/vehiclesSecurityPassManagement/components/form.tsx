@@ -331,8 +331,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {/* <div className="space-y-1">
+                                {/* <div className="grid grid-cols-2 gap-4"> */}
+                                {/* <div className="space-y-1">
                                         <SuggestionInput
                                             label="Address"
                                             fieldType="address"
@@ -341,16 +341,16 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                             onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelAddress", v)}
                                         />
                                     </div> */}
-                                    <div className="space-y-1">
-                                        <SuggestionInput
-                                            label="I Card Number"
-                                            fieldType="iCardNumber"
-                                            placeholder="e.g. A-123456"
-                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelICardNumber || ""}
-                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelICardNumber", v)}
-                                        />
-                                    </div>
+                                <div className="space-y-1">
+                                    <SuggestionInput
+                                        label="I Card Number"
+                                        fieldType="iCardNumber"
+                                        placeholder="e.g. A-123456"
+                                        value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelICardNumber || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelICardNumber", v)}
+                                    />
                                 </div>
+                                {/* </div> */}
                             </div>
                         )}
 
