@@ -248,7 +248,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                 {[
                                     { id: "militaryPersonnel", label: "Military Personnel" },
                                     { id: "employee", label: "Employee" },
-                                    { id: "civilian", label: "Civilian" },
+                                    { id: "civilian", label: "Civilian / Dependent" },
                                     { id: "servantMaid", label: "Servant / Maid" },
                                     { id: "shopKeeper", label: "Shop Keeper" },
                                     { id: "tempHiredWorker", label: "Temporary Hired Worker" },
@@ -271,50 +271,85 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                         {/* Reference image shows fields active for Military Personnel. I will keep them always visible or maybe tailor them if needed, but the request implies standard fields. */}
                         {vehiclePass.ownerInformation.ownerType === "militaryPersonnel" && (
                             <div className="space-y-4">
-                                <div className="space-y-1">
-                                    <SuggestionInput
-                                        label="Army No."
-                                        fieldType="armyNo"
-                                        placeholder="eg. 122334F"
-                                        value={vehiclePass.ownerInformation.ownerDetails?.armyNo || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.armyNo", v)}
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="Army No."
+                                            fieldType="armyNo"
+                                            placeholder="eg. 122334F"
+                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelArmyNo || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelArmyNo", v)}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="Rank"
+                                            fieldType="rank"
+                                            placeholder="eg. Sepoy"
+                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelRank || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelRank", v)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <SuggestionInput
-                                        label="Rank"
-                                        fieldType="rank"
-                                        placeholder="eg. Sepoy"
-                                        value={vehiclePass.ownerInformation.ownerDetails?.rank || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.rank", v)}
-                                    />
-                                </div>
+                                {/* <div className="grid grid-cols-2 gap-4"> */}
+                                {/* <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="Name"
+                                            fieldType="name"
+                                            placeholder="eg. John Doe "
+                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelName || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelName", v)}
+                                        />
+                                    </div> */}
                                 <div className="space-y-1">
                                     <SuggestionInput
                                         label="Unit"
                                         fieldType="unit"
                                         placeholder="eg. "
-                                        value={vehiclePass.ownerInformation.ownerDetails?.unit || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.unit", v)}
+                                        value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelUnit || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelUnit", v)}
                                     />
                                 </div>
-                                <div className="space-y-1">
-                                    <SuggestionInput
-                                        label="FMN"
-                                        fieldType="fmn"
-                                        placeholder="eg."
-                                        value={vehiclePass.ownerInformation.ownerDetails?.fmn || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.fmn", v)}
-                                    />
+                                {/* </div> */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="FMN"
+                                            fieldType="fmn"
+                                            placeholder="eg."
+                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelFmn || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelFmn", v)}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="Command"
+                                            fieldType="command"
+                                            placeholder="eg."
+                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelCommand || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelCommand", v)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <SuggestionInput
-                                        label="Command"
-                                        fieldType="command"
-                                        placeholder="eg."
-                                        value={vehiclePass.ownerInformation.ownerDetails?.command || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.command", v)}
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="Address"
+                                            fieldType="address"
+                                            placeholder="e.g. A-123456"
+                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelAddress || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelAddress", v)}
+                                        />
+                                    </div> */}
+                                    <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="I Card Number"
+                                            fieldType="iCardNumber"
+                                            placeholder="e.g. A-123456"
+                                            value={vehiclePass.ownerInformation.ownerDetails?.militaryPersonnelICardNumber || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.militaryPersonnelICardNumber", v)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -326,10 +361,19 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         label={<span>Service Number <span className="text-red-500">*</span></span>}
                                         fieldType="serviceNumber"
                                         placeholder="e.g. MES-12345678"
-                                        value={vehiclePass.ownerInformation.ownerDetails?.serviceNumber || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.serviceNumber", v)}
+                                        value={vehiclePass.ownerInformation.ownerDetails?.employeeServiceNumber || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.employeeServiceNumber", v)}
                                     />
                                 </div>
+                                {/* <div className="space-y-1">
+                                    <SuggestionInput
+                                        label={"Name"}
+                                        fieldType="name"
+                                        placeholder="e.g. John Doe"
+                                        value={vehiclePass.ownerInformation.ownerDetails?.employeeName || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.employeeName", v)}
+                                    />
+                                </div> */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <SuggestionInput
@@ -370,6 +414,16 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         />
                                     </div>
                                 </div>
+                                {/* <div className="grid grid-cols-2 gap-4"> */}
+                                {/* <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="Address"
+                                            fieldType="address"
+                                            placeholder="e.g. A-123456"
+                                            value={vehiclePass.ownerInformation.ownerDetails?.employeeAddress || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.employeeAddress", v)}
+                                        />
+                                    </div> */}
                                 <div className="space-y-1">
                                     <SuggestionInput
                                         label="I Card Number"
@@ -379,6 +433,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         onChange={(v) => setField("ownerInformation.ownerDetails.employeeICardNumber", v)}
                                     />
                                 </div>
+                                {/* </div> */}
                             </div>
                         )}
 
@@ -402,7 +457,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         onChange={(v) => setField("ownerInformation.ownerDetails.maidFathersName", v)}
                                     />
                                 </div>
-
+                                {/* <div className="grid grid-cols-2 gap-4"> */}
                                 <div className="space-y-1">
                                     <SuggestionInput
                                         label="Pass ID"
@@ -412,7 +467,16 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         onChange={(v) => setField("ownerInformation.ownerDetails.maidPassID", v)}
                                     />
                                 </div>
-
+                                {/* <div className="space-y-1">
+                                        <SuggestionInput
+                                            label="Name"
+                                            fieldType="name"
+                                            placeholder="e.g. John Doe"
+                                            value={vehiclePass.ownerInformation.ownerDetails?.maidName || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.maidName", v)}
+                                        />
+                                    </div> */}
+                                {/* </div> */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <SuggestionInput
@@ -494,7 +558,16 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         />
                                     </div>
                                 </div>
-
+                                {/* <div className="grid grid-cols-2 gap-4"> */}
+                                {/* <div className="space-y-1">
+                                    <SuggestionInput
+                                        label="Address"
+                                        fieldType="address"
+                                        placeholder="e.g. A-123456"
+                                        value={vehiclePass.ownerInformation.ownerDetails?.maidAddress || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.maidAddress", v)}
+                                    />
+                                </div> */}
                                 <div className="space-y-1">
                                     <SuggestionInput
                                         label="I Card Number"
@@ -504,12 +577,13 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         onChange={(v) => setField("ownerInformation.ownerDetails.maidICardNumber", v)}
                                     />
                                 </div>
+                                {/* </div> */}
                             </div>
                         )}
 
                         {vehiclePass.ownerInformation.ownerType === "shopKeeper" && (
                             <div className="space-y-4">
-                                <div className="space-y-1">
+                                {/* <div className="space-y-1">
                                     <SuggestionInput
                                         label="Shop Owner Name"
                                         fieldType="ownerName"
@@ -517,7 +591,7 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         value={vehiclePass.ownerInformation.ownerDetails?.shopOwnerName || ""}
                                         onChange={(v) => setField("ownerInformation.ownerDetails.shopOwnerName", v)}
                                     />
-                                </div>
+                                </div> */}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
@@ -583,8 +657,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
 
                         {vehiclePass.ownerInformation.ownerType === "tempHiredWorker" && (
                             <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
+                                {/* <div className="grid grid-cols-2 gap-4"> */}
+                                {/* <div className="space-y-1">
                                         <SuggestionInput
                                             label="Name"
                                             fieldType="ownerName"
@@ -592,17 +666,17 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                             value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerName || ""}
                                             onChange={(v) => setField("ownerInformation.ownerDetails.tempWorkerName", v)}
                                         />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <SuggestionInput
-                                            label="Place of Stay"
-                                            fieldType="address"
-                                            placeholder="e.g. C/O 56 APO"
-                                            value={vehiclePass.ownerInformation.ownerDetails?.placeOfStay || ""}
-                                            onChange={(v) => setField("ownerInformation.ownerDetails.placeOfStay", v)}
-                                        />
-                                    </div>
+                                    </div> */}
+                                <div className="space-y-1">
+                                    <SuggestionInput
+                                        label="Place of Stay"
+                                        fieldType="address"
+                                        placeholder="e.g. C/O 56 APO"
+                                        value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerPlaceOfStay || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.tempWorkerPlaceOfStay", v)}
+                                    />
                                 </div>
+                                {/* </div> */}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
@@ -610,8 +684,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                             label="Place Of Work"
                                             fieldType="address"
                                             placeholder="e.g. C/O 56 APO"
-                                            value={vehiclePass.ownerInformation.ownerDetails?.placeOfWork || ""}
-                                            onChange={(v) => setField("ownerInformation.ownerDetails.placeOfWork", v)}
+                                            value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerPlaceOfWork || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.tempWorkerPlaceOfWork", v)}
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -619,8 +693,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                             label="Type of Work"
                                             fieldType="trade"
                                             placeholder="e.g. John Shop"
-                                            value={vehiclePass.ownerInformation.ownerDetails?.typeOfWork || ""}
-                                            onChange={(v) => setField("ownerInformation.ownerDetails.typeOfWork", v)}
+                                            value={vehiclePass.ownerInformation.ownerDetails?.tempWorkerTypeOfWork || ""}
+                                            onChange={(v) => setField("ownerInformation.ownerDetails.tempWorkerTypeOfWork", v)}
                                         />
                                     </div>
                                 </div>
@@ -662,8 +736,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         label="Aadhar Card Number"
                                         fieldType="aadharCardNumber"
                                         placeholder="e.g. 8888 8888 8888"
-                                        value={vehiclePass.ownerInformation.ownerDetails?.aadharCardNumber || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.aadharCardNumber", v)}
+                                        value={vehiclePass.ownerInformation.ownerDetails?.civilianAadharCardNumber || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.civilianAadharCardNumber", v)}
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -671,8 +745,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         label="Father's / Husband's Name"
                                         fieldType="fathersName"
                                         placeholder="e.g. Naman"
-                                        value={vehiclePass.ownerInformation.ownerDetails?.fathersName || ""}
-                                        onChange={(v) => setField("ownerInformation.ownerDetails.fathersName", v)}
+                                        value={vehiclePass.ownerInformation.ownerDetails?.civilianFathersName || ""}
+                                        onChange={(v) => setField("ownerInformation.ownerDetails.civilianFathersName", v)}
                                     />
                                 </div>
 
@@ -714,6 +788,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                     { id: "servantMaid", label: "Servant / Maid" },
                                                     { id: "shopKeeper", label: "Shop Keeper" },
                                                     { id: "tempHiredWorker", label: "Temporary Hired Worker" },
+                                                    { id: "employee", label: "Employee" },
+
                                                 ].map((type) => (
                                                     <div className="flex items-center space-x-2 bg-white border border-gray-200 rounded-md p-2" key={type.id}>
                                                         <RadioGroupItem value={type.id} id={`rel-${type.id}`} />
@@ -726,50 +802,86 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                         {vehiclePass.ownerInformation.ownerDetails?.relativeCategory === "militaryPersonnel" && (
                                             <div className="space-y-4 p-4 bg-gray-50 rounded-md border border-gray-200">
                                                 <h4 className="text-sm font-semibold text-gray-700">Relative (Military Personnel) Details</h4>
-                                                <div className="space-y-1">
-                                                    <SuggestionInput
-                                                        label="Army No."
-                                                        fieldType="armyNo"
-                                                        placeholder="eg. 122334F"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.armyNo || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.armyNo", v)}
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Army No."
+                                                            fieldType="armyNo"
+                                                            placeholder="eg. 122334F"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.armyNo || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.armyNo", v)}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Rank"
+                                                            fieldType="rank"
+                                                            placeholder="eg. Sepoy"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.rank || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.rank", v)}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <SuggestionInput
-                                                        label="Rank"
-                                                        fieldType="rank"
-                                                        placeholder="eg. Sepoy"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.rank || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.rank", v)}
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Name"
+                                                            fieldType="name"
+                                                            placeholder="eg. John Doe"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.militaryPersonnelName || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.militaryPersonnelName", v)}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Unit"
+                                                            fieldType="unit"
+                                                            placeholder="eg."
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.militaryPersonnelUnit || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.militaryPersonnelUnit", v)}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <SuggestionInput
-                                                        label="Unit"
-                                                        fieldType="unit"
-                                                        placeholder="eg."
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.unit || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.unit", v)}
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="FMN"
+                                                            fieldType="fmn"
+                                                            placeholder="eg."
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.militaryPersonnelFmn || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.militaryPersonnelFmn", v)}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Command"
+                                                            fieldType="command"
+                                                            placeholder="eg."
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.militaryPersonnelCommand || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.militaryPersonnelCommand", v)}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <SuggestionInput
-                                                        label="FMN"
-                                                        fieldType="fmn"
-                                                        placeholder="eg."
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.fmn || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.fmn", v)}
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <SuggestionInput
-                                                        label="Command"
-                                                        fieldType="command"
-                                                        placeholder="eg."
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.command || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.command", v)}
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Address"
+                                                            fieldType="address"
+                                                            placeholder="e.g. CO 21-123456"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.militaryPersonnelAddress || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.militaryPersonnelAddress", v)}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="I Card Number"
+                                                            fieldType="iCardNumber"
+                                                            placeholder="e.g. A-123456"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.militaryPersonnelICardNumber || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.militaryPersonnelICardNumber", v)}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
@@ -812,8 +924,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                             label="Name"
                                                             fieldType="ownerName"
                                                             placeholder="e.g. John "
-                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.relativeName || ""}
-                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.relativeName", v)}
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidName || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidName", v)}
                                                         />
                                                     </div>
                                                 </div>
@@ -905,8 +1017,8 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                         label="Address"
                                                         fieldType="address"
                                                         placeholder="e.g. C/O 56 APO"
-                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.relativeAddress || ""}
-                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.relativeAddress", v)}
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.maidAddress || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.maidAddress", v)}
                                                     />
                                                 </div>
                                                 <div className="space-y-1">
@@ -1072,6 +1184,94 @@ const VehiclesSecurityPassForm: React.FC<Props> = ({ onCancel, onSuccess, initia
                                                 </div>
                                             </div>
                                         )}
+
+                                        {vehiclePass.ownerInformation.ownerDetails?.relativeCategory === "employee" && (
+                                            <div className="space-y-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                                <h4 className="text-sm font-semibold text-gray-700">Relative (Employee) Details</h4>
+                                                <div className="space-y-1">
+                                                    <SuggestionInput
+                                                        label={<span>Service Number <span className="text-red-500">*</span></span>}
+                                                        fieldType="serviceNumber"
+                                                        placeholder="e.g. MES-12345678"
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeServiceNumber || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeServiceNumber", v)}
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <SuggestionInput
+                                                        label={"Name"}
+                                                        fieldType="name"
+                                                        placeholder="e.g. John Doe"
+                                                        value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeName || ""}
+                                                        onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeName", v)}
+                                                    />
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Rank"
+                                                            fieldType="rank"
+                                                            placeholder="Select rank"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeRank || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeRank", v)}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Unit"
+                                                            fieldType="unit"
+                                                            placeholder="Select unit"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeUnit || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeUnit", v)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="FMN"
+                                                            fieldType="fmn"
+                                                            placeholder="Select FMN"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeFmn || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeFmn", v)}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Command"
+                                                            fieldType="command"
+                                                            placeholder="Select Command"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeCommand || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeCommand", v)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="I Card Number"
+                                                            fieldType="iCardNumber"
+                                                            placeholder="e.g. A-123456"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeICardNumber || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeICardNumber", v)}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <SuggestionInput
+                                                            label="Address"
+                                                            fieldType="address"
+                                                            placeholder="e.g. CO 21-123456"
+                                                            value={vehiclePass.ownerInformation.ownerDetails?.relativeDetails?.employeeAddress || ""}
+                                                            onChange={(v) => setField("ownerInformation.ownerDetails.relativeDetails.employeeAddress", v)}
+                                                        />
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                        )}
+
                                     </div>
                                 )}
                             </div>
