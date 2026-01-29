@@ -70,22 +70,13 @@ export async function POST(request) {
 
     const cleanBody = sanitizeEmpty(body) || {};
 
-    const { error, value } = createStaticSpeedCheckRecordSchema.validate(cleanBody, {
-      abortEarly: false,
-    });
-
-    if (error) {
-      const errors = (error.details || []).reduce((acc, curr) => {
-        const key = Array.isArray(curr.path) ? curr.path.join('.') : String(curr.path);
-        acc[key] = curr.message;
-        return acc;
-      }, {});
-
-      return NextResponse.json(
-        { error: errors },
-        { status: 400 }
-      );
-    }
+    // Server validation commented out to allow empty/partial submissions from frontend
+    // const { error, value } = validateOrBypass(createStaticSpeedCheckRecordSchema, cleanBody, {
+    //   abortEarly: false,
+    //   stripUnknown: true,
+    // });
+    // if (error) { ... }
+    const value = cleanBody;
 
     // Build request context from auth token, similar to other routes
     let requestContext = { userId: null, userRole: null };

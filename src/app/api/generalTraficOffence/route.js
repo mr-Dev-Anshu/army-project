@@ -60,20 +60,13 @@ export async function POST(request) {
     const body = await request.json();
     console.log("POST /api/generalTraficOffence body:", JSON.stringify(body, null, 2));
 
-    const { error, value } = createGeneralTrafficOffenceSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) {
-      const errors = (error.details || []).reduce((acc, curr) => {
-        const key = Array.isArray(curr.path) ? curr.path.join('.') : String(curr.path);
-        acc[key] = curr.message;
-        return acc;
-      }, {});
-
-      return NextResponse.json({ error: errors }, { status: 400 });
-    }
+    // Server validation commented out to allow empty/partial submissions from frontend
+    // const { error, value } = validateOrBypass(createGeneralTrafficOffenceSchema, body, {
+    //   abortEarly: false,
+    //   stripUnknown: true,
+    // });
+    // if (error) { ... }
+    const value = body;
 
     // Extract user from auth token (same logic as middleware)
     let requestContext = { userId: null, userRole: null };

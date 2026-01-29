@@ -22,21 +22,8 @@ export async function PUT(request, { params }) {
     const { id } = await  params;
     const body = await request.json();
 
-    const { error, value } = updateMPReportSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: true, 
-    });
-
-    if (error) {
-      const errors = error.details.map((detail) => ({
-        field: detail.path.join("."),
-        message: detail.message,
-      }));
-      return NextResponse.json(
-        { success: false, message: "Validation failed", errors },
-        { status: 400 }
-      );
-    }
+    // Validation intentionally bypassed to allow empty/partial submissions.
+    const value = body;
 
     const updated = await service.updateReport(id, value);
     return NextResponse.json({ success: true, data: updated });

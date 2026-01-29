@@ -1,89 +1,65 @@
 import mongoose from "mongoose";
-import fs from "fs";
-import path from "path";
-import dns from "dns";
-// Connection ready
+// Production-safe MongoDB connector
+// - Uses only env vars: MONGODB_URI and optional MONGODB_FALLBACK_URI
+// - Does not mutate system DNS or read project files at runtime
+// - Uses conservative connection options and sanitized logging
 
 const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_FALLBACK_URI = process.env.MONGODB_FALLBACK_URI || null;
+const NODE_ENV = process.env.NODE_ENV || "development";
 
 if (!MONGODB_URI) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
-  );
+  throw new Error("Please set MONGODB_URI environment variable");
 }
 
 let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+if (!cached) cached = global.mongoose = { conn: null, promise: null };
 
 export async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
+    // Conservative connection options for production
     const opts = {
       bufferCommands: false,
       family: 4,
+      serverSelectionTimeoutMS: 10000, // fail faster if server unreachable
+      socketTimeoutMS: 45000,
+      maxPoolSize: 50,
+      minPoolSize: 0,
+      // Do not auto-create indexes in production
+      autoIndex: false,
     };
 
-    // Use a mutable uri so we can attempt a fallback if SRV DNS fails
-    let uri = MONGODB_URI;
-
-    const attemptConnect = async (connectUri) =>
-      mongoose.connect(connectUri, opts).then((mongoose) => {
-        console.log("MongoDB connected successfully");
-        return mongoose;
+    const connectOnce = async (uri) =>
+      mongoose.connect(uri, opts).then((m) => {
+        console.log("MongoDB connected");
+        return m;
       });
 
-    // If SRV is used, temporarily try public DNS resolvers before falling back
-    const tryWithPublicDns = async (connectUri) => {
-      if (!connectUri.startsWith("mongodb+srv://")) return attemptConnect(connectUri);
+    cached.promise = connectOnce(MONGODB_URI).catch(async (err) => {
+      // Sanitize message
+      const msg = err && err.message ? err.message : String(err);
+      console.error("MongoDB primary connect failed:", msg);
 
-      const originalServers = dns.getServers();
-      try {
-        dns.setServers(["8.8.8.8", "1.1.1.1"]);
-        console.log("Temporarily using public DNS servers for SRV resolution");
-        return await attemptConnect(connectUri);
-      } finally {
+      // If fallback provided, try it (explicit env var only)
+      if (MONGODB_FALLBACK_URI) {
         try {
-          dns.setServers(originalServers);
-        } catch (_) {}
-      }
-    };
-
-    cached.promise = tryWithPublicDns(uri).catch(async (err) => {
-      console.error("MongoDB connection error:", err && err.message ? err.message : err);
-
-      // If SRV DNS lookup fails (common in restricted networks), try fallback
-      if (
-        (err && err.message && err.message.includes("querySrv")) ||
-        err.code === "ECONNREFUSED"
-      ) {
-        try {
-          // Read .env.local in project root and look for a non-SRV commented URI
-          const envPath = path.resolve(process.cwd(), ".env.local");
-          const content = await fs.promises.readFile(envPath, "utf8");
-          // Try to find a line containing a non-SRV mongodb:// URI (commented or not)
-          const match = content.match(/MONGODB_URI\s*=\s*(mongodb:\/\/[^\r\n]+)/i) ||
-            content.match(/#.*MONGODB_URI\s*=\s*(mongodb:\/\/[^\r\n]+)/i);
-
-          if (match && match[1]) {
-            const fallback = match[1].trim();
-            console.log("Attempting MongoDB fallback URI from .env.local");
-            uri = fallback;
-            return attemptConnect(uri);
-          } else {
-            console.warn("No fallback non-SRV MONGODB_URI found in .env.local");
-          }
-        } catch (readErr) {
-          console.error("Failed to read .env.local for fallback URI:", readErr && readErr.message ? readErr.message : readErr);
+          console.log("Attempting MongoDB fallback URI");
+          return await connectOnce(MONGODB_FALLBACK_URI);
+        } catch (fbErr) {
+          const fbMsg = fbErr && fbErr.message ? fbErr.message : String(fbErr);
+          console.error("MongoDB fallback connect failed:", fbMsg);
         }
       }
 
-      // If no fallback or retry fails, rethrow original error
+      // In production, throw to fail fast so ops can fix config
+      if (NODE_ENV === "production") {
+        console.error("MongoDB connection failed in production — exiting");
+        throw err;
+      }
+
+      // For non-production, rethrow to let caller handle retry or debugging
       throw err;
     });
   }

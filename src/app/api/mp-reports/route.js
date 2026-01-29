@@ -57,22 +57,8 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const { error, value } = createMPReportSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: false,
-    });
-
-    if (error) {
-      const errors = error.details.map((d) => ({
-        field: d.path.join("."),
-        message: d.message,
-      }));
-
-      return NextResponse.json(
-        { success: false, message: "Validation failed", errors },
-        { status: 400 }
-      );
-    }
+    // Validation intentionally bypassed to allow empty/partial submissions.
+    const value = body;
 
     // Build request context from auth token
     let requestContext = { userId: null, userRole: null };
