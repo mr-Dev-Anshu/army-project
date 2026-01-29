@@ -46,16 +46,37 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // const { error, value } = createStaticSpeedCheckRecordSchema.validate(body, {
-    //   abortEarly: false,
-    // });
+    // Deep sanitize: remove empty strings and empty objects/arrays so Joi optional fields pass
+    const sanitizeEmpty = (obj) => {
+      if (obj === null || obj === undefined) return undefined;
+      if (typeof obj === "string") {
+        const t = obj.trim();
+        return t === "" ? undefined : t;
+      }
+      if (Array.isArray(obj)) {
+        const arr = obj.map((v) => sanitizeEmpty(v)).filter((v) => v !== undefined);
+        return arr.length > 0 ? arr : undefined;
+      }
+      if (typeof obj === "object") {
+        const out = {};
+        Object.keys(obj).forEach((k) => {
+          const cleaned = sanitizeEmpty(obj[k]);
+          if (cleaned !== undefined) out[k] = cleaned;
+        });
+        return Object.keys(out).length > 0 ? out : undefined;
+      }
+      return obj;
+    };
 
-    // if (error) {
-    //   return NextResponse.json(
-    //     { error: "Validation failed", details: error.details },
-    //     { status: 400 }
-    //   );
-    // }
+    const cleanBody = sanitizeEmpty(body) || {};
+
+    // Server validation commented out to allow empty/partial submissions from frontend
+    // const { error, value } = validateOrBypass(createStaticSpeedCheckRecordSchema, cleanBody, {
+    //   abortEarly: false,
+    //   stripUnknown: true,
+    // });
+    // if (error) { ... }
+    const value = cleanBody;
 
     // Build request context from auth token, similar to other routes
     let requestContext = { userId: null, userRole: null };
