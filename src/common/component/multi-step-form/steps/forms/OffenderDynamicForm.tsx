@@ -271,8 +271,9 @@ export default function OffenderDynamicForm({
 
             return (
               <div key={i} className="space-y-4">
-                <div className="flex items-start gap-2">
+                <div className="flex items-center gap-3">
                   <Checkbox
+                    id={`checkbox-${i}`}
                     checked={isChecked}
                     onCheckedChange={(v) => {
                       const updated = {
@@ -287,7 +288,12 @@ export default function OffenderDynamicForm({
                       });
                     }}
                   />
-                  <label className="text-sm leading-relaxed cursor-pointer">{f.label}</label>
+                  <label
+                    htmlFor={`checkbox-${i}`}
+                    className="text-sm font-normal leading-none cursor-pointer"
+                  >
+                    {f.label}
+                  </label>
                 </div>
 
                 {/* Render nested fields when checkbox is checked */}
@@ -304,8 +310,9 @@ export default function OffenderDynamicForm({
 
                         return (
                           <div key={nIdx} className="space-y-4">
-                            <div className="flex items-start gap-2">
+                            <div className="flex items-center gap-3">
                               <Checkbox
+                                id={`nested-checkbox-${checkboxKey}-${nIdx}`}
                                 checked={isNestedChecked}
                                 onCheckedChange={(v) => {
                                   const updated = {
@@ -320,7 +327,10 @@ export default function OffenderDynamicForm({
                                   });
                                 }}
                               />
-                              <label className="text-sm leading-relaxed cursor-pointer">
+                              <label
+                                htmlFor={`nested-checkbox-${checkboxKey}-${nIdx}`}
+                                className="text-sm font-normal leading-none cursor-pointer"
+                              >
                                 {nestedField.label}
                               </label>
                             </div>
@@ -483,8 +493,9 @@ export default function OffenderDynamicForm({
                                 {/* Show Co-Driver checkbox after the dynamic fields */}
                                 {nestedField.label === "Who is it?" && (
                                   <div className="mt-6 pt-5 border-t border-gray-300">
-                                    <div className="flex items-start gap-2 mb-4">
+                                    <div className="flex items-center gap-3 mb-4">
                                       <Checkbox
+                                        id="codriver-checkbox"
                                         checked={localData?.coDriverCheckbox || false}
                                         onCheckedChange={(v) => {
                                           const updated = {
@@ -499,7 +510,10 @@ export default function OffenderDynamicForm({
                                           });
                                         }}
                                       />
-                                      <label className="text-sm leading-relaxed cursor-pointer">
+                                      <label
+                                        htmlFor="codriver-checkbox"
+                                        className="text-sm font-normal leading-none cursor-pointer"
+                                      >
                                         Was there a Co-Driver or Pillion Rider with the driver/rider?
                                       </label>
                                     </div>
