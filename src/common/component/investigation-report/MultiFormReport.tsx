@@ -176,20 +176,34 @@ export default function MultiFormReport({
       firNo: val(mp?.reportDetails?.firNo),
 
       /* ================= 1. MP DETAILS ================= */
-      mpDetails: {
-        armyNo: val(mp?.mpParticulars?.armyNo),
-        rank: val(mp?.mpParticulars?.rank),
-        name: val(mp?.mpParticulars?.name),
-        unit: val(mp?.mpParticulars?.unit),
-        fmn: val(mp?.mpParticulars?.fmn),
-        command: val(mp?.mpParticulars?.command),
-      },
+      /* ================= 1. MP DETAILS ================= */
+      mpDetails: (() => {
+        const p = mp?.mpParticulars || {};
+        const armyNo = val(p.armyNo);
+        const rank = val(p.rank);
+        const name = val(p.name);
+        const unit = val(p.unit);
+        const fmn = val(p.fmn);
+        const command = val(p.command);
+
+        // Return undefined if essentially empty, so report view hides the section
+        if (!armyNo && !rank && !name && !unit && !fmn && !command) return undefined;
+
+        return {
+          armyNumber: armyNo,
+          rank,
+          name,
+          unit,
+          fmn,
+          command,
+        };
+      })(),
 
       /* ================= 2–3. OCCURRENCE DETAILS ================= */
       occurrence: {
         types: mp?.occurrenceDetails?.offenceTypes && mp.occurrenceDetails.offenceTypes.length > 0
           ? mp.occurrenceDetails.offenceTypes
-          : (mp?.occurrenceDetails?.offenceType ? [mp.occurrenceDetails.offenceType] : []),
+          : (mp?.occurrenceDetails?.offenceType && mp.occurrenceDetails.offenceType !== "NA" ? [mp.occurrenceDetails.offenceType] : []),
         refs: mp?.occurrenceDetails?.offenceTypeReference || [],
         place: val(mp?.occurrenceDetails?.place),
         date: val(mp?.occurrenceDetails?.date),
@@ -203,17 +217,20 @@ export default function MultiFormReport({
       witnesses,
 
       /* ================= 6. EVIDENCE ================= */
-      evidence: {
-        eyeSketch: mp?.evidence?.eyeSketch?.url ? "Available" : "", // Changed from "Nil" to ""
-        photos:
-          mp?.evidence?.photos?.length > 0
-            ? `${mp.evidence.photos.length} Photos`
-            : "",
-        videos:
-          mp?.evidence?.videos?.length > 0
-            ? `${mp.evidence.videos.length} Videos`
-            : "",
-      },
+      /* ================= 6. EVIDENCE ================= */
+      evidence: (() => {
+        const es = mp?.evidence?.eyeSketch?.url ? "Available" : "";
+        const ph = mp?.evidence?.photos?.length > 0 ? `${mp.evidence.photos.length} Photos` : "";
+        const vid = mp?.evidence?.videos?.length > 0 ? `${mp.evidence.videos.length} Videos` : "";
+
+        if (!es && !ph && !vid) return undefined;
+
+        return {
+          eyeSketch: es,
+          photos: ph,
+          videos: vid,
+        };
+      })(),
 
       /* ================= 7. DOCUMENTS ================= */
       documents: (mp?.documents || []).map((d: any) => val(d?.statement)),

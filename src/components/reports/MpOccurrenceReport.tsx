@@ -5,7 +5,7 @@ export interface MpOccurrenceReportProps {
     reportNo: string;
     command: string;
     firNo: string;
-    mpDetails: {
+    mpDetails?: {
         armyNumber: string;
         rank: string;
         name: string;
@@ -46,7 +46,7 @@ export interface MpOccurrenceReportProps {
         remark?: string;
         customFields?: Record<string, any>;
     }[];
-    evidence: {
+    evidence?: {
         eyeSketch: string;
         photos: string;
         videos: string;
@@ -467,7 +467,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 </div>}
 
                 {/* 6. EVIDENCE */}
-                {evidence.eyeSketch || evidence.photos || evidence.videos && <div className="mb-6 break-inside-avoid">
+                {evidence && <div className="mb-6 break-inside-avoid">
                     <div className="font-bold mb-4 text-[12px]">
                         6. &nbsp;&nbsp; <span className="underline">EVIDENCE:</span> <span className="font-normal text-[12px] ml-2">(Collect and record evidence carefully)</span>
                     </div>
