@@ -48,9 +48,38 @@ export default function Step4Remarks({
   return (
     <div className="space-y-6 px-1">
 
-      {/* ATTACHMENTS LIST */}
+      <div>
+        <Label className="font-semibold text-lg mb-2 block">ADD REMARKS</Label>
+        <Textarea
+          value={value || ""}
+          onChange={(e) => set(e.target.value)}
+          className="min-h-[140px]"
+          placeholder="Enter remarks..."
+        />
+      </div>
+
+      <div className="pt-4 border-t">
+        <Label className="text-sm font-semibold mb-3 block">Pre-Written Remarks</Label>
+        <div className="space-y-3">
+          {remarkOptions.map((text, i) => (
+            <label key={i} className="flex gap-2 items-start cursor-pointer text-sm text-gray-700">
+              <Checkbox
+                checked={selected === i}
+                onCheckedChange={() => {
+                  setSelected(i);
+                  set(text);
+                }}
+                className="mt-0.5"
+              />
+              <span>{text}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* ATTACHMENTS LIST - MOVED BELOW */}
       {(attachments.length > 0) && (
-        <div className="space-y-2 mt-2">
+        <div className="space-y-2 pt-4 border-t">
           <Label className="font-semibold text-sm text-gray-700">Attached Documents</Label>
           <div className="space-y-2">
             {attachments.map((item, index) => (
@@ -92,35 +121,6 @@ export default function Step4Remarks({
         </div>
       )
       }
-
-      <div>
-        <Label className="font-semibold text-lg mb-2 block">ADD REMARKS</Label>
-        <Textarea
-          value={value || ""}
-          onChange={(e) => set(e.target.value)}
-          className="min-h-[140px]"
-          placeholder="Enter remarks..."
-        />
-      </div>
-
-      <div className="pt-4 border-t">
-        <Label className="text-sm font-semibold mb-3 block">Pre-Written Remarks</Label>
-        <div className="space-y-3">
-          {remarkOptions.map((text, i) => (
-            <label key={i} className="flex gap-2 items-start cursor-pointer text-sm text-gray-700">
-              <Checkbox
-                checked={selected === i}
-                onCheckedChange={() => {
-                  setSelected(i);
-                  set(text);
-                }}
-                className="mt-0.5"
-              />
-              <span>{text}</span>
-            </label>
-          ))}
-        </div>
-      </div>
 
     </div>
   );

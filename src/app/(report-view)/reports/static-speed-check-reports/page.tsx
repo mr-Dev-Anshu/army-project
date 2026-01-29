@@ -77,6 +77,65 @@ export default function StaticSpeedCheckReportsPage() {
     }
   };
 
+  // HANDLE ATTACHMENT DELETE
+  const handleAttachDelete = async (attachment: any) => {
+    if (!viewingReport?._id) {
+      console.error("No viewing report ID found");
+      return;
+    }
+
+    console.log("Deleting attachment:", attachment);
+
+    try {
+      const currentAttachments =
+        viewingReport.customFields?.attachments ||
+        viewingReport.attachments ||
+        viewingReport.certificates ||
+        [];
+
+      console.log("Current attachments:", currentAttachments);
+      const updatedAttachments = currentAttachments.filter((item: any) => item.url !== attachment.url);
+      console.log("Updated attachments:", updatedAttachments);
+
+      const updatePayload: any = {
+        id: viewingReport._id,
+        data: {}
+      };
+
+      if (viewingReport.customFields?.attachments) {
+        updatePayload.data.customFields = {
+          ...viewingReport.customFields,
+          attachments: updatedAttachments
+        };
+      } else if (viewingReport.certificates) {
+        updatePayload.data.certificates = updatedAttachments;
+      } else {
+        updatePayload.data.customFields = {
+          ...viewingReport.customFields,
+          attachments: updatedAttachments
+        };
+      }
+
+      await updateRecord(updatePayload);
+      toast.success("Attachment Deleted Successfully");
+
+      setViewingReport((prev: any) => {
+        const updated = { ...prev };
+        if (prev.customFields?.attachments) {
+          updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
+        } else if (prev.certificates) {
+          updated.certificates = updatedAttachments;
+        } else {
+          updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
+        }
+        return updated;
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete attachment: " + (error as any)?.message || "Unknown error");
+    }
+  };
+
   /* ================= AUTO PRINT ================= */
   // ... (rest of the file until return block)
 
@@ -504,6 +563,7 @@ export default function StaticSpeedCheckReportsPage() {
             <SignedAttachmentsViewer
               record={finalViewingRecord}
               onAttachMore={() => setIsAttachModalOpen(true)}
+              onDelete={handleAttachDelete}
             />
           )}
         </ReportViewerWrapper>

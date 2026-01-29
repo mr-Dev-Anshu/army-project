@@ -111,6 +111,90 @@ export default function ReportsPage({
     }
   };
 
+  // HANDLE ATTACHMENT DELETE
+  const handleAttachDelete = async (attachment: any) => {
+    if (!viewingReport?._id) {
+      console.error("No viewing report ID found");
+      return;
+    }
+
+    console.log("Deleting attachment:", attachment);
+    console.log("Current viewingReport:", viewingReport);
+
+    try {
+      // Check multiple possible locations for attachments
+      const currentAttachments =
+        viewingReport.customFields?.attachments ||
+        viewingReport.attachments ||
+        viewingReport.certificates ||
+        [];
+
+      console.log("Current attachments before delete:", currentAttachments);
+
+      // Filter out the deleted attachment by URL (most unique identifier)
+      const updatedAttachments = currentAttachments.filter((item: any) => {
+        const isSame = item.url === attachment.url;
+        if (isSame) console.log("Found matching attachment to delete:", item);
+        return !isSame;
+      });
+
+      console.log("Updated attachments after filter:", updatedAttachments);
+
+      // Update API - try to preserve the original structure
+      const updatePayload: any = {
+        id: viewingReport._id,
+        data: {}
+      };
+
+      // Update in the same location where we found them
+      if (viewingReport.customFields?.attachments) {
+        updatePayload.data.customFields = {
+          ...viewingReport.customFields,
+          attachments: updatedAttachments
+        };
+      } else if (viewingReport.certificates) {
+        updatePayload.data.certificates = updatedAttachments;
+      } else {
+        updatePayload.data.customFields = {
+          ...viewingReport.customFields,
+          attachments: updatedAttachments
+        };
+      }
+
+      console.log("Update payload:", updatePayload);
+
+      await updateOffence(updatePayload);
+
+      toast.success("Attachment Deleted Successfully");
+
+      // Update local viewing state to reflect changes immediately
+      setViewingReport((prev: any) => {
+        const updated = { ...prev };
+
+        if (prev.customFields?.attachments) {
+          updated.customFields = {
+            ...prev.customFields,
+            attachments: updatedAttachments
+          };
+        } else if (prev.certificates) {
+          updated.certificates = updatedAttachments;
+        } else {
+          updated.customFields = {
+            ...prev.customFields,
+            attachments: updatedAttachments
+          };
+        }
+
+        console.log("Updated local state:", updated);
+        return updated;
+      });
+
+    } catch (error) {
+      console.error("Failed to delete attachment", error);
+      toast.error("Failed to delete attachment: " + (error as any)?.message || "Unknown error");
+    }
+  };
+
 
 
   const [filters, setFilters] = useState({
@@ -413,6 +497,7 @@ export default function ReportsPage({
             <SignedAttachmentsViewer
               record={finalViewingRecord}
               onAttachMore={() => setIsAttachModalOpen(true)}
+              onDelete={handleAttachDelete}
             />
           )}
         </ReportViewerWrapper>

@@ -11,9 +11,10 @@ interface EvidenceItem {
 
 interface EvidenceViewerProps {
     evidences?: EvidenceItem[];
+    onDelete?: (item: EvidenceItem) => void;
 }
 
-export default function EvidenceViewer({ evidences = [] }: EvidenceViewerProps) {
+export default function EvidenceViewer({ evidences = [], onDelete }: EvidenceViewerProps) {
     const [previewItem, setPreviewItem] = useState<EvidenceItem | null>(null);
     const [activeTab, setActiveTab] = useState<string>("Photos");
 
@@ -117,7 +118,7 @@ export default function EvidenceViewer({ evidences = [] }: EvidenceViewerProps) 
 
     return (
         <>
-            <div className="w-full min-h-full bg-white p-8">
+            <div className="w-full max-w-5xl min-h-full bg-white rounded-xl shadow-sm p-8 overflow-hidden">
                 <h2 className="text-xl font-bold mb-6 text-black">View Evidences</h2>
 
                 {/* Tabs */}
@@ -206,13 +207,6 @@ export default function EvidenceViewer({ evidences = [] }: EvidenceViewerProps) 
                     >
                         <Button
                             className="bg-white text-black hover:bg-gray-200 h-9 gap-2 font-medium min-w-[120px]"
-                            onClick={() => alert("Re-Upload feature is not connected.")}
-                        >
-                            Re-Upload <Upload className="w-4 h-4" />
-                        </Button>
-
-                        <Button
-                            className="bg-white text-black hover:bg-gray-200 h-9 gap-2 font-medium min-w-[120px]"
                             onClick={handleDownload}
                         >
                             Download <Download className="w-4 h-4" />
@@ -225,12 +219,18 @@ export default function EvidenceViewer({ evidences = [] }: EvidenceViewerProps) 
                             Print <Printer className="w-4 h-4" />
                         </Button>
 
-                        <Button
+                        {/* TEMPORARILY COMMENTED OUT - DELETE BUTTON */}
+                        {/* <Button
                             className="bg-[#EF4444] text-white hover:bg-red-600 h-9 gap-2 font-medium min-w-[120px]"
-                            onClick={() => alert("Delete feature is not connected.")}
+                            onClick={() => {
+                                if (onDelete && previewItem) {
+                                    onDelete(previewItem);
+                                    setPreviewItem(null);
+                                }
+                            }}
                         >
                             Delete <Trash2 className="w-4 h-4" />
-                        </Button>
+                        </Button> */}
                     </div>
                 </div>
             )}

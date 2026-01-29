@@ -36,11 +36,29 @@ export default function Step11Remarks() {
 
   return (
     <div className="space-y-8">
-      {/* ATTACHMENTS SECTION */}
-      <div className="border-b pb-6">
+      {/* ADD REMARKS SECTION */}
+      <div className="mt-2">
+        <p className="font-semibold mb-1">ANALYSIS</p>
+        <FormTextarea
+          label=""
+          value={remarks.analysis}
+          onChange={(v) => set("analysis", v)}
+        />
+      </div>
 
+      <div className="mt-6">
+        <p className="font-semibold mb-1">RECOMMENDATION</p>
+        <FormTextarea
+          label=""
+          value={remarks.recommendation}
+          onChange={(v) => set("recommendation", v)}
+        />
+      </div>
+
+      {/* ATTACHMENTS SECTION - MOVED BELOW REMARKS */}
+      <div className="border-t pt-6">
         {attachments.length > 0 && (
-          <div className="space-y-2 mt-4">
+          <div className="space-y-2">
             <Label className="font-semibold text-sm text-gray-700">Attached Documents</Label>
             <div className="space-y-2">
               {attachments.map((item: any, index: number) => (
@@ -82,28 +100,6 @@ export default function Step11Remarks() {
             </div>
           </div>
         )}
-      </div>
-
-      <div className="mt-2 text-sm text-gray-500">
-        {/* Spacer or instruction if needed */}
-      </div>
-
-      <div className="mt-2">
-        <p className="font-semibold mb-1">ANALYSIS</p>
-        <FormTextarea
-          label=""
-          value={remarks.analysis}
-          onChange={(v) => set("analysis", v)}
-        />
-      </div>
-
-      <div className="mt-6">
-        <p className="font-semibold mb-1">RECOMMENDATION</p>
-        <FormTextarea
-          label=""
-          value={remarks.recommendation}
-          onChange={(v) => set("recommendation", v)}
-        />
       </div>
 
     </div>
