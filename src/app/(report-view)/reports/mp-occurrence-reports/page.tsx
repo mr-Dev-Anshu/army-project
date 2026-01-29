@@ -205,7 +205,10 @@ export default function MpOccurrenceReportsPage() {
         item.individual?.[0] ||
         item.individuals?.[0] ||
         item.offenders?.[0] ||
+        item.offenderList?.[0] ||
         item.customFields?.victim ||
+        item.customFields?.individuals?.[0] ||
+        item.customFields?.offenderList?.[0] ||
         {};
 
       return {
@@ -217,37 +220,38 @@ export default function MpOccurrenceReportsPage() {
             minute: "2-digit",
             hour12: false,
           })
-          : "00:00",
-        placeOfOccurrence: occurrence.placeOfOccurrence || "Unknown",
+          : "",
+        placeOfOccurrence: occurrence.placeOfOccurrence,
 
         assignedMP: {
           armyNumber: invHead.armyNumber,
           rank: invHead.rank,
           name: invHead.name,
           unit: invHead.unit,
-          fmn: invHead.fmn || "HQ 21 CORPs",
-          address: invHead.address || "C/O 56 APO",
-          iCardNumber: invHead.iCardNumber || "F-123456",
+          fmn: invHead.fmn,
+          address: invHead.address,
+          iCardNumber: invHead.iCardNumber,
         },
 
         victimDetails: {
           armyNumber:
             primaryIndividual.armyNumber ||
-            primaryIndividual.aadharNumber ||
-            "N/A",
-          rank: primaryIndividual.rank || "Civ",
-          name: primaryIndividual.name || "Unknown",
-          unit: primaryIndividual.unit || "N/A",
+            primaryIndividual.aadharNumber,
+          rank: primaryIndividual.rank,
+          name: primaryIndividual.name,
+          unit: primaryIndividual.unit,
           ...primaryIndividual,
         },
-        reportingMPName: invHead.name || "Unknown MP",
+        reportingMPName: invHead.name,
 
         offenceType:
-          occurrence.offenceType || "Overtaking in NO Overtaking Zone",
-        brief: occurrence.description || "Brief of occurrence...",
-        documents: item.documents || [],
-        reportNumber: item.reportDetails?.reportNumber,
-        actionStatus: item.actionStatus,
+          (Array.isArray(occurrence.offenceTypes) && occurrence.offenceTypes.length > 0)
+            ? occurrence.offenceTypes.join(", ")
+            : (occurrence.offenceType === "NA" ? "" : occurrence.offenceType),
+        brief: occurrence?.description,
+        documents: item?.documents,
+        reportNumber: item?.reportDetails?.reportNumber,
+        actionStatus: item?.actionStatus,
         originalData: item // Store original data for report view
       };
     });

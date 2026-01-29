@@ -283,13 +283,13 @@ export default function MpOccurrenceTable({
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
-              <DropdownMenuItem
+              {/* <DropdownMenuItem
                 className="gap-2 cursor-pointer"
                 onClick={() => onPrint && onPrint(item)}
               >
                 <Printer className="w-4 h-4" />
                 Print
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Edit className="w-4 h-4" />
                 Edit

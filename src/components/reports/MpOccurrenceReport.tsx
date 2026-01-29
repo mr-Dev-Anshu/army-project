@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface MpOccurrenceReportProps {
@@ -119,22 +120,22 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 </h1>
 
                 <div className="grid grid-cols-3 items-start mb-8 text-[12px]">
-                    <div className="text-left">
+                    {reportNo && <div className="text-left">
                         <span className="font-bold">Report No-</span> {reportNo}<br />
                         <span>(Fill in Desk Room)</span>
-                    </div>
-                    <div className="justify-self-center text-left">
+                    </div>}
+                    {command && <div className="justify-self-center text-left">
                         <span className="font-bold">Command-</span> {command}<br />
                         <span>(Origin)</span>
-                    </div>
-                    <div className="justify-self-end text-left">
+                    </div>}
+                    {firNo && <div className="justify-self-end text-left">
                         <span className="font-bold">FIR No.-</span> {firNo}<br />
                         <span>(Att Copy Filed)</span>
-                    </div>
+                    </div>}
                 </div>
 
                 {/* 1. MP DETAILS */}
-                <div className="mb-6 break-inside-avoid">
+                {mpDetails && <div className="mb-6 break-inside-avoid">
                     <div className="font-bold mb-2 text-[12px]">1. &nbsp;&nbsp; MP DETAILS:</div>
                     <div className="border border-gray-300 p-6 rounded-sm text-[12px] mb-2">
                         <div className="grid grid-cols-2 gap-x-12 gap-y-2">
@@ -149,10 +150,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                     <div className="text-[12px] text-gray-600 pl-1">
                         (MP must caution witness and ensure presence of independent witness if possible)
                     </div>
-                </div>
+                </div>}
 
                 {/* 2. OCCURRENCE DETAILS */}
-                <div className="mb-6 break-inside-avoid">
+                {occurrence.types && occurrence.types.length > 0 && <div className="mb-6 break-inside-avoid">
                     <div className="font-bold mb-2 text-[12px]">
                         2. &nbsp;&nbsp; <span className="underline">OCCURRENCE DETAILS:</span>
                     </div>
@@ -210,10 +211,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             </div>
                         )}
                     </div>
-                </div>
+                </div>}
 
                 {/* 3. DETAILS OF VICTIMS/OFFENDERS */}
-                <div className="mb-6">
+                {people.length > 0 && <div className="mb-6">
                     <div className="font-bold mb-2 text-[12px]">
                         3. &nbsp;&nbsp; <span className="underline">DETAILS OF VICTIMS/OFFENDERS:</span> <span className="font-normal text-[12px] ml-2">(MP must verify personal particulars)</span>
                     </div>
@@ -324,10 +325,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                     <div className="text-[12px] text-gray-700 leading-tight text-justify">
                         (To be read out to the Offender(s) by the MP 'above recorded personal particulars have been given by me voluntarily and I certify and sign them as correct. If found otherwise. I am liable for disciplinary action under the Army Act').
                     </div>
-                </div>
+                </div>}
 
                 {/* 4. BRIEF OF OCCURRENCE */}
-                <div className="flex-1">
+                {briefOfOccurrence && <div className="flex-1">
                     <div className="flex items-baseline mb-2 text-[12px]">
                         <span className="font-bold w-8">4.</span>
                         <div>
@@ -339,10 +340,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             {briefOfOccurrence}
                         </p>
                     </div>
-                </div>
+                </div>}
 
                 {/* Page 1 Footer */}
-                <div className="mt-8 text-center font-bold">
+                <div className="mt-auto text-center font-bold">
                     <div className="text-[12px]  underline mt-2">RESTRICTED</div>
                 </div>
             </div>
@@ -358,7 +359,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 </div>
 
                 {/* 5. WITNESS */}
-                <div className="mb-6">
+                {witnesses.length > 0 && <div className="mb-6">
                     <div className="font-bold mb-2 text-[12px]">
                         5. &nbsp;&nbsp; <span className="underline">WITNESS:</span> <span className="font-normal text-[12px] ml-2">(Witness must record statement in own hand where possible)</span>
                     </div>
@@ -463,10 +464,10 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             )}
                         </tbody>
                     </table>
-                </div>
+                </div>}
 
                 {/* 6. EVIDENCE */}
-                <div className="mb-6 break-inside-avoid">
+                {evidence.eyeSketch || evidence.photos || evidence.videos && <div className="mb-6 break-inside-avoid">
                     <div className="font-bold mb-4 text-[12px]">
                         6. &nbsp;&nbsp; <span className="underline">EVIDENCE:</span> <span className="font-normal text-[12px] ml-2">(Collect and record evidence carefully)</span>
                     </div>
@@ -487,216 +488,231 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             </div>
                         )}
                     </div>
-                </div>
+                </div>}
 
                 {/* 7. DOCUMENTS ATTACHED */}
-                <div className="flex-1">
+                {documents.length > 0 && <div className="flex-1">
                     <div className="font-bold mb-4 text-[12px]">
                         7. &nbsp;&nbsp; <span className="underline">DOCUMENTS ATTACHED</span>
                     </div>
                     <div className="pl-4 space-y-4 text-[12px]">
-                        {documents.length > 0 ? documents.map((doc, i) => (
+                        {documents.map((doc, i) => (
                             <div key={i} className="flex items-start">
                                 <span className="w-8 shrink-0">7.{i + 1}</span>
                                 <span className="text-justify leading-relaxed">{doc}</span>
                             </div>
-                        )) : (
-                            <div className="text-gray-400">No documents attached.</div>
-                        )}
+                        ))}
                     </div>
-                </div>
+                </div>}
 
                 {/* Page 2 Footer */}
-                <div className="mt-8 pt-8 text-center font-bold text-xs underline">RESTRICTED</div>
+                <div className="mt-auto pt-8 text-center font-bold text-xs underline">RESTRICTED</div>
             </div>
 
             {/* ==================== PAGE 3 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            {
+                detailedReport.statement && <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
-                {/* Header Page 3 */}
-                <div className="text-center font-bold mb-4">
-                    <div className="text-sm ">-3-</div>
-                    <div className="text-[12px] underline">RESTRICTED</div>
-                </div>
-
-                {/* 8. DETAILED OCCURRENCE REPORT */}
-                <div className="mb-6">
-                    <div className="font-bold mb-4 text-[12px]">
-                        8. &nbsp;&nbsp; <span className="underline">DETAILED OCCURRENCE REPORT</span>
+                    {/* Header Page 3 */}
+                    <div className="text-center font-bold mb-4">
+                        <div className="text-sm ">-3-</div>
+                        <div className="text-[12px] underline">RESTRICTED</div>
                     </div>
 
-                    <p className="mb-4 text-[12px] pl-4">Sir,</p>
+                    {/* 8. DETAILED OCCURRENCE REPORT */}
+                    <div className="mb-6">
+                        <div className="font-bold mb-4 text-[12px]">
+                            8. &nbsp;&nbsp; <span className="underline">DETAILED OCCURRENCE REPORT</span>
+                        </div>
 
-                    <div className="pl-4 space-y-4 text-[12px]">
-                        {detailedReport.statement ? (
-                            detailedReport.statement.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
-                                <div key={index} className="flex items-start">
-                                    <span className="w-10 shrink-0">8.{index + 1}</span>
-                                    <span className="text-justify leading-relaxed">{paragraph}</span>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="text-gray-400">No detailed statement available.</div>
-                        )}
+                        <p className="mb-4 text-[12px] pl-4">Sir,</p>
+
+                        <div className="pl-4 space-y-4 text-[12px]">
+                            {
+                                detailedReport.statement.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
+                                    <div key={index} className="flex items-start">
+                                        <span className="w-10 shrink-0">8.{index + 1}</span>
+                                        <span className="text-justify leading-relaxed">{paragraph}</span>
+                                    </div>
+                                ))
+                            }
+                        </div>
                     </div>
+
+
+
+                    {/* Page 3 Footer */}
+                    <div className="mt-auto pt-8 text-center font-bold text-xs underline">RESTRICTED</div>
+
                 </div>
-
-
-
-                {/* Page 3 Footer */}
-                <div className="mt-auto pt-8 text-center font-bold text-xs underline">RESTRICTED</div>
-
-            </div>
+            }
 
             {/* ==================== PAGE 4 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            {
+                detailedReport.findings.length > 0 && (<div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
-                {/* Header Page 4 */}
-                <div className="text-center font-bold mb-4">
-                    <div className="text-sm ">-4-</div>
-                    <div className="text-xs underline">RESTRICTED</div>
-                </div>
-
-                {/* 9. POINTS FIND OUT DURING THE INVESTIGATION */}
-                <div className="mb-6">
-                    <div className="font-bold mb-4 text-[12px]">
-                        9. &nbsp;&nbsp; <span className="underline uppercase">POINTS FIND OUT DURING THE INVESTIGATION</span>
+                    {/* Header Page 4 */}
+                    <div className="text-center font-bold mb-4">
+                        <div className="text-sm ">-4-</div>
+                        <div className="text-xs underline">RESTRICTED</div>
                     </div>
 
-                    <div className="pl-4 space-y-4 text-[12px]">
-                        {detailedReport.findings.length > 0 ? detailedReport.findings.map((point, i) => (
-                            <div key={i} className="flex items-start">
-                                <span className="w-10 shrink-0">9.{i + 1}</span>
-                                <span className="text-justify leading-relaxed">{point}</span>
-                            </div>
-                        )) : (
-                            <div className="text-gray-400">No investigation points recorded.</div>
-                        )}
-                    </div>
-                </div>
+                    {/* 9. POINTS FIND OUT DURING THE INVESTIGATION */}
+                    {detailedReport.findings.length > 0 && (<div className="mb-6">
+                        <div className="font-bold mb-4 text-[12px]">
+                            9. &nbsp;&nbsp; <span className="underline uppercase">POINTS FIND OUT DURING THE INVESTIGATION</span>
+                        </div>
 
-                {/* Page 4 Footer */}
-                <div className="mt-8 pt-8 text-center font-bold text-[12px] underline">RESTRICTED</div>
+                        <div className="pl-4 space-y-4 text-[12px]">
+                            {detailedReport.findings.map((point, i) => (
+                                <div key={i} className="flex items-start">
+                                    <span className="w-10 shrink-0">9.{i + 1}</span>
+                                    <span className="text-justify leading-relaxed">{point}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>)}
 
-            </div>
+                    {/* Page 4 Footer */}
+                    <div className="mt-auto pt-8 text-center font-bold text-[12px] underline">RESTRICTED</div>
+
+                </div>)
+            }
 
             {/* ==================== PAGE 5 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
+            {
+                detailedReport.opinion && (<div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]" style={{ pageBreakAfter: 'always' }}>
 
-                {/* Header Page 5 */}
-                <div className="text-center font-bold mb-4">
-                    <div className="text-sm ">-5-</div>
-                    <div className="text-xs underline">RESTRICTED</div>
-                </div>
+                    {/* Header Page 5 */}
+                    <div className="text-center font-bold mb-4">
+                        <div className="text-sm ">-5-</div>
+                        <div className="text-xs underline">RESTRICTED</div>
+                    </div>
 
-                {/* 10. OPINION */}
-                <div className="mb-6">
-                    <div className="font-bold text-[12px] mb-4">10. &nbsp;&nbsp; <span className="underline">OPINION:</span></div>
-                    <div className="pl-4 space-y-4 text-[12px]">
-                        {detailedReport.opinion ? (
-                            detailedReport.opinion.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
-                                <div key={index} className="flex items-start">
-                                    <span className="w-10 shrink-0">10.{index + 1}</span>
-                                    <span className="text-justify leading-relaxed">{paragraph}</span>
+                    {/* 10. OPINION */}
+                    {
+                        detailedReport.opinion && (
+                            <div className="mb-6">
+                                <div className="font-bold text-[12px] mb-4">10. &nbsp;&nbsp; <span className="underline">OPINION:</span></div>
+                                <div className="pl-4 space-y-4 text-[12px]">
+                                    {
+                                        detailedReport.opinion.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
+                                            <div key={index} className="flex items-start">
+                                                <span className="w-10 shrink-0">10.{index + 1}</span>
+                                                <span className="text-justify leading-relaxed">{paragraph}</span>
+                                            </div>
+                                        ))
+                                    }
                                 </div>
-                            ))
-                        ) : (
-                            <div className="text-gray-400">No opinion recorded.</div>
-                        )}
-                    </div>
-                </div>
+                            </div>
+                        )
+                    }
 
-                <div className="pt-8 flex justify-between items-end text-[12px] mb-32">
-                    <div>
-                        <span className="font-bold">Dated :</span> <span>{reportDate}</span>
-                    </div>
-                    <div className="text-center">
-                        (Signature of MP JCO/NCO)
-                    </div>
-                </div>
 
-                <div className="text-center font-bold text-[12px] underline">RESTRICTED</div>
-
-            </div>
-
-            {/* ==================== PAGE 6 ==================== */}
-            <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]">
-
-                {/* Header Page 6 */}
-                <div className="text-center font-bold mb-4">
-                    <div className="text-sm ">-6-</div>
-                    <div className="text-xs underline">RESTRICTED</div>
-                </div>
-
-                {/* 11. REMARKS CO/2IC PROVOST UNIT */}
-                <div className="mb-6">
-                    <div className="flex items-baseline mb-1 text-[12px]">
-                        <span className="font-bold w-8 shrink-0">11.</span>
-                        <span className="font-bold underline">REMARKS CO/2IC PROVOST UNIT</span>
-                    </div>
-                    <div className="text-[12px] mb-6 pl-8">
-                        Check evidence gives analysis and recommendation and fill IAFD-901 if required
-                    </div>
-
-                    {/* 11.1 ANALYSIS */}
-                    <div className="mb-6">
-                        <div className="flex items-baseline mb-4 text-[12px] pl-8">
-                            <span className="font-bold w-10 shrink-0">11.1</span>
-                            <span className="font-bold underline">ANALYSIS-</span>
-                        </div>
-                        <div className="pl-8 space-y-4 text-[12px]">
-                            {remarks.analysis ? (
-                                remarks.analysis.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
-                                    <div key={index} className="flex items-start">
-                                        <span className="w-12 shrink-0">11.1.{index + 1}</span>
-                                        <span className="text-justify leading-relaxed">{paragraph}</span>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="text-gray-400">No analysis details recorded.</div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* 11.2 RECOMMENDATION */}
-                    <div className="mb-6">
-                        <div className="flex items-baseline mb-4 text-[12px] pl-8">
-                            <span className="font-bold w-10 shrink-0">11.2</span>
-                            <span className="font-bold underline">RECOMMENDATION-</span>
-                        </div>
-                        <div className="pl-8 space-y-4 text-[12px]">
-                            {remarks.recommendation ? (
-                                remarks.recommendation.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
-                                    <div key={index} className="flex items-start">
-                                        <span className="w-12 shrink-0">11.2.{index + 1}</span>
-                                        <span className="text-justify leading-relaxed">{paragraph}</span>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="text-gray-400">No recommendation recorded.</div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-auto pt-16 flex justify-between items-end text-[12px] mb-32">
-                    <div className="space-y-1">
-                        <div>
-                            <span className="font-bold">Station :</span> <span>{station}</span>
-                        </div>
+                    {reportDate && (<div className="pt-8 flex justify-between items-end text-[12px] mb-32">
                         <div>
                             <span className="font-bold">Dated :</span> <span>{reportDate}</span>
                         </div>
+                        <div className="text-center">
+                            (Signature of MP JCO/NCO)
+                        </div>
+                    </div>)}
+
+                    <div className="text-center mt-auto pt-8 font-bold text-[12px] underline">RESTRICTED</div>
+
+                </div>)
+            }
+
+            {/* ==================== PAGE 6 ==================== */}
+            {
+                remarks.analysis &&
+                <div className="max-w-[210mm] w-full mx-auto bg-white p-[48px] min-h-[297mm] shadow-lg print:shadow-none print:min-h-[297mm] relative flex flex-col print:p-[48px]">
+
+                    {/* Header Page 6 */}
+                    <div className="text-center font-bold mb-4">
+                        <div className="text-sm ">-6-</div>
+                        <div className="text-xs underline">RESTRICTED</div>
                     </div>
-                    <div className="text-center">
-                        (Signature of CO/2IC with unit seal)
+
+                    {/* 11. REMARKS CO/2IC PROVOST UNIT */}
+                    <div className="mb-6">
+                        <div className="flex items-baseline mb-1 text-[12px]">
+                            <span className="font-bold w-8 shrink-0">11.</span>
+                            <span className="font-bold underline">REMARKS CO/2IC PROVOST UNIT</span>
+                        </div>
+                        <div className="text-[12px] mb-6 pl-8">
+                            Check evidence gives analysis and recommendation and fill IAFD-901 if required
+                        </div>
+
+                        {/* 11.1 ANALYSIS */}
+                        {
+                            remarks?.analysis && (
+                                <div className="mb-6">
+                                    <div className="flex items-baseline mb-4 text-[12px] pl-8">
+                                        <span className="font-bold w-10 shrink-0">11.1</span>
+                                        <span className="font-bold underline">ANALYSIS-</span>
+                                    </div>
+                                    <div className="pl-8 space-y-4 text-[12px]">
+                                        {
+                                            remarks.analysis.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
+                                                <div key={index} className="flex items-start">
+                                                    <span className="w-12 shrink-0">11.1.{index + 1}</span>
+                                                    <span className="text-justify leading-relaxed">{paragraph}</span>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {/* 11.2 RECOMMENDATION */}
+                        {
+                            remarks?.recommendation && (
+                                <div className="mb-6">
+                                    <div className="flex items-baseline mb-4 text-[12px] pl-8">
+                                        <span className="font-bold w-10 shrink-0">11.2</span>
+                                        <span className="font-bold underline">RECOMMENDATION-</span>
+                                    </div>
+                                    <div className="pl-8 space-y-4 text-[12px]">
+                                        {
+                                            remarks.recommendation.split('\n').filter(line => line.trim() !== '').map((paragraph, index) => (
+                                                <div key={index} className="flex items-start">
+                                                    <span className="w-12 shrink-0">11.2.{index + 1}</span>
+                                                    <span className="text-justify leading-relaxed">{paragraph}</span>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            )
+                        }
                     </div>
+
+                    {
+                        station && reportDate && (
+                            <div className="mt-auto pt-16 flex justify-between items-end text-[12px] mb-32">
+                                <div className="space-y-1">
+                                    <div>
+                                        <span className="font-bold">Station :</span> <span>{station}</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold">Dated :</span> <span>{reportDate}</span>
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    (Signature of CO/2IC with unit seal)
+                                </div>
+                            </div>
+                        )
+                    }
+
+
+                    <div className="text-center mt-auto pt-8 font-bold text-[12px] underline">RESTRICTED</div>
                 </div>
+            }
 
-                <div className="text-center font-bold text-[12px] underline">RESTRICTED</div>
-            </div>
-
-        </div>
+        </div >
     );
 
 };
