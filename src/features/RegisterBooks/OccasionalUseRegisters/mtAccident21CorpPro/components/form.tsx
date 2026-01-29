@@ -1236,23 +1236,25 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                 {/* Vehicle Details */}
                 <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">Vehicle Details</h3>
-                    <div className="space-y-1">
-                        <SuggestionInput
-                            label="Vehicle BA No. / Civil Vehicle Registration No."
-                            fieldType="vehicleNumber"
-                            placeholder="eg. UP 16 AP 1234"
-                            value={formData.vehicleDetails.vehicleNumber}
-                            onChange={(v) => handleChange("vehicleDetails.vehicleNumber", v)}
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <SuggestionInput
-                            label="Make & Take"
-                            fieldType="vehicleType"
-                            placeholder="Model / Type"
-                            value={formData.vehicleDetails.vehicleModel}
-                            onChange={(v) => handleChange("vehicleDetails.vehicleModel", v)}
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <SuggestionInput
+                                label="Vehicle BA No. / Civil Vehicle Registration No."
+                                fieldType="vehicleNumber"
+                                placeholder="eg. UP 16 AP 1234"
+                                value={formData.vehicleDetails.vehicleNumber}
+                                onChange={(v) => handleChange("vehicleDetails.vehicleNumber", v)}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <SuggestionInput
+                                label="Make & Type"
+                                fieldType="vehicleType"
+                                placeholder="Model / Type"
+                                value={formData.vehicleDetails.vehicleModel}
+                                onChange={(v) => handleChange("vehicleDetails.vehicleModel", v)}
+                            />
+                        </div>
                     </div>
                 </section>
 
@@ -1347,7 +1349,7 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                         >
                             <label
                                 className={cn(
-                                    "flex items-center justify-start space-x-3 border rounded-lg px-4 py-3 w-full cursor-pointer transition-all hover:bg-gray-50",
+                                    "flex-1 flex items-center justify-start space-x-3 border rounded-lg px-4 py-3 cursor-pointer transition-all hover:bg-gray-50",
                                     formData.actionStatus === "pending"
                                         ? "border-red-500 bg-red-50/10 ring-1 ring-red-500"
                                         : "border-gray-200"
@@ -1359,7 +1361,7 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
 
                             <label
                                 className={cn(
-                                    "flex items-center justify-start space-x-3 border rounded-lg px-4 py-3 w-full cursor-pointer transition-all hover:bg-gray-50",
+                                    "flex-1 flex items-center justify-start space-x-3 border rounded-lg px-4 py-3 cursor-pointer transition-all hover:bg-gray-50",
                                     formData.actionStatus === "taken"
                                         ? "border-green-500 bg-green-50/10 ring-1 ring-green-500"
                                         : "border-gray-200"

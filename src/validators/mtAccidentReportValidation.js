@@ -15,7 +15,7 @@ const individualSchema = Joi.object({
 });
 
 const accidentSchema = Joi.object({
-    accidentTime: Joi.date().allow(null, "").optional(),
+    accidentTime: Joi.string().allow(null, "").optional(),
     accidentDate: Joi.date().allow(null, "").optional(),
     placeOfAccident: Joi.string().allow(null, "").optional(),
     accidentType: Joi.string()

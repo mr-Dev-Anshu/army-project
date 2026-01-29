@@ -10,7 +10,7 @@ const individualSchema = new mongoose.Schema(
             ]
         },
         individualDetails: {
-            type: Schema.Types.Mixed,
+            type: mongoose.Schema.Types.Mixed,
             default: {}
         },
     }, { _id: false }
@@ -18,7 +18,7 @@ const individualSchema = new mongoose.Schema(
 
 const accidentSchema = new mongoose.Schema(
     {
-        accidentTime: Date,
+        accidentTime: String,
         accidentDate: Date,
         placeOfAccident: String,
         accidentType: {
@@ -76,7 +76,7 @@ const mtAccidentReportSchema = new mongoose.Schema(
         actionStatusRemark: String,
         remark: String,
         customFields: {
-            type: Schema.Types.Mixed,
+            type: mongoose.Schema.Types.Mixed,
             default: {}
         },
     },
