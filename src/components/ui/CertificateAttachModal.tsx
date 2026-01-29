@@ -53,9 +53,11 @@ const handleSave = async () => {
   try {
     const uploadResults = await uploadMultipleFiles(files);
 
-    const attachments = uploadResults.map((res) => ({
+    const attachments = uploadResults.map((res, idx) => ({
       type: selectedType,
       url: res.url,
+      // Prefer original filename if available, otherwise use server filename or url basename
+      name: files[idx]?.name || res.filename || (res.url ? String(res.url).split('/').pop() : 'Untitled Document'),
     }));
 
     // ✅ Conditional API call

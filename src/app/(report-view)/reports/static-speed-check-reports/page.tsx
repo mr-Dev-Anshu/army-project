@@ -8,12 +8,13 @@ import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 
-import { useGetStaticSpeedRecords } from "@/features/staticSpeed/hooks";
+import { useGetStaticSpeedRecords, useGetStaticSpeedRecordById } from "@/features/staticSpeed/hooks";
 import StaticSpeedReport, {
   StaticSpeedReportProps,
 } from "@/components/reports/StaticSpeedReport";
 
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
 import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
 
@@ -394,6 +395,29 @@ export default function StaticSpeedCheckReportsPage() {
     );
   }
 
+  /* ================= VIEW MODE STATE ================= */
+  const [viewMode, setViewMode] = useState<"report" | "attachments">("report");
+
+  // Debug logging
+  useEffect(() => {
+    if (viewingReport) {
+      console.log("=== STATIC SPEED - Viewing Report ===");
+      console.log("Full Report Object:", viewingReport);
+      console.log("Certificates field:", viewingReport.certificates);
+      console.log("Custom Fields:", viewingReport.customFields);
+      console.log("All keys:", Object.keys(viewingReport));
+    }
+  }, [viewingReport]);
+
+  // When a report is selected for viewing we may only have a lightweight
+  // item from the list endpoint. Fetch the full record (including
+  // certificates/attachments) by id and prefer that when rendering
+  // the attachments viewer.
+  const viewingId = viewingReport?._id ?? viewingReport?.originalData?._id ?? null;
+  const viewingIdStr = viewingId ?? "";
+  const { data: viewingFullRecordData, isLoading: isViewingRecordLoading } = useGetStaticSpeedRecordById(viewingIdStr);
+  const finalViewingRecord = viewingFullRecordData?.data ?? viewingFullRecordData ?? viewingReport?.originalData ?? viewingReport;
+
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -412,19 +436,36 @@ export default function StaticSpeedCheckReportsPage() {
         onBack={() => {
           setViewingReport(null);
           setShouldAutoPrint(false);
+          setViewMode("report");
         }}
         isDownloading={isDownloading}
         downloadType={downloadType}
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
         onDownloadWord={() => handleDownloadReport(viewingReport)}
         onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
         onEdit={() => {
-          setEditingReport(viewingReport);
+          setEditingReport(finalViewingRecord);
           setIsCreating(true);
           setViewingReport(null);
         }}
       >
-        <StaticSpeedReport {...mapToReportProps(viewingReport)} />
+        {viewMode === "report" && (
+          <StaticSpeedReport {...mapToReportProps(viewingReport)} />
+        )}
+
+        {viewMode === "attachments" && (
+          <SignedAttachmentsViewer
+            record={finalViewingRecord}
+            onAttachMore={() => {
+              setEditingReport(finalViewingRecord);
+              setIsCreating(true);
+              setViewingReport(null);
+            }}
+          />
+        )}
       </ReportViewerWrapper>
     );
   }

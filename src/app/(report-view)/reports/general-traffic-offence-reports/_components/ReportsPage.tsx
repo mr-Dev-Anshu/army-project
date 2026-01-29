@@ -4,11 +4,12 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Loader2, ArrowLeft, Download } from "lucide-react";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 
-import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
+import { useGetAllTrafficOffences, useGetTrafficOffenceById } from "@/features/generalTraficOffence/hooks";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 
@@ -301,6 +302,17 @@ export default function ReportsPage({
       ? "General & Traffic Offence Reports - Vehicle Involved"
       : "General & Traffic Offence Reports - No Vehicle Involved";
 
+  /* ================= VIEW MODE STATE ================= */
+  const [viewMode, setViewMode] = useState<"report" | "attachments">("report");
+
+  // When viewing a grouped offence item we may not have the full offence
+  // object from the grouped endpoint. Fetch the single offence by id
+  // so attachments (`certificates` etc.) are available to the viewer.
+  const viewingId = viewingReport?._id ?? viewingReport?.originalData?._id ?? null;
+  const viewingIdStr = viewingId ?? "";
+  const { data: viewingFullRecordData } = useGetTrafficOffenceById(viewingIdStr);
+  const finalViewingRecord = viewingFullRecordData?.data ?? viewingFullRecordData ?? viewingReport?.originalData ?? viewingReport;
+
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -319,9 +331,13 @@ export default function ReportsPage({
         onBack={() => {
           setViewingReport(null);
           setShouldAutoPrint(false);
+          setViewMode("report");
         }}
         isDownloading={isDownloading}
         downloadType={downloadType}
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
         onDownloadWord={() => handleDownloadReport(viewingReport)}
         onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
@@ -330,9 +346,21 @@ export default function ReportsPage({
           setIsCreating(true);
           setViewingReport(null);
         }}
-        onViewEvidences={() => console.log("View Evidence Clicked")}
       >
-        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+        {viewMode === "report" && (
+          <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+        )}
+
+        {viewMode === "attachments" && (
+          <SignedAttachmentsViewer
+            record={finalViewingRecord}
+            onAttachMore={() => {
+              setEditingReport(finalViewingRecord);
+              setIsCreating(true);
+              setViewingReport(null);
+            }}
+          />
+        )}
       </ReportViewerWrapper>
     );
   }

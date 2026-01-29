@@ -11,8 +11,10 @@ interface ReportViewerWrapperProps {
     downloadType?: "PDF" | "Word" | null;
     onDownloadWord?: () => void;
     onDownloadPdf?: () => void;
+    onViewReport?: () => void;
     onViewAttachments?: () => void;
     onViewEvidences?: () => void;
+    activeView?: "report" | "attachments" | "evidences";
     children: React.ReactNode;
 }
 
@@ -25,8 +27,10 @@ export default function ReportViewerWrapper({
     downloadType,
     onDownloadWord,
     onDownloadPdf,
+    onViewReport,
     onViewAttachments,
     onViewEvidences,
+    activeView = "report",
     children,
 }: ReportViewerWrapperProps) {
     return (
@@ -48,32 +52,36 @@ export default function ReportViewerWrapper({
 
                 {/* Center: View Modes */}
                 <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
-                    {/* View Final Report (Active) */}
+                    {/* View Final Report */}
                     <Button
-                        variant="default"
-                        className="bg-blue-600 text-white hover:bg-blue-700 h-9 px-4 gap-2 rounded text-sm font-medium transition-all"
+                        variant={activeView === "report" ? "default" : "outline"}
+                        className={`${activeView === "report" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-transparent border-white/20 text-white hover:bg-white/10"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all`}
+                        onClick={onViewReport}
                     >
                         View Final Report <FileText className="w-4 h-4" />
                     </Button>
 
                     {/* View Signed Attachments */}
-                    <Button
-                        variant="outline"
-                        className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
-                        onClick={onViewAttachments}
-                    >
-                        View Signed Attachments <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🔒</div>
-                    </Button>
+                    {onViewAttachments && (
+                        <Button
+                            variant={activeView === "attachments" ? "default" : "outline"}
+                            className={`${activeView === "attachments" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-transparent border-white/20 text-white hover:bg-white/10"} h-9 px-4 gap-2 rounded text-sm font-normal transition-all`}
+                            onClick={onViewAttachments}
+                        >
+                            View Signed Attachments <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🔒</div>
+                        </Button>
+                    )}
 
                     {/* View Evidences */}
-                    <Button
-                        variant="outline"
-                        className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
-                        onClick={onViewEvidences}
-                    >
-                        View Evidences <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🖼️</div>
-                        {/* Use Lucide icon if available below, sticking to generic for now if Import missing. I will add imports */}
-                    </Button>
+                    {onViewEvidences && (
+                        <Button
+                            variant={activeView === "evidences" ? "default" : "outline"}
+                            className={`${activeView === "evidences" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-transparent border-white/20 text-white hover:bg-white/10"} h-9 px-4 gap-2 rounded text-sm font-normal transition-all`}
+                            onClick={onViewEvidences}
+                        >
+                            View Evidences <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px]">🖼️</div>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Right: Actions */}

@@ -3,12 +3,13 @@
 import React, { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
-import { useGetAllMPReports } from "@/features/mpReports/hooks";
+import { useGetAllMPReports, useGetMPReportById } from "@/features/mpReports/hooks";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/reports/MpOccurrenceReport";
 
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
@@ -503,6 +504,15 @@ export default function MpOccurrenceReportsPage() {
     )
   }
 
+  /* ================= VIEW MODE STATE ================= */
+  const [viewMode, setViewMode] = useState<"report" | "attachments" | "evidences">("report");
+
+  // Fetch full record when a report is selected (list endpoint may be lightweight)
+  const viewingId = viewingReport?._id ?? viewingReport?.originalData?._id ?? null;
+  const viewingIdStr = viewingId ?? "";
+  const { data: viewingFullRecordData } = useGetMPReportById(viewingIdStr);
+  const finalViewingRecord = viewingFullRecordData?.data ?? viewingFullRecordData ?? viewingReport?.originalData ?? viewingReport;
+
   if (viewingReport) {
     return (
       <ReportViewerWrapper
@@ -510,14 +520,41 @@ export default function MpOccurrenceReportsPage() {
         onBack={() => {
           setViewingReport(null);
           setShouldAutoPrint(false);
+          setViewMode("report");
         }}
         isDownloading={isDownloading}
         downloadType={downloadType}
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
+        onViewEvidences={() => setViewMode("evidences")}
         onDownloadWord={() => handleDownloadReport(viewingReport)}
         onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
+        onEdit={() => {
+          // For now, log since there's no edit form yet
+          console.log("Edit clicked - edit form not implemented yet");
+        }}
       >
-        <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
+        {viewMode === "report" && (
+          <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
+        )}
+
+        {viewMode === "attachments" && (
+          <SignedAttachmentsViewer
+            record={finalViewingRecord}
+            onAttachMore={() => {
+              // For now, close viewer since there's no edit form yet
+              console.log("Attach more clicked - edit form not implemented yet");
+            }}
+          />
+        )}
+
+        {viewMode === "evidences" && (
+          <div className="flex h-[400px] items-center justify-center text-gray-400">
+            Evidences View (Coming Soon)
+          </div>
+        )}
       </ReportViewerWrapper>
     );
   }

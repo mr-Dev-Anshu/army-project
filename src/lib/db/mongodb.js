@@ -28,20 +28,27 @@ export async function connectDB() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false, // Disable mongoose buffering
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log("MongoDB connected successfully");
-      return mongoose;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI, opts)
+      .then((mongoose) => {
+        console.log("✅ MongoDB connected successfully");
+        return mongoose;
+      })
+      .catch((error) => {
+        console.error("❌ MongoDB connection failed:", error.message);
+        throw error;
+      });
   }
 
   try {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    console.error("MongoDB connection error:", e);
-    throw e; // Let the caller handle it (e.g., show error page)
+    console.error("❌ MongoDB connection error:", e.message);
+    throw new Error(`Failed to connect to MongoDB: ${e.message}`);
   }
 
   return cached.conn;
