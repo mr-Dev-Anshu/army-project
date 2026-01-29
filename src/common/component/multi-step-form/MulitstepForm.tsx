@@ -43,100 +43,91 @@ export default function MultiStepForm({
   useEffect(() => {
     if (existingOffence) {
       console.log("Hydrating Form with:", existingOffence);
+      try {
+        const trafficNodes = { ...initialState.formData.traffic };
+        const eo = existingOffence;
 
-      const trafficNodes = { ...initialState.formData.traffic };
-      const eo = existingOffence;
+        // 1. Basic Fields
+        trafficNodes.vehicleInvolved = eo.isVehicleInvolved ? "yes" : "no";
+        trafficNodes.remarks = eo.customFields?.remarks || eo.remarks || "";
+        trafficNodes.reportNo = eo.reportNo || eo.reportId || eo.reportNumber;
 
-      // 1. Basic Fields
-      trafficNodes.vehicleInvolved = eo.isVehicleInvolved ? "yes" : "no";
-      trafficNodes.remarks = eo.customFields?.remarks || eo.remarks || "";
-      trafficNodes.reportNo = eo.reportNo || eo.reportId || eo.reportNumber;
-
-      // 2. Vehicle Details
-      if (eo.isVehicleInvolved) {
-        trafficNodes.vehicleDetails = {
-          category: eo.vehicleCategory || "",
-          vehicleType: eo.vehicleType || "",
-          driverType: eo.driverType || "",
-          vehicleName: eo.vehicleName || "",
-          vehicleNumber: eo.vehicleNumber || "",
-        };
-      }
-
-      // 3. Offender Without Vehicle (if applicable)
-      // Check if there is a primary offender without vehicle details mapped
-      // This mapping might depend on how backend stores vs frontend
-
-      // 4. On Duty Details
-      trafficNodes.onDutyDetails = {
-        dateOfDuty: eo.onDutyDetails?.dateOfDuty ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split('T')[0] : "",
-        startTime: eo.onDutyDetails?.startTime || "",
-        endTime: eo.onDutyDetails?.endTime || "",
-        dutyLocation: eo.onDutyDetails?.dutyLocation || "",
-        dutyType: eo.onDutyDetails?.dutyType || "",
-      };
-
-      // 5. MP Reporting
-      trafficNodes.onDutyDetailsMPReporting = {
-        nameReportingMP: eo.onDutyDetailsMPReporting?.nameReportingMP || "",
-        rank: eo.onDutyDetailsMPReporting?.rank || "",
-        unit: eo.onDutyDetailsMPReporting?.unit || "",
-        armyNumber: eo.onDutyDetailsMPReporting?.armyNumber || "",
-        contactNumber: eo.onDutyDetailsMPReporting?.contactNumber || "",
-      };
-
-      // 6. Occurence
-      trafficNodes.offenceOccurenceDetails = {
-        timeOfOffence: eo.offenceOccurenceDetails?.timeOfOffence || "",
-        incidentLocation: eo.offenceOccurenceDetails?.incidentLocation || "",
-        description: eo.offenceOccurenceDetails?.description || "",
-        briefDescription: eo.offenceOccurenceDetails?.briefDescription || "",
-        time: eo.offenceOccurenceDetails?.time || "",
-      };
-
-      // 7. Arrays - Deep Copy to avoid mutations
-      trafficNodes.offenceTypes = Array.isArray(eo.offenceTypes) ? [...eo.offenceTypes] : [];
-      trafficNodes.offenceRefList = Array.isArray(eo.offenceTypeReference) ? [...eo.offenceTypeReference] : [];
-
-      // Witnesses
-      // Map backend witness structure to frontend if needed
-      if (Array.isArray(eo.onDutyWitnessingMps)) {
-        trafficNodes.witnesses = eo.onDutyWitnessingMps.map((w: any) => ({
-          reportingBlock: {
-            nameReportingMP: w.name || w.nameReportingMP || "",
-            rank: w.rank || "",
-            unit: w.unit || "",
-            armyNumber: w.armyNumber || w.ArmyNo || "",
-            contactNumber: w.contactNumber || "",
-          }
-        }));
-      }
-
-      // Offender People
-      if (Array.isArray(eo.offenders)) {
-        trafficNodes.offenderPeople = eo.offenders.map((o: any) => {
-          // Map backend offender to frontend structure
-          // Assuming structure matches reasonably well or doing manual mapping
-          return {
-            offenderDetails: o.offenderDetails || {},
-            // ... other fields
+        // 2. Vehicle Details
+        if (eo.isVehicleInvolved) {
+          trafficNodes.vehicleDetails = {
+            category: eo.vehicleCategory || "",
+            vehicleType: eo.vehicleType || "",
+            driverType: eo.driverType || "",
+            vehicleName: eo.vehicleName || "",
+            vehicleNumber: eo.vehicleNumber || "",
           };
-        });
-      }
-
-      dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          ...initialState.formData,
-          traffic: trafficNodes,
-          // Also populate mpReport if needed for attachments
-          mpReport: {
-            ...initialState.formData.mpReport,
-            attachments: eo.customFields?.attachments || [], // Hydrate attachments if they exist
-            // If attachments are stored in a specific way in backend, map them here
-          }
         }
-      });
+
+        // 4. On Duty Details
+        trafficNodes.onDutyDetails = {
+          dateOfDuty: eo.onDutyDetails?.dateOfDuty ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split('T')[0] : "",
+          startTime: eo.onDutyDetails?.startTime || "",
+          endTime: eo.onDutyDetails?.endTime || "",
+          dutyLocation: eo.onDutyDetails?.dutyLocation || "",
+          dutyType: eo.onDutyDetails?.dutyType || "",
+        };
+
+        // 5. MP Reporting
+        trafficNodes.onDutyDetailsMPReporting = {
+          nameReportingMP: eo.onDutyDetailsMPReporting?.nameReportingMP || "",
+          rank: eo.onDutyDetailsMPReporting?.rank || "",
+          unit: eo.onDutyDetailsMPReporting?.unit || "",
+          armyNumber: eo.onDutyDetailsMPReporting?.armyNumber || "",
+          contactNumber: eo.onDutyDetailsMPReporting?.contactNumber || "",
+        };
+
+        // 6. Occurence
+        trafficNodes.offenceOccurenceDetails = {
+          timeOfOffence: eo.offenceOccurenceDetails?.timeOfOffence || "",
+          incidentLocation: eo.offenceOccurenceDetails?.incidentLocation || "",
+          description: eo.offenceOccurenceDetails?.description || "",
+          briefDescription: eo.offenceOccurenceDetails?.briefDescription || "",
+          time: eo.offenceOccurenceDetails?.time || "",
+        };
+
+        // 7. Arrays - Deep Copy to avoid mutations
+        trafficNodes.offenceTypes = Array.isArray(eo.offenceTypes) ? [...eo.offenceTypes] : [];
+        trafficNodes.offenceRefList = Array.isArray(eo.offenceTypeReference) ? [...eo.offenceTypeReference] : [];
+
+        // Witnesses
+        if (Array.isArray(eo.onDutyWitnessingMps)) {
+          trafficNodes.witnesses = eo.onDutyWitnessingMps.map((w: any) => ({
+            reportingBlock: {
+              nameReportingMP: w.name || w.nameReportingMP || "",
+              rank: w.rank || "",
+              unit: w.unit || "",
+              armyNumber: w.armyNumber || w.ArmyNo || "",
+              contactNumber: w.contactNumber || "",
+            }
+          }));
+        }
+
+        // Offender People
+        if (Array.isArray(eo.offenders)) {
+          // Basic mapping placeholder - expand as needed
+          // trafficNodes.offenderPeople = eo.offenders...
+        }
+
+        dispatch({
+          type: "SET_FORM_DATA",
+          payload: {
+            ...initialState.formData,
+            traffic: trafficNodes,
+            mpReport: {
+              ...initialState.formData.mpReport,
+              attachments: eo.customFields?.attachments || [],
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Hydration Failed:", error);
+        toast.error("Failed to load existing data");
+      }
     }
   }, [existingOffence, dispatch]);
 
@@ -270,8 +261,14 @@ export default function MultiStepForm({
   };
 
   const toISO = (date?: string, time?: string) => {
-    if (!date || !time) return null;
-    return new Date(`${date}T${time}`).toISOString();
+    if (!date || !time) return undefined;
+    try {
+      const d = new Date(`${date}T${time}`);
+      if (isNaN(d.getTime())) return undefined;
+      return d.toISOString();
+    } catch (e) {
+      return undefined;
+    }
   };
 
   const onSubmitFinal = async () => {
@@ -280,8 +277,8 @@ export default function MultiStepForm({
       const traffic = state.formData.traffic;
       console.log("🚔 RAW TRAFFIC ===>", traffic);
 
-      /* ================= CREATE OFFENCE ================= */
-      const offenceRes = await createOffence({
+      /* ================= CREATE / UPDATE OFFENCE ================= */
+      const payload = {
         reportId: reportNo,
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
@@ -302,6 +299,7 @@ export default function MultiStepForm({
 
         onDutyDetails: {
           ...traffic.onDutyDetails,
+          dateOfDuty: traffic.onDutyDetails?.dateOfDuty ? traffic.onDutyDetails.dateOfDuty : undefined,
           startTime: toISO(
             traffic.onDutyDetails?.dateOfDuty,
             traffic.onDutyDetails?.startTime
@@ -329,8 +327,25 @@ export default function MultiStepForm({
         customFields: {
           remarks: traffic.remarks,
           selectedWitness: traffic.selectedWitness,
+          attachments: state.formData.mpReport?.attachments || [], // Save attachments with types
         },
-      });
+      };
+
+      let offenceRes;
+      if (existingOffence && existingOffence._id) {
+        // UPDATE MODE
+        console.log("📝 UPDATING Traffic Offence:", existingOffence._id);
+        offenceRes = await updateOffence({
+          id: existingOffence._id,
+          data: payload
+        });
+        toast.success("Traffic Offence Updated Successfully!");
+      } else {
+        // CREATE MODE
+        console.log("🆕 CREATING Traffic Offence");
+        offenceRes = await createOffence(payload);
+        toast.success("Traffic Offence Created Successfully!");
+      }
 
       const offenceId = offenceRes?._id;
       if (!offenceId) {
@@ -427,9 +442,12 @@ export default function MultiStepForm({
       dispatch({ type: "SET_STEP", payload: 1 });
       dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
       dispatch({ type: "SET_PREVIEW", payload: false });
-    } catch (err) {
+    } catch (err: any) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
-      toast.error("Submit failed");
+      const msg = err?.response?.data?.details?.[0]?.message
+        ? `Val Error: ${err.response.data.details[0].message} (${err.response.data.details[0].path})`
+        : err?.response?.data?.error || "Submit failed";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

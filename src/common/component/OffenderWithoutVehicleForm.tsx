@@ -461,27 +461,21 @@ export default function OffenderWithoutVehicleForm({
   const [blocks, setBlocks] = useState<Block[]>([{ id: Date.now() }]);
 
   /* ================= HYDRATE FROM STATE ================= */
+  /* ================= HYDRATE FROM STATE ================= */
   useEffect(() => {
+    let list: any[] = [];
+    let isMp = false;
+
     // 1. Traffic / Static (Array)
     if (scope === "traffic" || scope === "static") {
-      const list =
-        scope === "static"
-          ? state.formData.staticSpeed?.offenderPeople || []
-          : state.formData.traffic?.offenderPeople || [];
-
-      if (list.length > 0) {
-        const restored = list.map((p: any, i: number) => ({
-          id: Date.now() + i,
-          type: p.type,
-          index: i,
-        }));
-        setBlocks(restored);
-      }
+      list = scope === "static"
+        ? state.formData.staticSpeed?.offenderPeople || []
+        : state.formData.traffic?.offenderPeople || [];
     }
 
-    // 2. MP / Root Path (Single Object)
+    // 2. MP / Root Path (Single Object wrapped in array for consistent logic here)
     if (scope === "mp-main" || scope === "mp-additional" || rootPath) {
-      // Determine Path
+      isMp = true;
       let tempPath = "";
       if (rootPath) {
         tempPath = `${rootPath}.tempOffender`;
@@ -496,19 +490,50 @@ export default function OffenderWithoutVehicleForm({
         path.split(".").reduce((o, k) => (o || {})[k], obj);
 
       const temp = getValue(state, tempPath);
-
       if (temp?.offenderType) {
-        setBlocks([
-          {
-            id: Date.now(),
-            type: temp.offenderType,
-            index: 0,
-          },
-        ]);
+        list = [{ type: temp.offenderType, index: 0 }];
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount
+
+    // SYNC LOGIC
+    // We only update blocks if the list from state is different structurally (length or types)
+    // from our local blocks, to avoid re-generating IDs and losing focus/state.
+
+    // Check length mismatch
+    let shouldUpdate = list.length !== blocks.length;
+
+    // Check type mismatch
+    if (!shouldUpdate) {
+      shouldUpdate = list.some((p: any, i: number) => {
+        // MP logic differs slightly in object structure, but 'type' field is common in my mapping above?
+        // Wait, for MP I constructed a list item with 'type'. For traffic, 'p' has 'type'.
+        const stateType = p.type || p.offenderType;
+        const blockType = blocks[i]?.type;
+        return stateType !== blockType;
+      });
+    }
+
+    if (shouldUpdate) {
+      if (list.length > 0) {
+        const restored = list.map((p: any, i: number) => ({
+          id: Date.now() + i, // Generate new IDs only when structure mismatch (e.g. hydration)
+          type: p.type || p.offenderType,
+          index: i,
+        }));
+        setBlocks(restored);
+      } else {
+        // If state is empty but we have blocks (and it's not default empty block), clear.
+        // But we usually want at least one empty block?
+        // Use default if nothing in state.
+        setBlocks([{ id: Date.now() }]);
+      }
+    }
+
+  }, [state.formData, scope, rootPath]); // We rely on blocks in closure for comparison, which is fine since we want to compare with CURRENT blocks. 
+  // Warning: exhaustive-deps might want 'blocks' in dependency.
+  // If we add 'blocks', every local update triggers this. 
+  // BUT we only update if mismatch. So it should stabilize.
+
 
   /* ================= ADD MORE ================= */
   const addMore = () => {

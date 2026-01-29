@@ -8,7 +8,7 @@ import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 
-import { useGetStaticSpeedRecords, useGetStaticSpeedRecordById } from "@/features/staticSpeed/hooks";
+import { useGetStaticSpeedRecords, useGetStaticSpeedRecordById, useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import StaticSpeedReport, {
   StaticSpeedReportProps,
 } from "@/components/reports/StaticSpeedReport";
@@ -17,6 +17,8 @@ import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
 import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
+import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
+import { toast } from "react-toastify";
 
 export default function StaticSpeedCheckReportsPage() {
   /* ================= FILTER STATE ================= */
@@ -37,7 +39,48 @@ export default function StaticSpeedCheckReportsPage() {
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
+  // NEW STATE FOR ATTACHMENT
+  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+  const { mutateAsync: updateRecord } = useUpdateStaticSpeedRecord();
+
+  /* ================= HANDLERS ================= */
+  const handleAttachSave = async (newItems: AttachedItem[]) => {
+    if (!viewingReport?._id) return;
+
+    try {
+      const currentAttachments = viewingReport.customFields?.attachments || viewingReport.attachments || [];
+      const updatedAttachments = [...currentAttachments, ...newItems];
+
+      await updateRecord({
+        id: viewingReport._id,
+        data: {
+          customFields: {
+            ...viewingReport.customFields,
+            attachments: updatedAttachments
+          }
+        }
+      });
+
+      toast.success("Attachments Added Successfully");
+
+      // Update local state
+      setViewingReport((prev: any) => ({
+        ...prev,
+        customFields: {
+          ...prev.customFields,
+          attachments: updatedAttachments
+        }
+      }));
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add attachments");
+    }
+  };
+
   /* ================= AUTO PRINT ================= */
+  // ... (rest of the file until return block)
+
+
   useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
       const t = setTimeout(() => {
@@ -431,42 +474,46 @@ export default function StaticSpeedCheckReportsPage() {
 
   if (viewingReport) {
     return (
-      <ReportViewerWrapper
-        title="STATIC SPEED CHECK REPORT"
-        onBack={() => {
-          setViewingReport(null);
-          setShouldAutoPrint(false);
-          setViewMode("report");
-        }}
-        isDownloading={isDownloading}
-        downloadType={downloadType}
-        activeView={viewMode}
-        onViewReport={() => setViewMode("report")}
-        onViewAttachments={() => setViewMode("attachments")}
-        onDownloadWord={() => handleDownloadReport(viewingReport)}
-        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-        onPrint={() => window.print()}
-        onEdit={() => {
-          setEditingReport(finalViewingRecord);
-          setIsCreating(true);
-          setViewingReport(null);
-        }}
-      >
-        {viewMode === "report" && (
-          <StaticSpeedReport {...mapToReportProps(viewingReport)} />
-        )}
+      <>
+        <ReportViewerWrapper
+          title="STATIC SPEED CHECK REPORT"
+          onBack={() => {
+            setViewingReport(null);
+            setShouldAutoPrint(false);
+            setViewMode("report");
+          }}
+          isDownloading={isDownloading}
+          downloadType={downloadType}
+          activeView={viewMode}
+          onViewReport={() => setViewMode("report")}
+          onViewAttachments={() => setViewMode("attachments")}
+          onDownloadWord={() => handleDownloadReport(viewingReport)}
+          onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+          onPrint={() => window.print()}
+          onEdit={() => {
+            setEditingReport(finalViewingRecord);
+            setIsCreating(true);
+            setViewingReport(null);
+          }}
+        >
+          {viewMode === "report" && (
+            <StaticSpeedReport {...mapToReportProps(viewingReport)} />
+          )}
 
-        {viewMode === "attachments" && (
-          <SignedAttachmentsViewer
-            record={finalViewingRecord}
-            onAttachMore={() => {
-              setEditingReport(finalViewingRecord);
-              setIsCreating(true);
-              setViewingReport(null);
-            }}
-          />
-        )}
-      </ReportViewerWrapper>
+          {viewMode === "attachments" && (
+            <SignedAttachmentsViewer
+              record={finalViewingRecord}
+              onAttachMore={() => setIsAttachModalOpen(true)}
+            />
+          )}
+        </ReportViewerWrapper>
+
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => setIsAttachModalOpen(false)}
+          onSave={handleAttachSave}
+        />
+      </>
     );
   }
 

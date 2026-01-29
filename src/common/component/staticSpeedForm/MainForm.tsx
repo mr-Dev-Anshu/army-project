@@ -10,7 +10,7 @@ import StaticSpeedStep1Particulars from "./steps/Step1";
 import Step2Statement from "./steps/step2";
 import Step3Offence from "./steps/step3";
 import { toast } from "react-toastify";
-import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+import { useCreateStaticSpeedRecord, useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
@@ -28,10 +28,9 @@ export default function StaticSpeedForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const staticData = state.formData.staticSpeed as any;
-  // TODO: Add Update Hook if needed for editing submission
 
   const createStaticRecord = useCreateStaticSpeedRecord();
-  // const updateStaticRecord = useUpdateStaticSpeedRecord(); // Assuming hook exists or we use create
+  const updateStaticRecord = useUpdateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
 
@@ -44,7 +43,7 @@ export default function StaticSpeedForm({
       // Deep copy initial structure
       const speedNodes = { ...initialState.formData.staticSpeed };
 
-      speedNodes.reportNo = er.reportId || er.reportNo || "";
+      speedNodes.reportNo = er.reportNo || er.reportId || "";
       speedNodes.remarks = er.remarks || ""; // or customFields.remarks
 
       // Vehicle
@@ -58,33 +57,33 @@ export default function StaticSpeedForm({
 
       // Duty Block
       speedNodes.dutyBlock = {
-        dateOfDuty: er.dutyBlock?.dateOfDuty ? new Date(er.dutyBlock.dateOfDuty).toISOString().split('T')[0] : "",
-        startTime: er.dutyBlock?.startTime || "",
-        endTime: er.dutyBlock?.endTime || "",
-        dutyLocation: er.dutyBlock?.dutyLocation || "",
-        dutyType: er.dutyBlock?.dutyType || "",
+        dateOfDuty: er.onDutyDetails?.dateOfDuty ? new Date(er.onDutyDetails.dateOfDuty).toISOString().split('T')[0] : "",
+        startTime: er.onDutyDetails?.startTime ? new Date(er.onDutyDetails.startTime).toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' }) : "",
+        endTime: er.onDutyDetails?.endTime ? new Date(er.onDutyDetails.endTime).toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' }) : "",
+        dutyLocation: er.onDutyDetails?.dutyLocation || "",
+        dutyType: er.onDutyDetails?.dutyType || "",
       };
 
       // Reporting Block (MP)
       speedNodes.reportingBlock = {
-        nameReportingMP: er.reportingBlock?.nameReportingMP || "",
-        rank: er.reportingBlock?.rank || "",
-        unit: er.reportingBlock?.unit || "",
-        armyNumber: er.reportingBlock?.armyNumber || "",
-        contactNumber: er.reportingBlock?.contactNumber || "",
+        nameReportingMP: er.onDutyDetailsMPReporting?.nameReportingMP || "",
+        rank: er.onDutyDetailsMPReporting?.rank || "",
+        unit: er.onDutyDetailsMPReporting?.unit || "",
+        armyNumber: er.onDutyDetailsMPReporting?.armyNumber || "",
+        contactNumber: er.onDutyDetailsMPReporting?.contactNumber || "",
       };
 
       // Offence Block
       speedNodes.offenceBlock = {
-        timeOfOffence: er.offenceBlock?.timeOfOffence || er.offenceOccurenceDetails?.timeOfOffence || "",
-        time: er.offenceBlock?.time || er.offenceOccurenceDetails?.time || "",
-        incidentLocation: er.offenceBlock?.incidentLocation || er.offenceOccurenceDetails?.incidentLocation || "",
-        description: er.offenceBlock?.description || "",
-        briefDescription: er.offenceBlock?.briefDescription || "",
-        description2: er.offenceBlock?.description2 || "",
-        actualSpeedNoted: er.offenceBlock?.actualSpeedNoted || er.offenceBlock?.actualSpeed || "",
-        authSpeed: er.offenceBlock?.authSpeed || "",
-        overSpeedCalculated: er.offenceBlock?.overSpeedCalculated || er.offenceBlock?.overSpeed || "",
+        timeOfOffence: er.offenceOccurenceDetails?.timeOfOffence || "",
+        time: er.offenceOccurenceDetails?.time || "",
+        incidentLocation: er.offenceOccurenceDetails?.incidentLocation || "",
+        description: er.offenceOccurenceDetails?.description || "",
+        briefDescription: er.offenceOccurenceDetails?.briefDescription || "",
+        description2: er.offenceOccurenceDetails?.description2 || "",
+        actualSpeedNoted: er.offenceOccurenceDetails?.actualSpeedNoted || "",
+        authSpeed: er.offenceOccurenceDetails?.authSpeed || "",
+        overSpeedCalculated: er.offenceOccurenceDetails?.overSpeedCalculated || "",
       };
 
       // Witnesses (Array)
@@ -100,12 +99,13 @@ export default function StaticSpeedForm({
         }));
       }
 
-      // Offender People (Array)
-      if (Array.isArray(er.offenderPeople)) {
-        speedNodes.offenderPeople = er.offenderPeople; // Assuming direct map works or implement deep map
+      // Offender People (Array) - TODO: Map correctly from backend offenders structure
+      if (Array.isArray(er.offenders)) {
+        // speedNodes.offenderPeople = er.offenders... 
       }
 
       // Hydrate attachments
+      // Ensure we preserve the type if coming from backend
       speedNodes.attachments = er.customFields?.attachments || [];
 
       dispatch({
@@ -332,20 +332,30 @@ export default function StaticSpeedForm({
         remark: staticData.remarks,
         customFields: {
           selectedWitness: staticData.selectedWitness,
+          attachments: staticData.attachments || [], // Ensure attachments are saved with type key if present
         },
-
-        // DOCUMENTS (Mapped to backend expected field, often 'documents' or part of customFields?)
-        // Assuming backend accepts 'documents' array of strings
-        documents: staticData.documents || [],
       };
 
       console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
 
-      /* ================= CREATE STATIC RECORD ================= */
-      const staticRes = await createStaticRecord.mutateAsync(payload);
-      console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
+      /* ================= CREATE / UPDATE STATIC RECORD ================= */
+      let staticRes;
+      if (existingReport && existingReport._id) {
+        // UPDATE MODE
+        console.log("📝 UPDATING Static Record:", existingReport._id);
+        staticRes = await updateStaticRecord.mutateAsync({
+          id: existingReport._id,
+          data: payload
+        });
+        toast.success("Static Record Updated Successfully!");
+      } else {
+        // CREATE MODE
+        console.log("🆕 CREATING Static Record");
+        staticRes = await createStaticRecord.mutateAsync(payload);
+        toast.success("Static Record Created Successfully!");
+      }
 
-      toast.success("Static Record Created Successfully!");
+      console.log("✅ STATIC SPEED BACKEND RESPONSE ===>", staticRes);
 
       if (!staticRes?._id) {
         toast.error("Static Record ID Missing!");

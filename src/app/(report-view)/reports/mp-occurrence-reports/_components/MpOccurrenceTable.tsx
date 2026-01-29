@@ -38,6 +38,7 @@ interface MpOccurrenceTableProps {
   onView?: (item: any) => void;
   onPrint?: (item: any) => void;
   onDownload?: (item: any) => void;
+  onEdit?: (item: any) => void;
 }
 
 export default function MpOccurrenceTable({
@@ -45,6 +46,7 @@ export default function MpOccurrenceTable({
   onView,
   onPrint,
   onDownload,
+  onEdit,
 }: MpOccurrenceTableProps) {
   const { mutateAsync: updateReport, isPending: isUpdating } =
     useUpdateMPReport();
@@ -53,7 +55,7 @@ export default function MpOccurrenceTable({
 
   const [actionRemark, setActionRemark] = React.useState("");
   const [attachModalOpen, setAttachModalOpen] = React.useState(false);
-const [selectedReport, setSelectedReport] = React.useState<any>(null);
+  const [selectedReport, setSelectedReport] = React.useState<any>(null);
 
   const [modalState, setModalState] = React.useState<{
     isOpen: boolean;
@@ -81,9 +83,9 @@ const [selectedReport, setSelectedReport] = React.useState<any>(null);
   };
 
   const handleAttachCertificate = (item: any) => {
-  setSelectedReport(item);
-  setAttachModalOpen(true);
-};
+    setSelectedReport(item);
+    setAttachModalOpen(true);
+  };
 
   const handleDeleteClick = (reportId: string) => {
     setModalState({
@@ -299,7 +301,10 @@ const [selectedReport, setSelectedReport] = React.useState<any>(null);
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onEdit && onEdit(item)}
+              >
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
@@ -385,19 +390,19 @@ const [selectedReport, setSelectedReport] = React.useState<any>(null);
         )}
       </ConfirmationModal>
       <AttachCertificateModal
-  isOpen={attachModalOpen}
-  reportId={selectedReport?._id}
-  reportType="mp"
-  onClose={() => {
-    setAttachModalOpen(false);
-    setSelectedReport(null);
-  }}
-  onSave={() => {
-    toast.success("Certificate attached successfully");
-    setAttachModalOpen(false);
-    setSelectedReport(null);
-  }}
-/>
+        isOpen={attachModalOpen}
+        reportId={selectedReport?._id}
+        reportType="mp"
+        onClose={() => {
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+        onSave={() => {
+          toast.success("Certificate attached successfully");
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+      />
     </>
   );
 }

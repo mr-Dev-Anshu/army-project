@@ -32,24 +32,32 @@ export default function SignedAttachmentsViewer({ attachments = [], record, onAt
         if (!rec || typeof rec !== 'object') return [];
 
         const candidates: Attachment[] = [];
+        const seenUrls = new Set<string>();
 
         const tryPush = (arr: any[], inferredType?: string) => {
             if (!Array.isArray(arr)) return;
             arr.forEach((it) => {
                 // Common shapes: { type, name, url, statement }, or { url } or { filename }
-                const name = it.name || it.statement || it.filename || (it.url ? String(it.url).split('/').pop() : undefined) || 'Untitled Document';
-                const type = (it.type || inferredType || '').toString();
                 const url = it.url || it.path || it.file || '';
 
+                // If we've seen this URL already, skip it to prevent duplicates
+                if (url && seenUrls.has(String(url))) return;
+
+                const name = it.name || it.statement || it.filename || (url ? String(url).split('/').pop() : undefined) || 'Untitled Document';
+                const type = (it.type || inferredType || '').toString();
+
                 candidates.push({ type, name, url });
+                if (url) seenUrls.add(String(url));
             });
         };
 
         // Known keys which often hold attachments
         const keysToCheck = ['certificates', 'attachments', 'documents', 'signedAttachments', 'files', 'evidences', 'signed'];
+        const processedKeys = new Set<string>();
 
         for (const k of keysToCheck) {
             if (rec[k]) {
+                processedKeys.add(k);
                 // Infer type from the key name
                 let inferred = 'certificate';
                 if (k.toLowerCase().includes('form')) inferred = 'form';
@@ -60,12 +68,29 @@ export default function SignedAttachmentsViewer({ attachments = [], record, onAt
             }
         }
 
+        // Check inside customFields if it exists
+        if (rec.customFields && typeof rec.customFields === 'object') {
+            for (const k of keysToCheck) {
+                if (rec.customFields[k]) {
+                    // Infer type from the key name
+                    let inferred = 'certificate';
+                    if (k.toLowerCase().includes('form')) inferred = 'form';
+                    if (k.toLowerCase().includes('letter')) inferred = 'letter';
+                    if (k.toLowerCase().includes('attach') || k.toLowerCase().includes('file')) inferred = 'form';
+
+                    tryPush(rec.customFields[k], inferred);
+                }
+            }
+        }
+
         // Also inspect top-level keys for mixed shapes (e.g., custom fields)
         Object.keys(rec).forEach((k) => {
+            if (processedKeys.has(k)) return; // Skip already processed keys
+
             const val = rec[k];
-            if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object') {
+            if (Array.isArray(val) && val.length > 0 && val[0] && typeof val[0] === 'object') {
                 // Heuristic: if array items have url or name, treat them as attachments
-                if (val[0].url || val[0].name || val[0].filename) {
+                if (val[0]?.url || val[0]?.name || val[0]?.filename) {
                     tryPush(val, k);
                 }
             }

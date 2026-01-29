@@ -9,9 +9,11 @@ import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 
-import { useGetAllTrafficOffences, useGetTrafficOffenceById } from "@/features/generalTraficOffence/hooks";
+import { useGetAllTrafficOffences, useGetTrafficOffenceById, useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
+import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
+import { toast } from "react-toastify";
 
 import MilitaryPoliceReport, {
   MilitaryPoliceReportProps,
@@ -65,7 +67,51 @@ export default function ReportsPage({
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
 
+  // NEW STATE FOR ATTACHMENT MODAL
+  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+  const { mutateAsync: updateOffence } = useUpdateTrafficOffence();
+
   /* ================= FILTER STATE ================= */
+  // ...
+
+  // HANDLE ATTACHMENT SAVE
+  const handleAttachSave = async (newItems: AttachedItem[]) => {
+    if (!viewingReport?._id) return;
+
+    try {
+      // Get existing attachments
+      const currentAttachments = viewingReport.customFields?.attachments || viewingReport.attachments || [];
+      const updatedAttachments = [...currentAttachments, ...newItems];
+
+      // Update API
+      await updateOffence({
+        id: viewingReport._id,
+        data: {
+          customFields: {
+            ...viewingReport.customFields,
+            attachments: updatedAttachments
+          }
+        }
+      });
+
+      toast.success("Attachments Added Successfully");
+
+      // Update local viewing state to reflect changes immediately
+      setViewingReport((prev: any) => ({
+        ...prev,
+        customFields: {
+          ...prev.customFields,
+          attachments: updatedAttachments
+        }
+      }));
+
+    } catch (error) {
+      console.error("Failed to add attachments", error);
+      toast.error("Failed to add attachments");
+    }
+  };
+
+
 
   const [filters, setFilters] = useState({
     search: "",
@@ -313,55 +359,70 @@ export default function ReportsPage({
   const { data: viewingFullRecordData } = useGetTrafficOffenceById(viewingIdStr);
   const finalViewingRecord = viewingFullRecordData?.data ?? viewingFullRecordData ?? viewingReport?.originalData ?? viewingReport;
 
+  // Edit hydration
+  const editingId = editingReport?._id || editingReport?.reportId || "";
+  const { data: editingFullData, isLoading: isLoadingEdit } = useGetTrafficOffenceById(editingId);
+  const finalEditingRecord = editingFullData?.data ?? editingFullData ?? editingReport;
+
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100">
         <Button onClick={() => { setIsCreating(false); setEditingReport(null); }} className="m-4">
           <ArrowLeft /> Back
         </Button>
-        <MultiStepForm existingOffence={editingReport} />
+        {isLoadingEdit && editingId ? (
+          <div className="flex h-96 items-center justify-center">
+            <Loader2 className="animate-spin w-8 h-8 text-gray-500" />
+          </div>
+        ) : (
+          <MultiStepForm existingOffence={finalEditingRecord} />
+        )}
       </div>
     );
   }
 
   if (viewingReport) {
     return (
-      <ReportViewerWrapper
-        title="REPORT PREVIEW"
-        onBack={() => {
-          setViewingReport(null);
-          setShouldAutoPrint(false);
-          setViewMode("report");
-        }}
-        isDownloading={isDownloading}
-        downloadType={downloadType}
-        activeView={viewMode}
-        onViewReport={() => setViewMode("report")}
-        onViewAttachments={() => setViewMode("attachments")}
-        onDownloadWord={() => handleDownloadReport(viewingReport)}
-        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-        onPrint={() => window.print()}
-        onEdit={() => {
-          setEditingReport(viewingReport);
-          setIsCreating(true);
-          setViewingReport(null);
-        }}
-      >
-        {viewMode === "report" && (
-          <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
-        )}
+      <>
+        <ReportViewerWrapper
+          title="REPORT PREVIEW"
+          onBack={() => {
+            setViewingReport(null);
+            setShouldAutoPrint(false);
+            setViewMode("report");
+          }}
+          isDownloading={isDownloading}
+          downloadType={downloadType}
+          activeView={viewMode}
+          onViewReport={() => setViewMode("report")}
+          onViewAttachments={() => setViewMode("attachments")}
+          onDownloadWord={() => handleDownloadReport(viewingReport)}
+          onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+          onPrint={() => window.print()}
+          onEdit={() => {
+            setEditingReport(viewingReport);
+            setIsCreating(true);
+            setViewingReport(null);
+          }}
+        >
+          {viewMode === "report" && (
+            <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+          )}
 
-        {viewMode === "attachments" && (
-          <SignedAttachmentsViewer
-            record={finalViewingRecord}
-            onAttachMore={() => {
-              setEditingReport(finalViewingRecord);
-              setIsCreating(true);
-              setViewingReport(null);
-            }}
-          />
-        )}
-      </ReportViewerWrapper>
+          {viewMode === "attachments" && (
+            <SignedAttachmentsViewer
+              record={finalViewingRecord}
+              onAttachMore={() => setIsAttachModalOpen(true)}
+            />
+          )}
+        </ReportViewerWrapper>
+
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => setIsAttachModalOpen(false)}
+          onSave={handleAttachSave}
+        />
+      </>
     );
   }
 

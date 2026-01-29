@@ -1,11 +1,10 @@
 "use client";
-import { Check, Edit2, Save } from "lucide-react";
+import { Check, Edit2, Save, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@/context/FormContext";
 import React, { useState, useEffect } from "react";
-import { AttachDocumentDialog } from "@/components/common/AttachDocumentDialog";
-import { AttachmentItem } from "@/common/types/form.types";
-// import { AttachCertificateModal } from "./AttachCertificateModal"; // No longer needed if we use generic FileUpload
+import FormAttachmentModal, { AttachedItem, AttachmentType } from "@/components/ui/FormAttachmentModal";
+import { AttachmentItem as LegacyAttachmentItem } from "@/common/types/form.types";
 
 interface Step {
   id: number;
@@ -25,10 +24,7 @@ interface LeftStepperProps {
   onReportNoChange?: (val: string) => void;
   hideReportNo?: boolean;
   isSubmitting?: boolean;
-
-  // New Prop for Attachments
-  onAttach?: (items: AttachmentItem[]) => void;
-
+  onAttach?: (items: LegacyAttachmentItem[]) => void;
 }
 
 export const LeftStepper = ({
@@ -65,7 +61,6 @@ export const LeftStepper = ({
 
   const saveReportNo = () => {
     setEditing(false);
-    // Already synced via onChange
   };
 
   return (
@@ -76,7 +71,6 @@ export const LeftStepper = ({
           {title || "Create New General & Traffic Offence Record"}
         </h2>
 
-        {/* Editable Report No */}
         {!hideReportNo && (
           <div className="flex items-center gap-10 text-gray-300">
             {!editing ? (
@@ -192,28 +186,36 @@ export const LeftStepper = ({
           );
         })}
 
-        {/* ATTACH OPTION - Only Last Step */}
-        {currentStep === steps[steps.length - 1].id && onAttach && (
-          <div className="pt-2">
-            <Button
-              onClick={() => setIsAttachOpen(true)}
-              className="w-full bg-white text-black hover:bg-gray-200"
-            >
-              Attach Signed Certificates/Form/Letters
-            </Button>
-
-            <AttachDocumentDialog
-              open={isAttachOpen}
-              onOpenChange={setIsAttachOpen}
-              onSave={onAttach}
-            />
-          </div>
-        )}
-
       </div>
 
+      {/* ATTACH BUTTON - STICKY AT BOTTOM OF SIDEBAR */}
+      {onAttach && (
+        <div className="pt-4 mt-auto pb-4">
+          <Button
+            onClick={() => setIsAttachOpen(true)}
+            className="w-full bg-white text-black hover:bg-gray-200 h-10 text-xs sm:text-sm font-semibold rounded-md shadow-sm"
+          >
+            Attach Signed Certificates/Form/Letters
+          </Button>
+        </div>
+      )}
+
+      <FormAttachmentModal
+        isOpen={isAttachOpen}
+        onClose={() => setIsAttachOpen(false)}
+        onSave={(items) => {
+          if (onAttach) {
+            const legacyItems: LegacyAttachmentItem[] = items.map(i => ({
+              ...i,
+              type: i.type as any
+            }));
+            onAttach(legacyItems);
+          }
+        }}
+      />
+
       {/* FOOTER */}
-      <div className="mt-4 flex flex-col sm:flex-row gap-2">
+      <div className="pt-2 flex flex-col sm:flex-row gap-2 border-t border-gray-700">
         <Button
           className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base"
           onClick={() => onCancel && onCancel()}

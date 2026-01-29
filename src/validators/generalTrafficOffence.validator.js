@@ -1,30 +1,31 @@
 import Joi from "joi";
 
 export const createGeneralTrafficOffenceSchema = Joi.object({
-  reportId: Joi.string().optional(),
+  reportId: Joi.string().allow("").optional(),
   isVehicleInvolved: Joi.boolean().required(),
-  vehicleCategory: Joi.string().valid("2-Wheeler", "4-Wheeler").optional(),
-  vehicleType: Joi.string().valid("Civilian Vehicle", "DD Vehicle").optional(),
-  vehicleNumber: Joi.string().optional(),
-  vehicleName: Joi.string().optional(),
-  driverType: Joi.string().optional(),
+  vehicleCategory: Joi.string().valid("2-Wheeler", "4-Wheeler").allow(null).optional(),
+  vehicleType: Joi.string().valid("Civilian Vehicle", "DD Vehicle").allow(null).optional(),
+  vehicleNumber: Joi.string().allow("").optional(),
+  vehicleName: Joi.string().allow("").optional(),
+  driverType: Joi.string().allow("").optional(),
+  remarks: Joi.string().allow("").optional(),
 
   onDutyDetails: Joi.object({
-    dateOfDuty: Joi.date().optional(),
-    startTime: Joi.date().optional(),
-    endTime: Joi.date().optional(),
-    dutyLocation: Joi.string().optional(),
-    dutyType: Joi.string().optional(),
+    dateOfDuty: Joi.date().allow(null).optional(),
+    startTime: Joi.date().allow(null).optional(),
+    endTime: Joi.date().allow(null).optional(),
+    dutyLocation: Joi.string().allow("").optional(),
+    dutyType: Joi.string().allow("").optional(),
     customFields: Joi.object().unknown(true).optional(),
   })
     .unknown(true)
     .optional(),
 
   onDutyDetailsMPReporting: Joi.object({
-    nameReportingMP: Joi.string().optional(),
-    rank: Joi.string().optional(),
-    unit: Joi.string().optional(),
-    armyNumber: Joi.string().optional(),
+    nameReportingMP: Joi.string().allow("").optional(),
+    rank: Joi.string().allow("").optional(),
+    unit: Joi.string().allow("").optional(),
+    armyNumber: Joi.string().allow("").optional(),
     customFields: Joi.object().unknown(true).optional(),
   })
     .unknown(true)
@@ -32,19 +33,19 @@ export const createGeneralTrafficOffenceSchema = Joi.object({
 
 
   offenceOccurenceDetails: Joi.object({
-    timeOfOffence: Joi.date().optional(),
-    incidentLocation: Joi.string().optional(),
-    description: Joi.string().optional(),
-    briefDescription: Joi.string().optional(),
+    timeOfOffence: Joi.date().allow(null).optional(),
+    incidentLocation: Joi.string().allow("").optional(),
+    description: Joi.string().allow("").optional(),
+    briefDescription: Joi.string().allow("").optional(),
     customFields: Joi.object().unknown(true).optional(),
   })
     .unknown(true)
     .optional(),
 
-  offenceTypes: Joi.array().items(Joi.string()).optional(),
-  offenceTypeReference: Joi.array().items(Joi.string()).optional(),
+  offenceTypes: Joi.array().items(Joi.string().allow("")).optional(),
+  offenceTypeReference: Joi.array().items(Joi.string().allow("")).optional(),
   actionStatus: Joi.boolean().optional(),
-  actionStatusRemark: Joi.string().optional(),
+  actionStatusRemark: Joi.string().allow("").optional(),
   customFields: Joi.object()
     .unknown(true)
     .optional(),
