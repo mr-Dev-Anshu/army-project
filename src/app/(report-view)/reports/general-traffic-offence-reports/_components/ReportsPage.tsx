@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import { Loader2, ArrowLeft, Download, FileSpreadsheet, FileJson, Plus, X } from "lucide-react";
+import { Loader2, ArrowLeft, FileSpreadsheet, FileJson, Plus, X } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
@@ -13,7 +13,6 @@ import { useGetAllTrafficOffences, useCreateTrafficOffence } from "@/features/ge
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
 import { processImport } from "@/lib/processImport";
-// import { validateTrafficOffenceData } from "@/utils/GeneralTraficOffence";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 
@@ -22,9 +21,11 @@ import MilitaryPoliceReport, {
 } from "@/components/reports/MilitaryPoliceReport";
 
 import { generateWordReport } from "@/utils/generateWordReport";
+// IMPORT THE HOOK
+import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
 
 /* ================= KEY MAPPING UTILS ================= */
-
+// This section handles the IMPORT logic (mapping Excel back to App)
 const KEY_MAPPING: Record<string, string> = {
   "Offence Type": "offenceType",
   "Vehicle Number": "vehicleNumber",
@@ -75,7 +76,6 @@ const mapData = (data: any[]) => {
       }
     });
 
-    // FIX: Explicitly handle isVehicleInvolved logic during import
     if (newItem.vehicleNumber) {
         newItem.isVehicleInvolved = true;
     } else if (newItem.isVehicleInvolved === undefined) {
@@ -130,6 +130,8 @@ export default function ReportsPage({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { mutateAsync: createTrafficOffence } = useCreateTrafficOffence();
+  // INITIALIZE HOOK
+  const { exportToExcel } = useExcelExport();
 
   /* ================= HANDLERS FOR ADD NEW ================= */
   const handleImportCSV = () => {
@@ -162,8 +164,6 @@ export default function ReportsPage({
         const dataArray = Array.isArray(json) ? json : [json];
         const mappedData = mapData(dataArray);
 
-        // await processImport(json, createTrafficOffence); 
-        // Using mappedData ensures the isVehicleInvolved fix is applied
         await processImport(mappedData, createTrafficOffence);
         
         toast.success("Records imported successfully!");
@@ -225,7 +225,6 @@ export default function ReportsPage({
     if (filters.fromDate) params.fromDate = filters.fromDate;
     if (filters.toDate) params.toDate = filters.toDate;
     if (filters.unit) params.unit = filters.unit;
-    if (filters.fmn) params.fmn = filters.fmn;
     if (filters.fmn) params.fmn = filters.fmn;
     if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
     if (filters.date) params.date = filters.date;
@@ -336,7 +335,6 @@ export default function ReportsPage({
     const nvg: any[] = [];
 
     data.forEach((group: any) => {
-      // FIX: Also check if o.isVehicleInvolved is null/undefined and treat as false
       const v =
         group.offences?.filter(
           (o: any) => o.isVehicleInvolved === true && filterRecord(o)
@@ -396,8 +394,6 @@ export default function ReportsPage({
       a.download = `Report-${offence.reportNo || id}.pdf`;
       document.body.appendChild(a);
       a.click();
-
-      // Cleanup
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -411,6 +407,61 @@ export default function ReportsPage({
 
   const handlePrintReport = (offence: any) => {
     setViewingReport(offence);
+  };
+
+  /* ================= EXCEL EXPORT HANDLER ================= */
+  
+  const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
+
+  const handleExcelDownload = () => {
+    // 1. Flatten the data
+    const flatList = activeGroups.flatMap(group => group.offences);
+
+    // 2. Define Columns based on YOUR JSON
+    const columns: ExcelColumn[] = [
+      { header: "Report No", key: "reportId" },
+      { header: "Offence Type", key: "offenceTypes[0]" }, 
+      
+      // Date Formatting
+      { 
+        header: "Date", 
+        key: "offenceOccurenceDetails.timeOfOffence",
+        formatter: (val) => val ? new Date(val).toLocaleDateString("en-GB") : ""
+      },
+      { 
+        header: "Time", 
+        key: "offenceOccurenceDetails.timeOfOffence",
+        formatter: (val) => val ? new Date(val).toLocaleTimeString("en-GB", {hour: '2-digit', minute:'2-digit'}) : ""
+      },
+
+      { header: "Location", key: "offenceOccurenceDetails.incidentLocation" },
+      { header: "Description", key: "offenceOccurenceDetails.description" },
+      
+      // Vehicle
+      { header: "Vehicle No", key: "vehicleNumber" },
+      { header: "Vehicle Type", key: "vehicleType" },
+      { header: "Vehicle Name", key: "vehicleName" },
+
+      // Offender (Note: "Select Rank" matches your JSON key)
+      { header: "Offender Name", key: "offenders[0].offenderDetails.name" },
+      { header: "Rank", key: "offenders[0].offenderDetails.Select Rank" }, 
+      { header: "Army No", key: "offenders[0].offenderDetails.armyNumber" },
+      { header: "Unit", key: "offenders[0].offenderDetails.unit" },
+      { header: "FMN", key: "offenders[0].offenderDetails.fmn" },
+      { header: "Address", key: "offenders[0].offenderDetails.address" },
+      { header: "ICard", key: "offenders[0].offenderDetails.iCardNumber" },
+
+      // Reporting MP (Note: Unique key path prevents overwrite)
+      { header: "Reporting MP", key: "onDutyDetailsMPReporting.nameReportingMP" },
+      { header: "MP Rank", key: "onDutyDetailsMPReporting.rank" },
+      { header: "MP Unit", key: "onDutyDetailsMPReporting.unit" },
+      { header: "MP Army No", key: "onDutyDetailsMPReporting.armyNumber" },
+
+      { header: "Remarks", key: "remarks" },
+    ];
+
+    // 3. Export
+    exportToExcel(flatList, `Traffic_Offences_${viewType}`, columns);
   };
 
   /* ================= RENDER STATES ================= */
@@ -449,8 +500,6 @@ export default function ReportsPage({
     );
   }
 
-  const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <ReportPageHeader
@@ -459,6 +508,7 @@ export default function ReportsPage({
           (a: number, g: any) => a + g.offences.length,
           0
         )}
+        onDownload={handleExcelDownload}
       />
 
       {/* FILTER BAR */}
