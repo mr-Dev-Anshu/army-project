@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import { Loader2, ArrowLeft, Download } from "lucide-react";
+import React, { useState, useMemo, useRef } from "react";
+import { Loader2, ArrowLeft, FileSpreadsheet, FileJson, Plus, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 
-import { useGetAllTrafficOffences } from "@/features/generalTraficOffence/hooks";
+import { useGetAllTrafficOffences, useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
+import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
+import { excelToJson } from "@/lib/excelToJson";
+import { processImport } from "@/lib/processImport";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +21,70 @@ import MilitaryPoliceReport, {
 } from "@/components/reports/MilitaryPoliceReport";
 
 import { generateWordReport } from "@/utils/generateWordReport";
+// IMPORT THE HOOK
+import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
+
+/* ================= KEY MAPPING UTILS ================= */
+// This section handles the IMPORT logic (mapping Excel back to App)
+const KEY_MAPPING: Record<string, string> = {
+  "Offence Type": "offenceType",
+  "Vehicle Number": "vehicleNumber",
+  "Vehicle No": "vehicleNumber",
+  "Vehicle Type": "vehicleType",
+  "Place of Offence": "offenceOccurenceDetails.incidentLocation",
+  "Incident Location": "offenceOccurenceDetails.incidentLocation",
+  "Date": "offenceOccurenceDetails.timeOfOffence",
+  "Time": "offenceOccurenceDetails.timeOfOffence",
+  "Description": "offenceOccurenceDetails.description",
+  "Army No": "offenders[0].offenderDetails.armyNumber",
+  "Rank": "offenders[0].offenderDetails.rank",
+  "Name": "offenders[0].offenderDetails.name",
+  "Unit": "offenders[0].offenderDetails.unit",
+  "FMN": "offenders[0].offenderDetails.fmn",
+  "Father Name": "offenders[0].offenderDetails.fatherName",
+  "Relation": "offenders[0].offenderDetails.relation",
+  "Address": "offenders[0].offenderDetails.address",
+  "Reporting MP Name": "onDutyDetailsMPReporting.nameReportingMP",
+  "Reporting MP Rank": "onDutyDetailsMPReporting.rank",
+  "Reporting MP Army No": "onDutyDetailsMPReporting.armyNumber",
+  "Reporting MP Unit": "onDutyDetailsMPReporting.unit",
+};
+
+const setNestedValue = (obj: any, path: string, value: any) => {
+  const keys = path.replace(/\]/g, "").split(/[.\[]/);
+  let current = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    const nextKey = keys[i + 1];
+    const isArray = !isNaN(Number(nextKey));
+
+    if (!current[key]) {
+      current[key] = isArray ? [] : {};
+    }
+    current = current[key];
+  }
+  current[keys[keys.length - 1]] = value;
+};
+
+const mapData = (data: any[]) => {
+  return data.map((item) => {
+    const newItem: any = {};
+    Object.keys(item).forEach((key) => {
+      const mappedKey = KEY_MAPPING[key.trim()] || key.trim();
+      if (item[key] !== null && item[key] !== undefined && item[key] !== "") {
+        setNestedValue(newItem, mappedKey, item[key]);
+      }
+    });
+
+    if (newItem.vehicleNumber) {
+        newItem.isVehicleInvolved = true;
+    } else if (newItem.isVehicleInvolved === undefined) {
+        newItem.isVehicleInvolved = false;
+    }
+
+    return newItem;
+  });
+};
 
 /* ================= TABLE SECTION ================= */
 
@@ -58,7 +126,76 @@ export default function ReportsPage({
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
-  const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
+  const [showAddOptions, setShowAddOptions] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { mutateAsync: createTrafficOffence } = useCreateTrafficOffence();
+  // INITIALIZE HOOK
+  const { exportToExcel } = useExcelExport();
+
+  /* ================= HANDLERS FOR ADD NEW ================= */
+  const handleImportCSV = () => {
+    fileInputRef.current?.click();
+    setShowAddOptions(false);
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const isExcel = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+    const isJson = file.name.endsWith(".json");
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      const result = e.target?.result;
+      if (!result) return;
+
+      try {
+        let json: any;
+        if (isExcel && result instanceof ArrayBuffer) {
+          json = excelToJson(result);
+        } else if (isJson && typeof result === "string") {
+          json = JSON.parse(result);
+        } else if (typeof result === "string") {
+          json = csvToJsonWithHiddenKeys(result);
+        }
+
+        const dataArray = Array.isArray(json) ? json : [json];
+        const mappedData = mapData(dataArray);
+
+        await processImport(mappedData, createTrafficOffence);
+        
+        toast.success("Records imported successfully!");
+        await refetch();
+      } catch (error: any) {
+        console.error("Error importing file:", error);
+        if (error?.response?.data && typeof error.response.data === "string" && error.response.data.includes("<!DOCTYPE html>")) {
+          toast.error("API Error: Endpoint not found (404). Please check 'src/apis/generalTraficOffence/create.tsx' and fix the URL typo (likely 'Traffic' instead of 'Trafic').");
+        } else {
+          const errorMessage = error?.response?.data?.message || error?.message || "Unknown error";
+          toast.error(`Failed to import records: ${errorMessage}`);
+        }
+      }
+    };
+
+    if (isExcel) {
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.readAsText(file);
+    }
+    event.target.value = "";
+  };
+
+  const handleImportJSON = () => {
+    fileInputRef.current?.click();
+    setShowAddOptions(false);
+  };
+
+  const handleCreateNew = () => {
+    setIsCreating(true);
+    setShowAddOptions(false);
+  };
 
   /* ================= FILTER STATE ================= */
 
@@ -75,18 +212,6 @@ export default function ReportsPage({
     sortOrder: "desc" as "asc" | "desc",
   });
 
-  /* ================= AUTO PRINT ================= */
-
-  useEffect(() => {
-    if (viewingReport && shouldAutoPrint) {
-      const t = setTimeout(() => {
-        window.print();
-        setShouldAutoPrint(false);
-      }, 400);
-      return () => clearTimeout(t);
-    }
-  }, [viewingReport, shouldAutoPrint]);
-
   /* ================= API PARAMS ================= */
 
   const apiParams = useMemo(() => {
@@ -101,14 +226,13 @@ export default function ReportsPage({
     if (filters.toDate) params.toDate = filters.toDate;
     if (filters.unit) params.unit = filters.unit;
     if (filters.fmn) params.fmn = filters.fmn;
-    if (filters.fmn) params.fmn = filters.fmn;
     if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
     if (filters.date) params.date = filters.date;
 
     return params;
   }, [filters, viewType]);
 
-  const { data, isLoading, isError } = useGetAllTrafficOffences(apiParams);
+  const { data, isLoading, isError, refetch } = useGetAllTrafficOffences(apiParams);
 
   /* ================= DYNAMIC OPTIONS FROM DATA ================= */
   const { offenceTypeOptions, unitOptions, fmnOptions, placeOptions } = useMemo(() => {
@@ -213,12 +337,12 @@ export default function ReportsPage({
     data.forEach((group: any) => {
       const v =
         group.offences?.filter(
-          (o: any) => o.isVehicleInvolved && filterRecord(o)
+          (o: any) => o.isVehicleInvolved === true && filterRecord(o)
         ) || [];
 
       const nv =
         group.offences?.filter(
-          (o: any) => !o.isVehicleInvolved && filterRecord(o)
+          (o: any) => (o.isVehicleInvolved === false || o.isVehicleInvolved === null || o.isVehicleInvolved === undefined) && filterRecord(o)
         ) || [];
 
       if (v.length) vg.push({ ...group, offences: v });
@@ -227,8 +351,6 @@ export default function ReportsPage({
 
     return { vehicleGroups: vg, noVehicleGroups: nvg };
   }, [data, filters]);
-
-  /* ================= REPORT HELPERS ================= */
 
   /* ================= DOWNLOAD STATE ================= */
   const [isDownloading, setIsDownloading] = useState(false);
@@ -272,8 +394,6 @@ export default function ReportsPage({
       a.download = `Report-${offence.reportNo || id}.pdf`;
       document.body.appendChild(a);
       a.click();
-
-      // Cleanup
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -287,7 +407,61 @@ export default function ReportsPage({
 
   const handlePrintReport = (offence: any) => {
     setViewingReport(offence);
-    setShouldAutoPrint(true);
+  };
+
+  /* ================= EXCEL EXPORT HANDLER ================= */
+  
+  const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
+
+  const handleExcelDownload = () => {
+    // 1. Flatten the data
+    const flatList = activeGroups.flatMap(group => group.offences);
+
+    // 2. Define Columns based on YOUR JSON
+    const columns: ExcelColumn[] = [
+      { header: "Report No", key: "reportId" },
+      { header: "Offence Type", key: "offenceTypes[0]" }, 
+      
+      // Date Formatting
+      { 
+        header: "Date", 
+        key: "offenceOccurenceDetails.timeOfOffence",
+        formatter: (val) => val ? new Date(val).toLocaleDateString("en-GB") : ""
+      },
+      { 
+        header: "Time", 
+        key: "offenceOccurenceDetails.timeOfOffence",
+        formatter: (val) => val ? new Date(val).toLocaleTimeString("en-GB", {hour: '2-digit', minute:'2-digit'}) : ""
+      },
+
+      { header: "Location", key: "offenceOccurenceDetails.incidentLocation" },
+      { header: "Description", key: "offenceOccurenceDetails.description" },
+      
+      // Vehicle
+      { header: "Vehicle No", key: "vehicleNumber" },
+      { header: "Vehicle Type", key: "vehicleType" },
+      { header: "Vehicle Name", key: "vehicleName" },
+
+      // Offender (Note: "Select Rank" matches your JSON key)
+      { header: "Offender Name", key: "offenders[0].offenderDetails.name" },
+      { header: "Rank", key: "offenders[0].offenderDetails.Select Rank" }, 
+      { header: "Army No", key: "offenders[0].offenderDetails.armyNumber" },
+      { header: "Unit", key: "offenders[0].offenderDetails.unit" },
+      { header: "FMN", key: "offenders[0].offenderDetails.fmn" },
+      { header: "Address", key: "offenders[0].offenderDetails.address" },
+      { header: "ICard", key: "offenders[0].offenderDetails.iCardNumber" },
+
+      // Reporting MP (Note: Unique key path prevents overwrite)
+      { header: "Reporting MP", key: "onDutyDetailsMPReporting.nameReportingMP" },
+      { header: "MP Rank", key: "onDutyDetailsMPReporting.rank" },
+      { header: "MP Unit", key: "onDutyDetailsMPReporting.unit" },
+      { header: "MP Army No", key: "onDutyDetailsMPReporting.armyNumber" },
+
+      { header: "Remarks", key: "remarks" },
+    ];
+
+    // 3. Export
+    exportToExcel(flatList, `Traffic_Offences_${viewType}`, columns);
   };
 
   /* ================= RENDER STATES ================= */
@@ -314,7 +488,6 @@ export default function ReportsPage({
         title="REPORT PREVIEW"
         onBack={() => {
           setViewingReport(null);
-          setShouldAutoPrint(false);
         }}
         isDownloading={isDownloading}
         downloadType={downloadType}
@@ -327,8 +500,6 @@ export default function ReportsPage({
     );
   }
 
-  const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <ReportPageHeader
@@ -337,6 +508,7 @@ export default function ReportsPage({
           (a: number, g: any) => a + g.offences.length,
           0
         )}
+        onDownload={handleExcelDownload}
       />
 
       {/* FILTER BAR */}
@@ -347,7 +519,7 @@ export default function ReportsPage({
         showDateRange
         showActionStatus
         showFilter
-        onAddNew={() => setIsCreating(true)}
+        onAddNew={() => setShowAddOptions(true)}
         onReset={() =>
           setFilters({
             search: "",
@@ -379,6 +551,72 @@ export default function ReportsPage({
         />
       ) : (
         <div className="text-center text-gray-500 mt-10">No records found</div>
+      )}
+
+      {/* ADD OPTIONS MODAL */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        accept=".csv, .xlsx, .xls, .json"
+        onChange={handleFileChange}
+      />
+      {showAddOptions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Add New Record</h3>
+                <p className="text-sm text-gray-500 mt-1">Choose how you want to add data to the system</p>
+              </div>
+              <button
+                onClick={() => setShowAddOptions(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <button
+                onClick={handleImportCSV}
+                className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all group text-center h-72"
+              >
+                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <FileSpreadsheet className="w-10 h-10 text-green-600" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-700">Import CSV / Excel</h4>
+                <p className="text-gray-500 leading-relaxed">Upload a CSV or Excel file containing multiple offence records.</p>
+              </button>
+
+              <button
+                onClick={handleImportJSON}
+                className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-orange-500 hover:bg-orange-50 transition-all group text-center h-72"
+              >
+                <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <FileJson className="w-10 h-10 text-orange-600" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-700">Import JSON</h4>
+                <p className="text-gray-500 leading-relaxed">Upload a JSON file with structured offence data.</p>
+              </button>
+
+              <button
+                onClick={handleCreateNew}
+                className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group text-center h-72"
+              >
+                <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Plus className="w-10 h-10 text-blue-600" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700">Create Manually</h4>
+                <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
+              </button>
+            </div>
+            
+            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
