@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { MPReportService } from "@/services/investigationReport.repo";
 import { createMPReportSchema } from "@/validators/investigationReport";
+import jwt from "jsonwebtoken";
 
 const service = new MPReportService();
 
@@ -56,24 +57,39 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // const { error, value } = createMPReportSchema.validate(body, {
-    //   abortEarly: false,
-    //   stripUnknown: false,
-    // });
+    const { error, value } = createMPReportSchema.validate(body, {
+      abortEarly: false,
+      stripUnknown: false,
+    });
 
-    // if (error) {
-    //   const errors = error.details.map((d) => ({
-    //     field: d.path.join("."),
-    //     message: d.message,
-    //   }));
+    if (error) {
+      const errors = error.details.map((d) => ({
+        field: d.path.join("."),
+        message: d.message,
+      }));
 
-    //   return NextResponse.json(
-    //     { success: false, message: "Validation failed", errors },
-    //     { status: 400 }
-    //   );
-    // }
+      return NextResponse.json(
+        { success: false, message: "Validation failed", errors },
+        { status: 400 }
+      );
+    }
 
-    const report = await service.createReport(body);
+    // Build request context from auth token
+    let requestContext = { userId: null, userRole: null };
+    try {
+      const token = request.cookies.get("auth_token")?.value;
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        requestContext = {
+          userId: decoded.userId,
+          userRole: decoded.role,
+        };
+      }
+    } catch (err) {
+      console.error("POST /api/mp-reports - Failed to read user from token:", err.message);
+    }
+
+    const report = await service.createReport(value, requestContext);
 
     return NextResponse.json(
       { success: true, data: report },

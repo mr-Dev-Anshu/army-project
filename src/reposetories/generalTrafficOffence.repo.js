@@ -405,25 +405,8 @@ export class GeneralTrafficOffenceRepository {
 
     /* ================= EXECUTE ================= */
 
-    return await GeneralTrafficOffence.aggregate(pipeline);
-  }
-
-
-
-  async create(data) {
-    console.log(data);
-    const offence = new GeneralTrafficOffence(data);
-    await offence.save();
-    const savedOffence = offence.toObject();
-
-    // Track field suggestions (from feature branch)
-    trackFieldSuggestions(data, GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG)
-      .then((res) => console.log(res, "suggestions tracked on create"))
-      .catch((err) => {
-        console.error("Suggestions track karne mein error:", err);
-      });
-
-    return savedOffence;
+    const results = await GeneralTrafficOffence.aggregate(pipeline);
+    return results;
   }
 
   async update(id, data) {

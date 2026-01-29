@@ -1,3 +1,4 @@
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields.js";
 import mongoose from "mongoose";
 
 export const onDutyDetailsSchema = new mongoose.Schema({
@@ -55,18 +56,16 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
       enum: ["Civilian Vehicle", "DD Vehicle"],
     },
     vehicleNumber: { type: String },
-    vehicleName: {
-      type: String
-    },
-    driverType: {
-      type: String
-    },
+    vehicleName: { type: String },
+    driverType: { type: String },
+
     onDutyDetails: onDutyDetailsSchema,
     onDutyDetailsMPReporting: onDutyDetailsMPReporting,
     offenceOccurenceDetails: offenceOccurenceDetails,
 
     offenceTypes: [{ type: String }],
     offenceTypeReference: [{ type: String }],
+
     actionStatus: {
       type: Boolean,
       default: false,
@@ -80,14 +79,14 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true,
-    strict: false
-
+    timestamps: true,    
+    strict: false,        
   }
 );
 
+generalTrafficOffenceSchema.plugin(auditFieldsPlugin, {});
 
-
+// Export model
 export const GeneralTrafficOffence =
   mongoose.models.GeneralTrafficOffence ||
   mongoose.model("GeneralTrafficOffence", generalTrafficOffenceSchema);

@@ -94,6 +94,12 @@ export * from "@/apis/immediateReportingIncident/update";
 export * from "@/apis/immediateReportingIncident/delete";
 
 
+/* ================= USER MANAGEMENT ================= */
+export * from "@/apis/users/create";
+export * from "@/apis/users/getAll";
+export * from "@/apis/users/getById";
+export * from "@/apis/users/update";
+export * from "@/apis/users/delete";
 
 export * from "@/apis/certificateAndForm";
 

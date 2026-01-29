@@ -6,6 +6,7 @@ import Sidebar from "@/common/features/dashboard/components/dashboard-components
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import RouteProtection from "@/components/auth/RouteProtection";
 import MissingFieldsModal from "@/components/MissingFieldsModal";
 
 export default function ClientLayout({
@@ -15,22 +16,40 @@ export default function ClientLayout({
 }) {
     const pathname = usePathname();
     const isPrint = pathname.startsWith("/print");
+    const isLogin = pathname === "/login";
 
-    if (isPrint) {
-        return <>{children}</>;
+    if (isPrint || isLogin) {
+        return (
+            <>
+                {children}
+                <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
+            </>
+        );
     }
 
     return (
         <SidebarProvider>
-            <div className="flex h-screen overflow-hidden bg-[#f5f5f7]">
-                <Sidebar />
+            <RouteProtection>
+                <div className="flex h-screen overflow-hidden bg-[#f5f5f7]">
+                    <Sidebar />
 
-                <main className="flex-1 flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-y-auto">
-                        <div className="p-4 sm:p-6 md:p-8">{children}</div>
-                    </div>
-                </main>
-            </div>
+                    <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="p-4 sm:p-6 md:p-8">{children}</div>
+                        </div>
+                    </main>
+                </div>
+            </RouteProtection>
 
             <ToastContainer
                 position="top-right"
