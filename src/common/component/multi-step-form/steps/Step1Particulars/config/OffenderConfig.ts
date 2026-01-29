@@ -28,17 +28,54 @@ export const offenderFormsConfig: any = {
     ],
   },
 
-  /* ================= CIVILIAN ================= */
+  /* ================= CIVILIAN / DEPENDENT ================= */
 
-  Civilian: {
-    title: "Fill Civilian Details",
-    helperText: "Enter required civilian offender details.",
+  "Civilian / Dependent": {
+    title: "Fill Offender Particulars",
+    helperText: "Select who the offender is and fill their details. The form will update based on your selection.",
     fields: [
-      { type: "input", label: "Full Name", placeholder: "Enter Name" },
-      { type: "input", label: "Address", placeholder: "Enter Address" },
-      { type: "input", label: "Father's / Husband's Name", placeholder: "Enter Father's / Husband's Name" },
-
-      { type: "input", label: "I Card Number", placeholder: "Enter ID" },
+      {
+        type: "input",
+        label: "Civil/DD Vehicle Rider/Driver Name",
+        placeholder: "e.g. John Agraadhi"
+      },
+      {
+        type: "input",
+        label: "Aadhar Card Number",
+        placeholder: "e.g. 8888 8888 8888"
+      },
+      {
+        type: "input",
+        label: "Father's / Husband's Name",
+        placeholder: "e.g. Apraadhi k Papa"
+      },
+      {
+        type: "input",
+        label: "Address",
+        placeholder: "Enter Location"
+      },
+      {
+        type: "checkbox",
+        label: "Is this person Dependent / Relative of Military Personnel or Other Registered?",
+        fields: [
+          {
+            type: "input",
+            label: "Name the relation",
+            placeholder: "e.g. Brother-in-law"
+          },
+          {
+            type: "radio",
+            label: "Who is it?",
+            options: [
+              { label: "Military Personnel", value: "Military Person" },
+              { label: "Servant / Maid", value: "Servant/Maid" },
+              { label: "Shop Keeper", value: "Shop Keeper" },
+              { label: "Temporary Hired Worker", value: "Temporary Hired Worker" },
+              { label: "Employee", value: "Employee" },
+            ]
+          }
+        ]
+      }
     ],
   },
 
