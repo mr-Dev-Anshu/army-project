@@ -46,7 +46,31 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const { error, value } = createStaticSpeedCheckRecordSchema.validate(body, {
+    // Deep sanitize: remove empty strings and empty objects/arrays so Joi optional fields pass
+    const sanitizeEmpty = (obj) => {
+      if (obj === null || obj === undefined) return undefined;
+      if (typeof obj === "string") {
+        const t = obj.trim();
+        return t === "" ? undefined : t;
+      }
+      if (Array.isArray(obj)) {
+        const arr = obj.map((v) => sanitizeEmpty(v)).filter((v) => v !== undefined);
+        return arr.length > 0 ? arr : undefined;
+      }
+      if (typeof obj === "object") {
+        const out = {};
+        Object.keys(obj).forEach((k) => {
+          const cleaned = sanitizeEmpty(obj[k]);
+          if (cleaned !== undefined) out[k] = cleaned;
+        });
+        return Object.keys(out).length > 0 ? out : undefined;
+      }
+      return obj;
+    };
+
+    const cleanBody = sanitizeEmpty(body) || {};
+
+    const { error, value } = createStaticSpeedCheckRecordSchema.validate(cleanBody, {
       abortEarly: false,
     });
 
