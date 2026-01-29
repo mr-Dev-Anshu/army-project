@@ -4,17 +4,21 @@ import { FormProvider } from "@/context/FormContext";
 import { AuthProvider } from "@/context/AuthContext";
 import Wrapper from "@/common/hoc/Wrapper";
 import ClientLayout from "@/components/layout/ClientLayout";
+import { ValidationProvider } from "@/context/ValidationContext";
 
 export const metadata: Metadata = {
-  title: "My Next.js App",
-  description: "Awesome app with breadcrumbs",
+  title: "Provost | 21 Corps",
+  description: "Provost | 21 Corps Central Command",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
-      <body className="font-sans h-full bg-[#f5f5f7] overflow-hidden" suppressHydrationWarning>
+<!--       <body className="font-sans h-full bg-[#f5f5f7] overflow-hidden" suppressHydrationWarning> -->
+        
+      <body className={`${inter.className} h-full bg-[#f5f5f7] overflow-hidden`} suppressHydrationWarning>
         <AuthProvider>
+        <ValidationProvider>
           <FormProvider>
             <Wrapper>
               <ClientLayout>
@@ -23,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Wrapper>
           </FormProvider>
         </AuthProvider>
+        </ValidationProvider>
       </body>
     </html>
   );

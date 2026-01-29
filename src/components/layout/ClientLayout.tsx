@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import RouteProtection from "@/components/auth/RouteProtection";
+import MissingFieldsModal from "@/components/MissingFieldsModal";
 
 export default function ClientLayout({
     children,
@@ -61,6 +62,7 @@ export default function ClientLayout({
                 draggable
                 pauseOnHover
             />
+            <MissingFieldsModal />
         </SidebarProvider>
     );
 }

@@ -60,23 +60,23 @@ export async function POST(request) {
     const body = await request.json();
     console.log("POST /api/generalTraficOffence body:", JSON.stringify(body, null, 2));
 
-    const { error, value } = createGeneralTrafficOffenceSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
+    // const { error, value } = createGeneralTrafficOffenceSchema.validate(body, {
+    //   abortEarly: false,
+    //   stripUnknown: true,
+    // });
 
-    if (error) {
-      return NextResponse.json(
-        {
-          error: "Validation failed",
-          details: error.details.map(d => ({
-            path: d.path,
-            message: d.message
-          }))
-        },
-        { status: 400 }
-      );
-    }
+    // if (error) {
+    //   return NextResponse.json(
+    //     {
+    //       error: "Validation failed",
+    //       details: error.details.map(d => ({
+    //         path: d.path,
+    //         message: d.message
+    //       }))
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Extract user from auth token (same logic as middleware)
     let requestContext = { userId: null, userRole: null };

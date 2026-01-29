@@ -100,3 +100,6 @@ export * from "@/apis/users/getAll";
 export * from "@/apis/users/getById";
 export * from "@/apis/users/update";
 export * from "@/apis/users/delete";
+
+export * from "@/apis/certificateAndForm";
+

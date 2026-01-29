@@ -16,6 +16,7 @@ import {
   Shield,
   Siren,
   LogOut,
+  FileBadge,
 } from "lucide-react";
 
 import {
@@ -152,16 +153,9 @@ const Sidebar = () => {
   ];
 
   const formsAndCertificates: MenuItem = {
-    icon: <FileCheck className="w-5 h-5" />,
-    label: "Forms & Certificates",
-    submenu: [
-      { label: "Compromise Certificate", href: "/forms/compromise" },
-      { label: "Confiscation Certificate", href: "/forms/confiscation" },
-      { label: "Handing/Taking Certificate", href: "/forms/handing-taking" },
-      { label: "MP Report Form", href: "/forms/mp-report" },
-      { label: "Contact Numbers", href: "/forms/contact-numbers" },
-      { label: "Letters", href: "/forms/letters" },
-    ],
+    icon: <FileBadge className="w-5 h-5" />,
+    label: "Certificates, Letters & Forms",
+    href:"/form-certificate/certificate"
   };
 
   const systemSetup: MenuItem[] = [
