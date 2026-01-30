@@ -12,11 +12,7 @@ export async function GET(
         return new NextResponse('Report ID is required', { status: 400 });
     }
 
-    // Determine the base URL dynamically
-    const protocol = request.headers.get('x-forwarded-proto') || 'http';
-    const host = request.headers.get('host');
-    const baseUrl = `${protocol}://${host}`;
-    const reportUrl = `${baseUrl}/print/static-speed-report/${id}`;
+
 
     let browser;
     try {
@@ -26,6 +22,24 @@ export async function GET(
         });
 
         const page = await browser.newPage();
+
+        // Forward cookies to maintain authentication
+        const cookies = request.cookies.getAll();
+        const urlObj = new URL(request.nextUrl.origin || "http://localhost:3000");
+
+        if (cookies.length > 0) {
+            await page.setCookie(...cookies.map(cookie => ({
+                name: cookie.name,
+                value: cookie.value,
+                domain: urlObj.hostname,
+                path: '/',
+            })));
+        }
+        // Determine the base URL dynamically
+        const protocol = request.headers.get('x-forwarded-proto') || 'http';
+        const host = request.headers.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        const reportUrl = `${baseUrl}/print/static-speed-report/${id}`;
 
         // Navigate to the print page
         // Relaxed wait condition to avoid timeouts on long-running background requests
