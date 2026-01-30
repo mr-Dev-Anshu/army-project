@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import React, { useMemo, useState, useRef } from "react";
+import { Loader2, ArrowLeft, Download, FileSpreadsheet, FileJson, Plus, X } from "lucide-react";
+import { toast } from "react-toastify";
+
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
 import { useGetAllMPReports, useGetMPReportById, useUpdateMPReport } from "@/features/mpReports/hooks";
+import { useCreateMPReport } from "@/features/mpReports/hooks";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
@@ -17,6 +20,96 @@ import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWord
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
 import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
 import { toast } from "react-toastify";
+
+import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
+import { excelToJson } from "@/lib/excelToJson";
+import { processImport } from "@/lib/processImport";
+
+/* ================= HELPERS ================= */
+
+// Recursively removes system fields (_id, __v, createdAt, updatedAt)
+const cleanSystemFields = (data: any): any => {
+  if (Array.isArray(data)) {
+    return data.map(cleanSystemFields);
+  } else if (data !== null && typeof data === 'object') {
+    const cleaned: any = {};
+    Object.keys(data).forEach(key => {
+      if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
+      cleaned[key] = cleanSystemFields(data[key]);
+    });
+    return cleaned;
+  }
+  return data;
+};
+
+/* ================= KEY MAPPING UTILS ================= */
+const KEY_MAPPING: Record<string, string> = {
+  "Report No": "reportDetails.reportNumber",
+  "Report Number": "reportDetails.reportNumber",
+  "Command": "reportDetails.command",
+  "FIR No": "reportDetails.firNumber",
+  "Investigation MP Name": "investigationHead.name",
+  "Investigation MP Rank": "investigationHead.rank",
+  "Investigation MP Army No": "investigationHead.armyNumber",
+  "Investigation MP Unit": "investigationHead.unit",
+  "Investigation MP FMN": "investigationHead.fmn",
+  "Date of Occurrence": "occurrenceDetails.dateOfOccurrence",
+  "Time of Occurrence": "occurrenceDetails.timeOfOccurrence",
+  "Place of Occurrence": "occurrenceDetails.placeOfOccurrence",
+  "Offence Type": "occurrenceDetails.offenceType",
+  "Brief Description": "occurrenceDetails.description",
+  "Detailed Report": "detailedOccurrenceReport",
+  "Opinion": "opinion",
+  "Analysis": "remarks.analysis",
+  "Recommendation": "remarks.recommendation",
+  
+  "Offender Name": "individuals[0].name",
+  "Offender Rank": "individuals[0].rank",
+  "Offender Army No": "individuals[0].armyNo",
+  "Offender Unit": "individuals[0].unit",
+  "Offender Role": "individuals[0].role",
+
+  "Victim Name": "individuals[1].name"
+};
+
+const setNestedValue = (obj: any, path: string, value: any) => {
+  const keys = path.replace(/\]/g, "").split(/[.\[]/);
+  let current = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    const nextKey = keys[i + 1];
+    const isArray = !isNaN(Number(nextKey));
+
+    if (!current[key]) {
+      current[key] = isArray ? [] : {};
+    }
+    current = current[key];
+  }
+  current[keys[keys.length - 1]] = value;
+};
+
+const mapData = (data: any[]) => {
+  return data.map((item) => {
+    const newItem: any = {};
+    Object.keys(item).forEach((key) => {
+      // Extra check, though cleanSystemFields runs before this
+      if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
+
+      const mappedKey = KEY_MAPPING[key.trim()] || key.trim();
+      if (item[key] !== null && item[key] !== undefined && item[key] !== "") {
+        setNestedValue(newItem, mappedKey, item[key]);
+      }
+    });
+
+    if (newItem.individuals && newItem.individuals.length > 0) {
+        if (newItem.individuals[0] && !newItem.individuals[0].role) {
+            newItem.individuals[0].role = "Offender";
+        }
+    }
+
+    return newItem;
+  });
+};
 
 export default function MpOccurrenceReportsPage() {
   const [isCreating, setIsCreating] = useState(false);
@@ -120,11 +213,16 @@ export default function MpOccurrenceReportsPage() {
       toast.error("Failed to delete attachment: " + (error as any)?.message || "Unknown error");
     }
   };
+  
 
-  // Auto Print Effect
+  
+   /*const [showAddOptions, setShowAddOptions] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);*/
+  
+  const { mutateAsync: createMPReport } = useCreateMPReport();
+
   React.useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
-      // Small timeout to allow render
       const timer = setTimeout(() => {
         window.print();
         setShouldAutoPrint(false);
@@ -133,7 +231,6 @@ export default function MpOccurrenceReportsPage() {
     }
   }, [viewingReport, shouldAutoPrint]);
 
-  // State for filters
   const [filters, setFilters] = useState({
     search: "",
     offenceType: "All",
@@ -147,7 +244,6 @@ export default function MpOccurrenceReportsPage() {
     sortOrder: "desc" as "asc" | "desc",
   });
 
-  /* ================= API FILTERS ================= */
   const apiParams = useMemo(() => {
     const params: any = {};
     if (filters.unit) params.unit = filters.unit;
@@ -165,9 +261,78 @@ export default function MpOccurrenceReportsPage() {
   const { data: fullEditingReport, isLoading: isLoadingEdit } = useGetMPReportById(editingId);
   const finalEditingReport = fullEditingReport || viewingReport?.originalData || viewingReport;
 
-  const { data, isLoading, isError } = useGetAllMPReports(apiParams);
+  
+  const { data, isLoading, isError, refetch } = useGetAllMPReports(apiParams);
 
-  /* ================= DYNAMIC OPTIONS FROM DATA ================= */
+  const handleImportCSV = () => {
+    fileInputRef.current?.click();
+    setShowAddOptions(false);
+  };
+
+  const handleImportJSON = () => {
+    fileInputRef.current?.click();
+    setShowAddOptions(false);
+  };
+
+  const handleCreateNew = () => {
+    setIsCreating(true);
+    setShowAddOptions(false);
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    const isExcel = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
+    const isJson = fileName.endsWith(".json");
+
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      const result = e.target?.result;
+      if (!result) return;
+
+      try {
+        let json: any;
+        if (isExcel && result instanceof ArrayBuffer) {
+          json = excelToJson(result);
+        } else if (isJson && typeof result === "string") {
+          json = JSON.parse(result);
+        } else if (typeof result === "string") {
+          json = csvToJsonWithHiddenKeys(result);
+        }
+
+        // FIX: Unwrap API response wrappers
+        if (json && !Array.isArray(json) && json.data) {
+            json = json.data;
+        }
+
+        let dataArray = Array.isArray(json) ? json : [json];
+
+        // FIX: Clean nested system fields
+        dataArray = cleanSystemFields(dataArray);
+
+        const mappedData = mapData(dataArray);
+
+        await processImport(mappedData, createMPReport);
+        
+        toast.success("Reports imported successfully!");
+        await refetch();
+      } catch (error: any) {
+        console.error("Error importing file:", error);
+        toast.error(`Failed to import reports: ${error.message || "Unknown error"}`);
+      }
+    };
+
+    if (isExcel) {
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.readAsText(file);
+    }
+    event.target.value = "";
+  };
+
   const { offenceTypeOptions, unitOptions, fmnOptions, placeOptions } = useMemo(() => {
     if (!data) return { offenceTypeOptions: [], unitOptions: [], fmnOptions: [], placeOptions: [] };
 
@@ -177,7 +342,6 @@ export default function MpOccurrenceReportsPage() {
     const places = new Set<string>();
 
     data.forEach((item: any) => {
-      // Offence Types
       const type = item.occurrenceDetails?.offenceType;
       if (type) types.add(type);
       const typeList = item.occurrenceDetails?.offenceTypes;
@@ -185,17 +349,14 @@ export default function MpOccurrenceReportsPage() {
         typeList.forEach((t: string) => types.add(t));
       }
 
-      // Unit
       const invHead = item.investigationHead || {};
       const primaryIndividual = item.individuals?.[0] || item.individual?.[0] || {};
       const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
       if (unit) units.add(unit);
 
-      // FMN
       const fmn = invHead.fmn || primaryIndividual.fmn || item.customFields?.fmn;
       if (fmn) fmns.add(fmn);
 
-      // Place
       const place = item.occurrenceDetails?.placeOfOccurrence || item.placeOfOccurrence;
       if (place) places.add(place);
     });
@@ -211,23 +372,19 @@ export default function MpOccurrenceReportsPage() {
   const processedData = useMemo(() => {
     if (!data) return [];
 
-    // Filter raw data
     const filteredData = data.filter((item: any) => {
       const occurrence = item.occurrenceDetails || {};
       const invHead = item.investigationHead || {};
       const primaryIndividual = item.individuals?.[0] || item.individual?.[0] || {};
 
-      // Date Check
       const rawDate = occurrence.dateOfOccurrence || item.createdAt;
 
-      /* ---------- DATE RANGE ---------- */
       if (filters.fromDate || filters.toDate) {
         const d = new Date(rawDate).getTime();
         if (filters.fromDate && d < new Date(filters.fromDate).getTime()) return false;
         if (filters.toDate && d > new Date(filters.toDate + "T23:59:59.999").getTime()) return false;
       }
 
-      /* ---------- SINGLE DATE ---------- */
       if (filters.date) {
         if (rawDate) {
           const recordDate = new Date(rawDate).toISOString().split('T')[0];
@@ -235,56 +392,39 @@ export default function MpOccurrenceReportsPage() {
         }
       }
 
-      // Action Status Check
       if (filters.actionStatus !== "All") {
         const isTaken = item.actionStatus === true;
         const filterTaken = filters.actionStatus === "Taken";
         if (isTaken !== filterTaken) return false;
       }
 
-      // Offence Type Check
       if (filters.offenceType && filters.offenceType !== "All") {
         const type = occurrence.offenceType;
         const typeList = occurrence.offenceTypes || [];
         const selectedTypes = filters.offenceType.split(",");
-
-        // Check if ANY of the selected types match the record's type(s)
         const matchSingle = selectedTypes.includes(type);
         const matchArray = Array.isArray(typeList) && typeList.some(t => selectedTypes.includes(t));
-
         if (!matchSingle && !matchArray) return false;
       }
 
-      /* ---------- UNIT ---------- */
       if (filters.unit) {
         const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
         const selectedUnits = filters.unit.split(",");
         if (!unit || !selectedUnits.includes(unit)) return false;
       }
 
-      /* ---------- FMN ---------- */
       if (filters.fmn) {
         const fmn = invHead.fmn || primaryIndividual.fmn || item.customFields?.fmn;
         const selectedFmns = filters.fmn.split(",");
         if (!fmn || !selectedFmns.includes(fmn)) return false;
       }
 
-      /* ---------- PLACE OF OFFENCE ---------- */
       if (filters.placeOfOffence) {
-        const place =
-          item.occurrenceDetails?.placeOfOccurrence ||
-          item.placeOfOccurrence;
-
+        const place = item.occurrenceDetails?.placeOfOccurrence || item.placeOfOccurrence;
         const selectedPlaces = filters.placeOfOffence.split(",").map(p => p.toLowerCase());
-
-        if (
-          !place ||
-          !selectedPlaces.includes(place.toLowerCase())
-        )
-          return false;
+        if (!place || !selectedPlaces.includes(place.toLowerCase())) return false;
       }
 
-      // Search
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         const reportNo = item.reportDetails?.reportNumber?.toLowerCase() || "";
@@ -295,7 +435,6 @@ export default function MpOccurrenceReportsPage() {
       return true;
     });
 
-    // Sorting
     if (filters.sortOrder) {
       filteredData.sort((a: any, b: any) => {
         const dateA = new Date(a.occurrenceDetails?.dateOfOccurrence || a.createdAt).getTime();
@@ -309,12 +448,7 @@ export default function MpOccurrenceReportsPage() {
       const invHead = item.investigationHead || {};
 
       const dateObj = new Date(occurrence.dateOfOccurrence || item.createdAt);
-      const primaryIndividual =
-        item.individual?.[0] ||
-        item.individuals?.[0] ||
-        item.offenders?.[0] ||
-        item.customFields?.victim ||
-        {};
+      const primaryIndividual = item.individual?.[0] || item.individuals?.[0] || item.offenders?.[0] || item.customFields?.victim || {};
 
       return {
         _id: item._id,
@@ -339,10 +473,7 @@ export default function MpOccurrenceReportsPage() {
         },
 
         victimDetails: {
-          armyNumber:
-            primaryIndividual.armyNumber ||
-            primaryIndividual.aadharNumber ||
-            "N/A",
+          armyNumber: primaryIndividual.armyNumber || primaryIndividual.aadharNumber || "N/A",
           rank: primaryIndividual.rank || "Civ",
           name: primaryIndividual.name || "Unknown",
           unit: primaryIndividual.unit || "N/A",
@@ -350,13 +481,12 @@ export default function MpOccurrenceReportsPage() {
         },
         reportingMPName: invHead.name || "Unknown MP",
 
-        offenceType:
-          occurrence.offenceType || "Overtaking in NO Overtaking Zone",
+        offenceType: occurrence.offenceType || "Overtaking in NO Overtaking Zone",
         brief: occurrence.description || "Brief of occurrence...",
         documents: item.documents || [],
         reportNumber: item.reportDetails?.reportNumber,
         actionStatus: item.actionStatus,
-        originalData: item // Store original data for report view
+        originalData: item
       };
     });
   }, [data, filters]);
@@ -364,24 +494,15 @@ export default function MpOccurrenceReportsPage() {
   const mapToReportProps = (item: any): MpOccurrenceReportProps => {
     const raw = item.originalData || item || {};
     const reportDetails = raw.reportDetails || {};
-    const invHead = raw.investigationHead || raw.mpParticulars || {}; // Check form state key variants
+    const invHead = raw.investigationHead || raw.mpParticulars || {}; 
     const occurrence = raw.occurrenceDetails || {};
 
-    // Dynamic Fields: People (Victims/Offenders/Individuals)
-    // Check all possible locations where the array might be stored
-    const rawPeople =
-      raw.individuals ||
-      raw.offenders ||
-      raw.individual ||
-      raw.offenderList ||
-      raw.customFields?.individuals ||
-      raw.customFields?.offenderList ||
-      [];
+    const rawPeople = raw.individuals || raw.offenders || raw.individual || raw.offenderList || raw.customFields?.individuals || raw.customFields?.offenderList || [];
 
     const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
       const src = p.details || p;
       const custom = src.customFields || {};
-      const merged = { ...custom, ...src }; // flatten for search
+      const merged = { ...custom, ...src }; 
 
       return {
         sno: index + 1,
@@ -398,19 +519,12 @@ export default function MpOccurrenceReportsPage() {
       };
     }) : [];
 
-    // Helper for role mapping if needed, otherwise string
     function mappedRole(r: string) {
       if (!r) return "";
       return r;
     }
 
-    // Dynamic Fields: Witnesses
-    const rawWitnesses =
-      raw.witnesses ||
-      raw.witness ||
-      raw.witnessList ||
-      raw.customFields?.witnesses ||
-      [];
+    const rawWitnesses = raw.witnesses || raw.witness || raw.witnessList || raw.customFields?.witnesses || [];
 
     const witnesses = Array.isArray(rawWitnesses) ? rawWitnesses.map((w: any, index: number) => {
       const src = w.details || w;
@@ -431,37 +545,21 @@ export default function MpOccurrenceReportsPage() {
       };
     }) : [];
 
-    // Dynamic Fields: Documents
     const rawDocs = raw.documents || [];
     const docs = Array.isArray(rawDocs)
       ? rawDocs.map((d: any) => typeof d === 'string' ? d : (d.statement || d.name || "Attached Document"))
       : [];
 
-    // Dynamic Fields: Brief
-    const brief =
-      occurrence.description ||
-      occurrence.brief ||
-      occurrence.statement ||
-      raw.detailedOccurrenceReport ||
-      "";
+    const brief = occurrence.description || occurrence.brief || occurrence.statement || raw.detailedOccurrenceReport || "";
 
-    // Dynamic Fields: Evidences
     const evidences = raw.evidences || [];
-    // Helper to find specific evidence types if they exist in the array
     const findEvidence = (type: string) => {
       const found = evidences.find((e: any) => e.type?.toLowerCase().includes(type));
       return found ? (found.description || found.url || "Attached") : null;
     };
 
-    // Dynamic Fields: Detailed Report & Remarks
-    const detailedStatement =
-      raw.detailedOccurrenceReport ||
-      raw.detailedStatement ||
-      raw.detailedReport?.statement ||
-      raw.customFields?.detailedStatement ||
-      "";
+    const detailedStatement = raw.detailedOccurrenceReport || raw.detailedStatement || raw.detailedReport?.statement || raw.customFields?.detailedStatement || "";
 
-    // Handle findings whether stored as string (schema) or array
     let findingsList: string[] = [];
     const rawFindings = raw.pointsFindOutDuringInvestigation || raw.investigationFindings || raw.detailedReport?.findings;
 
@@ -475,7 +573,6 @@ export default function MpOccurrenceReportsPage() {
       ? new Date(raw.createdAt).toLocaleDateString("en-GB")
       : new Date().toLocaleDateString("en-GB");
 
-    // "Station" typically typically comes from unit address or similar
     const station = invHead.address || raw.customFields?.station || invHead.unit || "";
 
     return {
@@ -522,12 +619,8 @@ export default function MpOccurrenceReportsPage() {
     };
   };
 
-
-  /* ================= DOWNLOAD STATE ================= */
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
-
-  /* ================= ACTIONS ================= */
 
   const handleDownloadReport = async (item: any) => {
     setIsDownloading(true);
@@ -551,17 +644,14 @@ export default function MpOccurrenceReportsPage() {
       alert("Report ID not found");
       return;
     }
-
     setIsDownloading(true);
     setDownloadType("PDF");
-
     try {
       const response = await fetch(`/api/mp-occurrence-report/pdf/${id}`);
       if (!response.ok) {
         const errData = await response.json().catch(() => ({ error: "Unknown server error" }));
         throw new Error(errData.error || "Failed to generate PDF");
       }
-
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -569,8 +659,6 @@ export default function MpOccurrenceReportsPage() {
       a.download = `MPOccurrenceReport-${item.reportDetails?.reportNumber || id}.pdf`;
       document.body.appendChild(a);
       a.click();
-
-      // Cleanup
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -691,7 +779,6 @@ export default function MpOccurrenceReportsPage() {
         onDownload={() => window.print()}
       />
 
-      {/* Filters */}
       <ReportFilterBar
         filters={filters}
         onFilterChange={(key, value) =>
@@ -700,9 +787,7 @@ export default function MpOccurrenceReportsPage() {
         showOffenceType={true}
         showDateRange
         showFilter
-        // showSort={true}
-
-        onAddNew={() => setIsCreating(true)}
+        onAddNew={() => setShowAddOptions(true)}
         onReset={() =>
           setFilters({
             search: "",
@@ -719,7 +804,6 @@ export default function MpOccurrenceReportsPage() {
         }
       />
 
-      {/* Main Table */}
       {isLoading ? (
         <div className="flex items-center justify-center p-12">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -735,6 +819,71 @@ export default function MpOccurrenceReportsPage() {
             setIsCreating(true);
           }}
         />
+      )}
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        accept=".csv, .xlsx, .xls, .json"
+        onChange={handleFileChange}
+      />
+      {showAddOptions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Add New Record</h3>
+                <p className="text-sm text-gray-500 mt-1">Choose how you want to add data to the system</p>
+              </div>
+              <button
+                onClick={() => setShowAddOptions(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <button
+                onClick={handleImportCSV}
+                className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all group text-center h-72"
+              >
+                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <FileSpreadsheet className="w-10 h-10 text-green-600" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-700">Import CSV / Excel</h4>
+                <p className="text-gray-500 leading-relaxed">Upload a CSV or Excel file containing multiple records.</p>
+              </button>
+
+              <button
+                onClick={handleImportJSON}
+                className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-orange-500 hover:bg-orange-50 transition-all group text-center h-72"
+              >
+                <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <FileJson className="w-10 h-10 text-orange-600" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-700">Import JSON</h4>
+                <p className="text-gray-500 leading-relaxed">Upload a JSON file with structured data.</p>
+              </button>
+
+              <button
+                onClick={handleCreateNew}
+                className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group text-center h-72"
+              >
+                <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Plus className="w-10 h-10 text-blue-600" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700">Create Manually</h4>
+                <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
+              </button>
+            </div>
+            
+            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

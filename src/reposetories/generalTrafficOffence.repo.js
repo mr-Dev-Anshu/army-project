@@ -159,7 +159,16 @@ export class GeneralTrafficOffenceRepository {
     /* ================= VEHICLE / STATUS FILTERS ================= */
 
     if (filters.isVehicleInvolved !== undefined) {
-      matchStage.isVehicleInvolved = filters.isVehicleInvolved === "true";
+      // FIX: Handle "false" to include null/undefined values
+      if (filters.isVehicleInvolved === "true") {
+        matchStage.isVehicleInvolved = true;
+      } else {
+        matchStage.$or = [
+          { isVehicleInvolved: false },
+          { isVehicleInvolved: null },
+          { isVehicleInvolved: { $exists: false } }
+        ];
+      }
     }
 
     if (filters.status !== undefined) {
@@ -171,8 +180,7 @@ export class GeneralTrafficOffenceRepository {
       }
     }
 
-    /* 
-       NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
+    /* NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
        because they might depend on looked-up fields (e.g., offenders).
     */
 
@@ -225,8 +233,6 @@ export class GeneralTrafficOffenceRepository {
         },
       ];
     }
-
-    /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
 
     /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
 
@@ -406,8 +412,25 @@ export class GeneralTrafficOffenceRepository {
 
     /* ================= EXECUTE ================= */
 
-    const results = await GeneralTrafficOffence.aggregate(pipeline);
-    return results;
+    return await GeneralTrafficOffence.aggregate(pipeline);
+  }
+
+  async create(data) {
+    console.log(data);
+    const offence = new GeneralTrafficOffence(data);
+    await offence.save();
+    const savedOffence = offence.toObject();
+
+    // Track field suggestions (from feature branch)
+    trackFieldSuggestions(data, GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG)
+      .then((res) => console.log(res, "suggestions tracked on create"))
+      .catch((err) => {
+        console.error("Suggestions track karne mein error:", err);
+      });
+
+    return savedOffence;
+    // const results = await GeneralTrafficOffence.aggregate(pipeline);
+    // return results;
   }
 
   async update(id, data) {
