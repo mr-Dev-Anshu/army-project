@@ -1,7 +1,10 @@
 "use client";
 
 import UserManagement from "@/common/features/users/UserManagement";
+import { withAdminAuth } from "@/hoc/withSuperAdmin";
 
-export default function UserManagementPage() {
+function UserManagementPage() {
     return <UserManagement />;
 }
+
+export default withAdminAuth(UserManagementPage);
