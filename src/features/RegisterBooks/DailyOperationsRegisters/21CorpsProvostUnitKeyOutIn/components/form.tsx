@@ -34,9 +34,6 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
         armyNo: "",
         rank: "",
         name: "",
-        unit: "",
-        fmn: "",
-        command: "",
     });
     const [authentication, setAuthentication] = useState({
         initialsMPCPNCO: "",

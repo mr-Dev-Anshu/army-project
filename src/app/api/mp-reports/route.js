@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { MPReportService } from "@/services/investigationReport.repo";
+
+import Register from "@/models/Register";
 // import { createMPReportSchema } from "@/validators/investigationReport"; // validation commented out
 import jwt from "jsonwebtoken";
 
@@ -76,6 +78,59 @@ export async function POST(request) {
     }
 
     const report = await service.createReport(value, requestContext);
+
+    // --- AUTOMATICALLY CREATE REGISTER ENTRY ---
+    try {
+      const occurrence = report.occurrenceDetails || {};
+      const invHead = report.investigationHead || {};
+      const primaryIndividual = report.individuals?.[0] || report.individual?.[0] || {};
+
+      // Snapshot relevant details
+      const registerDetails = {
+        originalReportId: report._id,
+        caseNo: report.reportDetails?.reportNumber,
+        unitOfOccurrence: occurrence.unit || invHead.unit || "N/A",
+        dateOfOccurrence: occurrence.dateOfOccurrence || report.createdAt,
+        timeOfOccurrence: occurrence.timeOfOccurrence,
+        placeOfOccurrence: occurrence.placeOfOccurrence,
+        offenceType: occurrence.offenceType,
+        offenceTypes: occurrence.offenceTypes,
+
+        // Person Details
+        individual: {
+          armyNo: primaryIndividual.armyNumber,
+          rank: primaryIndividual.rank,
+          name: primaryIndividual.name,
+          unit: primaryIndividual.unit,
+          ...primaryIndividual
+        },
+
+        brief: occurrence.description || occurrence.brief,
+        documents: report.documents,
+
+        // Assigned MP
+        assignedMP: {
+          armyNo: invHead.armyNumber,
+          rank: invHead.rank,
+          name: invHead.name,
+          unit: invHead.unit,
+          fmn: invHead.fmn
+        }
+      };
+
+      await Register.create({
+        type: "mp-general-diary-daily-occurrence-book",
+        date: occurrence.dateOfOccurrence || new Date(),
+        details: registerDetails,
+        remark: "",
+        status: "pending_out" // Default equivalent
+      });
+
+    } catch (regError) {
+      console.error("Failed to auto-create register entry:", regError);
+      // We do not fail the main request if register creation fails, just log it
+    }
+    // -------------------------------------------
 
     return NextResponse.json(
       { success: true, data: report },

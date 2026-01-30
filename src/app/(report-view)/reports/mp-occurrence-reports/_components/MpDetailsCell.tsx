@@ -19,7 +19,7 @@ export default function MpDetailsCell({ details }: MpDetailsCellProps) {
     <div className="space-y-1 text-xs">
       <div className="flex gap-1">
         <span className="font-bold text-gray-900 min-w-[70px]">Army no.:</span>
-        <span className="text-gray-700">{details.armyNumber}</span>
+        <span className="text-gray-700">{details.armyNumber || details.armyNo}</span>
       </div>
       <div className="flex gap-1">
         <span className="font-bold text-gray-900 min-w-[70px]">Rank:</span>

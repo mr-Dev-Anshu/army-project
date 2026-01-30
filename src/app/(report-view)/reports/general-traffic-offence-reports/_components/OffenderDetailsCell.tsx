@@ -19,9 +19,9 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
   };
 
   // Extract all potential fields
-  const armyNo = get("armyNo", "armyNumber", "Army No.", "DD veh rider no.");
+  const armyNo = get("armyNo", "armyNumber", "serviceNumber", "Army No.", "DD veh rider no.");
   const rank = get("rank", "Select Rank", "Rank");
-  const name = get("name", "Driver Name", "Name");
+  const name = get("name", "personName", "fullName", "Driver Name", "Name");
 
   // S/O or D/O or Mother's Name
   const relationName = get("fatherName", "so", "S/O", "moName", "M/O Name");

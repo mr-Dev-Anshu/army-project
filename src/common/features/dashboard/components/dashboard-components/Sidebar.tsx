@@ -108,15 +108,15 @@ const Sidebar = () => {
       href: "/",
       badge: "1",
     },
-  ];
-
-  const createNewRecordItems: MenuItem[] = [
     {
       icon: <Siren className="w-5 h-5" />
       ,
       label: "Immediate Reporting of Incident (Initial Report)",
       href: "/create-record/immediate-reporting-incident",
     },
+  ];
+
+  const createNewRecordItems: MenuItem[] = [
     {
       icon: <ConeIcon className="w-5 h-5" color="currentColor" />,
       label: "General & Traffic Offence Report",
@@ -168,19 +168,10 @@ const Sidebar = () => {
         { label: "Vehicles Security Pass Management", href: "/setup/vehicles-security-pass-management" },
         // { label: "Rank Management", href: "/setup/ranks-master-list" },
         // { label: "Unit Management", href: "/setup/unit-master-list" },
-        { label: "Installation", href: "/setup/installation" },
+
       ],
     },
-    {
-      icon: <Network className="w-5 h-5" />,
-      label: "Military Structure Data",
-      submenu: [
-        { label: "Brigade", href: "/structure/brigade" },
-        { label: "Division", href: "/structure/division" },
-        { label: "Corps / Sub-Area", href: "/structure/corps" },
-        { label: "Command / Area", href: "/structure/command" },
-      ],
-    },
+
     {
       icon: <UserIcon className="w-5 h-5" />,
       label: "User Access Management",
@@ -197,7 +188,7 @@ const Sidebar = () => {
       <Link
         href={item.href || "#"}
         className={cn(
-          "w-full relative flex items-center transition-all group rounded-lg",
+          "w-full relative flex items-center transition-all group rounded-lg my-2",
           isCollapsed
             ? "h-10 justify-center hover:bg-gray-100"
             : cn(

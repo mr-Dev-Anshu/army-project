@@ -208,11 +208,13 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                 if (info.ownerType === "militaryPersonnel") {
                     return (
                         <div className="flex flex-col space-y-1 font-[Arial] text-xs">
-                            {renderField("Army No", details.armyNo)}
-                            {renderField("Rank", details.rank)}
-                            {renderField("Unit", details.unit)}
-                            {renderField("FMN", details.fmn)}
-                            {renderField("Command", details.command)}
+                            {renderField("Army No", details.militaryPersonnelArmyNo)}
+                            {renderField("Rank", details.militaryPersonnelRank)}
+                            {renderField("Unit", details.militaryPersonnelUnit)}
+                            {renderField("FMN", details.militaryPersonnelFMN)}
+                            {renderField("Command", details.militaryPersonnelCommand)}
+                            {renderField("I Card Number", details.militaryPersonnelICardNumber)}
+
                         </div>
                     );
                 }
@@ -221,7 +223,7 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                 if (info.ownerType === "employee") {
                     return (
                         <div className="flex flex-col space-y-1 font-[Arial] text-xs">
-                            {renderField("Service No", details.serviceNumber)}
+                            {renderField("Service No", details.employeeServiceNumber)}
                             {renderField("Rank", details.employeeRank)}
                             {renderField("Unit", details.employeeUnit)}
                             {renderField("FMN", details.employeeFmn)}
@@ -271,9 +273,9 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                     return (
                         <div className="flex flex-col space-y-1 font-[Arial] text-xs">
                             {renderField("Name", details.tempWorkerName)}
-                            {renderField("Place of Stay", details.placeOfStay)}
-                            {renderField("Place of Work", details.placeOfWork)}
-                            {renderField("Type of Work", details.typeOfWork)}
+                            {renderField("Place of Stay", details.tempWorkerPlaceOfStay)}
+                            {renderField("Place of Work", details.tempWorkerPlaceOfWork)}
+                            {renderField("Type of Work", details.tempWorkerTypeOfWork)}
                             {renderField("Pass No", details.tempWorkerPassNo)}
                             {renderDate("Issue Date", details.tempWorkerPassIssueDate)}
                             {renderDate("Expire Date", details.tempWorkerPassExpireDate)}
@@ -285,8 +287,8 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                 if (info.ownerType === "civilian") {
                     return (
                         <div className="flex flex-col space-y-1 font-[Arial] text-xs">
-                            {renderField("Aadhar No", details.aadharCardNumber)}
-                            {renderField("Father's Name", details.fathersName)}
+                            {renderField("Aadhar No", details.civilianAadharCardNumber)}
+                            {renderField("Father's Name", details.civilianFathersName)}
 
                             {details.isDependent && (
                                 <div className="mt-2 pt-2 border-t border-gray-200">
@@ -296,11 +298,11 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                                     {/* Nested Relative Details */}
                                     {details.relativeCategory === "militaryPersonnel" && details.relativeDetails && (
                                         <>
-                                            {renderField("Army No", details.relativeDetails.armyNo)}
-                                            {renderField("Rank", details.relativeDetails.rank)}
-                                            {renderField("Unit", details.relativeDetails.unit)}
-                                            {renderField("FMN", details.relativeDetails.fmn)}
-                                            {renderField("Command", details.relativeDetails.command)}
+                                            {renderField("Army No", details.relativeDetails.militaryPersonnelArmyNo)}
+                                            {renderField("Rank", details.relativeDetails.militaryPersonnelRank)}
+                                            {renderField("Unit", details.relativeDetails.militaryPersonnelUnit)}
+                                            {renderField("FMN", details.relativeDetails.militaryPersonnelFmn)}
+                                            {renderField("Command", details.relativeDetails.militaryPersonnelCommand)}
                                         </>
                                     )}
                                     {details.relativeCategory === "servantMaid" && details.relativeDetails && (
@@ -308,7 +310,7 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                                             {renderField("Pass No", details.relativeDetails.maidPassNumber)}
                                             {renderField("Father's Name", details.relativeDetails.maidFathersName)}
                                             {renderField("Pass ID", details.relativeDetails.maidPassID)}
-                                            {renderField("Name", details.relativeDetails.relativeName)}
+                                            {renderField("Name", details.relativeDetails.maidName)}
                                             {renderField("Trade", details.relativeDetails.maidTrade)}
                                             {renderField("Worked at Qtr", details.relativeDetails.maidQuarterNumber)}
                                             {renderField("Employer Rank", details.relativeDetails.officersEnclaveRank)}
@@ -317,7 +319,7 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
                                             {renderField("Unit", details.relativeDetails.maidUnit)}
                                             {renderField("FMN", details.relativeDetails.maidFmn)}
                                             {renderField("Command", details.relativeDetails.maidCommand)}
-                                            {renderField("Address", details.relativeDetails.relativeAddress)}
+                                            {renderField("Address", details.relativeDetails.maidAddress)}
                                             {renderField("I-Card", details.relativeDetails.maidICardNumber)}
 
                                         </>
