@@ -44,6 +44,8 @@ const DutyAndAssetMovementSchema = new Schema(
         'contact_info_army',
         'contact_info_civil_police',
         'contact_info_mp_control_room',
+        "mt-accident-21-corp-pro",
+        "mp-general-diary-daily-occurrence-book"
       ],
       required: [true, 'Register type is required'],
       index: true,
@@ -51,7 +53,7 @@ const DutyAndAssetMovementSchema = new Schema(
 
     date: {
       type: Date,
-      required: [true, 'Date is required'],
+      required: false, // Not required for contact registers
     },
     outTime: {
       type: Date,

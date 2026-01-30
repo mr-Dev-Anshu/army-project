@@ -1,10 +1,21 @@
-import { MTAccidentReport } from "@/models/MTAccidentReport";
+import { mtAccidentReportRepo } from "@/reposetories/mtAccidentReport.repo";
 
 export const createMTAccidentReport = async (data) => {
-    const report = await MTAccidentReport.create(data);
-    return report;
+    return await mtAccidentReportRepo.create(data);
 };
 
-export const getAllMTAccidentReports = async () => {
-    return await MTAccidentReport.find().sort({ createdAt: -1 });
+export const getAllMTAccidentReports = async (filters) => {
+    return await mtAccidentReportRepo.getAll(filters);
+};
+
+export const getMTAccidentReportById = async (id) => {
+    return await mtAccidentReportRepo.getById(id);
+};
+
+export const updateMTAccidentReport = async (id, data) => {
+    return await mtAccidentReportRepo.update(id, data);
+};
+
+export const deleteMTAccidentReport = async (id) => {
+    return await mtAccidentReportRepo.delete(id);
 };

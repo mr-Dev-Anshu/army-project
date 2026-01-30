@@ -18,8 +18,8 @@ export class GeneralTrafficOffenceService {
     return offence;
   }
 
-  async create(data) {
-    return await generalTrafficOffenceRepo.create(data);
+  async create(data, requestContext = null) {
+    return await generalTrafficOffenceRepo.create(data, requestContext);
   }
 
   async update(id, data) {

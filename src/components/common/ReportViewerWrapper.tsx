@@ -11,6 +11,7 @@ interface ReportViewerWrapperProps {
     downloadType?: "PDF" | "Word" | null;
     onDownloadWord?: () => void;
     onDownloadPdf?: () => void;
+    printUrl?: string; // New prop for dedicated print page URL
     children: React.ReactNode;
 }
 
@@ -23,6 +24,7 @@ export default function ReportViewerWrapper({
     downloadType,
     onDownloadWord,
     onDownloadPdf,
+    printUrl,
     children,
 }: ReportViewerWrapperProps) {
     return (
@@ -58,7 +60,45 @@ export default function ReportViewerWrapper({
                     <Button
                         variant="secondary"
                         className="bg-white text-black hover:bg-gray-200 h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
-                        onClick={() => onPrint ? onPrint() : window.print()}
+                        onClick={() => {
+                            if (printUrl) {
+                                window.open(printUrl, '_blank');
+                            } else {
+                                const printStyles = document.createElement('style');
+                                printStyles.textContent = `
+                                    @media print {
+                                        * { box-sizing: border-box; }
+                                        body { margin: 0 !important; padding: 0 !important; }
+                                        body * { visibility: hidden; }
+                                        .print-content, .print-content * { visibility: visible; }
+                                        .print-content { 
+                                            position: absolute !important; 
+                                            left: 0 !important; 
+                                            top: 0 !important; 
+                                            width: 100% !important;
+                                            height: auto !important;
+                                            overflow: visible !important;
+                                            page-break-inside: avoid;
+                                        }
+                                        .fixed { position: static !important; }
+                                        .bg-\[\#333333\] { background: white !important; }
+                                        @page { margin: -0.3in; size: auto; }
+                                    }
+                                `;
+                                document.head.appendChild(printStyles);
+                                
+                                if (onPrint) {
+                                    onPrint();
+                                } 
+                                else {
+                                    window.print();
+                                }
+                                
+                                setTimeout(() => {
+                                    document.head.removeChild(printStyles);
+                                }, 1000);
+                            }
+                        }}
                     >
                         Print Report <Printer className="w-3.5 h-3.5" />
                     </Button>
@@ -106,7 +146,7 @@ export default function ReportViewerWrapper({
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-auto p-8 flex justify-center">
+            <div className="flex-1 overflow-auto p-8 flex justify-center print-content">
                 {/* The child component (Report) should carry its own background (usually white) and shadow */}
                 {children}
             </div>

@@ -40,6 +40,12 @@ export interface FilterState {
   priceListStatus?: string;
   agreementStatus?: string;
   dutyType?: string;
+  rank?: string;
+  appointment?: string;
+  postingLocation?: string;
+  district?: string;
+  state?: string;
+  rankOfStation?: string;
   sortOrder?: "asc" | "desc";
   [key: string]: any;
 }
@@ -58,6 +64,7 @@ interface ReportFilterBarProps {
   showActionStatus?: boolean;
   statusLabel?: string;
   placeLabel?: string;
+  dateLabel?: string;
   dateRangeLabel?: string;
   actionStatusOptions?: string[];
   showOffenceType?: boolean;
@@ -74,6 +81,20 @@ interface ReportFilterBarProps {
   showUnitLocation?: boolean;
   showDutyType?: boolean;
   dutyTypeOptions?: string[];
+  showVehicleType?: boolean;
+  vehicleTypeOptions?: string[];
+  showRank?: boolean;
+  rankOptions?: string[];
+  showAppointment?: boolean;
+  appointmentOptions?: string[];
+  showPostingLocation?: boolean;
+  postingLocationOptions?: string[];
+  showDistrict?: boolean;
+  districtOptions?: string[];
+  showState?: boolean;
+  stateOptions?: string[];
+  showRankOfStation?: boolean; // Rank of Station (Civil Police)
+  rankOfStationOptions?: string[];
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -92,6 +113,7 @@ export default function ReportFilterBar({
   showActionStatus = true,
   statusLabel = "Action Status",
   placeLabel = "Place of Offence",
+  dateLabel,
   dateRangeLabel = "Offence Date",
   actionStatusOptions = ["Pending", "Taken"], // "All" is handled by placeholder
   showOffenceType = true,
@@ -107,6 +129,20 @@ export default function ReportFilterBar({
   showIndividualWorkingStatus = false,
   showUnitLocation = false,
   showDutyType = false,
+  showVehicleType = false,
+  vehicleTypeOptions = [],
+  showRank = false,
+  rankOptions = [],
+  showAppointment = false,
+  appointmentOptions = [],
+  showPostingLocation = false,
+  postingLocationOptions = [],
+  showDistrict = false,
+  districtOptions = [],
+  showState = false,
+  stateOptions = [],
+  showRankOfStation = false,
+  rankOfStationOptions = [],
 }: ReportFilterBarProps) {
   const isFilterActive =
     (showPriceListFilter && filters.priceListStatus && filters.priceListStatus !== "All") ||
@@ -114,6 +150,14 @@ export default function ReportFilterBar({
     (showActionStatus && filters.actionStatus && filters.actionStatus !== "All") ||
     (showIndividualWorkingStatus && filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") ||
     (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
+    (showDutyType && filters.dutyType && filters.dutyType !== "All") ||
+    (showVehicleType && filters.vehicleType && filters.vehicleType !== "All") ||
+    (showRank && filters.rank && filters.rank !== "All") ||
+    (showAppointment && filters.appointment && filters.appointment !== "All") ||
+    (showPostingLocation && filters.postingLocation && filters.postingLocation !== "All") ||
+    (showDistrict && filters.district && filters.district !== "All") ||
+    (showState && filters.state && filters.state !== "All") ||
+    (showRankOfStation && filters.rankOfStation && filters.rankOfStation !== "All") ||
     !!filters.date ||
     (showOffenceType && !!filters.offenceType && filters.offenceType !== "All") ||
     !!filters.fromDate ||
@@ -213,7 +257,7 @@ export default function ReportFilterBar({
                   {/* Specific Date */}
                   {showDate && (
                     <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium text-gray-700">Specific Date</label>
+                      <label className="text-sm font-medium text-gray-700">{dateLabel || "Specific Date"}</label>
                       <Input
                         type="date"
                         className="w-full text-sm"
@@ -400,6 +444,127 @@ export default function ReportFilterBar({
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                  )}
+
+                  {/* Vehicle Type */}
+                  {showVehicleType && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Type of Vehicle</label>
+                      <Select
+                        value={filters.vehicleType || "All"}
+                        onValueChange={(value) => onFilterChange("vehicleType", value)}
+                      >
+                        <SelectTrigger className="w-full bg-white border-gray-300">
+                          <SelectValue placeholder="Select Vehicle Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All">All</SelectItem>
+                          {(vehicleTypeOptions && vehicleTypeOptions.length > 0
+                            ? vehicleTypeOptions
+                            : ["Gypsy", "Truck", "ALS", "Bus", "Motorcycle", "Other"]
+                          ).map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  {/* Appointment */}
+                  {showAppointment && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Appointment</label>
+                      <AsyncSearchableSelect
+                        fieldType="appointment"
+                        value={filters.appointment || ""}
+                        onValueChange={(v) => onFilterChange("appointment", v)}
+                        placeholder="Search Appointment..."
+                        className="w-full"
+                        defaultOptions={appointmentOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Rank */}
+                  {showRank && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Rank</label>
+                      <AsyncSearchableSelect
+                        fieldType="rank"
+                        value={filters.rank || ""}
+                        onValueChange={(v) => onFilterChange("rank", v)}
+                        placeholder="Search Rank..."
+                        className="w-full"
+                        defaultOptions={rankOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Posting Location */}
+                  {showPostingLocation && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Posting Location</label>
+                      <AsyncSearchableSelect
+                        fieldType="postingLocation"
+                        value={filters.postingLocation || ""}
+                        onValueChange={(v) => onFilterChange("postingLocation", v)}
+                        placeholder="Search Location..."
+                        className="w-full"
+                        defaultOptions={postingLocationOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* District */}
+                  {showDistrict && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">District</label>
+                      <AsyncSearchableSelect
+                        fieldType="district"
+                        value={filters.district || ""}
+                        onValueChange={(v) => onFilterChange("district", v)}
+                        placeholder="Search District..."
+                        className="w-full"
+                        defaultOptions={districtOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* State */}
+                  {showState && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">State</label>
+                      <AsyncSearchableSelect
+                        fieldType="state"
+                        value={filters.state || ""}
+                        onValueChange={(v) => onFilterChange("state", v)}
+                        placeholder="Search State..."
+                        className="w-full"
+                        defaultOptions={stateOptions}
+                        mode="list-checkbox"
+                      />
+                    </div>
+                  )}
+
+                  {/* Rank of Station */}
+                  {showRankOfStation && (
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium text-gray-700">Rank of Station</label>
+                      <AsyncSearchableSelect
+                        fieldType="rankOfStation"
+                        value={filters.rankOfStation || ""}
+                        onValueChange={(v) => onFilterChange("rankOfStation", v)}
+                        placeholder="Search Rank of Station..."
+                        className="w-full"
+                        defaultOptions={rankOfStationOptions}
+                        mode="list-checkbox"
+                      />
                     </div>
                   )}
                 </div>
