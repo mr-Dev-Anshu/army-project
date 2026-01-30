@@ -20,7 +20,6 @@ import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer
 import { Button } from "@/components/ui/button";
 import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
 import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
-import { toast } from "react-toastify";
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
@@ -37,7 +36,7 @@ const cleanSystemFields = (data: any): any => {
     Object.keys(data).forEach(key => {
       // Skip system fields
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
-      
+
       // Recursively clean children
       cleaned[key] = cleanSystemFields(data[key]);
     });
@@ -54,7 +53,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Vehicle Type": "vehicleType",
   "Vehicle Name": "vehicleName",
   "Date": "offenceOccurenceDetails.time",
-  "Time": "offenceOccurenceDetails.time", 
+  "Time": "offenceOccurenceDetails.time",
   "Location": "offenceOccurenceDetails.incidentLocation",
   "Place": "offenceOccurenceDetails.incidentLocation",
   "Authorized Speed": "offenceOccurenceDetails.authSpeed",
@@ -123,7 +122,7 @@ export default function StaticSpeedCheckReportsPage() {
   const [editingReport, setEditingReport] = useState<any>(null);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-  
+
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -135,7 +134,7 @@ export default function StaticSpeedCheckReportsPage() {
     fileInputRef.current?.click();
     setShowAddOptions(false);
   };
-  
+
   const handleImportJSON = () => {
     fileInputRef.current?.click();
     setShowAddOptions(false);
@@ -153,7 +152,7 @@ export default function StaticSpeedCheckReportsPage() {
     const fileName = file.name.toLowerCase();
     const isExcel = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
     const isJson = fileName.endsWith(".json");
-    
+
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -172,7 +171,7 @@ export default function StaticSpeedCheckReportsPage() {
 
         // FIX: Unwrap API response wrappers (e.g., { success: true, data: [...] })
         if (json && !Array.isArray(json) && json.data) {
-            json = json.data;
+          json = json.data;
         }
 
         let dataArray = Array.isArray(json) ? json : [json];
@@ -183,9 +182,9 @@ export default function StaticSpeedCheckReportsPage() {
         const mappedData = mapData(dataArray);
 
         await processImport(mappedData, createStaticSpeedRecord);
-        
+
         toast.success("Records imported successfully!");
-        await refetch(); 
+        await refetch();
       } catch (error: any) {
         console.error("Error importing file:", error);
         toast.error(`Failed to import records: ${error.message || "Unknown error"}`);
@@ -197,7 +196,7 @@ export default function StaticSpeedCheckReportsPage() {
     } else {
       reader.readAsText(file);
     }
-    event.target.value = ""; 
+    event.target.value = "";
   };
 
   // NEW STATE FOR ATTACHMENT
@@ -724,9 +723,9 @@ export default function StaticSpeedCheckReportsPage() {
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-            
+
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>

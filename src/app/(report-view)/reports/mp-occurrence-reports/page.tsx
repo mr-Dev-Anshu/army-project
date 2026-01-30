@@ -13,7 +13,7 @@ import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/report
 
 import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, FileSpreadsheet, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, FileSpreadsheet, FileJson, Loader2, Plus, X } from "lucide-react";
 import EvidenceViewer from "@/components/common/EvidenceViewer";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
@@ -61,7 +61,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Opinion": "opinion",
   "Analysis": "remarks.analysis",
   "Recommendation": "remarks.recommendation",
-  
+
   "Offender Name": "individuals[0].name",
   "Offender Rank": "individuals[0].rank",
   "Offender Army No": "individuals[0].armyNo",
@@ -101,9 +101,9 @@ const mapData = (data: any[]) => {
     });
 
     if (newItem.individuals && newItem.individuals.length > 0) {
-        if (newItem.individuals[0] && !newItem.individuals[0].role) {
-            newItem.individuals[0].role = "Offender";
-        }
+      if (newItem.individuals[0] && !newItem.individuals[0].role) {
+        newItem.individuals[0].role = "Offender";
+      }
     }
 
     return newItem;
@@ -212,12 +212,12 @@ export default function MpOccurrenceReportsPage() {
       toast.error("Failed to delete attachment: " + (error as any)?.message || "Unknown error");
     }
   };
-  
 
-    
-    const [showAddOptions, setShowAddOptions] = useState(false);
-     const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
+
+  const [showAddOptions, setShowAddOptions] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { mutateAsync: createMPReport } = useCreateMPReport();
 
   React.useEffect(() => {
@@ -260,7 +260,7 @@ export default function MpOccurrenceReportsPage() {
   const { data: fullEditingReport, isLoading: isLoadingEdit } = useGetMPReportById(editingId);
   const finalEditingReport = fullEditingReport || viewingReport?.originalData || viewingReport;
 
-  
+
   const { data, isLoading, isError, refetch } = useGetAllMPReports(apiParams);
 
   const handleImportCSV = () => {
@@ -304,7 +304,7 @@ export default function MpOccurrenceReportsPage() {
 
         // FIX: Unwrap API response wrappers
         if (json && !Array.isArray(json) && json.data) {
-            json = json.data;
+          json = json.data;
         }
 
         let dataArray = Array.isArray(json) ? json : [json];
@@ -315,7 +315,7 @@ export default function MpOccurrenceReportsPage() {
         const mappedData = mapData(dataArray);
 
         await processImport(mappedData, createMPReport);
-        
+
         toast.success("Reports imported successfully!");
         await refetch();
       } catch (error: any) {
@@ -493,7 +493,7 @@ export default function MpOccurrenceReportsPage() {
   const mapToReportProps = (item: any): MpOccurrenceReportProps => {
     const raw = item.originalData || item || {};
     const reportDetails = raw.reportDetails || {};
-    const invHead = raw.investigationHead || raw.mpParticulars || {}; 
+    const invHead = raw.investigationHead || raw.mpParticulars || {};
     const occurrence = raw.occurrenceDetails || {};
 
     const rawPeople = raw.individuals || raw.offenders || raw.individual || raw.offenderList || raw.customFields?.individuals || raw.customFields?.offenderList || [];
@@ -501,7 +501,7 @@ export default function MpOccurrenceReportsPage() {
     const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
       const src = p.details || p;
       const custom = src.customFields || {};
-      const merged = { ...custom, ...src }; 
+      const merged = { ...custom, ...src };
 
       return {
         sno: index + 1,
@@ -877,9 +877,9 @@ export default function MpOccurrenceReportsPage() {
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-            
+
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>
