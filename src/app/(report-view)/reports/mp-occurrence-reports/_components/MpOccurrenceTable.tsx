@@ -84,6 +84,15 @@ export default function MpOccurrenceTable({
     });
   };
 
+  const handlePrintClick = React.useCallback((reportId: string) => {
+    if (!reportId) {
+      toast.error("Cannot print report without an ID.");
+      return;
+    }
+    const printUrl = `/print/mp-occurrence-report/${reportId}`;
+    window.open(printUrl, "_blank");
+  }, []);
+
   const handleConfirm = async () => {
     if (!modalState.reportId) return;
 
@@ -314,7 +323,7 @@ export default function MpOccurrenceTable({
         ),
       },
     ];
-  }, [updateReport, onView]);
+  }, [updateReport, onView, handlePrintClick]);
 
   const processedData = useMemo(() => {
     return data.map((item, index) => ({
