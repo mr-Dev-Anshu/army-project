@@ -85,7 +85,7 @@ export function SuggestionInput({
           value={safeValue}
           onChange={handleChange}
           onFocus={() => setShowSuggestions(true)}
-          className={cn("bg-white", icon && "pr-10")}
+          className={cn("bg-white", icon && "pr-10", safeValue && "border-blue-500")}
           autoComplete="off"
           {...props}
         />

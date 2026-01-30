@@ -9,6 +9,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { useMTAccidentReport } from "../hooks/useMTAccidentReport";
+import { FormFooter } from "@/features/RegisterBooks/components/FormFooter";
+import { AuthenticationSection } from "@/features/RegisterBooks/components/AuthenticationSection";
+
+import { toast } from "react-toastify";
+import { createMTAccidentReportSchema } from "@/validators/mtAccidentReportValidation";
+import Joi from "joi";
 
 const INITIAL_DATA = {
     individualDetails: {
@@ -37,9 +43,14 @@ const INITIAL_DATA = {
         firDate: "",
         firPoliceStation: ""
     },
+    authentication: {
+        initialsMPCPNCO: "",
+        initialsQMSJCO: "",
+        initials2IC: ""
+    },
     actionStatus: "pending",
     actionStatusRemark: "",
-    remark: ""
+    damageToVehicle: ""
 };
 
 interface Props {
@@ -78,7 +89,12 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                 firMactDetails: {
                     ...INITIAL_DATA.firMactDetails,
                     ...(initialData.firMactDetails || {})
-                }
+                },
+                authentication: {
+                    ...INITIAL_DATA.authentication,
+                    ...(initialData.authentication || {})
+                },
+                damageToVehicle: initialData.damageToVehicle || ""
             });
         }
     }, [initialData]);
@@ -99,37 +115,69 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
 
     const handleSubmit = async () => {
         try {
+            // Validate form data against schema
+            const { error, value } = createMTAccidentReportSchema.validate(formData, {
+                abortEarly: false,
+                stripUnknown: true
+            });
+
+            if (error) {
+                console.error("Validation error:", error);
+
+                const fieldLabels: Record<string, string> = {
+                    "casualtyDetails.injuredCivil": "Injured (Civil)",
+                    "casualtyDetails.injuredMilitary": "Injured (Military)",
+                    "casualtyDetails.diedCivil": "Died (Civil)",
+                    "casualtyDetails.diedMilitary": "Died (Military)",
+                    "accidentDetails.accidentDate": "Accident Date",
+                    "damageToVehicle": "Damage to Vehicle",
+                    "actionStatusRemark": "Action Remark"
+                };
+
+                const errorMessage = error.details.map(d => {
+                    const fieldPath = d.path.join(".");
+                    const label = fieldLabels[fieldPath] || fieldPath; // Fallback to path if no label
+                    // Replace the quoted path (e.g. "casualtyDetails.injuredCivil") with the friendly label
+                    return d.message.replace(/"[^"]*"/, label);
+                }).join(", ");
+
+                toast.error(errorMessage);
+                return;
+            }
+
+            // Use validated value
             if (initialData) {
-                await updateReport({ id: initialData._id, data: formData });
+                await updateReport({ id: initialData._id, data: value });
             } else {
-                await createReport(formData);
+                await createReport(value);
             }
             onSuccess();
         } catch (error) {
             console.error("Failed to save report", error);
+            // Error toast is already handled in the hook
         }
     };
 
     const iv = formData.individualDetails;
 
     return (
-        <div className="flex flex-col h-full bg-gray-50/50">
+        <div className="flex flex-col h-full bg-white font-[Arial]">
             <div className="flex-1 overflow-y-auto p-6 space-y-8">
 
                 {/* Individual / Victim Details */}
-                <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
-                    <div>
-                        <h3 className="text-base font-semibold text-gray-900 mb-1">Individual / Victim Details</h3>
-                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-3">
+                <section className="space-y-4">
+                    <div className="space-y-4">
+                        <h3 className="text-base font-semibold text-gray-900 mb-4">Individual / Victim Details</h3>
+                        <div>
                             <p className="text-sm font-medium text-gray-700 mb-3">Select Individual & Fill Details ?</p>
                             <RadioGroup
                                 value={iv.individualType}
                                 onValueChange={(v) => handleChange("individualDetails.individualType", v)}
-                                className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                                className="grid grid-cols-2 gap-3"
                             >
                                 {[
                                     { id: "militaryPersonnel", label: "Military Personnel" },
-                                    { id: "civilian", label: "Civilian" },
+                                    { id: "civilian", label: "Civilian / Dependent" },
                                     { id: "employee", label: "Employee" },
                                     { id: "servantMaid", label: "Servant / Maid" },
                                     { id: "shopKeeper", label: "Shop Keeper" },
@@ -138,14 +186,14 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                                     <label
                                         key={type.id}
                                         className={cn(
-                                            "flex items-center space-x-3 rounded-lg border bg-white p-3 cursor-pointer transition-all hover:bg-gray-50",
+                                            "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
                                             iv.individualType === type.id
-                                                ? "border-blue-500 ring-1 ring-blue-500 bg-blue-50/10"
+                                                ? "border-blue-500 bg-gray-50"
                                                 : "border-gray-200"
                                         )}
                                     >
-                                        <RadioGroupItem value={type.id} id={type.id} className="text-blue-600" />
-                                        <span className="text-sm font-medium text-gray-700">{type.label}</span>
+                                        <RadioGroupItem value={type.id} id={type.id} />
+                                        <span className="text-xs font-medium">{type.label}</span>
                                     </label>
                                 ))}
                             </RadioGroup>
@@ -871,7 +919,8 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                                     )}
 
                                     {iv.individualDetails?.relativeCategory === "servantMaid" && (
-                                        <div className="space-y-4 pt-2">
+                                        <div className="space-y-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                            <h4 className="text-sm font-semibold text-gray-700">Relative (Servant / Maid) Details</h4>
                                             <div className="space-y-1">
                                                 <SuggestionInput
                                                     label={<span>Maid/Servant Pass Number <span className="text-red-500">*</span></span>}
@@ -1018,7 +1067,8 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                                     )}
 
                                     {iv.individualDetails?.relativeCategory === "shopKeeper" && (
-                                        <div className="space-y-4 pt-2">
+                                        <div className="space-y-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                            <h4 className="text-sm font-semibold text-gray-700">Relative (Shop Keeper) Details</h4>
                                             <div className="space-y-1">
                                                 <SuggestionInput
                                                     label="Shop Owner Name"
@@ -1088,7 +1138,8 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                                     )}
 
                                     {iv.individualDetails?.relativeCategory === "tempHiredWorker" && (
-                                        <div className="space-y-4 pt-2">
+                                        <div className="space-y-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                            <h4 className="text-sm font-semibold text-gray-700">Relative (Temporary Hired Worker) Details</h4>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1">
                                                     <SuggestionInput
@@ -1164,27 +1215,29 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                 </section>
 
                 {/* Accident Details */}
-                <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <section className="space-y-4">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">Accident Details</h3>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>Date of Accident</Label>
                             <Input
                                 type="date"
                                 value={formData.accidentDetails.accidentDate ? new Date(formData.accidentDetails.accidentDate).toISOString().split('T')[0] : ""}
                                 onChange={(e) => e.target.value && handleChange("accidentDetails.accidentDate", new Date(e.target.value).toISOString())}
+                                className={cn(formData.accidentDetails.accidentDate && "border-blue-500")}
                             />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>Time of Accident (24hr format)</Label>
                             <Input
                                 type="time"
                                 value={formData.accidentDetails.accidentTime}
                                 onChange={(e) => handleChange("accidentDetails.accidentTime", e.target.value)}
+                                className={cn(formData.accidentDetails.accidentTime && "border-blue-500")}
                             />
                         </div>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                         <SuggestionInput
                             label="Place of Accident"
                             fieldType="address"
@@ -1212,31 +1265,32 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                                     className={cn(
                                         "flex items-center space-x-2 rounded-full border px-4 py-2 cursor-pointer transition-all hover:bg-gray-50",
                                         formData.accidentDetails.accidentType === type.id
-                                            ? "border-blue-500 bg-blue-50/20 text-blue-700 font-medium"
+                                            ? "border-blue-500 bg-gray-50 font-medium"
                                             : "border-gray-200 text-gray-700"
                                     )}
                                 >
-                                    <RadioGroupItem value={type.id} id={`acc-${type.id}`} className="text-blue-600 border-gray-300" />
+                                    <RadioGroupItem value={type.id} id={`acc-${type.id}`} />
                                     <span className="text-sm">{type.label}</span>
                                 </label>
                             ))}
                         </RadioGroup>
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                         <Label>Probable Cause of Accident</Label>
                         <Input
                             value={formData.accidentDetails.causeOfAccident}
                             onChange={(e) => handleChange("accidentDetails.causeOfAccident", e.target.value)}
                             placeholder="Briefly explain cause"
+                            className={cn(formData.accidentDetails.causeOfAccident && "border-blue-500")}
                         />
                     </div>
                 </section>
 
                 {/* Vehicle Details */}
-                <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <section className="space-y-4">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">Vehicle Details</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                         <div className="space-y-1">
                             <SuggestionInput
                                 label="Vehicle BA No. / Civil Vehicle Registration No."
@@ -1248,7 +1302,7 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                         </div>
                         <div className="space-y-1">
                             <SuggestionInput
-                                label="Make & Type"
+                                label="Make & Take"
                                 fieldType="vehicleType"
                                 placeholder="Model / Type"
                                 value={formData.vehicleDetails.vehicleModel}
@@ -1259,74 +1313,97 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                 </section>
 
                 {/* Casualty Details */}
-                <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <section className="space-y-4">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">Casualty Details</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>Injured (Civil)</Label>
                             <Input
                                 type="number"
                                 min="0"
                                 value={formData.casualtyDetails.injuredCivil}
-                                onChange={(e) => handleChange("casualtyDetails.injuredCivil", e.target.value)}
+                                onChange={(e) => handleChange("casualtyDetails.injuredCivil", e.target.value ? Number(e.target.value) : 0)}
                                 placeholder="Value"
+                                className={cn(formData.casualtyDetails.injuredCivil && "border-blue-500")}
                             />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>Injured (Mil)</Label>
                             <Input
                                 type="number"
                                 min="0"
                                 value={formData.casualtyDetails.injuredMilitary}
-                                onChange={(e) => handleChange("casualtyDetails.injuredMilitary", e.target.value)}
+                                onChange={(e) => handleChange("casualtyDetails.injuredMilitary", e.target.value ? Number(e.target.value) : 0)}
                                 placeholder="Value"
+                                className={cn(formData.casualtyDetails.injuredMilitary && "border-blue-500")}
                             />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>Died (Civil)</Label>
                             <Input
                                 type="number"
                                 min="0"
                                 value={formData.casualtyDetails.diedCivil}
-                                onChange={(e) => handleChange("casualtyDetails.diedCivil", e.target.value)}
+                                onChange={(e) => handleChange("casualtyDetails.diedCivil", e.target.value ? Number(e.target.value) : 0)}
                                 placeholder="Value"
+                                className={cn(formData.casualtyDetails.diedCivil && "border-blue-500")}
                             />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>Died (Mil)</Label>
                             <Input
                                 type="number"
                                 min="0"
                                 value={formData.casualtyDetails.diedMilitary}
-                                onChange={(e) => handleChange("casualtyDetails.diedMilitary", e.target.value)}
+                                onChange={(e) => handleChange("casualtyDetails.diedMilitary", e.target.value ? Number(e.target.value) : 0)}
                                 placeholder="Value"
+                                className={cn(formData.casualtyDetails.diedMilitary && "border-blue-500")}
                             />
                         </div>
                     </div>
                 </section>
 
+                {/* Damage to Vehicle */}
+                <section className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">Damage to Vehicle</h3>
+                    <div className="space-y-2">
+                        <Label>Describe Vehicle Condition</Label>
+                        <textarea
+                            className={cn(
+                                "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                                formData.damageToVehicle && "border-blue-500"
+                            )}
+                            placeholder="Describe the damage. Describe Vehicle Condition by enter Tyres Condition, Brakes Condition, Steering Condition, Light Condition, Wiper Condition"
+                            value={formData.damageToVehicle}
+                            onChange={(e) => handleChange("damageToVehicle", e.target.value)}
+                        />
+                    </div>
+                </section>
+
                 {/* FIR / MACT Details */}
-                <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <section className="space-y-4">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">FIR / MACT Details</h3>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>FIR / MACT No.</Label>
                             <Input
                                 value={formData.firMactDetails.firMactNumber}
                                 onChange={(e) => handleChange("firMactDetails.firMactNumber", e.target.value)}
                                 placeholder="Value"
+                                className={cn(formData.firMactDetails.firMactNumber && "border-blue-500")}
                             />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <Label>FIR Date</Label>
                             <Input
                                 type="date"
                                 value={formData.firMactDetails.firDate ? new Date(formData.firMactDetails.firDate).toISOString().split('T')[0] : ""}
                                 onChange={(e) => e.target.value && handleChange("firMactDetails.firDate", new Date(e.target.value).toISOString())}
+                                className={cn(formData.firMactDetails.firDate && "border-blue-500")}
                             />
                         </div>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                         <SuggestionInput
                             label="FIR Police Station"
                             fieldType="policeStation"
@@ -1337,38 +1414,44 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                     </div>
                 </section>
 
+                <AuthenticationSection
+                    data={formData.authentication || INITIAL_DATA.authentication}
+                    onChange={(field, value) => handleChange(`authentication.${field}`, value)}
+                />
+
+
                 {/* Action */}
-                <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <section className="space-y-4">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">Action</h3>
                     <div className="space-y-3">
                         <Label>Action Status</Label>
                         <RadioGroup
                             value={formData.actionStatus}
                             onValueChange={(v) => handleChange("actionStatus", v)}
-                            className="flex gap-4"
+                            className="grid grid-cols-2 gap-4"
                         >
                             <label
                                 className={cn(
-                                    "flex-1 flex items-center justify-start space-x-3 border rounded-lg px-4 py-3 cursor-pointer transition-all hover:bg-gray-50",
+                                    "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
                                     formData.actionStatus === "pending"
-                                        ? "border-red-500 bg-red-50/10 ring-1 ring-red-500"
+                                        ? "border-blue-500 bg-gray-50"
                                         : "border-gray-200"
                                 )}
                             >
-                                <RadioGroupItem value="pending" id="action-pending" className="text-red-600" />
-                                <span className={cn("font-medium", formData.actionStatus === "pending" ? "text-red-700" : "text-gray-700")}>Action Pending</span>
+                                <RadioGroupItem value="pending" id="action-pending" />
+                                <span className="text-xs font-medium">Action Pending</span>
                             </label>
 
                             <label
                                 className={cn(
-                                    "flex-1 flex items-center justify-start space-x-3 border rounded-lg px-4 py-3 cursor-pointer transition-all hover:bg-gray-50",
+                                    "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
                                     formData.actionStatus === "taken"
-                                        ? "border-green-500 bg-green-50/10 ring-1 ring-green-500"
+                                        ? "border-blue-500 bg-gray-50"
                                         : "border-gray-200"
                                 )}
                             >
-                                <RadioGroupItem value="taken" id="action-taken" className="text-green-600" />
-                                <span className={cn("font-medium", formData.actionStatus === "taken" ? "text-green-700" : "text-gray-700")}>Action Taken</span>
+                                <RadioGroupItem value="taken" id="action-taken" />
+                                <span className="text-xs font-medium">Action Taken</span>
                             </label>
                         </RadioGroup>
                     </div>
@@ -1376,22 +1459,27 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
                     <div className="space-y-1">
                         <Label>Add Remark</Label>
                         <textarea
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className={cn(
+                                "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                                formData.actionStatusRemark && "border-blue-500"
+                            )}
                             placeholder="Enter remark"
-                            value={formData.remark}
-                            onChange={(e) => handleChange("remark", e.target.value)}
+                            value={formData.actionStatusRemark}
+                            onChange={(e) => handleChange("actionStatusRemark", e.target.value)}
                         />
                     </div>
                 </section>
 
             </div >
 
-            <div className="p-6 border-t flex justify-end gap-2 bg-white sticky bottom-0 z-10 w-full rounded-b-xl border-gray-200">
-                <Button variant="outline" onClick={onCancel} type="button" className="px-6 h-10 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">Cancel</Button>
-                <Button type="button" onClick={handleSubmit} disabled={isPending} className="bg-[#0088FF] hover:bg-[#0069D9] px-6 h-10 rounded-lg text-white font-medium shadow-sm transition-colors">
-                    {isPending ? "Saving..." : (initialData ? "Update & Save" : "Save & Add Another")}
-                </Button>
-            </div>
+
+
+            <FormFooter
+                onCancel={onCancel}
+                onSave={handleSubmit}
+                isLoading={isPending}
+                saveLabel={initialData ? "Update & Save" : "Save & Add Another"}
+            />
         </div >
     );
 };

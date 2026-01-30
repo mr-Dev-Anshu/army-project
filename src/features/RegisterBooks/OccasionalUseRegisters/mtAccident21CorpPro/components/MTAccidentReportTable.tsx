@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { format } from "date-fns";
-import { MoreVertical, Edit, Trash2 } from "lucide-react";
+import { MoreVertical, Edit, Trash2, CarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -8,8 +8,13 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "react-toastify";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { useMTAccidentReport } from "../hooks/useMTAccidentReport";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface MTAccidentReportTableProps {
     data: any[];
@@ -19,34 +24,147 @@ interface MTAccidentReportTableProps {
 }
 
 const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentReportTableProps) => {
+    const { updateReport, isUpdating } = useMTAccidentReport();
+
     const [filters, setFilters] = useState<FilterState>({
         search: "",
         date: "",
         fromDate: "",
         toDate: "",
         unit: "",
+        fmn: "",
         sortOrder: "asc",
     });
 
-    const [deleteId, setDeleteId] = useState<string | null>(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [actionRemark, setActionRemark] = useState("");
+    const [remarkError, setRemarkError] = useState("");
+    const [modalState, setModalState] = useState<{
+        isOpen: boolean;
+        recordId: string | null;
+        type: "status" | "delete";
+        newStatus?: string;
+    }>({
+        isOpen: false,
+        recordId: null,
+        type: "status",
+    });
 
-    const handleDeleteClick = (id: string) => {
-        setDeleteId(id);
-        setIsDeleteModalOpen(true);
+    const handleStatusClick = (recordId: string, currentStatus: string) => {
+        setActionRemark("");
+        setRemarkError("");
+        setModalState({
+            isOpen: true,
+            recordId,
+            type: "status",
+            newStatus: currentStatus === "taken" ? "pending" : "taken",
+        });
     };
 
-    const handleConfirmDelete = () => {
-        if (deleteId) {
-            onDelete(deleteId);
-            setIsDeleteModalOpen(false);
-            setDeleteId(null);
+    const handleDeleteClick = (id: string) => {
+        setModalState({
+            isOpen: true,
+            recordId: id,
+            type: "delete",
+        });
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            // Explicitly construct the object to avoid issues with extra fields like _id, and ensure all fields are present
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: !currentAuth[field] // Toggle the specific field
+            };
+
+            await updateReport({
+                id: record._id,
+                data: {
+                    authentication: newAuth
+                } as any
+            });
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            // Optionally toast here if not handled by hook
+        }
+    };
+
+    const handleConfirm = async () => {
+        if (!modalState.recordId) return;
+
+        try {
+            if (modalState.type === "status") {
+                if (!actionRemark.trim()) {
+                    setRemarkError("Action remark is required.");
+                    toast.error("Please add action remark");
+                    return;
+                }
+
+                await updateReport({
+                    id: modalState.recordId,
+                    data: {
+                        actionStatus: modalState.newStatus as any, // casting as any to avoid strict type issues if interface mismatch
+                        actionStatusRemark: actionRemark,
+                    },
+                });
+                // Success toast handled in hook
+            } else if (modalState.type === "delete") {
+                onDelete(modalState.recordId);
+                // Modal closing handled below
+            }
+
+            setModalState((prev) => ({ ...prev, isOpen: false, recordId: null }));
+            setActionRemark("");
+            setRemarkError("");
+        } catch (error) {
+            console.error(error);
+            // Error toast handled in hook or here
         }
     };
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
     };
+
+    const getUnitFmn = (details: any) => {
+        const d = details?.individualDetails || {};
+        const type = details?.individualType;
+        let unit = "-";
+        let fmn = "-";
+
+        if (type === 'militaryPersonnel') {
+            unit = d.militaryPersonnelUnit || "-";
+            fmn = d.militaryPersonnelFmn || "-";
+        } else if (type === 'employee') {
+            unit = d.employeeUnit || "-";
+            fmn = d.employeeFmn || "-";
+        } else if (type === 'servantMaid') {
+            unit = d.maidUnit || "-";
+            fmn = d.maidFmn || "-";
+        }
+        // Add other types if they have Unit/FMN
+        return { unit, fmn };
+    };
+
+    const uniqueUnits = useMemo(() => {
+        const units = new Set<string>();
+        data.forEach(item => {
+            const { unit } = getUnitFmn(item.individualDetails);
+            if (unit && unit !== "-") units.add(unit);
+        });
+        return Array.from(units);
+    }, [data]);
+
+    const uniqueFmns = useMemo(() => {
+        const fmns = new Set<string>();
+        data.forEach(item => {
+            const { fmn } = getUnitFmn(item.individualDetails);
+            if (fmn && fmn !== "-") fmns.add(fmn);
+        });
+        return Array.from(fmns);
+    }, [data]);
 
     const filteredData = useMemo(() => {
         return data.filter((item) => {
@@ -73,6 +191,26 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                     if (toDate < itemDate) {
                         matchesDateRange = false;
                     }
+                }
+            }
+
+            if (filters.actionStatus && filters.actionStatus !== "All") {
+                if ((item.actionStatus || "pending").toLowerCase() !== filters.actionStatus.toLowerCase()) {
+                    return false;
+                }
+            }
+
+            if (filters.unit) {
+                const { unit } = getUnitFmn(item.individualDetails);
+                if (!unit.toLowerCase().includes(filters.unit.toLowerCase())) {
+                    return false;
+                }
+            }
+
+            if (filters.fmn) {
+                const { fmn } = getUnitFmn(item.individualDetails);
+                if (!fmn.toLowerCase().includes(filters.fmn.toLowerCase())) {
+                    return false;
                 }
             }
 
@@ -141,34 +279,13 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
         );
     };
 
-    const getUnitFmn = (details: any) => {
-        const d = details?.individualDetails || {};
-        const type = details?.individualType;
-        let unit = "-";
-        let fmn = "-";
 
-        if (type === 'militaryPersonnel') {
-            unit = d.militaryPersonnelUnit || "-";
-            fmn = d.militaryPersonnelFmn || "-";
-        } else if (type === 'employee') {
-            unit = d.employeeUnit || "-";
-            fmn = d.employeeFmn || "-";
-        } else if (type === 'servantMaid') {
-            unit = d.maidUnit || "-";
-            fmn = d.maidFmn || "-";
-        }
-        // Add other types if they have Unit/FMN
-        return { unit, fmn };
-    };
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="24" height="24" rx="12" fill="#E5E5E5" />
-                        <path d="M12 7V17M12 17L9 14M12 17L15 14" stroke="#404040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <div className="bg-[#F5F5F5] p-1 rounded-full"><CarIcon className="text-[#404040]" size="18" /></div>
                     <h2 className="text-lg font-semibold text-[#404040]">MT Accident Register: 21 CORPs PRO</h2>
                 </div>
                 <span className="text-sm font-medium text-[#0A0A0A]">{filteredData.length} Reports</span>
@@ -177,13 +294,16 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
             <ReportFilterBar
                 filters={filters}
                 onFilterChange={handleFilterChange}
-                showOffenceType={true}
+                showOffenceType={false}
                 showActionStatus={true}
                 showDate={true}
-                showDateRange={false}
-                showUnit={false}
+                showDateRange={true}
+                dateRangeLabel="Date range"
+                showUnit={true}
+                unitOptions={uniqueUnits}
                 showFilter={true}
-                showFmn={false}
+                showFmn={true}
+                fmnOptions={uniqueFmns}
                 showPlaceOfOffence={false}
                 onReset={() => setFilters({
                     search: "",
@@ -191,10 +311,12 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                     fromDate: "",
                     toDate: "",
                     unit: "",
+                    fmn: "",
+                    actionStatus: "",
                     sortOrder: "asc",
                 })}
                 onAddNew={onAddNew}
-                placeholder="Search by report no, unit, offence type..."
+                placeholder="Search by report no..."
             />
 
             <div className="rounded-md border border-gray-300 bg-white overflow-hidden shadow-sm">
@@ -243,6 +365,16 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]">
                                     Report no.
                                 </th>
+                                <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]">
+                                    Initials of MPCR NCO
+                                </th>
+                                <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]">
+                                    Initials of SM/SJCO
+                                </th>
+                                <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]">
+                                    Initials of 2IC
+                                </th>
+
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-32 align-top sticky top-0 z-40 bg-[#F5F5F5]">
                                     Action Status
                                 </th>
@@ -311,7 +443,7 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
 
                                             <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A] text-sm">
                                                 {/* Placeholder for Damage to Vehicle as we don't have it in schema yet */}
-                                                <span className="text-gray-400 italic">--</span>
+                                                {item.damageToVehicle || "-"}
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A] text-sm">
                                                 {item.accidentDetails?.causeOfAccident || "-"}
@@ -325,22 +457,43 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                                                 <span className="text-xs text-gray-600 block">00042/102/25</span>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-300">
-                                                <div className="flex items-center gap-2">
-                                                    {item.actionStatus === 'taken' ? (
-                                                        <>
-                                                            <div className="h-4 w-8 bg-green-500 rounded-full relative">
-                                                                <div className="absolute right-0.5 top-0.5 h-3 w-3 bg-white rounded-full"></div>
-                                                            </div>
-                                                            <span className="text-xs font-medium text-green-700">Taken</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <div className="h-4 w-8 bg-red-200 rounded-full relative">
-                                                                <div className="absolute left-0.5 top-0.5 h-3 w-3 bg-red-500 rounded-full"></div>
-                                                            </div>
-                                                            <span className="text-xs font-medium text-red-700">Pending</span>
-                                                        </>
-                                                    )}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4 align-top border-r border-gray-300">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4 align-top border-r border-gray-300">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        checked={item.authentication?.initialsOf2IC || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4 align-top border-r border-gray-300">
+                                                <div
+                                                    className="flex flex-col items-center gap-1 cursor-pointer"
+                                                    title={item.actionStatusRemark || "No remark"}
+                                                    onClick={() => handleStatusClick(item._id, item.actionStatus)}
+                                                >
+                                                    <div className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${item.actionStatus === "taken" ? "bg-green-500" : "bg-red-500"
+                                                        }`}>
+                                                        <div className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${item.actionStatus === "taken" ? "translate-x-5" : "translate-x-0"
+                                                            }`}></div>
+                                                    </div>
+                                                    <span className="text-[10px] text-gray-500 font-medium uppercase">
+                                                        {item.actionStatus === "taken" ? "Taken" : "Pending"}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-2 py-4 align-middle text-center sticky right-0 z-30 bg-white group-hover:bg-gray-50">
@@ -379,15 +532,41 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
             </div>
 
             <ConfirmationModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onConfirm={handleConfirmDelete}
-                title="Delete Entry"
-                message="Are you sure you want to delete this report? This action cannot be undone."
-                confirmLabel="Delete"
+                isOpen={modalState.isOpen}
+                onClose={() => setModalState((prev) => ({ ...prev, isOpen: false }))}
+                onConfirm={handleConfirm}
+                title={modalState.type === "status" ? "Change Action Status" : "Delete Entry"}
+                message={
+                    modalState.type === "status"
+                        ? `Are you sure you want to change the status to ${modalState.newStatus === "taken" ? "Taken" : "Pending"}?`
+                        : "Are you sure you want to delete this report? This action cannot be undone."
+                }
+                confirmLabel={modalState.type === "status" ? "Yes, Change" : "Delete"}
                 cancelLabel="Cancel"
-                variant="danger"
-            />
+                variant={modalState.type === "status" ? "info" : "danger"}
+                isProcessing={isUpdating}
+            >
+                {modalState.type === "status" && (
+                    <div className="flex flex-col gap-2 mt-2">
+                        <Label htmlFor="remark">
+                            Action Remark <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            id="remark"
+                            placeholder="Enter reason for status change..."
+                            value={actionRemark}
+                            onChange={(e) => {
+                                setActionRemark(e.target.value);
+                                if (e.target.value.trim()) setRemarkError("");
+                            }}
+                            className={remarkError ? "border-red-500 focus-visible:ring-red-500" : ""}
+                        />
+                        {remarkError && (
+                            <span className="text-xs text-red-500 mt-1">{remarkError}</span>
+                        )}
+                    </div>
+                )}
+            </ConfirmationModal>
         </div>
     );
 };

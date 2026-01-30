@@ -53,6 +53,14 @@ const firMactSchema = new mongoose.Schema(
         firPoliceStation: String,
     }, { _id: false }
 );
+const authenticationSchema = new mongoose.Schema({
+    initialsOfMPCRNCO: { type: Boolean, default: false },
+    initialsOfSMSJCO: { type: Boolean, default: false },
+    initialsOf2IC: { type: Boolean, default: false },
+    initialsMPCPNCO: String,
+    initialsQMSJCO: String,
+    initials2IC: String,
+}, { _id: false });
 const mtAccidentReportSchema = new mongoose.Schema(
     {
         individualDetails: {
@@ -74,7 +82,8 @@ const mtAccidentReportSchema = new mongoose.Schema(
             default: "pending"
         },
         actionStatusRemark: String,
-        remark: String,
+        damageToVehicle: String,
+        authentication: { type: authenticationSchema },
         customFields: {
             type: mongoose.Schema.Types.Mixed,
             default: {}

@@ -42,14 +42,24 @@ const firMactSchema = Joi.object({
     firPoliceStation: Joi.string().allow(null, "").optional(),
 });
 
+const authenticationSchema = Joi.object({
+    initialsOfMPCRNCO: Joi.boolean().default(false),
+    initialsOfSMSJCO: Joi.boolean().default(false),
+    initialsOf2IC: Joi.boolean().default(false),
+    initialsMPCPNCO: Joi.string().allow(null, "").optional(),
+    initialsQMSJCO: Joi.string().allow(null, "").optional(),
+    initials2IC: Joi.string().allow(null, "").optional(),
+});
+
 export const createMTAccidentReportSchema = Joi.object({
     individualDetails: individualSchema.optional(),
     accidentDetails: accidentSchema.optional(),
     vehicleDetails: vehicleSchema.optional(),
     casualtyDetails: casualtySchema.optional(),
     firMactDetails: firMactSchema.optional(),
+    authentication: authenticationSchema.optional(),
     actionStatus: Joi.string().valid("pending", "taken").default("pending"),
     actionStatusRemark: Joi.string().allow(null, "").optional(),
-    remark: Joi.string().allow(null, "").optional(),
+    damageToVehicle: Joi.string().allow(null, "").optional(),
     customFields: Joi.object().optional().unknown(true),
 }).unknown(true);
