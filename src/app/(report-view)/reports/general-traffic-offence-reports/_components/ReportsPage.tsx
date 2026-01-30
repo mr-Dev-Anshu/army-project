@@ -508,7 +508,29 @@ export default function ReportsPage({
           (a: number, g: any) => a + g.offences.length,
           0
         )}
-        onDownload={handleExcelDownload}
+        onDownload={() => console.log('Download clicked')}
+        reportData={activeGroups.flatMap(group => 
+          group.offences.map((offence: any) => ({
+            _id: offence._id,
+            reportNo: offence.reportId || offence.reportNumber,
+            date: offence.offenceOccurenceDetails?.timeOfOffence ? 
+              new Date(offence.offenceOccurenceDetails.timeOfOffence).toLocaleDateString('en-GB') : 'N/A',
+            time: offence.offenceOccurenceDetails?.timeOfOffence ? 
+              new Date(offence.offenceOccurenceDetails.timeOfOffence).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A',
+            driverDetails: {
+              name: offence.offenders?.[0]?.offenderDetails?.name || 'N/A',
+              rank: offence.offenders?.[0]?.offenderDetails?.rank || offence.offenders?.[0]?.offenderDetails?.['Select Rank'] || 'N/A',
+              armyNumber: offence.offenders?.[0]?.offenderDetails?.armyNumber || 'N/A'
+            },
+            mpName: offence.onDutyDetailsMPReporting?.nameReportingMP || 'N/A',
+            unit: offence.offenders?.[0]?.offenderDetails?.unit || offence.onDutyDetailsMPReporting?.unit || 'N/A',
+            fmn: offence.offenders?.[0]?.offenderDetails?.fmn || 'N/A',
+            offenceBrief: offence.offenceOccurenceDetails?.description || 'N/A',
+            offenceType: group.offenceType || group._id || 'N/A',
+            actionStatus: offence.actionStatus || false
+          }))
+        )}
+        groupBy="offenceType"
       />
 
       {/* FILTER BAR */}
@@ -624,7 +646,7 @@ export default function ReportsPage({
 
 /* ================= REPORT MAPPER ================= */
 
-function mapToReportProps(offence: any): MilitaryPoliceReportProps {
+export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const primary = offence.offenders?.[0]?.offenderDetails || {};
   const secondary = offence.offenders?.[1]?.offenderDetails;
 

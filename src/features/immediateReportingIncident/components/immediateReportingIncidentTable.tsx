@@ -376,7 +376,25 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
             <ReportPageHeader
                 title="(Initial Report) Immediate Reporting of Incident"
                 reportCount={filteredData.length}
-                onDownload={() => window.print()}
+                onDownload={() => console.log('Download clicked')}
+                reportData={filteredData.map((item, index) => ({
+                    _id: item._id,
+                    reportNo: item._id || `IRI-${index + 1}`,
+                    date: item.incidentDate ? format(new Date(item.incidentDate), 'dd/MM/yyyy') : 'N/A',
+                    time: item.incidentTime || 'N/A',
+                    driverDetails: {
+                        name: item.individuals?.[0]?.name || 'N/A',
+                        rank: item.individuals?.[0]?.rank || 'N/A',
+                        armyNumber: item.individuals?.[0]?.armyNo || 'N/A'
+                    },
+                    mpName: 'N/A', // Not available in this data structure
+                    unit: item.individuals?.[0]?.unit || 'N/A',
+                    fmn: item.individuals?.[0]?.fmn || 'N/A',
+                    offenceBrief: item.incidentBrief || 'N/A',
+                    offenceType: 'Incident Report',
+                    actionStatus: false // Default for incident reports
+                }))}
+                groupBy="offenceType"
                 breadcrumbItems={[
                     { label: "Reports & Analysis", href: "/" },
                     { label: "All Reports", href: "/reports" },

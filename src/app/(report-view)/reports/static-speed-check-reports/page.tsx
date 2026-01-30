@@ -456,6 +456,9 @@ export default function StaticSpeedCheckReportsPage() {
       <ReportPageHeader
         title="Static Speed Check Reports"
         reportCount={processedData.length}
+        onDownload={() => console.log('Download clicked')}
+        reportData={processedData}
+        groupBy="unit"
       />
 
       <ReportFilterBar

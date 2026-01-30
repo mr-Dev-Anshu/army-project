@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Printer, PanelLeft } from "lucide-react";
 import Link from "next/link";
+import { exportToExcel } from "@/utils/excelExport";
 
 export type BreadcrumbItem = string | { label: string; href?: string };
 
@@ -10,6 +11,8 @@ interface ReportPageHeaderProps {
   reportCount?: number;
   onDownload?: () => void;
   breadcrumbItems?: BreadcrumbItem[];
+  reportData?: any[];
+  groupBy?: string;
 }
 
 export default function ReportPageHeader({
@@ -20,7 +23,15 @@ export default function ReportPageHeader({
     { label: "Reports & Analysis", href: "/" },
     { label: "All Reports", href: "/reports" },
   ],
+  reportData = [],
+  groupBy,
 }: ReportPageHeaderProps) {
+  const handleDownload = () => {
+    if (reportData.length > 0) {
+      exportToExcel(reportData, title.toLowerCase().replace(/\s+/g, '-'), groupBy);
+    }
+    onDownload?.();
+  };
   return (
     <>
       <div className="bg-white border-b border-gray-300 px-4 py-3 flex items-center justify-between mb-7">
@@ -64,7 +75,7 @@ export default function ReportPageHeader({
         {onDownload && (
           <Button
             className="bg-[#0A0A0A] text-white hover:bg-gray-800 gap-2 h-9 px-4 text-xs font-medium"
-            onClick={onDownload}
+            onClick={handleDownload}
           >
             Download & Print Report
             <Printer className="w-3.5 h-3.5" />
