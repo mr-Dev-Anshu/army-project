@@ -417,8 +417,15 @@ export default function StaticSpeedCheckReportsPage() {
   };
 
   const handlePrintReport = (item: any) => {
-    setViewingReport(item);
-    setShouldAutoPrint(true);
+    const id = item._id;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+    
+    // Open print page in new window
+    const printUrl = `/print/static-speed-report/${id}`;
+    window.open(printUrl, '_blank');
   };
 
   if (isCreating) {

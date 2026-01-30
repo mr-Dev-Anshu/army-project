@@ -1,7 +1,9 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect } from 'react';
 import { notFound } from 'next/navigation';
-import { connectDB } from "@/lib/db/mongodb";
-import { staticSpeedCheckRecordRepo } from "@/reposetories/staticSpeedCheckRecord";
+import { Loader2 } from "lucide-react";
+import { useGetStaticSpeedRecordById } from "@/features/staticSpeed/hooks";
 import StaticSpeedReport, { StaticSpeedReportProps } from "@/components/reports/StaticSpeedReport";
 
 function mapToReportProps(raw: any): StaticSpeedReportProps {
@@ -72,27 +74,42 @@ function mapToReportProps(raw: any): StaticSpeedReportProps {
     };
 }
 
-export default async function PrintStaticSpeedReportPage(props: { params: Promise<{ id: string }> }) {
-    await connectDB();
-    const params = await props.params;
-    const { id } = params;
+export default function PrintStaticSpeedReportPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params);
+    const { data, isLoading } = useGetStaticSpeedRecordById(id);
 
-    let record;
-    try {
-        record = await staticSpeedCheckRecordRepo.getById(id);
-    } catch (e) {
-        console.error("Error fetching static speed report:", e);
+    useEffect(() => {
+        if (data) {
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [data]);
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+        );
     }
 
-    if (!record) {
-        return notFound();
+    if (!data) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center text-red-500">
+                Report not found
+            </div>
+        );
     }
 
-    const reportProps = mapToReportProps(record);
+    const reportProps = mapToReportProps(data);
 
     return (
-        <div className="bg-white">
-            <StaticSpeedReport {...reportProps} />
+        <div id="print-container" className="min-h-screen bg-white p-0">
+            <div id="report-content">
+                <StaticSpeedReport {...reportProps} />
+            </div>
         </div>
     );
 }

@@ -406,7 +406,18 @@ export default function ReportsPage({
   };
 
   const handlePrintReport = (offence: any) => {
-    setViewingReport(offence);
+    const id = offence._id;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+    
+    // Determine print URL based on vehicle involvement
+    const printUrl = offence.isVehicleInvolved 
+      ? `/print/general-traffic-offence-reports/vehicle-involved/${id}`
+      : `/print/general-traffic-offence-reports/no-vehicle-involved/${id}`;
+    
+    window.open(printUrl, '_blank');
   };
 
   /* ================= EXCEL EXPORT HANDLER ================= */
@@ -624,7 +635,7 @@ export default function ReportsPage({
 
 /* ================= REPORT MAPPER ================= */
 
-function mapToReportProps(offence: any): MilitaryPoliceReportProps {
+export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const primary = offence.offenders?.[0]?.offenderDetails || {};
   const secondary = offence.offenders?.[1]?.offenderDetails;
 

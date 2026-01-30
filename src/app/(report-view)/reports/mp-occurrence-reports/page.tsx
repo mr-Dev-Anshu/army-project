@@ -571,8 +571,15 @@ export default function MpOccurrenceReportsPage() {
   };
 
   const handlePrintReport = (item: any) => {
-    setViewingReport(item);
-    setShouldAutoPrint(true);
+    const id = item._id;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+    
+    // Open print page in new window
+    const printUrl = `/print/mp-occurrence-report/${id}`;
+    window.open(printUrl, '_blank');
   };
 
   const distinctReportsCount = processedData.length;
