@@ -385,8 +385,8 @@ export default function MpOccurrenceReportsPage() {
         brief: occurrence?.description,
         documents: item?.documents,
         reportNumber: item?.reportDetails?.reportNumber,
-        actionStatus: item?.actionStatus,
-        originalData: item // Store original data for report view
+        actionStatus: item?.actionStatus, // status action
+        originalData: item // Store original data for report view 
       };
     });
   }, [data, filters]);
