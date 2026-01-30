@@ -1,6 +1,6 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 
-export const exportToExcel = (data: any[], filename: string = 'report', groupBy?: string) => {
+export const exportToExcel = (data: any[], filename: string = 'report', groupBy?: string, title?: string) => {
   const workbook = XLSX.utils.book_new();
   
   if (!data || data.length === 0) {
@@ -15,20 +15,36 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
   // Create worksheet data array
   const wsData: any[][] = [];
   
-  // Add main title with date
-  const currentDate = new Date().toLocaleDateString('en-GB');
-  wsData.push(['GENERAL AND TRAFFIC OFFENCE REPORT', '', '', '', '', '', '', `Generated: ${currentDate}`]);
+  // Add main title (centered)
+  const reportTitle = title || 'GENERAL AND TRAFFIC OFFENCE REPORT';
+  wsData.push([reportTitle]);
   wsData.push([]); // Empty row
   
   // Add summary row
   const totalRecords = data.length;
   const pendingTotal = data.filter(item => !item.actionStatus).length;
   const takenTotal = totalRecords - pendingTotal;
-  wsData.push(['SUMMARY:', '', '', `Total Records: ${totalRecords}`, `Pending: ${pendingTotal}`, `Taken: ${takenTotal}`, '', '']);
+  wsData.push(['SUMMARY:', '', '', '', '', '', '', `Total Records: ${totalRecords}`, `Pending: ${pendingTotal}`, `Taken: ${takenTotal}`]);
   wsData.push([]); // Empty row
   
-  // Add table headers
-  wsData.push(['Sr No.', 'Name & Details', 'Unit', 'FMN', 'Report No.', 'Date', 'Time', 'Offence Type', 'Description', 'Status']);
+  // Add table headers based on report type
+  let headers: string[];
+  if (title && title.includes('STATIC SPEED')) {
+    headers = ['Sr No.', 'Place of Offence', 'Particulars of Driver/Rider', 'Unit', 'FMN', 'Report Number', 'Date & Time', 'Offence Brief', 'Veh. BA No. / Make & Take', 'Auth. Speed', 'Actual Speed', 'Over Speed', 'Particulars of Co-Driver/Rider', 'Action Status'];
+  } else if (title && title.includes('MP OCCURRENCE')) {
+    headers = ['Sr no.', 'Particulars of Individual/Victim', 'Unit', 'FMN', 'Report Number', 'Date & Time', 'Offence Type', 'Brief of Occurrence', 'Action Status	'];
+  } else if (title && title.includes('GENERAL') && title.includes('TRAFFIC')) {
+    if (groupBy) {
+      // Grouped format
+      headers = ['Sr no.', 'Particulars of Indls.', 'Unit', 'FMN', 'Report no.', 'Date', 'Time', 'Type of Offence','Offence Description', 'Action Status'];
+    } else {
+      // Non-grouped format
+      headers = ['Sr no.', 'Particulars of Driver/Rider', 'Unit', 'FMN', 'Report Number', 'Date & Time', 'Offence Type /Brief', 'Veh. BA No. , Make & Take', 'Particulars of Co-Driver/Rider', 'Action Status'];
+    }
+  } else {
+    headers = ['Sr No.', 'Name & Details', 'Unit', 'FMN', 'Report No.', 'Date', 'Time', 'Offence Type', 'Description', 'Status'];
+  }
+  wsData.push(headers);
   
   if (groupBy && data.length > 0) {
     // Group data by specified field
@@ -84,7 +100,7 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
                  item.victimDetails?.name || 
                  item.assignedMP?.name || 
                  item.name || 
-                 'N/A';
+                 '';
         };
         
         const getRank = () => {
@@ -108,7 +124,7 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
           return item.mpName || 
                  item.reportingMPName || 
                  item.assignedMP?.name || 
-                 'N/A';
+                 '';
         };
         
         const getUnit = () => {
@@ -116,7 +132,7 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
                  item.driverDetails?.unit || 
                  item.victimDetails?.unit || 
                  item.assignedMP?.unit || 
-                 'N/A';
+                 '';
         };
         
         const getFMN = () => {
@@ -124,24 +140,24 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
                  item.driverDetails?.fmn || 
                  item.victimDetails?.fmn || 
                  item.assignedMP?.fmn || 
-                 'N/A';
+                 '';
         };
         
         const getReportNo = () => {
           return item.reportNo || 
                  item.reportNumber || 
                  item._id || 
-                 'N/A';
+                 '';
         };
         
         const getDate = () => {
           return item.date || 
-                 (item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB') : 'N/A');
+                 (item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB') : '');
         };
         
         const getTime = () => {
           return item.time || 
-                 (item.createdAt ? new Date(item.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A');
+                 (item.createdAt ? new Date(item.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : '');
         };
         
         const getDescription = () => {
@@ -149,10 +165,12 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
                  item.brief || 
                  item.description || 
                  item.offenceDescription || 
-                 'N/A';
+                 '';
         };
         
-        const nameDetails = `${getName()}\n${getRank()} ${getArmyNumber()}\nMP: ${getMPName()}`;
+        const nameDetails = getName() || getRank() || getArmyNumber() || getMPName() ? 
+          `${getName()}\n${getRank()} ${getArmyNumber()}\nMP: ${getMPName()}`.replace(/\n\s*\n/g, '\n').replace(/MP: $/g, '').trim() : 
+          '';
         
         wsData.push([
           serialNo,
@@ -173,93 +191,162 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
   } else {
     // Simple table without grouping
     data.forEach((item, index) => {
-      const getName = () => {
-        return item.driverDetails?.name || 
-               item.victimDetails?.name || 
-               item.assignedMP?.name || 
-               item.name || 
-               'N/A';
-      };
-      
-      const getRank = () => {
-        return item.driverDetails?.rank || 
-               item.victimDetails?.rank || 
-               item.assignedMP?.rank || 
-               item.rank || 
-               '';
-      };
-      
-      const getArmyNumber = () => {
-        return item.driverDetails?.armyNumber || 
-               item.victimDetails?.armyNumber || 
-               item.assignedMP?.armyNumber || 
-               item.armyNumber || 
-               item.reportNumber || 
-               '';
-      };
-      
-      const getMPName = () => {
-        return item.mpName || 
-               item.reportingMPName || 
-               item.assignedMP?.name || 
-               'N/A';
-      };
-      
-      const nameDetails = `${getName()}\n${getRank()} ${getArmyNumber()}\nMP: ${getMPName()}`;
-      
-      wsData.push([
-        index + 1,
-        nameDetails,
-        item.unit || item.driverDetails?.unit || item.victimDetails?.unit || item.assignedMP?.unit || 'N/A',
-        item.fmn || item.driverDetails?.fmn || item.victimDetails?.fmn || item.assignedMP?.fmn || 'N/A',
-        item.reportNo || item.reportNumber || item._id || 'N/A',
-        item.date || (item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB') : 'N/A'),
-        item.time || (item.createdAt ? new Date(item.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'),
-        item.offenceType || item.offenceBrief || item.brief || 'N/A',
-        item.offenceBrief || item.brief || item.description || item.offenceDescription || 'N/A',
-        item.actionStatus ? 'Taken' : 'Pending'
-      ]);
+      if (title && title.includes('STATIC SPEED')) {
+        // Static Speed Check Report format
+        const driverDetails = `Aadhar No. ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nName: ${item.driverDetails?.name || item.name || ''}\nArmy no.: ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nRank: ${item.driverDetails?.rank || item.rank || ''}\nMP Name: ${item.mpName || ''}`;
+        const coDriverDetails = `Aadhar No. ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nName: ${item.driverDetails?.name || item.name || ''}\nArmy no.: ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nRank: ${item.driverDetails?.rank || item.rank || ''}\nMP Name: ${item.mpName || ''}`;
+        
+        wsData.push([
+          index + 1, // Sr No.
+          item.placeOfOffence || '', // Place of Offence
+          driverDetails, // Particulars of Driver/Rider
+          item.unit || item.driverDetails?.unit || '', // Unit
+          item.fmn || item.driverDetails?.fmn || '', // FMN
+          item.reportNo || item.reportNumber || '', // Report Number
+          `${item.date || ''} ${item.time || ''}`, // Date & Time
+          item.offenceBrief || item.brief || '', // Offence Brief
+          item.vehicleNo || '', // Veh. BA No. / Make & Take
+          item.authSpeed || '', // Auth. Speed
+          item.actualSpeed || '', // Actual Speed
+          item.overSpeed || '', // Over Speed
+          coDriverDetails, // Particulars of Co-Driver/Rider
+          item.actionStatus ? 'Taken' : 'Pending' // Action Status
+        ]);
+      } else if (title && title.includes('MP OCCURRENCE')) {
+        // MP Occurrence Report format - matching the exact headers
+        const mpDetails = `Army no.: ${item.assignedMP?.armyNumber || item.reportingMPName || ''}\nRank: ${item.assignedMP?.rank || ''}\nName: ${item.assignedMP?.name || item.reportingMPName || ''}\nUnit: ${item.assignedMP?.unit || item.unit || ''}\nFMN: ${item.assignedMP?.fmn || item.fmn || ''}`;
+        const victimDetails = `Army no.: ${item.victimDetails?.armyNumber || item.driverDetails?.armyNumber || ''}\nRank: ${item.victimDetails?.rank || item.driverDetails?.rank || ''}\nName: ${item.victimDetails?.name || item.driverDetails?.name || ''}\nUnit: ${item.victimDetails?.unit || item.driverDetails?.unit || item.unit || ''}`;
+        
+        wsData.push([
+          index + 1, // Sr no.
+          `${item.date || ''} ${item.time || ''}`, // Date & Time of Occur.
+          item.placeOfOccurrence || item.placeOfOffence || '', // Place of Occurrence
+          mpDetails, // Assigned MP Particulars
+          victimDetails, // Particulars of Individual/Victim
+          item.vehicleNo || '', // Veh. BA No. / Make & Take
+          item.offenceType || item.offenceBrief || '', // Offence Type
+          item.brief || item.offenceBrief || item.description || '', // Brief of Occurrence
+          item.documents?.join(', ') || '', // List of Attached Documents & Statements
+          item.reportNumber || item.reportNo || '', // Report no.
+          item.remarks || '', // Remark
+          item.actionStatus ? 'Taken' : 'Pending' // Action Status
+        ]);
+      } else if (title && title.includes('GENERAL') && title.includes('TRAFFIC')) {
+        if (groupBy) {
+          // Grouped format
+          const individualDetails = `Aadhar No. ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nName: ${item.driverDetails?.name || item.name || ''}\nArmy no.: ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nRank: ${item.driverDetails?.rank || item.rank || ''}\nMP Name: ${item.mpName || ''}`;
+          
+          wsData.push([
+            index + 1,
+            individualDetails,
+            item.unit || item.driverDetails?.unit || '',
+            item.fmn || item.driverDetails?.fmn || '',
+            item.reportNo || item.reportNumber || '',
+            `${item.date || ''} ${item.time || ''}`,
+            item.offenceBrief || item.brief || item.description || '',
+            item.actionStatus ? 'Taken' : 'Pending'
+          ]);
+        } else {
+          // Non-grouped format
+          const driverDetails = `Aadhar No. ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nName: ${item.driverDetails?.name || item.name || ''}\nArmy no.: ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nRank: ${item.driverDetails?.rank || item.rank || ''}\nMP Name: ${item.mpName || ''}`;
+          const coDriverDetails = `Aadhar No. ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nName: ${item.driverDetails?.name || item.name || ''}\nArmy no.: ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nRank: ${item.driverDetails?.rank || item.rank || ''}\nMP Name: ${item.mpName || ''}`;
+          
+          wsData.push([
+            index + 1,
+            driverDetails,
+            item.unit || item.driverDetails?.unit || '',
+            item.fmn || item.driverDetails?.fmn || '',
+            item.reportNo || item.reportNumber || '',
+            `${item.date || ''} ${item.time || ''}`,
+            item.offenceType || item.offenceBrief || item.brief || '',
+            item.vehicleNo || '',
+            coDriverDetails,
+            item.actionStatus ? 'Taken' : 'Pending'
+          ]);
+        }
+      } else {
+        // Default format
+        const nameDetails = `${item.driverDetails?.name || item.name || ''}\n${item.driverDetails?.rank || item.rank || ''} ${item.driverDetails?.armyNumber || item.armyNumber || ''}\nMP: ${item.mpName || ''}`.replace(/\n\s*\n/g, '\n').replace(/MP: $/g, '').trim();
+        
+        wsData.push([
+          index + 1,
+          nameDetails,
+          item.unit || item.driverDetails?.unit || '',
+          item.fmn || item.driverDetails?.fmn || '',
+          item.reportNo || item.reportNumber || '',
+          item.date || '',
+          item.time || '',
+          item.offenceType || item.offenceBrief || item.brief || '',
+          item.offenceBrief || item.brief || item.description || '',
+          item.actionStatus ? 'Taken' : 'Pending'
+        ]);
+      }
     });
   }
   
   // Create worksheet from array
   const worksheet = XLSX.utils.aoa_to_sheet(wsData);
   
-  // Set column widths for better readability
-  worksheet['!cols'] = [
-    { width: 8 },   // Sr No.
-    { width: 25 },  // Name & Details
-    { width: 15 },  // Unit
-    { width: 12 },  // FMN
-    { width: 15 },  // Report No.
-    { width: 12 },  // Date
-    { width: 8 },   // Time
-    { width: 20 },  // Offence Type
-    { width: 35 },  // Description
-    { width: 10 }   // Status
-  ];
+  // Calculate optimal column widths based on content
+  const calculateColumnWidths = (data: any[][], headers: string[]) => {
+    const widths = headers.map(header => Math.max(header.length, 8)); // Start with header length, minimum 8
+    
+    data.forEach(row => {
+      row.forEach((cell, colIndex) => {
+        if (cell && colIndex < widths.length) {
+          const cellStr = String(cell);
+          // For multi-line content, use the longest line
+          const lines = cellStr.split('\n');
+          const maxLineLength = Math.max(...lines.map(line => line.length));
+          // Cap maximum width at 50 characters for readability
+          widths[colIndex] = Math.max(widths[colIndex], Math.min(maxLineLength, 50));
+        }
+      });
+    });
+    
+    return widths.map(width => ({ width }));
+  };
   
-  // Set row heights
+  // Set dynamic column widths
+  worksheet['!cols'] = calculateColumnWidths(wsData.slice(5), headers); // Skip title, empty, summary, empty, headers
+  
+  // Set row heights with better spacing for different report types
   worksheet['!rows'] = wsData.map((row, index) => {
-    if (index === 0) return { hpt: 25 }; // Title row
-    if (index === 2) return { hpt: 20 }; // Summary row
-    if (index === 4) return { hpt: 20 }; // Header row
-    if (row[1] && typeof row[1] === 'string' && row[1].includes('\n')) {
-      return { hpt: 60 }; // Multi-line content
+    if (index === 0) return { hpt: 40 }; // Title row - larger height
+    if (index === 2) return { hpt: 30 }; // Summary row
+    if (index === 4) return { hpt: 30 }; // Header row - larger height
+    
+    // Check for multi-line content in different columns based on report type
+    if (title && title.includes('STATIC SPEED')) {
+      // Static Speed has multi-line content in columns 2 and 12 (Particulars)
+      if (row[2] && typeof row[2] === 'string' && row[2].includes('\n')) {
+        return { hpt: 100 }; // Extra space for Static Speed particulars
+      }
+    } else if (title && title.includes('MP OCCURRENCE')) {
+      // MP Occurrence has multi-line content in columns 3 and 4
+      if ((row[3] && typeof row[3] === 'string' && row[3].includes('\n')) || 
+          (row[4] && typeof row[4] === 'string' && row[4].includes('\n'))) {
+        return { hpt: 90 }; // Space for MP and victim details
+      }
+    } else if (title && title.includes('GENERAL') && title.includes('TRAFFIC')) {
+      // General & Traffic has multi-line content in particulars columns
+      if (row[1] && typeof row[1] === 'string' && row[1].includes('\n')) {
+        return { hpt: 85 }; // Space for individual details
+      }
     }
-    return { hpt: 18 };
+    
+    return { hpt: 25 }; // Default row height
   });
   
   // Apply styles
   const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
   
-  // Style title row (row 0)
-  for (let col = 0; col <= 9; col++) {
+  // Style title row (row 0) - centered and underlined
+  for (let col = 0; col <= 13; col++) {
     const cell = XLSX.utils.encode_cell({ r: 0, c: col });
     if (worksheet[cell]) {
       worksheet[cell].s = {
-        font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "2E7D32" } },
+        font: { bold: true, sz: 18, underline: true },
         alignment: { horizontal: 'center', vertical: 'center' },
         border: {
           top: { style: 'thick' },
@@ -276,8 +363,7 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
     const cell = XLSX.utils.encode_cell({ r: 2, c: col });
     if (worksheet[cell]) {
       worksheet[cell].s = {
-        font: { bold: true, sz: 11 },
-        fill: { fgColor: { rgb: "E8F5E8" } },
+        font: { bold: true, sz: 10 },
         alignment: { horizontal: 'center', vertical: 'center' },
         border: {
           top: { style: 'thin' },
@@ -290,12 +376,11 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
   }
   
   // Style headers (row 4)
-  for (let col = 0; col <= 9; col++) {
+  for (let col = 0; col <= headers.length - 1; col++) {
     const cell = XLSX.utils.encode_cell({ r: 4, c: col });
     if (worksheet[cell]) {
       worksheet[cell].s = {
-        font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "1976D2" } },
+        font: { bold: true, sz: 11 },
         alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
         border: {
           top: { style: 'medium' },
@@ -317,8 +402,7 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
         // Check if it's a group header row
         if (typeof cellValue === 'string' && cellValue === cellValue.toUpperCase() && cellValue.length > 3) {
           worksheet[cellRef].s = {
-            font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "FF9800" } },
+            font: { bold: true, sz: 11 },
             alignment: { horizontal: 'left', vertical: 'center' },
             border: {
               top: { style: 'medium' },
@@ -345,10 +429,10 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
     }
   }
   
-  // Merge cells
+  // Merge cells for title (center it across all columns)
   worksheet['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, // Title
-    { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } }  // Summary label
+    { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }, // Title centered across all columns
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } }  // Summary label
   ];
   
   // Add group header merges

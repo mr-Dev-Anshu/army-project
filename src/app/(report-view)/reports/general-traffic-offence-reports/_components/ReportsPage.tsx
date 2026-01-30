@@ -531,6 +531,7 @@ export default function ReportsPage({
           }))
         )}
         groupBy="offenceType"
+        excelTitle="GENERAL AND TRAFFIC OFFENCE REPORT"
       />
 
       {/* FILTER BAR */}

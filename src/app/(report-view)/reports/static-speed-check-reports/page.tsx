@@ -458,7 +458,7 @@ export default function StaticSpeedCheckReportsPage() {
         reportCount={processedData.length}
         onDownload={() => console.log('Download clicked')}
         reportData={processedData}
-        groupBy="unit"
+        excelTitle="STATIC SPEED CHECK REPORT"
       />
 
       <ReportFilterBar

@@ -395,6 +395,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                     actionStatus: false // Default for incident reports
                 }))}
                 groupBy="offenceType"
+                excelTitle="IMMEDIATE REPORTING OF INCIDENT"
                 breadcrumbItems={[
                     { label: "Reports & Analysis", href: "/" },
                     { label: "All Reports", href: "/reports" },

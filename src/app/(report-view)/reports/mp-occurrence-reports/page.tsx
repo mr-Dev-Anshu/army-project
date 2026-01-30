@@ -634,6 +634,7 @@ export default function MpOccurrenceReportsPage() {
         onDownload={() => console.log('Download clicked')}
         reportData={processedData}
         groupBy="offenceType"
+        excelTitle="MP OCCURRENCE REPORTS"
       />
 
       <ReportFilterBar

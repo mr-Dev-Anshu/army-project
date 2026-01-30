@@ -13,6 +13,7 @@ interface ReportPageHeaderProps {
   breadcrumbItems?: BreadcrumbItem[];
   reportData?: any[];
   groupBy?: string;
+  excelTitle?: string;
 }
 
 export default function ReportPageHeader({
@@ -25,10 +26,11 @@ export default function ReportPageHeader({
   ],
   reportData = [],
   groupBy,
+  excelTitle,
 }: ReportPageHeaderProps) {
   const handleDownload = () => {
     if (reportData.length > 0) {
-      exportToExcel(reportData, title.toLowerCase().replace(/\s+/g, '-'), groupBy);
+      exportToExcel(reportData, title.toLowerCase().replace(/\s+/g, '-'), groupBy, excelTitle || title.toUpperCase());
     }
     onDownload?.();
   };
