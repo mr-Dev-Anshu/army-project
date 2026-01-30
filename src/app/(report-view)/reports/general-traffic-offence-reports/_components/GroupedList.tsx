@@ -24,6 +24,7 @@ export default function GroupedList({ data, isVehicleInvolved, onView, onPrint, 
   const handleToggle = (index: number) => {
     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
   };
+  
 
   return (
     <div className="divide-y divide-gray-100">

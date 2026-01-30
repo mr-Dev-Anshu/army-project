@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useForm, initialState } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
-import { useCreateTrafficOffence, useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
+import {
+  useCreateTrafficOffence,
+  useUpdateTrafficOffence,
+} from "@/features/generalTraficOffence/hooks";
 import { toast } from "react-toastify";
 
 import Step1Particulars from "./steps/Step1Particulars";
@@ -22,16 +25,17 @@ import { useEffect } from "react";
 
 export default function MultiStepForm({
   onCancel,
-  existingOffence
+  existingOffence,
 }: {
   onCancel?: () => void;
   existingOffence?: any;
 }) {
   const { state, dispatch } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  console.log("EDIT DATA RECEIVED 👉", existingOffence);
 
   const { mutateAsync: createOffence } = useCreateTrafficOffence();
-  const { mutateAsync: updateOffence } = useUpdateTrafficOffence(); // Need this hook if we want to update vs create? Or we just create new? 
+  const { mutateAsync: updateOffence } = useUpdateTrafficOffence(); // Need this hook if we want to update vs create? Or we just create new?
   // User said "edit button is not working". Editing implies updating.
   // But usually this form submits to "Create". If we are reusing it for Edit, we might need Update hook or handle submit differently.
   // For now let's focus on FILLING the table (hydrating).
@@ -40,12 +44,214 @@ export default function MultiStepForm({
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
   const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
+  const mapBackendOffenderDetails = (d: any = {}) => {
+    const mapped: any = {};
+
+    Object.entries(d).forEach(([key, value]) => {
+      if (!value) return;
+
+      const k = key.toLowerCase();
+
+      /* ================= SHOP KEEPER SPECIAL ================= */
+
+      if (k.includes("shop owner")) {
+        mapped.shopOwnerName = value;
+
+        // 🔥 ADD THIS
+        mapped["Shop Owner Name"] = value;
+        return;
+      }
+
+      if (k === "shop name") {
+        mapped.shopName = value;
+
+        // 🔥 ADD THIS
+        mapped["Shop Name"] = value;
+        return;
+      }
+
+      if (k === "shop address") {
+        mapped.shopAddress = value;
+
+        // 🔥 ADD THIS
+        mapped["Shop Address"] = value;
+        return;
+      }
+
+      /* ================= GENERIC PERSON ================= */
+
+      if (k === "name" || (k.includes("name") && !mapped.name)) {
+        mapped.name = value;
+        return;
+      }
+
+      if (k === "so" || k.includes("father") || k.includes("relative")) {
+        mapped.so = value;
+        return;
+      }
+
+      if (k.includes("rank")) {
+        mapped.rank = normalizeRank(String(value));
+        return;
+      }
+
+      if (k.includes("army")) {
+        mapped.armyNumber = value;
+        return;
+      }
+
+      if (k.includes("unit")) {
+        mapped.unit = value;
+        return;
+      }
+
+      if (k.includes("command")) {
+        mapped.command = value;
+        return;
+      }
+
+      if (k.includes("fmn")) {
+        mapped.fmn = value;
+        return;
+      }
+
+      /* ================= ADDRESS ================= */
+
+      if (
+        k === "address" ||
+        k.includes("place of stay") ||
+        k.includes("place of work")
+      ) {
+        mapped.address = value;
+        return;
+      }
+
+      /* ================= PASS / CARD ================= */
+
+      if (k.includes("passno") || k.includes("pass no")) {
+        mapped.passNo = value;
+        mapped.iCardNumber = value;
+        return;
+      }
+
+      if (k.includes("passissuedate")) {
+        mapped.passIssueDate = value;
+        return;
+      }
+
+      if (k.includes("passexpiredate")) {
+        mapped.passExpireDate = value;
+        return;
+      }
+
+      if (k.includes("card") || k.includes("icard")) {
+        mapped.iCardNumber = value;
+        return;
+      }
+
+      /* ================= FALLBACK ================= */
+
+      mapped[key] = value;
+    });
+
+    return mapped;
+  };
+
+  // const mapBackendOffenderDetails = (d: any = {}) => {
+  //   const mapped: any = {};
+
+  //   Object.entries(d).forEach(([key, value]) => {
+  //     if (!value) return;
+
+  //     const k = key.toLowerCase();
+
+  //     // NAME
+  //     if (k.includes("name") && !mapped.name) {
+  //       mapped.name = value;
+  //     }
+
+  //     // S/O , W/O , D/O , Relative
+  //     else if (
+  //       (k === "so" || k.includes("father") || k.includes("relative")) &&
+  //       !mapped.so
+  //     ) {
+  //       mapped.so = value;
+  //     }
+
+  //     // RANK
+  //     else if (k.includes("rank")) {
+  //       mapped.rank = normalizeRank(String(value));
+  //     }
+
+  //     // ARMY NUMBER
+  //     else if (k.includes("army")) {
+  //       mapped.armyNumber = value;
+  //     }
+
+  //     // UNIT
+  //     else if (k.includes("unit")) {
+  //       mapped.unit = value;
+  //     }
+
+  //     // COMMAND
+  //     else if (k.includes("command")) {
+  //       mapped.command = value;
+  //     }
+
+  //     // FMN
+  //     else if (k.includes("fmn")) {
+  //       mapped.fmn = value;
+  //     }
+
+  //     // ADDRESS / PLACE
+  //     else if (
+  //       k.includes("address") ||
+  //       k.includes("shop") ||
+  //       k.includes("place") ||
+  //       k.includes("stay") ||
+  //       k.includes("work")
+  //     ) {
+  //       mapped.address = value;
+  //     }
+
+  //     // ID CARD / PASS
+  //     else if (
+  //       k.includes("card") ||
+  //       k.includes("icard") ||
+  //       k.includes("passNo")
+  //     ) {
+  //       mapped.iCardNumber = value;
+  //     }
+
+  //     // fallback: keep unknown fields
+  //     else {
+  //       mapped[key] = value;
+  //     }
+  //   });
+
+  //   return mapped;
+  // };
+
+  const normalizeRank = (rank?: string) => {
+    if (!rank) return "";
+
+    const r = rank.toLowerCase().trim();
+
+    if (r === "sepoy" || r === "sep") return "sepoy";
+    if (r === "naik") return "naik";
+    if (r === "havildar") return "havildar";
+    if (r === "lance naik") return "lance naik";
+
+    return r;
+  };
+
   // Hydration Effect
   useEffect(() => {
     if (existingOffence) {
-      console.log("Hydrating Form with:", existingOffence);
+      // console.log("Hydrating Form with:", existingOffence);
       try {
         const trafficNodes = { ...initialState.formData.traffic };
+        console.log(trafficNodes);
         const eo = existingOffence;
 
         // 1. Basic Fields
@@ -66,7 +272,9 @@ export default function MultiStepForm({
 
         // 4. On Duty Details
         trafficNodes.onDutyDetails = {
-          dateOfDuty: eo.onDutyDetails?.dateOfDuty ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split('T')[0] : "",
+          dateOfDuty: eo.onDutyDetails?.dateOfDuty
+            ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split("T")[0]
+            : "",
           startTime: eo.onDutyDetails?.startTime || "",
           endTime: eo.onDutyDetails?.endTime || "",
           dutyLocation: eo.onDutyDetails?.dutyLocation || "",
@@ -92,8 +300,12 @@ export default function MultiStepForm({
         };
 
         // 7. Arrays - Deep Copy to avoid mutations
-        trafficNodes.offenceTypes = Array.isArray(eo.offenceTypes) ? [...eo.offenceTypes] : [];
-        trafficNodes.offenceRefList = Array.isArray(eo.offenceTypeReference) ? [...eo.offenceTypeReference] : [];
+        trafficNodes.offenceTypes = Array.isArray(eo.offenceTypes)
+          ? [...eo.offenceTypes]
+          : [];
+        trafficNodes.offenceRefList = Array.isArray(eo.offenceTypeReference)
+          ? [...eo.offenceTypeReference]
+          : [];
 
         // Witnesses
         if (Array.isArray(eo.onDutyWitnessingMps)) {
@@ -104,14 +316,29 @@ export default function MultiStepForm({
               unit: w.unit || "",
               armyNumber: w.armyNumber || w.ArmyNo || "",
               contactNumber: w.contactNumber || "",
-            }
+            },
           }));
         }
 
-        // Offender People
         if (Array.isArray(eo.offenders)) {
-          // Basic mapping placeholder - expand as needed
-          // trafficNodes.offenderPeople = eo.offenders...
+          trafficNodes.offenderPeople = eo.offenders.map(
+            (o: any, index: number) => {
+              console.log(
+                `🟠 OFFENDER ${index} RAW DETAILS 👉`,
+                o.offenderDetails,
+              );
+
+              const mapped = mapBackendOffenderDetails(o.offenderDetails);
+
+              console.log(`🟢 OFFENDER ${index} MAPPED DETAILS 👉`, mapped);
+
+              return {
+                type: o.offenderType || "Civilian",
+                whoIsIt: o.category || "Offender",
+                details: mapped,
+              };
+            },
+          );
         }
 
         dispatch({
@@ -122,8 +349,8 @@ export default function MultiStepForm({
             mpReport: {
               ...initialState.formData.mpReport,
               attachments: eo.customFields?.attachments || [],
-            }
-          }
+            },
+          },
         });
       } catch (error) {
         console.error("Hydration Failed:", error);
@@ -144,10 +371,10 @@ export default function MultiStepForm({
     const dateVal = (d: string) =>
       d ? new Date(d).toLocaleDateString("en-GB") : "";
 
-    /* ================= HELPER FOR PERSON MAPPING ================= */
+    /* ================= PERSON MAPPER ================= */
     const mapPerson = (person: any) => {
       const d = person?.details || {};
-      if (!Object.keys(d).length && !person?.type) return null;
+      if (!Object.keys(d).length) return null;
 
       return {
         aadharCardNo: val(d.aadharCardNo),
@@ -164,16 +391,10 @@ export default function MultiStepForm({
       };
     };
 
-    const primaryPerson =
-      Array.isArray(traffic?.offenderPeople) && traffic.offenderPeople[0]
-        ? traffic.offenderPeople[0]
-        : null;
-
-    const secondaryPerson =
-      Array.isArray(traffic?.offenderPeople) &&
-        traffic.offenderPeople.length > 1
-        ? traffic.offenderPeople[1]
-        : null;
+    /* ✅ ALL OFFENDERS */
+    const persons = Array.isArray(traffic.offenderPeople)
+      ? traffic.offenderPeople.map(mapPerson).filter(Boolean)
+      : [];
 
     const witnesses = Array.isArray(traffic?.witnesses)
       ? traffic.witnesses
@@ -184,31 +405,18 @@ export default function MultiStepForm({
       reportDate: new Date().toLocaleDateString("en-GB"),
 
       particulars: {
-        primary: mapPerson(primaryPerson) || {
-          aadharCardNo: "",
-          name: "",
-          so: "",
-          relation: "",
-          armyNo: "",
-          rank: "",
-          unit: "",
-          command: "",
-          fmn: "",
-          address: "",
-          iCardNo: "",
-        },
-        secondary: mapPerson(secondaryPerson),
+        persons, // 👈 ARRAY OF ALL OFFENDERS
 
         vehicle:
           traffic.vehicleInvolved === "yes"
             ? {
-              baNo: val(v.vehicleNumber),
-              makeAndTake: val(v.vehicleName),
-              vehicleNumber:
-                v.vehicleType === "DD Vehicle"
-                  ? "DD Veh. BA No."
-                  : "Registration No.",
-            }
+                baNo: val(v.vehicleNumber),
+                makeAndTake: val(v.vehicleName),
+                vehicleNumber:
+                  v.vehicleType === "DD Vehicle"
+                    ? "DD Veh. BA No."
+                    : "Registration No.",
+              }
             : undefined,
       },
 
@@ -235,15 +443,8 @@ export default function MultiStepForm({
 
       offence: {
         types: traffic.offenceTypes || [],
-        refs: traffic.offenceRefList?.map((r: any) => r.reference) || [],
+        refs: traffic.offenceRefList || [],
         description: val(occ.description),
-      },
-
-      witnessSig: {
-        armyNo: val(traffic.selectedWitness?.armyNumber || witnesses[0]?.reportingBlock?.armyNumber),
-        rank: val(traffic.selectedWitness?.rank || witnesses[0]?.reportingBlock?.rank),
-        name: val(traffic.selectedWitness?.nameReportingMP || witnesses[0]?.reportingBlock?.nameReportingMP),
-        unit: val(traffic.selectedWitness?.unit || witnesses[0]?.reportingBlock?.unit),
       },
 
       mpSig: {
@@ -300,14 +501,16 @@ export default function MultiStepForm({
 
         onDutyDetails: {
           ...traffic.onDutyDetails,
-          dateOfDuty: traffic.onDutyDetails?.dateOfDuty ? traffic.onDutyDetails.dateOfDuty : undefined,
+          dateOfDuty: traffic.onDutyDetails?.dateOfDuty
+            ? traffic.onDutyDetails.dateOfDuty
+            : undefined,
           startTime: toISO(
             traffic.onDutyDetails?.dateOfDuty,
-            traffic.onDutyDetails?.startTime
+            traffic.onDutyDetails?.startTime,
           ),
           endTime: toISO(
             traffic.onDutyDetails?.dateOfDuty,
-            traffic.onDutyDetails?.endTime
+            traffic.onDutyDetails?.endTime,
           ),
         },
         onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
@@ -315,7 +518,7 @@ export default function MultiStepForm({
           ...traffic.offenceOccurenceDetails,
           timeOfOffence: toISO(
             traffic.onDutyDetails?.dateOfDuty,
-            traffic.offenceOccurenceDetails?.timeOfOffence
+            traffic.offenceOccurenceDetails?.timeOfOffence,
           ),
           briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
         },
@@ -338,7 +541,7 @@ export default function MultiStepForm({
         console.log("📝 UPDATING Traffic Offence:", existingOffence._id);
         offenceRes = await updateOffence({
           id: existingOffence._id,
-          data: payload
+          data: payload,
         });
         toast.success("Traffic Offence Updated Successfully!");
       } else {
@@ -425,7 +628,7 @@ export default function MultiStepForm({
       // const letters = atts.filter(a => a.type === 'Letter');
       // But based on available types, we might need to put them in 'customFields' or rely on a "documents" endpoint.
       // For now, let's assume we update the MP Report part or just save it.
-      // Since `createTrafficOffence` seems to not have explicit attachment fields in the helper above, 
+      // Since `createTrafficOffence` seems to not have explicit attachment fields in the helper above,
       // we might need to rely on the fact that we might have already put them in `customFields` or similar.
       // However, if we need to SAVE them, we might need `mpReport` context.
       // Let's assume for now valid saving is handled through `mpReport` submission if that exists (not seen here)
@@ -434,7 +637,6 @@ export default function MultiStepForm({
       // NOTE: The user requested separate submission logic.
       // If we don't have a dedicated API for documents, we might be limited.
       // Assuming we can patch the offence with custom data.
-
 
       toast.success("🎉 TRAFFIC REPORT COMPLETED");
 
