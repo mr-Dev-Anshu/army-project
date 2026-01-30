@@ -624,7 +624,7 @@ export default function ReportsPage({
 
 /* ================= REPORT MAPPER ================= */
 
-function mapToReportProps(offence: any): MilitaryPoliceReportProps {
+export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
   const primary = offence.offenders?.[0]?.offenderDetails || {};
   const secondary = offence.offenders?.[1]?.offenderDetails;
 
