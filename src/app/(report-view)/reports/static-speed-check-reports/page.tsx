@@ -33,7 +33,7 @@ const cleanSystemFields = (data: any): any => {
     Object.keys(data).forEach(key => {
       // Skip system fields
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
-      
+
       // Recursively clean children
       cleaned[key] = cleanSystemFields(data[key]);
     });
@@ -50,7 +50,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Vehicle Type": "vehicleType",
   "Vehicle Name": "vehicleName",
   "Date": "offenceOccurenceDetails.time",
-  "Time": "offenceOccurenceDetails.time", 
+  "Time": "offenceOccurenceDetails.time",
   "Location": "offenceOccurenceDetails.incidentLocation",
   "Place": "offenceOccurenceDetails.incidentLocation",
   "Authorized Speed": "offenceOccurenceDetails.authSpeed",
@@ -118,7 +118,7 @@ export default function StaticSpeedCheckReportsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-  
+
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -130,7 +130,7 @@ export default function StaticSpeedCheckReportsPage() {
     fileInputRef.current?.click();
     setShowAddOptions(false);
   };
-  
+
   const handleImportJSON = () => {
     fileInputRef.current?.click();
     setShowAddOptions(false);
@@ -148,7 +148,7 @@ export default function StaticSpeedCheckReportsPage() {
     const fileName = file.name.toLowerCase();
     const isExcel = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
     const isJson = fileName.endsWith(".json");
-    
+
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -167,7 +167,7 @@ export default function StaticSpeedCheckReportsPage() {
 
         // FIX: Unwrap API response wrappers (e.g., { success: true, data: [...] })
         if (json && !Array.isArray(json) && json.data) {
-            json = json.data;
+          json = json.data;
         }
 
         let dataArray = Array.isArray(json) ? json : [json];
@@ -178,9 +178,9 @@ export default function StaticSpeedCheckReportsPage() {
         const mappedData = mapData(dataArray);
 
         await processImport(mappedData, createStaticSpeedRecord);
-        
+
         toast.success("Records imported successfully!");
-        await refetch(); 
+        await refetch();
       } catch (error: any) {
         console.error("Error importing file:", error);
         toast.error(`Failed to import records: ${error.message || "Unknown error"}`);
@@ -192,7 +192,7 @@ export default function StaticSpeedCheckReportsPage() {
     } else {
       reader.readAsText(file);
     }
-    event.target.value = ""; 
+    event.target.value = "";
   };
 
   useEffect(() => {
@@ -287,19 +287,21 @@ export default function StaticSpeedCheckReportsPage() {
           name: driver.name,
           armyNumber: driver.armyNumber,
           rank: driver.rank,
+          unit: driver.unit,
+          fmn: driver.fmn,
         },
-        mpName: item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
-        unit: item.onDutyDetailsMPReporting?.unit || driver.unit || "MP Unit",
-        fmn: item.fmn || driver.fmn,
+        mpName: item.onDutyDetailsMPReporting?.nameReportingMP,
+        unit: item.onDutyDetailsMPReporting?.unit,
+        fmn: item.fmn,
         vehicleNo: item.vehicleNumber,
         vehicleModel: item.vehicleName,
-        reportNo: item.reportId || item.reportNumber || item.reportNo || "N/A",
+        reportNo: item.reportId || item.reportNumber || item.reportNo,
         actionStatus: item.actionStatus,
-        offenceBrief: offence.description || "N/A",
-        authSpeed: offence.authSpeed || "-",
-        actualSpeed: offence.actualSpeedNoted || "-",
-        overSpeed: offence.overSpeedCalculated || "-",
-        remarks: item.remark || item.remarks || "N/A",
+        offenceBrief: offence.description,
+        authSpeed: offence.authSpeed,
+        actualSpeed: offence.actualSpeedNoted,
+        overSpeed: offence.overSpeedCalculated,
+        remarks: item.remark || item.remarks,
         originalData: item,
       };
     });
@@ -553,9 +555,9 @@ export default function StaticSpeedCheckReportsPage() {
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-            
+
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>

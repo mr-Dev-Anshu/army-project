@@ -140,10 +140,10 @@ export default function StaticSpeedTable({
         cell: (item) => (
           <div>
             <div className="font-medium text-gray-900">
-              {item.placeOfOffence || "Unknown"}
+              {item.placeOfOffence}
             </div>
             <div className="text-gray-500 font-normal mt-1">
-              {item.subLocation || "SI Line Military Station"}
+              {item.subLocation}
             </div>
           </div>
         ),
