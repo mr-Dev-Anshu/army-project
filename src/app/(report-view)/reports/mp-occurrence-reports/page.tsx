@@ -871,7 +871,7 @@ export default function MpOccurrenceReportsPage() {
                 className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group text-center h-72"
               >
                 <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Plus className="w-10 h-10 text-blue-600" />
+               -assName="w-10 h-10 text-blue-600" />
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700">Create Manually</h4>
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
