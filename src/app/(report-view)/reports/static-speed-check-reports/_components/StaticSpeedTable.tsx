@@ -140,10 +140,10 @@ export default function StaticSpeedTable({
         cell: (item) => (
           <div>
             <div className="font-medium text-gray-900">
-              {item.placeOfOffence || "Unknown"}
+              {item.placeOfOffence}
             </div>
             <div className="text-gray-500 font-normal mt-1">
-              {item.subLocation || "SI Line Military Station"}
+              {item.subLocation}
             </div>
           </div>
         ),
@@ -304,13 +304,13 @@ export default function StaticSpeedTable({
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
-              {/* <DropdownMenuItem
+              <DropdownMenuItem
                 className="gap-2 cursor-pointer"
                 onSelect={() => onPrint && onPrint(item)}
               >
                 <Printer className="w-4 h-4" />
                 Print
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
               <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Edit className="w-4 h-4" />
                 Edit

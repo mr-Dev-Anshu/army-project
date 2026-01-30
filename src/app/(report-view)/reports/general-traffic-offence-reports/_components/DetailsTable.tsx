@@ -73,6 +73,15 @@ export default function DetailsTable({
     });
   };
 
+  const handlePrintClick = React.useCallback((offenceId: string) => {
+    if (!offenceId) {
+      toast.error("Cannot print report without an ID.");
+      return;
+    }
+    const printUrl = `/print/general-traffic-offence/${offenceId}`;
+    window.open(printUrl, "_blank");
+  }, []);
+
   const handleConfirm = async () => {
     if (!modalState.offenceId) return;
 
@@ -387,13 +396,13 @@ export default function DetailsTable({
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
-              {/* <DropdownMenuItem
+              <DropdownMenuItem
                 className="gap-2 cursor-pointer"
                 onClick={() => onPrint && onPrint(offence)}
               >
                 <Printer className="w-4 h-4" />
                 Print
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
               <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Edit className="w-4 h-4" />
                 Edit
@@ -427,7 +436,7 @@ export default function DetailsTable({
       ...(isVehicleInvolved ? vehicleColumns : noVehicleColumns),
       ...actionColumns,
     ];
-  }, [isVehicleInvolved, updateOffence, onView]);
+  }, [isVehicleInvolved, updateOffence, onView, onPrint]);
 
   const processedData = useMemo(() => {
     return offences.map((item, index) => ({

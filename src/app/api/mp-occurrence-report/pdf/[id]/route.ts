@@ -15,11 +15,11 @@ export async function GET(
         );
     }
 
-    // Determine the base URL dynamically
-    const protocol = request.headers.get('x-forwarded-proto') || 'http';
-    const host = request.headers.get('host');
-    const baseUrl = `${protocol}://${host}`;
-    const reportUrl = `${baseUrl}/print/mp-occurrence-report/${id}`;
+    // Forward cookies to maintain authentication
+    const cookies = request.cookies.getAll();
+    const urlObj = new URL(request.nextUrl.origin || "http://localhost:3000");
+
+
 
     let browser;
     try {
@@ -38,6 +38,20 @@ export async function GET(
 
         const page = await browser.newPage();
 
+        if (cookies.length > 0) {
+            await page.setCookie(...cookies.map(cookie => ({
+                name: cookie.name,
+                value: cookie.value,
+                domain: urlObj.hostname,
+                path: '/',
+            })));
+        }
+
+        // Determine the base URL dynamically
+        const protocol = request.headers.get('x-forwarded-proto') || 'http';
+        const host = request.headers.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        const reportUrl = `${baseUrl}/print/mp-occurrence-report/${id}`;
         // Fast wait condition: proceed as soon as DOM is ready. 
         // We wait for the selector explicitly anyway.
         await page.goto(reportUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });

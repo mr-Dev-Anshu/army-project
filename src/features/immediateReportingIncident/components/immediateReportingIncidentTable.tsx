@@ -74,6 +74,13 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         }
     };
 
+    const handlePrintClick = (id: string) => {
+        // Open a specific print view or API endpoint in a new tab
+        // Replace '/print-incident/' with your actual route
+        const printUrl = `/print/immediate-reporting-incident/${id}`;
+        window.open(printUrl, '_blank');
+    };
+
     // 3 Unique Options Logic
     const { placeOptions, unitOptions, fmnOptions, unitLocationOptions } = useMemo(() => {
         if (!incidents) return { placeOptions: [], unitOptions: [], fmnOptions: [], unitLocationOptions: [] };
@@ -355,6 +362,9 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEdit(item)}>
                             Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handlePrintClick(item._id)}>
+                            Print
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDeleteClick(item._id)} className="text-red-600">
                             Delete
