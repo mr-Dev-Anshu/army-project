@@ -12,6 +12,14 @@ export default function PrintImmediateReportingIncidentPage({
 }) {
     const { id } = use(params);
     const { data, isLoading } = useGetImmediateReportingIncidentById(id);
+    useEffect(() => {
+        if (data) {
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [data]);
 
     useEffect(() => {
         if (data) {

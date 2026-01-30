@@ -171,7 +171,7 @@ export default function PrintReportPage({ params }: { params: Promise<{ id: stri
     const reportProps = mapToReportProps(data);
 
     return (
-        <div id="print-container" className="min-h-screen bg-white p-0">
+         <div id="print-container" className="min-h-screen bg-white p-0">
             <div id="report-content">
                 <MilitaryPoliceReport {...reportProps} />
             </div>

@@ -62,13 +62,13 @@ const Sidebar = () => {
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
-  const toggleMenu = (label) => {
+  const toggleMenu = (label: string) => {
     setOpenMenus((prev) =>
       prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
     );
   };
 
-  const isActive = (href) => {
+  const isActive = (href: string | undefined) => {
     if (!href) return false;
     return pathname === href || pathname.startsWith(href + "/");
   };
@@ -108,7 +108,7 @@ const Sidebar = () => {
     },
   ];
 
-  const renderMenuItem = (item, isSubmenu = false) => {
+  const renderMenuItem = (item: any, isSubmenu = false) => {
     if (item.submenu) return null;
     const active = isActive(item.href);
 
@@ -144,9 +144,9 @@ const Sidebar = () => {
     );
   };
 
-  const renderCollapsibleSection = (item) => {
+  const renderCollapsibleSection = (item: any) => {
     if (!item.submenu) return renderMenuItem(item);
-    const hasActiveSubmenu = item.submenu.some((sub) => isActive(sub.href));
+    const hasActiveSubmenu = item.submenu.some((sub: any) => isActive(sub.href));
 
     return (
       <Collapsible
@@ -176,7 +176,7 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {!isCollapsed && (
           <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-200 space-y-1">
-            {item.submenu.map((sub) => (
+            {item.submenu.map((sub: any) => (
               <div key={sub.label}>{renderMenuItem(sub, true)}</div>
             ))}
           </CollapsibleContent>
