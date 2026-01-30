@@ -104,4 +104,12 @@ export * from "@/apis/registers/delete";
 
 export * from "@/apis/mtAccidentReport";
 
+/* ================= USER MANAGEMENT ================= */
+export * from "@/apis/users/create";
+export * from "@/apis/users/getAll";
+export * from "@/apis/users/getById";
+export * from "@/apis/users/update";
+export * from "@/apis/users/delete";
+
+export * from "@/apis/certificateAndForm";
 

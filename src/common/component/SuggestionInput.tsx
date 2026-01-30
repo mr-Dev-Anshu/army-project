@@ -18,6 +18,7 @@ interface SuggestionInputProps extends Omit<React.ComponentProps<"input">, "onCh
   className?: string;
   defaultOptions?: (string | { label: string; value: string })[];
   icon?: React.ReactNode;
+  error?: string;
 }
 
 export function SuggestionInput({
@@ -114,6 +115,7 @@ export function SuggestionInput({
           ))}
         </div>
       )}
+      {props.error && <p className="text-xs text-red-500">{props.error}</p>}
     </div>
   );
 }

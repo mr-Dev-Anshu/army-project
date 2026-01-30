@@ -14,6 +14,7 @@ import Step4Remarks from "./steps/Step4Remarks";
 
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
+import { setMissingFields } from "@/context/validationDispatcher";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
 export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
@@ -296,6 +297,36 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       dispatch({ type: "SET_PREVIEW", payload: false });
     } catch (err) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
+
+      // If server returned validation errors in shape { field: message }
+      const serverErrors = (err as any)?.response?.data?.error;
+      if (serverErrors && typeof serverErrors === "object") {
+        const fields = Object.keys(serverErrors);
+
+        // Try to focus the user on the first offending step
+        const determineStep = (field: string) => {
+          if (field.includes("offenceOccurenceDetails")) return 2;
+          if (field.includes("offenceTypes") || field.includes("offenceTypeReference")) return 3;
+          if (field.includes("vehicleDetails") || field.includes("offender")) return 1;
+          if (field.includes("onDutyDetailsMPReporting") || field.includes("onDutyDetails")) return 2;
+          return 1;
+        };
+
+        const firstStep = determineStep(fields[0]);
+        dispatch({ type: "SET_STEP", payload: firstStep });
+
+        // Show the modal with server reported fields
+        setMissingFields(
+          "/api/generalTraficOffence",
+          fields,
+          () => {},
+          () => {}
+        );
+
+        toast.error("Validation failed — please fix highlighted fields.");
+        return;
+      }
+
       toast.error("Submit failed");
     } finally {
       setIsSubmitting(false);

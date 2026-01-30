@@ -2,6 +2,7 @@ import trackFieldSuggestions from "@/lib/fieldSuggestionTracker.js";
 import { GeneralTrafficOffence } from "../models/GeneralTraficOffence.js";
 import mongoose from "mongoose";
 import { GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/GeneralTraficOffence.js";
+import { setCurrentUserId } from "@/lib/mongoose-plugins/auditsFields.js";
 
 export class GeneralTrafficOffenceRepository {
   async getAll() {
@@ -158,7 +159,16 @@ export class GeneralTrafficOffenceRepository {
     /* ================= VEHICLE / STATUS FILTERS ================= */
 
     if (filters.isVehicleInvolved !== undefined) {
-      matchStage.isVehicleInvolved = filters.isVehicleInvolved === "true";
+      // FIX: Handle "false" to include null/undefined values
+      if (filters.isVehicleInvolved === "true") {
+        matchStage.isVehicleInvolved = true;
+      } else {
+        matchStage.$or = [
+          { isVehicleInvolved: false },
+          { isVehicleInvolved: null },
+          { isVehicleInvolved: { $exists: false } }
+        ];
+      }
     }
 
     if (filters.status !== undefined) {
@@ -170,8 +180,7 @@ export class GeneralTrafficOffenceRepository {
       }
     }
 
-    /* 
-       NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
+    /* NOTE: Unit, FMN, and Place filters are now moved to postLookupMatch 
        because they might depend on looked-up fields (e.g., offenders).
     */
 
@@ -224,8 +233,6 @@ export class GeneralTrafficOffenceRepository {
         },
       ];
     }
-
-    /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
 
     /* ================= OFFENCE TYPE (PRE-UNWIND FILTER) ================= */
 
@@ -408,8 +415,6 @@ export class GeneralTrafficOffenceRepository {
     return await GeneralTrafficOffence.aggregate(pipeline);
   }
 
-
-
   async create(data) {
     console.log(data);
     const offence = new GeneralTrafficOffence(data);
@@ -424,6 +429,8 @@ export class GeneralTrafficOffenceRepository {
       });
 
     return savedOffence;
+    // const results = await GeneralTrafficOffence.aggregate(pipeline);
+    // return results;
   }
 
   async update(id, data) {
@@ -431,6 +438,39 @@ export class GeneralTrafficOffenceRepository {
       new: true,
       runValidators: true,
     }).lean();
+  }
+
+  /* ========================= CREATE ========================= */
+
+  async create(data, requestContext = null) {
+    const record = new GeneralTrafficOffence(data);
+
+    if (requestContext && requestContext.userId) {
+      record.createdBy = requestContext.userId;
+      record.updatedBy = requestContext.userId;
+
+      try {
+        setCurrentUserId(requestContext.userId);
+        console.log(
+          "GeneralTrafficOffenceRepository - setCurrentUserId:",
+          requestContext.userId
+        );
+      } catch (err) {
+        console.error(
+          "GeneralTrafficOffenceRepository - Failed to setCurrentUserId:",
+          err
+        );
+      }
+    }
+
+    await record.save();
+    const saved = record.toObject();
+
+    trackFieldSuggestions(data, GENERAL_TRAFFIC_OFFENCE_SUGGESTION_CONFIG)
+      .then((res) => console.log(res, "suggestions tracked on general offence create"))
+      .catch((err) => console.error("Suggestion tracking error (GeneralOffence):", err));
+
+    return saved;
   }
 
   async delete(id) {

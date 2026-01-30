@@ -1,5 +1,6 @@
 // models/ShopkeeperSecurityPass.js
 import mongoose from "mongoose";
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields";
 const Schema = mongoose.Schema;
 
 const WorkerSchema = new Schema({
@@ -92,6 +93,8 @@ const ShopkeeperSecurityPassSchema = new Schema(
     timestamps: true,
   }
 );
+
+ShopkeeperSecurityPassSchema.plugin(auditFieldsPlugin, {});
 
 export const ShopkeeperSecurityPass =
   mongoose.models.ShopkeeperSecurityPass ||
