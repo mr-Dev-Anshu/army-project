@@ -128,6 +128,8 @@ export const initialState: GlobalFormState = {
 
       offenderDetails: {},
       offenderPeople: [],
+      documents: [],
+      attachments: [], // Initial empty state
     },
 
     mpReport: {
@@ -177,6 +179,8 @@ export const initialState: GlobalFormState = {
       },
 
       documents: [],
+
+      attachments: [],
 
       additionalIndividual: {
         vehicleInvolved: "",

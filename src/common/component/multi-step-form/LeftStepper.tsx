@@ -1,8 +1,10 @@
 "use client";
-import { Check, Edit2, Save } from "lucide-react";
+import { Check, Edit2, Save, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@/context/FormContext";
 import React, { useState, useEffect } from "react";
+import FormAttachmentModal, { AttachedItem, AttachmentType } from "@/components/ui/FormAttachmentModal";
+import { AttachmentItem as LegacyAttachmentItem } from "@/common/types/form.types";
 
 interface Step {
   id: number;
@@ -17,13 +19,12 @@ interface LeftStepperProps {
   title?: string;
   reportNo?: string;
   onStepClick: (id: number) => void;
-
-  // ⭐ ADD THIS
   onCreate?: () => void;
   onCancel?: () => void;
   onReportNoChange?: (val: string) => void;
   hideReportNo?: boolean;
   isSubmitting?: boolean;
+  onAttach?: (items: LegacyAttachmentItem[]) => void;
 }
 
 export const LeftStepper = ({
@@ -38,6 +39,7 @@ export const LeftStepper = ({
   onReportNoChange,
   hideReportNo = false,
   isSubmitting = false,
+  onAttach,
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
@@ -49,6 +51,7 @@ export const LeftStepper = ({
 
   const [editing, setEditing] = useState(false);
   const [reportValue, setReportValue] = useState(reportNo || "");
+  const [isAttachOpen, setIsAttachOpen] = useState(false);
 
   useEffect(() => {
     if (!editing) {
@@ -58,8 +61,6 @@ export const LeftStepper = ({
 
   const saveReportNo = () => {
     setEditing(false);
-    console.log("Saved Report No:", reportValue);
-    // Already synced via onChange
   };
 
   return (
@@ -70,7 +71,6 @@ export const LeftStepper = ({
           {title || "Create New General & Traffic Offence Record"}
         </h2>
 
-        {/* Editable Report No */}
         {!hideReportNo && (
           <div className="flex items-center gap-10 text-gray-300">
             {!editing ? (
@@ -185,10 +185,37 @@ export const LeftStepper = ({
             </div>
           );
         })}
+
+        {/* ATTACH BUTTON - INLINE */}
+        {onAttach && currentStep === steps.length && (
+          <div className="mt-8 mb-6 px-1">
+            <Button
+              onClick={() => setIsAttachOpen(true)}
+              className="w-full bg-white text-black hover:bg-gray-200 h-10 text-[13px] font-medium rounded-md shadow-none flex items-center justify-center gap-2"
+            >
+              <Paperclip className="w-4 h-4" />
+              Attach Signed Certificates/Form/Letters
+            </Button>
+          </div>
+        )}
       </div>
 
+      <FormAttachmentModal
+        isOpen={isAttachOpen}
+        onClose={() => setIsAttachOpen(false)}
+        onSave={(items) => {
+          if (onAttach) {
+            const legacyItems: LegacyAttachmentItem[] = items.map(i => ({
+              ...i,
+              type: i.type as any
+            }));
+            onAttach(legacyItems);
+          }
+        }}
+      />
+
       {/* FOOTER */}
-      <div className="mt-4 flex flex-col sm:flex-row gap-2">
+      <div className="pt-2 flex flex-col sm:flex-row gap-2 border-t border-gray-700">
         <Button
           className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base"
           onClick={() => onCancel && onCancel()}
@@ -205,6 +232,6 @@ export const LeftStepper = ({
           {isSubmitting ? "Saving..." : "Save Report"}
         </Button>
       </div>
-    </div>
+    </div >
   );
 };

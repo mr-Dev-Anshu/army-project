@@ -9,6 +9,7 @@ import {
   Copy,
   Trash,
   Download,
+  Paperclip
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -30,12 +31,14 @@ import { Label } from "@/components/ui/label";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 import OffenderDetailsCell from "@/app/(report-view)/reports/general-traffic-offence-reports/_components/OffenderDetailsCell";
+import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
 
 interface MpOccurrenceTableProps {
   data: any[];
   onView?: (item: any) => void;
   onPrint?: (item: any) => void;
   onDownload?: (item: any) => void;
+  onEdit?: (item: any) => void;
 }
 
 export default function MpOccurrenceTable({
@@ -43,6 +46,7 @@ export default function MpOccurrenceTable({
   onView,
   onPrint,
   onDownload,
+  onEdit,
 }: MpOccurrenceTableProps) {
   const { mutateAsync: updateReport, isPending: isUpdating } =
     useUpdateMPReport();
@@ -50,6 +54,8 @@ export default function MpOccurrenceTable({
     useDeleteMPReport();
 
   const [actionRemark, setActionRemark] = React.useState("");
+  const [attachModalOpen, setAttachModalOpen] = React.useState(false);
+  const [selectedReport, setSelectedReport] = React.useState<any>(null);
 
   const [modalState, setModalState] = React.useState<{
     isOpen: boolean;
@@ -74,6 +80,11 @@ export default function MpOccurrenceTable({
       type: "status",
       newStatus: !currentStatus,
     });
+  };
+
+  const handleAttachCertificate = (item: any) => {
+    setSelectedReport(item);
+    setAttachModalOpen(true);
   };
 
   const handleDeleteClick = (reportId: string) => {
@@ -290,7 +301,10 @@ export default function MpOccurrenceTable({
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onEdit && onEdit(item)}
+              >
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
@@ -298,6 +312,13 @@ export default function MpOccurrenceTable({
                 <Copy className="w-4 h-4" />
                 Duplicate Report
               </DropdownMenuItem> */}
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => handleAttachCertificate(item)}
+              >
+                <Paperclip className="w-4 h-4" />
+                Attach Signed Certificates / Letters
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 onClick={() => {
@@ -368,6 +389,20 @@ export default function MpOccurrenceTable({
           </div>
         )}
       </ConfirmationModal>
+      <AttachCertificateModal
+        isOpen={attachModalOpen}
+        reportId={selectedReport?._id}
+        reportType="mp"
+        onClose={() => {
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+        onSave={() => {
+          toast.success("Certificate attached successfully");
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+      />
     </>
   );
 }

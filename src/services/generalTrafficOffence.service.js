@@ -22,15 +22,26 @@ export class GeneralTrafficOffenceService {
     return await generalTrafficOffenceRepo.create(data, requestContext);
   }
 
-  async update(id, data) {
-    const updated = await generalTrafficOffenceRepo.update(id, data);
+async update(id, data) {
+  const { certificates, ...restData } = data;
 
-    if (!updated) {
-      throw new Error("General Traffic Offence not found");
-    }
+  let updated = null;
 
-    return updated;
+  // 1️⃣ Update normal fields first
+  if (Object.keys(restData).length) {
+    updated = await generalTrafficOffenceRepo.update(id, restData);
   }
+
+  // 2️⃣ Append certificates
+  if (certificates?.length) {
+    updated = await generalTrafficOffenceRepo.appendCertificates(id, certificates);
+  }
+
+  if (!updated) throw new Error("Report not found");
+
+  return updated;
+}
+
 
   async delete(id) {
     const deleted = await generalTrafficOffenceRepo.delete(id);

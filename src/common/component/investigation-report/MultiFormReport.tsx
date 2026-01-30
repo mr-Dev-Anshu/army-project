@@ -19,8 +19,9 @@ import Step11Remarks from "./steps/Step11Remarks";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
 import { RightPanel } from "../multi-step-form/RightPanel";
 
-import { useCreateMPReport } from "@/features/mpReports/hooks";
+import { useCreateMPReport, useUpdateMPReport } from "@/features/mpReports/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
+import React, { useEffect } from "react";
 
 /* ================= EVIDENCE BUILDER ================= */
 const buildEvidences = (ev: any) => {
@@ -70,18 +71,125 @@ const buildEvidences = (ev: any) => {
 
 export default function MultiFormReport({
   onCancel,
+  existingReport,
 }: {
   onCancel: () => void;
+  existingReport?: any;
 }) {
   const { state, dispatch } = useForm();
   const [mode] = useState("mp");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { mutateAsync: createReportAsync } = useCreateMPReport();
+  const { mutateAsync: updateReportAsync } = useUpdateMPReport();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
 
   /* ================= FETCH REPORT NO ================= */
   const reportNo = state.formData.mpReport.reportDetails.reportNo || "PRO/21 CPU/00042/106/25";
+
+  // Hydration Effect
+  useEffect(() => {
+    if (existingReport) {
+      console.log("Hydrating MP Report Form:", existingReport);
+      const er = existingReport;
+      const mpNodes = { ...initialState.formData.mpReport };
+
+      // Map existing report to form state
+      mpNodes.reportDetails = {
+        reportNo: er.reportDetails?.reportNumber || "",
+        command: er.reportDetails?.command || "",
+        firNo: er.reportDetails?.firNumber || "",
+        firFile: er.reportDetails?.firFileUrl || "",
+      };
+
+      mpNodes.mpParticulars = {
+        armyNo: er.investigationHead?.armyNumber || "",
+        rank: er.investigationHead?.rank || "",
+        name: er.investigationHead?.name || "",
+        unit: er.investigationHead?.unit || "",
+        fmn: er.investigationHead?.fmn || "",
+        command: er.investigationHead?.command || "",
+        address: er.investigationHead?.address || "",
+        icard: er.investigationHead?.iCardNumber || "",
+      };
+
+      mpNodes.occurrenceDetails = {
+        offenceType: er.occurrenceDetails?.offenceType || "",
+        offenceTypes: er.occurrenceDetails?.offenceTypes || [],
+        offenceTypeReference: er.occurrenceDetails?.offenceTypeReference || [],
+        place: er.occurrenceDetails?.placeOfOccurrence || "",
+        date: er.occurrenceDetails?.dateOfOccurrence ? new Date(er.occurrenceDetails.dateOfOccurrence).toISOString().split('T')[0] : "",
+        time: er.occurrenceDetails?.timeOfOccurrence ? new Date(er.occurrenceDetails.timeOfOccurrence).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : "",
+        description: er.occurrenceDetails?.description || "",
+      };
+
+      // Individuals
+      if (Array.isArray(er.individuals)) {
+        mpNodes.individualDetails = {
+          vehicleInvolved: "",
+          vehicleData: {},
+          driverType: "",
+          tempOffender: undefined,
+          offenderList: er.individuals.map((ind: any) => ({
+            details: {
+              armyNumber: ind.armyNo,
+              rank: ind.rank,
+              name: ind.name,
+              unit: ind.unit,
+              fmn: ind.fmn,
+              address: ind.address,
+              iCardNumber: ind.iCardNumber,
+              remark: ind.remark,
+            },
+            role: ind.role,
+            offenderType: ind.role, // Mapping back
+            vehicleInvolved: ind.isVehicleInvolved ? "yes" : "no",
+          }))
+        };
+      }
+
+      // Witnesses
+      if (Array.isArray(er.witnesses)) {
+        mpNodes.witnesses = er.witnesses.map((w: any) => ({
+          details: {
+            armyNumber: w.armyNo,
+            rank: w.rank,
+            name: w.name,
+            unit: w.unit,
+            fmn: w.fmn,
+            address: w.address,
+            iCardNumber: w.iCardNumber,
+            remark: w.remark,
+          }
+        }));
+      }
+
+      // Documents
+      if (Array.isArray(er.documents)) {
+        mpNodes.documents = er.documents;
+      }
+
+      // Evidence & Detailed Report & Remarks
+      // ... map strictly if needed, mainly strictly structure matching
+
+      mpNodes.investigationPoints = er.pointsFindOutDuringInvestigation ? er.pointsFindOutDuringInvestigation.split('\n') : [];
+      mpNodes.opinion = er.opinion || "";
+      mpNodes.remarks = {
+        analysis: er.remarks?.analysis || "",
+        recommendation: er.remarks?.recommendation || ""
+      };
+
+      mpNodes.attachments = er.customFields?.attachments || []; // Hydrate attachments
+
+      dispatch({
+        type: "SET_FORM_DATA",
+        payload: {
+          ...initialState.formData,
+          mpReport: mpNodes
+        }
+      });
+    }
+  }, [existingReport, dispatch]);
 
   const handleReportNoChange = (newReportNo: string) => {
     dispatch({
@@ -106,16 +214,13 @@ export default function MultiFormReport({
     { id: 11, label: "Remarks", icon: "11" },
   ];
 
-  // ... (existing helper functions) ...
-
   const toISODateTime = (date?: string, time?: string) =>
-    date && time ? new Date(`${date}T${time}`).toISOString() : null;
+    date && time ? new Date(`${date}T${time}`).toISOString() : undefined;
 
   const mapMpToReport = (mp: any) => {
     const offenderList = mp?.individualDetails?.offenderList || [];
     const witnessList = mp?.witnesses || [];
 
-    /* ================= 4. OFFENDERS ================= */
     /* ================= 4. OFFENDERS ================= */
     const people = offenderList.map((p: any, i: number) => {
       const src = p.details ?? p;
@@ -286,10 +391,7 @@ export default function MultiFormReport({
       const individualsPayload = (mp.individualDetails?.offenderList || []).map(
         (o: any) => {
           const d = o.details || {};
-
-          // Helper to sanitize "Nil" or empty string to undefined for cleaner payload
           const sanitize = (v: any) => (v && v !== "Nil" && v !== "" ? v : undefined);
-
           return {
             armyNo: sanitize(d.armyNumber) || sanitize(d.armyNo),
             rank: sanitize(d.rank),
@@ -309,10 +411,7 @@ export default function MultiFormReport({
       /* ================= MAP WITNESSES (EMBEDDED) ================= */
       const witnessesPayload = (mp.witnesses || []).map((w: any) => {
         const d = w.details || w;
-
-        // Helper to sanitize "Nil" or empty string to undefined for cleaner payload
         const sanitize = (v: any) => (v && v !== "Nil" && v !== "" ? v : undefined);
-
         return {
           armyNo: sanitize(d.armyNumber) || sanitize(d.armyNo),
           rank: sanitize(d.rank),
@@ -353,11 +452,11 @@ export default function MultiFormReport({
           offenceTypes: mp.occurrenceDetails?.offenceTypes ?? [],
           offenceTypeReference: mp.occurrenceDetails?.offenceTypeReference ?? [],
           placeOfOccurrence: mp.occurrenceDetails.place || "NA",
-          dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00"),
+          dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00") || "",
           timeOfOccurrence: toISODateTime(
             mp.occurrenceDetails.date,
             mp.occurrenceDetails.time
-          ),
+          ) || "",
           description: mp.occurrenceDetails.description || "Nil",
           customFields: {},
         },
@@ -370,6 +469,7 @@ export default function MultiFormReport({
           statement: d.statement || "Nil",
           url: d.url || "NA",
           fileName: d.fileName || "",
+          type: d.type || "Document", // Pass Type
         })),
 
         evidences: buildEvidences(mp.evidence),
@@ -388,13 +488,28 @@ export default function MultiFormReport({
           customFields: {},
         },
 
-        customFields: {},
+        customFields: {
+          attachments: mp.attachments || [] // Also capture any loose attachments from stepper
+        },
       };
 
       console.log("🚀 MP REPORT PAYLOAD ===>", payload);
 
-      /* ================= CREATE MP REPORT ================= */
-      const reportRes = await createReportAsync(payload);
+      /* ================= CREATE / UPDATE MP REPORT ================= */
+      let reportRes;
+      if (existingReport && existingReport._id) {
+        console.log("📝 UPDATING MP Report:", existingReport._id);
+        reportRes = await updateReportAsync({
+          id: existingReport._id,
+          data: payload
+        });
+        toast.success("MP Report Updated Successfully");
+      } else {
+        console.log("🆕 CREATING MP Report");
+        reportRes = await createReportAsync(payload);
+        toast.success("MP Investigation Report Created 🎉");
+      }
+
       console.log("✅ MP REPORT RESPONSE ===>", reportRes);
 
       const offenceId = reportRes?._id;
@@ -565,6 +680,14 @@ export default function MultiFormReport({
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
             onReportNoChange={handleReportNoChange} // Wired up
+            onAttach={(items) => {
+              const current = state.formData.mpReport.attachments || [];
+              dispatch({
+                type: "SET_PATH",
+                path: "formData.mpReport.attachments",
+                value: [...current, ...items],
+              });
+            }}
           />
 
           {/* RIGHT SIDE DYNAMIC CONTENT */}

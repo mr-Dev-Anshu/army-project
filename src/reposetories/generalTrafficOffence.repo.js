@@ -434,6 +434,8 @@ export class GeneralTrafficOffenceRepository {
   }
 
   async update(id, data) {
+    console.log(data);
+    
     return await GeneralTrafficOffence.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
@@ -475,6 +477,17 @@ export class GeneralTrafficOffenceRepository {
 
   async delete(id) {
     return await GeneralTrafficOffence.findByIdAndDelete(id).lean();
+  }
+    async appendCertificates(id, certificates) {
+    return await GeneralTrafficOffence.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          certificates: { $each: certificates },
+        },
+      },
+      { new: true, runValidators: true }
+    );
   }
 }
 

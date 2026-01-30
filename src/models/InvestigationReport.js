@@ -93,6 +93,7 @@ export const witnessSchema = new Schema({
 export const documentSchema = new Schema({
   statement: { type: String },
   url: { type: String },
+  type:{type:String},
   customFields: {
     type: Schema.Types.Mixed,
     default: {},
@@ -144,6 +145,7 @@ const mpReportSchema = new Schema(
     },
 
     evidences: [evidenceSchema],
+    certificates: [documentSchema],
     customFields: {
       type: Schema.Types.Mixed,
       default: {},

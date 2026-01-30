@@ -571,6 +571,18 @@ export class StaticSpeedCheckRecordRepository {
   async delete(id) {
     return await StaticSpeedCheckRecord.findByIdAndDelete(id).lean();
   }
+
+      async appendCertificates(id, certificates) {
+      return await StaticSpeedCheckRecord.findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            certificates: { $each: certificates },
+          },
+        },
+        { new: true, runValidators: true }
+      );
+    }
 }
 
 export const staticSpeedCheckRecordRepo =

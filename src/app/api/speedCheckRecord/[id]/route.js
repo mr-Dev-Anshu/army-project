@@ -46,7 +46,7 @@ export async function PUT(request, { params }) {
     // Validation commented out to allow empty/partial updates from frontend.
     const value = body;
 
-    const updated = await staticSpeedCheckRecordService.update(id, value);
+    const updated = await staticSpeedCheckRecordService.update(id, body);
 
     return NextResponse.json(updated);
   } catch (error) {

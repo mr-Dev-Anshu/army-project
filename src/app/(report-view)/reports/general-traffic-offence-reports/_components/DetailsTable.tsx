@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { MoreVertical, Eye, Printer, Edit, Copy, Trash } from "lucide-react";
+import { MoreVertical, Eye, Printer, Edit, Copy, Trash, Download, Paperclip } from "lucide-react";
 import {
   useUpdateTrafficOffence,
   useDeleteTrafficOffence,
@@ -21,12 +21,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OffenderDetailsCell from "./OffenderDetailsCell";
+import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
 
 interface DetailsTableProps {
   offences: any[];
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
+  onEdit?: (offence: any) => void;
 }
 
 export default function DetailsTable({
@@ -34,6 +36,7 @@ export default function DetailsTable({
   isVehicleInvolved,
   onView,
   onPrint,
+  onEdit,
 }: DetailsTableProps) {
   const { mutateAsync: updateOffence, isPending: isUpdating } =
     useUpdateTrafficOffence();
@@ -53,6 +56,8 @@ export default function DetailsTable({
   });
 
   const [remarkError, setRemarkError] = React.useState("");
+  const [attachModalOpen, setAttachModalOpen] = React.useState(false);
+  const [selectedReport, setSelectedReport] = React.useState<any>(null);
 
   const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
     setActionRemark(""); // Reset remark
@@ -71,6 +76,11 @@ export default function DetailsTable({
       offenceId,
       type: "delete",
     });
+  };
+
+  const handleAttachCertificate = (offence: any) => {
+    setSelectedReport(offence);
+    setAttachModalOpen(true);
   };
 
   const handleConfirm = async () => {
@@ -347,14 +357,12 @@ export default function DetailsTable({
               }}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${
-                  isTaken ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
+                  }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
-                    isTaken ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
+                    }`}
                 ></div>
               </div>
               <span className="text-[10px] text-gray-500 font-medium uppercase">
@@ -396,7 +404,10 @@ export default function DetailsTable({
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onEdit && onEdit(offence)}
+              >
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
@@ -404,6 +415,13 @@ export default function DetailsTable({
                 <Copy className="w-4 h-4" />
                 Duplicate Report
               </DropdownMenuItem> */}
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => handleAttachCertificate(offence)}
+              >
+                <Paperclip className="w-4 h-4" />
+                Attach Signed Certificates / Letters
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 onClick={() => {
@@ -456,9 +474,8 @@ export default function DetailsTable({
         }
         message={
           modalState.type === "status"
-            ? `Are you sure you want to change the status to ${
-                modalState.newStatus ? "Taken" : "Pending"
-              }?`
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
+            }?`
             : "Are you sure you want to delete this report? This action cannot be undone."
         }
         confirmLabel={
@@ -490,6 +507,20 @@ export default function DetailsTable({
           </div>
         )}
       </ConfirmationModal>
+      <AttachCertificateModal
+        isOpen={attachModalOpen}
+        reportId={selectedReport?._id}
+        reportType="traffic"
+        onClose={() => {
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+        onSave={() => {
+          toast.success("Certificate attached successfully");
+          setAttachModalOpen(false);
+          setSelectedReport(null);
+        }}
+      />
     </>
   );
 }

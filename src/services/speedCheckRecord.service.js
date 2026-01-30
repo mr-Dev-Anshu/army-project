@@ -32,11 +32,23 @@ export class StaticSpeedCheckRecordService {
   }
 
   async update(id, data) {
-    const updated = await staticSpeedCheckRecordRepo.update(id, data);
-    if (!updated) {
-      throw new Error("Static Speed Check Record not found");
-    }
-    return updated;
+   const { certificates, ...restData } = data;
+   
+     let updated = null;
+   
+     // 1️⃣ Update normal fields first
+     if (Object.keys(restData).length) {
+       updated = await staticSpeedCheckRecordRepo.update(id, restData);
+     }
+   
+     // 2️⃣ Append certificates
+     if (certificates?.length) {
+       updated = await staticSpeedCheckRecordRepo.appendCertificates(id, certificates);
+     }
+   
+     if (!updated) throw new Error("Report not found");
+   
+     return updated;
   }
 
   async delete(id) {

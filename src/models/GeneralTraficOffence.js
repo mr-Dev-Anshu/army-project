@@ -1,6 +1,9 @@
 import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields.js";
 import mongoose from "mongoose";
 
+const { Schema } = mongoose;
+
+
 export const onDutyDetailsSchema = new mongoose.Schema({
   dateOfDuty: { type: Date },
   startTime: { type: Date },
@@ -38,6 +41,16 @@ export const offenceOccurenceDetails = new mongoose.Schema({
   },
 });
 
+export const documentSchema = new Schema({
+  statement: { type: String },
+  url: { type: String },
+  type: { type: String },
+  customFields: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
+});
+
 const generalTrafficOffenceSchema = new mongoose.Schema(
   {
     reportId: {
@@ -56,9 +69,12 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
       enum: ["Civilian Vehicle", "DD Vehicle"],
     },
     vehicleNumber: { type: String },
-    vehicleName: { type: String },
-    driverType: { type: String },
-
+    vehicleName: {
+      type: String,
+    },
+    driverType: {
+      type: String,
+    },
     onDutyDetails: onDutyDetailsSchema,
     onDutyDetailsMPReporting: onDutyDetailsMPReporting,
     offenceOccurenceDetails: offenceOccurenceDetails,
@@ -73,20 +89,19 @@ const generalTrafficOffenceSchema = new mongoose.Schema(
     actionStatusRemark: {
       type: String,
     },
+    certificates: [documentSchema],
+
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
   },
   {
-    timestamps: true,    
-    strict: false,        
-  }
+    timestamps: true,
+    strict: false,
+  },
 );
 
-generalTrafficOffenceSchema.plugin(auditFieldsPlugin, {});
-
-// Export model
 export const GeneralTrafficOffence =
   mongoose.models.GeneralTrafficOffence ||
   mongoose.model("GeneralTrafficOffence", generalTrafficOffenceSchema);

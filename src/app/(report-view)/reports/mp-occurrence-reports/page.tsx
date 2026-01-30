@@ -1,18 +1,24 @@
 "use client";
 
 import React, { useMemo, useState, useRef } from "react";
-import { Loader2, ArrowLeft, Download, FileSpreadsheet, FileJson, Plus, X } from "lucide-react";
-import { toast } from "react-toastify";
+
 
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
-import { useGetAllMPReports, useCreateMPReport } from "@/features/mpReports/hooks";
+import { useGetAllMPReports, useGetMPReportById, useUpdateMPReport } from "@/features/mpReports/hooks";
+import { useCreateMPReport } from "@/features/mpReports/hooks";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/reports/MpOccurrenceReport";
 
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft, Download, FileSpreadsheet, FileJson, Loader2, Plus, X } from "lucide-react";
+import EvidenceViewer from "@/components/common/EvidenceViewer";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
+import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
+import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
+import { toast } from "react-toastify";
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
@@ -55,7 +61,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Opinion": "opinion",
   "Analysis": "remarks.analysis",
   "Recommendation": "remarks.recommendation",
-  
+
   "Offender Name": "individuals[0].name",
   "Offender Rank": "individuals[0].rank",
   "Offender Army No": "individuals[0].armyNo",
@@ -95,9 +101,9 @@ const mapData = (data: any[]) => {
     });
 
     if (newItem.individuals && newItem.individuals.length > 0) {
-        if (newItem.individuals[0] && !newItem.individuals[0].role) {
-            newItem.individuals[0].role = "Offender";
-        }
+      if (newItem.individuals[0] && !newItem.individuals[0].role) {
+        newItem.individuals[0].role = "Offender";
+      }
     }
 
     return newItem;
@@ -108,10 +114,110 @@ export default function MpOccurrenceReportsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-  
+  /* ================= VIEW MODE STATE ================= */
+  const [viewMode, setViewMode] = useState<"report" | "attachments" | "evidences">("report");
+  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+
+  const { mutateAsync: updateReport } = useUpdateMPReport();
+
+  // Handle Attachment Save
+  const handleAttachSave = async (newItems: AttachedItem[]) => {
+    if (!viewingReport?._id) return;
+
+    try {
+      const currentAttachments = viewingReport.customFields?.attachments || viewingReport.attachments || [];
+      const updatedAttachments = [...currentAttachments, ...newItems];
+
+      await updateReport({
+        id: viewingReport._id,
+        data: {
+          customFields: {
+            ...viewingReport.customFields,
+            attachments: updatedAttachments
+          }
+        }
+      });
+
+      toast.success("Attachments Added Successfully");
+
+      // Update local viewing state
+      setViewingReport((prev: any) => ({
+        ...prev,
+        customFields: {
+          ...prev.customFields,
+          attachments: updatedAttachments
+        }
+      }));
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add attachments");
+    }
+  };
+
+  // HANDLE ATTACHMENT DELETE
+  const handleAttachDelete = async (attachment: any) => {
+    if (!viewingReport?._id) {
+      console.error("No viewing report ID found");
+      return;
+    }
+
+    console.log("Deleting attachment:", attachment);
+
+    try {
+      const currentAttachments =
+        viewingReport.customFields?.attachments ||
+        viewingReport.attachments ||
+        viewingReport.certificates ||
+        [];
+
+      console.log("Current attachments:", currentAttachments);
+      const updatedAttachments = currentAttachments.filter((item: any) => item.url !== attachment.url);
+      console.log("Updated attachments:", updatedAttachments);
+
+      const updatePayload: any = {
+        id: viewingReport._id,
+        data: {}
+      };
+
+      if (viewingReport.customFields?.attachments) {
+        updatePayload.data.customFields = {
+          ...viewingReport.customFields,
+          attachments: updatedAttachments
+        };
+      } else if (viewingReport.certificates) {
+        updatePayload.data.certificates = updatedAttachments;
+      } else {
+        updatePayload.data.customFields = {
+          ...viewingReport.customFields,
+          attachments: updatedAttachments
+        };
+      }
+
+      await updateReport(updatePayload);
+      toast.success("Attachment Deleted Successfully");
+
+      setViewingReport((prev: any) => {
+        const updated = { ...prev };
+        if (prev.customFields?.attachments) {
+          updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
+        } else if (prev.certificates) {
+          updated.certificates = updatedAttachments;
+        } else {
+          updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
+        }
+        return updated;
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete attachment: " + (error as any)?.message || "Unknown error");
+    }
+  };
+
+
+
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const { mutateAsync: createMPReport } = useCreateMPReport();
 
   React.useEffect(() => {
@@ -148,6 +254,12 @@ export default function MpOccurrenceReportsPage() {
     if (filters.date) params.date = filters.date;
     return params;
   }, [filters]);
+
+  /* ================= EDIT DATA FETCHING ================= */
+  const editingId = isCreating && viewingReport ? (viewingReport._id || viewingReport.originalData?._id) : null;
+  const { data: fullEditingReport, isLoading: isLoadingEdit } = useGetMPReportById(editingId);
+  const finalEditingReport = fullEditingReport || viewingReport?.originalData || viewingReport;
+
 
   const { data, isLoading, isError, refetch } = useGetAllMPReports(apiParams);
 
@@ -192,7 +304,7 @@ export default function MpOccurrenceReportsPage() {
 
         // FIX: Unwrap API response wrappers
         if (json && !Array.isArray(json) && json.data) {
-            json = json.data;
+          json = json.data;
         }
 
         let dataArray = Array.isArray(json) ? json : [json];
@@ -203,7 +315,7 @@ export default function MpOccurrenceReportsPage() {
         const mappedData = mapData(dataArray);
 
         await processImport(mappedData, createMPReport);
-        
+
         toast.success("Reports imported successfully!");
         await refetch();
       } catch (error: any) {
@@ -381,7 +493,7 @@ export default function MpOccurrenceReportsPage() {
   const mapToReportProps = (item: any): MpOccurrenceReportProps => {
     const raw = item.originalData || item || {};
     const reportDetails = raw.reportDetails || {};
-    const invHead = raw.investigationHead || raw.mpParticulars || {}; 
+    const invHead = raw.investigationHead || raw.mpParticulars || {};
     const occurrence = raw.occurrenceDetails || {};
 
     const rawPeople = raw.individuals || raw.offenders || raw.individual || raw.offenderList || raw.customFields?.individuals || raw.customFields?.offenderList || [];
@@ -389,7 +501,7 @@ export default function MpOccurrenceReportsPage() {
     const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
       const src = p.details || p;
       const custom = src.customFields || {};
-      const merged = { ...custom, ...src }; 
+      const merged = { ...custom, ...src };
 
       return {
         sno: index + 1,
@@ -572,38 +684,83 @@ export default function MpOccurrenceReportsPage() {
           <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
-          <h1 className="text-lg font-semibold text-gray-800">Create New MP Occurrence & Investigation Report</h1>
+          <h1 className="text-lg font-semibold text-gray-800">
+            {viewingReport ? "Edit MP Occurrence & Investigation Report" : "Create New MP Occurrence & Investigation Report"}
+          </h1>
         </div>
         <div className="flex-1 overflow-auto p-6">
-          <div className="w-full max-w-5xl p-6 border rounded-xl mx-auto bg-white">
-            <h2 className="font-semibold text-lg">
-              MP Occurrence & Investigation Form
-            </h2>
-            <p className="text-gray-500 mt-2">Form implementation pending...</p>
-          </div>
+          {isLoadingEdit ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+            </div>
+          ) : (
+            <MultiFormReport
+              onCancel={() => { setIsCreating(false); setViewingReport(null); }}
+              existingReport={finalEditingReport}
+            />
+          )}
         </div>
       </div>
     )
   }
 
+
+  const viewingIdStr = viewingReport?._id ?? viewingReport?.originalData?._id ?? "";
+  const finalViewingRecord = viewingReport?.originalData || viewingReport;
+
   if (viewingReport) {
     return (
-      <ReportViewerWrapper
-        title="MP OCCURRENCE REPORT"
-        onBack={() => {
-          setViewingReport(null);
-          setShouldAutoPrint(false);
-        }}
-        isDownloading={isDownloading}
-        downloadType={downloadType}
-        onDownloadWord={() => handleDownloadReport(viewingReport)}
-        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-        onPrint={() => window.print()}
-      >
-        <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
-      </ReportViewerWrapper>
+      <>
+        <ReportViewerWrapper
+          title="MP OCCURRENCE REPORT"
+          onBack={() => {
+            setViewingReport(null);
+            setShouldAutoPrint(false);
+            setViewMode("report");
+          }}
+          isDownloading={isDownloading}
+          downloadType={downloadType}
+          activeView={viewMode}
+          onViewReport={() => setViewMode("report")}
+          onViewAttachments={() => setViewMode("attachments")}
+          onViewEvidences={() => setViewMode("evidences")}
+          onDownloadWord={() => handleDownloadReport(viewingReport)}
+          onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+          onPrint={() => window.print()}
+          onEdit={() => {
+            setIsCreating(true);
+          }}
+        >
+          {viewMode === "report" && (
+            <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
+          )}
+
+          {viewMode === "attachments" && (
+            <SignedAttachmentsViewer
+              record={finalViewingRecord}
+              onAttachMore={() => setIsAttachModalOpen(true)}
+              onDelete={handleAttachDelete}
+            />
+          )}
+
+          {viewMode === "evidences" && (
+            <EvidenceViewer
+              evidences={finalViewingRecord?.evidences || []}
+              onDelete={handleAttachDelete}
+            />
+          )}
+        </ReportViewerWrapper>
+
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => setIsAttachModalOpen(false)}
+          onSave={handleAttachSave}
+        />
+      </>
     );
   }
+
+
 
   if (isError) {
     return (
@@ -656,6 +813,10 @@ export default function MpOccurrenceReportsPage() {
           onView={(item) => setViewingReport(item)}
           onPrint={handlePrintReport}
           onDownload={handleDownloadReport}
+          onEdit={(item) => {
+            setViewingReport(item);
+            setIsCreating(true);
+          }}
         />
       )}
 
@@ -716,9 +877,9 @@ export default function MpOccurrenceReportsPage() {
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-            
+
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>

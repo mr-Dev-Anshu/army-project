@@ -4,10 +4,14 @@ import { FormSection } from "@/common/component/FormSection";
 import { useForm } from "@/context/FormContext";
 import { FormTextarea } from "@/common/component/FormTextarea";
 
+import { FileText, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+
 export default function Step11Remarks() {
   const { state, dispatch } = useForm();
 
   const remarks = state.formData.mpReport.remarks;
+  const attachments = state.formData.mpReport.attachments || [];
 
   const set = (k: string, v: string) =>
     dispatch({
@@ -16,15 +20,23 @@ export default function Step11Remarks() {
       value: v,
     });
 
-  const clear = () =>
+  const handleAttachments = (newFiles: any[]) => {
     dispatch({
       type: "SET_PATH",
-      path: "formData.mpReport.remarks",
-      value: { analysis: "", recommendation: "" },
+      path: "formData.mpReport.attachments",
+      value: newFiles,
     });
+  };
+
+  const removeAttachment = (index: number) => {
+    const next = [...attachments];
+    next.splice(index, 1);
+    handleAttachments(next);
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* ADD REMARKS SECTION */}
       <div className="mt-2">
         <p className="font-semibold mb-1">ANALYSIS</p>
         <FormTextarea
@@ -42,6 +54,54 @@ export default function Step11Remarks() {
           onChange={(v) => set("recommendation", v)}
         />
       </div>
+
+      {/* ATTACHMENTS SECTION - MOVED BELOW REMARKS */}
+      <div className="border-t pt-6">
+        {attachments.length > 0 && (
+          <div className="space-y-2">
+            <Label className="font-semibold text-sm text-gray-700">Attached Documents</Label>
+            <div className="space-y-2">
+              {attachments.map((item: any, index: number) => (
+                <div key={index} className="bg-white border rounded-md p-3 flex items-center justify-between shadow-sm">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className={`
+                                  w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                                  ${item.type?.toLowerCase().includes('certificate') ? 'bg-blue-100 text-blue-600' :
+                        item.type?.toLowerCase().includes('forms') ? 'bg-orange-100 text-orange-600' :
+                          'bg-green-100 text-green-600'
+                      }
+                                `}>
+                      {(item.type || "F")[0].toUpperCase()}
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{item.name}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] bg-gray-100 text-gray-500 px-1 rounded">{item.type || "Attachment"}</span>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-500 hover:underline flex items-center gap-1"
+                        >
+                          <FileText className="w-3 h-3" /> View
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => removeAttachment(index)}
+                    className="text-gray-400 hover:text-red-500"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

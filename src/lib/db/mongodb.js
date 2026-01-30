@@ -1,19 +1,58 @@
 import mongoose from "mongoose";
-// Production-safe MongoDB connector
-// - Uses only env vars: MONGODB_URI and optional MONGODB_FALLBACK_URI
-// - Does not mutate system DNS or read project files at runtime
-// - Uses conservative connection options and sanitized logging
+import dns from "dns";
+const dnsPromises = dns.promises;
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || null;
 const MONGODB_FALLBACK_URI = process.env.MONGODB_FALLBACK_URI || null;
-const NODE_ENV = process.env.NODE_ENV || "development";
 
-if (!MONGODB_URI) {
-  throw new Error("Please set MONGODB_URI environment variable");
+if (!MONGODB_URI && !MONGODB_FALLBACK_URI) {
+  throw new Error(
+    "Please define MONGODB_URI or MONGODB_FALLBACK_URI environment variable"
+  );
 }
 
 let cached = global.mongoose;
-if (!cached) cached = global.mongoose = { conn: null, promise: null };
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+function sleep(ms) {
+  return new Promise((res) => setTimeout(res, ms));
+}
+
+async function tryResolveSrvToNonSrv(srvUri) {
+  try {
+    const m = srvUri.match(/^mongodb\+srv:\/\/(?:([^:]+):([^@]+)@)?([^\/]+)(?:\/(.*))?$/);
+    if (!m) return null;
+    const [, user, pass, host, rest] = m;
+    const srvName = `_mongodb._tcp.${host}`;
+    const srvRecords = await dnsPromises.resolveSrv(srvName);
+    if (!srvRecords || srvRecords.length === 0) return null;
+    const hosts = srvRecords.map((r) => `${r.name}:${r.port}`).join(",");
+
+    // Try to obtain TXT record options (may be []).
+    let txtOptions = "";
+    try {
+      const txt = await dnsPromises.resolveTxt(host);
+      if (Array.isArray(txt) && txt.length > 0) {
+        txtOptions = txt.map((t) => t.join(""))
+          .filter(Boolean)
+          .join("&");
+      }
+    } catch (e) {
+      // ignore TXT resolution failure
+    }
+
+    const auth = user ? `${encodeURIComponent(user)}:${encodeURIComponent(pass)}@` : "";
+    const restPart = rest ? `/${rest}` : "";
+    const querySep = rest && rest.includes("?") ? "" : (txtOptions ? `?${txtOptions}` : "");
+
+    const nonSrv = `mongodb://${auth}${hosts}${restPart}${querySep}`;
+    return nonSrv;
+  } catch (e) {
+    return null;
+  }
+}
 
 export async function connectDB() {
   if (cached.conn) return cached.conn;
@@ -22,53 +61,80 @@ export async function connectDB() {
     // Conservative connection options for production
     const opts = {
       bufferCommands: false,
-      family: 4,
-      serverSelectionTimeoutMS: 10000, // fail faster if server unreachable
+      serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      maxPoolSize: 50,
-      minPoolSize: 0,
-      // Do not auto-create indexes in production
-      autoIndex: false,
+      maxPoolSize: process.env.MONGODB_MAX_POOL_SIZE ? Number(process.env.MONGODB_MAX_POOL_SIZE) : 10,
+      minPoolSize: process.env.MONGODB_MIN_POOL_SIZE ? Number(process.env.MONGODB_MIN_POOL_SIZE) : 0,
+      // Removed `useNewUrlParser` and `useUnifiedTopology` as they're ignored/unsupported in newer mongoose versions
+      family: 4,
     };
 
-    const connectOnce = async (uri) =>
-      mongoose.connect(uri, opts).then((m) => {
-        console.log("MongoDB connected");
-        return m;
-      });
+    cached.promise = (async () => {
+      // Try primary URI first if present
+      if (MONGODB_URI) {
+        const maxAttempts = 3;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            const conn = await mongoose.connect(MONGODB_URI, opts);
+            console.log(`✅ MongoDB connected using MONGODB_URI (attempt ${attempt})`);
+            return conn;
+          } catch (err) {
+            console.error(`❌ Primary MongoDB connection failed (attempt ${attempt}):`, err.message);
+            if (attempt < maxAttempts) {
+              const backoff = 500 * attempt;
+              console.log(`⏳ Retrying primary connection in ${backoff}ms...`);
+              await sleep(backoff);
+              continue;
+            }
 
-    cached.promise = connectOnce(MONGODB_URI).catch(async (err) => {
-      // Sanitize message
-      const msg = err && err.message ? err.message : String(err);
-      console.error("MongoDB primary connect failed:", msg);
+            // If URI is SRV, try resolving SRV to non-SRV and connect
+            if (MONGODB_URI.startsWith("mongodb+srv://")) {
+              console.log("ℹ️ Attempting to resolve SRV records and form non-SRV URI...");
+              const nonSrv = await tryResolveSrvToNonSrv(MONGODB_URI);
+              if (nonSrv) {
+                try {
+                  const conn2 = await mongoose.connect(nonSrv, opts);
+                  console.log("✅ MongoDB connected using resolved non-SRV URI");
+                  return conn2;
+                } catch (err2) {
+                  console.error("❌ Connecting with resolved non-SRV URI failed:", err2.message);
+                }
+              } else {
+                console.log("ℹ️ SRV resolution to non-SRV URI failed or returned no hosts");
+              }
+            }
 
-      // If fallback provided, try it (explicit env var only)
-      if (MONGODB_FALLBACK_URI) {
-        try {
-          console.log("Attempting MongoDB fallback URI");
-          return await connectOnce(MONGODB_FALLBACK_URI);
-        } catch (fbErr) {
-          const fbMsg = fbErr && fbErr.message ? fbErr.message : String(fbErr);
-          console.error("MongoDB fallback connect failed:", fbMsg);
+            // fall through to fallback if configured
+            if (!MONGODB_FALLBACK_URI) {
+              throw err;
+            }
+            console.log("ℹ️ Attempting MONGODB_FALLBACK_URI due to primary failure...");
+          }
         }
       }
 
-      // In production, throw to fail fast so ops can fix config
-      if (NODE_ENV === "production") {
-        console.error("MongoDB connection failed in production — exiting");
-        throw err;
+      // Try fallback URI if present
+      if (MONGODB_FALLBACK_URI) {
+        try {
+          const conn2 = await mongoose.connect(MONGODB_FALLBACK_URI, opts);
+          console.log("✅ MongoDB connected using MONGODB_FALLBACK_URI");
+          return conn2;
+        } catch (err2) {
+          console.error("❌ Fallback MongoDB connection failed:", err2.message);
+          throw err2;
+        }
       }
 
-      // For non-production, rethrow to let caller handle retry or debugging
-      throw err;
-    });
+      throw new Error("No MongoDB URI available to connect");
+    })();
   }
 
   try {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    throw e;
+    console.error("❌ MongoDB connection error:", e.message);
+    throw new Error(`Failed to connect to MongoDB: ${e.message}`);
   }
 
   return cached.conn;

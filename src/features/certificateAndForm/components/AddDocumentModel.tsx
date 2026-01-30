@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Modal from "@/common/ui/Modal";
-import FileDropZone from "@/components/ui/FileDropZone";
 import { Button } from "@/components/ui/button";
 import { uploadFile } from "@/lib/uploadFile";
 import {
@@ -10,6 +9,7 @@ import {
   useUpdateDocument,
 } from "@/features/certificateAndForm/hook";
 import { toast } from "react-toastify";
+import FileDropZone from "@/components/ui/FileDropZoneForCertificate";
 
 interface Props {
   open: boolean;
