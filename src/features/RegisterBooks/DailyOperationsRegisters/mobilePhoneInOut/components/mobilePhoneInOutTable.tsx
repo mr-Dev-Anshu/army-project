@@ -14,7 +14,7 @@ import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 // Define interface for data item
 interface RegisterItem {
-    _id: string;
+    _id?: string;
     serialNumber?: number;
     date?: string;
     details?: {
@@ -45,6 +45,7 @@ interface FilterState {
     dutyType: string;
     fromDate?: string;
     toDate?: string;
+    [key: string]: any;
 }
 
 interface MobilePhoneInOutTableProps {
@@ -303,7 +304,7 @@ const MobilePhoneInOutTable = ({
                                                             Edit
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
-                                                            onClick={() => handleDeleteClick(item._id)}
+                                                            onClick={() => item._id && handleDeleteClick(item._id)}
                                                             className="text-red-600 focus:text-red-600"
                                                         >
                                                             <Trash2 className="mr-2 h-4 w-4" />

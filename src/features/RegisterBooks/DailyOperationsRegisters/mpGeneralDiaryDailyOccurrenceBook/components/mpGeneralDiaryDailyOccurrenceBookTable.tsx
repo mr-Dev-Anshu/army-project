@@ -233,16 +233,7 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
                     unit: "",
                     fmn: "",
                 })}
-                onReset={() => setFilters({
-                    search: "",
-                    date: "",
-                    fromDate: "",
-                    toDate: "",
-                    sortOrder: "asc",
-                    offenceType: "",
-                    unit: "",
-                    fmn: "",
-                })}
+
                 placeholder="Search by report no..."
             />
 

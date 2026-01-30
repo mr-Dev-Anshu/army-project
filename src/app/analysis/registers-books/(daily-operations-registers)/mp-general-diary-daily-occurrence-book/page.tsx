@@ -245,8 +245,6 @@ const Page = () => {
                 ) : (
                     <MpGeneralDiaryDailyOccurrenceBookTable
                         data={registers || []}
-                        onView={handleView}
-                        onPrint={handlePrint}
                         onEdit={handleEdit}
                     />
                 )}
