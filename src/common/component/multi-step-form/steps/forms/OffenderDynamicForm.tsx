@@ -76,15 +76,10 @@ export default function OffenderDynamicForm({
     !title.toLowerCase().includes("co-driver");
 
   /* ================= SYNC LOCAL DATA ================= */
-  /* ================= SYNC LOCAL DATA ================= */
   useEffect(() => {
-    const newData = globalData || {};
-    // simple equality check for object to avoid infinite loop
-    if (JSON.stringify(localData) !== JSON.stringify(newData)) {
-      setLocalData(structuredClone(newData));
-      setErrors({});
-    }
-  }, [path, globalData]); // Removed localData from deps, but needed in comparison logic. Actually we can rely on globalData reference change or deep comparison.
+    setLocalData(structuredClone(globalData || {}));
+    setErrors({}); // ✅ Clear errors on form switch
+  }, [path, globalData]);
 
   /* ================= HYDRATE UI STATE (Fix Back Navigation) ================= */
   useEffect(() => {

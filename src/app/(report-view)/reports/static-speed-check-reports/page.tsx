@@ -9,17 +9,14 @@ import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 
-import { useGetStaticSpeedRecords, useGetStaticSpeedRecordById, useUpdateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
-import { useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+import { useGetStaticSpeedRecords, useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
 import StaticSpeedReport, {
   StaticSpeedReportProps,
 } from "@/components/reports/StaticSpeedReport";
 
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
-import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
 import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
-import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
@@ -36,7 +33,7 @@ const cleanSystemFields = (data: any): any => {
     Object.keys(data).forEach(key => {
       // Skip system fields
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
-
+      
       // Recursively clean children
       cleaned[key] = cleanSystemFields(data[key]);
     });
@@ -53,7 +50,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Vehicle Type": "vehicleType",
   "Vehicle Name": "vehicleName",
   "Date": "offenceOccurenceDetails.time",
-  "Time": "offenceOccurenceDetails.time",
+  "Time": "offenceOccurenceDetails.time", 
   "Location": "offenceOccurenceDetails.incidentLocation",
   "Place": "offenceOccurenceDetails.incidentLocation",
   "Authorized Speed": "offenceOccurenceDetails.authSpeed",
@@ -119,10 +116,9 @@ export default function StaticSpeedCheckReportsPage() {
   });
 
   const [isCreating, setIsCreating] = useState(false);
-  const [editingReport, setEditingReport] = useState<any>(null);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-
+  
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -134,7 +130,7 @@ export default function StaticSpeedCheckReportsPage() {
     fileInputRef.current?.click();
     setShowAddOptions(false);
   };
-
+  
   const handleImportJSON = () => {
     fileInputRef.current?.click();
     setShowAddOptions(false);
@@ -152,7 +148,7 @@ export default function StaticSpeedCheckReportsPage() {
     const fileName = file.name.toLowerCase();
     const isExcel = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
     const isJson = fileName.endsWith(".json");
-
+    
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -171,7 +167,7 @@ export default function StaticSpeedCheckReportsPage() {
 
         // FIX: Unwrap API response wrappers (e.g., { success: true, data: [...] })
         if (json && !Array.isArray(json) && json.data) {
-          json = json.data;
+            json = json.data;
         }
 
         let dataArray = Array.isArray(json) ? json : [json];
@@ -182,9 +178,9 @@ export default function StaticSpeedCheckReportsPage() {
         const mappedData = mapData(dataArray);
 
         await processImport(mappedData, createStaticSpeedRecord);
-
+        
         toast.success("Records imported successfully!");
-        await refetch();
+        await refetch(); 
       } catch (error: any) {
         console.error("Error importing file:", error);
         toast.error(`Failed to import records: ${error.message || "Unknown error"}`);
@@ -196,109 +192,8 @@ export default function StaticSpeedCheckReportsPage() {
     } else {
       reader.readAsText(file);
     }
-    event.target.value = "";
+    event.target.value = ""; 
   };
-
-  // NEW STATE FOR ATTACHMENT
-  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
-  const { mutateAsync: updateRecord } = useUpdateStaticSpeedRecord();
-
-  /* ================= HANDLERS ================= */
-  const handleAttachSave = async (newItems: AttachedItem[]) => {
-    if (!viewingReport?._id) return;
-
-    try {
-      const currentAttachments = viewingReport.customFields?.attachments || viewingReport.attachments || [];
-      const updatedAttachments = [...currentAttachments, ...newItems];
-
-      await updateRecord({
-        id: viewingReport._id,
-        data: {
-          customFields: {
-            ...viewingReport.customFields,
-            attachments: updatedAttachments
-          }
-        }
-      });
-
-      toast.success("Attachments Added Successfully");
-
-      // Update local state
-      setViewingReport((prev: any) => ({
-        ...prev,
-        customFields: {
-          ...prev.customFields,
-          attachments: updatedAttachments
-        }
-      }));
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to add attachments");
-    }
-  };
-
-  // HANDLE ATTACHMENT DELETE
-  const handleAttachDelete = async (attachment: any) => {
-    if (!viewingReport?._id) {
-      console.error("No viewing report ID found");
-      return;
-    }
-
-    console.log("Deleting attachment:", attachment);
-
-    try {
-      const currentAttachments =
-        viewingReport.customFields?.attachments ||
-        viewingReport.attachments ||
-        viewingReport.certificates ||
-        [];
-
-      console.log("Current attachments:", currentAttachments);
-      const updatedAttachments = currentAttachments.filter((item: any) => item.url !== attachment.url);
-      console.log("Updated attachments:", updatedAttachments);
-
-      const updatePayload: any = {
-        id: viewingReport._id,
-        data: {}
-      };
-
-      if (viewingReport.customFields?.attachments) {
-        updatePayload.data.customFields = {
-          ...viewingReport.customFields,
-          attachments: updatedAttachments
-        };
-      } else if (viewingReport.certificates) {
-        updatePayload.data.certificates = updatedAttachments;
-      } else {
-        updatePayload.data.customFields = {
-          ...viewingReport.customFields,
-          attachments: updatedAttachments
-        };
-      }
-
-      await updateRecord(updatePayload);
-      toast.success("Attachment Deleted Successfully");
-
-      setViewingReport((prev: any) => {
-        const updated = { ...prev };
-        if (prev.customFields?.attachments) {
-          updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
-        } else if (prev.certificates) {
-          updated.certificates = updatedAttachments;
-        } else {
-          updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
-        }
-        return updated;
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to delete attachment: " + (error as any)?.message || "Unknown error");
-    }
-  };
-
-  /* ================= AUTO PRINT ================= */
-  // ... (rest of the file until return block)
-
 
   useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
@@ -537,83 +432,22 @@ export default function StaticSpeedCheckReportsPage() {
     );
   }
 
-  /* ================= VIEW MODE STATE ================= */
-  const [viewMode, setViewMode] = useState<"report" | "attachments">("report");
-
-  // Debug logging
-  useEffect(() => {
-    if (viewingReport) {
-      console.log("=== STATIC SPEED - Viewing Report ===");
-      console.log("Full Report Object:", viewingReport);
-      console.log("Certificates field:", viewingReport.certificates);
-      console.log("Custom Fields:", viewingReport.customFields);
-      console.log("All keys:", Object.keys(viewingReport));
-    }
-  }, [viewingReport]);
-
-  // When a report is selected for viewing we may only have a lightweight
-  // item from the list endpoint. Fetch the full record (including
-  // certificates/attachments) by id and prefer that when rendering
-  // the attachments viewer.
-  const viewingId = viewingReport?._id ?? viewingReport?.originalData?._id ?? null;
-  const viewingIdStr = viewingId ?? "";
-  const { data: viewingFullRecordData, isLoading: isViewingRecordLoading } = useGetStaticSpeedRecordById(viewingIdStr);
-  const finalViewingRecord = viewingFullRecordData?.data ?? viewingFullRecordData ?? viewingReport?.originalData ?? viewingReport;
-
-  if (isCreating) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Button onClick={() => { setIsCreating(false); setEditingReport(null); }} className="m-4">
-          <ArrowLeft /> Back
-        </Button>
-        <StaticSpeedForm onCancel={() => { setIsCreating(false); setEditingReport(null); }} existingReport={editingReport} />
-      </div>
-    );
-  }
-
   if (viewingReport) {
     return (
-      <>
-        <ReportViewerWrapper
-          title="STATIC SPEED CHECK REPORT"
-          onBack={() => {
-            setViewingReport(null);
-            setShouldAutoPrint(false);
-            setViewMode("report");
-          }}
-          isDownloading={isDownloading}
-          downloadType={downloadType}
-          activeView={viewMode}
-          onViewReport={() => setViewMode("report")}
-          onViewAttachments={() => setViewMode("attachments")}
-          onDownloadWord={() => handleDownloadReport(viewingReport)}
-          onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-          onPrint={() => window.print()}
-          onEdit={() => {
-            setEditingReport(finalViewingRecord);
-            setIsCreating(true);
-            setViewingReport(null);
-          }}
-        >
-          {viewMode === "report" && (
-            <StaticSpeedReport {...mapToReportProps(viewingReport)} />
-          )}
-
-          {viewMode === "attachments" && (
-            <SignedAttachmentsViewer
-              record={finalViewingRecord}
-              onAttachMore={() => setIsAttachModalOpen(true)}
-              onDelete={handleAttachDelete}
-            />
-          )}
-        </ReportViewerWrapper>
-
-        <FormAttachmentModal
-          isOpen={isAttachModalOpen}
-          onClose={() => setIsAttachModalOpen(false)}
-          onSave={handleAttachSave}
-        />
-      </>
+      <ReportViewerWrapper
+        title="STATIC SPEED CHECK REPORT"
+        onBack={() => {
+          setViewingReport(null);
+          setShouldAutoPrint(false);
+        }}
+        isDownloading={isDownloading}
+        downloadType={downloadType}
+        onDownloadWord={() => handleDownloadReport(viewingReport)}
+        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+        onPrint={() => window.print()}
+      >
+        <StaticSpeedReport {...mapToReportProps(viewingReport)} />
+      </ReportViewerWrapper>
     );
   }
 
@@ -658,10 +492,6 @@ export default function StaticSpeedCheckReportsPage() {
           onView={setViewingReport}
           onPrint={handlePrintReport}
           onDownload={handleDownloadReport}
-          onEdit={(report) => {
-            setEditingReport(report);
-            setIsCreating(true);
-          }}
         />
       )}
 
@@ -723,9 +553,9 @@ export default function StaticSpeedCheckReportsPage() {
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-
+            
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>

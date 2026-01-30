@@ -29,13 +29,12 @@ export async function PUT(request, { params }) {
     // 1. Unwrapping params
     const { id } = await params;
     const body = await request.json();
-    
 
     // Validation commented out to allow empty/partial updates from frontend.
     const value = body;
 
     // 2. Using the unwrapped id
-    const updatedOffence = await generalTrafficOffenceService.update(id,body);
+    const updatedOffence = await generalTrafficOffenceService.update(id, value);
 
     if (!updatedOffence) {
       return NextResponse.json({ error: "Offence not found" }, { status: 404 });

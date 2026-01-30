@@ -5,9 +5,6 @@ import {
   onDutyDetailsSchema,
 } from "./GeneralTraficOffence";
 
-const { Schema } = mongoose;
-
-
 const offenceOccurrenceSchema = new mongoose.Schema({
   time: {
     type: Date,
@@ -34,16 +31,6 @@ const offenceOccurrenceSchema = new mongoose.Schema({
   },
   offenceTypes: [{ type: String }],
   offenceTypeReference: [{ type: String }],
-});
-
-export const documentSchema = new Schema({
-  statement: { type: String },
-  url: { type: String },
-  type:{type:String},
-  customFields: {
-    type: Schema.Types.Mixed,
-    default: {},
-  },
 });
 const staticSpeedCheckRecordSchema = new mongoose.Schema(
   {
@@ -86,9 +73,6 @@ const staticSpeedCheckRecordSchema = new mongoose.Schema(
     actionStatusRemark: {
       type: String,
     },
-        certificates: [documentSchema],
-    
-
   },
   {
     timestamps: true,
