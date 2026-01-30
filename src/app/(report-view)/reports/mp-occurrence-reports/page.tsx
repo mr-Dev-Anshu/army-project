@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useRef } from "react";
-import { Loader2, ArrowLeft, Download, FileSpreadsheet, FileJson, Plus, X } from "lucide-react";
-import { toast } from "react-toastify";
+
 
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
 import { useGetAllMPReports, useGetMPReportById, useUpdateMPReport } from "@/features/mpReports/hooks";
@@ -14,7 +13,7 @@ import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/report
 
 import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import EvidenceViewer from "@/components/common/EvidenceViewer";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
@@ -215,9 +214,9 @@ export default function MpOccurrenceReportsPage() {
   };
   
 
-  
-   /*const [showAddOptions, setShowAddOptions] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);*/
+    
+    const [showAddOptions, setShowAddOptions] = useState(false);
+     const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { mutateAsync: createMPReport } = useCreateMPReport();
 
