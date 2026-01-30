@@ -220,7 +220,7 @@ export default function VehicleDetailsForm({
       )}
 
       {/* DRIVER / RIDER */}
-      <div>
+      {/* <div>
         <p className="font-semibold mb-2">Select Who was the Driver/Rider?</p>
         <RadioGroup
           value={driverType}
@@ -245,7 +245,7 @@ export default function VehicleDetailsForm({
             </label>
           ))}
         </RadioGroup>
-      </div>
+      </div> */}
 
       {/* OFFENDER DETAILS */}
       {driverType && (
