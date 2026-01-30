@@ -5,19 +5,16 @@ import { Loader2, ArrowLeft, FileSpreadsheet, FileJson, Plus, X } from "lucide-r
 import { toast } from "react-toastify";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
-import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 
-import { useGetAllTrafficOffences, useGetTrafficOffenceById, useUpdateTrafficOffence } from "@/features/generalTraficOffence/hooks";
-import { useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
+import { useGetAllTrafficOffences, useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
 import { processImport } from "@/lib/processImport";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
-import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
 
 import MilitaryPoliceReport, {
   MilitaryPoliceReportProps,
@@ -80,9 +77,9 @@ const mapData = (data: any[]) => {
     });
 
     if (newItem.vehicleNumber) {
-      newItem.isVehicleInvolved = true;
+        newItem.isVehicleInvolved = true;
     } else if (newItem.isVehicleInvolved === undefined) {
-      newItem.isVehicleInvolved = false;
+        newItem.isVehicleInvolved = false;
     }
 
     return newItem;
@@ -96,13 +93,11 @@ const TableSection = ({
   isVehicleInvolved,
   onView,
   onPrint,
-  onEdit,
 }: {
   groups: any[];
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
-  onEdit?: (offence: any) => void;
 }) => {
   return (
     <div className="bg-white rounded-lg shadow border mt-6 overflow-hidden">
@@ -117,7 +112,6 @@ const TableSection = ({
         isVehicleInvolved={isVehicleInvolved}
         onView={onView}
         onPrint={onPrint}
-        onEdit={onEdit}
       />
     </div>
   );
@@ -131,7 +125,6 @@ export default function ReportsPage({
   viewType?: "vehicle" | "no-vehicle";
 }) {
   const [isCreating, setIsCreating] = useState(false);
-  const [editingReport, setEditingReport] = useState<any>(null); // State for editing
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -172,7 +165,7 @@ export default function ReportsPage({
         const mappedData = mapData(dataArray);
 
         await processImport(mappedData, createTrafficOffence);
-
+        
         toast.success("Records imported successfully!");
         await refetch();
       } catch (error: any) {
@@ -204,135 +197,7 @@ export default function ReportsPage({
     setShowAddOptions(false);
   };
 
-  // NEW STATE FOR ATTACHMENT MODAL
-  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
-  const { mutateAsync: updateOffence } = useUpdateTrafficOffence();
-
   /* ================= FILTER STATE ================= */
-  // ...
-
-  // HANDLE ATTACHMENT SAVE
-  const handleAttachSave = async (newItems: AttachedItem[]) => {
-    if (!viewingReport?._id) return;
-
-    try {
-      // Get existing attachments
-      const currentAttachments = viewingReport.customFields?.attachments || viewingReport.attachments || [];
-      const updatedAttachments = [...currentAttachments, ...newItems];
-
-      // Update API
-      await updateOffence({
-        id: viewingReport._id,
-        data: {
-          customFields: {
-            ...viewingReport.customFields,
-            attachments: updatedAttachments
-          }
-        }
-      });
-
-      toast.success("Attachments Added Successfully");
-
-      // Update local viewing state to reflect changes immediately
-      setViewingReport((prev: any) => ({
-        ...prev,
-        customFields: {
-          ...prev.customFields,
-          attachments: updatedAttachments
-        }
-      }));
-
-    } catch (error) {
-      console.error("Failed to add attachments", error);
-      toast.error("Failed to add attachments");
-    }
-  };
-
-  // HANDLE ATTACHMENT DELETE
-  const handleAttachDelete = async (attachment: any) => {
-    if (!viewingReport?._id) {
-      console.error("No viewing report ID found");
-      return;
-    }
-
-    console.log("Deleting attachment:", attachment);
-    console.log("Current viewingReport:", viewingReport);
-
-    try {
-      // Check multiple possible locations for attachments
-      const currentAttachments =
-        viewingReport.customFields?.attachments ||
-        viewingReport.attachments ||
-        viewingReport.certificates ||
-        [];
-
-      console.log("Current attachments before delete:", currentAttachments);
-
-      // Filter out the deleted attachment by URL (most unique identifier)
-      const updatedAttachments = currentAttachments.filter((item: any) => {
-        const isSame = item.url === attachment.url;
-        if (isSame) console.log("Found matching attachment to delete:", item);
-        return !isSame;
-      });
-
-      console.log("Updated attachments after filter:", updatedAttachments);
-
-      // Update API - try to preserve the original structure
-      const updatePayload: any = {
-        id: viewingReport._id,
-        data: {}
-      };
-
-      // Update in the same location where we found them
-      if (viewingReport.customFields?.attachments) {
-        updatePayload.data.customFields = {
-          ...viewingReport.customFields,
-          attachments: updatedAttachments
-        };
-      } else if (viewingReport.certificates) {
-        updatePayload.data.certificates = updatedAttachments;
-      } else {
-        updatePayload.data.customFields = {
-          ...viewingReport.customFields,
-          attachments: updatedAttachments
-        };
-      }
-
-      console.log("Update payload:", updatePayload);
-
-      await updateOffence(updatePayload);
-
-      toast.success("Attachment Deleted Successfully");
-
-      // Update local viewing state to reflect changes immediately
-      setViewingReport((prev: any) => {
-        const updated = { ...prev };
-
-        if (prev.customFields?.attachments) {
-          updated.customFields = {
-            ...prev.customFields,
-            attachments: updatedAttachments
-          };
-        } else if (prev.certificates) {
-          updated.certificates = updatedAttachments;
-        } else {
-          updated.customFields = {
-            ...prev.customFields,
-            attachments: updatedAttachments
-          };
-        }
-
-        console.log("Updated local state:", updated);
-        return updated;
-      });
-
-    } catch (error) {
-      console.error("Failed to delete attachment", error);
-      toast.error("Failed to delete attachment: " + (error as any)?.message || "Unknown error");
-    }
-  };
-
-
 
   const [filters, setFilters] = useState({
     search: "",
@@ -545,7 +410,7 @@ export default function ReportsPage({
   };
 
   /* ================= EXCEL EXPORT HANDLER ================= */
-
+  
   const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
 
   const handleExcelDownload = () => {
@@ -555,23 +420,23 @@ export default function ReportsPage({
     // 2. Define Columns based on YOUR JSON
     const columns: ExcelColumn[] = [
       { header: "Report No", key: "reportId" },
-      { header: "Offence Type", key: "offenceTypes[0]" },
-
+      { header: "Offence Type", key: "offenceTypes[0]" }, 
+      
       // Date Formatting
-      {
-        header: "Date",
+      { 
+        header: "Date", 
         key: "offenceOccurenceDetails.timeOfOffence",
         formatter: (val) => val ? new Date(val).toLocaleDateString("en-GB") : ""
       },
-      {
-        header: "Time",
+      { 
+        header: "Time", 
         key: "offenceOccurenceDetails.timeOfOffence",
-        formatter: (val) => val ? new Date(val).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }) : ""
+        formatter: (val) => val ? new Date(val).toLocaleTimeString("en-GB", {hour: '2-digit', minute:'2-digit'}) : ""
       },
 
       { header: "Location", key: "offenceOccurenceDetails.incidentLocation" },
       { header: "Description", key: "offenceOccurenceDetails.description" },
-
+      
       // Vehicle
       { header: "Vehicle No", key: "vehicleNumber" },
       { header: "Vehicle Type", key: "vehicleType" },
@@ -579,7 +444,7 @@ export default function ReportsPage({
 
       // Offender (Note: "Select Rank" matches your JSON key)
       { header: "Offender Name", key: "offenders[0].offenderDetails.name" },
-      { header: "Rank", key: "offenders[0].offenderDetails.Select Rank" },
+      { header: "Rank", key: "offenders[0].offenderDetails.Select Rank" }, 
       { header: "Army No", key: "offenders[0].offenderDetails.armyNumber" },
       { header: "Unit", key: "offenders[0].offenderDetails.unit" },
       { header: "FMN", key: "offenders[0].offenderDetails.fmn" },
@@ -606,81 +471,32 @@ export default function ReportsPage({
       ? "General & Traffic Offence Reports - Vehicle Involved"
       : "General & Traffic Offence Reports - No Vehicle Involved";
 
-  /* ================= VIEW MODE STATE ================= */
-  const [viewMode, setViewMode] = useState<"report" | "attachments">("report");
-
-  // When viewing a grouped offence item we may not have the full offence
-  // object from the grouped endpoint. Fetch the single offence by id
-  // so attachments (`certificates` etc.) are available to the viewer.
-  const viewingId = viewingReport?._id ?? viewingReport?.originalData?._id ?? null;
-  const viewingIdStr = viewingId ?? "";
-  const { data: viewingFullRecordData } = useGetTrafficOffenceById(viewingIdStr);
-  const finalViewingRecord = viewingFullRecordData?.data ?? viewingFullRecordData ?? viewingReport?.originalData ?? viewingReport;
-
-  // Edit hydration
-  const editingId = editingReport?._id || editingReport?.reportId || "";
-  const { data: editingFullData, isLoading: isLoadingEdit } = useGetTrafficOffenceById(editingId);
-  const finalEditingRecord = editingFullData?.data ?? editingFullData ?? editingReport;
-
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100">
-        <Button onClick={() => { setIsCreating(false); setEditingReport(null); }} className="m-4">
+        <Button onClick={() => setIsCreating(false)} className="m-4">
           <ArrowLeft /> Back
         </Button>
-        {isLoadingEdit && editingId ? (
-          <div className="flex h-96 items-center justify-center">
-            <Loader2 className="animate-spin w-8 h-8 text-gray-500" />
-          </div>
-        ) : (
-          <MultiStepForm existingOffence={finalEditingRecord} />
-        )}
+        <MultiStepForm />
       </div>
     );
   }
 
   if (viewingReport) {
     return (
-      <>
-        <ReportViewerWrapper
-          title="REPORT PREVIEW"
-          onBack={() => {
-            setViewingReport(null);
-            setViewMode("report");
-          }}
-          isDownloading={isDownloading}
-          downloadType={downloadType}
-          activeView={viewMode}
-          onViewReport={() => setViewMode("report")}
-          onViewAttachments={() => setViewMode("attachments")}
-          onDownloadWord={() => handleDownloadReport(viewingReport)}
-          onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-          onPrint={() => window.print()}
-          onEdit={() => {
-            setEditingReport(viewingReport);
-            setIsCreating(true);
-            setViewingReport(null);
-          }}
-        >
-          {viewMode === "report" && (
-            <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
-          )}
-
-          {viewMode === "attachments" && (
-            <SignedAttachmentsViewer
-              record={finalViewingRecord}
-              onAttachMore={() => setIsAttachModalOpen(true)}
-              onDelete={handleAttachDelete}
-            />
-          )}
-        </ReportViewerWrapper>
-
-        <FormAttachmentModal
-          isOpen={isAttachModalOpen}
-          onClose={() => setIsAttachModalOpen(false)}
-          onSave={handleAttachSave}
-        />
-      </>
+      <ReportViewerWrapper
+        title="REPORT PREVIEW"
+        onBack={() => {
+          setViewingReport(null);
+        }}
+        isDownloading={isDownloading}
+        downloadType={downloadType}
+        onDownloadWord={() => handleDownloadReport(viewingReport)}
+        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+        onPrint={() => window.print()}
+      >
+        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+      </ReportViewerWrapper>
     );
   }
 
@@ -732,10 +548,6 @@ export default function ReportsPage({
           isVehicleInvolved={viewType === "vehicle"}
           onView={setViewingReport}
           onPrint={handlePrintReport}
-          onEdit={(offense) => {
-            setEditingReport(offense);
-            setIsCreating(true);
-          }}
         />
       ) : (
         <div className="text-center text-gray-500 mt-10">No records found</div>
@@ -799,9 +611,9 @@ export default function ReportsPage({
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-
+            
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>

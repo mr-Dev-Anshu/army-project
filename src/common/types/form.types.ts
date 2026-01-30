@@ -18,12 +18,6 @@ export interface VehicleDetailsState {
   vehicleNumber: string;
 }
 
-export interface AttachmentItem {
-  type: "Certificate" | "Forms" | "Letter";
-  name: string;
-  url: string;
-}
-
 // ---------- OFFENDER ----------
 export interface OffenderWithoutVehicleState {
   offenderType: OffenderType | "";
@@ -142,9 +136,6 @@ export interface MpReportState {
     analysis: string;
     recommendation: string;
   };
-
-  certificates?: string[]; // Legacy support during migration?
-  attachments?: AttachmentItem[]; // NEW STRUCTURE
 }
 
 // ---------- DEPENDENTS ----------
@@ -261,8 +252,7 @@ export interface StaticSpeedFormState {
   offenderDetails: any;
   offenderPeople: any[];
 
-  documents?: string[];
-  attachments?: AttachmentItem[];
+
 }
 
 // ---------- FORM ROOT ----------
