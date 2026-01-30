@@ -18,18 +18,19 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
     return null;
   };
 
+
+
   // Extract all potential fields
   const armyNo = get("armyNo", "armyNumber", "serviceNumber", "Army No.", "DD veh rider no.");
+  const serviceNo = get("Employee ID", "serviceNumber", "serviceNo");
   const rank = get("rank", "Select Rank", "Rank");
-  const name = get("name", "personName", "fullName", "Driver Name", "Name");
-
+  const name = get("name", "Name");
   // S/O or D/O or Mother's Name
-  const relationName = get("fatherName", "so", "S/O", "moName", "M/O Name");
+  const relationName = get("fathersName", "so",);
   const relationLabel = details.moName ? "M/O" : "S/O"; // Simple heuristic, or just display generic label
-
   const unit = get("unit", "Unit");
   const address = get("address", "Place of Stay", "Address");
-  const iCard = get("identityCard", "iCardNo", "ICard", "Pass ID & No.", "passId");
+  const iCard = get("iCardNumber", "I Card Number", "I Card No", "iCardNo", "ICard", "Pass ID & No.", "passId");
   const aadhar = get("aadharCard", "aadharNumber", "Aadhar Card No.");
   const mobile = get("contactNumber", "mobile", "Mobile No");
 
@@ -42,9 +43,9 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
     { label: "Unit", value: unit }, // Useful if Unit column is empty or for context
     { label: relationLabel, value: relationName },
     { label: "Address", value: address },
-    { label: "I-Card", value: iCard },
-    { label: "Aadhar", value: aadhar },
-    { label: "Contact", value: mobile },
+    { label: "I-Card No", value: iCard },
+    { label: "Aadhar No", value: aadhar },
+    { label: "Contact No", value: mobile },
     { label: "C/O Rank", value: coRank },
   ];
 

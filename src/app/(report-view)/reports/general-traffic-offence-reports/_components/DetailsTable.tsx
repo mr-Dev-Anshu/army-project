@@ -141,13 +141,7 @@ export default function DetailsTable({
         cell: (offence) => (
           <div>
             <div className="font-medium text-gray-900">
-              {offence.offenceOccurenceDetails?.incidentLocation ||
-                "Unknown Location"}
-            </div>
-            <div className="text-gray-500 font-normal mt-1">
-              {" "}
-              {offence.offenceOccurenceDetails?.incidentLocation ||
-                "Unknown Location"}
+              {offence.offenceOccurenceDetails?.incidentLocation}
             </div>
           </div>
         ),
@@ -162,7 +156,7 @@ export default function DetailsTable({
         cell: (offence) => {
           const primaryDetails = offence.offenders?.[0]?.offenderDetails || {};
           const reportingMP =
-            offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+            offence.onDutyDetailsMPReporting?.nameReportingMP;
           return (
             <OffenderDetailsCell
               details={primaryDetails}
@@ -175,16 +169,14 @@ export default function DetailsTable({
         header: "Unit",
         cell: (offence) =>
           offence.onDutyDetailsMPReporting?.unit ||
-          offence.offenders?.[0]?.offenderDetails?.unit ||
-          "N/A",
+          offence.offenders?.[0]?.offenderDetails?.unit,
         className: "min-w-[100px]",
       },
       {
         header: "FMN",
         cell: (offence) =>
           offence.fmn ||
-          offence.offenders?.[0]?.offenderDetails?.fmn ||
-          "HQ 21 Corps",
+          offence.offenders?.[0]?.offenderDetails?.fmn,
         className: "min-w-[100px]",
       },
       {
@@ -193,11 +185,11 @@ export default function DetailsTable({
         cell: (offence) => (
           <div title={offence.offenceOccurenceDetails?.description || ""}>
             <div className="font-medium text-gray-900">
-              {offence.currentOffenceType || "Traffic Offence"}
+              {offence.currentOffenceType}
             </div>
-            <div className="text-xs text-gray-500 mt-1 line-clamp-2">
-              {offence.offenceOccurenceDetails?.description || ""}
-            </div>
+            {/* <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+              {offence.offenceOccurenceDetails?.description}
+            </div> */}
           </div>
         ),
       },
@@ -206,11 +198,11 @@ export default function DetailsTable({
         className: "min-w-[150px]",
         cell: (offence) => (
           <div>
-            <div className="font-semibold text-gray-900">
-              {offence.vehicleNumber || "N/A"}
+            <div className="font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
+              {offence.vehicleNumber}
             </div>
             <div className="text-gray-500 text-xs">
-              {offence.vehicleName || "Unknown Vehicle"}
+              {offence.vehicleName}
             </div>
           </div>
         ),
@@ -220,7 +212,7 @@ export default function DetailsTable({
         className: "min-w-[140px]",
         cell: (offence) => {
           const reportNo = offence.reportId || offence.reportNumber;
-          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+          return <span className="text-gray-900 text-xs">{reportNo}</span>;
         },
       },
       {
@@ -254,7 +246,7 @@ export default function DetailsTable({
           if (!coDriver) return <span className="text-gray-400">-</span>;
           const details = coDriver.offenderDetails || {};
           const reportingMP =
-            offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+            offence.onDutyDetailsMPReporting?.nameReportingMP;
           return <OffenderDetailsCell details={details} mpName={reportingMP} />;
         },
       },
@@ -267,7 +259,7 @@ export default function DetailsTable({
         cell: (offence) => {
           const primaryDetails = offence.offenders?.[0]?.offenderDetails || {};
           const reportingMP =
-            offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+            offence.onDutyDetailsMPReporting?.nameReportingMP;
           return (
             <OffenderDetailsCell
               details={primaryDetails}
@@ -281,16 +273,14 @@ export default function DetailsTable({
         className: "min-w-[100px]",
         cell: (offence) =>
           offence.onDutyDetailsMPReporting?.unit ||
-          offence.offenders?.[0]?.offenderDetails?.unit ||
-          "N/A",
+          offence.offenders?.[0]?.offenderDetails?.unit,
       },
       {
         header: "FMN",
         className: "min-w-[100px]",
         cell: (offence) =>
           offence.fmn ||
-          offence.offenders?.[0]?.offenderDetails?.fmn ||
-          "HQ 21 Corps",
+          offence.offenders?.[0]?.offenderDetails?.fmn,
       },
       {
         header: "Report no.",
@@ -298,11 +288,8 @@ export default function DetailsTable({
         cell: (offence) => {
           const reportNo =
             offence.reportId ||
-            offence.reportNumber ||
-            `GTO/21 CPU/${(
-              offence._id?.slice(-4) || "0000"
-            ).toUpperCase()}/${new Date().getFullYear()}`;
-          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+            offence.reportNumber
+          return <span className="text-gray-900 text-xs">{reportNo}</span>;
         },
       },
       {
@@ -333,8 +320,7 @@ export default function DetailsTable({
         className: "min-w-[300px] max-w-md",
         cell: (offence) => (
           <div className="text-gray-700 text-xs">
-            {offence.offenceOccurenceDetails?.description ||
-              "No description provided."}
+            {offence.offenceOccurenceDetails?.description}
           </div>
         ),
       },
