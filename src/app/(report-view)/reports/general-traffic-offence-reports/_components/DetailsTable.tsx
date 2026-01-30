@@ -38,6 +38,7 @@ export default function DetailsTable({
   onPrint,
   onEdit,
 }: DetailsTableProps) {
+  
   const { mutateAsync: updateOffence, isPending: isUpdating } =
     useUpdateTrafficOffence();
   const { mutateAsync: deleteOffence, isPending: isDeleting } =
