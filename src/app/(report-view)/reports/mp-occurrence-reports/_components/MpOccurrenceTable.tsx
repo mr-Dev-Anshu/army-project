@@ -9,6 +9,9 @@ import {
   Copy,
   Trash,
   Download,
+  Check,
+  Square,
+  CheckSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -26,6 +29,7 @@ import MpDetailsCell from "./MpDetailsCell";
 import { toast } from "react-toastify";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
@@ -82,6 +86,21 @@ export default function MpOccurrenceTable({
       reportId,
       type: "delete",
     });
+  };
+
+  const handleInitialsClick = async (reportId: string, field: "initialsMPCRNCO" | "initialsCO", currentValue: boolean) => {
+    try {
+      await updateReport({
+        id: reportId,
+        data: {
+          [field]: !currentValue
+        }
+      });
+      toast.success(!currentValue ? "Signed successfully" : "Unsigned successfully");
+    } catch (error) {
+      console.error("Failed to update initials", error);
+      toast.error("Failed to update status");
+    }
   };
 
   const handlePrintClick = React.useCallback((reportId: string) => {
@@ -143,13 +162,13 @@ export default function MpOccurrenceTable({
           <span className="text-gray-900">{item.displayIndex}</span>
         ),
         className:
-          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
+          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-300",
         headerClassName:
-          "sticky left-0 z-20 bg-gray-50 border-r border-gray-200 w-12",
+          "sticky left-0 z-20 bg-gray-50 border-r border-gray-300 w-12",
       },
       {
         header: "Date & Time of Occu.",
-        className: "min-w-[120px]",
+        className: "min-w-[120px] border-r border-gray-300",
         cell: (item) => (
           <div>
             <div className="font-semibold text-gray-900">{item.date}</div>
@@ -159,7 +178,7 @@ export default function MpOccurrenceTable({
       },
       {
         header: "Place of Occu.",
-        className: "min-w-[150px]",
+        className: "min-w-[150px] border-r border-gray-300",
         cell: (item) => (
           <div className="font-medium text-gray-900">
             {item.placeOfOccurrence}
@@ -168,12 +187,12 @@ export default function MpOccurrenceTable({
       },
       {
         header: "Assigned MP Particulars",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (item) => <MpDetailsCell details={item.assignedMP} />,
       },
       {
         header: "Particulars of Individual/Victim",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (item) => (
           // Using OffenderDetailsCell as a generic Person info cell
           <OffenderDetailsCell
@@ -182,23 +201,38 @@ export default function MpOccurrenceTable({
           />
         ),
       },
+
       {
         header: "Offence Type",
-        className: "min-w-[150px]",
+        className: "min-w-[150px] border-r border-gray-300",
         cell: (item) => (
           <div className="font-medium text-gray-900">{item.offenceType}</div>
         ),
       },
       {
+        header: "Veh. BA No. / Make & Take",
+        className: "min-w-[150px] border-r border-gray-300",
+        cell: (item) => (
+          <div>
+            <div className="font-semibold text-gray-900 border-b border-gray-300 pb-1 mb-1">
+              {item.vehicleDetails?.number}
+            </div>
+            <div className="text-gray-500 text-xs text-wrap">
+              {item.vehicleDetails?.name}
+            </div>
+          </div>
+        ),
+      },
+      {
         header: "Brief of Occurrence",
-        className: "min-w-[250px]",
+        className: "min-w-[250px] border-r border-gray-300",
         cell: (item) => (
           <div className="text-gray-700 text-xs">{item.brief}</div>
         ),
       },
       {
         header: "List of Attached Documents & Statements",
-        className: "min-w-[250px]",
+        className: "min-w-[250px] border-r border-gray-300",
         cell: (item) => (
           <ul className="list-decimal pl-4 text-xs text-gray-600 space-y-1">
             {item.documents?.map((doc: any, i: number) => (
@@ -210,28 +244,40 @@ export default function MpOccurrenceTable({
       },
       {
         header: "Report no.",
-        className: "min-w-[140px]",
+        className: "min-w-[140px] border-r border-gray-300",
         cell: (item) => (
-          <span className="text-gray-600 text-xs">{item.reportNumber}</span>
+          <span className="text-gray-900 text-xs">{item.reportNumber}</span>
         ),
       },
       {
         header: "Initials of MPCR NCO",
-        className: "text-center w-24",
+        className: "text-center w-24 border-r border-gray-300",
         cell: (item) => (
-          <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
+          <div className="flex justify-center py-2">
+            <Checkbox
+              checked={!!item.initialsMPCRNCO}
+              onCheckedChange={() => item._id && handleInitialsClick(item._id, "initialsMPCRNCO", !!item.initialsMPCRNCO)}
+              className="w-5 h-5 border-gray-400 data-[state=checked]:bg-black data-[state=checked]:text-white"
+            />
+          </div>
         ),
       },
       {
         header: "Initials of CO",
-        className: "text-center w-24",
+        className: "text-center w-24 border-r border-gray-300",
         cell: (item) => (
-          <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
+          <div className="flex justify-center py-2">
+            <Checkbox
+              checked={!!item.initialsCO}
+              onCheckedChange={() => item._id && handleInitialsClick(item._id, "initialsCO", !!item.initialsCO)}
+              className="w-5 h-5 border-gray-400 data-[state=checked]:bg-black data-[state=checked]:text-white"
+            />
+          </div>
         ),
       },
       {
         header: "Remark",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (item) => (
           <span className="text-gray-400 text-xs italic">Add Remark</span>
         ),
@@ -239,9 +285,9 @@ export default function MpOccurrenceTable({
       {
         header: "Action Status",
         className:
-          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
+          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-300",
         headerClassName:
-          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
+          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-300",
         cell: (item) => {
           const isTaken = item.actionStatus === true;
           return (
@@ -338,7 +384,7 @@ export default function MpOccurrenceTable({
       <DynamicTable
         data={processedData}
         columns={columns}
-        className="no-scrollbar"
+        className="no-scrollbar max-h-[calc(100vh-220px)]"
       />
       <ConfirmationModal
         isOpen={modalState.isOpen}

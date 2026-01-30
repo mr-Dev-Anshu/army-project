@@ -97,13 +97,16 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
       const name = get("name", "Full Name", "civilianName");
       const aadhar = get("aadharCardNo", "Aadhar Card No.", "civilianAadharCardNumber");
       const father = get("so", "Father's / Husband's Name", "civilianFathersName");
+      const address = get("address", "Address", "civilianAddress");
+      const iCard = get("iCardNumber", "ID Card Number", "civilianICardNumber", "icard", "identityCard");
 
       return (
         <div className="space-y-0.5 text-sm text-[#0A0A0A]">
-
           {name && <div><span className="font-semibold ">Name:</span> {name}</div>}
           {aadhar && <div><span className="font-semibold ">Aadhar No.:</span> {aadhar}</div>}
           {father && <div><span className="font-semibold ">Father/Husband:</span> {father}</div>}
+          {address && <div><span className="font-semibold ">Address:</span> {address}</div>}
+          {iCard && <div><span className="font-semibold ">ID Card:</span> {iCard}</div>}
         </div>
       );
     }

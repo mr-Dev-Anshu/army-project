@@ -17,22 +17,30 @@ interface MpDetailsCellProps {
 export default function MpDetailsCell({ details }: MpDetailsCellProps) {
   return (
     <div className="space-y-1 text-xs">
-      <div className="flex gap-1">
-        <span className="font-bold text-gray-900 min-w-[70px]">Army no.:</span>
-        <span className="text-gray-700">{details.armyNumber || details.armyNo}</span>
-      </div>
-      <div className="flex gap-1">
-        <span className="font-bold text-gray-900 min-w-[70px]">Rank:</span>
-        <span className="text-gray-700">{details.rank}</span>
-      </div>
-      <div className="flex gap-1">
-        <span className="font-bold text-gray-900 min-w-[70px]">Name:</span>
-        <span className="text-gray-700">{details.name}</span>
-      </div>
-      <div className="flex gap-1">
-        <span className="font-bold text-gray-900 min-w-[70px]">Unit:</span>
-        <span className="text-gray-700">{details.unit}</span>
-      </div>
+      {details.armyNumber && (
+        <div className="flex gap-1">
+          <span className="font-bold text-gray-900 min-w-[70px]">Army no.:</span>
+          <span className="text-gray-700">{details.armyNumber || details.armyNo}</span>
+        </div>
+      )}
+      {details.rank && (
+        <div className="flex gap-1">
+          <span className="font-bold text-gray-900 min-w-[70px]">Rank:</span>
+          <span className="text-gray-700">{details.rank}</span>
+        </div>
+      )}
+      {details.name && (
+        <div className="flex gap-1">
+          <span className="font-bold text-gray-900 min-w-[70px]">Name:</span>
+          <span className="text-gray-700">{details.name}</span>
+        </div>
+      )}
+      {details.unit && (
+        <div className="flex gap-1">
+          <span className="font-bold text-gray-900 min-w-[70px]">Unit:</span>
+          <span className="text-gray-700">{details.unit}</span>
+        </div>
+      )}
       {details.fmn && (
         <div className="flex gap-1">
           <span className="font-bold text-gray-900 min-w-[70px]">FMN:</span>
