@@ -231,40 +231,82 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                 {type === 'militaryPersonnel' ? 'Military Personnel' :
                     type === 'civilian' ? 'Civilian / Dependent' :
                         type === 'employee' ? 'Employee' :
-                            type.replace(/([A-Z])/g, ' $1').trim()}
+                            type === 'shopKeeper' ? 'Shop Keeper' :
+                                type === 'servantMaid' ? 'Servant / Maid' :
+                                    type === 'tempHiredWorker' ? 'Temporarily Hired Worker' :
+                                        type.replace(/([A-Z])/g, ' $1').trim()}
             </div>
         );
 
         if (type === 'militaryPersonnel') {
             return (
-                <div className="space-y-0.5 text-sm">
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
                     {TypeLabel}
-                    <div><span className="font-medium text-gray-700">Army No:</span> {d.militaryPersonnelArmyNo || "-"}</div>
-                    <div><span className="font-medium text-gray-700">Rank:</span> {d.militaryPersonnelRank || "-"}</div>
-                    {d.militaryPersonnelName && <div><span className="font-medium text-gray-700">Name:</span> {d.militaryPersonnelName}</div>}
+                    {d.militaryPersonnelArmyNo && <div><span className="font-bold ">Army No:</span> {d.militaryPersonnelArmyNo}</div>}
+                    {d.militaryPersonnelRank && <div><span className="font-bold ">Rank:</span> {d.militaryPersonnelRank}</div>}
+                    {d.militaryPersonnelName && <div><span className="font-bold ">Name:</span> {d.militaryPersonnelName}</div>}
+                    {d.militaryPersonnelUnit && <div><span className="font-bold ">Unit:</span> {d.militaryPersonnelUnit}</div>}
+                    {d.militaryPersonnelFmn && <div><span className="font-bold ">FMN:</span> {d.militaryPersonnelFmn}</div>}
+
                 </div>
             );
         }
         if (type === 'employee') {
             return (
-                <div className="space-y-0.5 text-sm">
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
                     {TypeLabel}
-                    <div><span className="font-medium text-gray-700">Svc No:</span> {d.employeeServiceNumber || "-"}</div>
-                    <div><span className="font-medium text-gray-700">Rank:</span> {d.employeeRank || "-"}</div>
+                    {d.employeeServiceNumber && <div><span className="font-bold ">Service No:</span> {d.employeeServiceNumber}</div>}
+                    {d.employeeRank && <div><span className="font-bold ">Rank:</span> {d.employeeRank}</div>}
+                    {d.employeeName && <div><span className="font-bold ">Name:</span> {d.employeeName}</div>}
+                    {d.employeeUnit && <div><span className="font-bold ">Unit:</span> {d.employeeUnit}</div>}
+                    {d.employeeFmn && <div><span className="font-bold ">FMN:</span> {d.employeeFmn}</div>}
                 </div>
             );
         }
         if (type === 'civilian') {
             return (
-                <div className="space-y-0.5 text-sm">
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
                     {TypeLabel}
-                    <div><span className="font-medium text-gray-700">Aadhar:</span> {d.civilianAadharCardNumber || "-"}</div>
-                    <div><span className="font-medium text-gray-700">Father/Husband:</span> {d.civilianFathersName || "-"}</div>
-                    {d.isDependent && (
-                        <div className="mt-1 pt-1 border-t border-gray-100">
-                            <span className="text-xs text-blue-600 font-medium">Dependent: {d.relationName}</span>
-                        </div>
-                    )}
+                    {d.civilianName && <div><span className="font-bold ">Name:</span> {d.civilianName}</div>}
+                    {d.civilianAadharCardNumber && <div><span className="font-bold ">Aadhar No.:</span> {d.civilianAadharCardNumber}</div>}
+                    {d.civilianFathersName && <div><span className="font-bold ">Father/Husband:</span> {d.civilianFathersName}</div>}
+
+                </div>
+            );
+        }
+        if (type === "shopKeeper") {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.shopOwnerName && <div><span className="font-bold ">Name:</span> {d.shopOwnerName}</div>}
+                    {d.shopUnit && <div><span className="font-bold ">Unit:</span> {d.shopUnit}</div>}
+                    {d.shopAddress && <div><span className="font-bold ">Shop Address:</span> {d.shopAddress}</div>}
+                    {d.shopPassNo && <div><span className="font-bold ">Pass No:</span> {d.shopPassNo}</div>}
+                </div>
+            );
+        }
+        if (type === "servantMaid") {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.maidName && <div><span className="font-bold ">Name:</span> {d.maidName}</div>}
+                    {d.maidFathersName && <div><span className="font-bold ">Father/Husband:</span> {d.maidFathersName}</div>}
+                    {d.maidPassNumber && <div><span className="font-bold ">Pass No:</span> {d.maidPassNumber}</div>}
+                    {d.officersEnclaveRank && <div><span className="font-bold ">C/O Rank:</span> {d.officersEnclaveRank}</div>}
+                    {d.officersEnclaveName && <div><span className="font-bold ">C/O Name:</span> {d.officersEnclaveName}</div>}
+                    {d.officersEnclaveUnit && <div><span className="font-bold ">C/O Unit:</span> {d.officersEnclaveUnit}</div>}
+                    {d.officersEnclaveFmn && <div><span className="font-bold ">C/O FMN:</span> {d.officersEnclaveFmn}</div>}
+                </div>
+            );
+        }
+        if (type === "tempHiredWorker") {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.tempWorkerName && <div><span className="font-bold ">Name:</span> {d.tempWorkerName}</div>}
+                    {d.tempWorkerPassNo && <div><span className="font-bold ">Pass No:</span> {d.tempWorkerPassNo}</div>}
+                    {d.tempWorkerPlaceOfWork && <div><span className="font-bold ">Place of Work:</span> {d.tempWorkerPlaceOfWork}</div>}
+                    {d.tempWorkerTypeOfWork && <div><span className="font-bold ">Type of Work:</span> {d.tempWorkerTypeOfWork}</div>}
                 </div>
             );
         }
@@ -327,7 +369,7 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-14 align-top sticky left-0 top-0 z-50 bg-[#F5F5F5]">
                                     Sr no.
                                 </th>
-                                <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-64 align-top sticky top-0 z-40 bg-[#F5F5F5]">
+                                <th rowSpan={2} className="px-4 py-3 border-r border-gray-300  align-top sticky top-0 z-40 bg-[#F5F5F5]">
                                     Particulars of Offender(s), Victim(s) and Vehicles Involved
                                 </th>
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-32 align-top sticky top-0 z-40 bg-[#F5F5F5]">
@@ -362,9 +404,7 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-32 align-top sticky top-0 z-40 bg-[#F5F5F5]">
                                     FIR/MACT. Status
                                 </th>
-                                <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]">
-                                    Report no.
-                                </th>
+
                                 <th rowSpan={2} className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]">
                                     Initials of MPCR NCO
                                 </th>
@@ -451,11 +491,7 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
                                             <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A]">
                                                 {item.firMactDetails?.firMactNumber || "-"}
                                             </td>
-                                            <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A]">
-                                                {/* Mock Report No */}
-                                                <span className="text-xs text-gray-600 block">PRO/21 CPU/</span>
-                                                <span className="text-xs text-gray-600 block">00042/102/25</span>
-                                            </td>
+
                                             <td className="px-4 py-4 align-top border-r border-gray-300">
                                                 <div className="flex justify-center">
                                                     <Checkbox
