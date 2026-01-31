@@ -32,7 +32,7 @@ export const exportToExcel = (data: any[], filename: string = 'report', groupBy?
   if (title && title.includes('STATIC SPEED')) {
     headers = ['Sr No.', 'Place of Offence', 'Particulars of Driver/Rider', 'Unit', 'FMN', 'Report Number', 'Date & Time', 'Offence Brief', 'Veh. BA No. / Make & Take', 'Auth. Speed', 'Actual Speed', 'Over Speed', 'Particulars of Co-Driver/Rider', 'Action Status'];
   } else if (title && title.includes('MP OCCURRENCE')) {
-    headers = ['Sr no.', 'Particulars of Individual/Victim', 'Unit', 'FMN', 'Report Number', 'Date & Time', 'Offence Type', 'Brief of Occurrence', 'Action Status	'];
+    headers = ['Sr no.', 'Particulars of Individual/Victim', 'Unit', 'FMN', 'Report Number', 'Date','Time','Offence Type', 'Brief of Occurrence', 'Action Status	'];
   } else if (title && title.includes('GENERAL') && title.includes('TRAFFIC')) {
     if (groupBy) {
       // Grouped format
