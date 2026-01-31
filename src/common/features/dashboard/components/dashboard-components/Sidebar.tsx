@@ -217,54 +217,54 @@ const Sidebar = () => {
 
     return (
       <Link
-  key={item.label}
-  href={item.href || "#"}
-  {...(isCollapsed
-    ? {
-        "data-tooltip-id": "sidebar-tooltip",
-        "data-tooltip-html": renderToStaticMarkup(
-          typeof item.label === "string" ? item.label : item.label
-        ),
-        "data-tooltip-place": "right",
-      }
-    : {})}
-  className={cn(
-    "w-full relative flex items-center transition-all group rounded-lg my-2",
-    isCollapsed
-      ? "h-10 justify-center hover:bg-gray-100"
-      : cn(
-          "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
-          isSubmenu && "py-1.5",
-          isActive(item.href) &&
-            "bg-blue-50 text-blue-700 hover:bg-blue-50"
-        )
-  )}
->
-  {!isSubmenu && <span className="flex-shrink-0">{item.icon}</span>}
-
-  {!isCollapsed && (
-    <>
-      <span
+        key={item.label}
+        href={item.href || "#"}
+        {...(isCollapsed
+          ? {
+            "data-tooltip-id": "sidebar-tooltip",
+            "data-tooltip-html": renderToStaticMarkup(
+              typeof item.label === "string" ? item.label : item.label
+            ),
+            "data-tooltip-place": "right",
+          }
+          : {})}
         className={cn(
-          "flex-1 whitespace-normal break-words leading-snug",
-          isSubmenu ? "text-sm" : "text-base",
-          isActive(item.href)
-            ? "text-blue-700 font-medium"
-            : "text-gray-600 group-hover:text-gray-900"
+          "w-full relative flex items-center transition-all group rounded-lg my-2",
+          isCollapsed
+            ? "h-10 justify-center hover:bg-gray-100"
+            : cn(
+              "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
+              isSubmenu && "py-1.5",
+              isActive(item.href) &&
+              "bg-blue-50 text-blue-700 hover:bg-blue-50"
+            )
         )}
       >
-        {item.label}
-      </span>
-      {item.badge && (
-        <span className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-gray-200 text-gray-600 rounded-full">
-          {item.badge}
-        </span>
-      )}
-    </>
-  )}
-</Link>
+        {!isSubmenu && <span className="flex-shrink-0">{item.icon}</span>}
 
-      
+        {!isCollapsed && (
+          <>
+            <span
+              className={cn(
+                "flex-1 whitespace-normal break-words leading-snug",
+                isSubmenu ? "text-sm" : "text-base",
+                isActive(item.href)
+                  ? "text-blue-700 font-medium"
+                  : "text-gray-600 group-hover:text-gray-900"
+              )}
+            >
+              {item.label}
+            </span>
+            {item.badge && (
+              <span className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-gray-200 text-gray-600 rounded-full">
+                {item.badge}
+              </span>
+            )}
+          </>
+        )}
+      </Link>
+
+
     );
   };
 
@@ -281,43 +281,43 @@ const Sidebar = () => {
         onOpenChange={() => toggleMenu(item.label)}
         className="w-full"
       >
-       <CollapsibleTrigger
-  {...(isCollapsed
-    ? {
-        "data-tooltip-id": "sidebar-tooltip",
-        "data-tooltip-html": renderToStaticMarkup(item.label),
-        "data-tooltip-place": "right",
-      }
-    : {})}
-  className={cn(
-    "w-full flex items-center transition-all group rounded-lg",
-    isCollapsed
-      ? "h-10 justify-center hover:bg-gray-100"
-      : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100",
-    hasActiveSubmenu && "bg-blue-50"
-  )}
->
-  <span className="flex-shrink-0">{item.icon}</span>
-  {!isCollapsed && (
-    <>
-      <span
-        className={cn(
-          "flex-1 text-base leading-snug",
-          hasActiveSubmenu
-            ? "text-blue-700 font-medium"
-            : "text-gray-600 group-hover:text-gray-900"
-        )}
-      >
-        {item.label}
-      </span>
-      {openMenus.includes(item.label) ? (
-        <ChevronDown className="w-4 h-4 text-gray-400" />
-      ) : (
-        <ChevronRight className="w-4 h-4 text-gray-400" />
-      )}
-    </>
-  )}
-</CollapsibleTrigger>
+        <CollapsibleTrigger
+          {...(isCollapsed
+            ? {
+              "data-tooltip-id": "sidebar-tooltip",
+              "data-tooltip-html": renderToStaticMarkup(item.label),
+              "data-tooltip-place": "right",
+            }
+            : {})}
+          className={cn(
+            "w-full flex items-center transition-all group rounded-lg",
+            isCollapsed
+              ? "h-10 justify-center hover:bg-gray-100"
+              : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100",
+            hasActiveSubmenu && "bg-blue-50"
+          )}
+        >
+          <span className="flex-shrink-0">{item.icon}</span>
+          {!isCollapsed && (
+            <>
+              <span
+                className={cn(
+                  "flex-1 text-base leading-snug",
+                  hasActiveSubmenu
+                    ? "text-blue-700 font-medium"
+                    : "text-gray-600 group-hover:text-gray-900"
+                )}
+              >
+                {item.label}
+              </span>
+              {openMenus.includes(item.label) ? (
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-gray-400" />
+              )}
+            </>
+          )}
+        </CollapsibleTrigger>
 
         {!isCollapsed && (
           <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-200 space-y-1">
@@ -333,7 +333,7 @@ const Sidebar = () => {
   return (
     <div
       className={cn(
-        "h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
+        "h-screen bg-white border-r border-gray-300 flex flex-col transition-all duration-300",
         isCollapsed ? "w-[74px]" : "w-[340px]",
       )}
     >
@@ -351,7 +351,7 @@ const Sidebar = () => {
         )}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm z-50 text-gray-500 hover:text-gray-900 opacity-0 group-hover/sidebar:opacity-100 transition-all"
+          className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm z-50 text-gray-500 hover:text-gray-900 opacity-0 group-hover/sidebar:opacity-100 transition-all"
         >
           {isCollapsed ? (
             <ChevronRight className="w-4 h-4" />
@@ -368,18 +368,18 @@ const Sidebar = () => {
         )}
       >
         <div className="mb-2">
-          {menuItems.map((item,idx) => (
+          {menuItems.map((item, idx) => (
             <div key={idx}>{renderMenuItem(item)}</div>
           ))}
         </div>
-        <div className="w-full h-px bg-gray-100 my-2" />
+        <div className="w-full h-[1px] bg-gray-300 my-2" />
         <div className="mb-2">
           {!isCollapsed && (
             <h2 className="px-4 py-3 text-sm font-bold text-gray-400">
               Create New Record
             </h2>
           )}
-          {createNewRecordItems.map((item,idx) => (
+          {createNewRecordItems.map((item, idx) => (
             <div key={idx}>{renderMenuItem(item)}</div>
           ))}
         </div>
@@ -390,7 +390,7 @@ const Sidebar = () => {
               Reports & Analysis
             </h2>
           )}
-          {reportsAndAnalysis.map((item,idx) => (
+          {reportsAndAnalysis.map((item, idx) => (
             <div key={idx}>{renderMenuItem(item)}</div>
           ))}
         </div>
@@ -455,10 +455,10 @@ const Sidebar = () => {
           </button>
         )}
       </div>
-            {isCollapsed && <Tooltip id="sidebar-tooltip" className="!text-sm !px-3 !py-2 !rounded-md !bg-gray-900 !text-white z-100" delayShow={100}/>}
+      {isCollapsed && <Tooltip id="sidebar-tooltip" className="!text-sm !px-3 !py-2 !rounded-md !bg-gray-900 !text-white z-100" delayShow={100} />}
 
     </div>
-    
+
 
   );
 };
