@@ -171,15 +171,9 @@ const mpReportSchema = new Schema(
 // Attach common audit fields plugin to MP reports
 mpReportSchema.plugin(auditFieldsPlugin, {});
 
-mpReportSchema.virtual("offenders").get(function () {
-  return this.individuals ? this.individuals.filter((ind) => ind.role === "Offender") : [];
-});
 
-mpReportSchema.index({ "reportDetails.reportNumber": 1 });
-mpReportSchema.index({ "investigationHead.armyNumber": 1 });
-mpReportSchema.index({ "occurrenceDetails.offenceType": 1 });
-mpReportSchema.index({ "occurrenceDetails.placeOfOccurrence": 1 });
-mpReportSchema.index({ "occurrenceDetails.dateOfOccurrence": -1 });
+
+
 
 if (mongoose.models.MPReport) {
   delete mongoose.models.MPReport;

@@ -10,6 +10,10 @@ import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 
 import { useGetStaticSpeedRecords, useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
+// 1. Import Offender Hook and Type
+import { useCreateOffender } from "@/features/offender/Hooks";
+import { CreateOffenderData } from "@/apis/offender/types";
+
 import StaticSpeedReport, {
   StaticSpeedReportProps,
 } from "@/components/reports/StaticSpeedReport";
@@ -33,7 +37,7 @@ const cleanSystemFields = (data: any): any => {
     Object.keys(data).forEach(key => {
       // Skip system fields
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
-
+      
       // Recursively clean children
       cleaned[key] = cleanSystemFields(data[key]);
     });
@@ -42,7 +46,7 @@ const cleanSystemFields = (data: any): any => {
   return data;
 };
 
-/* ================= KEY MAPPING UTILS ================= */
+/* ================= KEY MAPPING UTILS (CSV/Flat JSON) ================= */
 const KEY_MAPPING: Record<string, string> = {
   "Report No": "reportId",
   "Vehicle No": "vehicleNumber",
@@ -50,7 +54,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Vehicle Type": "vehicleType",
   "Vehicle Name": "vehicleName",
   "Date": "offenceOccurenceDetails.time",
-  "Time": "offenceOccurenceDetails.time",
+  "Time": "offenceOccurenceDetails.time", 
   "Location": "offenceOccurenceDetails.incidentLocation",
   "Place": "offenceOccurenceDetails.incidentLocation",
   "Authorized Speed": "offenceOccurenceDetails.authSpeed",
@@ -90,7 +94,7 @@ const mapData = (data: any[]) => {
   return data.map((item) => {
     const newItem: any = {};
     Object.keys(item).forEach((key) => {
-      // Skip if it's a system field (extra safety, though cleanSystemFields handles this)
+      // Skip if it's a system field
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
 
       const mappedKey = KEY_MAPPING[key.trim()] || key.trim();
@@ -100,6 +104,65 @@ const mapData = (data: any[]) => {
     });
     return newItem;
   });
+};
+
+// 2. Specialized Normalizer for JSON structure
+const normalizeJSON = (json: any): any[] => {
+  if (json.reports && Array.isArray(json.reports)) {
+    return json.reports.map((item: any) => {
+      const r = item.report || {};
+      const d = item.dutyDetails || {};
+      const reporting = d.reportingMP || {};
+      const witnessing = d.witnessingMP || {};
+
+      // Map Offenders
+      const offenders = Array.isArray(r.offenders) ? r.offenders.map((o: any) => ({
+        offenderType: o.offenderType === "militaryPersonnel" ? "Military Person" : (o.offenderType || "Military Person"),
+        offenderDetails: {
+          armyNumber: o.armyNumber,
+          rank: o.selectRank || o.rank,
+          name: o.name,
+          unit: o.unit,
+          fmn: o.fmn,
+          command: o.command,
+          address: o.address,
+          iCardNumber: o.iCardNumber
+        }
+      })) : [];
+
+      return {
+        vehicleNumber: r.vehicleNumber,
+        vehicleType: r.vehicleType,
+        vehicleName: r.vehicleName,
+        offenceOccurenceDetails: {
+          incidentLocation: r.incidentLocation,
+          timeOfOffence: r.timeOfOffence ? `${d.dateOfDuty}T${r.timeOfOffence}` : d.dateOfDuty,
+          authSpeed: r.authSpeed,
+          actualSpeedNoted: r.actualSpeedNoted,
+          overSpeedCalculated: r.overSpeedCalculated,
+          description: r.reportHeading
+        },
+        onDutyDetailsMPReporting: {
+          armyNumber: reporting.armyNo,
+          rank: reporting.rank,
+          nameReportingMP: reporting.name,
+          unit: reporting.unit
+        },
+        onDutyWitnessingMps: witnessing.armyNo ? [{
+           armyNumber: witnessing.armyNo,
+           rank: witnessing.rank,
+           name: witnessing.name,
+           unit: witnessing.unit
+        }] : [],
+        remarks: r.remarks || item.remarks,
+        offenders: offenders // Pass offenders to be handled by loop
+      };
+    });
+  }
+  // Fallback
+  if (Array.isArray(json)) return mapData(json);
+  if (json.data && Array.isArray(json.data)) return mapData(json.data);
+  return mapData([json]);
 };
 
 export default function StaticSpeedCheckReportsPage() {
@@ -118,11 +181,13 @@ export default function StaticSpeedCheckReportsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-
+  
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { mutateAsync: createStaticSpeedRecord } = useCreateStaticSpeedRecord();
+  // 3. Initialize Offender Hook
+  const { mutateAsync: createOffender } = useCreateOffender();
 
   /* ================= IMPORT HANDLERS ================= */
 
@@ -130,7 +195,7 @@ export default function StaticSpeedCheckReportsPage() {
     fileInputRef.current?.click();
     setShowAddOptions(false);
   };
-
+  
   const handleImportJSON = () => {
     fileInputRef.current?.click();
     setShowAddOptions(false);
@@ -148,7 +213,7 @@ export default function StaticSpeedCheckReportsPage() {
     const fileName = file.name.toLowerCase();
     const isExcel = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
     const isJson = fileName.endsWith(".json");
-
+    
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -165,22 +230,35 @@ export default function StaticSpeedCheckReportsPage() {
           json = csvToJsonWithHiddenKeys(result);
         }
 
-        // FIX: Unwrap API response wrappers (e.g., { success: true, data: [...] })
-        if (json && !Array.isArray(json) && json.data) {
-          json = json.data;
-        }
+        // 4. Normalize JSON
+        const mappedData = normalizeJSON(json);
 
-        let dataArray = Array.isArray(json) ? json : [json];
+        // 5. Custom mutation function to handle both Static Speed Record and Offender creation
+        const handleImportRecord = async (item: any) => {
+            // A. Create the Static Speed Record
+            const createdRecord = await createStaticSpeedRecord(item);
 
-        // FIX: Deep clean system fields from all objects (nested _id, etc.)
-        dataArray = cleanSystemFields(dataArray);
+            // B. If successful and offenders exist in the imported data, create them in the DB
+            if (createdRecord && createdRecord._id && item.offenders && Array.isArray(item.offenders)) {
+                for (const offender of item.offenders) {
+                    if (offender.offenderDetails) {
+                        const offenderPayload: CreateOffenderData = {
+                            offenceId: createdRecord._id, 
+                            offenderType: offender.offenderType || "Military Person", 
+                            offenderDetails: offender.offenderDetails
+                        };
+                        // C. Call Offender API
+                        await createOffender(offenderPayload);
+                    }
+                }
+            }
+            return createdRecord;
+        };
 
-        const mappedData = mapData(dataArray);
-
-        await processImport(mappedData, createStaticSpeedRecord);
-
-        toast.success("Records imported successfully!");
-        await refetch();
+        await processImport(mappedData, handleImportRecord);
+        
+        toast.success("Records and Offenders imported successfully!");
+        await refetch(); 
       } catch (error: any) {
         console.error("Error importing file:", error);
         toast.error(`Failed to import records: ${error.message || "Unknown error"}`);
@@ -192,7 +270,7 @@ export default function StaticSpeedCheckReportsPage() {
     } else {
       reader.readAsText(file);
     }
-    event.target.value = "";
+    event.target.value = ""; 
   };
 
   useEffect(() => {
@@ -275,51 +353,31 @@ export default function StaticSpeedCheckReportsPage() {
 
     return filtered.map((item: any) => {
       const offence = item.offenceOccurenceDetails || {};
-
-      const driverObj = item.offenders?.[0] || {};
-      const driverDetailsRaw = driverObj.offenderDetails || {};
-
-      const coDriverObj = item.offenders?.[1];
-      const coDriverDetailsRaw = coDriverObj?.offenderDetails || {};
-
+      const driver = item.offenders?.[0]?.offenderDetails || {};
       const dateObj = new Date(offence.timeOfOffence || item.createdAt);
 
       return {
         _id: item._id,
-        placeOfOffence: offence.incidentLocation,
+        placeOfOffence: offence.incidentLocation || "Unknown",
         date: dateObj.toLocaleDateString("en-GB"),
         time: dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
-
         driverDetails: {
-          ...driverDetailsRaw,
-          offenderType: driverObj.offenderType,
-          // Ensure critical fields are present if mapped differently in raw data
-          armyNumber: driverDetailsRaw.armyNumber || driverDetailsRaw.armyNo,
+          name: driver.name,
+          armyNumber: driver.armyNumber,
+          rank: driver.rank,
         },
-
-        coDriverDetails: coDriverObj ? {
-          ...coDriverDetailsRaw,
-          offenderType: coDriverObj.offenderType,
-          armyNumber: coDriverDetailsRaw.armyNumber || coDriverDetailsRaw.armyNo,
-        } : null,
-
-        mpDetails: {
-          armyNumber: item.onDutyDetailsMPReporting?.armyNumber,
-          rank: item.onDutyDetailsMPReporting?.rank,
-          name: item.onDutyDetailsMPReporting?.nameReportingMP,
-          unit: item.onDutyDetailsMPReporting?.unit,
-        },
-        unit: item.onDutyDetailsMPReporting?.unit,
-        fmn: item.fmn,
+        mpName: item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
+        unit: item.onDutyDetailsMPReporting?.unit || driver.unit || "MP Unit",
+        fmn: item.fmn || driver.fmn,
         vehicleNo: item.vehicleNumber,
         vehicleModel: item.vehicleName,
-        reportNo: item.reportId || item.reportNumber || item.reportNo,
+        reportNo: item.reportId || item.reportNumber || item.reportNo || "N/A",
         actionStatus: item.actionStatus,
-        offenceBrief: offence.description,
-        authSpeed: offence.authSpeed,
-        actualSpeed: offence.actualSpeedNoted,
-        overSpeed: offence.overSpeedCalculated,
-        remarks: item.remark || item.remarks,
+        offenceBrief: offence.description || "N/A",
+        authSpeed: offence.authSpeed || "-",
+        actualSpeed: offence.actualSpeedNoted || "-",
+        overSpeed: offence.overSpeedCalculated || "-",
+        remarks: item.remark || item.remarks || "N/A",
         originalData: item,
       };
     });
@@ -437,15 +495,8 @@ export default function StaticSpeedCheckReportsPage() {
   };
 
   const handlePrintReport = (item: any) => {
-    const id = item._id;
-    if (!id) {
-      alert("Report ID not found");
-      return;
-    }
-
-    // Open print page in new window
-    const printUrl = `/print/static-speed-report/${id}`;
-    window.open(printUrl, '_blank');
+    setViewingReport(item);
+    setShouldAutoPrint(true);
   };
 
   if (isCreating) {
@@ -580,9 +631,9 @@ export default function StaticSpeedCheckReportsPage() {
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-
+            
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>

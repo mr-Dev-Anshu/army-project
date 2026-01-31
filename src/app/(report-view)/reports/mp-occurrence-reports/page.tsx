@@ -6,6 +6,10 @@ import { toast } from "react-toastify";
 
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
 import { useGetAllMPReports, useCreateMPReport } from "@/features/mpReports/hooks";
+// 1. Import Offender Hook and Type
+import { useCreateOffender } from "@/features/offender/Hooks";
+import { CreateOffenderData } from "@/apis/offender/types";
+
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
@@ -35,7 +39,7 @@ const cleanSystemFields = (data: any): any => {
   return data;
 };
 
-/* ================= KEY MAPPING UTILS ================= */
+/* ================= KEY MAPPING UTILS (CSV/Flat JSON) ================= */
 const KEY_MAPPING: Record<string, string> = {
   "Report No": "reportDetails.reportNumber",
   "Report Number": "reportDetails.reportNumber",
@@ -55,7 +59,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Opinion": "opinion",
   "Analysis": "remarks.analysis",
   "Recommendation": "remarks.recommendation",
-
+  
   "Offender Name": "individuals[0].name",
   "Offender Rank": "individuals[0].rank",
   "Offender Army No": "individuals[0].armyNo",
@@ -95,24 +99,81 @@ const mapData = (data: any[]) => {
     });
 
     if (newItem.individuals && newItem.individuals.length > 0) {
-      if (newItem.individuals[0] && !newItem.individuals[0].role) {
-        newItem.individuals[0].role = "Offender";
-      }
+        if (newItem.individuals[0] && !newItem.individuals[0].role) {
+            newItem.individuals[0].role = "Offender";
+        }
     }
 
     return newItem;
   });
 };
 
+// 2. Specialized Normalizer for MP Occurrence JSON structure
+const normalizeJSON = (json: any): any[] => {
+  if (json.reports && Array.isArray(json.reports)) {
+    return json.reports.map((item: any) => {
+      const r = item.report || {};
+      
+      // Map Offenders
+      const offenders = Array.isArray(r.offenders) ? r.offenders.map((o: any) => ({
+        offenderType: o.offenderType === "militaryPersonnel" ? "Military Person" : (o.offenderType || "Military Person"),
+        offenderDetails: {
+          armyNumber: o.armyNumber,
+          rank: o.selectRank || o.rank,
+          name: o.name,
+          unit: o.unit,
+          fmn: o.fmn,
+          command: o.command,
+          address: o.address,
+          iCardNumber: o.iCardNumber
+        }
+      })) : [];
+
+      return {
+        // Map to MP Report Schema
+        // Note: reportDetails.reportNumber is usually auto-generated or manually entered. 
+        // We use the ID from JSON or a placeholder if needed.
+        reportDetails: {
+            // reportNumber: r.id, 
+        },
+        occurrenceDetails: {
+            dateOfOccurrence: r.dateOfOccurrence,
+            // Combine Date and Time if time is separate
+            timeOfOccurrence: r.timeOfOccurrence ? `${r.dateOfOccurrence}T${r.timeOfOccurrence}` : r.dateOfOccurrence,
+            placeOfOccurrence: r.placeOfOccurrence,
+            offenceType: r.reportHeading, // Use Heading as the main Offence Type/Title
+            description: r.reportHeading
+        },
+        customFields: {
+            vehicleNumber: r.vehicleNumber,
+            vehicleType: r.vehicleType,
+            vehicleName: r.vehicleName,
+            age: r.age,
+            totalServiceDuration: r.totalServiceDuration,
+            leaveOrDuty: r["leave / duty"]
+        },
+        offenders: offenders // Pass offenders to be handled by the loop
+      };
+    });
+  }
+  
+  // Fallback for flat arrays
+  if (Array.isArray(json)) return mapData(json);
+  if (json.data && Array.isArray(json.data)) return mapData(json.data);
+  return mapData([json]);
+};
+
 export default function MpOccurrenceReportsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-
+  
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
   const { mutateAsync: createMPReport } = useCreateMPReport();
+  // 3. Initialize Offender Hook
+  const { mutateAsync: createOffender } = useCreateOffender();
 
   React.useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
@@ -192,7 +253,7 @@ export default function MpOccurrenceReportsPage() {
 
         // FIX: Unwrap API response wrappers
         if (json && !Array.isArray(json) && json.data) {
-          json = json.data;
+            json = json.data;
         }
 
         let dataArray = Array.isArray(json) ? json : [json];
@@ -200,11 +261,34 @@ export default function MpOccurrenceReportsPage() {
         // FIX: Clean nested system fields
         dataArray = cleanSystemFields(dataArray);
 
-        const mappedData = mapData(dataArray);
+        // 4. Normalize JSON using the new function
+        const mappedData = normalizeJSON(dataArray);
 
-        await processImport(mappedData, createMPReport);
+        // 5. Custom mutation function to handle both MP Report and Offender creation
+        const handleImportRecord = async (item: any) => {
+            // A. Create the MP Report
+            const createdReport = await createMPReport(item);
 
-        toast.success("Reports imported successfully!");
+            // B. If successful and offenders exist in the imported data, create them in the DB
+            if (createdReport && createdReport._id && item.offenders && Array.isArray(item.offenders)) {
+                for (const offender of item.offenders) {
+                    if (offender.offenderDetails) {
+                        const offenderPayload: CreateOffenderData = {
+                            offenceId: createdReport._id, 
+                            offenderType: offender.offenderType || "Military Person", 
+                            offenderDetails: offender.offenderDetails
+                        };
+                        // C. Call Offender API
+                        await createOffender(offenderPayload);
+                    }
+                }
+            }
+            return createdReport;
+        };
+
+        await processImport(mappedData, handleImportRecord);
+        
+        toast.success("Reports and Offenders imported successfully!");
         await refetch();
       } catch (error: any) {
         console.error("Error importing file:", error);
@@ -324,8 +408,8 @@ export default function MpOccurrenceReportsPage() {
 
     if (filters.sortOrder) {
       filteredData.sort((a: any, b: any) => {
-        const dateA = new Date(a.createdAt || a.occurrenceDetails?.dateOfOccurrence).getTime();
-        const dateB = new Date(b.createdAt || b.occurrenceDetails?.dateOfOccurrence).getTime();
+        const dateA = new Date(a.occurrenceDetails?.dateOfOccurrence || a.createdAt).getTime();
+        const dateB = new Date(b.occurrenceDetails?.dateOfOccurrence || b.createdAt).getTime();
         return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
       });
     }
@@ -355,16 +439,16 @@ export default function MpOccurrenceReportsPage() {
             hour12: false,
           })
           : "",
-        placeOfOccurrence: occurrence.placeOfOccurrence === "NA" ? "" : occurrence.placeOfOccurrence,
+        placeOfOccurrence: occurrence.placeOfOccurrence,
 
         assignedMP: {
-          armyNumber: invHead.armyNumber === "NA" ? "" : invHead.armyNumber,
-          rank: invHead.rank === "NA" ? "" : invHead.rank,
-          name: invHead.name === "NA" ? "" : invHead.name,
-          unit: invHead.unit === "NA" ? "" : invHead.unit,
-          fmn: invHead.fmn === "NA" ? "" : invHead.fmn,
-          address: invHead.address === "NA" ? "" : invHead.address,
-          iCardNumber: invHead.iCardNumber === "NA" ? "" : invHead.iCardNumber,
+          armyNumber: invHead.armyNumber,
+          rank: invHead.rank,
+          name: invHead.name,
+          unit: invHead.unit,
+          fmn: invHead.fmn,
+          address: invHead.address,
+          iCardNumber: invHead.iCardNumber,
         },
 
         victimDetails: {
@@ -375,31 +459,17 @@ export default function MpOccurrenceReportsPage() {
           name: primaryIndividual.name,
           unit: primaryIndividual.unit,
           ...primaryIndividual,
-          // Infer type if missing, so OffenderDetailsCell can render
-          individualType:
-            primaryIndividual.individualType ||
-            primaryIndividual.offenderType ||
-            (primaryIndividual.armyNumber || primaryIndividual.armyNo ? "Military Person" : "Civilian"),
         },
-        reportingMPName: invHead.name === "NA" ? "" : invHead.name,
-
-        vehicleDetails: {
-          isVehicleInvolved: primaryIndividual.isVehicleInvolved,
-          number: primaryIndividual.vehicleNumber || primaryIndividual.customFields?.vehicleNumber || primaryIndividual.details?.vehicleNumber || "--",
-          name: primaryIndividual.vehicleName || primaryIndividual.customFields?.vehicleName || primaryIndividual.details?.vehicleName || "--",
-        },
+        reportingMPName: invHead.name,
 
         offenceType:
           (Array.isArray(occurrence.offenceTypes) && occurrence.offenceTypes.length > 0)
             ? occurrence.offenceTypes.join(", ")
             : (occurrence.offenceType === "NA" ? "" : occurrence.offenceType),
-        brief: (occurrence?.description === "Nil" || occurrence?.description === "NA") ? "" : occurrence?.description,
+        brief: occurrence?.description,
         documents: item?.documents,
         reportNumber: item?.reportDetails?.reportNumber,
         actionStatus: item?.actionStatus, // status action
-        initialsMPCRNCO: item.initialsMPCRNCO,
-        initialsCO: item.initialsCO,
-        addRemark: item.addRemark,
         originalData: item // Store original data for report view 
       };
     });
@@ -408,7 +478,7 @@ export default function MpOccurrenceReportsPage() {
   const mapToReportProps = (item: any): MpOccurrenceReportProps => {
     const raw = item.originalData || item || {};
     const reportDetails = raw.reportDetails || {};
-    const invHead = raw.investigationHead || raw.mpParticulars || {};
+    const invHead = raw.investigationHead || raw.mpParticulars || {}; 
     const occurrence = raw.occurrenceDetails || {};
 
     const rawPeople = raw.individuals || raw.offenders || raw.individual || raw.offenderList || raw.customFields?.individuals || raw.customFields?.offenderList || [];
@@ -416,7 +486,7 @@ export default function MpOccurrenceReportsPage() {
     const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
       const src = p.details || p;
       const custom = src.customFields || {};
-      const merged = { ...custom, ...src };
+      const merged = { ...custom, ...src }; 
 
       return {
         sno: index + 1,
@@ -585,15 +655,8 @@ export default function MpOccurrenceReportsPage() {
   };
 
   const handlePrintReport = (item: any) => {
-    const id = item._id;
-    if (!id) {
-      alert("Report ID not found");
-      return;
-    }
-
-    // Open print page in new window
-    const printUrl = `/print/mp-occurrence-report/${id}`;
-    window.open(printUrl, '_blank');
+    setViewingReport(item);
+    setShouldAutoPrint(true);
   };
 
   const distinctReportsCount = processedData.length;
@@ -750,9 +813,9 @@ export default function MpOccurrenceReportsPage() {
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-
+            
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>
