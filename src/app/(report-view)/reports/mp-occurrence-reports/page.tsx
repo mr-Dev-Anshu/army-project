@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
 import { useGetAllMPReports, useCreateMPReport } from "@/features/mpReports/hooks";
-// 1. Import Offender Hook and Type
+
+// Import Offender Hook and Type
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { CreateOffenderData } from "@/apis/offender/types";
 
@@ -24,7 +25,7 @@ import { processImport } from "@/lib/processImport";
 
 /* ================= HELPERS ================= */
 
-// Recursively removes system fields (_id, __v, createdAt, updatedAt)
+// Recursively removes system fields
 const cleanSystemFields = (data: any): any => {
   if (Array.isArray(data)) {
     return data.map(cleanSystemFields);
@@ -89,7 +90,6 @@ const mapData = (data: any[]) => {
   return data.map((item) => {
     const newItem: any = {};
     Object.keys(item).forEach((key) => {
-      // Extra check, though cleanSystemFields runs before this
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
 
       const mappedKey = KEY_MAPPING[key.trim()] || key.trim();
@@ -108,56 +108,86 @@ const mapData = (data: any[]) => {
   });
 };
 
-// 2. Specialized Normalizer for MP Occurrence JSON structure
+// 2. UPDATED NORMALIZER FOR MP OCCURRENCE JSON
 const normalizeJSON = (json: any): any[] => {
+  // Handle the specific structure: { exportDate: "...", reports: [ { report: { ... } } ] }
   if (json.reports && Array.isArray(json.reports)) {
     return json.reports.map((item: any) => {
       const r = item.report || {};
       
-      // Map Offenders
-      const offenders = Array.isArray(r.offenders) ? r.offenders.map((o: any) => ({
-        offenderType: o.offenderType === "militaryPersonnel" ? "Military Person" : (o.offenderType || "Military Person"),
-        offenderDetails: {
-          armyNumber: o.armyNumber,
-          rank: o.selectRank || o.rank,
-          name: o.name,
-          unit: o.unit,
-          fmn: o.fmn,
-          command: o.command,
-          address: o.address,
-          iCardNumber: o.iCardNumber
-        }
-      })) : [];
+      // 1. Map Offenders
+      const offenders = Array.isArray(r.offenders) ? r.offenders.map((o: any) => {
+        let type = "Military Person"; 
+        if (o.offenderType === "servantMaid") type = "Maid"; 
+        else if (o.offenderType === "civilian") type = "Civilian";
+        else if (o.offenderType) type = o.offenderType;
+
+        return {
+          offenderType: type,
+          offenderDetails: {
+            name: o.name || o.personName,
+            rank: o.rank || o.selectRank,
+            armyNumber: o.armyNumber || o.serviceNumber,
+            iCardNumber: o["I Card Number"] || o.iCardNumber || o["Pass ID"] || o.passNo,
+            unit: o.unit || o.unitName,
+            fmn: o.fmn || o.fmnName,
+            command: o.command,
+            address: o.address || o["Place of QTR."],
+            trade: o.Trade,
+            fatherName: o.fatherName,
+            caste: o.caste,
+            age: o.age,
+          }
+        };
+      }) : [];
+
+      // 2. Map Victim/Individual (Using root fields based on your JSON)
+      // If 'reportHeading' or 'age' at root belongs to the victim
+      const victim = {
+          role: "Victim",
+          name: r.reportHeading || "Unknown", // Assuming reportHeading might contain the name as per snippet "aditya"
+          age: r.age,
+          totalServiceDuration: r.totalServiceDuration,
+          unit: r.unit, // If unit exists at root
+          fmn: r.fmn,
+          command: r.command
+      };
 
       return {
-        // Map to MP Report Schema
-        // Note: reportDetails.reportNumber is usually auto-generated or manually entered. 
-        // We use the ID from JSON or a placeholder if needed.
+        // Map Report Details
         reportDetails: {
-            // reportNumber: r.id, 
+            reportNumber: r.id || "Auto-Generated",
+            firNumber: r.firNo
+        },
+        // 3. Map Assigned MP (Investigation Head)
+        investigationHead: {
+            name: r.incidentCoveredBy || r.coordWith || "", // Mapping from 'incidentCoveredBy'
+            rank: "", // Add field if available in JSON
+            armyNumber: "", // Add field if available in JSON
+            unit: "",
+            fmn: ""
         },
         occurrenceDetails: {
             dateOfOccurrence: r.dateOfOccurrence,
-            // Combine Date and Time if time is separate
             timeOfOccurrence: r.timeOfOccurrence ? `${r.dateOfOccurrence}T${r.timeOfOccurrence}` : r.dateOfOccurrence,
             placeOfOccurrence: r.placeOfOccurrence,
-            offenceType: r.reportHeading, // Use Heading as the main Offence Type/Title
-            description: r.reportHeading
+            offenceType: r.reportHeading, 
+            description: r.description
         },
         customFields: {
             vehicleNumber: r.vehicleNumber,
             vehicleType: r.vehicleType,
             vehicleName: r.vehicleName,
-            age: r.age,
-            totalServiceDuration: r.totalServiceDuration,
             leaveOrDuty: r["leave / duty"]
         },
-        offenders: offenders // Pass offenders to be handled by the loop
+        // 4. Include Individuals (Victim)
+        individuals: [victim],
+        // Pass normalized offenders for the loop
+        offenders: offenders 
       };
     });
   }
   
-  // Fallback for flat arrays
   if (Array.isArray(json)) return mapData(json);
   if (json.data && Array.isArray(json.data)) return mapData(json.data);
   return mapData([json]);
@@ -172,7 +202,6 @@ export default function MpOccurrenceReportsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { mutateAsync: createMPReport } = useCreateMPReport();
-  // 3. Initialize Offender Hook
   const { mutateAsync: createOffender } = useCreateOffender();
 
   React.useEffect(() => {
@@ -203,7 +232,6 @@ export default function MpOccurrenceReportsPage() {
     if (filters.unit) params.unit = filters.unit;
     if (filters.fmn) params.fmn = filters.fmn;
     if (filters.fromDate) params.fromDate = filters.fromDate;
-    if (filters.toDate) params.toDate = filters.toDate;
     if (filters.toDate) params.toDate = filters.toDate;
     if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
     if (filters.date) params.date = filters.date;
@@ -251,37 +279,41 @@ export default function MpOccurrenceReportsPage() {
           json = csvToJsonWithHiddenKeys(result);
         }
 
-        // FIX: Unwrap API response wrappers
         if (json && !Array.isArray(json) && json.data) {
             json = json.data;
         }
 
         let dataArray = Array.isArray(json) ? json : [json];
-
-        // FIX: Clean nested system fields
         dataArray = cleanSystemFields(dataArray);
 
-        // 4. Normalize JSON using the new function
-        const mappedData = normalizeJSON(dataArray);
+        // Normalize JSON
+        const mappedData = normalizeJSON(json || dataArray);
 
-        // 5. Custom mutation function to handle both MP Report and Offender creation
+        // Import Logic
         const handleImportRecord = async (item: any) => {
             // A. Create the MP Report
-            const createdReport = await createMPReport(item);
+            // Note: We keep 'individuals' (Victim) in reportPayload, but remove 'offenders'
+            const reportPayload = { ...item };
+            delete reportPayload.offenders; 
 
-            // B. If successful and offenders exist in the imported data, create them in the DB
+            const createdReport = await createMPReport(reportPayload);
+
+            // B. Create Offenders Linked to Report
             if (createdReport && createdReport._id && item.offenders && Array.isArray(item.offenders)) {
-                for (const offender of item.offenders) {
+                await Promise.all(item.offenders.map(async (offender: any) => {
                     if (offender.offenderDetails) {
                         const offenderPayload: CreateOffenderData = {
                             offenceId: createdReport._id, 
                             offenderType: offender.offenderType || "Military Person", 
                             offenderDetails: offender.offenderDetails
                         };
-                        // C. Call Offender API
-                        await createOffender(offenderPayload);
+                        try {
+                            await createOffender(offenderPayload);
+                        } catch (err) {
+                            console.error("Failed to create offender:", err);
+                        }
                     }
-                }
+                }));
             }
             return createdReport;
         };
