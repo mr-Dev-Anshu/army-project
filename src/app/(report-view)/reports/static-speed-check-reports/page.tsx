@@ -275,22 +275,40 @@ export default function StaticSpeedCheckReportsPage() {
 
     return filtered.map((item: any) => {
       const offence = item.offenceOccurenceDetails || {};
-      const driver = item.offenders?.[0]?.offenderDetails || {};
+
+      const driverObj = item.offenders?.[0] || {};
+      const driverDetailsRaw = driverObj.offenderDetails || {};
+
+      const coDriverObj = item.offenders?.[1];
+      const coDriverDetailsRaw = coDriverObj?.offenderDetails || {};
+
       const dateObj = new Date(offence.timeOfOffence || item.createdAt);
 
       return {
         _id: item._id,
-        placeOfOffence: offence.incidentLocation || "Unknown",
+        placeOfOffence: offence.incidentLocation,
         date: dateObj.toLocaleDateString("en-GB"),
         time: dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
+
         driverDetails: {
-          name: driver.name,
-          armyNumber: driver.armyNumber,
-          rank: driver.rank,
-          unit: driver.unit,
-          fmn: driver.fmn,
+          ...driverDetailsRaw,
+          offenderType: driverObj.offenderType,
+          // Ensure critical fields are present if mapped differently in raw data
+          armyNumber: driverDetailsRaw.armyNumber || driverDetailsRaw.armyNo,
         },
-        mpName: item.onDutyDetailsMPReporting?.nameReportingMP,
+
+        coDriverDetails: coDriverObj ? {
+          ...coDriverDetailsRaw,
+          offenderType: coDriverObj.offenderType,
+          armyNumber: coDriverDetailsRaw.armyNumber || coDriverDetailsRaw.armyNo,
+        } : null,
+
+        mpDetails: {
+          armyNumber: item.onDutyDetailsMPReporting?.armyNumber,
+          rank: item.onDutyDetailsMPReporting?.rank,
+          name: item.onDutyDetailsMPReporting?.nameReportingMP,
+          unit: item.onDutyDetailsMPReporting?.unit,
+        },
         unit: item.onDutyDetailsMPReporting?.unit,
         fmn: item.fmn,
         vehicleNo: item.vehicleNumber,
@@ -424,7 +442,7 @@ export default function StaticSpeedCheckReportsPage() {
       alert("Report ID not found");
       return;
     }
-    
+
     // Open print page in new window
     const printUrl = `/print/static-speed-report/${id}`;
     window.open(printUrl, '_blank');

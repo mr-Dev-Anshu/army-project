@@ -36,24 +36,39 @@ export const useUpdateMPReport = () => {
     mutationFn: ({ id, data }: { id: string; data: Partial<api.MPReport> }) =>
       api.updateMPReport(id, data),
     onMutate: async ({ id, data }) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ["mp-reports"] });
       await queryClient.cancelQueries({ queryKey: ["mp-report", id] });
 
-      const previousReports = queryClient.getQueryData(["mp-reports"]);
+      // Snapshot the previous value
+      const previousReports = queryClient.getQueriesData({ queryKey: ["mp-reports"] });
 
-      queryClient.setQueryData(["mp-reports"], (old: api.MPReport[] | undefined) => {
+      // Optimistically update to the new value
+      queryClient.setQueriesData({ queryKey: ["mp-reports"] }, (old: api.MPReport[] | undefined) => {
         if (!old) return [];
         return old.map((report) =>
           report._id === id ? { ...report, ...data } : report
         );
       });
 
+      // Also update the single report view if it exists
+      queryClient.setQueryData(["mp-report", id], (old: api.MPReport | undefined) => {
+        if (!old) return undefined;
+        return { ...old, ...data };
+      });
+
       return { previousReports };
     },
     onError: (err, newTodo, context) => {
-      queryClient.setQueryData(["mp-reports"], context?.previousReports);
+      // Rollback
+      if (context?.previousReports) {
+        context.previousReports.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
     },
     onSettled: (_, __, { id }) => {
+      // Always refetch after error or success:
       queryClient.invalidateQueries({ queryKey: ["mp-reports"] });
       queryClient.invalidateQueries({ queryKey: ["mp-report", id] });
     },

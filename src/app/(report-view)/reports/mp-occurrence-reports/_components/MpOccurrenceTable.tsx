@@ -9,6 +9,10 @@ import {
   Copy,
   Trash,
   Download,
+  Check,
+  Square,
+  CheckSquare,
+  PencilLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -19,6 +23,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
   useUpdateMPReport,
   useDeleteMPReport,
 } from "@/features/mpReports/hooks";
@@ -26,6 +38,7 @@ import MpDetailsCell from "./MpDetailsCell";
 import { toast } from "react-toastify";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
@@ -65,6 +78,18 @@ export default function MpOccurrenceTable({
 
   const [remarkError, setRemarkError] = React.useState("");
 
+  const [remarkModal, setRemarkModal] = React.useState<{
+    isOpen: boolean;
+    reportId: string | null;
+    remark: string;
+    isEdit: boolean;
+  }>({
+    isOpen: false,
+    reportId: null,
+    remark: "",
+    isEdit: false,
+  });
+
   const handleStatusClick = (reportId: string, currentStatus: boolean) => {
     setActionRemark("");
     setRemarkError("");
@@ -84,6 +109,21 @@ export default function MpOccurrenceTable({
     });
   };
 
+  const handleInitialsClick = async (reportId: string, field: "initialsMPCRNCO" | "initialsCO", currentValue: boolean) => {
+    try {
+      await updateReport({
+        id: reportId,
+        data: {
+          [field]: !currentValue
+        }
+      });
+      toast.success(!currentValue ? "Signed successfully" : "Unsigned successfully");
+    } catch (error) {
+      console.error("Failed to update initials", error);
+      toast.error("Failed to update status");
+    }
+  };
+
   const handlePrintClick = React.useCallback((reportId: string) => {
     if (!reportId) {
       toast.error("Cannot print report without an ID.");
@@ -92,6 +132,32 @@ export default function MpOccurrenceTable({
     const printUrl = `/print/mp-occurrence-report/${reportId}`;
     window.open(printUrl, "_blank");
   }, []);
+
+  const openRemarkModal = (reportId: string, currentRemark?: string) => {
+    setRemarkModal({
+      isOpen: true,
+      reportId,
+      remark: currentRemark || "",
+      isEdit: !!currentRemark,
+    });
+  };
+
+  const handleSaveRemark = async () => {
+    if (!remarkModal.reportId) return;
+    try {
+      await updateReport({
+        id: remarkModal.reportId,
+        data: {
+          addRemark: remarkModal.remark,
+        },
+      });
+      toast.success(remarkModal.isEdit ? "Remark updated successfully" : "Remark added successfully");
+      setRemarkModal((prev) => ({ ...prev, isOpen: false }));
+    } catch (error) {
+      console.error("Failed to save remark", error);
+      toast.error(remarkModal.isEdit ? "Failed to update remark" : "Failed to add remark");
+    }
+  };
 
 
   const handleConfirm = async () => {
@@ -143,13 +209,13 @@ export default function MpOccurrenceTable({
           <span className="text-gray-900">{item.displayIndex}</span>
         ),
         className:
-          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
+          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-300",
         headerClassName:
-          "sticky left-0 z-20 bg-gray-50 border-r border-gray-200 w-12",
+          "sticky left-0 z-20 bg-gray-50 border-r border-gray-300 w-12",
       },
       {
         header: "Date & Time of Occu.",
-        className: "min-w-[120px]",
+        className: "min-w-[120px] border-r border-gray-300",
         cell: (item) => (
           <div>
             <div className="font-semibold text-gray-900">{item.date}</div>
@@ -159,7 +225,7 @@ export default function MpOccurrenceTable({
       },
       {
         header: "Place of Occu.",
-        className: "min-w-[150px]",
+        className: "min-w-[150px] border-r border-gray-300",
         cell: (item) => (
           <div className="font-medium text-gray-900">
             {item.placeOfOccurrence}
@@ -168,12 +234,12 @@ export default function MpOccurrenceTable({
       },
       {
         header: "Assigned MP Particulars",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (item) => <MpDetailsCell details={item.assignedMP} />,
       },
       {
         header: "Particulars of Individual/Victim",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (item) => (
           // Using OffenderDetailsCell as a generic Person info cell
           <OffenderDetailsCell
@@ -182,23 +248,38 @@ export default function MpOccurrenceTable({
           />
         ),
       },
+
       {
         header: "Offence Type",
-        className: "min-w-[150px]",
+        className: "min-w-[150px] border-r border-gray-300",
         cell: (item) => (
           <div className="font-medium text-gray-900">{item.offenceType}</div>
         ),
       },
       {
+        header: "Veh. BA No. / Make & Take",
+        className: "min-w-[150px] border-r border-gray-300",
+        cell: (item) => (
+          <div>
+            <div className="font-semibold text-gray-900 border-b border-gray-300 pb-1 mb-1">
+              {item.vehicleDetails?.number}
+            </div>
+            <div className="text-gray-500 text-xs text-wrap">
+              {item.vehicleDetails?.name}
+            </div>
+          </div>
+        ),
+      },
+      {
         header: "Brief of Occurrence",
-        className: "min-w-[250px]",
+        className: "min-w-[250px] border-r border-gray-300",
         cell: (item) => (
           <div className="text-gray-700 text-xs">{item.brief}</div>
         ),
       },
       {
         header: "List of Attached Documents & Statements",
-        className: "min-w-[250px]",
+        className: "min-w-[250px] border-r border-gray-300",
         cell: (item) => (
           <ul className="list-decimal pl-4 text-xs text-gray-600 space-y-1">
             {item.documents?.map((doc: any, i: number) => (
@@ -210,38 +291,61 @@ export default function MpOccurrenceTable({
       },
       {
         header: "Report no.",
-        className: "min-w-[140px]",
+        className: "min-w-[140px] border-r border-gray-300",
         cell: (item) => (
-          <span className="text-gray-600 text-xs">{item.reportNumber}</span>
+          <span className="text-gray-900 text-xs">{item.reportNumber}</span>
         ),
       },
       {
         header: "Initials of MPCR NCO",
-        className: "text-center w-24",
+        className: "text-center w-24 border-r border-gray-300",
         cell: (item) => (
-          <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
+          <div className="flex justify-center py-2">
+            <Checkbox
+              checked={!!item.initialsMPCRNCO}
+              onCheckedChange={() => item._id && handleInitialsClick(item._id, "initialsMPCRNCO", !!item.initialsMPCRNCO)}
+              className="w-5 h-5 border-gray-400 data-[state=checked]:bg-black data-[state=checked]:text-white"
+            />
+          </div>
         ),
       },
       {
         header: "Initials of CO",
-        className: "text-center w-24",
+        className: "text-center w-24 border-r border-gray-300",
         cell: (item) => (
-          <div className="w-4 h-4 border border-gray-300 rounded mx-auto"></div>
+          <div className="flex justify-center py-2">
+            <Checkbox
+              checked={!!item.initialsCO}
+              onCheckedChange={() => item._id && handleInitialsClick(item._id, "initialsCO", !!item.initialsCO)}
+              className="w-5 h-5 border-gray-400 data-[state=checked]:bg-black data-[state=checked]:text-white"
+            />
+          </div>
         ),
       },
       {
         header: "Remark",
-        className: "min-w-[100px]",
+        className: "min-w-[150px] border-r border-gray-300 cursor-pointer hover:bg-gray-50",
         cell: (item) => (
-          <span className="text-gray-400 text-xs italic">Add Remark</span>
+          <div
+            className="w-full h-full min-h-[20px] flex items-center"
+            onClick={() => item._id && openRemarkModal(item._id, item.addRemark)}
+          >
+            {item.addRemark ? (
+              <span className="text-gray-900 text-xs text-wrap break-words" title={item.addRemark}>
+                {item.addRemark}
+              </span>
+            ) : (
+              <span className="text-gray-400 text-xs text-center">Add Remark</span>
+            )}
+          </div>
         ),
       },
       {
         header: "Action Status",
         className:
-          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
+          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-300",
         headerClassName:
-          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
+          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-300",
         cell: (item) => {
           const isTaken = item.actionStatus === true;
           return (
@@ -286,6 +390,13 @@ export default function MpOccurrenceTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => item._id && openRemarkModal(item._id, item.addRemark)}
+              >
+                <PencilLine className="w-4 h-4" />
+                {item.addRemark ? "Update Remark" : "Add Remark"}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
                 onClick={() => onView && onView(item)}
@@ -338,7 +449,7 @@ export default function MpOccurrenceTable({
       <DynamicTable
         data={processedData}
         columns={columns}
-        className="no-scrollbar"
+        className="no-scrollbar max-h-[calc(100vh-220px)]"
       />
       <ConfirmationModal
         isOpen={modalState.isOpen}
@@ -378,6 +489,54 @@ export default function MpOccurrenceTable({
           </div>
         )}
       </ConfirmationModal>
+
+      <Dialog
+        open={remarkModal.isOpen}
+        onOpenChange={(open) =>
+          setRemarkModal((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{remarkModal.isEdit ? "Update Remark" : "Add Remark"}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="add-remark" className="mb-2 block">
+              Remark
+            </Label>
+            <Textarea
+              id="add-remark"
+              value={remarkModal.remark}
+              onChange={(e) =>
+                setRemarkModal((prev) => ({ ...prev, remark: e.target.value }))
+              }
+              placeholder="Enter remark here..."
+              rows={4}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setRemarkModal((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveRemark}
+              disabled={isUpdating}
+              className="bg-[#0088FF] hover:bg-[#0088FF]/90 text-white"
+            >
+              {isUpdating
+                ? "Saving..."
+                : remarkModal.isEdit
+                  ? "Update Remark"
+                  : "Save Remark"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
