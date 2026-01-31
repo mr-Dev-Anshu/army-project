@@ -324,8 +324,8 @@ export default function MpOccurrenceReportsPage() {
 
     if (filters.sortOrder) {
       filteredData.sort((a: any, b: any) => {
-        const dateA = new Date(a.occurrenceDetails?.dateOfOccurrence || a.createdAt).getTime();
-        const dateB = new Date(b.occurrenceDetails?.dateOfOccurrence || b.createdAt).getTime();
+        const dateA = new Date(a.createdAt || a.occurrenceDetails?.dateOfOccurrence).getTime();
+        const dateB = new Date(b.createdAt || b.occurrenceDetails?.dateOfOccurrence).getTime();
         return filters.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
       });
     }
@@ -355,16 +355,16 @@ export default function MpOccurrenceReportsPage() {
             hour12: false,
           })
           : "",
-        placeOfOccurrence: occurrence.placeOfOccurrence,
+        placeOfOccurrence: occurrence.placeOfOccurrence === "NA" ? "" : occurrence.placeOfOccurrence,
 
         assignedMP: {
-          armyNumber: invHead.armyNumber,
-          rank: invHead.rank,
-          name: invHead.name,
-          unit: invHead.unit,
-          fmn: invHead.fmn,
-          address: invHead.address,
-          iCardNumber: invHead.iCardNumber,
+          armyNumber: invHead.armyNumber === "NA" ? "" : invHead.armyNumber,
+          rank: invHead.rank === "NA" ? "" : invHead.rank,
+          name: invHead.name === "NA" ? "" : invHead.name,
+          unit: invHead.unit === "NA" ? "" : invHead.unit,
+          fmn: invHead.fmn === "NA" ? "" : invHead.fmn,
+          address: invHead.address === "NA" ? "" : invHead.address,
+          iCardNumber: invHead.iCardNumber === "NA" ? "" : invHead.iCardNumber,
         },
 
         victimDetails: {
@@ -381,7 +381,7 @@ export default function MpOccurrenceReportsPage() {
             primaryIndividual.offenderType ||
             (primaryIndividual.armyNumber || primaryIndividual.armyNo ? "Military Person" : "Civilian"),
         },
-        reportingMPName: invHead.name,
+        reportingMPName: invHead.name === "NA" ? "" : invHead.name,
 
         vehicleDetails: {
           isVehicleInvolved: primaryIndividual.isVehicleInvolved,
@@ -393,7 +393,7 @@ export default function MpOccurrenceReportsPage() {
           (Array.isArray(occurrence.offenceTypes) && occurrence.offenceTypes.length > 0)
             ? occurrence.offenceTypes.join(", ")
             : (occurrence.offenceType === "NA" ? "" : occurrence.offenceType),
-        brief: occurrence?.description,
+        brief: (occurrence?.description === "Nil" || occurrence?.description === "NA") ? "" : occurrence?.description,
         documents: item?.documents,
         reportNumber: item?.reportDetails?.reportNumber,
         actionStatus: item?.actionStatus, // status action
