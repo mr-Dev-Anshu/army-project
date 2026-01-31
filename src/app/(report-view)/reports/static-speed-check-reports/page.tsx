@@ -10,7 +10,6 @@ import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 
 import { useGetStaticSpeedRecords, useCreateStaticSpeedRecord } from "@/features/staticSpeed/hooks";
-// 1. Import Offender Hook and Type
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { CreateOffenderData } from "@/apis/offender/types";
 
@@ -28,17 +27,13 @@ import { processImport } from "@/lib/processImport";
 
 /* ================= HELPERS ================= */
 
-// Recursively removes system fields (_id, __v, createdAt, updatedAt) from any object or array
 const cleanSystemFields = (data: any): any => {
   if (Array.isArray(data)) {
     return data.map(cleanSystemFields);
-  } else if (data !== null && typeof data === 'object') {
+  } else if (data !== null && typeof data === "object") {
     const cleaned: any = {};
-    Object.keys(data).forEach(key => {
-      // Skip system fields
+    Object.keys(data).forEach((key) => {
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
-      
-      // Recursively clean children
       cleaned[key] = cleanSystemFields(data[key]);
     });
     return cleaned;
@@ -54,7 +49,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Vehicle Type": "vehicleType",
   "Vehicle Name": "vehicleName",
   "Date": "offenceOccurenceDetails.time",
-  "Time": "offenceOccurenceDetails.time", 
+  "Time": "offenceOccurenceDetails.time",
   "Location": "offenceOccurenceDetails.incidentLocation",
   "Place": "offenceOccurenceDetails.incidentLocation",
   "Authorized Speed": "offenceOccurenceDetails.authSpeed",
@@ -71,7 +66,7 @@ const KEY_MAPPING: Record<string, string> = {
   "Reporting MP Rank": "onDutyDetailsMPReporting.rank",
   "Reporting MP Army No": "onDutyDetailsMPReporting.armyNumber",
   "Reporting MP Unit": "onDutyDetailsMPReporting.unit",
-  "Remarks": "remark"
+  "Remarks": "remark",
 };
 
 const setNestedValue = (obj: any, path: string, value: any) => {
@@ -81,7 +76,6 @@ const setNestedValue = (obj: any, path: string, value: any) => {
     const key = keys[i];
     const nextKey = keys[i + 1];
     const isArray = !isNaN(Number(nextKey));
-
     if (!current[key]) {
       current[key] = isArray ? [] : {};
     }
@@ -94,9 +88,7 @@ const mapData = (data: any[]) => {
   return data.map((item) => {
     const newItem: any = {};
     Object.keys(item).forEach((key) => {
-      // Skip if it's a system field
       if (["_id", "__v", "createdAt", "updatedAt", "id"].includes(key)) return;
-
       const mappedKey = KEY_MAPPING[key.trim()] || key.trim();
       if (item[key] !== null && item[key] !== undefined && item[key] !== "") {
         setNestedValue(newItem, mappedKey, item[key]);
@@ -106,7 +98,7 @@ const mapData = (data: any[]) => {
   });
 };
 
-// 2. Specialized Normalizer for JSON structure
+/* ================= JSON NORMALIZER ================= */
 const normalizeJSON = (json: any): any[] => {
   if (json.reports && Array.isArray(json.reports)) {
     return json.reports.map((item: any) => {
@@ -115,20 +107,35 @@ const normalizeJSON = (json: any): any[] => {
       const reporting = d.reportingMP || {};
       const witnessing = d.witnessingMP || {};
 
-      // Map Offenders
-      const offenders = Array.isArray(r.offenders) ? r.offenders.map((o: any) => ({
-        offenderType: o.offenderType === "militaryPersonnel" ? "Military Person" : (o.offenderType || "Military Person"),
-        offenderDetails: {
-          armyNumber: o.armyNumber,
-          rank: o.selectRank || o.rank,
-          name: o.name,
-          unit: o.unit,
-          fmn: o.fmn,
-          command: o.command,
-          address: o.address,
-          iCardNumber: o.iCardNumber
-        }
-      })) : [];
+      const offenders = Array.isArray(r.offenders)
+        ? r.offenders.map((o: any) => ({
+            offenderType:
+              o.offenderType === "militaryPersonnel"
+                ? "Military Person"
+                : o.offenderType || "Military Person",
+            offenderDetails: {
+              armyNumber: o.armyNumber,
+              rank: o.selectRank || o.rank,
+              name: o.name,
+              unit: o.unit,
+              fmn: o.fmn,
+              command: o.command,
+              address: o.address,
+              iCardNumber: o.iCardNumber,
+            },
+          }))
+        : [];
+
+      // FIX 2: Append ":00" so the combined string is a valid ISO datetime.
+      // "2026-02-01T08:07" is ambiguous across browsers; "2026-02-01T08:07:00" is not.
+      let finalTime: string | undefined;
+      if (d.dateOfDuty && r.timeOfOffence) {
+        finalTime = `${d.dateOfDuty}T${r.timeOfOffence}:00`;
+      } else if (d.dateOfDuty) {
+        finalTime = d.dateOfDuty;
+      } else {
+        finalTime = r.timeOfOffence;
+      }
 
       return {
         vehicleNumber: r.vehicleNumber,
@@ -136,26 +143,30 @@ const normalizeJSON = (json: any): any[] => {
         vehicleName: r.vehicleName,
         offenceOccurenceDetails: {
           incidentLocation: r.incidentLocation,
-          timeOfOffence: r.timeOfOffence ? `${d.dateOfDuty}T${r.timeOfOffence}` : d.dateOfDuty,
+          timeOfOffence: finalTime,
           authSpeed: r.authSpeed,
           actualSpeedNoted: r.actualSpeedNoted,
           overSpeedCalculated: r.overSpeedCalculated,
-          description: r.reportHeading
+          description: r.reportHeading,
         },
         onDutyDetailsMPReporting: {
           armyNumber: reporting.armyNo,
           rank: reporting.rank,
           nameReportingMP: reporting.name,
-          unit: reporting.unit
+          unit: reporting.unit,
         },
-        onDutyWitnessingMps: witnessing.armyNo ? [{
-           armyNumber: witnessing.armyNo,
-           rank: witnessing.rank,
-           name: witnessing.name,
-           unit: witnessing.unit
-        }] : [],
+        onDutyWitnessingMps: witnessing.armyNo
+          ? [
+              {
+                armyNumber: witnessing.armyNo,
+                rank: witnessing.rank,
+                name: witnessing.name,
+                unit: witnessing.unit,
+              },
+            ]
+          : [],
         remarks: r.remarks || item.remarks,
-        offenders: offenders // Pass offenders to be handled by loop
+        offenders: offenders,
       };
     });
   }
@@ -181,12 +192,12 @@ export default function StaticSpeedCheckReportsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-  
+
   const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { mutateAsync: createStaticSpeedRecord } = useCreateStaticSpeedRecord();
-  // 3. Initialize Offender Hook
+  const { mutateAsync: createStaticSpeedRecord } =
+    useCreateStaticSpeedRecord();
   const { mutateAsync: createOffender } = useCreateOffender();
 
   /* ================= IMPORT HANDLERS ================= */
@@ -195,7 +206,7 @@ export default function StaticSpeedCheckReportsPage() {
     fileInputRef.current?.click();
     setShowAddOptions(false);
   };
-  
+
   const handleImportJSON = () => {
     fileInputRef.current?.click();
     setShowAddOptions(false);
@@ -206,14 +217,16 @@ export default function StaticSpeedCheckReportsPage() {
     setShowAddOptions(false);
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     const fileName = file.name.toLowerCase();
     const isExcel = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
     const isJson = fileName.endsWith(".json");
-    
+
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -230,38 +243,71 @@ export default function StaticSpeedCheckReportsPage() {
           json = csvToJsonWithHiddenKeys(result);
         }
 
-        // 4. Normalize JSON
         const mappedData = normalizeJSON(json);
 
-        // 5. Custom mutation function to handle both Static Speed Record and Offender creation
-        const handleImportRecord = async (item: any) => {
-            // A. Create the Static Speed Record
-            const createdRecord = await createStaticSpeedRecord(item);
+        // FIX 3: Track per-record success/failure so we can report it accurately.
+        let successCount = 0;
+        let failCount = 0;
 
-            // B. If successful and offenders exist in the imported data, create them in the DB
-            if (createdRecord && createdRecord._id && item.offenders && Array.isArray(item.offenders)) {
-                for (const offender of item.offenders) {
-                    if (offender.offenderDetails) {
-                        const offenderPayload: CreateOffenderData = {
-                            offenceId: createdRecord._id, 
-                            offenderType: offender.offenderType || "Military Person", 
-                            offenderDetails: offender.offenderDetails
-                        };
-                        // C. Call Offender API
-                        await createOffender(offenderPayload);
-                    }
+        const handleImportRecord = async (item: any) => {
+          try {
+            // FIX 1: Destructure offenders OUT before sending to the main record API.
+            // The API does not handle nested offender creation — they must be
+            // created separately via createOffender after we have the record's _id.
+            const { offenders, ...reportPayload } = item;
+
+            const createdRecord =
+              await createStaticSpeedRecord(reportPayload);
+
+            // Now create each offender linked to the new record
+            if (
+              createdRecord &&
+              createdRecord._id &&
+              offenders &&
+              Array.isArray(offenders)
+            ) {
+              for (const offender of offenders) {
+                if (offender.offenderDetails) {
+                  const offenderPayload: CreateOffenderData = {
+                    offenceId: createdRecord._id,
+                    offenderType:
+                      offender.offenderType || "Military Person",
+                    offenderDetails: offender.offenderDetails,
+                  };
+                  await createOffender(offenderPayload);
                 }
+              }
             }
+
+            successCount++;
             return createdRecord;
+          } catch (err) {
+            // Log per-record error but don't let one failure kill the whole batch
+            console.error("Failed to import record:", err);
+            failCount++;
+            return null;
+          }
         };
 
         await processImport(mappedData, handleImportRecord);
-        
-        toast.success("Records and Offenders imported successfully!");
-        await refetch(); 
+
+        // Show a detailed result toast
+        if (failCount === 0) {
+          toast.success(
+            `All ${successCount} record(s) and offenders imported successfully!`
+          );
+        } else {
+          toast.warning(
+            `Import done: ${successCount} succeeded, ${failCount} failed. Check console for details.`
+          );
+        }
+
+        await refetch();
       } catch (error: any) {
         console.error("Error importing file:", error);
-        toast.error(`Failed to import records: ${error.message || "Unknown error"}`);
+        toast.error(
+          `Failed to import records: ${error.message || "Unknown error"}`
+        );
       }
     };
 
@@ -270,7 +316,7 @@ export default function StaticSpeedCheckReportsPage() {
     } else {
       reader.readAsText(file);
     }
-    event.target.value = ""; 
+    event.target.value = "";
   };
 
   useEffect(() => {
@@ -289,24 +335,33 @@ export default function StaticSpeedCheckReportsPage() {
     if (filters.fmn) params.fmn = filters.fmn;
     if (filters.fromDate) params.fromDate = filters.fromDate;
     if (filters.toDate) params.toDate = filters.toDate;
-    if (filters.placeOfOffence) params.placeOfOffence = filters.placeOfOffence;
+    if (filters.placeOfOffence)
+      params.placeOfOffence = filters.placeOfOffence;
     if (filters.date) params.date = filters.date;
-    if (filters.actionStatus && filters.actionStatus !== "All") params.status = filters.actionStatus;
+    if (filters.actionStatus && filters.actionStatus !== "All")
+      params.status = filters.actionStatus;
     return params;
   }, [filters]);
 
-  const { data, isLoading, isError, refetch } = useGetStaticSpeedRecords(apiParams);
+  const { data, isLoading, isError, refetch } =
+    useGetStaticSpeedRecords(apiParams);
 
   const processedData = useMemo(() => {
     if (!data) return [];
 
     const filtered = data.filter((item: any) => {
-      const rawDate = item.offenceOccurenceDetails?.timeOfOffence || item.createdAt;
+      const rawDate =
+        item.offenceOccurenceDetails?.timeOfOffence || item.createdAt;
 
       if (filters.fromDate || filters.toDate) {
         const d = new Date(rawDate).getTime();
-        if (filters.fromDate && d < new Date(filters.fromDate).getTime()) return false;
-        if (filters.toDate && d > new Date(filters.toDate + "T23:59:59.999").getTime()) return false;
+        if (filters.fromDate && d < new Date(filters.fromDate).getTime())
+          return false;
+        if (
+          filters.toDate &&
+          d > new Date(filters.toDate + "T23:59:59.999").getTime()
+        )
+          return false;
       }
 
       if (filters.date) {
@@ -316,12 +371,21 @@ export default function StaticSpeedCheckReportsPage() {
 
       if (filters.actionStatus !== "All") {
         const isTaken = item.actionStatus === true;
-        if ((filters.actionStatus === "Taken" && !isTaken) || (filters.actionStatus === "Pending" && isTaken)) return false;
+        if (
+          (filters.actionStatus === "Taken" && !isTaken) ||
+          (filters.actionStatus === "Pending" && isTaken)
+        )
+          return false;
       }
 
+      // FIX 5: Normalize both sides to lowercase before comparing unit.
+      // Previously "MP Unit" !== "mp unit" would silently filter out records.
       if (filters.unit) {
-        const unit = item.onDutyDetailsMPReporting?.unit || item.offenders?.[0]?.offenderDetails?.unit;
-        if (!unit || unit !== filters.unit) return false;
+        const unit =
+          item.onDutyDetailsMPReporting?.unit ||
+          item.offenders?.[0]?.offenderDetails?.unit ||
+          "";
+        if (unit.toLowerCase() !== filters.unit.toLowerCase()) return false;
       }
 
       if (filters.fmn) {
@@ -330,14 +394,35 @@ export default function StaticSpeedCheckReportsPage() {
       }
 
       if (filters.placeOfOffence) {
-        const place = item.placeOfOffence || item.offenceOccurenceDetails?.incidentLocation || item.incidentLocation;
-        if (!place || place.toLowerCase() !== filters.placeOfOffence.toLowerCase()) return false;
+        const place =
+          item.placeOfOffence ||
+          item.offenceOccurenceDetails?.incidentLocation ||
+          item.incidentLocation;
+        if (
+          !place ||
+          place.toLowerCase() !== filters.placeOfOffence.toLowerCase()
+        )
+          return false;
       }
 
+      // FIX 4: Search across all commonly visible fields, not just reportId + vehicleNumber.
+      // Previously, any record missing both reportId and vehicleNumber was silently filtered out
+      // because "".includes(searchTerm) is always false.
       if (filters.search) {
         const s = filters.search.toLowerCase();
-        const rNo = item.reportId || item.reportNumber || item.reportNo || "";
-        if (!rNo.toLowerCase().includes(s) && !item.vehicleNumber?.toLowerCase().includes(s)) return false;
+        const searchableFields = [
+          item.reportId || item.reportNumber || item.reportNo || "",
+          item.vehicleNumber || "",
+          item.vehicleName || "",
+          item.offenceOccurenceDetails?.incidentLocation || "",
+          item.offenders?.[0]?.offenderDetails?.name || "",
+          item.offenders?.[0]?.offenderDetails?.armyNumber || "",
+          item.onDutyDetailsMPReporting?.nameReportingMP || "",
+        ];
+        const matchFound = searchableFields.some((field) =>
+          field.toLowerCase().includes(s)
+        );
+        if (!matchFound) return false;
       }
 
       return true;
@@ -345,8 +430,16 @@ export default function StaticSpeedCheckReportsPage() {
 
     if (filters.sortOrder) {
       filtered.sort((a: any, b: any) => {
-        const dA = new Date(a.offenceOccurenceDetails?.timeOfOffence || a.createdAt).getTime();
-        const dB = new Date(b.offenceOccurenceDetails?.timeOfOffence || b.createdAt).getTime();
+        const dA = new Date(
+          a.offenceOccurenceDetails?.timeOfOffence || a.createdAt
+        ).getTime();
+        const dB = new Date(
+          b.offenceOccurenceDetails?.timeOfOffence || b.createdAt
+        ).getTime();
+        // Guard against NaN: if either date is invalid, push it to the end
+        // so the rest of the list still sorts correctly.
+        if (isNaN(dA)) return 1;
+        if (isNaN(dB)) return -1;
         return filters.sortOrder === "asc" ? dA - dB : dB - dA;
       });
     }
@@ -359,19 +452,30 @@ export default function StaticSpeedCheckReportsPage() {
       return {
         _id: item._id,
         placeOfOffence: offence.incidentLocation || "Unknown",
-        date: dateObj.toLocaleDateString("en-GB"),
-        time: dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
+        date: isNaN(dateObj.getTime())
+          ? "Invalid Date"
+          : dateObj.toLocaleDateString("en-GB"),
+        time: isNaN(dateObj.getTime())
+          ? "--:--"
+          : dateObj.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }),
         driverDetails: {
           name: driver.name,
           armyNumber: driver.armyNumber,
           rank: driver.rank,
         },
-        mpName: item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
-        unit: item.onDutyDetailsMPReporting?.unit || driver.unit || "MP Unit",
+        mpName:
+          item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
+        unit:
+          item.onDutyDetailsMPReporting?.unit || driver.unit || "MP Unit",
         fmn: item.fmn || driver.fmn,
         vehicleNo: item.vehicleNumber,
         vehicleModel: item.vehicleName,
-        reportNo: item.reportId || item.reportNumber || item.reportNo || "N/A",
+        reportNo:
+          item.reportId || item.reportNumber || item.reportNo || "N/A",
         actionStatus: item.actionStatus,
         offenceBrief: offence.description || "N/A",
         authSpeed: offence.authSpeed || "-",
@@ -448,14 +552,16 @@ export default function StaticSpeedCheckReportsPage() {
   };
 
   const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(
+    null
+  );
 
   const handleDownloadReport = async (item: any) => {
     setIsDownloading(true);
     setDownloadType("Word");
     try {
       generateStaticSpeedWordReport(mapToReportProps(item));
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (e) {
       console.error(e);
       alert("Failed to download Word report");
@@ -478,7 +584,7 @@ export default function StaticSpeedCheckReportsPage() {
       if (!response.ok) throw new Error("Failed to generate PDF");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `StaticSpeedReport-${item.reportNo || id}.pdf`;
       document.body.appendChild(a);
@@ -563,7 +669,9 @@ export default function StaticSpeedCheckReportsPage() {
           <Loader2 className="animate-spin w-8 h-8 text-blue-600" />
         </div>
       ) : isError ? (
-        <div className="p-8 text-red-500 text-center">Failed to load reports</div>
+        <div className="p-8 text-red-500 text-center">
+          Failed to load reports
+        </div>
       ) : (
         <StaticSpeedTable
           data={processedData}
@@ -586,8 +694,12 @@ export default function StaticSpeedCheckReportsPage() {
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">Add New Record</h3>
-                <p className="text-sm text-gray-500 mt-1">Choose how you want to add data to the system</p>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Add New Record
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Choose how you want to add data to the system
+                </p>
               </div>
               <button
                 onClick={() => setShowAddOptions(false)}
@@ -605,8 +717,12 @@ export default function StaticSpeedCheckReportsPage() {
                 <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <FileSpreadsheet className="w-10 h-10 text-green-600" />
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-700">Import CSV / Excel</h4>
-                <p className="text-gray-500 leading-relaxed">Upload a CSV or Excel file containing multiple records.</p>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-700">
+                  Import CSV / Excel
+                </h4>
+                <p className="text-gray-500 leading-relaxed">
+                  Upload a CSV or Excel file containing multiple records.
+                </p>
               </button>
 
               <button
@@ -616,8 +732,12 @@ export default function StaticSpeedCheckReportsPage() {
                 <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <FileJson className="w-10 h-10 text-orange-600" />
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-700">Import JSON</h4>
-                <p className="text-gray-500 leading-relaxed">Upload a JSON file with structured data.</p>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-700">
+                  Import JSON
+                </h4>
+                <p className="text-gray-500 leading-relaxed">
+                  Upload a JSON file with structured data.
+                </p>
               </button>
 
               <button
@@ -627,13 +747,22 @@ export default function StaticSpeedCheckReportsPage() {
                 <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Plus className="w-10 h-10 text-blue-600" />
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700">Create Manually</h4>
-                <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
+                <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700">
+                  Create Manually
+                </h4>
+                <p className="text-gray-500 leading-relaxed">
+                  Fill out the form manually to add a single record.
+                </p>
               </button>
             </div>
-            
+
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAddOptions(false)}
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         </div>
