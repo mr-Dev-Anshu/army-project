@@ -182,6 +182,21 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         });
     }, [incidents, filters]);
 
+    const getIndividualInfo = (ind: any) => {
+        const details = { ...(ind.individualDetails || {}), ...(ind.offenderDetails || {}) };
+
+        let type = ind.individualType;
+        if (!type) {
+            if (details.employeeServiceNumber) type = "employee";
+            else if (details.maidPassNumber) type = "servantMaid";
+            else if (details.shopOwnerName) type = "shopKeeper";
+            else if (details.tempWorkerName) type = "tempHiredWorker";
+            else if (details.civilianName || details.civilianAadharCardNumber) type = "civilian";
+            else type = "militaryPersonnel";
+        }
+        return { details, type };
+    };
+
     // 4. Columns Definition
     const columns: Column<ImmediateReportingIncident>[] = [
         {
@@ -204,12 +219,170 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => {
-                            const details = ind.offenderDetails || ind.individualDetails || {};
+                            const { details, type } = getIndividualInfo(ind);
+
+                            const renderField = (label: string, value: any) => {
+                                if (!value) return null;
+                                return <div><span className="font-bold text-[#0A0A0A]">{label}:</span> <span className="text-[#0A0A0A]">{value}</span></div>;
+                            };
+
+                            const renderDate = (label: string, value: any) => {
+                                if (!value) return null;
+                                return <div><span className="font-bold text-[#0A0A0A]">{label}:</span> <span className="text-[#0A0A0A]">{format(new Date(value), 'dd/MM/yyyy')}</span></div>;
+                            };
+
                             return (
                                 <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                    <div><span className="font-bold text-[#0A0A0A]">Army no.:</span> <span className="text-[#0A0A0A]">{details.armyNo || "-"}</span></div>
-                                    <div><span className="font-bold text-[#0A0A0A]">Rank:</span> <span className="text-[#0A0A0A]">{details.rank || "-"}</span></div>
-                                    <div><span className="font-bold text-[#0A0A0A]">Name:</span> <span className="text-[#0A0A0A]">{details.name || "-"}</span></div>
+                                    {/* Military Personnel */}
+                                    {type === "militaryPersonnel" && (
+                                        <>
+                                            {renderField("Army No", details.armyNo || details.militaryPersonnelArmyNo)}
+                                            {renderField("Rank", details.rank || details.militaryPersonnelRank)}
+                                            {renderField("Name", details.name || details.militaryPersonnelName)}
+                                            {renderField("Unit", details.unit || details.militaryPersonnelUnit)}
+                                            {renderField("FMN", details.fmn || details.militaryPersonnelFmn)}
+                                            {renderField("Command", details.militaryPersonnelCommand)}
+                                            {renderField("I Card Number", details.militaryPersonnelICardNumber)}
+                                        </>
+                                    )}
+
+                                    {/* Employee */}
+                                    {type === "employee" && (
+                                        <>
+                                            {renderField("Service No", details.employeeServiceNumber)}
+                                            {renderField("Name", details.employeeName)}
+                                            {renderField("Rank", details.employeeRank)}
+                                            {renderField("Unit", details.employeeUnit)}
+                                            {renderField("FMN", details.employeeFmn)}
+                                            {renderField("Command", details.employeeCommand)}
+                                            {renderField("I-Card", details.employeeICardNumber)}
+                                        </>
+                                    )}
+
+                                    {/* Servant / Maid (Primary) */}
+                                    {type === "servantMaid" && (
+                                        <>
+                                            {renderField("Pass No", details.maidPassNumber)}
+                                            {renderField("Name", details.maidName)}
+                                            {renderField("Father's Name", details.maidFathersName)}
+                                            {renderField("Pass ID", details.maidPassID)}
+                                            {renderField("Trade", details.maidTrade)}
+                                            {renderField("Worked at Qtr", details.maidQuarterNumber)}
+                                            {renderField("Employer Rank", details.officersEnclaveRank)}
+                                            {renderField("Employer Name", details.officersEnclaveName)}
+                                            {renderField("Place of Qtr", details.officersEnclavePlaceOfQtr)}
+                                            {renderField("Unit", details.officersEnclaveUnit)}
+                                            {renderField("FMN", details.officersEnclaveFmn)}
+                                            {renderField("Command", details.officersEnclaveCommand)}
+                                            {renderField("I-Card", details.officersEnclaveICardNumber)}
+                                        </>
+                                    )}
+
+                                    {/* Shop Keeper (Primary) */}
+                                    {type === "shopKeeper" && (
+                                        <>
+                                            {renderField("Shop Owner", details.shopOwnerName)}
+                                            {renderField("Shop Name", details.shopName)}
+                                            {renderField("Address", details.shopAddress)}
+                                            {renderField("Unit", details.shopUnit)}
+                                            {renderField("Pass No", details.shopPassNo)}
+                                            {renderDate("Issue Date", details.shopPassIssueDate)}
+                                            {renderDate("Expire Date", details.shopPassExpireDate)}
+                                        </>
+                                    )}
+
+                                    {/* Temp Hired Worker (Primary) */}
+                                    {type === "tempHiredWorker" && (
+                                        <>
+                                            {renderField("Name", details.tempWorkerName)}
+                                            {renderField("Place of Stay", details.tempWorkerPlaceOfStay)}
+                                            {renderField("Place of Work", details.tempWorkerPlaceOfWork)}
+                                            {renderField("Type of Work", details.tempWorkerTypeOfWork)}
+                                            {renderField("Pass No", details.tempWorkerPassNo)}
+                                            {renderDate("Issue Date", details.tempWorkerPassIssueDate)}
+                                            {renderDate("Expire Date", details.tempWorkerPassExpireDate)}
+                                        </>
+                                    )}
+
+                                    {/* Civilian */}
+                                    {type === "civilian" && (
+                                        <>
+                                            {renderField("Name", details.civilianName)}
+                                            {renderField("Aadhar No", details.civilianAadharCardNumber)}
+                                            {renderField("Father's Name", details.civilianFathersName)}
+                                            {renderField("Address", details.civilianAddress)}
+
+                                            {details.isDependent && (
+                                                <div className="mt-2 pt-2 border-t border-gray-200">
+                                                    <div className="font-semibold text-gray-700 mb-1">
+                                                        Relative <span className="font-normal text-xs">({details.relationName})</span>:
+                                                    </div>
+                                                    {/* Nested Relative Details */}
+                                                    {details.relativeCategory === "militaryPersonnel" && details.relativeDetails && (
+                                                        <>
+                                                            {renderField("Army No", details.relativeDetails.armyNo || details.relativeDetails.militaryPersonnelArmyNo)}
+                                                            {renderField("Rank", details.relativeDetails.rank || details.relativeDetails.militaryPersonnelRank)}
+                                                            {renderField("Name", details.relativeDetails.name || details.relativeDetails.militaryPersonnelName)}
+                                                            {renderField("Unit", details.relativeDetails.unit || details.relativeDetails.militaryPersonnelUnit)}
+                                                            {renderField("FMN", details.relativeDetails.fmn || details.relativeDetails.militaryPersonnelFmn)}
+                                                            {renderField("Command", details.relativeDetails.militaryPersonnelCommand)}
+                                                        </>
+                                                    )}
+                                                    {details.relativeCategory === "employee" && details.relativeDetails && (
+                                                        <>
+                                                            {renderField("Service No", details.relativeDetails.employeeServiceNumber)}
+                                                            {renderField("Name", details.relativeDetails.employeeName)}
+                                                            {renderField("Rank", details.relativeDetails.employeeRank)}
+                                                            {renderField("Unit", details.relativeDetails.employeeUnit)}
+                                                            {renderField("FMN", details.relativeDetails.employeeFmn)}
+                                                            {renderField("Command", details.relativeDetails.employeeCommand)}
+                                                        </>
+                                                    )}
+                                                    {details.relativeCategory === "servantMaid" && details.relativeDetails && (
+                                                        <>
+                                                            {renderField("Pass No", details.relativeDetails.maidPassNumber)}
+                                                            {renderField("Father's Name", details.relativeDetails.maidFathersName)}
+                                                            {renderField("Pass ID", details.relativeDetails.maidPassID)}
+                                                            {renderField("Name", details.relativeDetails.maidName || details.relativeDetails.officersEnclaveName)}
+                                                            {renderField("Trade", details.relativeDetails.maidTrade)}
+                                                            {renderField("Worked at Qtr", details.relativeDetails.maidQuarterNumber)}
+                                                            {renderField("Employer Rank", details.relativeDetails.officersEnclaveRank)}
+                                                            {renderField("Employer Name", details.relativeDetails.officersEnclaveName)}
+                                                            {renderField("Place of Qtr", details.relativeDetails.maidPlaceOfQtr || details.relativeDetails.officersEnclavePlaceOfQtr)}
+                                                            {renderField("Unit", details.relativeDetails.maidUnit || details.relativeDetails.officersEnclaveUnit)}
+                                                            {renderField("FMN", details.relativeDetails.maidFmn || details.relativeDetails.officersEnclaveFmn)}
+                                                            {renderField("Command", details.relativeDetails.maidCommand || details.relativeDetails.officersEnclaveCommand)}
+                                                            {renderField("Address", details.relativeDetails.maidAddress || details.relativeDetails.officersEnclaveAddress)}
+                                                            {renderField("I-Card", details.relativeDetails.maidICardNumber || details.relativeDetails.officersEnclaveICardNumber)}
+
+                                                        </>
+                                                    )}
+                                                    {details.relativeCategory === "shopKeeper" && details.relativeDetails && (
+                                                        <>
+                                                            {renderField("Shop Owner", details.relativeDetails.shopOwnerName)}
+                                                            {renderField("Shop Name", details.relativeDetails.shopName)}
+                                                            {renderField("Address", details.relativeDetails.shopAddress)}
+                                                            {renderField("Unit", details.relativeDetails.shopUnit)}
+                                                            {renderField("Pass No", details.relativeDetails.shopPassNo)}
+                                                            {renderDate("Issue Date", details.relativeDetails.shopPassIssueDate)}
+                                                            {renderDate("Expire Date", details.relativeDetails.shopPassExpireDate)}
+                                                        </>
+                                                    )}
+                                                    {details.relativeCategory === "tempHiredWorker" && details.relativeDetails && (
+                                                        <>
+                                                            {renderField("Name", details.relativeDetails.tempWorkerName)}
+                                                            {renderField("Place of Stay", details.relativeDetails.tempWorkerPlaceOfStay)}
+                                                            {renderField("Place of Work", details.relativeDetails.tempWorkerPlaceOfWork)}
+                                                            {renderField("Type of Work", details.relativeDetails.tempWorkerTypeOfWork)}
+                                                            {renderField("Pass No", details.relativeDetails.tempWorkerPassNo)}
+                                                            {renderDate("Issue Date", details.relativeDetails.tempWorkerPassIssueDate)}
+                                                            {renderDate("Expire Date", details.relativeDetails.tempWorkerPassExpireDate)}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                             );
                         })}
@@ -218,6 +391,19 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
             },
             className: "border-r border-gray-300 min-w-[200px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[200px]",
+        },
+
+        {
+            header: "Vehicle BA No. / Reg No.",
+            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.vehicleNumber || "-"}</span>,
+            className: "border-r border-gray-300 min-w-[120px] align-top py-2",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
+        },
+        {
+            header: "Make & Take",
+            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.vehicleName || "-"}</span>,
+            className: "border-r border-gray-300 min-w-[120px] align-top py-2",
+            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },
         {
             header: "Age & Service Yrs",
@@ -229,8 +415,8 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => (
                             <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                <div>{ind.age} Years old</div>
-                                <div>{ind.totalServiceDuration} Years</div>
+                                <div><span className="font-bold">Age:</span> {ind.age} Years</div>
+                                <div><span className="font-bold">Service:</span> {ind.totalServiceDuration} Years</div>
                             </div>
                         ))}
                     </div>
@@ -248,10 +434,16 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => {
-                            const details = ind.offenderDetails || ind.individualDetails || {};
+                            const { details, type } = getIndividualInfo(ind);
+                            let unit = "-";
+                            if (type === "militaryPersonnel") unit = details.unit || details.militaryPersonnelUnit;
+                            else if (type === "employee") unit = details.employeeUnit;
+                            else if (type === "servantMaid") unit = details.officersEnclaveUnit;
+                            else if (type === "shopKeeper") unit = details.shopUnit;
+
                             return (
                                 <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                    {details.unit || "-"}
+                                    {unit || "-"}
                                 </div>
                             );
                         })}
@@ -289,10 +481,15 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => {
-                            const details = ind.offenderDetails || ind.individualDetails || {};
+                            const { details, type } = getIndividualInfo(ind);
+                            let fmn = "-";
+                            if (type === "militaryPersonnel") fmn = details.fmn || details.militaryPersonnelFmn;
+                            else if (type === "employee") fmn = details.employeeFmn;
+                            else if (type === "servantMaid") fmn = details.officersEnclaveFmn;
+
                             return (
                                 <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                    {details.fmn || "-"}
+                                    {fmn || "-"}
                                 </div>
                             );
                         })}

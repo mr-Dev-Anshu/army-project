@@ -9,15 +9,23 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 interface IndividualVictimDetailsProps {
     data: any;
     onChange: (path: string, value: any) => void;
+    hideHeader?: boolean;
 }
 
-export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = ({ data, onChange }) => {
+export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = ({ data, onChange, hideHeader = false }) => {
     return (
         <section className="space-y-4">
             <div className="space-y-4">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">Individual / Victim Details</h3>
+                {!hideHeader && <h3 className="text-base font-semibold text-gray-900 mb-4">Individual / Victim Details</h3>}
                 <div>
-                    <p className="text-sm font-medium text-gray-700 mb-3">Select Individual & Fill Details</p>
+                    {!hideHeader ? (
+                        <p className="text-sm font-medium text-gray-700 mb-3">Select Individual & Fill Details</p>
+                    ) : (
+                        <div className="mb-4">
+                            <p className="text-sm font-medium text-gray-900">Fill Details</p>
+                            <p className="text-xs text-gray-500">The form will update based on your selection.</p>
+                        </div>
+                    )}
                     <RadioGroup
                         value={data.individualType}
                         onValueChange={(v) => onChange("individualType", v)}
@@ -56,7 +64,7 @@ export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = (
                             <SuggestionInput
                                 label="Army No."
                                 fieldType="armyNo"
-                                placeholder="eg. 122334F"
+                                placeholder="e.g. 12345678A"
                                 value={data.individualDetails?.militaryPersonnelArmyNo || ""}
                                 onChange={(v) => onChange("individualDetails.militaryPersonnelArmyNo", v)}
                             />
@@ -65,7 +73,7 @@ export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = (
                             <SuggestionInput
                                 label="Rank"
                                 fieldType="rank"
-                                placeholder="eg. Sepoy"
+                                placeholder="Enter rank"
                                 value={data.individualDetails?.militaryPersonnelRank || ""}
                                 onChange={(v) => onChange("individualDetails.militaryPersonnelRank", v)}
                             />
@@ -76,7 +84,7 @@ export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = (
                             <SuggestionInput
                                 label="Unit"
                                 fieldType="unit"
-                                placeholder="eg. "
+                                placeholder="Enter unit"
                                 value={data.individualDetails?.militaryPersonnelUnit || ""}
                                 onChange={(v) => onChange("individualDetails.militaryPersonnelUnit", v)}
                             />
@@ -97,7 +105,7 @@ export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = (
                             <SuggestionInput
                                 label="FMN"
                                 fieldType="fmn"
-                                placeholder="eg."
+                                placeholder="Enter FMN"
                                 value={data.individualDetails?.militaryPersonnelFmn || ""}
                                 onChange={(v) => onChange("individualDetails.militaryPersonnelFmn", v)}
                             />
@@ -106,7 +114,7 @@ export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = (
                             <SuggestionInput
                                 label="Command"
                                 fieldType="command"
-                                placeholder="eg."
+                                placeholder="Enter Command"
                                 value={data.individualDetails?.militaryPersonnelCommand || ""}
                                 onChange={(v) => onChange("individualDetails.militaryPersonnelCommand", v)}
                             />
@@ -117,7 +125,7 @@ export const IndividualVictimDetails: React.FC<IndividualVictimDetailsProps> = (
                             <SuggestionInput
                                 label="Address"
                                 fieldType="address"
-                                placeholder="e.g. A-123456"
+                                placeholder="e.g. C/O 56 APO"
                                 value={data.individualDetails?.militaryPersonnelAddress || ""}
                                 onChange={(v) => onChange("individualDetails.militaryPersonnelAddress", v)}
                             />
