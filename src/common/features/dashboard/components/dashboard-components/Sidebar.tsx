@@ -28,6 +28,10 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import ConeIcon from "@/components/icons/ConeIcon";
 import { useAuth } from "@/context/AuthContext";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
+import { renderToStaticMarkup } from "react-dom/server";
+
 
 const cn = (...classes: (string | boolean)[]) =>
   classes.filter(Boolean).join(" ");
@@ -213,53 +217,54 @@ const Sidebar = () => {
 
     return (
       <Link
-        key={item.label}
-        href={item.href || "#"}
+  key={item.label}
+  href={item.href || "#"}
+  {...(isCollapsed
+    ? {
+        "data-tooltip-id": "sidebar-tooltip",
+        "data-tooltip-html": renderToStaticMarkup(
+          typeof item.label === "string" ? item.label : item.label
+        ),
+        "data-tooltip-place": "right",
+      }
+    : {})}
+  className={cn(
+    "w-full relative flex items-center transition-all group rounded-lg my-2",
+    isCollapsed
+      ? "h-10 justify-center hover:bg-gray-100"
+      : cn(
+          "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
+          isSubmenu && "py-1.5",
+          isActive(item.href) &&
+            "bg-blue-50 text-blue-700 hover:bg-blue-50"
+        )
+  )}
+>
+  {!isSubmenu && <span className="flex-shrink-0">{item.icon}</span>}
+
+  {!isCollapsed && (
+    <>
+      <span
         className={cn(
-          "w-full relative flex items-center transition-all group rounded-lg my-2",
-          isCollapsed
-            ? "h-10 justify-center hover:bg-gray-100"
-            : cn(
-                "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
-                isSubmenu && "py-1.5",
-                active && "bg-blue-50 text-blue-700 hover:bg-blue-50",
-              ),
+          "flex-1 whitespace-normal break-words leading-snug",
+          isSubmenu ? "text-sm" : "text-base",
+          isActive(item.href)
+            ? "text-blue-700 font-medium"
+            : "text-gray-600 group-hover:text-gray-900"
         )}
       >
-        {!isSubmenu && (
-          <span
-            className={cn(
-              "flex-shrink-0",
-              active
-                ? "text-blue-700"
-                : "text-gray-500 group-hover:text-gray-900",
-            )}
-          >
-            {" "}
-            {item.icon}{" "}
-          </span>
-        )}
-        {!isCollapsed && (
-          <>
-            <span
-              className={cn(
-                "flex-1 whitespace-normal break-words leading-snug",
-                isSubmenu ? "text-sm" : "text-base",
-                active
-                  ? "text-blue-700 font-medium"
-                  : "text-gray-600 group-hover:text-gray-900",
-              )}
-            >
-              {item.label}
-            </span>
-            {item.badge && (
-              <span className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-gray-200 text-gray-600 rounded-full">
-                {item.badge}
-              </span>
-            )}
-          </>
-        )}
-      </Link>
+        {item.label}
+      </span>
+      {item.badge && (
+        <span className="w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-gray-200 text-gray-600 rounded-full">
+          {item.badge}
+        </span>
+      )}
+    </>
+  )}
+</Link>
+
+      
     );
   };
 
@@ -276,45 +281,44 @@ const Sidebar = () => {
         onOpenChange={() => toggleMenu(item.label)}
         className="w-full"
       >
-        <CollapsibleTrigger
-          className={cn(
-            "w-full flex items-center transition-all group rounded-lg",
-            isCollapsed
-              ? "h-10 justify-center hover:bg-gray-100"
-              : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100",
-            hasActiveSubmenu && "bg-blue-50",
-          )}
-        >
-          <span
-            className={cn(
-              "flex-shrink-0",
-              hasActiveSubmenu
-                ? "text-blue-700"
-                : "text-gray-500 group-hover:text-gray-900",
-            )}
-          >
-            {item.icon}
-          </span>
-          {!isCollapsed && (
-            <>
-              <span
-                className={cn(
-                  "flex-1 text-base leading-snug",
-                  hasActiveSubmenu
-                    ? "text-blue-700 font-medium"
-                    : "text-gray-600 group-hover:text-gray-900",
-                )}
-              >
-                {item.label}
-              </span>
-              {openMenus.includes(item.label) ? (
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-400" />
-              )}
-            </>
-          )}
-        </CollapsibleTrigger>
+       <CollapsibleTrigger
+  {...(isCollapsed
+    ? {
+        "data-tooltip-id": "sidebar-tooltip",
+        "data-tooltip-html": renderToStaticMarkup(item.label),
+        "data-tooltip-place": "right",
+      }
+    : {})}
+  className={cn(
+    "w-full flex items-center transition-all group rounded-lg",
+    isCollapsed
+      ? "h-10 justify-center hover:bg-gray-100"
+      : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100",
+    hasActiveSubmenu && "bg-blue-50"
+  )}
+>
+  <span className="flex-shrink-0">{item.icon}</span>
+  {!isCollapsed && (
+    <>
+      <span
+        className={cn(
+          "flex-1 text-base leading-snug",
+          hasActiveSubmenu
+            ? "text-blue-700 font-medium"
+            : "text-gray-600 group-hover:text-gray-900"
+        )}
+      >
+        {item.label}
+      </span>
+      {openMenus.includes(item.label) ? (
+        <ChevronDown className="w-4 h-4 text-gray-400" />
+      ) : (
+        <ChevronRight className="w-4 h-4 text-gray-400" />
+      )}
+    </>
+  )}
+</CollapsibleTrigger>
+
         {!isCollapsed && (
           <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-200 space-y-1">
             {item.submenu.map((sub: any) => (
@@ -364,8 +368,8 @@ const Sidebar = () => {
         )}
       >
         <div className="mb-2">
-          {menuItems.map((item) => (
-            <div key={item.label}>{renderMenuItem(item)}</div>
+          {menuItems.map((item,idx) => (
+            <div key={idx}>{renderMenuItem(item)}</div>
           ))}
         </div>
         <div className="w-full h-px bg-gray-100 my-2" />
@@ -375,8 +379,8 @@ const Sidebar = () => {
               Create New Record
             </h2>
           )}
-          {createNewRecordItems.map((item) => (
-            <div key={item.label}>{renderMenuItem(item)}</div>
+          {createNewRecordItems.map((item,idx) => (
+            <div key={idx}>{renderMenuItem(item)}</div>
           ))}
         </div>
         <div className="w-full h-px bg-gray-100 my-2" />
@@ -386,8 +390,8 @@ const Sidebar = () => {
               Reports & Analysis
             </h2>
           )}
-          {reportsAndAnalysis.map((item) => (
-            <div key={item.label}>{renderMenuItem(item)}</div>
+          {reportsAndAnalysis.map((item,idx) => (
+            <div key={idx}>{renderMenuItem(item)}</div>
           ))}
         </div>
         <div className="w-full h-px bg-gray-100 my-2" />
@@ -451,6 +455,8 @@ const Sidebar = () => {
           </button>
         )}
       </div>
+            {isCollapsed && <Tooltip id="sidebar-tooltip" className="!text-sm !px-3 !py-2 !rounded-md !bg-gray-900 !text-white z-100" delayShow={100}/>}
+
     </div>
     
 
