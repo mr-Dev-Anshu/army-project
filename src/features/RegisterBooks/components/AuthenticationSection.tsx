@@ -18,9 +18,10 @@ interface AuthenticationSectionProps {
     title?: string;
     description?: string;
     variant?: 'default' | 'minimal';
+    hiddenFields?: string[];
 }
 
-export const AuthenticationSection = ({ data, onChange, title, description, variant = 'default' }: AuthenticationSectionProps) => {
+export const AuthenticationSection = ({ data, onChange, title, description, variant = 'default', hiddenFields = [] }: AuthenticationSectionProps) => {
     const isMinimal = variant === 'minimal';
     const Wrapper = isMinimal ? 'div' : 'section';
 
@@ -49,72 +50,78 @@ export const AuthenticationSection = ({ data, onChange, title, description, vari
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
-                        <tr>
-                            <td className="px-4 py-2 text-[#0a0a0a] font-medium">Initials of MPCR NCO</td>
-                            <td className="px-4 py-2">
-                                <SuggestionInput
-                                    label=""
-                                    fieldType="initials"
-                                    placeholder="Signature"
-                                    value={data.initialsMPCPNCO || ""}
-                                    onChange={(v) => onChange("initialsMPCPNCO", v)}
-                                    disabled={true}
-                                />
-                            </td>
-                            <td className="px-4 py-2 text-center align-middle">
-                                <div className="flex justify-center">
-                                    <Checkbox
-                                        className="border-black"
-                                        checked={data.initialsOfMPCRNCO || false}
-                                        onCheckedChange={(checked) => onChange("initialsOfMPCRNCO", checked)}
+                        {!hiddenFields.includes("initialsMPCPNCO") && (
+                            <tr>
+                                <td className="px-4 py-2 text-[#0a0a0a] font-medium">Initials of MPCR NCO</td>
+                                <td className="px-4 py-2">
+                                    <SuggestionInput
+                                        label=""
+                                        fieldType="initials"
+                                        placeholder="Signature"
+                                        value={data.initialsMPCPNCO || ""}
+                                        onChange={(v) => onChange("initialsMPCPNCO", v)}
+                                        disabled={true}
                                     />
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-2 text-[#0a0a0a] font-medium">Initials of SM/SJCO</td>
-                            <td className="px-4 py-2">
-                                <SuggestionInput
-                                    label=""
-                                    fieldType="initials"
-                                    placeholder="Signature"
-                                    value={data.initialsQMSJCO || ""}
-                                    onChange={(v) => onChange("initialsQMSJCO", v)}
-                                    disabled={true}
-                                />
-                            </td>
-                            <td className="px-4 py-2 text-center align-middle">
-                                <div className="flex justify-center">
-                                    <Checkbox
-                                        className="border-black"
-                                        checked={data.initialsOfSMSJCO || false}
-                                        onCheckedChange={(checked) => onChange("initialsOfSMSJCO", checked)}
+                                </td>
+                                <td className="px-4 py-2 text-center align-middle">
+                                    <div className="flex justify-center">
+                                        <Checkbox
+                                            className="border-black"
+                                            checked={data.initialsOfMPCRNCO || false}
+                                            onCheckedChange={(checked) => onChange("initialsOfMPCRNCO", checked)}
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
+                        {!hiddenFields.includes("initialsQMSJCO") && (
+                            <tr>
+                                <td className="px-4 py-2 text-[#0a0a0a] font-medium">Initials of SM/SJCO</td>
+                                <td className="px-4 py-2">
+                                    <SuggestionInput
+                                        label=""
+                                        fieldType="initials"
+                                        placeholder="Signature"
+                                        value={data.initialsQMSJCO || ""}
+                                        onChange={(v) => onChange("initialsQMSJCO", v)}
+                                        disabled={true}
                                     />
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-2 text-[#0a0a0a] font-medium">Initials of 2IC</td>
-                            <td className="px-4 py-2">
-                                <SuggestionInput
-                                    label=""
-                                    fieldType="initials"
-                                    placeholder="Signature"
-                                    value={data.initials2IC || ""}
-                                    onChange={(v) => onChange("initials2IC", v)}
-                                    disabled={true}
-                                />
-                            </td>
-                            <td className="px-4 py-2 text-center align-middle">
-                                <div className="flex justify-center">
-                                    <Checkbox
-                                        className="border-black"
-                                        checked={data.initialsOf2IC || false}
-                                        onCheckedChange={(checked) => onChange("initialsOf2IC", checked)}
+                                </td>
+                                <td className="px-4 py-2 text-center align-middle">
+                                    <div className="flex justify-center">
+                                        <Checkbox
+                                            className="border-black"
+                                            checked={data.initialsOfSMSJCO || false}
+                                            onCheckedChange={(checked) => onChange("initialsOfSMSJCO", checked)}
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
+                        {!hiddenFields.includes("initials2IC") && (
+                            <tr>
+                                <td className="px-4 py-2 text-[#0a0a0a] font-medium">Initials of 2IC</td>
+                                <td className="px-4 py-2">
+                                    <SuggestionInput
+                                        label=""
+                                        fieldType="initials"
+                                        placeholder="Signature"
+                                        value={data.initials2IC || ""}
+                                        onChange={(v) => onChange("initials2IC", v)}
+                                        disabled={true}
                                     />
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+                                <td className="px-4 py-2 text-center align-middle">
+                                    <div className="flex justify-center">
+                                        <Checkbox
+                                            className="border-black"
+                                            checked={data.initialsOf2IC || false}
+                                            onCheckedChange={(checked) => onChange("initialsOf2IC", checked)}
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

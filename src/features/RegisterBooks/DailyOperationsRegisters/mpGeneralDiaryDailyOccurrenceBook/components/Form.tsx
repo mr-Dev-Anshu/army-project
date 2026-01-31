@@ -413,6 +413,7 @@ export default function MpGeneralDiaryForm({
             <AuthenticationSection
                 data={formData.authentication}
                 onChange={(field, value) => handleNestedChange("authentication", field, value)}
+                hiddenFields={["initials2IC"]}
             />
 
             {/* Footer Actions */}
