@@ -34,9 +34,9 @@ export default function Step6Evidence() {
         onChange={set}
         fields={[
           { label: "Attach Evidence", key: "attachEvidence" },
-          { label: "Eye Sketch", key: "eyeSketch" },
-          { label: "Photos", key: "photos", multiple: true },
-          { label: "Videos", key: "videos", multiple: true },
+          { label: "Eye Sketch", key: "eyeSketch", accept: "image/*" },
+          { label: "Photos", key: "photos", multiple: true, accept: "image/*" },
+          { label: "Videos", key: "videos", multiple: true, accept: "video/*" },
         ]}
       />
     </div>
