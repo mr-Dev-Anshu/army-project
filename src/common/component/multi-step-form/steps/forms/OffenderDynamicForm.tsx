@@ -14,7 +14,7 @@ interface OffenderDynamicFormProps {
   title: string;
   helperText?: string;
   fields: any[];
-  scope?: "traffic" | "static";
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
   path?: string;
   isRoot?: boolean;
 }

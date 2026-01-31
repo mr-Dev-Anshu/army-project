@@ -321,24 +321,24 @@ export default function MultiStepForm({
         }
 
         if (Array.isArray(eo.offenders)) {
-          trafficNodes.offenderPeople = eo.offenders.map(
-            (o: any, index: number) => {
-              console.log(
-                `🟠 OFFENDER ${index} RAW DETAILS 👉`,
-                o.offenderDetails,
-              );
+          const uniqueMap = new Map<string, any>();
 
-              const mapped = mapBackendOffenderDetails(o.offenderDetails);
+          eo.offenders.forEach((o: any) => {
+            const mapped = mapBackendOffenderDetails(o.offenderDetails);
 
-              console.log(`🟢 OFFENDER ${index} MAPPED DETAILS 👉`, mapped);
+            // 🔑 unique key
+            const key = mapped.armyNumber || mapped.iCardNumber || mapped.name;
 
-              return {
+            if (!uniqueMap.has(key)) {
+              uniqueMap.set(key, {
                 type: o.offenderType || "Civilian",
-                whoIsIt: o.category || "Offender",
+                whoIsIt: o.offenderDetails?.type || "Offender",
                 details: mapped,
-              };
-            },
-          );
+              });
+            }
+          });
+
+          trafficNodes.offenderPeople = Array.from(uniqueMap.values());
         }
 
         dispatch({
