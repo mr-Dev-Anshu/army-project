@@ -10,7 +10,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "react-toastify";
+import { useUpdateMobilePhoneInOutRegister } from "../hooks";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+
 
 // Define interface for data item
 interface RegisterItem {
@@ -34,6 +38,9 @@ interface RegisterItem {
         initialsMPCPNCO?: string;
         initialsQMSJCO?: string;
         initials2IC?: string;
+        initialsOfMPCRNCO?: boolean;
+        initialsOfSMSJCO?: boolean;
+        initialsOf2IC?: boolean;
     };
     remark?: string;
 }
@@ -61,6 +68,7 @@ const MobilePhoneInOutTable = ({
     onDelete,
     onAddNew,
 }: MobilePhoneInOutTableProps) => {
+    const { mutate: updateReport } = useUpdateMobilePhoneInOutRegister();
     // Filter State
     const [filters, setFilters] = useState<FilterState>({
         search: "",
@@ -88,6 +96,36 @@ const MobilePhoneInOutTable = ({
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding // Toggle the specific field
+            };
+
+            await updateReport({
+                id: record._id,
+                payload: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
+        }
     };
 
     const filteredData = useMemo(() => {
@@ -138,7 +176,7 @@ const MobilePhoneInOutTable = ({
                 <div className="flex items-center gap-2">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="24" height="24" rx="12" fill="#E5E5E5" />
-                        <g clip-path="url(#clip0_536_85919)">
+                        <g clipPath="url(#clip0_536_85919)">
                             <path d="M14.5 7H9.5C8.94772 7 8.5 7.44772 8.5 8V16C8.5 16.5523 8.94772 17 9.5 17H14.5C15.0523 17 15.5 16.5523 15.5 16V8C15.5 7.44772 15.0523 7 14.5 7Z" stroke="#404040" stroke-width="1.2" stroke-linejoin="round" />
                             <path d="M12 15H12.005" stroke="#404040" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="round" />
                         </g>
@@ -277,13 +315,31 @@ const MobilePhoneInOutTable = ({
                                             </td>
 
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-[#0A0A0A] text-center">
-                                                {item.authentication?.initialsMPCPNCO || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-[#0A0A0A] text-center">
-                                                {item.authentication?.initialsQMSJCO || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-[#0A0A0A] text-center">
-                                                {item.authentication?.initials2IC || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOf2IC || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-[#0A0A0A] text-xs">
                                                 {item.remark || "-"}

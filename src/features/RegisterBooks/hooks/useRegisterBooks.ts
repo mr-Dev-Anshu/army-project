@@ -56,14 +56,16 @@ export const useCreateRegister = () => {
 export const useUpdateRegister = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ id, payload }: { id: string; payload: Partial<RegisterEntry> }) => {
+        mutationFn: async ({ id, payload }: { id: string; payload: Partial<RegisterEntry>; suppressToast?: boolean }) => {
             return await updateRegisterEntry(id, payload);
         },
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ["register", data._id] });
             queryClient.invalidateQueries({ queryKey: ["registers", data.type] });
             queryClient.invalidateQueries({ queryKey: ["registers", undefined] });
-            toast.success("Register entry updated successfully");
+            if (!variables.suppressToast) {
+                toast.success("Register entry updated successfully");
+            }
         },
         onError: (error: any) => {
             const message = error.response?.data?.error || "Failed to update register entry";
