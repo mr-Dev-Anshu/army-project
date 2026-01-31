@@ -77,9 +77,9 @@ const mapData = (data: any[]) => {
     });
 
     if (newItem.vehicleNumber) {
-        newItem.isVehicleInvolved = true;
+      newItem.isVehicleInvolved = true;
     } else if (newItem.isVehicleInvolved === undefined) {
-        newItem.isVehicleInvolved = false;
+      newItem.isVehicleInvolved = false;
     }
 
     return newItem;
@@ -165,7 +165,7 @@ export default function ReportsPage({
         const mappedData = mapData(dataArray);
 
         await processImport(mappedData, createTrafficOffence);
-        
+
         toast.success("Records imported successfully!");
         await refetch();
       } catch (error: any) {
@@ -406,11 +406,22 @@ export default function ReportsPage({
   };
 
   const handlePrintReport = (offence: any) => {
-    setViewingReport(offence);
+    const id = offence._id;
+    if (!id) {
+      alert("Report ID not found");
+      return;
+    }
+
+    // Determine print URL based on vehicle involvement
+    const printUrl = offence.isVehicleInvolved
+      ? `/print/general-traffic-offence-reports/vehicle-involved/${id}`
+      : `/print/general-traffic-offence-reports/no-vehicle-involved/${id}`;
+
+    window.open(printUrl, '_blank');
   };
 
   /* ================= EXCEL EXPORT HANDLER ================= */
-  
+
   const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
 
   const handleExcelDownload = () => {
@@ -420,23 +431,23 @@ export default function ReportsPage({
     // 2. Define Columns based on YOUR JSON
     const columns: ExcelColumn[] = [
       { header: "Report No", key: "reportId" },
-      { header: "Offence Type", key: "offenceTypes[0]" }, 
-      
+      { header: "Offence Type", key: "offenceTypes[0]" },
+
       // Date Formatting
-      { 
-        header: "Date", 
+      {
+        header: "Date",
         key: "offenceOccurenceDetails.timeOfOffence",
         formatter: (val) => val ? new Date(val).toLocaleDateString("en-GB") : ""
       },
-      { 
-        header: "Time", 
+      {
+        header: "Time",
         key: "offenceOccurenceDetails.timeOfOffence",
-        formatter: (val) => val ? new Date(val).toLocaleTimeString("en-GB", {hour: '2-digit', minute:'2-digit'}) : ""
+        formatter: (val) => val ? new Date(val).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }) : ""
       },
 
       { header: "Location", key: "offenceOccurenceDetails.incidentLocation" },
       { header: "Description", key: "offenceOccurenceDetails.description" },
-      
+
       // Vehicle
       { header: "Vehicle No", key: "vehicleNumber" },
       { header: "Vehicle Type", key: "vehicleType" },
@@ -444,7 +455,7 @@ export default function ReportsPage({
 
       // Offender (Note: "Select Rank" matches your JSON key)
       { header: "Offender Name", key: "offenders[0].offenderDetails.name" },
-      { header: "Rank", key: "offenders[0].offenderDetails.Select Rank" }, 
+      { header: "Rank", key: "offenders[0].offenderDetails.Select Rank" },
       { header: "Army No", key: "offenders[0].offenderDetails.armyNumber" },
       { header: "Unit", key: "offenders[0].offenderDetails.unit" },
       { header: "FMN", key: "offenders[0].offenderDetails.fmn" },
@@ -634,9 +645,9 @@ export default function ReportsPage({
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
               </button>
             </div>
-            
+
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-               <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
             </div>
           </div>
         </div>

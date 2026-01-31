@@ -67,16 +67,8 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
                     ),
                 }
                 : undefined,
-            vehicle: offence.isVehicleInvolved
-                ? {
-                    baNo: val(offence.vehicleNumber),
-                    makeAndTake: val(offence.vehicleName) || val(offence.vehicleType),
-                    vehicleNumber:
-                        offence.vehicleType === "DD Vehicle"
-                            ? "DD Veh. BA No."
-                            : "Registration No.",
-                }
-                : undefined,
+            // No vehicle for this type
+            vehicle: undefined,
         },
         occurrence: {
             dateOfDuty: dateVal(offence.onDutyDetails?.dateOfDuty),
@@ -139,7 +131,7 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
     };
 }
 
-export default function PrintReportPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PrintNoVehicleInvolvedReportPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params);
     const { data, isLoading } = useGetTrafficOffenceById(id);
 
@@ -171,7 +163,7 @@ export default function PrintReportPage({ params }: { params: Promise<{ id: stri
     const reportProps = mapToReportProps(data);
 
     return (
-         <div id="print-container" className="min-h-screen bg-white p-0">
+        <div id="print-container" className="min-h-screen bg-white p-0">
             <div id="report-content">
                 <MilitaryPoliceReport {...reportProps} />
             </div>

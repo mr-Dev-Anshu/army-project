@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useEffect } from "react";
 import ImmediateReportingIncidentReport from "@/components/reports/ImmediateReportingIncident";
 import { useGetImmediateReportingIncidentById } from "@/features/immediateReportingIncident/hooks";
 import { Loader2 } from "lucide-react";
@@ -12,6 +12,23 @@ export default function PrintImmediateReportingIncidentPage({
 }) {
     const { id } = use(params);
     const { data, isLoading } = useGetImmediateReportingIncidentById(id);
+    useEffect(() => {
+        if (data) {
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [data]);
+
+    useEffect(() => {
+        if (data) {
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [data]);
 
     if (isLoading) {
         return (

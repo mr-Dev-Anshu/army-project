@@ -68,7 +68,7 @@ const Sidebar = () => {
     );
   };
 
-  const isActive = (href: string) => {
+  const isActive = (href: string | undefined) => {
     if (!href) return false;
     return pathname === href || pathname.startsWith(href + "/");
   };
