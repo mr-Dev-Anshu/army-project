@@ -62,7 +62,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
       const fmn = get("fmn", "FMN", "militaryPersonnelFmn");
 
       return (
-        <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+        <div className="space-y-0.5 text-xs text-[#0A0A0A]">
           {armyNo && <div><span className="font-semibold ">Army No:</span> {armyNo}</div>}
           {rank && <div><span className="font-semibold ">Rank:</span> {rank}</div>}
           {name && <div><span className="font-semibold ">Name:</span> {name}</div>}
@@ -82,7 +82,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
 
 
       return (
-        <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+        <div className="space-y-0.5 text-xs text-[#0A0A0A]">
           {serviceNo && <div><span className="font-semibold ">Service No:</span> {serviceNo}</div>}
           {dept && <div><span className="font-semibold ">Dept:</span> {dept}</div>}
           {/* Fallbacks if data exists */}
@@ -101,7 +101,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
       const iCard = get("iCardNumber", "ID Card Number", "civilianICardNumber", "icard", "identityCard");
 
       return (
-        <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+        <div className="space-y-0.5 text-xs text-[#0A0A0A]">
           {name && <div><span className="font-semibold ">Name:</span> {name}</div>}
           {aadhar && <div><span className="font-semibold ">Aadhar No.:</span> {aadhar}</div>}
           {father && <div><span className="font-semibold ">Father/Husband:</span> {father}</div>}
@@ -119,7 +119,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
       const passNo = get("Pass No.", "shopPassNo", "passNo");
 
       return (
-        <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+        <div className="space-y-0.5 text-xs text-[#0A0A0A]">
 
           {name && <div><span className="font-semibold ">Name:</span> {name}</div>}
           {unit && <div><span className="font-semibold ">Unit:</span> {unit}</div>}
@@ -140,7 +140,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
       const coFmn = get("fmn", "FMN", "officersEnclaveFmn");
 
       return (
-        <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+        <div className="space-y-0.5 text-xs text-[#0A0A0A]">
           {name && <div><span className="font-semibold ">Name:</span> {name}</div>}
           {father && <div><span className="font-semibold ">Father/Husband:</span> {father}</div>}
           {passNo && <div><span className="font-semibold ">Pass No:</span> {passNo}</div>}
@@ -160,7 +160,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
       const typeWork = get("Type of Work", "tempWorkerTypeOfWork");
 
       return (
-        <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+        <div className="space-y-0.5 text-xs text-[#0A0A0A]">
           {name && <div><span className="font-semibold ">Name:</span> {name}</div>}
           {passNo && <div><span className="font-semibold ">Pass No:</span> {passNo}</div>}
           {placeWork && <div><span className="font-semibold ">Place of Work:</span> {placeWork}</div>}
@@ -171,7 +171,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
 
     // Fallback for others
     return (
-      <div className="space-y-0.5 text-sm">
+      <div className="space-y-0.5 text-xs">
 
         {Object.entries(d).slice(0, 3).map(([k, v]: any) => (
           <div key={k}><span className="font-semibold text-gray-900">{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {v}</div>
