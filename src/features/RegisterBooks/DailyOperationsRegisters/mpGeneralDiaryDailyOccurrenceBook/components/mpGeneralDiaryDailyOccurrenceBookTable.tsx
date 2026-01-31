@@ -283,7 +283,7 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
 
                                 <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-56 align-middle sticky top-0 z-40 bg-[#F5F5F5]">Assigned MP Particulars</th>
                                 <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-24 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5]">Initials of MPCR NCO</th>
-                                <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-24 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5]">Initials of CO</th>
+                                <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-24 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5]"> Initials of SM/SJCO</th>
                                 <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-32 align-middle sticky top-0 z-40 bg-[#F5F5F5]">Remark</th>
                                 <th rowSpan={2} className="px-2 py-3 w-10 text-center align-middle sticky right-0 top-0 z-50 bg-[#F5F5F5] border-l border-neutral-300">Action</th>
                             </tr>
@@ -371,8 +371,8 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
                                                 <div className="flex justify-center">
                                                     <Checkbox
                                                         className="border-black"
-                                                        checked={item.authentication?.initialsOf2IC || false}
-                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
                                                     />
                                                 </div>
                                             </td>
