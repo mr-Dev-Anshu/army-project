@@ -325,17 +325,20 @@ export default function MultiStepForm({
 
           eo.offenders.forEach((o: any) => {
             const mapped = mapBackendOffenderDetails(o.offenderDetails);
+            if (!mapped || !Object.keys(mapped).length) return;
 
-            // 🔑 unique key
-            const key = mapped.armyNumber || mapped.iCardNumber || mapped.name;
+            // ✅ Same person key
+            const key =
+              (mapped.armyNumber || mapped.iCardNumber || mapped.name) +
+              "_" +
+              (o.offenderDetails?.type || "Offender");
 
-            if (!uniqueMap.has(key)) {
-              uniqueMap.set(key, {
-                type: o.offenderType || "Civilian",
-                whoIsIt: o.offenderDetails?.type || "Offender",
-                details: mapped,
-              });
-            }
+            // ✅ Always overwrite -> latest wins
+            uniqueMap.set(key, {
+              type: o.offenderType || "Civilian",
+              whoIsIt: o.offenderDetails?.type || "Offender",
+              details: mapped,
+            });
           });
 
           trafficNodes.offenderPeople = Array.from(uniqueMap.values());
