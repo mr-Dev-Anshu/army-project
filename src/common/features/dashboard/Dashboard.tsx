@@ -33,6 +33,9 @@ const StatsCardSkeleton = () => {
 };
 
 
+
+
+
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -65,6 +68,22 @@ export default function Dashboard() {
     }
     return flattened;
   }, [trafficOffences]);
+
+  const todayFormatted = useMemo(() => {
+  const now = new Date();
+
+  const date = now.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const day = now.toLocaleDateString("en-GB", {
+    weekday: "long",
+  });
+
+  return `${date} | ${day}`;
+}, []);
 
   const stats = useMemo(() => {
     const trafficCount = allTrafficOffences.length;
@@ -308,20 +327,22 @@ export default function Dashboard() {
       {/* MAIN CONTENT */}
       <div className="flex-1 p-4 sm:p-5 md:p-6 space-y-8 overflow-y-auto no-scrollbar">
         {/* HEADER / SEARCH */}
-        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-3 print:hidden">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"
-          >
-            <SquareSplitHorizontal className="w-5 h-5" />
-          </button>
-          <Search className="text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Type to search..."
-            className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder:text-gray-400"
-          />
-        </div>
+        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 px-4 py-3 flex items-center justify-between gap-3 print:hidden">
+  <div className="flex items-center gap-3">
+    <button
+      onClick={() => setCollapsed(!collapsed)}
+      className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"
+    >
+      <SquareSplitHorizontal className="w-5 h-5" />
+    </button>
+  </div>
+
+  {/* DATE */}
+  <div className="text-sm text-gray-600 font-medium">
+    {todayFormatted}
+  </div>
+</div>
+
 
         {/* STATS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 print:hidden">

@@ -50,7 +50,6 @@ export default function AllRegisteredReports() {
       staticSpeed: speedData?.length || 0,
       mpOccurrence: mpData?.length || 0,
       immediateIncident: immediateData?.length || 0, // Add count here
-      mtAccident: 56, // Mock data
     };
   }, [trafficData, speedData, mpData, immediateData]);
 
@@ -261,21 +260,21 @@ export default function AllRegisteredReports() {
       iconBgColor: "bg-[#7B1E1E]",
       onClick: () => router.push("/reports/mp-occurrence-reports"),
     },
-    {
-      title: "MT Accident Register: 21 Corps Pro",
-      count: counts.mtAccident,
-      icon: (
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="48" height="48" rx="24" fill="#C2A14D" />
-          <path d="M26.332 28.6641H20.4987M32.1654 28.6641H35.6654V24.9891C35.6662 24.7115 35.5679 24.4427 35.3883 24.2309C35.2087 24.0192 34.9594 23.8785 34.6854 23.8341L28.6654 22.8308L25.5154 18.6308C25.4067 18.4859 25.2658 18.3683 25.1038 18.2873C24.9418 18.2063 24.7632 18.1641 24.582 18.1641H16.112C15.6772 18.1611 15.2501 18.2796 14.8791 18.5064C14.508 18.7332 14.2077 19.0591 14.012 19.4475L13.0787 21.3491C12.5889 22.3228 12.3332 23.3975 12.332 24.4875V28.6641H14.6654" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M17.5846 32.1693C19.1955 32.1693 20.5013 30.8634 20.5013 29.2526C20.5013 27.6418 19.1955 26.3359 17.5846 26.3359C15.9738 26.3359 14.668 27.6418 14.668 29.2526C14.668 30.8634 15.9738 32.1693 17.5846 32.1693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M29.2487 32.1693C30.8595 32.1693 32.1654 30.8634 32.1654 29.2526C32.1654 27.6418 30.8595 26.3359 29.2487 26.3359C27.6379 26.3359 26.332 27.6418 26.332 29.2526C26.332 30.8634 27.6379 32.1693 29.2487 32.1693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+    // {
+    //   title: "MT Accident Register: 21 Corps Pro",
+    //   count: counts.mtAccident,
+    //   icon: (
+    //     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    //       <rect width="48" height="48" rx="24" fill="#C2A14D" />
+    //       <path d="M26.332 28.6641H20.4987M32.1654 28.6641H35.6654V24.9891C35.6662 24.7115 35.5679 24.4427 35.3883 24.2309C35.2087 24.0192 34.9594 23.8785 34.6854 23.8341L28.6654 22.8308L25.5154 18.6308C25.4067 18.4859 25.2658 18.3683 25.1038 18.2873C24.9418 18.2063 24.7632 18.1641 24.582 18.1641H16.112C15.6772 18.1611 15.2501 18.2796 14.8791 18.5064C14.508 18.7332 14.2077 19.0591 14.012 19.4475L13.0787 21.3491C12.5889 22.3228 12.3332 23.3975 12.332 24.4875V28.6641H14.6654" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    //       <path d="M17.5846 32.1693C19.1955 32.1693 20.5013 30.8634 20.5013 29.2526C20.5013 27.6418 19.1955 26.3359 17.5846 26.3359C15.9738 26.3359 14.668 27.6418 14.668 29.2526C14.668 30.8634 15.9738 32.1693 17.5846 32.1693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    //       <path d="M29.2487 32.1693C30.8595 32.1693 32.1654 30.8634 32.1654 29.2526C32.1654 27.6418 30.8595 26.3359 29.2487 26.3359C27.6379 26.3359 26.332 27.6418 26.332 29.2526C26.332 30.8634 27.6379 32.1693 29.2487 32.1693Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    //     </svg>
 
-      ),
-      iconBgColor: "bg-[#C2A14D]",
-      onClick: () => console.log("Navigate to MT Accident"),
-    },
+    //   ),
+    //   iconBgColor: "bg-[#C2A14D]",
+    //   onClick: () => console.log("Navigate to MT Accident"),
+    // },
   ];
 
   return (
@@ -284,7 +283,7 @@ export default function AllRegisteredReports() {
       <ReportPageHeader
         title="All Registered Reports"
         breadcrumbItems={[{ label: "Reports & Analysis", href: "/" }]}
-        reportCount={counts.trafficVehicle + counts.trafficNoVehicle + counts.staticSpeed + counts.mpOccurrence + counts.immediateIncident + counts.mtAccident}
+        reportCount={counts.trafficVehicle + counts.trafficNoVehicle + counts.staticSpeed + counts.mpOccurrence + counts.immediateIncident}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
