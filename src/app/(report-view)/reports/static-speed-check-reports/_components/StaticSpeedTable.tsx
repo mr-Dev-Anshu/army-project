@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import OffenderDetailsCell from "@/app/(report-view)/reports/general-traffic-offence-reports/_components/OffenderDetailsCell";
+import MpDetailsCell from "@/app/(report-view)/reports/mp-occurrence-reports/_components/MpDetailsCell";
 import {
   useUpdateStaticSpeedRecord,
   useDeleteStaticSpeedRecord,
@@ -130,27 +131,27 @@ export default function StaticSpeedTable({
           <span className="text-gray-900">{item.displayIndex}</span>
         ),
         className:
-          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
+          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-300",
         headerClassName:
-          "sticky left-0 z-20 bg-gray-50 border-r border-gray-200 w-12",
+          "sticky left-0 z-20 bg-gray-50 border-r border-gray-300 w-12",
       },
       {
         header: "Place of Offence",
-        className: "min-w-[150px]",
+        className: "min-w-[150px] border-r border-gray-300",
         cell: (item) => (
           <div>
             <div className="font-medium text-gray-900">
-              {item.placeOfOffence || "Unknown"}
+              {item.placeOfOffence}
             </div>
             <div className="text-gray-500 font-normal mt-1">
-              {item.subLocation || "SI Line Military Station"}
+              {item.subLocation}
             </div>
           </div>
         ),
       },
       {
         header: "Date & Time",
-        className: "min-w-[120px]",
+        className: "min-w-[120px] border-r border-gray-300",
         cell: (item) => (
           <div>
             <div className="font-semibold text-gray-900">{item.date}</div>
@@ -160,27 +161,35 @@ export default function StaticSpeedTable({
       },
       {
         header: "Particulars of Driver/Rider",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (item) => (
-          <OffenderDetailsCell
-            details={item.driverDetails}
-            mpName={item.mpName}
-          />
+          <div className="flex flex-col gap-2">
+            {item.driverDetails ? <OffenderDetailsCell
+              details={item.driverDetails}
+              mpName=""
+            /> : ""}
+            {item.mpDetails && Object.values(item.mpDetails).some((val) => val) && (
+              <div className="pt-2 border-t border-dashed border-gray-300">
+                <div className="font-semibold text-xs text-gray-900 mb-1">MP Details:</div>
+                <MpDetailsCell details={item.mpDetails} />
+              </div>
+            )}
+          </div>
         ),
       },
       {
         header: "Unit",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (item) => item.unit,
       },
       {
         header: "FMN",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (item) => item.fmn,
       },
       {
         header: "Offence Brief",
-        className: "min-w-[180px]",
+        className: "min-w-[180px] border-r border-gray-300",
         cell: (item) => (
           <div className="text-gray-700 text-xs max-w-xs">
             {item.offenceBrief}
@@ -189,7 +198,7 @@ export default function StaticSpeedTable({
       },
       {
         header: "Veh. BA No. / Make & Take",
-        className: "min-w-[150px]",
+        className: "min-w-[150px] border-r border-gray-300",
         cell: (item) => (
           <div>
             <div className="font-semibold text-gray-900">{item.vehicleNo}</div>
@@ -199,56 +208,67 @@ export default function StaticSpeedTable({
       },
       {
         header: "Report no.",
-        className: "min-w-[140px]",
+        className: "min-w-[140px] border-r border-gray-300",
         cell: (item) => (
           <span className="text-gray-600 text-xs">{item.reportNo}</span>
         ),
       },
       {
         header: "Auth. Speed",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (item) => (
-          <span className="font-semibold text-gray-900">
+          <span className=" text-gray-900">
             {item.authSpeed} KMPH
           </span>
         ),
       },
       {
         header: "Actual Speed",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (item) => (
-          <span className="font-semibold text-gray-900">
+          <span className="text-gray-900">
             {item.actualSpeed} KMPH
           </span>
         ),
       },
       {
         header: "Over Speed",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (item) => (
-          <span className="font-bold text-gray-900">{item.overSpeed} KMPH</span>
+          <span className="font-semibold text-gray-900">{item.overSpeed} KMPH</span>
         ),
       },
       {
         header: "Particulars of Co-Driver/Rider",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (item) => {
-          if (!item.coDriverDetails)
-            return <span className="text-gray-400">-</span>;
+          if (!item.coDriverDetails) return <span className="text-gray-400">-</span>;
+
           return (
-            <OffenderDetailsCell
-              details={item.coDriverDetails}
-              mpName={item.mpName}
-            />
+            <div className="flex flex-col gap-2">
+              <OffenderDetailsCell
+                details={item.coDriverDetails}
+                mpName=""
+              />
+
+              {item.mpDetails && Object.values(item.mpDetails).some((val) => val) && (
+                <div className="pt-2 border-t border-dashed border-gray-300">
+                  <div className="font-semibold text-xs text-gray-900 mb-1">
+                    MP Details:
+                  </div>
+                  <MpDetailsCell details={item.mpDetails} />
+                </div>
+              )}
+            </div>
           );
         },
       },
       {
         header: "Action Status",
         className:
-          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
+          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-300",
         headerClassName:
-          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
+          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-300",
         cell: (item) => {
           const isTaken = item.actionStatus === true;
           return (
@@ -304,13 +324,13 @@ export default function StaticSpeedTable({
                 <Eye className="w-4 h-4" />
                 View
               </DropdownMenuItem>
-              {/* <DropdownMenuItem
+              <DropdownMenuItem
                 className="gap-2 cursor-pointer"
                 onSelect={() => onPrint && onPrint(item)}
               >
                 <Printer className="w-4 h-4" />
                 Print
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
               <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Edit className="w-4 h-4" />
                 Edit

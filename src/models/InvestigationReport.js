@@ -131,7 +131,18 @@ const mpReportSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    initialsMPCRNCO: {
+      type: Boolean,
+      default: false,
+    },
+    initialsCO: {
+      type: Boolean,
+      default: false,
+    },
     actionStatusRemark: {
+      type: String,
+    },
+    addRemark: {
       type: String,
     },
     remarks: {

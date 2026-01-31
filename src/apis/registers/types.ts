@@ -12,6 +12,9 @@ export interface RegisterEntry {
         initialsMPCPNCO?: string;
         initialsQMSJCO?: string;
         initials2IC?: string;
+        initialsOfMPCRNCO?: boolean;
+        initialsOfSMSJCO?: boolean;
+        initialsOf2IC?: boolean;
     };
     remark?: string;
     status?: string;

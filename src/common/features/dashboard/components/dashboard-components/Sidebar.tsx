@@ -78,8 +78,7 @@ const Sidebar = () => {
     );
   };
 
-  // FIX: Added type annotations
-  const isActive = (href?: string) => {
+  const isActive = (href: string | undefined) => {
     if (!href) return false;
     return pathname === href || pathname.startsWith(href + "/");
   };
@@ -120,7 +119,8 @@ const Sidebar = () => {
   ];
 
   // FIX: Added type annotations for item and isSubmenu
-  const renderMenuItem = (item: MenuItem, isSubmenu: boolean = false) => {
+  // const renderMenuItem = (item: MenuItem, isSubmenu: boolean = false) => {
+  const renderMenuItem = (item: any, isSubmenu = false) => {
     if (item.submenu) return null;
     const active = isActive(item.href);
 
@@ -157,9 +157,10 @@ const Sidebar = () => {
   };
 
   // FIX: Added type annotation for item
-  const renderCollapsibleSection = (item: MenuItem) => {
+  // const renderCollapsibleSection = (item: MenuItem) => {
+  const renderCollapsibleSection = (item: any) => {
     if (!item.submenu) return renderMenuItem(item);
-    const hasActiveSubmenu = item.submenu.some((sub) => isActive(sub.href));
+    const hasActiveSubmenu = item.submenu.some((sub: any) => isActive(sub.href));
 
     return (
       <Collapsible
@@ -189,7 +190,7 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {!isCollapsed && (
           <CollapsibleContent className="pt-1 pl-4 ml-5 border-l border-gray-200 space-y-1">
-            {item.submenu.map((sub) => (
+            {item.submenu.map((sub: any) => (
               <div key={sub.label}>{renderMenuItem(sub, true)}</div>
             ))}
           </CollapsibleContent>
