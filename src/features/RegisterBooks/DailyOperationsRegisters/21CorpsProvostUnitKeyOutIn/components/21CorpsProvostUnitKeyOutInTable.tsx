@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useUpdateKeyOutInRegister } from "../hooks";
+import { toast } from "react-toastify";
 
 
 interface KeyOutInTableProps {
@@ -20,6 +23,7 @@ interface KeyOutInTableProps {
 }
 
 const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps) => {
+    const { mutate: updateReport } = useUpdateKeyOutInRegister();
     const [filters, setFilters] = useState<FilterState>({
         search: "",
         date: "",
@@ -34,6 +38,36 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
     const handleDeleteClick = (id: string) => {
         setDeleteId(id);
         setIsDeleteModalOpen(true);
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding // Toggle the specific field
+            };
+
+            await updateReport({
+                id: record._id,
+                payload: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
+        }
     };
 
     const handleConfirmDelete = () => {
@@ -232,13 +266,31 @@ const KeyOutInTable = ({ data, onEdit, onDelete, onAddNew }: KeyOutInTableProps)
 
                                             {/* Initials */}
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
-                                                {item.authentication?.initialsMPCPNCO || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
-                                                {item.authentication?.initialsQMSJCO || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
-                                                {item.authentication?.initials2IC || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOf2IC || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                    />
+                                                </div>
                                             </td>
 
                                             {/* Actions */}

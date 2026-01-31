@@ -9,6 +9,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "react-toastify";
+import { useUpdateConvoyRegister } from "../hooks";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 interface ConvoyInOutTableProps {
@@ -19,6 +22,7 @@ interface ConvoyInOutTableProps {
 }
 
 const ConvoyInOutTable = ({ data, onEdit, onDelete, onAddNew }: ConvoyInOutTableProps) => {
+    const { mutate: updateReport } = useUpdateConvoyRegister();
     const [filters, setFilters] = useState<FilterState>({
         search: "",
         date: "",
@@ -43,6 +47,36 @@ const ConvoyInOutTable = ({ data, onEdit, onDelete, onAddNew }: ConvoyInOutTable
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding // Toggle the specific field
+            };
+
+            await updateReport({
+                id: record._id,
+                payload: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
+        }
     };
 
     const filteredData = useMemo(() => {
@@ -150,7 +184,10 @@ const ConvoyInOutTable = ({ data, onEdit, onDelete, onAddNew }: ConvoyInOutTable
                                     Initials of MPCR NCO
                                 </th>
                                 <th className="px-4 py-3 border-r border-gray-300 w-28 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
-                                    Initials of SM/2IC
+                                    Initials of SM/SJCO
+                                </th>
+                                <th className="px-4 py-3 border-r border-gray-300 w-28 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
+                                    Initials of 2IC
                                 </th>
                                 <th className="px-4 py-3 border-r border-gray-300 align-middle sticky top-0 z-40 bg-[#F5F5F5]" rowSpan={2}>
                                     Remark
@@ -285,12 +322,33 @@ const ConvoyInOutTable = ({ data, onEdit, onDelete, onAddNew }: ConvoyInOutTable
                                             <td className="px-2 py-4 align-middle border-r border-gray-300 text-center font-bold">{sum(req.amn556, req.amn762, req.mm9) || "-"}</td>
 
                                             {/* Initials */}
+                                            {/* Initials */}
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
-                                                {item.authentication?.initialsMPCPNCO || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
-                                                {/* Combining QMSJCO and 2IC as per column header suggestion */}
-                                                {[item.authentication?.initialsQMSJCO, item.authentication?.initials2IC].filter(Boolean).join(" / ") || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOf2IC || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
                                                 {item.remark || "-"}

@@ -71,23 +71,32 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
     const handleInitialToggle = async (record: any, field: string) => {
         try {
             const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+
             // Explicitly construct the object to avoid issues with extra fields like _id, and ensure all fields are present
             const newAuth = {
                 initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
                 initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
                 initialsOf2IC: currentAuth.initialsOf2IC || false,
-                [field]: !currentAuth[field] // Toggle the specific field
+                [field]: isAdding // Toggle the specific field
             };
 
             await updateReport({
                 id: record._id,
                 data: {
                     authentication: newAuth
-                } as any
+                } as any,
+                suppressToast: true
             });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
         } catch (error) {
             console.error("Failed to update initial", error);
-            // Optionally toast here if not handled by hook
+            toast.error("Failed to update sign");
         }
     };
 

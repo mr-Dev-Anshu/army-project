@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "react-toastify";
+import { useUpdateLostAndFoundRegister } from "../hooks";
 
 interface LostAndFoundTableProps {
     data: any[];
@@ -19,6 +22,7 @@ interface LostAndFoundTableProps {
 }
 
 const LostAndFoundTable = ({ data, onEdit, onDelete, onAddNew }: LostAndFoundTableProps) => {
+    const { mutateAsync: updateReport } = useUpdateLostAndFoundRegister();
     const [filters, setFilters] = useState<FilterState>({
         search: "",
         date: "",
@@ -47,6 +51,72 @@ const LostAndFoundTable = ({ data, onEdit, onDelete, onAddNew }: LostAndFoundTab
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
+    };
+
+    // Toggle for standard authentication (Deposit)
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding
+            };
+
+            await updateReport({
+                id: record._id,
+                payload: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
+        }
+    };
+
+    // Toggle for Takeover authentication (details.takeoverAuth)
+    const handleTakeoverToggle = async (record: any, field: string) => {
+        try {
+            const currentDetails = record.details || {};
+            const currentAuth = currentDetails.takeoverAuth || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding
+            };
+
+            await updateReport({
+                id: record._id,
+                payload: {
+                    details: {
+                        ...currentDetails,
+                        takeoverAuth: newAuth
+                    }
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update takeover initial", error);
+            toast.error("Failed to update sign");
+        }
     };
 
     const filteredData = useMemo(() => {
@@ -224,14 +294,32 @@ const LostAndFoundTable = ({ data, onEdit, onDelete, onAddNew }: LostAndFoundTab
                                             {item.details?.handedByName || "-"}
                                         </td>
                                         {/* Authorization (Deposit) */}
-                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                            {item.authentication?.initialsMPCPNCO || "-"}
+                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
+                                            <div className="flex justify-center">
+                                                <Checkbox
+                                                    className="border-black"
+                                                    checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                    onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                />
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                            {item.authentication?.initialsQMSJCO || "-"}
+                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
+                                            <div className="flex justify-center">
+                                                <Checkbox
+                                                    className="border-black"
+                                                    checked={item.authentication?.initialsOfSMSJCO || false}
+                                                    onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                />
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                            {item.authentication?.initials2IC || "-"}
+                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
+                                            <div className="flex justify-center">
+                                                <Checkbox
+                                                    className="border-black"
+                                                    checked={item.authentication?.initialsOf2IC || false}
+                                                    onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                />
+                                            </div>
                                         </td>
 
                                         <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
@@ -239,14 +327,32 @@ const LostAndFoundTable = ({ data, onEdit, onDelete, onAddNew }: LostAndFoundTab
                                         </td>
 
                                         {/* Authorization (Takeover) */}
-                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                            {item.details?.takeoverAuth?.initialsMPCPNCO || "-"}
+                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
+                                            <div className="flex justify-center">
+                                                <Checkbox
+                                                    className="border-black"
+                                                    checked={item.details?.takeoverAuth?.initialsOfMPCRNCO || false}
+                                                    onCheckedChange={() => handleTakeoverToggle(item, "initialsOfMPCRNCO")}
+                                                />
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                            {item.details?.takeoverAuth?.initialsQMSJCO || "-"}
+                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
+                                            <div className="flex justify-center">
+                                                <Checkbox
+                                                    className="border-black"
+                                                    checked={item.details?.takeoverAuth?.initialsOfSMSJCO || false}
+                                                    onCheckedChange={() => handleTakeoverToggle(item, "initialsOfSMSJCO")}
+                                                />
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                            {item.details?.takeoverAuth?.initials2IC || "-"}
+                                        <td className="px-4 py-4 align-middle border-r border-gray-300 text-center">
+                                            <div className="flex justify-center">
+                                                <Checkbox
+                                                    className="border-black"
+                                                    checked={item.details?.takeoverAuth?.initialsOf2IC || false}
+                                                    onCheckedChange={() => handleTakeoverToggle(item, "initialsOf2IC")}
+                                                />
+                                            </div>
                                         </td>
 
                                         <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">
