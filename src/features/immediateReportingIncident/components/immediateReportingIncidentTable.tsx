@@ -29,6 +29,38 @@ interface Props {
     onView: (item: ImmediateReportingIncident) => void;
 }
 
+const getIndividualInfo = (ind: any) => {
+    const details = { ...(ind.individualDetails || {}), ...(ind.offenderDetails || {}) };
+
+    let type = ind.individualType;
+    if (!type) {
+        if (details.employeeServiceNumber) type = "employee";
+        else if (details.maidPassNumber) type = "servantMaid";
+        else if (details.shopOwnerName) type = "shopKeeper";
+        else if (details.tempWorkerName) type = "tempHiredWorker";
+        else if (details.civilianName || details.civilianAadharCardNumber) type = "civilian";
+        else type = "militaryPersonnel";
+    }
+    return { details, type };
+};
+
+const getUnit = (ind: any) => {
+    const { details, type } = getIndividualInfo(ind);
+    if (type === "militaryPersonnel") return details.unit || details.militaryPersonnelUnit;
+    if (type === "employee") return details.employeeUnit;
+    if (type === "servantMaid") return details.officersEnclaveUnit;
+    if (type === "shopKeeper") return details.shopUnit;
+    return details.unit;
+};
+
+const getFmn = (ind: any) => {
+    const { details, type } = getIndividualInfo(ind);
+    if (type === "militaryPersonnel") return details.fmn || details.militaryPersonnelFmn;
+    if (type === "employee") return details.employeeFmn;
+    if (type === "servantMaid") return details.officersEnclaveFmn;
+    return details.fmn;
+};
+
 const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, onView }) => {
     // 1. Fetch data
     const { data: incidents = [], isLoading } = useGetAllImmediateReportingIncidents();
@@ -95,9 +127,11 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
 
             if (item.individuals && Array.isArray(item.individuals)) {
                 item.individuals.forEach((ind: any) => {
-                    const details = ind.individualDetails || {};
-                    if (details.unit) units.add(details.unit);
-                    if (details.fmn) fmns.add(details.fmn);
+                    const unit = getUnit(ind);
+                    const fmn = getFmn(ind);
+
+                    if (unit) units.add(unit);
+                    if (fmn) fmns.add(fmn);
                     if (ind.unitLocation) unitLocations.add(ind.unitLocation);
                 });
             }
@@ -121,15 +155,31 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
             // Basic search across multiple fields
             const matchesSearch =
                 (item.description || "").toLowerCase().includes(searchTerm) ||
+                (item.vehicleNumber || "").toLowerCase().includes(searchTerm) ||
+                (item.vehicleName || "").toLowerCase().includes(searchTerm) ||
                 individuals.some((ind: any) => {
-                    const details = ind.individualDetails || {};
-                    return (
-                        (details.armyNo || "").toLowerCase().includes(searchTerm) ||
-                        (details.name || "").toLowerCase().includes(searchTerm) ||
-                        (details.unit || "").toLowerCase().includes(searchTerm) ||
-                        (ind.unitLocation || "").toLowerCase().includes(searchTerm) ||
-                        (details.fmn || "").toLowerCase().includes(searchTerm)
-                    );
+                    const { details } = getIndividualInfo(ind);
+                    const valuesToCheck = [
+                        // Common
+                        details.unit, details.fmn, details.rank, details.name,
+                        // Military
+                        details.militaryPersonnelArmyNo, details.militaryPersonnelName, details.militaryPersonnelUnit, details.militaryPersonnelFmn,
+                        // Employee
+                        details.employeeServiceNumber, details.employeeName, details.employeeUnit, details.employeeFmn,
+                        // Maid
+                        details.maidPassNumber, details.maidName, details.officersEnclaveUnit, details.officersEnclaveFmn,
+                        // Shop
+                        details.shopOwnerName, details.shopName, details.shopUnit,
+                        // Temp
+                        details.tempWorkerName, details.tempWorkerPassNo,
+                        // Civilian
+                        details.civilianName, details.civilianAadharCardNumber,
+                        // Explicit unit/fmn helpers
+                        getUnit(ind), getFmn(ind),
+                        ind.unitLocation
+                    ];
+
+                    return valuesToCheck.some(val => val && String(val).toLowerCase().includes(searchTerm));
                 });
 
             let matchesDate = true;
@@ -155,12 +205,20 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
 
             let matchesUnit = true;
             if (filters.unit && filters.unit !== "All") {
-                matchesUnit = individuals.some((ind: any) => (ind.individualDetails?.unit || "").toLowerCase() === (filters.unit || "").toLowerCase());
+                const selected = filters.unit.split(",").map(s => s.trim().toLowerCase());
+                matchesUnit = individuals.some((ind: any) => {
+                    const val = getUnit(ind);
+                    return val && selected.includes(val.toLowerCase());
+                });
             }
 
             let matchesFmn = true;
             if (filters.fmn && filters.fmn !== "All") {
-                matchesFmn = individuals.some((ind: any) => (ind.individualDetails?.fmn || "").toLowerCase() === (filters.fmn || "").toLowerCase());
+                const selected = filters.fmn.split(",").map(s => s.trim().toLowerCase());
+                matchesFmn = individuals.some((ind: any) => {
+                    const val = getFmn(ind);
+                    return val && selected.includes(val.toLowerCase());
+                });
             }
 
             let matchesPlace = true;
@@ -182,20 +240,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         });
     }, [incidents, filters]);
 
-    const getIndividualInfo = (ind: any) => {
-        const details = { ...(ind.individualDetails || {}), ...(ind.offenderDetails || {}) };
 
-        let type = ind.individualType;
-        if (!type) {
-            if (details.employeeServiceNumber) type = "employee";
-            else if (details.maidPassNumber) type = "servantMaid";
-            else if (details.shopOwnerName) type = "shopKeeper";
-            else if (details.tempWorkerName) type = "tempHiredWorker";
-            else if (details.civilianName || details.civilianAadharCardNumber) type = "civilian";
-            else type = "militaryPersonnel";
-        }
-        return { details, type };
-    };
 
     // 4. Columns Definition
     const columns: Column<ImmediateReportingIncident>[] = [
@@ -268,8 +313,8 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                                             {renderField("Pass ID", details.maidPassID)}
                                             {renderField("Trade", details.maidTrade)}
                                             {renderField("Worked at Qtr", details.maidQuarterNumber)}
-                                            {renderField("Employer Rank", details.officersEnclaveRank)}
-                                            {renderField("Employer Name", details.officersEnclaveName)}
+                                            {renderField("C/O Rank", details.officersEnclaveRank)}
+                                            {renderField("C/O Name", details.officersEnclaveName)}
                                             {renderField("Place of Qtr", details.officersEnclavePlaceOfQtr)}
                                             {renderField("Unit", details.officersEnclaveUnit)}
                                             {renderField("FMN", details.officersEnclaveFmn)}
@@ -346,8 +391,8 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                                                             {renderField("Name", details.relativeDetails.maidName || details.relativeDetails.officersEnclaveName)}
                                                             {renderField("Trade", details.relativeDetails.maidTrade)}
                                                             {renderField("Worked at Qtr", details.relativeDetails.maidQuarterNumber)}
-                                                            {renderField("Employer Rank", details.relativeDetails.officersEnclaveRank)}
-                                                            {renderField("Employer Name", details.relativeDetails.officersEnclaveName)}
+                                                            {renderField("C/O Rank", details.relativeDetails.officersEnclaveRank)}
+                                                            {renderField("C/O Name", details.relativeDetails.officersEnclaveName)}
                                                             {renderField("Place of Qtr", details.relativeDetails.maidPlaceOfQtr || details.relativeDetails.officersEnclavePlaceOfQtr)}
                                                             {renderField("Unit", details.relativeDetails.maidUnit || details.relativeDetails.officersEnclaveUnit)}
                                                             {renderField("FMN", details.relativeDetails.maidFmn || details.relativeDetails.officersEnclaveFmn)}
@@ -434,13 +479,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => {
-                            const { details, type } = getIndividualInfo(ind);
-                            let unit = "-";
-                            if (type === "militaryPersonnel") unit = details.unit || details.militaryPersonnelUnit;
-                            else if (type === "employee") unit = details.employeeUnit;
-                            else if (type === "servantMaid") unit = details.officersEnclaveUnit;
-                            else if (type === "shopKeeper") unit = details.shopUnit;
-
+                            const unit = getUnit(ind);
                             return (
                                 <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
                                     {unit || "-"}
@@ -481,12 +520,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 return (
                     <div className="flex flex-col space-y-3">
                         {inds.map((ind: any, idx: number) => {
-                            const { details, type } = getIndividualInfo(ind);
-                            let fmn = "-";
-                            if (type === "militaryPersonnel") fmn = details.fmn || details.militaryPersonnelFmn;
-                            else if (type === "employee") fmn = details.employeeFmn;
-                            else if (type === "servantMaid") fmn = details.officersEnclaveFmn;
-
+                            const fmn = getFmn(ind);
                             return (
                                 <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
                                     {fmn || "-"}
@@ -604,6 +638,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
             />
 
             <ReportFilterBar
+                placeholder="Search by Vehicle No, Make & Take, Unit, FMN, Name..."
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 offenceTypeOptions={[]}
@@ -637,7 +672,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                     fromDate: "",
                     toDate: "",
                 })}
-                placeholder="Search by army no, name unit, fmn..."
+
                 showFmn={true}
                 showUnit={true}
             />
