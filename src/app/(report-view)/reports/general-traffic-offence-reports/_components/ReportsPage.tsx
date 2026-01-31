@@ -10,6 +10,8 @@ import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
 
 import { useGetAllTrafficOffences, useCreateTrafficOffence } from "@/features/generalTraficOffence/hooks";
+// Import the Offender Hook
+import { useCreateOffender } from "@/features/offender/Hooks"; 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
 import { processImport } from "@/lib/processImport";
@@ -21,11 +23,9 @@ import MilitaryPoliceReport, {
 } from "@/components/reports/MilitaryPoliceReport";
 
 import { generateWordReport } from "@/utils/generateWordReport";
-// IMPORT THE HOOK
 import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
 
 /* ================= KEY MAPPING UTILS ================= */
-// This section handles the IMPORT logic (mapping Excel back to App)
 const KEY_MAPPING: Record<string, string> = {
   "Offence Type": "offenceType",
   "Vehicle Number": "vehicleNumber",
@@ -130,7 +130,9 @@ export default function ReportsPage({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { mutateAsync: createTrafficOffence } = useCreateTrafficOffence();
-  // INITIALIZE HOOK
+  // Initialize the Offender creation hook
+  const { mutateAsync: createOffender } = useCreateOffender();
+  
   const { exportToExcel } = useExcelExport();
 
   /* ================= HANDLERS FOR ADD NEW ================= */
@@ -164,9 +166,35 @@ export default function ReportsPage({
         const dataArray = Array.isArray(json) ? json : [json];
         const mappedData = mapData(dataArray);
 
-        await processImport(mappedData, createTrafficOffence);
+        // Custom mutation function to handle both Traffic Offence and Offender creation
+        const handleImportRecord = async (item: any) => {
+            // 1. Create the Traffic Offence first
+            const createdOffence = await createTrafficOffence(item);
+
+            // 2. If successful and offenders exist in the imported data, create them in the DB
+            if (createdOffence && createdOffence._id && item.offenders && Array.isArray(item.offenders)) {
+                for (const offender of item.offenders) {
+                    // Check if offenderDetails exists to avoid errors
+                    if (offender.offenderDetails) {
+                        const offenderPayload = {
+                            offenceId: createdOffence._id, // Link to the created offence
+                            // Default to "Military Person" if not specified, matching the typical columns (Army No, Rank)
+                            offenderType: offender.offenderType || "Military Person", 
+                            offenderDetails: offender.offenderDetails
+                        };
+                        
+                        // Call the createOffender API
+                        await createOffender(offenderPayload);
+                    }
+                }
+            }
+            return createdOffence;
+        };
+
+        // Pass the custom handler to processImport
+        await processImport(mappedData, handleImportRecord);
         
-        toast.success("Records imported successfully!");
+        toast.success("Records and Offenders imported successfully!");
         await refetch();
       } catch (error: any) {
         console.error("Error importing file:", error);

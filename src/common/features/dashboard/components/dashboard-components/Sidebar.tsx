@@ -23,19 +23,28 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import ConeIcon from "@/components/icons/ConeIcon";
 import { useAuth } from "@/context/AuthContext";
 
-const cn = (...classes: (string | boolean)[]) => classes.filter(Boolean).join(" ");
+const cn = (...classes: (string | boolean | undefined | null)[]) => classes.filter(Boolean).join(" ");
+
+// Define a type for your menu items to allow proper typing below
+type MenuItem = {
+  icon?: ReactNode;
+  label: string;
+  href?: string;
+  badge?: string;
+  submenu?: MenuItem[];
+};
 
 const Sidebar = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [openMenus, setOpenMenus] = useState([
+  const [openMenus, setOpenMenus] = useState<string[]>([
     "Forms & Certificates",
     "Basic Information",
     "Military Structure Data",
@@ -43,7 +52,7 @@ const Sidebar = () => {
  
    console.log(user , "this is user")
   // Check if user is admin
-  const isSuperAdmin =user?.role === "superadmin";
+  const isSuperAdmin = user?.role === "superadmin";
 
   const routesThatPreferCollapsed = [
     "/", "/create-record", "/forms", "/test", "/reports", "/analysis", "/setup", "/structure", "/hello"
@@ -62,41 +71,43 @@ const Sidebar = () => {
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
-  const toggleMenu = (label) => {
+  // FIX: Added ': string' type annotation
+  const toggleMenu = (label: string) => {
     setOpenMenus((prev) =>
       prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
     );
   };
 
-  const isActive = (href) => {
+  // FIX: Added type annotations
+  const isActive = (href?: string) => {
     if (!href) return false;
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { icon: <PieChart className="w-5 h-5" />, label: "Dashboard", href: "/", badge: "1" },
     { icon: <Siren className="w-5 h-5" />, label: "Immediate Reporting of Incident (Initial Report)", href: "/create-record/immediate-reporting-incident" },
   ];
 
-  const createNewRecordItems = [
+  const createNewRecordItems: MenuItem[] = [
     { icon: <ConeIcon className="w-5 h-5" color="currentColor" />, label: "General & Traffic Offence Report", href: "/create-record/general-traffic" },
     { icon: <Gauge className="w-5 h-5" />, label: "Static Speed Check Report", href: "/create-record/static-speed" },
     { icon: <ClipboardList className="w-5 h-5" />, label: "MP Occurrence & Investigation Report", href: "/create-record/mp-investigation" },
   ];
 
-  const reportsAndAnalysis = [
+  const reportsAndAnalysis: MenuItem[] = [
     { icon: <Files className="w-5 h-5" />, label: "All Reports", href: "/reports" },
     { icon: <BookOpen className="w-5 h-5" />, label: "Registers/Books", href: "/analysis/registers-books" },
     { icon: <LineChart className="w-5 h-5" />, label: "MP Offence Analysis Monthly Report", href: "/analysis/mp-offence-monthly" },
   ];
 
-  const formsAndCertificates = {
+  const formsAndCertificates: MenuItem = {
     icon: <FileBadge className="w-5 h-5" />,
     label: "Certificates, Letters & Forms",
     href: "/form-certificate/certificate"
   };
 
-  const systemSetup = [
+  const systemSetup: MenuItem[] = [
     {
       icon: <Database className="w-5 h-5" />,
       label: "Basic Information",
@@ -108,7 +119,8 @@ const Sidebar = () => {
     },
   ];
 
-  const renderMenuItem = (item, isSubmenu = false) => {
+  // FIX: Added type annotations for item and isSubmenu
+  const renderMenuItem = (item: MenuItem, isSubmenu: boolean = false) => {
     if (item.submenu) return null;
     const active = isActive(item.href);
 
@@ -144,7 +156,8 @@ const Sidebar = () => {
     );
   };
 
-  const renderCollapsibleSection = (item) => {
+  // FIX: Added type annotation for item
+  const renderCollapsibleSection = (item: MenuItem) => {
     if (!item.submenu) return renderMenuItem(item);
     const hasActiveSubmenu = item.submenu.some((sub) => isActive(sub.href));
 

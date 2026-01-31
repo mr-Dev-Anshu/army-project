@@ -26,8 +26,6 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
   const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
-  // ... (existing code: mapTrafficToReport function) ...
-
   const mapTrafficToReport = (traffic: any) => {
     const occ = traffic?.offenceOccurenceDetails || {};
     const duty = traffic?.onDutyDetails || {};
@@ -38,7 +36,6 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     const dateVal = (d: string) =>
       d ? new Date(d).toLocaleDateString("en-GB") : "";
 
-    /* ================= HELPER FOR PERSON MAPPING ================= */
     const mapPerson = (person: any) => {
       const d = person?.details || {};
       if (!Object.keys(d).length && !person?.type) return null;
@@ -166,12 +163,10 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       const traffic = state.formData.traffic;
       console.log("🚔 RAW TRAFFIC ===>", traffic);
 
-      /* ================= CREATE OFFENCE ================= */
       const offenceRes = await createOffence({
         reportId: reportNo,
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
-        // Mapped Vehicle Details
         ...(traffic.vehicleInvolved === "yes" && {
           vehicleCategory:
             traffic.vehicleDetails.category === "2w"
@@ -227,18 +222,15 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
       /* ================= COLLECT ALL OFFENDERS ================= */
       const offenders: any[] = [];
 
-      /* 1️⃣ Vehicle / normal offenders */
       if (Array.isArray(traffic.offenderPeople)) {
         offenders.push(...traffic.offenderPeople);
       }
 
-      /* 2️⃣ No-vehicle offender flow */
       if (
         traffic.vehicleInvolved === "no" &&
         traffic.offenderWithoutVehicle?.military
       ) {
         const m = traffic.offenderWithoutVehicle.military;
-
         const hasData = m?.name || m?.armyNumber || m?.address || m?.rank;
 
         if (hasData) {
@@ -250,27 +242,19 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         }
       }
 
-      console.log("👥 FINAL OFFENDERS ===>", offenders);
-
       for (const o of offenders) {
         const d = o.details || {};
-
-        // 🛑 completely empty offender skip
         if (!Object.keys(d).length) continue;
 
         const payload: CreateOffenderData = {
           offenceId,
           offenderType: (o.type || "Civilian") as OffenderType,
-
           offenderDetails: {
             type: o.whoIsIt || "Offender",
-
-            // 🔥🔥🔥 MAGIC LINE
             ...d,
           },
         };
 
-        console.log("🚨 OFFENDER PAYLOAD ===>", payload);
         await createOffender(payload);
       }
 
@@ -290,20 +274,15 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
 
       toast.success("🎉 TRAFFIC REPORT COMPLETED");
 
-      /* ================= RESET FORM ================= */
       dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
       dispatch({ type: "SET_STEP", payload: 1 });
       dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
       dispatch({ type: "SET_PREVIEW", payload: false });
     } catch (err) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
-
-      // If server returned validation errors in shape { field: message }
       const serverErrors = (err as any)?.response?.data?.error;
       if (serverErrors && typeof serverErrors === "object") {
         const fields = Object.keys(serverErrors);
-
-        // Try to focus the user on the first offending step
         const determineStep = (field: string) => {
           if (field.includes("offenceOccurenceDetails")) return 2;
           if (field.includes("offenceTypes") || field.includes("offenceTypeReference")) return 3;
@@ -315,7 +294,6 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
         const firstStep = determineStep(fields[0]);
         dispatch({ type: "SET_STEP", payload: firstStep });
 
-        // Show the modal with server reported fields
         setMissingFields(
           "/api/generalTraficOffence",
           fields,
@@ -333,7 +311,6 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
     }
   };
 
-  /* ================= STEPS CONFIG ================= */
   const stepsConfig = {
     1: {
       title: "1. PARTICULARS",
@@ -393,7 +370,7 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             onCreate={onSubmitFinal}
             onCancel={onCancel}
-            isSubmitting={isSubmitting} // Passed prop
+            isSubmitting={isSubmitting} 
             onReportNoChange={(val) =>
               dispatch({
                 type: "SET_PATH",
@@ -401,6 +378,9 @@ export default function MultiStepForm({ onCancel }: { onCancel?: () => void }) {
                 value: val,
               })
             }
+            
+            // 🔥 CRITICAL: TELL STEPPER THIS IS TRAFFIC
+            module="traffic"
           />
 
           <RightPanel
