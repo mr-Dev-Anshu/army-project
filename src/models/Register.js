@@ -19,9 +19,12 @@ const SignatureSchema = new Schema({
 }, { _id: false });
 
 const authenticationSchema = new Schema({
-  initialsMPCPNCO: { type: String },
-  initialsQMSJCO: { type: String },
-  initials2IC: { type: String },
+  initialsOfMPCRNCO: { type: Boolean, default: false },
+  initialsOfSMSJCO: { type: Boolean, default: false },
+  initialsOf2IC: { type: Boolean, default: false },
+  initialsMPCPNCO: String,
+  initialsQMSJCO: String,
+  initials2IC: String,
 }, { _id: false });
 
 const DutyAndAssetMovementSchema = new Schema(

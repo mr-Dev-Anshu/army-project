@@ -45,12 +45,14 @@ export const useMTAccidentReport = (id?: string) => {
 
     // Mutation for updating a report
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: Partial<CreateMTAccidentReportData> }) =>
+        mutationFn: ({ id, data }: { id: string; data: Partial<CreateMTAccidentReportData>; suppressToast?: boolean }) =>
             updateMTAccidentReport(id, data),
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ["mtAccidentReport", data._id] });
             queryClient.invalidateQueries({ queryKey: ["mtAccidentReports"] });
-            toast.success("MT Accident Report updated successfully");
+            if (!variables.suppressToast) {
+                toast.success("MT Accident Report updated successfully");
+            }
         },
         onError: (error: any) => {
             const message = error.response?.data?.error || "Failed to update MT Accident Report";

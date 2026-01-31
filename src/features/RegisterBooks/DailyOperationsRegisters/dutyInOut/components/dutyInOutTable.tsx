@@ -9,6 +9,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "react-toastify";
+import { useUpdateDutyInOutRegister } from "../hooks";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 interface DutyInOutTableProps {
@@ -19,6 +22,7 @@ interface DutyInOutTableProps {
 }
 
 const DutyInOutTable = ({ data, onEdit, onDelete, onAddNew }: DutyInOutTableProps) => {
+    const { mutate: updateReport } = useUpdateDutyInOutRegister();
     const [filters, setFilters] = useState<FilterState>({
         search: "",
         date: "",
@@ -45,6 +49,36 @@ const DutyInOutTable = ({ data, onEdit, onDelete, onAddNew }: DutyInOutTableProp
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding // Toggle the specific field
+            };
+
+            await updateReport({
+                id: record._id,
+                payload: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
+        }
     };
 
     const filteredData = useMemo(() => {
@@ -251,14 +285,33 @@ const DutyInOutTable = ({ data, onEdit, onDelete, onAddNew }: DutyInOutTableProp
                                             </td>
 
                                             {/* Initials */}
+                                            {/* Initials */}
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-center text-[#0A0A0A]">
-                                                {item.authentication?.initialsMPCPNCO || ""}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-center text-[#0A0A0A]">
-                                                {item.authentication?.initialsSM_SJCO || item.authentication?.initialsQMSJCO || ""}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-center text-[#0A0A0A]">
-                                                {item.authentication?.initials2IC || ""}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOf2IC || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-[#0A0A0A]">
                                                 <p className="line-clamp-2 max-w-[200px]">{item.remark || ""}</p>

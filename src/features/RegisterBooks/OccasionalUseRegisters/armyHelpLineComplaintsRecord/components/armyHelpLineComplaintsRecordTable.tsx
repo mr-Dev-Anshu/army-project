@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "react-toastify";
+import { useUpdateArmyHelpLineComplaintsRegister } from "../hooks";
 
 interface ArmyHelpLineComplaintsRecordTableProps {
     data: any[];
@@ -19,6 +22,7 @@ interface ArmyHelpLineComplaintsRecordTableProps {
 }
 
 const ArmyHelpLineComplaintsRecordTable = ({ data, onEdit, onDelete, onAddNew }: ArmyHelpLineComplaintsRecordTableProps) => {
+    const { mutateAsync: updateReport } = useUpdateArmyHelpLineComplaintsRegister();
     const [filters, setFilters] = useState<FilterState>({
         search: "",
         date: "",
@@ -49,6 +53,36 @@ const ArmyHelpLineComplaintsRecordTable = ({ data, onEdit, onDelete, onAddNew }:
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding
+            };
+
+            await updateReport({
+                id: record._id,
+                payload: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
+        }
     };
 
     const filteredData = useMemo(() => {
@@ -276,14 +310,32 @@ const ArmyHelpLineComplaintsRecordTable = ({ data, onEdit, onDelete, onAddNew }:
                                                 {item.details?.briefOfCase || "-"}
                                             </td>
 
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                                {item.authentication?.initialsMPCPNCO || "-"}
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-center">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
                                             </td>
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                                {item.authentication?.initialsQMSJCO || "-"}
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-center">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
                                             </td>
-                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-[#0A0A0A]">
-                                                {item.authentication?.initials2IC || "-"}
+                                            <td className="px-4 py-4 align-middle border-r border-gray-300 text-center text-center">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOf2IC || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                    />
+                                                </div>
                                             </td>
 
                                             <td className="px-4 py-4 align-middle border-r border-gray-300 text-[#0A0A0A]">

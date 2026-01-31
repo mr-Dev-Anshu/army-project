@@ -13,6 +13,7 @@ import {
     useUpdateMpGeneralDiaryEntry,
     useDeleteMpGeneralDiaryEntry,
 } from "../hooks";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useGetFieldSuggestions } from "@/features/suggestions/hooks";
 import { toast } from "react-toastify";
 import { Input } from "@/components/ui/input";
@@ -55,8 +56,7 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
     data,
     onEdit,
 }: MpGeneralDiaryDailyOccurrenceBookTableProps) {
-    const { mutateAsync: updateRegister, isPending: isUpdating } =
-        useUpdateMpGeneralDiaryEntry();
+    const { mutateAsync: updateRegister } = useUpdateMpGeneralDiaryEntry();
     const { mutateAsync: deleteRegister, isPending: isDeleting } =
         useDeleteMpGeneralDiaryEntry();
 
@@ -87,6 +87,36 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
             } catch (error) {
                 console.error("Failed to delete", error);
             }
+        }
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding
+            };
+
+            await updateRegister({
+                id: record._id,
+                payload: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
         }
     };
 
@@ -253,7 +283,7 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
 
                                 <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-56 align-middle sticky top-0 z-40 bg-[#F5F5F5]">Assigned MP Particulars</th>
                                 <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-24 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5]">Initials of MPCR NCO</th>
-                                <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-24 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5]">Initials of CO</th>
+                                <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-24 text-center align-middle sticky top-0 z-40 bg-[#F5F5F5]"> Initials of SM/SJCO</th>
                                 <th rowSpan={2} className="px-4 py-3 border-r border-neutral-300 w-32 align-middle sticky top-0 z-40 bg-[#F5F5F5]">Remark</th>
                                 <th rowSpan={2} className="px-2 py-3 w-10 text-center align-middle sticky right-0 top-0 z-50 bg-[#F5F5F5] border-l border-neutral-300">Action</th>
                             </tr>
@@ -329,12 +359,22 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
                                                 )}
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-center">
-                                                {/* Initials Placeholder */}
-                                                {item.authentication?.initialsMPCPNCO && <div className="text-xs text-[#0A0A0A] ">{item.authentication.initialsMPCPNCO}</div>}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300 text-center">
-                                                {/* Initials Placeholder */}
-                                                {item.authentication?.initials2IC && <div className="text-xs text-[#0A0A0A] ">{item.authentication.initials2IC}</div>}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-neutral-300">
                                                 <span className="text-[#0A0A0A] text-xs">{item.remark || "-"}</span>
