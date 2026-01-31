@@ -1,38 +1,36 @@
 import mongoose from "mongoose";
 
-const individualSchema = new mongoose.Schema({
-    armyNo: { type: String },
-    name: { type: String },
-    rank: { type: String },
-    age: { type: String },
-    totalServiceDuration: { type: String },
-    unit: { type: String },
-    unitLocation: { type: String },
-    fmn: { type: String },
-    individualWorkingStatus: {
-        type: String,
-        enum: ["Leave", "Duty", ""]
-    }
-});
 
 const immediateReportingIncidentSchema = new mongoose.Schema({
-    individuals: {
-        type: [individualSchema],
-        default: []
-    },
-    incidentPlace: {
+    reportHeading: {
         type: String,
     },
-    incidentDate: {
+    vehicleType: {
         type: String,
     },
-    incidentTime: {
+    vehicleNumber: {
         type: String,
     },
-    incidentBrief: {
+    vehicleName: {
         type: String,
     },
-    coordinationWithPolice: {
+    individuals: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Offender'
+    }],
+    placeOfOccurrence: {
+        type: String,
+    },
+    dateOfOccurrence: {
+        type: String,
+    },
+    timeOfOccurrence: {
+        type: String,
+    },
+    description: {
+        type: String,
+    },
+    coordWith: {
         type: String,
     },
     incidentCoveredBy: {
@@ -42,7 +40,6 @@ const immediateReportingIncidentSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
-
 }, { timestamps: true });
 
 // Force model recompilation if it exists to pick up schema changes

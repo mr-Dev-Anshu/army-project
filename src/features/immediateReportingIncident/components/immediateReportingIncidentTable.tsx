@@ -91,12 +91,13 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         const unitLocations = new Set<string>();
 
         incidents.forEach(item => {
-            if (item.incidentPlace) places.add(item.incidentPlace);
+            if (item.placeOfOccurrence) places.add(item.placeOfOccurrence);
 
             if (item.individuals && Array.isArray(item.individuals)) {
                 item.individuals.forEach((ind: any) => {
-                    if (ind.unit) units.add(ind.unit);
-                    if (ind.fmn) fmns.add(ind.fmn);
+                    const details = ind.individualDetails || {};
+                    if (details.unit) units.add(details.unit);
+                    if (details.fmn) fmns.add(details.fmn);
                     if (ind.unitLocation) unitLocations.add(ind.unitLocation);
                 });
             }
@@ -119,24 +120,27 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
 
             // Basic search across multiple fields
             const matchesSearch =
-                (item.incidentBrief || "").toLowerCase().includes(searchTerm) ||
-                individuals.some((ind: any) =>
-                    (ind.armyNo || "").toLowerCase().includes(searchTerm) ||
-                    (ind.name || "").toLowerCase().includes(searchTerm) ||
-                    (ind.unit || "").toLowerCase().includes(searchTerm) ||
-                    (ind.unitLocation || "").toLowerCase().includes(searchTerm) ||
-                    (ind.fmn || "").toLowerCase().includes(searchTerm)
-                );
+                (item.description || "").toLowerCase().includes(searchTerm) ||
+                individuals.some((ind: any) => {
+                    const details = ind.individualDetails || {};
+                    return (
+                        (details.armyNo || "").toLowerCase().includes(searchTerm) ||
+                        (details.name || "").toLowerCase().includes(searchTerm) ||
+                        (details.unit || "").toLowerCase().includes(searchTerm) ||
+                        (ind.unitLocation || "").toLowerCase().includes(searchTerm) ||
+                        (details.fmn || "").toLowerCase().includes(searchTerm)
+                    );
+                });
 
             let matchesDate = true;
             // Specific Date Check
             if (filters.date) {
-                matchesDate = (item.incidentDate && item.incidentDate.includes(filters.date)) || false;
+                matchesDate = (item.dateOfOccurrence && item.dateOfOccurrence.includes(filters.date)) || false;
             }
 
             // Date Range Check
             if (filters.fromDate || filters.toDate) {
-                const incidentDate = item.incidentDate ? new Date(item.incidentDate) : null;
+                const incidentDate = item.dateOfOccurrence ? new Date(item.dateOfOccurrence) : null;
                 if (incidentDate) {
                     if (filters.fromDate) {
                         matchesDate = matchesDate && incidentDate >= new Date(filters.fromDate);
@@ -151,17 +155,17 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
 
             let matchesUnit = true;
             if (filters.unit && filters.unit !== "All") {
-                matchesUnit = individuals.some((ind: any) => (ind.unit || "").toLowerCase() === (filters.unit || "").toLowerCase());
+                matchesUnit = individuals.some((ind: any) => (ind.individualDetails?.unit || "").toLowerCase() === (filters.unit || "").toLowerCase());
             }
 
             let matchesFmn = true;
             if (filters.fmn && filters.fmn !== "All") {
-                matchesFmn = individuals.some((ind: any) => (ind.fmn || "").toLowerCase() === (filters.fmn || "").toLowerCase());
+                matchesFmn = individuals.some((ind: any) => (ind.individualDetails?.fmn || "").toLowerCase() === (filters.fmn || "").toLowerCase());
             }
 
             let matchesPlace = true;
             if (filters.placeOfOffence && filters.placeOfOffence !== "All") {
-                matchesPlace = (item.incidentPlace || "").toLowerCase().includes((filters.placeOfOffence || "").toLowerCase());
+                matchesPlace = (item.placeOfOccurrence || "").toLowerCase().includes((filters.placeOfOffence || "").toLowerCase());
             }
 
             let matchesUnitLocation = true;
@@ -199,13 +203,16 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
 
                 return (
                     <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                <div><span className="font-bold text-[#0A0A0A]">Army no.:</span> <span className="text-[#0A0A0A]">{ind.armyNo}</span></div>
-                                <div><span className="font-bold text-[#0A0A0A]">Rank:</span> <span className="text-[#0A0A0A]">{ind.rank}</span></div>
-                                <div><span className="font-bold text-[#0A0A0A]">Name:</span> <span className="text-[#0A0A0A]">{ind.name}</span></div>
-                            </div>
-                        ))}
+                        {inds.map((ind: any, idx: number) => {
+                            const details = ind.offenderDetails || ind.individualDetails || {};
+                            return (
+                                <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-300 last:border-0 pb-2 last:pb-0">
+                                    <div><span className="font-bold text-[#0A0A0A]">Army no.:</span> <span className="text-[#0A0A0A]">{details.armyNo || "-"}</span></div>
+                                    <div><span className="font-bold text-[#0A0A0A]">Rank:</span> <span className="text-[#0A0A0A]">{details.rank || "-"}</span></div>
+                                    <div><span className="font-bold text-[#0A0A0A]">Name:</span> <span className="text-[#0A0A0A]">{details.name || "-"}</span></div>
+                                </div>
+                            );
+                        })}
                     </div>
                 );
             },
@@ -240,11 +247,14 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                     : [];
                 return (
                     <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                {ind.unit || "-"}
-                            </div>
-                        ))}
+                        {inds.map((ind: any, idx: number) => {
+                            const details = ind.offenderDetails || ind.individualDetails || {};
+                            return (
+                                <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
+                                    {details.unit || "-"}
+                                </div>
+                            );
+                        })}
                     </div>
                 );
             },
@@ -278,11 +288,14 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                     : [];
                 return (
                     <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                {ind.fmn || "-"}
-                            </div>
-                        ))}
+                        {inds.map((ind: any, idx: number) => {
+                            const details = ind.offenderDetails || ind.individualDetails || {};
+                            return (
+                                <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
+                                    {details.fmn || "-"}
+                                </div>
+                            );
+                        })}
                     </div>
                 );
             },
@@ -310,19 +323,19 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         },
         {
             header: "Place of Incident",
-            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.incidentPlace || "-"}</span>,
+            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.placeOfOccurrence || "-"}</span>,
             className: "border-r border-gray-300 min-w-[150px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[150px]",
         },
         {
             header: "Date of Incident",
-            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.incidentDate ? format(new Date(item.incidentDate), 'dd/MM/yyyy') : "-"}</span>,
+            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.dateOfOccurrence ? format(new Date(item.dateOfOccurrence), 'dd/MM/yyyy') : "-"}</span>,
             className: "border-r border-gray-300 min-w-[100px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[100px]",
         },
         {
             header: "Time of Incident",
-            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.incidentTime || "-"}</span>,
+            cell: (item) => <span className="font-[Arial] text-sm text-[#0A0A0A]">{item.timeOfOccurrence || "-"}</span>,
             className: "border-r border-gray-300 min-w-[100px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[100px]",
         },
@@ -330,7 +343,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
             header: "Brief of the Incident",
             cell: (item) => (
                 <div className="font-[Arial] text-xs text-[#0A0A0A] max-w-[250px] whitespace-normal line-clamp-4">
-                    {item.incidentBrief || "-"}
+                    {item.description || "-"}
                 </div>
             ),
             className: "border-r border-gray-300 min-w-[250px] align-top py-2",
@@ -340,7 +353,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
             header: "Coord with Police on Civ Adm, FIR, Current Sit",
             cell: (item) => (
                 <div className="font-[Arial] text-xs text-[#0A0A0A] max-w-[250px] whitespace-normal line-clamp-4">
-                    {item.coordinationWithPolice || "-"}
+                    {item.coordWith || "-"}
                 </div>
             ),
             className: "border-r border-gray-300 min-w-[250px] align-top py-2",

@@ -9,6 +9,11 @@ const offenderSchema = new mongoose.Schema(
       ref: "GeneralTrafficOffence",
       required: false,
     },
+    incidentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ImmediateReportingIncident",
+      required: false,
+    },
     // Supporting both field names for compatibility
     offenderType: {
       type: String,
@@ -30,9 +35,32 @@ const offenderSchema = new mongoose.Schema(
     },
 
     offenderDetails: {
-      type: mongoose.Schema.Types.Mixed,
+      type: mongoose.Schema.Types.Mixed, // Stores armyNo, rank, name, unit, fmn, etc.
       default: {},
     },
+
+    // Additional fields for Immediate Reporting Incident individuals
+    individualWorkingStatus: {
+      type: String,
+      enum: ["Leave", "Duty", ""],
+      required: false
+    },
+    unitLocation: {
+      type: String,
+      trim: true,
+      required: false
+    },
+    age: {
+      type: String,
+      trim: true,
+      required: false
+    },
+    totalServiceDuration: {
+      type: String,
+      trim: true,
+      required: false
+    },
+
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},

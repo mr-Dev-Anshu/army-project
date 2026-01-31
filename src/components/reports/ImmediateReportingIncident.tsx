@@ -21,6 +21,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
             <div className="space-y-4">
                 {individuals.map((ind, index) => {
                     const baseIndex = index * 5;
+                    const details = ind.offenderDetails || ind.individualDetails || {};
                     return (
                         <div key={index} className="border-b border-gray-200 pb-4 mb-4 last:mb-0 last:border-0">
                             {/* <div className="font-bold mb-2 underline">Individual {index + 1}</div> */}
@@ -30,7 +31,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                                 <div className="w-8 font-bold">{baseIndex + 1}.</div>
                                 <div className="w-64 font-bold">Army No. Rk, Name</div>
                                 <div className="w-4">:</div>
-                                <div className="flex-1">{ind.armyNo || "-"}, {ind.rank || "-"}, {ind.name || "-"}</div>
+                                <div className="flex-1">{details.armyNo || "-"}, {details.rank || "-"}, {details.name || "-"}</div>
                             </div>
 
                             {/* Age / Service */}
@@ -46,7 +47,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                                 <div className="w-8 font-bold">{baseIndex + 3}.</div>
                                 <div className="w-64 font-bold">Unit & Loc of Unit</div>
                                 <div className="w-4">:</div>
-                                <div className="flex-1">{ind.unit || "-"}, {ind.unitLocation || "-"}</div>
+                                <div className="flex-1">{details.unit || "-"}, {ind.unitLocation || "-"}</div>
                             </div>
 
                             {/* Fmn */}
@@ -54,7 +55,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                                 <div className="w-8 font-bold">{baseIndex + 4}.</div>
                                 <div className="w-64 font-bold">Fmn</div>
                                 <div className="w-4">:</div>
-                                <div className="flex-1">{ind.fmn || "Fmn of the channel upto Comd HQ to be mentioned"}</div>
+                                <div className="flex-1">{details.fmn || "Fmn of the channel upto Comd HQ to be mentioned"}</div>
                             </div>
 
                             {/* Whether not on lve/ duty */}
@@ -73,7 +74,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                     <div className="w-8 font-bold">{individuals.length * 5 + 1}.</div>
                     <div className="w-64 font-bold">Place of incident</div>
                     <div className="w-4">:</div>
-                    <div className="flex-1">{data.incidentPlace || "-"}</div>
+                    <div className="flex-1">{data.placeOfOccurrence || "-"}</div>
                 </div>
 
                 {/* Dt & Time of incident */}
@@ -82,7 +83,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                     <div className="w-64 font-bold">Dt & Time of incident</div>
                     <div className="w-4">:</div>
                     <div className="flex-1">
-                        {data.incidentDate ? format(new Date(data.incidentDate), "dd MMM yyyy") : "-"} approx {data.incidentTime ? data.incidentTime : "-"} hrs
+                        {data.dateOfOccurrence ? format(new Date(data.dateOfOccurrence), "dd MMM yyyy") : "-"} approx {data.timeOfOccurrence ? data.timeOfOccurrence : "-"} hrs
                     </div>
                 </div>
 
@@ -92,7 +93,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                     <div className="w-64 font-bold shrink-0">Brief of the incident</div>
                     <div className="w-4">:</div>
                     <div className="flex-1 text-justify">
-                        {data.incidentBrief || "Relevant details leading to the incident, occurrence of incident occurrence of incident and the resultant effect to be mentioned"}
+                        {data.description || "Relevant details leading to the incident, occurrence of incident occurrence of incident and the resultant effect to be mentioned"}
                     </div>
                 </div>
 
@@ -105,7 +106,7 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                     </div>
                     <div className="w-4">:</div>
                     <div className="flex-1 text-justify">
-                        {data.coordinationWithPolice || "In case copy of FIR/ complaint/ Post Mortem Report etc are available it should be shared."}
+                        {data.coordWith || "In case copy of FIR/ complaint/ Post Mortem Report etc are available it should be shared."}
                     </div>
                 </div>
 
