@@ -117,6 +117,7 @@ export const createMPReportSchema = Joi.object({
   initialsMPCRNCO: Joi.boolean().optional(),
   initialsCO: Joi.boolean().optional(),
   actionStatusRemark: Joi.string().optional(),
+  addRemark: Joi.string().optional(),
 
   customFields: Joi.object().unknown(true).optional(),
 });

@@ -399,6 +399,7 @@ export default function MpOccurrenceReportsPage() {
         actionStatus: item?.actionStatus, // status action
         initialsMPCRNCO: item.initialsMPCRNCO,
         initialsCO: item.initialsCO,
+        addRemark: item.addRemark,
         originalData: item // Store original data for report view 
       };
     });

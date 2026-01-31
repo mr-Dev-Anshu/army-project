@@ -142,6 +142,9 @@ const mpReportSchema = new Schema(
     actionStatusRemark: {
       type: String,
     },
+    addRemark: {
+      type: String,
+    },
     remarks: {
       analysis: { type: String },
       recommendation: { type: String },

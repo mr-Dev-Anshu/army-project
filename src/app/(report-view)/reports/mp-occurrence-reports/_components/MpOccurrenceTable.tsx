@@ -12,6 +12,7 @@ import {
   Check,
   Square,
   CheckSquare,
+  PencilLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -21,6 +22,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
   useUpdateMPReport,
   useDeleteMPReport,
@@ -69,6 +78,18 @@ export default function MpOccurrenceTable({
 
   const [remarkError, setRemarkError] = React.useState("");
 
+  const [remarkModal, setRemarkModal] = React.useState<{
+    isOpen: boolean;
+    reportId: string | null;
+    remark: string;
+    isEdit: boolean;
+  }>({
+    isOpen: false,
+    reportId: null,
+    remark: "",
+    isEdit: false,
+  });
+
   const handleStatusClick = (reportId: string, currentStatus: boolean) => {
     setActionRemark("");
     setRemarkError("");
@@ -111,6 +132,32 @@ export default function MpOccurrenceTable({
     const printUrl = `/print/mp-occurrence-report/${reportId}`;
     window.open(printUrl, "_blank");
   }, []);
+
+  const openRemarkModal = (reportId: string, currentRemark?: string) => {
+    setRemarkModal({
+      isOpen: true,
+      reportId,
+      remark: currentRemark || "",
+      isEdit: !!currentRemark,
+    });
+  };
+
+  const handleSaveRemark = async () => {
+    if (!remarkModal.reportId) return;
+    try {
+      await updateReport({
+        id: remarkModal.reportId,
+        data: {
+          addRemark: remarkModal.remark,
+        },
+      });
+      toast.success(remarkModal.isEdit ? "Remark updated successfully" : "Remark added successfully");
+      setRemarkModal((prev) => ({ ...prev, isOpen: false }));
+    } catch (error) {
+      console.error("Failed to save remark", error);
+      toast.error(remarkModal.isEdit ? "Failed to update remark" : "Failed to add remark");
+    }
+  };
 
 
   const handleConfirm = async () => {
@@ -277,9 +324,20 @@ export default function MpOccurrenceTable({
       },
       {
         header: "Remark",
-        className: "min-w-[100px] border-r border-gray-300",
+        className: "min-w-[150px] border-r border-gray-300 cursor-pointer hover:bg-gray-50",
         cell: (item) => (
-          <span className="text-gray-400 text-xs italic">Add Remark</span>
+          <div
+            className="w-full h-full min-h-[20px] flex items-center"
+            onClick={() => item._id && openRemarkModal(item._id, item.addRemark)}
+          >
+            {item.addRemark ? (
+              <span className="text-gray-900 text-xs text-wrap break-words" title={item.addRemark}>
+                {item.addRemark}
+              </span>
+            ) : (
+              <span className="text-gray-400 text-xs text-center">Add Remark</span>
+            )}
+          </div>
         ),
       },
       {
@@ -332,6 +390,13 @@ export default function MpOccurrenceTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => item._id && openRemarkModal(item._id, item.addRemark)}
+              >
+                <PencilLine className="w-4 h-4" />
+                {item.addRemark ? "Update Remark" : "Add Remark"}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
                 onClick={() => onView && onView(item)}
@@ -424,6 +489,54 @@ export default function MpOccurrenceTable({
           </div>
         )}
       </ConfirmationModal>
+
+      <Dialog
+        open={remarkModal.isOpen}
+        onOpenChange={(open) =>
+          setRemarkModal((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{remarkModal.isEdit ? "Update Remark" : "Add Remark"}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="add-remark" className="mb-2 block">
+              Remark
+            </Label>
+            <Textarea
+              id="add-remark"
+              value={remarkModal.remark}
+              onChange={(e) =>
+                setRemarkModal((prev) => ({ ...prev, remark: e.target.value }))
+              }
+              placeholder="Enter remark here..."
+              rows={4}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setRemarkModal((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveRemark}
+              disabled={isUpdating}
+              className="bg-[#0088FF] hover:bg-[#0088FF]/90 text-white"
+            >
+              {isUpdating
+                ? "Saving..."
+                : remarkModal.isEdit
+                  ? "Update Remark"
+                  : "Save Remark"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
