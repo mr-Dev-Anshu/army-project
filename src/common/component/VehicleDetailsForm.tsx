@@ -308,10 +308,24 @@ export default function VehicleDetailsForm({
   const driverType = vehicleState?.driverType || "";
   const relativeType = vehicleState?.relativeType || "";
 
+
+
   const vehiclePath =
-    scope === "traffic"
-      ? "formData.traffic.vehicleDetails"
-      : "formData.staticSpeed.vehicleDetails";
+  scope === "traffic"
+    ? "formData.traffic.vehicleDetails"
+    : scope === "static"
+    ? "formData.staticSpeed.vehicleDetails"
+    : scope === "mp-main"
+    ? "formData.mpReport.individualDetails.vehicleData"
+    : rootPath
+    ? `${rootPath}.vehicleData`
+    : "";
+
+
+  // const vehiclePath =
+  //   scope === "traffic"
+  //     ? "formData.traffic.vehicleDetails"
+  //     : "formData.staticSpeed.vehicleDetails";
 
   /* ================= UPDATE VEHICLE ================= */
   const updateVehicle = (data: any) => {

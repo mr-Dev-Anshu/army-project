@@ -58,7 +58,7 @@ export default function Step5WitnessList() {
     let temp: any = null;
 
     if (witnessVehicleStatus === "yes") {
-      const vehicleData = mp.individualDetails.vehicleData;
+      const vehicleData = mp.witnessTemp?.vehicleData;
 
       if (!vehicleData || !vehicleData.driverType) {
         toast.error("Please fill witness details!");
@@ -72,7 +72,7 @@ export default function Step5WitnessList() {
     }
 
     if (witnessVehicleStatus === "no") {
-      temp = mp.individualDetails.tempOffender;
+      temp = mp.witnessTemp?.tempOffender;
     }
 
     if (!temp || !temp.details || !Object.keys(temp.details).length) {
@@ -92,15 +92,10 @@ export default function Step5WitnessList() {
       value: [...witnesses, witnessPayload],
     });
 
+    // reset witness temp
     dispatch({
       type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.tempOffender",
-      value: {},
-    });
-
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.individualDetails.vehicleData",
+      path: "formData.mpReport.witnessTemp",
       value: {},
     });
 
@@ -122,11 +117,17 @@ export default function Step5WitnessList() {
       />
 
       {witnessVehicleStatus === "yes" && (
-        <VehicleDetailsForm scope="mp-main" />
+        <VehicleDetailsForm
+          scope="mp-additional"
+          rootPath="formData.mpReport.witnessTemp"
+        />
       )}
 
       {witnessVehicleStatus === "no" && (
-        <OffenderWithoutVehicleForm scope="mp-main" />
+        <OffenderWithoutVehicleForm
+          scope="mp-additional"
+          rootPath="formData.mpReport.witnessTemp"
+        />
       )}
 
       {witnessVehicleStatus && (
