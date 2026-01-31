@@ -12,7 +12,7 @@ import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBa
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "react-toastify";
-import { useUpdateGeneralDutyDiaryRegister } from "../hooks.ts";
+import { useUpdateGeneralDutyDiaryRegister } from "../hooks";
 
 interface GeneralDutyDiaryTableProps {
     data: any[];
