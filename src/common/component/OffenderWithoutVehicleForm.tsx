@@ -125,7 +125,7 @@ export default function OffenderWithoutVehicleForm({
   };
 
   return (
-    <div className="space-y-6 border rounded-lg p-6 bg-white">
+    <div className="space-y-6  p-6 bg-white">
       <p className="font-semibold text-lg">
         Select Who was the Offender?
       </p>

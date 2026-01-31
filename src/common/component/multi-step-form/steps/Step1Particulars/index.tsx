@@ -1,3 +1,5 @@
+
+
 // "use client";
 
 // import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
@@ -12,54 +14,29 @@
 //   onChange: (v: string) => void;
 // }) {
 //   return (
-//     <div
-//       className="
-//         w-full h-full
-//         flex flex-col
-//         gap-4 sm:gap-5 lg:gap-6
-//         px-2 sm:px-3 md:px-4 lg:px-6
-//         pb-4
-//         overflow-y-auto
-//       "
-//     >
-//       {/* ✅ QUESTION ONLY */}
-//       <div className="w-full max-w-full">
-//         <VehiclePrimaryQuestion
-//           vehicleStatus={value}
-//           setVehicleStatus={onChange}
-//           onChange={onChange}
-//         />
-//       </div>
+//     <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
 
-//       {/* ================= AFTER SELECTION ================= */}
+//       {/* QUESTION */}
+//       <VehiclePrimaryQuestion
+//         vehicleStatus={value}
+//         setVehicleStatus={onChange}
+//         onChange={onChange}
+//       />
 
-//       {/* ✅ IF VEHICLE INVOLVED */}
+//       {/* ✅ VEHICLE FLOW */}
 //       {value === "yes" && (
-//         <>
-//           {/* Vehicle Details */}
-//           <div className="w-full">
-//             <h1 className="text-xl font-bold mb-4">
-//               1.1 Fill Vehicle Identification Fields:
-//             </h1>
-//             <VehicleDetailsForm scope="traffic" />
-//           </div>
-
-//           {/* Driver / Rider */}
-//           <div className="w-full flex flex-col gap-6">
-//             <OffenderWithoutVehicleForm scope="traffic" />
-//           </div>
-//         </>
+//         <VehicleDetailsForm scope="traffic" />
 //       )}
 
-//       {/* ✅ IF NO VEHICLE */}
+//       {/* ✅ NO VEHICLE FLOW */}
 //       {value === "no" && (
-//         <div className="w-full flex flex-col gap-6">
-//           <OffenderWithoutVehicleForm scope="traffic" />
-//         </div>
+//         <OffenderWithoutVehicleForm scope="traffic" />
 //       )}
+
 //     </div>
 //   );
 // }
+
 
 
 "use client";
@@ -78,21 +55,33 @@ export default function Step1Particulars({
   return (
     <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
 
-      {/* QUESTION */}
-      <VehiclePrimaryQuestion
-        vehicleStatus={value}
-        setVehicleStatus={onChange}
-        onChange={onChange}
-      />
+      {/* ================= VEHICLE + QUESTION CARD ================= */}
+      <div className="border rounded-xl p-4 space-y-6 bg-white">
 
-      {/* ✅ VEHICLE FLOW */}
+        <VehiclePrimaryQuestion
+          vehicleStatus={value}
+          setVehicleStatus={onChange}
+          onChange={onChange}
+        />
+
+        {value === "yes" && (
+          <VehicleDetailsForm scope="traffic" hideDriverSection />
+        )}
+
+      </div>
+
+      {/* ================= OFFENDER CARD ================= */}
       {value === "yes" && (
-        <VehicleDetailsForm scope="traffic" />
+        <div className="border rounded-xl p-4 bg-white">
+          <OffenderWithoutVehicleForm scope="traffic" />
+        </div>
       )}
 
-      {/* ✅ NO VEHICLE FLOW */}
+      {/* ================= NO VEHICLE FLOW ================= */}
       {value === "no" && (
-        <OffenderWithoutVehicleForm scope="traffic" />
+        <div className="border rounded-xl p-4 bg-white">
+          <OffenderWithoutVehicleForm scope="traffic" />
+        </div>
       )}
 
     </div>

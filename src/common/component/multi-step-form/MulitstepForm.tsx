@@ -307,17 +307,24 @@ export default function MultiStepForm({
           ? [...eo.offenceTypeReference]
           : [];
 
-        // Witnesses
         if (Array.isArray(eo.onDutyWitnessingMps)) {
-          trafficNodes.witnesses = eo.onDutyWitnessingMps.map((w: any) => ({
-            reportingBlock: {
-              nameReportingMP: w.name || w.nameReportingMP || "",
-              rank: w.rank || "",
-              unit: w.unit || "",
-              armyNumber: w.armyNumber || w.ArmyNo || "",
-              contactNumber: w.contactNumber || "",
-            },
-          }));
+          const witnessMap = new Map<string, any>();
+
+          eo.onDutyWitnessingMps.forEach((w: any) => {
+            const key = (w.armyNumber || w.ArmyNo || w.name || "") + "_witness";
+
+            witnessMap.set(key, {
+              reportingBlock: {
+                nameReportingMP: w.name || w.nameReportingMP || "",
+                rank: w.rank || "",
+                unit: w.unit || "",
+                armyNumber: w.armyNumber || w.ArmyNo || "",
+                contactNumber: w.contactNumber || "",
+              },
+            });
+          });
+
+          trafficNodes.witnesses = Array.from(witnessMap.values());
         }
 
         if (Array.isArray(eo.offenders)) {
