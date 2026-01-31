@@ -242,13 +242,29 @@ export default function SignedAttachmentsViewer({ attachments = [], record, onAt
                                         {item.name}
                                     </span>
                                 </div>
-                                <Button
-                                    size="icon"
-                                    className="bg-black text-white hover:bg-gray-800 h-10 w-10 min-w-[2.5rem] rounded-lg shadow-sm"
-                                    onClick={() => handleView(item)}
-                                >
-                                    <FileText className="w-5 h-5" />
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        size="icon"
+                                        className="bg-black text-white hover:bg-gray-800 h-10 w-10 min-w-[2.5rem] rounded-lg shadow-sm"
+                                        onClick={() => handleView(item)}
+                                    >
+                                        <FileText className="w-5 h-5" />
+                                    </Button>
+                                    {/* TEMPORARILY COMMENTED OUT - DELETE BUTTON */}
+                                    {/* {onDelete && (
+                                        <Button
+                                            size="icon"
+                                            className="bg-red-600 text-white hover:bg-red-700 h-10 w-10 min-w-[2.5rem] rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => {
+                                                if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+                                                    onDelete(item);
+                                                }
+                                            }}
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </Button>
+                                    )} */}
+                                </div>
                             </div>
                         ))
                     )}

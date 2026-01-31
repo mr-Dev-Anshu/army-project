@@ -83,8 +83,39 @@ export default function ReportViewerWrapper({
                     )}
                 </div>
 
-                {/* Right: Close Button Only */}
+                {/* Right: Download Icons + Close Button */}
                 <div className="flex items-center gap-2">
+                    {onDownloadWord && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onDownloadWord}
+                            disabled={isDownloading}
+                            className="bg-white text-black hover:bg-gray-200 rounded w-8 h-8 flex items-center justify-center"
+                            title="Download Word"
+                        >
+                            <FileText className="w-5 h-5" />
+                        </Button>
+                    )}
+
+                    {onDownloadPdf && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onDownloadPdf}
+                            disabled={isDownloading}
+                            className="bg-white text-black hover:bg-gray-200 rounded w-8 h-8 flex items-center justify-center"
+                            title="Download PDF"
+                        >
+                            <FileDown className="w-5 h-5" />
+                        </Button>
+                    )}
+
+                    {/* Divider */}
+                    {(onDownloadWord || onDownloadPdf) && (
+                        <div className="h-6 w-px bg-white/20 mx-1" />
+                    )}
+
                     <Button
                         variant="ghost"
                         size="icon"

@@ -37,9 +37,18 @@ export async function GET(
             throw new Error("Could not compute bounding box for report element.");
         }
 
+        // Give the page a moment to render Tailwind classes
+        await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
+
         const pdf = await page.pdf({
             printBackground: true,
             format: 'A4',
+            margin: {
+                top: '0.5cm',
+                right: '0.5cm',
+                bottom: '0.5cm',
+                left: '0.5cm'
+            }
         });
 
         await browser.close();

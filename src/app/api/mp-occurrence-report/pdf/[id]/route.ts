@@ -38,18 +38,25 @@ export async function GET(
 
         const page = await browser.newPage();
 
-        // Fast wait condition: proceed as soon as DOM is ready. 
-        // We wait for the selector explicitly anyway.
-        await page.goto(reportUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        // Wait for page to fully load with network idle
+        await page.goto(reportUrl, { waitUntil: 'networkidle0', timeout: 60000 });
 
-        // Ensure the report content is loaded
-        const reportSelector = '.print\\:block';
-        await page.waitForSelector(reportSelector, { timeout: 30000 });
+        // Wait for the report body to be present
+        await page.waitForSelector('body', { timeout: 30000 });
+
+        // Give the page a moment to render Tailwind classes
+        await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
 
         // Generate PDF
         const pdf = await page.pdf({
             printBackground: true,
             format: 'A4',
+            margin: {
+                top: '0.5cm',
+                right: '0.5cm',
+                bottom: '0.5cm',
+                left: '0.5cm'
+            }
         });
 
         await browser.close();

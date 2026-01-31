@@ -4,7 +4,7 @@ import React, { useMemo, useState, useRef } from "react";
 
 
 import MpOccurrenceTable from "./_components/MpOccurrenceTable";
-import { useGetAllMPReports, useGetMPReportById, useUpdateMPReport } from "@/features/mpReports/hooks";
+import { useGetAllMPReports, useGetMPReportById, useUpdateMPReport, useDeleteMPReport } from "@/features/mpReports/hooks";
 import { useCreateMPReport } from "@/features/mpReports/hooks";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
@@ -14,7 +14,6 @@ import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/report
 import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, FileSpreadsheet, FileJson, Loader2, Plus, X } from "lucide-react";
-import EvidenceViewer from "@/components/common/EvidenceViewer";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
 import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
@@ -115,7 +114,7 @@ export default function MpOccurrenceReportsPage() {
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
   /* ================= VIEW MODE STATE ================= */
-  const [viewMode, setViewMode] = useState<"report" | "attachments" | "evidences">("report");
+  const [viewMode, setViewMode] = useState<"report" | "attachments">("report");
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
 
   const { mutateAsync: updateReport } = useUpdateMPReport();
@@ -156,12 +155,17 @@ export default function MpOccurrenceReportsPage() {
 
   // HANDLE ATTACHMENT DELETE
   const handleAttachDelete = async (attachment: any) => {
-    if (!viewingReport?._id) {
+    // Extract the correct ID - handle originalData structure
+    const reportId = viewingReport?._id || viewingReport?.originalData?._id;
+
+    if (!reportId) {
       console.error("No viewing report ID found");
+      toast.error("Cannot delete: Report ID missing");
       return;
     }
 
     console.log("Deleting attachment:", attachment);
+    console.log("Using report ID:", reportId);
 
     try {
       const currentAttachments =
@@ -171,11 +175,29 @@ export default function MpOccurrenceReportsPage() {
         [];
 
       console.log("Current attachments:", currentAttachments);
-      const updatedAttachments = currentAttachments.filter((item: any) => item.url !== attachment.url);
+
+      // Filter out the deleted item - match by URL or name for better accuracy
+      const updatedAttachments = currentAttachments.filter((item: any) => {
+        // Match by URL if both have URLs
+        if (attachment.url && item.url) {
+          return item.url !== attachment.url;
+        }
+        // Fallback to name matching if available
+        if (attachment.name && item.name) {
+          return item.name !== attachment.name;
+        }
+        // If statement matches, keep it (safety)
+        if (item.statement && attachment.name) {
+          return item.statement !== attachment.name;
+        }
+        // Keep item by default if no match criteria found
+        return true;
+      });
+
       console.log("Updated attachments:", updatedAttachments);
 
       const updatePayload: any = {
-        id: viewingReport._id,
+        id: reportId,
         data: {}
       };
 
@@ -186,15 +208,19 @@ export default function MpOccurrenceReportsPage() {
         };
       } else if (viewingReport.certificates) {
         updatePayload.data.certificates = updatedAttachments;
+      } else if (viewingReport.attachments) {
+        updatePayload.data.attachments = updatedAttachments;
       } else {
-        updatePayload.data.customFields = {
-          ...viewingReport.customFields,
-          attachments: updatedAttachments
-        };
+        // Default to certificates
+        updatePayload.data.certificates = updatedAttachments;
       }
 
+      console.log("Update payload:", JSON.stringify(updatePayload, null, 2));
+      console.log("Report ID being updated:", viewingReport._id);
+
       await updateReport(updatePayload);
-      toast.success("Attachment Deleted Successfully");
+      const deletedFileName = attachment.name || attachment.statement || 'Attachment';
+      toast.success(`${deletedFileName} deleted successfully`);
 
       setViewingReport((prev: any) => {
         const updated = { ...prev };
@@ -202,8 +228,10 @@ export default function MpOccurrenceReportsPage() {
           updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
         } else if (prev.certificates) {
           updated.certificates = updatedAttachments;
+        } else if (prev.attachments) {
+          updated.attachments = updatedAttachments;
         } else {
-          updated.customFields = { ...prev.customFields, attachments: updatedAttachments };
+          updated.certificates = updatedAttachments;
         }
         return updated;
       });
@@ -677,11 +705,31 @@ export default function MpOccurrenceReportsPage() {
   const distinctReportsCount = processedData.length;
   const pageTitle = "MP Occurrence & Investigation Report";
 
+  // Debug logging
+  React.useEffect(() => {
+    if (viewingReport) {
+      console.log("=== MP OCCURRENCE - Viewing Report ===");
+      console.log("Full Report Object:", viewingReport);
+      console.log("Certificates field:", viewingReport.certificates);
+      console.log("Custom Fields:", viewingReport.customFields);
+      console.log("All keys:", Object.keys(viewingReport));
+    }
+  }, [viewingReport]);
+
+  // When a report is selected for viewing we may only have a lightweight
+  // item from the list endpoint. Fetch the full record (including
+  // certificates/attachments) by id and prefer that when rendering
+  // the attachments viewer.
+  const viewingId = viewingReport?._id ?? viewingReport?.originalData?._id ?? null;
+  const viewingIdStr = viewingId ?? "";
+  const { data: viewingFullRecordData, isLoading: isViewingRecordLoading } = useGetMPReportById(viewingIdStr);
+  const finalViewingRecord = viewingFullRecordData?.data ?? viewingFullRecordData ?? viewingReport?.originalData ?? viewingReport;
+
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { setIsCreating(false); setViewingReport(null); }} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
           <h1 className="text-lg font-semibold text-gray-800">
@@ -704,10 +752,6 @@ export default function MpOccurrenceReportsPage() {
     )
   }
 
-
-  const viewingIdStr = viewingReport?._id ?? viewingReport?.originalData?._id ?? "";
-  const finalViewingRecord = viewingReport?.originalData || viewingReport;
-
   if (viewingReport) {
     return (
       <>
@@ -723,11 +767,11 @@ export default function MpOccurrenceReportsPage() {
           activeView={viewMode}
           onViewReport={() => setViewMode("report")}
           onViewAttachments={() => setViewMode("attachments")}
-          onViewEvidences={() => setViewMode("evidences")}
           onDownloadWord={() => handleDownloadReport(viewingReport)}
           onDownloadPdf={() => handleDownloadPdf(viewingReport)}
           onPrint={() => window.print()}
           onEdit={() => {
+            setViewingReport(null);
             setIsCreating(true);
           }}
         >
@@ -739,13 +783,6 @@ export default function MpOccurrenceReportsPage() {
             <SignedAttachmentsViewer
               record={finalViewingRecord}
               onAttachMore={() => setIsAttachModalOpen(true)}
-              onDelete={handleAttachDelete}
-            />
-          )}
-
-          {viewMode === "evidences" && (
-            <EvidenceViewer
-              evidences={finalViewingRecord?.evidences || []}
               onDelete={handleAttachDelete}
             />
           )}
@@ -871,7 +908,7 @@ export default function MpOccurrenceReportsPage() {
                 className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group text-center h-72"
               >
                 <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-               -assName="w-10 h-10 text-blue-600" />
+                  <Plus className="w-10 h-10 text-blue-600" />
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700">Create Manually</h4>
                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>

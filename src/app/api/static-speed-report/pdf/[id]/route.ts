@@ -27,18 +27,25 @@ export async function GET(
 
         const page = await browser.newPage();
 
-        // Navigate to the print page
-        // Relaxed wait condition to avoid timeouts on long-running background requests
-        await page.goto(reportUrl, { waitUntil: 'load', timeout: 60000 });
+        // Wait for page to fully load with network idle
+        await page.goto(reportUrl, { waitUntil: 'networkidle0', timeout: 60000 });
 
-        // Ensure the report content is loaded
-        const reportSelector = '.print\\:block'; // Targeting the main report container
-        await page.waitForSelector(reportSelector, { timeout: 20000 });
+        // Wait for the report body to be present
+        await page.waitForSelector('body', { timeout: 30000 });
+
+        // Give the page a moment to render Tailwind classes
+        await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
 
         // Generate PDF
         const pdf = await page.pdf({
             printBackground: true,
             format: 'A4',
+            margin: {
+                top: '0.5cm',
+                right: '0.5cm',
+                bottom: '0.5cm',
+                left: '0.5cm'
+            }
         });
 
         await browser.close();

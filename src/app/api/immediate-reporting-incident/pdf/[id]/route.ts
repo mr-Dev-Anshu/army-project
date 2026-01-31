@@ -44,6 +44,9 @@ export async function GET(
             throw new Error("Report element (#report-content) not found on the page.");
         }
 
+        // Give the page a moment to render Tailwind classes
+        await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 1000)));
+
         const pdf = await page.pdf({
             printBackground: true,
             format: 'A4',
