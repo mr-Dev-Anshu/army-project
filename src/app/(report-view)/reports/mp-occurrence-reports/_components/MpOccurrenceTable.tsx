@@ -283,7 +283,7 @@ export default function MpOccurrenceTable({
         cell: (item) => (
           <ul className="list-decimal pl-4 text-xs text-gray-600 space-y-1">
             {item.documents?.map((doc: any, i: number) => (
-              <li key={i}>{doc.statement || "Document"}</li>
+              <li key={i}>{typeof doc === "string" ? doc : (doc?.statement || doc?.name || "Document")}</li>
             ))}
             {(!item.documents || item.documents.length === 0) && <li>-</li>}
           </ul>

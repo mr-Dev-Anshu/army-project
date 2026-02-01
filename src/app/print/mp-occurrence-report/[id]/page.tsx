@@ -38,52 +38,71 @@ export default function PrintMpOccurrenceReportPage({
     );
   }
 
-  // Transform data to match MpOccurrenceReportProps
+  // Transform data to match MpOccurrenceReportProps (individuals or offenders from lookup)
+  const hasIndividuals = Array.isArray(data.individuals) && data.individuals.length > 0;
+  const rawPeople = hasIndividuals ? data.individuals : (data.offenders || data.individual || []);
+  const mapPerson = (p: any, index: number) => {
+    const src = p?.offenderDetails || p?.details || p;
+    const base = typeof src === "object" && src ? src : p;
+    const merged = { ...(base?.customFields || {}), ...base };
+    return {
+      sno: index + 1,
+      armyNo: merged.armyNo || merged.armyNumber || merged.serviceNumber || "",
+      rank: merged.rank || "",
+      name: merged.name || merged.personName || merged.fullName || "",
+      identityCard: merged.iCardNumber || merged.icard || merged.passNo || "",
+      unitName: merged.unit || merged.unitName || "",
+      fmn: merged.fmn || merged.fmnName || "",
+      address: merged.address || "",
+      remark: merged.remark || "",
+      role: merged.role || p?.offenderType || p?.category || "Unknown",
+      customFields: merged,
+    };
+  };
+
+  const occ = data.occurrenceDetails || {};
   const transformedData = {
-    reportNo: data.reportDetails.reportNumber || "",
-    command: data.reportDetails.command || "",
-    firNo: data.reportDetails.firNumber || "",
+    reportNo: (data.reportDetails?.reportNumber || "").toString(),
+    command: (data.reportDetails?.command || "").toString(),
+    firNo: (data.reportDetails?.firNumber || "").toString(),
     mpDetails: {
-      armyNumber: data.investigationHead.armyNumber || "",
-      rank: data.investigationHead.rank || "",
-      name: data.investigationHead.name || "",
-      unit: data.investigationHead.unit || "",
-      fmn: data.investigationHead.fmn || "",
-      command: data.investigationHead.command || "",
+      armyNumber: (data.investigationHead?.armyNumber || data.investigationHead?.armyNo || "").toString(),
+      rank: (data.investigationHead?.rank || "").toString(),
+      name: (data.investigationHead?.name || "").toString(),
+      unit: (data.investigationHead?.unit || "").toString(),
+      fmn: (data.investigationHead?.fmn || "").toString(),
+      command: (data.investigationHead?.command || "").toString(),
     },
     occurrence: {
-      types: data.occurrenceDetails.offenceType ? [data.occurrenceDetails.offenceType] : [],
-      refs: [],
-      place: data.occurrenceDetails.placeOfOccurrence || "",
-      date: data.occurrenceDetails.dateOfOccurrence || "",
-      time: data.occurrenceDetails.timeOfOccurrence || "",
+      types: (Array.isArray(occ.offenceTypes) && occ.offenceTypes.length > 0)
+        ? occ.offenceTypes
+        : (occ.offenceType ? [occ.offenceType] : []),
+      refs: occ.offenceTypeReference || [],
+      place: (occ.placeOfOccurrence || "").toString(),
+      date: occ.dateOfOccurrence
+        ? new Date(occ.dateOfOccurrence).toLocaleDateString("en-GB")
+        : "",
+      time: occ.timeOfOccurrence
+        ? new Date(occ.timeOfOccurrence).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })
+        : "",
     },
-    people: data.individual?.map((person, index) => ({
-      sno: index + 1,
-      armyNo: person.armyNumber,
-      rank: person.rank,
-      name: person.name,
-      identityCard: person.iCardNumber,
-      unitName: person.unit,
-      fmn: person.fmn,
-      address: person.address,
-      remark: person.remark,
-      role: person.role || "Unknown",
-      customFields: person,
-    })) || [],
-    briefOfOccurrence: data.occurrenceDetails.description || "",
-    witnesses: data.witness?.map((witness, index) => ({
-      sno: index + 1,
-      armyNo: witness.armyNumber,
-      rank: witness.rank,
-      name: witness.name,
-      identityCard: witness.iCardNumber,
-      unitName: witness.unit,
-      fmn: witness.fmn,
-      address: witness.address,
-      remark: witness.remark,
-      customFields: witness,
-    })) || [],
+    people: Array.isArray(rawPeople) ? rawPeople.map(mapPerson) : [],
+    briefOfOccurrence: (occ.description || "").toString(),
+    witnesses: (Array.isArray(data.witnesses) ? data.witnesses : Array.isArray(data.witness) ? data.witness : []).map((w: any, index: number) => {
+      const src = w?.details || w;
+      return {
+        sno: index + 1,
+        armyNo: src.armyNo || src.armyNumber || "",
+        rank: src.rank || "",
+        name: src.name || "",
+        identityCard: src.iCardNumber || src.icard || "",
+        unitName: src.unit || src.unitName || "",
+        fmn: src.fmn || src.fmnName || "",
+        address: src.address || "",
+        remark: src.remark || "",
+        customFields: src,
+      };
+    }),
     evidence: {
       eyeSketch: "",
       photos: "",
@@ -91,9 +110,13 @@ export default function PrintMpOccurrenceReportPage({
     },
     documents: data.documents?.map(doc => doc.statement || "").filter(Boolean) || [],
     detailedReport: {
-      statement: data.detailedOccurrenceReport || "",
-      findings: data.pointsFindOutDuringInvestigation ? [data.pointsFindOutDuringInvestigation] : [],
-      opinion: data.opinion || "",
+      statement: (data.detailedOccurrenceReport || "").toString(),
+      findings: Array.isArray(data.pointsFindOutDuringInvestigation)
+        ? data.pointsFindOutDuringInvestigation
+        : (typeof data.pointsFindOutDuringInvestigation === "string" && data.pointsFindOutDuringInvestigation.trim())
+          ? data.pointsFindOutDuringInvestigation.split("\n").filter((l: string) => l.trim())
+          : [],
+      opinion: (data.opinion || "").toString(),
     },
     remarks: {
       analysis: data.remarks?.analysis || "",

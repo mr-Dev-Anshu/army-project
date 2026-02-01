@@ -21,6 +21,7 @@ import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWord
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
+import { normalizeMPOccurrenceJSON } from "@/utils/mpOccurrenceTransform";
 
 /* ================= HELPERS ================= */
 
@@ -107,100 +108,6 @@ const mapData = (data: any[]) => {
   });
 };
 
-// Normalize a single item that may be { report: { ... } } or flat object
-const normalizeOneReport = (item: any): any => {
-  const r = item.report != null ? item.report : item;
-
-  const offenderIndividuals = Array.isArray(r.offenders) ? r.offenders.map((o: any) => {
-    let type = "Military Person";
-    if (o.offenderType === "servantMaid") type = "Maid";
-    else if (o.offenderType === "civilian") type = "Civilian";
-    else if (o.offenderType) type = o.offenderType;
-    return {
-      role: "Offender",
-      name: o.name || o.personName || "Unknown",
-      rank: o.rank || o.selectRank,
-      armyNo: o.armyNumber || o.serviceNumber,
-      iCardNumber: o["I Card Number"] || o.iCardNumber || o["Pass ID"] || o.passNo,
-      unit: o.unit || o.unitName,
-      fmn: o.fmn || o.fmnName,
-      command: o.command || r.command,
-      address: o.address || o["Place of QTR."],
-      trade: o.Trade,
-      fatherName: o.fatherName,
-      caste: o.caste,
-      age: o.age,
-      customFields: { offenderType: type },
-    };
-  }) : [];
-
-  const victim = {
-    role: "Victim",
-    name: r.victimName || r.victim?.name || "Unknown",
-    age: r.age,
-    totalServiceDuration: r.totalServiceDuration,
-    unit: r.unit,
-    fmn: r.fmn,
-    command: r.command,
-    address: r.address,
-  };
-
-  const allIndividuals = [...offenderIndividuals];
-  if (r.age || r.totalServiceDuration || r.unit || r.victimName || r.victim?.name) {
-    allIndividuals.push(victim);
-  }
-
-  const dateVal = r.dateOfOccurrence;
-  const timeVal = r.timeOfOccurrence;
-  const timeOfOccurrenceCombined = dateVal && timeVal
-    ? (typeof timeVal === "string" && timeVal.length <= 8 ? `${dateVal}T${timeVal}` : `${dateVal}T${timeVal}`)
-    : dateVal || undefined;
-
-  return {
-    reportDetails: {
-      reportNumber: r.reportNumber ?? r.id ?? "Auto-Generated",
-      firNumber: r.firNumber ?? r.firNo,
-      command: r.command ?? "",
-    },
-    investigationHead: {
-      name: r.investigationHead?.name ?? r.incidentCoveredBy ?? r.coordWith ?? "Imported Report",
-      rank: r.investigationHead?.rank ?? r.rank ?? "",
-      armyNumber: r.investigationHead?.armyNumber ?? r.armyNo ?? "",
-      unit: r.investigationHead?.unit ?? r.unit ?? "",
-      fmn: r.investigationHead?.fmn ?? r.fmn ?? "",
-    },
-    occurrenceDetails: {
-      dateOfOccurrence: dateVal,
-      timeOfOccurrence: timeOfOccurrenceCombined ?? dateVal,
-      placeOfOccurrence: r.placeOfOccurrence ?? r.place ?? "",
-      offenceType: r.reportHeading ?? r.offenceType ?? "General Offence",
-      description: r.description ?? r.brief ?? "",
-    },
-    customFields: {
-      vehicleNumber: r.vehicleNumber,
-      vehicleType: r.vehicleType,
-      vehicleName: r.vehicleName,
-      leaveOrDuty: r["leave / duty"] ?? r.leaveOrDuty,
-    },
-    individuals: allIndividuals,
-    rawOffenders: r.offenders,
-  };
-};
-
-// Normalizer for MP Occurrence JSON: supports { reports: [...] }, { data: [...] }, or array
-const normalizeJSON = (json: any): any[] => {
-  if (json?.reports && Array.isArray(json.reports)) {
-    return json.reports.map((item: any) => normalizeOneReport(item));
-  }
-  if (Array.isArray(json)) {
-    return json.map((item: any) => (item.report != null ? normalizeOneReport(item) : mapData([item])[0]));
-  }
-  if (json?.data && Array.isArray(json.data)) {
-    return json.data.map((item: any) => (item.report != null ? normalizeOneReport(item) : mapData([item])[0]));
-  }
-  return [normalizeOneReport(json)];
-};
-
 /** Maps normalized import item to backend shape (ensures required fields and no rawOffenders in payload) */
 const mapItemToMPReportPayload = (item: any) => {
   const { rawOffenders, ...rest } = item;
@@ -210,6 +117,12 @@ const mapItemToMPReportPayload = (item: any) => {
   payload.occurrenceDetails = payload.occurrenceDetails ?? {};
   if (!payload.investigationHead.name) payload.investigationHead.name = "Imported Report";
   if (!payload.occurrenceDetails.offenceType) payload.occurrenceDetails.offenceType = "General Offence";
+  // Ensure offenceTypes array exists for filtering/display
+  if (!Array.isArray(payload.occurrenceDetails.offenceTypes)) {
+    payload.occurrenceDetails.offenceTypes = payload.occurrenceDetails.offenceType
+      ? [payload.occurrenceDetails.offenceType]
+      : [];
+  }
   payload.individuals = payload.individuals ?? [];
   return payload;
 };
@@ -307,8 +220,8 @@ export default function MpOccurrenceReportsPage() {
         }
         const dataArray = Array.isArray(json) ? cleanSystemFields(json) : cleanSystemFields([json]);
 
-        // Normalize: supports { reports: [...] }, { data: [...] }, or raw array
-        const mappedData = normalizeJSON(originalJson ?? dataArray);
+        // Normalize: supports { reports: [...] }, { data: [...] }, or raw array (uses mpOccurrenceTransform)
+        const mappedData = normalizeMPOccurrenceJSON(originalJson ?? dataArray, (item) => mapData([item])[0]);
         if (!mappedData.length) {
           toast.warning("No valid records found in the file.");
           return;
@@ -495,13 +408,23 @@ export default function MpOccurrenceReportsPage() {
       const invHead = item.investigationHead || {};
 
       const dateObj = new Date(occurrence.dateOfOccurrence || item.createdAt);
-      // Try to find the "Main" person involved (usually first individual/offender)
+      // Try to find the "Main" person involved (individuals first, then offenders from lookup)
+      const firstIndividual = item.individuals?.[0];
+      const firstOffender = item.offenders?.[0];
       const primaryIndividual =
-        item.individuals?.[0] ||
+        firstIndividual ||
+        (firstOffender?.offenderDetails ? { ...firstOffender.offenderDetails, ...firstOffender } : firstOffender) ||
         item.individual?.[0] ||
-        item.offenders?.[0] ||
         item.customFields?.victim ||
         {};
+
+      // Vehicle details from customFields (import) or first individual
+      const vehicleFromCustom = item.customFields || {};
+      const vehicleFromIndividual = firstIndividual || (firstOffender?.offenderDetails || {});
+      const vehicleDetails = {
+        number: vehicleFromCustom.vehicleNumber || vehicleFromIndividual.vehicleNumber || "",
+        name: vehicleFromCustom.vehicleName || vehicleFromIndividual.vehicleName || vehicleFromCustom.vehicleType || "",
+      };
 
       return {
         _id: item._id,
@@ -526,13 +449,17 @@ export default function MpOccurrenceReportsPage() {
         },
 
         victimDetails: {
-          armyNumber:
-            primaryIndividual.armyNo ||
-            primaryIndividual.armyNumber ||
-            primaryIndividual.aadharNumber,
-          rank: primaryIndividual.rank,
-          name: primaryIndividual.name,
+          // OffenderDetailsCell needs offenderType/individualType at top level to render correctly
+          offenderType: primaryIndividual.customFields?.offenderType || primaryIndividual.offenderType || (primaryIndividual.role === "Offender" ? "militaryPersonnel" : undefined),
+          individualType: primaryIndividual.customFields?.offenderType || primaryIndividual.offenderType,
+          armyNumber: primaryIndividual.armyNo || primaryIndividual.armyNumber || primaryIndividual.aadharNumber,
+          armyNo: primaryIndividual.armyNo || primaryIndividual.armyNumber,
+          rank: primaryIndividual.rank || primaryIndividual.selectRank,
+          name: primaryIndividual.name || primaryIndividual.personName || primaryIndividual.fullName,
           unit: primaryIndividual.unit || primaryIndividual.unitName,
+          fmn: primaryIndividual.fmn || primaryIndividual.fmnName,
+          address: primaryIndividual.address,
+          iCardNumber: primaryIndividual.iCardNumber || primaryIndividual.icard || primaryIndividual.passNo,
           ...primaryIndividual,
         },
         reportingMPName: invHead.name,
@@ -543,9 +470,13 @@ export default function MpOccurrenceReportsPage() {
             : (occurrence.offenceType === "NA" ? "" : occurrence.offenceType),
         brief: occurrence?.description,
         documents: item?.documents,
+        vehicleDetails,
         reportNumber: item?.reportDetails?.reportNumber,
-        actionStatus: item?.actionStatus, // status action
-        originalData: item // Store original data for report view 
+        actionStatus: item?.actionStatus,
+        initialsMPCRNCO: item?.initialsMPCRNCO,
+        initialsCO: item?.initialsCO,
+        addRemark: item?.addRemark,
+        originalData: item,
       };
     });
   }, [data, filters]);
@@ -556,14 +487,20 @@ export default function MpOccurrenceReportsPage() {
     const invHead = raw.investigationHead || raw.mpParticulars || {}; 
     const occurrence = raw.occurrenceDetails || {};
 
-    // Prioritize 'individuals' which we standardized in the import
-    const rawPeople = raw.individuals || raw.offenders || raw.individual || [];
+    // Use individuals from report; fallback to offenders (from lookup) for imported reports
+    const hasIndividuals = Array.isArray(raw.individuals) && raw.individuals.length > 0;
+    const rawPeople = hasIndividuals
+      ? raw.individuals
+      : (raw.offenders || raw.individual || []);
 
     const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
-      const src = p.details || p;
-      const custom = src.customFields || {};
-      const merged = { ...custom, ...src }; 
+      // Offenders from lookup have offenderDetails; individuals have flat structure
+      const src = p?.offenderDetails || p?.details || p;
+      const base = typeof src === "object" && src ? src : p;
+      const custom = base?.customFields || p?.customFields || {};
+      const merged = { ...custom, ...base };
 
+      const roleFromOffender = p?.offenderType || p?.category;
       return {
         sno: index + 1,
         armyNo: merged.armyNo || merged.armyNumber || merged.serviceNumber || merged.aadharNumber || "",
@@ -574,7 +511,7 @@ export default function MpOccurrenceReportsPage() {
         fmn: merged.fmn || merged.fmnName || "",
         address: merged.address || "",
         remark: merged.remark || "",
-        role: mappedRole(merged.role || merged.type || "Offender"),
+        role: mappedRole(merged.role || merged.type || roleFromOffender || "Offender"),
         customFields: merged
       };
     }) : [];
