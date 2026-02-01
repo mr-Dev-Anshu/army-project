@@ -46,7 +46,7 @@ const Sidebar = () => {
     "Military Structure Data",
   ]);
 
-  console.log(user, "this is user");
+  console.log(user, "this is user")
   // Check if user is admin
   const isSuperAdmin = user?.role === "superadmin";
 
@@ -91,22 +91,8 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    {
-      icon: <PieChart className="w-5 h-5" />,
-      label: "Dashboard",
-      href: "/",
-      badge: "1",
-    },
-    {
-      icon: <Siren className="w-5 h-5" />,
-      label: (
-        <>
-          Immediate Reporting of Incident{" "}
-          <span className="font-bold">(Initial Report)</span>{" "}
-        </>
-      ),
-      href: "/create-record/immediate-reporting-incident",
-    },
+    { icon: <PieChart className="w-5 h-5" />, label: "Dashboard", href: "/", badge: "1" },
+    { icon: <Siren className="w-5 h-5" />, label: "Immediate Reporting of Incident (Initial Report)", href: "/immediate-reporting-incident" },
   ];
 
   const createNewRecordItems = [
