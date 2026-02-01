@@ -23,7 +23,6 @@ import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordRe
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
-import { processImport } from "@/lib/processImport";
 
 /* ================= HELPERS ================= */
 
@@ -99,72 +98,95 @@ const mapData = (data: any[]) => {
 };
 
 /* ================= JSON NORMALIZER ================= */
-const normalizeJSON = (json: any): any[] => {
-  if (json.reports && Array.isArray(json.reports)) {
-    return json.reports.map((item: any) => {
-      const r = item.report || {};
-      const d = item.dutyDetails || {};
-      const reporting = d.reportingMP || {};
-      const witnessing = d.witnessingMP || {};
+const normalizeOneStaticSpeed = (item: any): any => {
+  const r = item.report ?? item;
+  const d = item.dutyDetails ?? {};
+  const reporting = d.reportingMP ?? {};
+  const witnessing = d.witnessingMP ?? {};
 
-      const offenders = Array.isArray(r.offenders)
-        ? r.offenders.map((o: any) => ({
-            offenderType: o.offenderType === "militaryPersonnel" ? "Military Person" : o.offenderType || "Military Person",
-            offenderDetails: {
-              armyNumber: o.armyNumber,
-              rank: o.selectRank || o.rank,
-              name: o.name,
-              unit: o.unit,
-              fmn: o.fmn,
-              command: o.command,
-              address: o.address,
-              iCardNumber: o.iCardNumber,
-            },
-          }))
-        : [];
-
-      let finalTime: string | undefined;
-      if (d.dateOfDuty && r.timeOfOffence) {
-        const timePart = r.timeOfOffence.length === 5 ? `${r.timeOfOffence}:00` : r.timeOfOffence;
-        finalTime = `${d.dateOfDuty}T${timePart}`;
-      } else if (d.dateOfDuty) {
-        finalTime = d.dateOfDuty;
-      } else {
-        finalTime = r.timeOfOffence;
-      }
-
-      return {
-        vehicleNumber: r.vehicleNumber,
-        vehicleType: r.vehicleType,
-        vehicleName: r.vehicleName,
-        offenceOccurenceDetails: {
-          incidentLocation: r.incidentLocation,
-          timeOfOffence: finalTime,
-          authSpeed: r.authSpeed,
-          actualSpeedNoted: r.actualSpeedNoted,
-          overSpeedCalculated: r.overSpeedCalculated,
-          description: r.reportHeading || r.description,
+  const offenders = Array.isArray(r.offenders)
+    ? r.offenders.map((o: any) => ({
+        offenderType: o.offenderType === "militaryPersonnel" ? "Military Person" : (o.offenderType || "Military Person"),
+        offenderDetails: {
+          armyNumber: o.armyNumber ?? "",
+          rank: o.selectRank ?? o.rank ?? "",
+          name: o.name ?? "",
+          unit: o.unit ?? "",
+          fmn: o.fmn ?? "",
+          command: o.command ?? "",
+          address: o.address ?? "",
+          iCardNumber: o.iCardNumber ?? "",
         },
-        onDutyDetailsMPReporting: {
-          armyNumber: reporting.armyNo,
-          rank: reporting.rank,
-          nameReportingMP: reporting.name,
-          unit: reporting.unit,
-        },
-        onDutyWitnessingMps: witnessing.armyNo ? [{
-          armyNumber: witnessing.armyNo,
-          rank: witnessing.rank,
-          name: witnessing.name,
-          unit: witnessing.unit,
-        }] : [],
-        remarks: r.remarks || item.remarks,
-        offenders: offenders,
-      };
-    });
+      }))
+    : [];
+
+  let finalTime: string | undefined;
+  if (d.dateOfDuty && r.timeOfOffence) {
+    const timePart = typeof r.timeOfOffence === "string" && r.timeOfOffence.length === 5 ? `${r.timeOfOffence}:00` : r.timeOfOffence;
+    finalTime = `${d.dateOfDuty}T${timePart}`;
+  } else if (d.dateOfDuty) {
+    finalTime = d.dateOfDuty;
+  } else {
+    finalTime = r.timeOfOffence;
   }
-  if (Array.isArray(json)) return mapData(json);
-  if (json.data && Array.isArray(json.data)) return mapData(json.data);
-  return mapData([json]);
+
+  return {
+    vehicleNumber: r.vehicleNumber ?? "",
+    vehicleType: r.vehicleType ?? "",
+    vehicleName: r.vehicleName ?? "",
+    offenceOccurenceDetails: {
+      incidentLocation: r.incidentLocation ?? "",
+      timeOfOffence: finalTime,
+      authSpeed: r.authSpeed ?? "",
+      actualSpeedNoted: r.actualSpeedNoted ?? "",
+      overSpeedCalculated: r.overSpeedCalculated ?? "",
+      description: r.reportHeading ?? r.description ?? "",
+    },
+    onDutyDetailsMPReporting: {
+      armyNumber: reporting.armyNo ?? reporting.armyNumber ?? "",
+      rank: reporting.rank ?? "",
+      nameReportingMP: reporting.name ?? "",
+      unit: reporting.unit ?? "",
+    },
+    onDutyWitnessingMps: witnessing.armyNo
+      ? [{ armyNumber: witnessing.armyNo, rank: witnessing.rank, name: witnessing.name, unit: witnessing.unit }]
+      : [],
+    remarks: r.remarks ?? item.remarks ?? "",
+    offenders,
+  };
+};
+
+const normalizeJSON = (json: any): any[] => {
+  if (json?.reports && Array.isArray(json.reports)) {
+    return json.reports.map((item: any) => normalizeOneStaticSpeed(item));
+  }
+  if (json?.data && Array.isArray(json.data)) {
+    return json.data.map((item: any) =>
+      item.report != null ? normalizeOneStaticSpeed(item) : mapData([item])[0]
+    );
+  }
+  if (Array.isArray(json)) {
+    return json.map((item: any) =>
+      item.report != null ? normalizeOneStaticSpeed(item) : mapData([item])[0]
+    );
+  }
+  return [normalizeOneStaticSpeed(json)];
+};
+
+/** Maps a normalized import item to the exact shape the API/DB expect (time, remark, etc.) */
+const mapItemToApiPayload = (item: any) => {
+  const { offenders, offenceOccurenceDetails: occRaw, remarks, ...rest } = item;
+  const occ = occRaw || {};
+  const { timeOfOffence, ...occRest } = occ;
+  const offenceOccurenceDetails = {
+    ...occRest,
+    time: occ.time ?? timeOfOffence,
+  };
+  return {
+    ...rest,
+    offenceOccurenceDetails,
+    remark: rest.remark ?? remarks ?? "",
+  };
 };
 
 export default function StaticSpeedCheckReportsPage() {
@@ -217,14 +239,24 @@ export default function StaticSpeedCheckReportsPage() {
           json = csvToJsonWithHiddenKeys(result);
         }
 
-        const mappedData = normalizeJSON(json);
+        const originalJson = json;
+        if (json && !Array.isArray(json) && json.data) {
+          json = json.data;
+        }
+        const dataArray = Array.isArray(json) ? json : [json];
+        const mappedData = normalizeJSON(originalJson ?? dataArray);
+        if (!mappedData.length) {
+          toast.warning("No valid records found in the file.");
+          return;
+        }
         let successCount = 0;
         let failCount = 0;
 
         const handleImportRecord = async (item: any) => {
           try {
-            // 1. Destructure offenders array and rest of report data
-            const { offenders, ...reportPayload } = item;
+            // 1. Destructure offenders array and map rest to API payload shape (time, remark, etc.)
+            const { offenders } = item;
+            const reportPayload = mapItemToApiPayload(item);
 
             // 2. Create the main Speed Report first to get the database _id
             const createdRecord = await createStaticSpeedRecord(reportPayload);
@@ -262,7 +294,10 @@ export default function StaticSpeedCheckReportsPage() {
           }
         };
 
-        await processImport(mappedData, handleImportRecord);
+        // Process each record sequentially so each is saved as a separate DB record
+        for (const record of mappedData) {
+          await handleImportRecord(record);
+        }
 
         if (failCount === 0) {
           toast.success(`All ${successCount} record(s) and linked offenders imported successfully!`);
@@ -365,14 +400,18 @@ export default function StaticSpeedCheckReportsPage() {
 
     return filtered.map((item: any) => {
       const offence = item.offenceOccurenceDetails || {};
-      const driver = item.offenders?.[0]?.offenderDetails || {};
+      const offendersList = item.offenders ?? [];
+      const driverOffender = offendersList.find((o: any) => o?.offenderDetails?.type === "Driver") ?? offendersList[0];
+      const coDriverOffender = offendersList.find((o: any) => o?.offenderDetails?.type === "Co-Driver") ?? offendersList[1];
+      const driver = driverOffender?.offenderDetails ?? {};
       const dateObj = new Date(offence.timeOfOffence || item.createdAt);
       return {
         _id: item._id,
         placeOfOffence: offence.incidentLocation || "Unknown",
         date: isNaN(dateObj.getTime()) ? "Invalid Date" : dateObj.toLocaleDateString("en-GB"),
         time: isNaN(dateObj.getTime()) ? "--:--" : dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
-        driverDetails: { name: driver.name, armyNumber: driver.armyNumber, rank: driver.rank },
+        driverDetails: driverOffender ? { ...driverOffender, offenderDetails: driverOffender.offenderDetails ?? driverOffender } : undefined,
+        coDriverDetails: coDriverOffender ? { ...coDriverOffender, offenderDetails: coDriverOffender.offenderDetails ?? coDriverOffender } : undefined,
         mpName: item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
         unit: item.onDutyDetailsMPReporting?.unit || driver.unit || "MP Unit",
         fmn: item.fmn || driver.fmn,

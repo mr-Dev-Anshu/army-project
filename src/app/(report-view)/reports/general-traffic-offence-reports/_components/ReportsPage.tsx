@@ -16,7 +16,6 @@ import { CreateOffenderData } from "@/apis/offender/types";
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
-import { processImport } from "@/lib/processImport";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 
@@ -89,69 +88,73 @@ const mapData = (data: any[]) => {
   });
 };
 
-// 2. Normalizer for your JSON structure
+// 2. Normalizer for JSON: supports { reports: [...] }, { data: [...] }, or array
 const normalizeJSON = (json: any): any[] => {
-  if (json.reports && Array.isArray(json.reports)) {
-    return json.reports.map((item: any) => {
-      const r = item.report || {};
-      const d = item.dutyDetails || {};
-      const reporting = d.reportingMP || {};
-      const witnessing = d.witnessingMP || {};
+  if (json?.reports && Array.isArray(json.reports)) {
+    return json.reports.map((item: any) => normalizeOneTrafficReport(item));
+  }
+  if (json?.data && Array.isArray(json.data)) {
+    return json.data.map((item: any) =>
+      item.report != null ? normalizeOneTrafficReport(item) : mapData([item])[0]
+    );
+  }
+  if (Array.isArray(json)) {
+    return json.map((item: any) =>
+      item.report != null ? normalizeOneTrafficReport(item) : mapData([item])[0]
+    );
+  }
+  return [normalizeOneTrafficReport(json)];
+}
 
-      // Map Offenders
-      const offenders = Array.isArray(r.offenders) ? r.offenders.map((o: any) => ({
+function normalizeOneTrafficReport(item: any): any {
+  const r = item.report ?? item;
+  const d = item.dutyDetails ?? {};
+  const reporting = d.reportingMP ?? {};
+  const witnessing = d.witnessingMP ?? {};
+  const offenders = Array.isArray(r.offenders)
+    ? r.offenders.map((o: any) => ({
         offenderType: o.offenderType === "militaryPersonnel" ? "Military Person" : (o.offenderType || "Military Person"),
         offenderDetails: {
-          armyNumber: o.armyNumber,
-          rank: o.selectRank || o.rank,
-          name: o.name,
-          unit: o.unit,
-          fmn: o.fmn,
-          command: o.command,
-          address: o.address,
-          iCardNumber: o.iCardNumber
-        }
-      })) : [];
-
-      // Combine Date + Time
-      let finalTime = r.timeOfOffence;
-      if (d.dateOfDuty && r.timeOfOffence && !r.timeOfOffence.includes("T")) {
-         finalTime = `${d.dateOfDuty}T${r.timeOfOffence}`;
-      } else if (d.dateOfDuty) {
-         finalTime = d.dateOfDuty;
-      }
-
-      return {
-        vehicleNumber: r.vehicleNumber,
-        vehicleType: r.vehicleType,
-        vehicleName: r.vehicleName,
-        isVehicleInvolved: !!r.vehicleNumber,
-        offenceOccurenceDetails: {
-          incidentLocation: r.incidentLocation,
-          timeOfOffence: finalTime,
-          description: r.briefDescription || r.reportHeading
+          armyNumber: o.armyNumber ?? "",
+          rank: o.selectRank ?? o.rank ?? "",
+          name: o.name ?? "",
+          unit: o.unit ?? "",
+          fmn: o.fmn ?? "",
+          command: o.command ?? "",
+          address: o.address ?? "",
+          iCardNumber: o.iCardNumber ?? "",
         },
-        onDutyDetailsMPReporting: {
-          armyNumber: reporting.armyNo,
-          rank: reporting.rank,
-          nameReportingMP: reporting.name,
-          unit: reporting.unit
-        },
-        onDutyWitnessingMps: witnessing.armyNo ? [{
-           armyNumber: witnessing.armyNo,
-           rank: witnessing.rank,
-           name: witnessing.name,
-           unit: witnessing.unit
-        }] : [],
-        remarks: r.remarks,
-        offenders: offenders // Pass offenders to be handled by the loop
-      };
-    });
+      }))
+    : [];
+  let finalTime = r.timeOfOffence;
+  if (d.dateOfDuty && r.timeOfOffence && typeof r.timeOfOffence === "string" && !r.timeOfOffence.includes("T")) {
+    finalTime = `${d.dateOfDuty}T${r.timeOfOffence}`;
+  } else if (d.dateOfDuty) {
+    finalTime = d.dateOfDuty;
   }
-  // Fallback
-  if (Array.isArray(json)) return mapData(json);
-  return mapData([json]);
-};
+  return {
+    vehicleNumber: r.vehicleNumber ?? "",
+    vehicleType: r.vehicleType ?? "",
+    vehicleName: r.vehicleName ?? "",
+    isVehicleInvolved: !!r.vehicleNumber,
+    offenceOccurenceDetails: {
+      incidentLocation: r.incidentLocation ?? "",
+      timeOfOffence: finalTime ?? "",
+      description: r.briefDescription ?? r.reportHeading ?? r.description ?? "",
+    },
+    onDutyDetailsMPReporting: {
+      armyNumber: reporting.armyNo ?? reporting.armyNumber ?? "",
+      rank: reporting.rank ?? "",
+      nameReportingMP: reporting.name ?? "",
+      unit: reporting.unit ?? "",
+    },
+    onDutyWitnessingMps: witnessing.armyNo
+      ? [{ armyNumber: witnessing.armyNo, rank: witnessing.rank, name: witnessing.name, unit: witnessing.unit }]
+      : [],
+    remarks: r.remarks ?? item.remarks ?? "",
+    offenders,
+  };
+}
 
 /* ================= MAIN PAGE ================= */
 
@@ -199,31 +202,57 @@ export default function ReportsPage({
           json = csvToJsonWithHiddenKeys(result);
         }
 
-        // 4. Use normalizer
-        const mappedData = normalizeJSON(json);
+        const originalJson = json;
+        if (json && !Array.isArray(json) && json.data) {
+          json = json.data;
+        }
+        const dataArray = Array.isArray(json) ? json : [json];
 
-        // 5. Custom handler to save Report -> Then Save Offenders
+        // 4. Normalize (supports { reports: [...] }, { data: [...] }, or array)
+        const mappedData = normalizeJSON(originalJson ?? dataArray);
+        if (!mappedData.length) {
+          toast.warning("No valid records found in the file.");
+          return;
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+
         const handleImportRecord = async (item: any) => {
-            const createdOffence = await createTrafficOffence(item);
+          try {
+            const { offenders, ...reportPayload } = item;
+            const createdOffence = await createTrafficOffence(reportPayload);
 
-            if (createdOffence && createdOffence._id && item.offenders && Array.isArray(item.offenders)) {
-                for (const offender of item.offenders) {
-                    if (offender.offenderDetails) {
-                        const offenderPayload: CreateOffenderData = {
-                            offenceId: createdOffence._id,
-                            offenderType: offender.offenderType || "Military Person", 
-                            offenderDetails: offender.offenderDetails
-                        };
-                        await createOffender(offenderPayload);
-                    }
+            if (createdOffence?._id && Array.isArray(offenders)) {
+              for (const offender of offenders) {
+                if (offender.offenderDetails) {
+                  const offenderPayload: CreateOffenderData = {
+                    offenceId: createdOffence._id,
+                    offenderType: offender.offenderType || "Military Person",
+                    offenderDetails: offender.offenderDetails,
+                  };
+                  await createOffender(offenderPayload);
                 }
+              }
             }
+            successCount++;
             return createdOffence;
+          } catch (err) {
+            console.error("Failed to import traffic offence:", err);
+            failCount++;
+            return null;
+          }
         };
 
-        await processImport(mappedData, handleImportRecord);
-        
-        toast.success("Records and Offenders imported successfully!");
+        for (const record of mappedData) {
+          await handleImportRecord(record);
+        }
+
+        if (failCount === 0) {
+          toast.success(`All ${successCount} record(s) and linked offenders imported successfully!`);
+        } else {
+          toast.warning(`Import partial: ${successCount} succeeded, ${failCount} failed.`);
+        }
         await refetch();
       } catch (error: any) {
         console.error("Error importing file:", error);
