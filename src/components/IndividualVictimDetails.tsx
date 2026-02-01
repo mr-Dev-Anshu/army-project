@@ -487,14 +487,7 @@ export const IndividualVictimDetails: React.FC<
         )}
       </section>
 
-      {/* ================= ADD MORE INDIVIDUAL ================= */}
-      {!hideFooter && (
-        <div className="btn w-full flex justify-end">
-          <button className="bg-black text-white p-2 px-4 rounded-lg mt-4">
-            + Add More Individuals
-          </button>
-        </div>
-      )}
+     
     </div>
   );
 };
