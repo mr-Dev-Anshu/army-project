@@ -187,8 +187,10 @@ export class MPReportRepository {
           rules.push({
             $or: [
               { "reportDetails.unit": { $regex: regex } },
+              { "investigationHead.unit": { $regex: regex } },
               { "onDutyDetailsMPReporting.unit": { $regex: regex } },
-              { "offenders.offenderDetails.unit": { $regex: regex } }
+              { "offenders.offenderDetails.unit": { $regex: regex } },
+              { "individuals.unit": { $regex: regex } }
             ]
           });
         }
@@ -198,7 +200,9 @@ export class MPReportRepository {
           rules.push({
             $or: [
               { "reportDetails.fmn": { $regex: regex } },
-              { "offenders.offenderDetails.fmn": { $regex: regex } }
+              { "investigationHead.fmn": { $regex: regex } },
+              { "offenders.offenderDetails.fmn": { $regex: regex } },
+              { "individuals.fmn": { $regex: regex } }
             ]
           });
         }

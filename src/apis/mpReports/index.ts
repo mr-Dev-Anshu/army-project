@@ -12,22 +12,31 @@ export const getAllMPReports = async (filters: any = {}): Promise<MPReport[]> =>
   if (filters.placeOfOffence) params.append("placeOfOffence", filters.placeOfOffence);
 
   const res = await api.get(`/api/mp-reports?${params.toString()}`);
-  return res.data.data;
+  // Support both { success, data } and direct array response
+  const raw = res.data;
+  if (Array.isArray(raw)) return raw;
+  return raw?.data ?? [];
 };
 
 export const getMPReportById = async (id: string): Promise<MPReport> => {
   const res = await api.get(`/api/mp-reports/${id}`);
-  return res.data.data;
+  const raw = res.data;
+  if (raw?.data !== undefined) return raw.data;
+  return raw;
 };
 
 export const createMPReport = async (data: CreateMPReportPayload): Promise<MPReport> => {
   const res = await api.post("/api/mp-reports", data);
-  return res.data.data;
+  const raw = res.data;
+  if (raw?.data !== undefined) return raw.data;
+  return raw;
 };
 
 export const updateMPReport = async (id: string, data: UpdateMPReportPayload): Promise<MPReport> => {
   const res = await api.put(`/api/mp-reports/${id}`, data);
-  return res.data.data;
+  const raw = res.data;
+  if (raw?.data !== undefined) return raw.data;
+  return raw;
 };
 
 export const deleteMPReport = async (id: string): Promise<void> => {
