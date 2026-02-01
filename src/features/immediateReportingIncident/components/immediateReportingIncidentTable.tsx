@@ -444,12 +444,12 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         {
             header: "Age & Service Yrs",
             cell: (item) => {
-                const age = item.age || item.individuals?.[0]?.age || "-";
-                const service = item.totalServiceDuration || item.individuals?.[0]?.totalServiceDuration || "-";
+                const age = item.age;
+                const service = item.totalServiceDuration;
                 return (
                     <div className="flex flex-col font-[Arial] text-xs space-y-1">
-                        <div>{age} Years Old</div>
-                        <div>{service} Years</div>
+                        {age && <div>{age} Years Old</div>}
+                        {service && <div>{service} Years</div>}
                     </div>
                 );
             },
@@ -460,7 +460,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         {
             header: "Whether Indl on Lve or Duty",
             cell: (item) => {
-                const status = item.individualWorkingStatus || item.individuals?.[0]?.individualWorkingStatus || "-";
+                const status = item.individualWorkingStatus || "-";
                 return (
                     <div className="font-[Arial] text-sm text-[#0A0A0A]">
                         {status}
