@@ -238,45 +238,37 @@ const ImmediateReportingIncidentReport: React.FC<
                                             {/* Military Personnel */}
                                             {type === "militaryPersonnel" && (
                                                 <>
-                                                    {renderRow(
+                                                    {details.militaryPersonnelArmyNo && renderRow(
                                                         "Army No.",
-                                                        details.militaryPersonnelArmyNo ||
-                                                            details.armyNo,
+                                                        details.militaryPersonnelArmyNo
                                                     )}
-                                                    {renderRow(
+                                                    {details.militaryPersonnelRank && renderRow(
                                                         "Rank",
-                                                        details.militaryPersonnelRank ||
-                                                            details.rank,
+                                                        details.militaryPersonnelRank
                                                     )}
-                                                    {renderRow(
+                                                    {details.militaryPersonnelName && renderRow(
                                                         "Name",
-                                                        details.militaryPersonnelName ||
-                                                            details.name,
+                                                        details.militaryPersonnelName
                                                     )}
-                                                    {renderRow(
+                                                    {details.militaryPersonnelUnit && renderRow(
                                                         "Unit",
-                                                        details.militaryPersonnelUnit ||
-                                                            details.unit,
+                                                        details.militaryPersonnelUnit
                                                     )}
-                                                    {renderRow(
+                                                    {details.militaryPersonnelFmn && renderRow(
                                                         "FMN",
-                                                        details.militaryPersonnelFmn ||
-                                                            details.fmn,
+                                                        details.militaryPersonnelFmn
                                                     )}
-                                                    {renderRow(
+                                                    {details.militaryPersonnelCommand && renderRow(
                                                         "Command",
-                                                        details.militaryPersonnelCommand ||
-                                                            details.command,
+                                                        details.militaryPersonnelCommand
                                                     )}
-                                                    {renderRow(
+                                                    {details.militaryPersonnelAddress && renderRow(
                                                         "Address",
-                                                        details.militaryPersonnelAddress ||
-                                                            details.address,
+                                                        details.militaryPersonnelAddress
                                                     )}
-                                                    {renderRow(
-                                                        "I-Card No.",
-                                                        details.militaryPersonnelICardNumber ||
-                                                            details.iCardNumber,
+                                                    {details.militaryPersonnelICardNumber && renderRow(
+                                                        "I Card No.",
+                                                        details.militaryPersonnelICardNumber
                                                     )}
                                                 </>
                                             )}
@@ -284,32 +276,32 @@ const ImmediateReportingIncidentReport: React.FC<
                                             {/* Employee */}
                                             {type === "employee" && (
                                                 <>
-                                                    {renderRow(
+                                                    {details.employeeServiceNumber && renderRow(
                                                         "Service No.",
                                                         details.employeeServiceNumber,
                                                     )}
-                                                    {renderRow(
+                                                    {details.employeeRank && renderRow(
                                                         "Rank",
                                                         details.employeeRank,
                                                     )}
-                                                    {renderRow(
+                                                    {details.employeeName && renderRow(
                                                         "Name",
                                                         details.employeeName,
                                                     )}
-                                                    {renderRow(
+                                                    {details.employeeUnit && renderRow(
                                                         "Unit",
                                                         details.employeeUnit,
                                                     )}
-                                                    {renderRow(
+                                                    {details.employeeFmn && renderRow(
                                                         "FMN",
                                                         details.employeeFmn,
                                                     )}
-                                                    {renderRow(
+                                                    {details.employeeCommand && renderRow(
                                                         "Command",
                                                         details.employeeCommand,
                                                     )}
-                                                    {renderRow(
-                                                        "I-Card No.",
+                                                    {details.employeeICardNumber && renderRow(
+                                                        "I Card No.",
                                                         details.employeeICardNumber,
                                                     )}
                                                 </>
@@ -318,32 +310,36 @@ const ImmediateReportingIncidentReport: React.FC<
                                             {/* Servant / Maid */}
                                             {type === "servantMaid" && (
                                                 <>
-                                                    {renderRow(
+                                                    {details.maidPassNumber && renderRow(
                                                         "Pass No",
                                                         details.maidPassNumber,
                                                     )}
-                                                    {renderRow(
+                                                    {details.maidName && renderRow(
                                                         "Name",
                                                         details.maidName,
                                                     )}
-                                                    {renderRow(
-                                                        "Father's Name",
+                                                    {details.maidFathersName && renderRow(
+                                                        "S/O",
                                                         details.maidFathersName,
                                                     )}
-                                                    {renderRow(
+                                                    {details.maidTrade && renderRow(
                                                         "Trade",
                                                         details.maidTrade,
                                                     )}
-                                                    {renderRow(
+                                                    {details.maidQuarterNumber && renderRow(
                                                         "Quarter No",
                                                         details.maidQuarterNumber,
                                                     )}
-                                                    {renderRow(
-                                                        "C/O",
-                                                        `${details.officersEnclaveRank || ""} ${details.officersEnclaveName || ""}`,
+                                                    {details.officersEnclaveRank && renderRow(
+                                                        "C/O Rank",
+                                                        details.officersEnclaveRank,
                                                     )}
-                                                    {renderRow(
-                                                        "Unit",
+                                                    {details.officersEnclaveName && renderRow(
+                                                        "C/O Name",
+                                                        details.officersEnclaveName,
+                                                    )}
+                                                    {details.officersEnclaveUnit && renderRow(
+                                                        "C/O Unit",
                                                         details.officersEnclaveUnit,
                                                     )}
                                                 </>
@@ -352,23 +348,23 @@ const ImmediateReportingIncidentReport: React.FC<
                                             {/* Shop Keeper */}
                                             {type === "shopKeeper" && (
                                                 <>
-                                                    {renderRow(
+                                                    {details.shopOwnerName && renderRow(
                                                         "Shop Owner",
                                                         details.shopOwnerName,
                                                     )}
-                                                    {renderRow(
+                                                    {details.shopName && renderRow(
                                                         "Shop Name",
                                                         details.shopName,
                                                     )}
-                                                    {renderRow(
+                                                    {details.shopAddress && renderRow(
                                                         "Address",
                                                         details.shopAddress,
                                                     )}
-                                                    {renderRow(
+                                                    {details.shopUnit && renderRow(
                                                         "Unit",
                                                         details.shopUnit,
                                                     )}
-                                                    {renderRow(
+                                                    {details.shopPassNo && renderRow(
                                                         "Pass No",
                                                         details.shopPassNo,
                                                     )}
@@ -378,23 +374,23 @@ const ImmediateReportingIncidentReport: React.FC<
                                             {/* Temp Hired Worker */}
                                             {type === "tempHiredWorker" && (
                                                 <>
-                                                    {renderRow(
+                                                    {details.tempWorkerName && renderRow(
                                                         "Name",
                                                         details.tempWorkerName,
                                                     )}
-                                                    {renderRow(
+                                                    {details.tempWorkerPassNo && renderRow(
                                                         "Pass No",
                                                         details.tempWorkerPassNo,
                                                     )}
-                                                    {renderRow(
+                                                    {details.tempWorkerPlaceOfStay && renderRow(
                                                         "Place of Stay",
                                                         details.tempWorkerPlaceOfStay,
                                                     )}
-                                                    {renderRow(
+                                                    {details.tempWorkerPlaceOfWork && renderRow(
                                                         "Place of Work",
                                                         details.tempWorkerPlaceOfWork,
                                                     )}
-                                                    {renderRow(
+                                                    {details.tempWorkerTypeOfWork && renderRow(
                                                         "Type of Work",
                                                         details.tempWorkerTypeOfWork,
                                                     )}
@@ -404,30 +400,27 @@ const ImmediateReportingIncidentReport: React.FC<
                                             {/* Civilian */}
                                             {type === "civilian" && (
                                                 <>
-                                                    {renderRow(
+                                                    {details.civilianName && renderRow(
                                                         "Name",
                                                         details.civilianName,
                                                     )}
-                                                    {renderRow(
-                                                        "Aadhar No",
+                                                    {details.civilianAadharCardNumber && renderRow(
+                                                        "Aadhar Card No.",
                                                         details.civilianAadharCardNumber,
                                                     )}
-                                                    {renderRow(
-                                                        "Father's Name",
+                                                    {details.civilianFathersName && renderRow(
+                                                        "S/O",
                                                         details.civilianFathersName,
                                                     )}
-                                                    {renderRow(
+                                                    {details.civilianAddress && renderRow(
                                                         "Address",
                                                         details.civilianAddress,
                                                     )}
-                                                    {renderRow(
-                                                        "Driver Name",
-                                                        details.civilianName,
-                                                    )}{" "}
+
                                                     {/* As per image context for civilian driver */}
                                                     {details.relationName &&
                                                         renderRow(
-                                                            "Relation",
+                                                            "Name the Relation",
                                                             details.relationName,
                                                         )}
                                                 </>
@@ -447,150 +440,193 @@ const ImmediateReportingIncidentReport: React.FC<
 
                                                     <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-1">
                                                         {details.relativeCategory ===
-                                                        "militaryPersonnel" ? (
+                                                            "militaryPersonnel" ? (
                                                             <>
-                                                                {renderRow(
+                                                                {details.relativeDetails.militaryPersonnelArmyNo && renderRow(
                                                                     "Army No.",
                                                                     details
                                                                         .relativeDetails
                                                                         .militaryPersonnelArmyNo,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.militaryPersonnelRank && renderRow(
                                                                     "Rank",
                                                                     details
                                                                         .relativeDetails
                                                                         .militaryPersonnelRank,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.militaryPersonnelName && renderRow(
                                                                     "Name",
                                                                     details
                                                                         .relativeDetails
                                                                         .militaryPersonnelName,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.militaryPersonnelUnit && renderRow(
                                                                     "Unit",
                                                                     details
                                                                         .relativeDetails
                                                                         .militaryPersonnelUnit,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.militaryPersonnelFmn && renderRow(
                                                                     "FMN",
                                                                     details
                                                                         .relativeDetails
                                                                         .militaryPersonnelFmn,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.militaryPersonnelCommand && renderRow(
                                                                     "Command",
                                                                     details
                                                                         .relativeDetails
                                                                         .militaryPersonnelCommand,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.militaryPersonnelAddress && renderRow(
                                                                     "Address",
                                                                     details
                                                                         .relativeDetails
                                                                         .militaryPersonnelAddress,
                                                                 )}
+                                                                {details.relativeDetails.militaryPersonnelICardNumber && renderRow(
+                                                                    "I Card No.",
+                                                                    details
+                                                                        .relativeDetails
+                                                                        .militaryPersonnelICardNumber,
+                                                                )}
                                                             </>
                                                         ) : details.relativeCategory ===
-                                                          "employee" ? (
+                                                            "employee" ? (
                                                             <>
-                                                                {renderRow(
+                                                                {details.relativeDetails.employeeServiceNo && renderRow(
                                                                     "Service No.",
                                                                     details
                                                                         .relativeDetails
-                                                                        .employeeServiceNumber,
+                                                                        .employeeServiceNo,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.employeeRank && renderRow(
                                                                     "Rank",
                                                                     details
                                                                         .relativeDetails
                                                                         .employeeRank,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.employeeName && renderRow(
                                                                     "Name",
                                                                     details
                                                                         .relativeDetails
                                                                         .employeeName,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.employeeUnit && renderRow(
                                                                     "Unit",
                                                                     details
                                                                         .relativeDetails
                                                                         .employeeUnit,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.employeeFmn && renderRow(
                                                                     "FMN",
                                                                     details
                                                                         .relativeDetails
                                                                         .employeeFmn,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.employeeCommand && renderRow(
                                                                     "Command",
                                                                     details
                                                                         .relativeDetails
                                                                         .employeeCommand,
                                                                 )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.employeeAddress && renderRow(
                                                                     "Address",
                                                                     details
                                                                         .relativeDetails
                                                                         .employeeAddress,
                                                                 )}
+                                                                {details.relativeDetails.employeeICardNumber && renderRow(
+                                                                    "I Card No.",
+                                                                    details
+                                                                        .relativeDetails
+                                                                        .employeeICardNumber,
+                                                                )}
                                                             </>
-                                                        ) : (
-                                                            // Fallback / Other
+                                                        ) : details.relativeCategory === "servantMaid" ? (
                                                             <>
-                                                                {renderRow(
-                                                                    "Army/Svc No.",
-                                                                    details
-                                                                        .relativeDetails
-                                                                        .armyNo ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .employeeServiceNumber ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .militaryPersonnelArmyNo,
+                                                                {details.relativeDetails.maidPassNumber && renderRow(
+                                                                    "Pass No",
+                                                                    details.relativeDetails.maidPassNumber,
                                                                 )}
-                                                                {renderRow(
-                                                                    "Rank",
-                                                                    details
-                                                                        .relativeDetails
-                                                                        .rank ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .employeeRank ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .militaryPersonnelRank,
-                                                                )}
-                                                                {renderRow(
+                                                                {details.relativeDetails.maidName && renderRow(
                                                                     "Name",
-                                                                    details
-                                                                        .relativeDetails
-                                                                        .name ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .employeeName ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .militaryPersonnelName,
+                                                                    details.relativeDetails.maidName,
                                                                 )}
-                                                                {renderRow(
-                                                                    "Unit",
-                                                                    details
-                                                                        .relativeDetails
-                                                                        .unit ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .employeeUnit ||
-                                                                        details
-                                                                            .relativeDetails
-                                                                            .militaryPersonnelUnit,
+                                                                {details.relativeDetails.maidFathersName && renderRow(
+                                                                    "S/O",
+                                                                    details.relativeDetails.maidFathersName,
+                                                                )}
+                                                                {details.relativeDetails.maidTrade && renderRow(
+                                                                    "Trade",
+                                                                    details.relativeDetails.maidTrade,
+                                                                )}
+                                                                {details.relativeDetails.maidQuarterNumber && renderRow(
+                                                                    "Quarter No",
+                                                                    details.relativeDetails.maidQuarterNumber,
+                                                                )}
+                                                                {details.relativeDetails.officersEnclaveRank && renderRow(
+                                                                    "C/O Rank",
+                                                                    details.relativeDetails.officersEnclaveRank,
+                                                                )}
+                                                                {details.relativeDetails.officersEnclaveName && renderRow(
+                                                                    "C/O Name",
+                                                                    details.relativeDetails.officersEnclaveName,
+                                                                )}
+                                                                {details.relativeDetails.officersEnclaveUnit && renderRow(
+                                                                    "C/O Unit",
+                                                                    details.relativeDetails.officersEnclaveUnit,
                                                                 )}
                                                             </>
-                                                        )}
+                                                        ) : details.relativeCategory === "tempHiredWorker" ? (
+                                                            <>
+                                                                {details.relativeDetails.tempWorkerName && renderRow(
+                                                                    "Name",
+                                                                    details.relativeDetails.tempWorkerName,
+                                                                )}
+                                                                {details.relativeDetails.tempWorkerPassNo && renderRow(
+                                                                    "Pass No",
+                                                                    details.relativeDetails.tempWorkerPassNo,
+                                                                )}
+                                                                {details.relativeDetails.tempWorkerPlaceOfStay && renderRow(
+                                                                    "Place of Stay",
+                                                                    details.relativeDetails.tempWorkerPlaceOfStay,
+                                                                )}
+                                                                {details.relativeDetails.tempWorkerPlaceOfWork && renderRow(
+                                                                    "Place of Work",
+                                                                    details.relativeDetails.tempWorkerPlaceOfWork,
+                                                                )}
+                                                                {details.relativeDetails.tempWorkerTypeOfWork && renderRow(
+                                                                    "Type of Work",
+                                                                    details.tempWorkerTypeOfWork,
+                                                                )}
+                                                            </>
+
+                                                        ) : details.relativeCategory === "shopKeeper" ? (
+                                                            <>
+                                                                {details.relativeDetails.shopOwnerName && renderRow(
+                                                                    "Shop Owner",
+                                                                    details.relativeDetails.shopOwnerName,
+                                                                )}
+                                                                {details.relativeDetails.shopName && renderRow(
+                                                                    "Shop Name",
+                                                                    details.relativeDetails.shopName,
+                                                                )}
+                                                                {details.relativeDetails.shopAddress && renderRow(
+                                                                    "Address",
+                                                                    details.relativeDetails.shopAddress,
+                                                                )}
+                                                                {details.relativeDetails.shopUnit && renderRow(
+                                                                    "Unit",
+                                                                    details.relativeDetails.shopUnit,
+                                                                )}
+                                                                {details.relativeDetails.shopPassNo && renderRow(
+                                                                    "Pass No",
+                                                                    details.relativeDetails.shopPassNo,
+                                                                )}
+                                                            </>
+                                                        ) : ""}
+
                                                     </div>
                                                 </div>
                                             )}
@@ -649,9 +685,9 @@ const ImmediateReportingIncidentReport: React.FC<
                     <div className="flex-1">
                         {data.dateOfOccurrence
                             ? format(
-                                  new Date(data.dateOfOccurrence),
-                                  "dd/MM/yyyy",
-                              )
+                                new Date(data.dateOfOccurrence),
+                                "dd/MM/yyyy",
+                            )
                             : "-"}{" "}
                         & {data.timeOfOccurrence ? data.timeOfOccurrence : "-"}
                         hrs
