@@ -283,151 +283,147 @@ export default function StaticSpeedForm({
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
   console.log(existingReport);
 
-
-
   const handleFinalSubmit = async () => {
-  setIsSubmitting(true);
+    setIsSubmitting(true);
 
-  const { contactNumber, ...mpReportingSafe } =
-    staticData.reportingBlock || {};
+    const { contactNumber, ...mpReportingSafe } =
+      staticData.reportingBlock || {};
 
-  try {
-    /* ================= STATIC SPEED PAYLOAD ================= */
-    const payload = {
-      reportId: reportNo,
-      vehicleType: staticData.vehicleDetails.vehicleType,
-      vehicleCategory: staticData.vehicleDetails.category,
-      vehicleNumber: staticData.vehicleDetails.vehicleNumber,
-      vehicleName: staticData.vehicleDetails.vehicleName,
+    try {
+      /* ================= STATIC SPEED PAYLOAD ================= */
+      const payload = {
+        reportId: reportNo,
+        vehicleType: staticData.vehicleDetails.vehicleType,
+        vehicleCategory: staticData.vehicleDetails.category,
+        vehicleNumber: staticData.vehicleDetails.vehicleNumber,
+        vehicleName: staticData.vehicleDetails.vehicleName,
 
-      onDutyDetails: {
-        dateOfDuty: staticData.dutyBlock?.dateOfDuty || undefined,
-        dutyLocation: staticData.dutyBlock?.dutyLocation || undefined,
-        dutyType: staticData.dutyBlock?.dutyType || undefined,
+        onDutyDetails: {
+          dateOfDuty: staticData.dutyBlock?.dateOfDuty || undefined,
+          dutyLocation: staticData.dutyBlock?.dutyLocation || undefined,
+          dutyType: staticData.dutyBlock?.dutyType || undefined,
 
-        startTime: staticData.dutyBlock?.startTime
-          ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`
-            ).toISOString()
-          : undefined,
+          startTime: staticData.dutyBlock?.startTime
+            ? new Date(
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`,
+              ).toISOString()
+            : undefined,
 
-        endTime: staticData.dutyBlock?.endTime
-          ? new Date(
-              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`
-            ).toISOString()
-          : undefined,
-      },
+          endTime: staticData.dutyBlock?.endTime
+            ? new Date(
+                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`,
+              ).toISOString()
+            : undefined,
+        },
 
-      onDutyDetailsMPReporting: mpReportingSafe,
+        onDutyDetailsMPReporting: mpReportingSafe,
 
-      offenceOccurenceDetails: {
-        time: staticData.offenceBlock?.time || undefined,
-        incidentLocation: staticData.offenceBlock?.incidentLocation || "",
-        description: [
-          staticData.offenceBlock?.description,
-          staticData.offenceBlock?.description2,
-        ]
-          .filter(Boolean)
-          .join("\n\n"),
+        offenceOccurenceDetails: {
+          time: staticData.offenceBlock?.time || undefined,
+          incidentLocation: staticData.offenceBlock?.incidentLocation || "",
+          description: [
+            staticData.offenceBlock?.description,
+            staticData.offenceBlock?.description2,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
 
-        overSpeedCalculated:
-          staticData.offenceBlock?.overSpeedCalculated ?? "",
-        actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
-        authSpeed: staticData.offenceBlock?.authSpeed ?? "",
+          overSpeedCalculated:
+            staticData.offenceBlock?.overSpeedCalculated ?? "",
+          actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
+          authSpeed: staticData.offenceBlock?.authSpeed ?? "",
 
-        briefDescription:
-          staticData.offenceBlock?.briefDescription || "",
-      },
+          briefDescription: staticData.offenceBlock?.briefDescription || "",
+        },
 
-      remark: staticData.remarks,
+        remark: staticData.remarks,
 
-      customFields: {
-        selectedWitness: staticData.selectedWitness,
-      },
-    };
-
-    console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
-
-    /* ================= CREATE STATIC RECORD ================= */
-    const staticRes = await createStaticRecord.mutateAsync(payload);
-
-    toast.success("Static Record Created Successfully!");
-
-    if (!staticRes?._id) {
-      toast.error("Static Record ID Missing!");
-      return;
-    }
-
-    const offenceId = String(staticRes._id);
-
-    /* ================= CREATE OFFENDERS ================= */
-
-    const people = staticData.offenderPeople || [];
-
-    for (const person of people) {
-      const details = person.details || {};
-
-      if (!Object.keys(details).length) continue;
-
-      const offenderPayload: CreateOffenderData = {
-        offenceId,
-        offenderType: person.type as OffenderType,
-        offenderDetails: {
-          ...details,
-          type: person.whoIsIt || "Offender",
+        customFields: {
+          selectedWitness: staticData.selectedWitness,
         },
       };
 
-      await createOffenderMutation.mutateAsync(offenderPayload);
-    }
+      console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
 
-    toast.success("Offenders Saved!");
+      /* ================= CREATE STATIC RECORD ================= */
+      const staticRes = await createStaticRecord.mutateAsync(payload);
 
-    /* ================= CREATE WITNESSES ================= */
+      toast.success("Static Record Created Successfully!");
 
-    if (staticData.witnesses?.length) {
-      for (const w of staticData.witnesses) {
-        await createWitnessMutation.mutateAsync({
-          offenceId,
-          rank: w.reportingBlock.rank,
-          unit: w.reportingBlock.unit,
-          ArmyNo: w.reportingBlock.armyNumber,
-          name: w.reportingBlock.nameReportingMP || "",
-          contactNumber: w.reportingBlock.contactNumber || "",
-        });
+      if (!staticRes?._id) {
+        toast.error("Static Record ID Missing!");
+        return;
       }
 
-      toast.success("Witnesses Saved!");
+      const offenceId = String(staticRes._id);
+
+      /* ================= CREATE OFFENDERS ================= */
+
+      const people = staticData.offenderPeople || [];
+
+      for (const person of people) {
+        const details = person.details || {};
+
+        if (!Object.keys(details).length) continue;
+
+        const offenderPayload: CreateOffenderData = {
+          offenceId,
+          offenderType: person.type as OffenderType,
+          offenderDetails: {
+            ...details,
+            type: person.whoIsIt || "Offender",
+          },
+        };
+
+        await createOffenderMutation.mutateAsync(offenderPayload);
+      }
+
+      toast.success("Offenders Saved!");
+
+      /* ================= CREATE WITNESSES ================= */
+
+      if (staticData.witnesses?.length) {
+        for (const w of staticData.witnesses) {
+          await createWitnessMutation.mutateAsync({
+            offenceId,
+            rank: w.reportingBlock.rank,
+            unit: w.reportingBlock.unit,
+            ArmyNo: w.reportingBlock.armyNumber,
+            name: w.reportingBlock.nameReportingMP || "",
+            contactNumber: w.reportingBlock.contactNumber || "",
+          });
+        }
+
+        toast.success("Witnesses Saved!");
+      }
+
+      toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
+
+      /* ================= RESET ================= */
+
+      dispatch({
+        type: "SET_PATH",
+        path: "formData.staticSpeed",
+        value: initialState.formData.staticSpeed,
+      });
+
+      dispatch({ type: "SET_STEP", payload: 1 });
+      dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
+      dispatch({ type: "SET_PREVIEW", payload: false });
+    } catch (err: any) {
+      console.error("❌ FINAL STATIC SPEED ERROR ===>", err);
+
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to submit record";
+
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
-
-    /* ================= RESET ================= */
-
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed",
-      value: initialState.formData.staticSpeed,
-    });
-
-    dispatch({ type: "SET_STEP", payload: 1 });
-    dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
-    dispatch({ type: "SET_PREVIEW", payload: false });
-  } catch (err: any) {
-    console.error("❌ FINAL STATIC SPEED ERROR ===>", err);
-
-    const msg =
-      err?.response?.data?.message ||
-      err?.response?.data?.error ||
-      err?.message ||
-      "Failed to submit record";
-
-    toast.error(msg);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   // Hydration Effect
   useEffect(() => {
@@ -523,37 +519,43 @@ export default function StaticSpeedForm({
       }
 
       // Offenders
-      // Offenders ✅ FIXED
+      // Offenders ✅ UNIVERSAL (ShopKeeper / Servant / TempWorker / Employee / Relative)
       if (Array.isArray(er.offenders)) {
         speedNodes.offenderPeople = er.offenders.map((o: any) => {
           const d = o.offenderDetails || {};
 
+          const details: any = {};
+
+          /* 🔁 COPY EVERYTHING AS-IS */
+          Object.entries(d).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              details[key] = value;
+            }
+          });
+
+          /* ✅ NORMALIZED COMMON KEYS */
+          details.name = d.name || d["Full Name"] || "";
+          details.so = d.so || d["Father's / Husband's Name"] || "";
+          details.address = d.address || d["Address"] || "";
+          details.rank = d.rank || d.type || "";
+          details.unit = d.unit || "";
+          details.armyNumber = d.armyNumber || "";
+          details.iCardNumber =
+            d["I Card Number"] || d.iCardNumber || d.passNo || "";
+
+          /* ✅ ALSO ENSURE LABEL KEYS EXIST */
+          details["Full Name"] = details.name;
+          details["Father's / Husband's Name"] = details.so;
+          details["Address"] = details.address;
+          details["I Card Number"] = details.iCardNumber;
+          details["Select Rank"] = details.rank;
+          details["Unit"] = details.unit;
+          details["Army Rider / Driver Number"] = details.armyNumber;
+
           return {
             type: o.offenderType || "Civilian",
             whoIsIt: o.category || "Offender",
-
-            details: {
-              name: d.name || "",
-              so: d.so || "",
-              address: d.address || "",
-              rank: d.rank || d.type || "",
-              armyNumber: d.armyNumber || "",
-              unit: d.unit || "",
-              fmn: d.fmn || "",
-              command: d.command || "",
-              iCardNumber: d["I Card Number"] || d.iCardNumber || "",
-
-              // 👇 Form labels mapping
-              "Full Name": d.name || "",
-              Address: d.address || "",
-              "Father's / Husband's Name": d.so || "",
-              "I Card Number": d["I Card Number"] || d.iCardNumber || "",
-              "Army Rider / Driver Number": d.armyNumber || "",
-              "Select Rank": d.rank || d.type || "",
-              Unit: d.unit || "",
-              FMN: d.fmn || "",
-              Command: d.command || "",
-            },
+            details,
           };
         });
       }
