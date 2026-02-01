@@ -17,81 +17,247 @@ import {
 import { saveAs } from "file-saver";
 import { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
 
-/* ===============================
-   COMMON CELL PADDING (UI MATCH)
-================================ */
 const CELL_PADDING = {
-    top: 60,      // ~3px
-    bottom: 60,   // ~3px
-    left: 30,     // ~1.5px
+    top: 60,
+    bottom: 60,
+    left: 30,
     right: 20,
 };
 
-function createInfoTable(
-    rows: Array<Array<{ label: string; value: string }>>
+const hasContent = (str?: string) => str && str !== "N/A" && str.trim() !== "";
+const hasAnyContent = (obj: any, keys: string[]) => {
+    if (!obj) return false;
+    return keys.some(key => hasContent(obj[key]));
+};
+const hasArrayContent = (arr?: string[]) => arr && arr.length > 0 && arr.some(item => hasContent(item));
+
+const chunkArray = <T>(arr: T[], size: number): T[][] => {
+    return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+        arr.slice(i * size, i * size + size)
+    );
+};
+
+// Interface for normalized blocks (Internal helper)
+interface NormalizedBlock {
+    index: string;
+    fields: { label: string; value: string }[];
+}
+
+function normalizeParticulars(particulars: MilitaryPoliceReportProps['particulars']): NormalizedBlock[] {
+    if (particulars.blocks && particulars.blocks.length > 0) {
+        return particulars.blocks;
+    }
+
+    const blocks: NormalizedBlock[] = [];
+    const p = particulars.primary;
+    const s = particulars.secondary;
+    const v = particulars.vehicle;
+
+    let sectionCounter = 1;
+
+    const processPerson = (person: any, isPrimary: boolean) => {
+        if (!person) return;
+
+        const hasAadhar = hasContent(person.aadharCardNo);
+        const hasArmyNo = hasContent(person.armyNo);
+        const isDependent = hasAadhar && hasArmyNo;
+
+        // Determine effective type
+        let type = person.driverType;
+        if (!type) {
+            if (hasArmyNo && !hasAadhar) type = 'Military Person';
+            else type = 'Civilian';
+        }
+
+        const currentIndex = `(1.${sectionCounter})`;
+
+        // --- LOGIC BY TYPE ---
+
+        if (type === 'Shop Keeper') {
+            // Shop Keeper: Address primarily
+            const fields = [{ label: "Address", value: person.address }];
+            if (hasAnyContent(person, ['address'])) {
+                blocks.push({
+                    index: currentIndex,
+                    fields: fields
+                });
+            }
+            sectionCounter++;
+
+        } else if (type === 'Military Person') {
+            // Military Person
+            const armyLabel = isPrimary ? "DD veh rider no." : "Army No.";
+            const fields = [
+                { label: armyLabel, value: person.armyNo },
+                { label: "Rank", value: person.rank },
+                { label: "Name", value: person.name },
+                { label: "Unit", value: person.unit },
+                { label: "FMN", value: person.fmn },
+                { label: "Command", value: person.command },
+                { label: "Address", value: person.address },
+                { label: "I Card No.", value: person.iCardNo }
+            ];
+
+            if (hasAnyContent(person, ['armyNo'])) {
+                blocks.push({
+                    index: currentIndex,
+                    fields: fields
+                });
+            }
+            sectionCounter++;
+
+        } else if (['Employee', 'Servant/Maid', 'Temporary Hired Worker'].includes(type)) {
+            // Other Workers: Name, Address, Aadhar (Civ Subset)
+            const fields = [
+                { label: "Name", value: person.name },
+                { label: "Address", value: person.address },
+                { label: "Aadhar No.", value: person.aadharCardNo },
+                { label: "S/O", value: person.so }
+            ];
+
+            if (hasAnyContent(person, ['name', 'address', 'aadharCardNo'])) {
+                blocks.push({
+                    index: currentIndex,
+                    fields: fields
+                });
+            }
+            sectionCounter++;
+
+        } else {
+            // Civilian / Dependent (Default Fallback)
+            if (isDependent) {
+                // Dependent: Split 1.X (Civ) and 1.X.1 (Army)
+                const civFields = [
+                    { label: "Aadhar No.", value: person.aadharCardNo },
+                    { label: "S/O", value: person.so },
+                    { label: isPrimary ? "Driver Name" : "Name", value: person.name },
+                    { label: "Name the Relation", value: person.relation }
+                ];
+
+                if (hasAnyContent(person, ['aadharCardNo', 'so', 'name', 'relation'])) {
+                    blocks.push({
+                        index: currentIndex,
+                        fields: civFields
+                    });
+                }
+
+                const armyFields = [
+                    { label: "Army No.", value: person.armyNo },
+                    { label: "Rank", value: person.rank },
+                    { label: "Name", value: person.name },
+                    { label: "Unit", value: person.unit },
+                    { label: "FMN", value: person.fmn },
+                    { label: "Command", value: person.command },
+                    { label: "Address", value: person.address },
+                    { label: "I Card No.", value: person.iCardNo }
+                ];
+
+                if (hasAnyContent(person, ['armyNo'])) {
+                    blocks.push({
+                        index: `(1.${sectionCounter}.1)`,
+                        fields: armyFields
+                    });
+                }
+                sectionCounter++;
+
+            } else {
+                // Pure Civilian
+                const fields = [
+                    { label: "Aadhar No.", value: person.aadharCardNo },
+                    { label: "S/O", value: person.so },
+                    { label: isPrimary ? "Driver Name" : "Name", value: person.name },
+                    { label: "Name the Relation", value: person.relation },
+                    { label: "Address", value: person.address }
+                ];
+                if (hasAnyContent(person, ['aadharCardNo', 'so', 'name', 'relation', 'address'])) {
+                    blocks.push({
+                        index: currentIndex,
+                        fields: fields
+                    });
+                }
+                sectionCounter++;
+            }
+        }
+    };
+
+    processPerson(p, true);
+    processPerson(s, false);
+
+    // --- Vehicle ---
+    if (v) {
+        const currentIndex = `(1.${sectionCounter})`;
+        const vehFields = [
+            { label: "DD Veh. BA No.", value: v.baNo },
+            { label: "Make & Take", value: v.makeAndTake }
+        ];
+        if (hasAnyContent(v, ['baNo', 'makeAndTake'])) {
+            blocks.push({
+                index: currentIndex,
+                fields: vehFields
+            });
+        }
+        sectionCounter++;
+    }
+
+    return blocks;
+}
+
+function createDynamicInfoTable(
+    allItems: Array<{ label: string; value: string }>
 ) {
+    const validItems = allItems.filter(item => hasContent(item.value));
+    const rowsOfItems = chunkArray(validItems, 2);
+
     return new Table({
         width: {
             size: 100,
             type: WidthType.PERCENTAGE,
         },
-        borders: {
-            top: { style: BorderStyle.NONE },
-            bottom: { style: BorderStyle.NONE },
-            left: { style: BorderStyle.NONE },
-            right: { style: BorderStyle.NONE },
-            insideHorizontal: { style: BorderStyle.NONE },
-            insideVertical: { style: BorderStyle.NONE },
-        },
-        rows: rows.map(
-            (row) =>
+        borders: TableBordersNone(),
+        rows: rowsOfItems.map(
+            (rowItems) =>
                 new TableRow({
-                    children: row.flatMap((item) => [
-                        // LABEL CELL
-                        new TableCell({
-                            width: { size: 25, type: WidthType.PERCENTAGE },
-                            margins: CELL_PADDING,
-                            borders: {
-                                top: { style: BorderStyle.NONE },
-                                bottom: { style: BorderStyle.NONE },
-                                left: { style: BorderStyle.NONE },
-                                right: { style: BorderStyle.NONE },
-                            },
-                            children: [
-                                new Paragraph({
-                                    children: [
-                                        new TextRun({
-                                            text: item.label,
-                                            bold: true,
-                                            size: 24,
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-
-                        // VALUE CELL
-                        new TableCell({
-                            width: { size: 25, type: WidthType.PERCENTAGE },
-                            margins: CELL_PADDING,
-                            borders: {
-                                top: { style: BorderStyle.NONE },
-                                bottom: { style: BorderStyle.NONE },
-                                left: { style: BorderStyle.NONE },
-                                right: { style: BorderStyle.NONE },
-                            },
-                            children: [
-                                new Paragraph({
-                                    children: [
-                                        new TextRun({
-                                            text: item.value || "",
-                                            size: 24,
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ]),
+                    children: [
+                        ...rowItems.flatMap((item) => [
+                            new TableCell({
+                                width: { size: 25, type: WidthType.PERCENTAGE },
+                                margins: CELL_PADDING,
+                                borders: TableBordersNone(),
+                                children: [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: item.label,
+                                                bold: true,
+                                                size: 24,
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                            new TableCell({
+                                width: { size: 25, type: WidthType.PERCENTAGE },
+                                margins: CELL_PADDING,
+                                borders: TableBordersNone(),
+                                children: [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: item.value || "",
+                                                size: 24,
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                        ]),
+                        ...(rowItems.length === 1
+                            ? [
+                                new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: TableBordersNone(), children: [] }),
+                                new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: TableBordersNone(), children: [] }),
+                            ]
+                            : []),
+                    ],
                 })
         ),
     });
@@ -99,6 +265,11 @@ function createInfoTable(
 
 
 export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
+
+    // Normalize Data Blocks
+    const particularBlocks = normalizeParticulars(data.particulars);
+    const showSection1 = particularBlocks.length > 0;
+
     const doc = new Document({
         creator: "Army App",
         title: "Military Police Report",
@@ -175,7 +346,6 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                     }),
                 },
                 children: [
-                    /* TOP RIGHT */
                     new Paragraph({
                         alignment: AlignmentType.RIGHT,
                         children: [
@@ -184,7 +354,6 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                         spacing: { after: 200 },
                     }),
 
-                    /* TITLE */
                     new Paragraph({
                         alignment: AlignmentType.CENTER,
                         children: [new TextRun({ text: "MILITARY POLICE REPORT", bold: true, size: 24 })],
@@ -195,7 +364,6 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
                         spacing: { after: 300 },
                     }),
 
-                    /* REPORT META */
                     new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
                         borders: TableBordersNone(),
@@ -211,65 +379,90 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
 
                     spacer(),
 
-                    /* 1. PARTICULARS */
-                    sectionHeading("1.", "PARTICULARS:"),
+                    // SECTION 1 - Dynamic
+                    ...(showSection1 ? [
+                        sectionHeading("1.", "PARTICULARS:"),
 
-                    createParticularsBox("1.1", data.particulars.primary, "1.1.1", "Driver Name"),
+                        ...particularBlocks.map((block, index) => {
+                            const isLast = index === particularBlocks.length - 1;
+                            return [
+                                createGenericBlockTable(block),
+                                !isLast ? spacer(100) : new Paragraph({}) // Spacer between blocks
+                            ];
+                        }).flat(), // Flatten because map returns arrays of arrays
 
-                    ...(data.particulars.secondary
-                        ? [spacer(100), createParticularsBox("1.2", data.particulars.secondary, "1.2.1", "Co-Driver Name")]
-                        : []),
+                        spacer(),
+                    ] : []),
 
-                    ...(data.particulars.vehicle
-                        ? [spacer(100), createVehicleBox(data.particulars.vehicle)]
-                        : []),
 
-                    spacer(),
-
-                    /* 2. STATEMENT */
                     sectionHeading("2.", "STATEMENT OF EVIDENCE/OCCURRENCE:"),
-
-
-                    new Paragraph({
-                        text: "     On-Duty Details of Witnessing Official:",
-                        spacing: { after: 100 },
-                    }),
 
                     createEvidenceGrid(data.occurrence),
 
                     spacer(100),
 
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: "(2.7)  ", size: 24 }),
-                            new TextRun({ text: data.occurrence.statement, size: 24 }),
-                        ],
-                        alignment: AlignmentType.JUSTIFIED,
-                    }),
-
-                    spacer(),
-
-                    /* 3. OFFENCE */
-                    sectionHeading("3.", "OFFENCE COMMITTED/ORDERS CONTRAVENED:"),
-
-                    offenceParagraph("(3.1)", "Offence Type", (data.offence.types || []).join(", ")),
-
-                    ...(data.offence.refs && data.offence.refs.length > 0
-                        ? data.offence.refs.map((ref, index) => {
-                            const roman = ["i", "ii", "iii", "iv", "v"][index] || (index + 1).toString();
-                            return offenceRef(`(${roman}.)`, ref);
+                    ...(hasContent(data.occurrence.statement) ? [
+                        new Paragraph({
+                            children: [
+                                new TextRun({ text: "(2.4)   ", bold: true, size: 24 }),
+                                new TextRun({ text: data.occurrence.statement, size: 24 }),
+                            ],
+                            alignment: AlignmentType.JUSTIFIED,
+                            spacing: { after: 200 }
                         })
-                        : [offenceRef("(i.)", "N/A")]),
-                    offenceDescription(data.offence.description),
+                    ] : []),
 
                     spacer(),
 
-                    /* SIGNATURES */
+                    ...((hasArrayContent(data.offence.types) || hasArrayContent(data.offence.refs) || hasContent(data.offence.description)) ? [
+                        sectionHeading("3.", "OFFENCE COMMITTED/ORDERS CONTRAVENED:"),
+
+                        ...((hasArrayContent(data.offence.types) || hasArrayContent(data.offence.refs)) ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({ text: "(3.1) ", size: 24 }),
+                                    ...(hasArrayContent(data.offence.types) ? [
+                                        new TextRun({ text: "Offence Type  ", bold: true, size: 24 }),
+                                        new TextRun({ text: (data.offence.types || []).filter(Boolean).join(", "), size: 24 })
+                                    ] : [])
+                                ],
+                                spacing: { after: 50 },
+                            }),
+
+                            ...(data.offence.refs && data.offence.refs.length > 0 ?
+                                data.offence.refs.map((ref, index) => {
+                                    const roman = ["i", "ii", "iii", "iv", "v"][index] || (index + 1).toString();
+                                    return new Paragraph({
+                                        children: [
+                                            // Make sure ref format matches: (i.)
+                                            new TextRun({ text: `       Ref :- (${roman}.) `, bold: true, size: 24 }),
+                                            new TextRun({ text: ref, size: 24 }),
+                                        ],
+                                        spacing: { after: 50 },
+                                    });
+                                })
+                                : [])
+                        ] : []),
+
+                        ...(hasContent(data.offence.description) ? [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({ text: "(3.2) ", size: 24 }),
+                                    new TextRun({ text: data.offence.description, size: 24 }),
+                                ],
+                                alignment: AlignmentType.JUSTIFIED,
+                                spacing: { before: 100, after: 200 }
+                            })
+                        ] : [])
+
+                    ] : []),
+
+                    spacer(),
+
                     createSignatureSection(data.witnessSig, data.mpSig),
 
                     spacer(),
 
-                    /* REMARKS */
                     new Paragraph({
                         alignment: AlignmentType.CENTER,
                         children: [
@@ -284,15 +477,24 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
 
                     spacer(150),
 
-                    new Paragraph({
-                        children: [new TextRun({ text: data.remarks.text, size: 24 })],
-                        alignment: AlignmentType.JUSTIFIED,
-                    }),
+                    ...(hasContent(data.remarks.text) ? [
+                        new Paragraph({
+                            children: [new TextRun({ text: data.remarks.text, size: 24 })],
+                            alignment: AlignmentType.JUSTIFIED,
+                            indent: { firstLine: 720 },
+                        })
+                    ] : []),
 
                     spacer(100),
 
-                    footerLine("Station :", data.remarks.station),
-                    footerLine("Dated :", data.remarks.dated),
+                    new Table({
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        borders: TableBordersNone(),
+                        rows: [
+                            new TableRow({ children: [footerCell("Station : " + data.remarks.station)] }),
+                            new TableRow({ children: [footerCell("Dated : " + data.remarks.dated)] }),
+                        ]
+                    }),
                 ],
             },
         ],
@@ -304,7 +506,7 @@ export const generateWordReport = async (data: MilitaryPoliceReportProps) => {
 };
 
 /* ===============================
-   HELPERS (UI MATCHED)
+   HELPERS
 ================================ */
 
 function TableBordersNone() {
@@ -324,7 +526,7 @@ function sectionHeading(no: string, title: string) {
     return new Paragraph({
         children: [
             new TextRun({ text: no, bold: true, size: 24 }),
-            new TextRun({ text: "     ", size: 24 }), // Spaces not underlined
+            new TextRun({ text: "     ", size: 24 }),
             new TextRun({ text: title, bold: true, underline: {}, size: 24 }),
         ],
         spacing: { after: 200 },
@@ -346,51 +548,147 @@ function metaCell(label: string, value: string, align: any = AlignmentType.LEFT)
         borders: TableBordersNone(),
     });
 }
+function footerCell(text: string) {
+    return new TableCell({
+        margins: CELL_PADDING,
+        children: [new Paragraph({ children: [new TextRun({ text: text, bold: true, size: 24 })] })],
+        borders: TableBordersNone(),
+    });
+}
 
-function footerLine(label: string, value: string) {
-    return new Paragraph({
-        children: [
-            new TextRun({ text: label, bold: true, size: 24 }),
-            new TextRun({ text: `  ${value}`, size: 24 }),
+// Replaced specific helpers with a generic one
+function createGenericBlockTable(block: NormalizedBlock) {
+    return new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: {
+            top: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
+            left: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
+            right: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
+            insideHorizontal: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
+            insideVertical: { style: BorderStyle.NONE },
+        },
+        rows: [
+            new TableRow({
+                children: [
+                    boxIndexCell(block.index),
+                    boxContentCell(
+                        createDynamicInfoTable(block.fields)
+                    ),
+                ],
+            })
         ],
     });
 }
 
-/* ===============================
-   PARTICULARS BOX (PADDED)
-================================ */
+function boxIndexCell(text: string) {
+    return new TableCell({
+        width: { size: 8, type: WidthType.PERCENTAGE },
+        verticalAlign: VerticalAlign.TOP,
+        margins: CELL_PADDING,
+        children: [new Paragraph({ children: [new TextRun({ text: text, size: 24 })] })],
+    });
+}
 
-function createParticularsBox(title1: string, p: any, title2?: string, mainNameLabel = "Name") {
+function boxContentCell(content: any) {
+    return new TableCell({
+        width: { size: 92, type: WidthType.PERCENTAGE },
+        margins: CELL_PADDING,
+        children: [content],
+    });
+}
+
+function createEvidenceGrid(occurrence: any) {
     const rows: TableRow[] = [];
+
+    // Row 1: (2.1) Date, Duty Time, Duty Location
+    const fields21 = [
+        { label: "Date of Duty", value: occurrence.dateOfDuty },
+        { label: "Duty Time", value: occurrence.dutyTime },
+        { label: "Duty Location", value: occurrence.dutyLocation },
+    ];
 
     rows.push(
         new TableRow({
             children: [
-                boxIndexCell(title1),
+                boxIndexCell("2.1"),
                 boxContentCell(
-                    createInfoTable([
-                        [{ label: "Aadhar Card No.", value: p.aadharCardNo }, { label: "S/O", value: p.so }],
-                        [{ label: mainNameLabel, value: p.name }, { label: "Name the Relation", value: p.relation }],
-                    ])
-                ),
-            ],
+                    createDynamicInfoTable(fields21)
+                )
+            ]
         })
     );
 
-    if (title2) {
+    // Row 2: (2.2) Witnesses
+    if (occurrence.witnessingMps && occurrence.witnessingMps.length > 0) {
+        occurrence.witnessingMps.forEach((mp: any, index: number) => {
+            const label = index === 0 ? "2.2" : `2.2.${index}`;
+
+            const witnessTable = new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                borders: TableBordersNone(),
+                rows: [
+                    new TableRow({
+                        children: [
+                            new TableCell({
+                                width: { size: 30, type: WidthType.PERCENTAGE },
+                                margins: CELL_PADDING,
+                                borders: TableBordersNone(),
+                                children: [new Paragraph({ children: [new TextRun({ text: "Name of MP Witnessing", bold: true, size: 24 })] })]
+                            }),
+                            new TableCell({
+                                width: { size: 30, type: WidthType.PERCENTAGE },
+                                margins: CELL_PADDING,
+                                borders: TableBordersNone(),
+                                children: [new Paragraph({ children: [new TextRun({ text: mp.name || "", size: 24 })] })]
+                            }),
+                            new TableCell({
+                                width: { size: 15, type: WidthType.PERCENTAGE },
+                                margins: CELL_PADDING,
+                                borders: TableBordersNone(),
+                                children: [new Paragraph({ children: [new TextRun({ text: "Rank", bold: true, size: 24 })] })]
+                            }),
+                            new TableCell({
+                                width: { size: 25, type: WidthType.PERCENTAGE },
+                                margins: CELL_PADDING,
+                                borders: TableBordersNone(),
+                                children: [new Paragraph({ children: [new TextRun({ text: mp.rank || "", size: 24 })] })]
+                            }),
+                        ]
+                    })
+                ]
+            });
+
+            rows.push(
+                new TableRow({
+                    children: [
+                        boxIndexCell(label),
+                        boxContentCell(witnessTable)
+                    ]
+                })
+            );
+        });
+    } else {
+        // Optional: Hide if empty or show N/A. React hides. Let's hide here too if requested? 
+        // Logic should match React. React hides entirely if array exists but empty? 
+        // Current code hides if empty.
+    }
+
+    // Row 3: (2.3) Time/Location of Offence
+    if (hasContent(occurrence.timeOfOffence) || hasContent(occurrence.locationOfOffence)) {
+        const fields23 = [
+            { label: "Time of Offence", value: occurrence.timeOfOffence },
+            { label: "Location of Offence", value: occurrence.locationOfOffence }
+        ];
+
         rows.push(
             new TableRow({
                 children: [
-                    boxIndexCell(title2),
+                    boxIndexCell("2.3"),
                     boxContentCell(
-                        createInfoTable([
-                            [{ label: "Army No.", value: p.armyNo }, { label: "Rank", value: p.rank }],
-                            [{ label: "Name", value: p.name }, { label: "Unit", value: p.unit }],
-                            [{ label: "FMN", value: p.fmn }, { label: "Command", value: p.command }],
-                            [{ label: "Address", value: p.address }, { label: "I Card No.", value: p.iCardNo }],
-                        ])
-                    ),
-                ],
+                        createDynamicInfoTable(fields23)
+                    )
+                ]
             })
         );
     }
@@ -405,170 +703,10 @@ function createParticularsBox(title1: string, p: any, title2?: string, mainNameL
             insideHorizontal: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
             insideVertical: { style: BorderStyle.NONE },
         },
-        rows,
+        rows: rows,
     });
 }
 
-
-function boxIndexCell(text: string) {
-    return new TableCell({
-        width: { size: 8, type: WidthType.PERCENTAGE },
-        verticalAlign: VerticalAlign.TOP,
-        margins: CELL_PADDING,
-        children: [new Paragraph({ children: [new TextRun({ text: `(${text})`, size: 24 })] })],
-    });
-}
-
-function boxContentCell(content: any) {
-    return new TableCell({
-        width: { size: 92, type: WidthType.PERCENTAGE },
-        margins: CELL_PADDING,
-        children: [content],
-    });
-}
-
-function createVehicleBox(vehicle: any) {
-    return new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: {
-            top: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            bottom: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            left: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            right: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            insideHorizontal: { style: BorderStyle.NONE },
-            insideVertical: { style: BorderStyle.NONE },
-        },
-        rows: [
-            new TableRow({
-                children: [
-                    boxIndexCell("1.3"),
-                    boxContentCell(
-                        new Table({
-                            width: { size: 100, type: WidthType.PERCENTAGE },
-                            borders: TableBordersNone(),
-                            rows: [
-                                new TableRow({
-                                    children: [
-                                        new TableCell({
-                                            width: { size: 50, type: WidthType.PERCENTAGE },
-                                            borders: TableBordersNone(),
-                                            children: [
-                                                new Paragraph({
-                                                    children: [
-                                                        new TextRun({ text: "DD Veh. BA No.  ", bold: true, size: 24 }),
-                                                        new TextRun({ text: vehicle.baNo, size: 24 }),
-                                                    ],
-                                                }),
-                                            ],
-                                        }),
-                                        new TableCell({
-                                            width: { size: 50, type: WidthType.PERCENTAGE },
-                                            borders: TableBordersNone(),
-                                            children: [
-                                                new Paragraph({
-                                                    children: [
-                                                        new TextRun({ text: "Make & Take  ", bold: true, size: 24 }),
-                                                        new TextRun({ text: vehicle.makeAndTake, size: 24 }),
-                                                    ],
-                                                }),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        })
-                    ),
-                ],
-            }),
-        ],
-    });
-}
-
-function createEvidenceGrid(occurrence: any) {
-    return new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: {
-            top: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            bottom: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            left: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            right: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            insideHorizontal: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
-            insideVertical: { style: BorderStyle.NONE }, // Explicitly NONE to match image (no column dividers)
-        },
-        rows: [
-            createEvidenceRow("(2.1)", "Date of Duty", occurrence.dateOfDuty, "(2.2)", "Duty Time", occurrence.dutyTime),
-            createEvidenceRow("(2.3)", "Duty Location", occurrence.dutyLocation, "(2.4.1)", "Name of Witnessing Official", occurrence.nameOfWitnessingOfficial1),
-            createEvidenceRow("(2.4.2)", "Name of Witnessing Official", occurrence.nameOfWitnessingOfficial2, "(2.4.3)", "Name of Official", occurrence.nameOfWitnessingOfficial3 || ""),
-            createEvidenceRow("(2.5)", "Time of Offence", occurrence.timeOfOffence, "(2.6)", "Location of Offence", occurrence.locationOfOffence),
-        ],
-    });
-}
-
-function createEvidenceRow(num1: string, label1: string, value1: string, num2: string, label2: string, value2: string) {
-    return new TableRow({
-        children: [
-            evidenceCell(num1, 8),
-            evidenceLabelCell(label1, 17),
-            evidenceValueCell(value1, 17),
-            evidenceCell(num2, 8),
-            evidenceLabelCell(label2, 25),
-            evidenceValueCell(value2, 25),
-        ],
-    });
-}
-
-function evidenceCell(text: string, widthPercent: number) {
-    return new TableCell({
-        width: { size: widthPercent, type: WidthType.PERCENTAGE },
-        margins: CELL_PADDING,
-        children: [new Paragraph({ children: [new TextRun({ text: text ?? "", size: 24 })] })],
-    });
-}
-
-function evidenceLabelCell(text: string, widthPercent: number) {
-    return new TableCell({
-        width: { size: widthPercent, type: WidthType.PERCENTAGE },
-        margins: CELL_PADDING,
-        children: [new Paragraph({ children: [new TextRun({ text: text ?? "", bold: true, size: 24 })] })],
-    });
-}
-
-function evidenceValueCell(text: string, widthPercent: number) {
-    return new TableCell({
-        width: { size: widthPercent, type: WidthType.PERCENTAGE },
-        margins: CELL_PADDING,
-        children: [new Paragraph({ children: [new TextRun({ text: text ?? "", size: 24 })] })],
-    });
-}
-
-function offenceParagraph(prefix: string, label: string, value: string) {
-    return new Paragraph({
-        children: [
-            new TextRun({ text: `${prefix} `, size: 24 }),
-            new TextRun({ text: `${label}  `, bold: true, size: 24 }),
-            new TextRun({ text: value || "", size: 24 }),
-        ],
-        spacing: { after: 100 },
-    });
-}
-
-function offenceRef(prefix: string, text: string) {
-    return new Paragraph({
-        children: [
-            new TextRun({ text: `       ${prefix}  `, size: 24 }),
-            new TextRun({ text: text || "", size: 24 }),
-        ],
-        spacing: { after: 50 },
-    });
-}
-
-function offenceDescription(text: string) {
-    return new Paragraph({
-        children: [new TextRun({ text: `     ${text || ""}`, size: 24 })],
-        alignment: AlignmentType.JUSTIFIED,
-        spacing: { after: 300 },
-    });
-}
 
 function createSignatureSection(witnessSig: any, mpSig: any) {
     return new Table({
@@ -582,7 +720,11 @@ function createSignatureSection(witnessSig: any, mpSig: any) {
                         borders: TableBordersNone(),
                         children: [
                             new Paragraph({
-                                children: [new TextRun({ text: "Sig of Witness   ________________", bold: true, size: 24 })],
+                                children: [new TextRun({ text: "Sig of Witness", bold: true, size: 24 })],
+                                spacing: { after: 0 },
+                            }),
+                            new Paragraph({
+                                children: [new TextRun({ text: "______________________", size: 24 })],
                                 spacing: { after: 200 },
                             }),
                             createSignatureBlock(witnessSig),
@@ -594,8 +736,8 @@ function createSignatureSection(witnessSig: any, mpSig: any) {
                         children: [
                             new Paragraph({
                                 children: [new TextRun({ text: "Sig of MP JCO/NCO", bold: true, size: 24 })],
-                                spacing: { after: 200 },
-                                alignment: AlignmentType.LEFT,
+                                alignment: AlignmentType.RIGHT,
+                                spacing: { after: 300 },
                             }),
                             createSignatureBlock(mpSig),
                         ],
@@ -611,38 +753,35 @@ function createSignatureBlock(sig: any) {
         width: { size: 100, type: WidthType.PERCENTAGE },
         borders: TableBordersNone(),
         rows: [
-            signatureRow("Army No.", sig.armyNo),
-            signatureRow("Rank", sig.rank),
-            signatureRow("Name", sig.name),
-            signatureRow("Unit", sig.unit),
+            signatureSimpleRow("Army No.", sig.armyNo),
+            signatureSimpleRow("Rank", sig.rank),
+            signatureSimpleRow("Name", sig.name),
+            signatureSimpleRow("Unit", sig.unit),
         ],
     });
 }
 
-function signatureRow(label: string, value: string) {
+function signatureSimpleRow(label: string, value: string) {
     return new TableRow({
         children: [
             new TableCell({
+                width: { size: 30, type: WidthType.PERCENTAGE },
+                borders: TableBordersNone(),
                 children: [
                     new Paragraph({
                         children: [new TextRun({ text: label, bold: true, size: 24 })],
-                        spacing: { before: 50, after: 50 },
-                    }),
-                ],
-                width: { size: 30, type: WidthType.PERCENTAGE },
-                borders: TableBordersNone(),
+                    })
+                ]
             }),
             new TableCell({
-                children: [
-                    new Paragraph({
-                        text: value || "",
-                        spacing: { before: 50, after: 50 },
-                    }),
-                ],
                 width: { size: 70, type: WidthType.PERCENTAGE },
                 borders: TableBordersNone(),
-            }),
-        ],
+                children: [
+                    new Paragraph({
+                        children: [new TextRun({ text: value || "", size: 24 })],
+                    })
+                ]
+            })
+        ]
     });
 }
-

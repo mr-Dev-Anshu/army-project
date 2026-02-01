@@ -186,7 +186,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                                 </div>
                             </div>
                         )}
-                        {occurrence.place && (
+                        {occurrence.place && occurrence.place.trim() !== "" && (
                             <div className="flex">
                                 <span className="w-8 ">2.2</span>
                                 <div className="flex-1">
@@ -194,7 +194,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                                 </div>
                             </div>
                         )}
-                        {occurrence.date && (
+                        {occurrence.date && occurrence.date.trim() !== "" && (
                             <div className="flex">
                                 <span className="w-8 ">2.3</span>
                                 <div className="flex-1">
@@ -202,7 +202,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                                 </div>
                             </div>
                         )}
-                        {occurrence.time && (
+                        {occurrence.time && occurrence.time.trim() !== "" && (
                             <div className="flex">
                                 <span className="w-8 ">2.4</span>
                                 <div className="flex-1">
@@ -214,7 +214,7 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 </div>}
 
                 {/* 3. DETAILS OF VICTIMS/OFFENDERS */}
-                {people.length > 0 && <div className="mb-6">
+                {people.filter(p => p.name || p.armyNo || p.rank || p.unitName).length > 0 && <div className="mb-6">
                     <div className="font-bold mb-2 text-[12px]">
                         3. &nbsp;&nbsp; <span className="underline">DETAILS OF VICTIMS/OFFENDERS:</span> <span className="font-normal text-[12px] ml-2">(MP must verify personal particulars)</span>
                     </div>
@@ -229,97 +229,132 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                             </tr>
                         </thead>
                         <tbody>
-                            {people.map((person, index) => {
-                                // Helper to resolve value from prop or customFields (case-insensitive search in customFields)
-                                const getVal = (keys: string[], propVal?: string) => {
-                                    if (propVal && propVal !== "" && propVal !== "Nil") return propVal;
-                                    if (!person.customFields) return null;
+                            {people
+                                .filter(person => {
+                                    const hasData = [person.name, person.armyNo, person.rank, person.unitName, person.identityCard, person.remark,
+                                    // Also check custom fields existence
+                                    person.customFields && Object.values(person.customFields).some(v => v && v !== "")
+                                    ].some(val => val && val !== "" && val !== "Nil" && val !== "--");
+                                    return hasData;
+                                })
+                                .map((person, index) => {
+                                    // Helper to resolve value from prop or customFields (case-insensitive search in customFields)
+                                    const getVal = (keys: string[], propVal?: string) => {
+                                        if (propVal && propVal !== "" && propVal !== "Nil") return propVal;
+                                        if (!person.customFields) return null;
 
-                                    for (const key of keys) {
-                                        // Exact match
-                                        if (person.customFields[key]) return person.customFields[key];
+                                        for (const key of keys) {
+                                            // Exact match
+                                            if (person.customFields[key]) return person.customFields[key];
 
-                                        // Case insensitive match
-                                        const lowerKey = key.toLowerCase();
-                                        const foundKey = Object.keys(person.customFields).find(k => k.toLowerCase() === lowerKey || k.toLowerCase().replace(/\s/g, '') === lowerKey);
-                                        if (foundKey) return person.customFields[foundKey];
-                                    }
-                                    return null;
-                                };
+                                            // Case insensitive match
+                                            const lowerKey = key.toLowerCase();
+                                            const foundKey = Object.keys(person.customFields).find(k => k.toLowerCase() === lowerKey || k.toLowerCase().replace(/\s/g, '') === lowerKey);
+                                            if (foundKey) return person.customFields[foundKey];
+                                        }
+                                        return null;
+                                    };
 
-                                const armyNo = getVal(['armyNo', 'armyNumber', 'serviceNumber'], person.armyNo);
-                                const rank = getVal(['rank'], person.rank);
-                                const name = getVal(['name', 'personName', 'witnessName'], person.name);
-                                const iCard = getVal(['iCardNumber', 'identityCard', 'icard', 'idCard', 'passNo'], person.identityCard);
-                                const unit = getVal(['unit', 'unitName'], person.unitName);
-                                const fmn = getVal(['fmn', 'fmnName'], person.fmn);
-                                const address = getVal(['address'], person.address);
+                                    const armyNo = getVal(['armyNo', 'armyNumber', 'serviceNumber'], person.armyNo);
+                                    const rank = getVal(['rank'], person.rank);
+                                    const name = getVal(['name', 'personName', 'witnessName'], person.name);
+                                    const iCard = getVal(['iCardNumber', 'identityCard', 'icard', 'idCard', 'passNo'], person.identityCard);
+                                    const unit = getVal(['unit', 'unitName'], person.unitName);
+                                    const fmn = getVal(['fmn', 'fmnName'], person.fmn);
+                                    const address = getVal(['address'], person.address);
 
-                                return (
-                                    <tr key={index} className="break-inside-avoid">
-                                        <td className="border border-gray-300 p-2 text-center font-bold align-middle">3.{person.sno}</td>
-                                        <td className="border border-gray-300 p-2 align-top">
-                                            <div className="grid grid-cols-[80px_1fr] gap-y-1">
-                                                {armyNo && (
-                                                    <>
-                                                        <span className="font-bold">Army no.:</span>
-                                                        <span className="break-words">{armyNo}</span>
-                                                    </>
-                                                )}
+                                    // New Civilian Fields
+                                    const aadhar = getVal(['aadhar', 'aadharCard', 'aadharCardNo', 'adhar']);
+                                    const so = getVal(['so', 's/o', 'fatherName', 'father']);
+                                    const relation = getVal(['relation', 'relationship', 'nametheRelation']);
+                                    const tele = getVal(['tele', 'mobile', 'contact', 'phone']);
 
-                                                {rank && (
-                                                    <>
-                                                        <span className="font-bold">Rank:</span>
-                                                        <span className="break-words">{rank}</span>
-                                                    </>
-                                                )}
+                                    return (
+                                        <tr key={index} className="break-inside-avoid">
+                                            <td className="border border-gray-300 p-2 text-center font-bold align-middle">3.{index + 1}</td>
+                                            <td className="border border-gray-300 p-2 align-top">
+                                                <div className="grid grid-cols-[110px_1fr] gap-y-1">
+                                                    {aadhar && (
+                                                        <>
+                                                            <span className="font-bold">Aadhar Card No.:</span>
+                                                            <span className="break-words">{aadhar}</span>
+                                                        </>
+                                                    )}
+                                                    {armyNo && (
+                                                        <>
+                                                            <span className="font-bold">Army no.:</span>
+                                                            <span className="break-words">{armyNo}</span>
+                                                        </>
+                                                    )}
 
-                                                {name && (
-                                                    <>
-                                                        <span className="font-bold">Name:</span>
-                                                        <span className="break-words">{name}</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="border border-gray-300 p-2 text-center align-middle break-words max-w-[100px]">
-                                            {iCard || "--"}
-                                        </td>
-                                        <td className="border border-gray-300 p-2 align-top">
-                                            <div className="grid grid-cols-[60px_1fr] gap-y-1">
-                                                {unit && (
-                                                    <>
-                                                        <span className="font-bold">Unit:</span>
-                                                        <span className="break-words">{unit}</span>
-                                                    </>
-                                                )}
+                                                    {rank && (
+                                                        <>
+                                                            <span className="font-bold">Rank:</span>
+                                                            <span className="break-words">{rank}</span>
+                                                        </>
+                                                    )}
 
-                                                {fmn && (
-                                                    <>
-                                                        <span className="font-bold">FMN:</span>
-                                                        <span className="break-words">{fmn}</span>
-                                                    </>
-                                                )}
+                                                    {name && (
+                                                        <>
+                                                            <span className="font-bold">Name:</span>
+                                                            <span className="break-words">{name}</span>
+                                                        </>
+                                                    )}
 
-                                                {address && (
-                                                    <>
-                                                        <span className="font-bold">Address:</span>
-                                                        <span className="break-words">{address}</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="border border-gray-300 p-2 align-middle text-center">
-                                            {person.remark || "--"}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            {people.length === 0 && (
-                                <tr>
-                                    <td colSpan={5} className="p-4 text-center text-gray-500">No details available</td>
-                                </tr>
-                            )}
+                                                    {so && (
+                                                        <>
+                                                            <span className="font-bold">S/O:</span>
+                                                            <span className="break-words">{so}</span>
+                                                        </>
+                                                    )}
+                                                    {relation && (
+                                                        <>
+                                                            <span className="font-bold">Relation:</span>
+                                                            <span className="break-words">{relation}</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="border border-gray-300 p-2 text-center align-middle break-words max-w-[100px]">
+                                                {iCard || "--"}
+                                            </td>
+                                            <td className="border border-gray-300 p-2 align-top">
+                                                <div className="grid grid-cols-[60px_1fr] gap-y-1">
+                                                    {unit && (
+                                                        <>
+                                                            <span className="font-bold">Unit:</span>
+                                                            <span className="break-words">{unit}</span>
+                                                        </>
+                                                    )}
+
+                                                    {tele && (
+                                                        <>
+                                                            <span className="font-bold">Tele:</span>
+                                                            <span className="break-words">{tele}</span>
+                                                        </>
+                                                    )}
+
+                                                    {fmn && (
+                                                        <>
+                                                            <span className="font-bold">FMN:</span>
+                                                            <span className="break-words">{fmn}</span>
+                                                        </>
+                                                    )}
+
+                                                    {address && (
+                                                        <>
+                                                            <span className="font-bold">Address:</span>
+                                                            <span className="break-words">{address}</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="border border-gray-300 p-2 align-middle text-center">
+                                                {person.remark || "--"}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                         </tbody>
                     </table>
                     <div className="text-[12px] text-gray-700 leading-tight text-justify">
@@ -359,112 +394,158 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                 </div>
 
                 {/* 5. WITNESS */}
-                {witnesses.length > 0 && <div className="mb-6">
-                    <div className="font-bold mb-2 text-[12px]">
-                        5. &nbsp;&nbsp; <span className="underline">WITNESS:</span> <span className="font-normal text-[12px] ml-2">(Witness must record statement in own hand where possible)</span>
-                    </div>
-                    <table className="w-full border-collapse border border-gray-300 text-[12px] mb-2 break-inside-auto">
-                        <thead>
-                            <tr className="bg-white">
-                                <th className="border border-gray-300 p-2 w-16 text-center align-middle">Sr no.</th>
-                                <th className="border border-gray-300 p-2 text-left align-middle">Army No, Rank & Name</th>
-                                <th className="border border-gray-300 p-2 text-left align-middle">Identity Card</th>
-                                <th className="border border-gray-300 p-2 text-left align-middle">Unit/Tele No.</th>
-                                <th className="border border-gray-300 p-2 text-left align-middle">Remark</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {witnesses.length > 0 ? witnesses.map((person, index) => {
-                                // Helper to resolve value from prop or customFields (case-insensitive search in customFields)
-                                const getVal = (keys: string[], propVal?: string) => {
-                                    if (propVal && propVal !== "" && propVal !== "Nil") return propVal;
-                                    if (!person.customFields) return null;
+                {witnesses
+                    .filter(person => {
+                        const hasData = [
+                            person.name, person.armyNo, person.rank, person.unitName, person.identityCard, person.remark,
+                            // Also check custom fields existence
+                            person.customFields && Object.values(person.customFields).some(v => v && v !== "")
+                        ].some(val => val && val !== "" && val !== "Nil" && val !== "--");
+                        return hasData;
+                    })
+                    .length > 0 && <div className="mb-6">
+                        <div className="font-bold mb-2 text-[12px]">
+                            5. &nbsp;&nbsp; <span className="underline">WITNESS:</span> <span className="font-normal text-[12px] ml-2">(Witness must record statement in own hand where possible)</span>
+                        </div>
+                        <table className="w-full border-collapse border border-gray-300 text-[12px] mb-2 break-inside-auto">
+                            <thead>
+                                <tr className="bg-white">
+                                    <th className="border border-gray-300 p-2 w-16 text-center align-middle">Sr no.</th>
+                                    <th className="border border-gray-300 p-2 text-left align-middle">Particulars</th>
+                                    <th className="border border-gray-300 p-2 text-left align-middle">Identity Card</th>
+                                    <th className="border border-gray-300 p-2 text-left align-middle">Unit/Tele No.</th>
+                                    <th className="border border-gray-300 p-2 text-left align-middle">Remark</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {witnesses
+                                    .filter(person => {
+                                        const hasData = [
+                                            person.name, person.armyNo, person.rank, person.unitName, person.identityCard, person.remark,
+                                            // Also check custom fields existence
+                                            person.customFields && Object.values(person.customFields).some(v => v && v !== "")
+                                        ].some(val => val && val !== "" && val !== "Nil" && val !== "--");
+                                        return hasData;
+                                    })
+                                    .map((person, index) => {
+                                        // Helper to resolve value from prop or customFields (case-insensitive search in customFields)
+                                        const getVal = (keys: string[], propVal?: string) => {
+                                            if (propVal && propVal !== "" && propVal !== "Nil") return propVal;
+                                            if (!person.customFields) return null;
 
-                                    for (const key of keys) {
-                                        // Exact match
-                                        if (person.customFields[key]) return person.customFields[key];
+                                            for (const key of keys) {
+                                                // Exact match
+                                                if (person.customFields[key]) return person.customFields[key];
 
-                                        // Case insensitive match
-                                        const lowerKey = key.toLowerCase();
-                                        const foundKey = Object.keys(person.customFields).find(k => k.toLowerCase() === lowerKey || k.toLowerCase().replace(/\s/g, '') === lowerKey);
-                                        if (foundKey) return person.customFields[foundKey];
-                                    }
-                                    return null;
-                                };
+                                                // Case insensitive match
+                                                const lowerKey = key.toLowerCase();
+                                                const foundKey = Object.keys(person.customFields).find(k => k.toLowerCase() === lowerKey || k.toLowerCase().replace(/\s/g, '') === lowerKey);
+                                                if (foundKey) return person.customFields[foundKey];
+                                            }
+                                            return null;
+                                        };
 
-                                const armyNo = getVal(['armyNo', 'armyNumber', 'serviceNumber'], person.armyNo);
-                                const rank = getVal(['rank'], person.rank);
-                                const name = getVal(['name', 'personName', 'witnessName'], person.name);
-                                const iCard = getVal(['iCardNumber', 'identityCard', 'icard', 'idCard', 'passNo'], person.identityCard);
-                                const unit = getVal(['unit', 'unitName'], person.unitName);
-                                const fmn = getVal(['fmn', 'fmnName'], person.fmn);
-                                const address = getVal(['address'], person.address);
+                                        const armyNo = getVal(['armyNo', 'armyNumber', 'serviceNumber'], person.armyNo);
+                                        const rank = getVal(['rank'], person.rank);
+                                        const name = getVal(['name', 'personName', 'witnessName'], person.name);
+                                        const iCard = getVal(['iCardNumber', 'identityCard', 'icard', 'idCard', 'passNo'], person.identityCard);
+                                        const unit = getVal(['unit', 'unitName'], person.unitName);
+                                        const fmn = getVal(['fmn', 'fmnName'], person.fmn);
+                                        const address = getVal(['address'], person.address);
 
-                                return (
-                                    <tr key={index} className="break-inside-avoid">
-                                        <td className="border border-gray-300 p-2 text-center font-bold align-middle">5.{person.sno}</td>
-                                        <td className="border border-gray-300 p-2 align-top">
-                                            <div className="grid grid-cols-[80px_1fr] gap-y-1">
-                                                {armyNo && (
-                                                    <>
-                                                        <span className="font-bold">Army no.:</span>
-                                                        <span className="break-words">{armyNo}</span>
-                                                    </>
-                                                )}
+                                        // New Civilian Fields used in witnesses too
+                                        const aadhar = getVal(['aadhar', 'aadharCard', 'aadharCardNo', 'adhar']);
+                                        const so = getVal(['so', 's/o', 'fatherName', 'father']);
+                                        const relation = getVal(['relation', 'relationship', 'nametheRelation']);
+                                        const tele = getVal(['tele', 'mobile', 'contact', 'phone']);
 
-                                                {rank && (
-                                                    <>
-                                                        <span className="font-bold">Rank:</span>
-                                                        <span className="break-words">{rank}</span>
-                                                    </>
-                                                )}
+                                        return (
+                                            <tr key={index} className="break-inside-avoid">
+                                                <td className="border border-gray-300 p-2 text-center font-bold align-middle">5.{index + 1}</td>
+                                                <td className="border border-gray-300 p-2 align-top">
+                                                    <div className="grid grid-cols-[110px_1fr] gap-y-1">
+                                                        {aadhar && (
+                                                            <>
+                                                                <span className="font-bold">Aadhar Card No.:</span>
+                                                                <span className="break-words">{aadhar}</span>
+                                                            </>
+                                                        )}
+                                                        {armyNo && (
+                                                            <>
+                                                                <span className="font-bold">Army no.:</span>
+                                                                <span className="break-words">{armyNo}</span>
+                                                            </>
+                                                        )}
 
-                                                {name && (
-                                                    <>
-                                                        <span className="font-bold">Name:</span>
-                                                        <span className="break-words">{name}</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="border border-gray-300 p-2 text-center align-middle break-words max-w-[100px]">
-                                            {iCard || "--"}
-                                        </td>
-                                        <td className="border border-gray-300 p-2 align-top">
-                                            <div className="grid grid-cols-[60px_1fr] gap-y-1">
-                                                {unit && (
-                                                    <>
-                                                        <span className="font-bold">Unit:</span>
-                                                        <span className="break-words">{unit}</span>
-                                                    </>
-                                                )}
+                                                        {rank && (
+                                                            <>
+                                                                <span className="font-bold">Rank:</span>
+                                                                <span className="break-words">{rank}</span>
+                                                            </>
+                                                        )}
 
-                                                {fmn && (
-                                                    <>
-                                                        <span className="font-bold">FMN:</span>
-                                                        <span className="break-words">{fmn}</span>
-                                                    </>
-                                                )}
+                                                        {name && (
+                                                            <>
+                                                                <span className="font-bold">Name:</span>
+                                                                <span className="break-words">{name}</span>
+                                                            </>
+                                                        )}
+                                                        {so && (
+                                                            <>
+                                                                <span className="font-bold">S/O:</span>
+                                                                <span className="break-words">{so}</span>
+                                                            </>
+                                                        )}
+                                                        {relation && (
+                                                            <>
+                                                                <span className="font-bold">Relation:</span>
+                                                                <span className="break-words">{relation}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="border border-gray-300 p-2 text-center align-middle break-words max-w-[100px]">
+                                                    {iCard || "--"}
+                                                </td>
+                                                <td className="border border-gray-300 p-2 align-top">
+                                                    <div className="grid grid-cols-[60px_1fr] gap-y-1">
+                                                        {unit && (
+                                                            <>
+                                                                <span className="font-bold">Unit:</span>
+                                                                <span className="break-words">{unit}</span>
+                                                            </>
+                                                        )}
+                                                        {tele && (
+                                                            <>
+                                                                <span className="font-bold">Tele:</span>
+                                                                <span className="break-words">{tele}</span>
+                                                            </>
+                                                        )}
 
-                                                {address && (
-                                                    <>
-                                                        <span className="font-bold">Address:</span>
-                                                        <span className="break-words">{address}</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="border border-gray-300 p-2 align-middle text-center">
-                                            {person.remark || "--"}
-                                        </td>
-                                    </tr>
-                                )
-                            }) : (
-                                <tr><td colSpan={5} className="p-4 text-center text-gray-400">No witnesses recorded</td></tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>}
+                                                        {fmn && (
+                                                            <>
+                                                                <span className="font-bold">FMN:</span>
+                                                                <span className="break-words">{fmn}</span>
+                                                            </>
+                                                        )}
+
+                                                        {address && (
+                                                            <>
+                                                                <span className="font-bold">Address:</span>
+                                                                <span className="break-words">{address}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="border border-gray-300 p-2 align-middle text-center">
+                                                    {person.remark || "--"}
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
+                            </tbody>
+                        </table>
+                    </div>}
 
                 {/* 6. EVIDENCE */}
                 {evidence && <div className="mb-6 break-inside-avoid">
@@ -472,21 +553,15 @@ const MpOccurrenceReport: React.FC<MpOccurrenceReportProps> = ({
                         6. &nbsp;&nbsp; <span className="underline">EVIDENCE:</span> <span className="font-normal text-[12px] ml-2">(Collect and record evidence carefully)</span>
                     </div>
                     <div className="flex justify-between items-end px-4 text-[12px] mt-8 gap-8">
-                        {evidence.eyeSketch && (
-                            <div className="border-b border-gray-400 flex-1 pb-1">
-                                <span className="font-bold mr-2">6.1 Eye Sketch-</span> {evidence.eyeSketch}
-                            </div>
-                        )}
-                        {evidence.photos && (
-                            <div className="border-b border-gray-400 flex-1 pb-1 mx-4">
-                                <span className="font-bold mr-2">6.2 Photos-</span> {evidence.photos}
-                            </div>
-                        )}
-                        {evidence.videos && (
-                            <div className="border-b border-gray-400 flex-1 pb-1">
-                                <span className="font-bold mr-2">6.3 Videos-</span> {evidence.videos}
-                            </div>
-                        )}
+                        <div className="border-b border-gray-400 flex-1 pb-1">
+                            <span className="font-bold mr-2">6.1 Eye Sketch-</span> {evidence.eyeSketch || "Nil"}
+                        </div>
+                        <div className="border-b border-gray-400 flex-1 pb-1 mx-4">
+                            <span className="font-bold mr-2">6.2 Photos-</span> {evidence.photos || "Nil"}
+                        </div>
+                        <div className="border-b border-gray-400 flex-1 pb-1">
+                            <span className="font-bold mr-2">6.3 Videos-</span> {evidence.videos || "Nil"}
+                        </div>
                     </div>
                 </div>}
 
