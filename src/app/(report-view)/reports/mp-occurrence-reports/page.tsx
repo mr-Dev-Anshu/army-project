@@ -115,63 +115,76 @@ const normalizeJSON = (json: any): any[] => {
     return json.reports.map((item: any) => {
       const r = item.report || {};
       
-      // 1. Map Offenders
-      const offenders = Array.isArray(r.offenders) ? r.offenders.map((o: any) => {
+      // 1. Map Offenders to 'individuals' structure with role='Offender'
+      const offenderIndividuals = Array.isArray(r.offenders) ? r.offenders.map((o: any) => {
         let type = "Military Person"; 
         if (o.offenderType === "servantMaid") type = "Maid"; 
         else if (o.offenderType === "civilian") type = "Civilian";
         else if (o.offenderType) type = o.offenderType;
 
         return {
-          offenderType: type,
-          offenderDetails: {
-            name: o.name || o.personName,
-            rank: o.rank || o.selectRank,
-            armyNumber: o.armyNumber || o.serviceNumber,
-            iCardNumber: o["I Card Number"] || o.iCardNumber || o["Pass ID"] || o.passNo,
-            unit: o.unit || o.unitName,
-            fmn: o.fmn || o.fmnName,
-            command: o.command,
-            address: o.address || o["Place of QTR."],
-            trade: o.Trade,
-            fatherName: o.fatherName,
-            caste: o.caste,
-            age: o.age,
+          role: "Offender",
+          name: o.name || o.personName || "Unknown",
+          rank: o.rank || o.selectRank,
+          armyNo: o.armyNumber || o.serviceNumber,
+          iCardNumber: o["I Card Number"] || o.iCardNumber || o["Pass ID"] || o.passNo,
+          unit: o.unit || o.unitName,
+          fmn: o.fmn || o.fmnName,
+          command: o.command || r.command, // Inherit command from report if missing on person
+          address: o.address || o["Place of QTR."],
+          trade: o.Trade,
+          fatherName: o.fatherName,
+          caste: o.caste,
+          age: o.age,
+          customFields: {
+             offenderType: type
           }
         };
       }) : [];
 
       // 2. Map Victim/Individual (Using root fields based on your JSON)
-      // If 'reportHeading' or 'age' at root belongs to the victim
       const victim = {
           role: "Victim",
-          name: r.reportHeading || "Unknown", // Assuming reportHeading might contain the name as per snippet "aditya"
+          name: "Unknown", // Default since name isn't clearly at root level in your JSON example
           age: r.age,
           totalServiceDuration: r.totalServiceDuration,
-          unit: r.unit, // If unit exists at root
+          unit: r.unit, 
           fmn: r.fmn,
-          command: r.command
+          command: r.command,
+          address: r.address
       };
+
+      // Combine Offenders and Victim into one 'individuals' array
+      // This is crucial: The Report View looks at 'individuals' to list people.
+      const allIndividuals = [...offenderIndividuals];
+      
+      // Only add victim if there is relevant data (avoid empty victim entries if possible)
+      if (r.age || r.totalServiceDuration || r.unit) {
+        allIndividuals.push(victim);
+      }
 
       return {
         // Map Report Details
         reportDetails: {
             reportNumber: r.id || "Auto-Generated",
-            firNumber: r.firNo
+            firNumber: r.firNo,
+            command: r.command
         },
         // 3. Map Assigned MP (Investigation Head)
         investigationHead: {
-            name: r.incidentCoveredBy || r.coordWith || "", // Mapping from 'incidentCoveredBy'
-            rank: "", // Add field if available in JSON
-            armyNumber: "", // Add field if available in JSON
+            name: r.incidentCoveredBy || r.coordWith || "System Import", 
+            rank: "",
+            armyNumber: "", 
             unit: "",
             fmn: ""
         },
         occurrenceDetails: {
             dateOfOccurrence: r.dateOfOccurrence,
+            // Format time properly if it exists
             timeOfOccurrence: r.timeOfOccurrence ? `${r.dateOfOccurrence}T${r.timeOfOccurrence}` : r.dateOfOccurrence,
             placeOfOccurrence: r.placeOfOccurrence,
-            offenceType: r.reportHeading, 
+            // Map reportHeading to offenceType
+            offenceType: r.reportHeading || "General Offence", 
             description: r.description
         },
         customFields: {
@@ -180,10 +193,11 @@ const normalizeJSON = (json: any): any[] => {
             vehicleName: r.vehicleName,
             leaveOrDuty: r["leave / duty"]
         },
-        // 4. Include Individuals (Victim)
-        individuals: [victim],
-        // Pass normalized offenders for the loop
-        offenders: offenders 
+        // 4. Save individuals here so they appear in the report
+        individuals: allIndividuals,
+        
+        // Keep raw offenders for the separate collection creation loop
+        rawOffenders: r.offenders 
       };
     });
   }
@@ -292,26 +306,40 @@ export default function MpOccurrenceReportsPage() {
         // Import Logic
         const handleImportRecord = async (item: any) => {
             // A. Create the MP Report
-            // Note: We keep 'individuals' (Victim) in reportPayload, but remove 'offenders'
+            // Note: We MUST keep 'individuals' in reportPayload because that's where we normalized the offenders to.
             const reportPayload = { ...item };
-            delete reportPayload.offenders; 
+            
+            // Clean up the temporary rawOffenders field before saving to DB
+            const rawOffendersForLoop = reportPayload.rawOffenders;
+            delete reportPayload.rawOffenders; 
+
+            // Safety Defaults
+            if (!reportPayload.investigationHead.name) reportPayload.investigationHead.name = "Imported Report";
+            if (!reportPayload.occurrenceDetails.offenceType) reportPayload.occurrenceDetails.offenceType = "General";
 
             const createdReport = await createMPReport(reportPayload);
 
-            // B. Create Offenders Linked to Report
-            if (createdReport && createdReport._id && item.offenders && Array.isArray(item.offenders)) {
-                await Promise.all(item.offenders.map(async (offender: any) => {
-                    if (offender.offenderDetails) {
-                        const offenderPayload: CreateOffenderData = {
-                            offenceId: createdReport._id, 
-                            offenderType: offender.offenderType || "Military Person", 
-                            offenderDetails: offender.offenderDetails
-                        };
-                        try {
-                            await createOffender(offenderPayload);
-                        } catch (err) {
-                            console.error("Failed to create offender:", err);
+            // B. Create Offenders Linked to Report (Separate Collection)
+            // Even though they are in the report now, we also create them as entities if your system uses a separate offenders table.
+            if (createdReport && createdReport._id && rawOffendersForLoop && Array.isArray(rawOffendersForLoop)) {
+                await Promise.all(rawOffendersForLoop.map(async (offender: any) => {
+                    const offenderPayload: CreateOffenderData = {
+                        offenceId: createdReport._id, 
+                        offenderType: offender.offenderType || "Military Person", 
+                        offenderDetails: {
+                            name: offender.name || offender.personName,
+                            rank: offender.rank || offender.selectRank,
+                            armyNumber: offender.armyNumber || offender.serviceNumber,
+                            iCardNumber: offender["I Card Number"] || offender.iCardNumber,
+                            unit: offender.unit,
+                            fmn: offender.fmn,
+                            address: offender.address
                         }
+                    };
+                    try {
+                        await createOffender(offenderPayload);
+                    } catch (err) {
+                        console.error("Failed to create offender entity:", err);
                     }
                 }));
             }
@@ -353,6 +381,7 @@ export default function MpOccurrenceReportsPage() {
       }
 
       const invHead = item.investigationHead || {};
+      // Safely access first individual if it exists
       const primaryIndividual = item.individuals?.[0] || item.individual?.[0] || {};
       const unit = invHead.unit || primaryIndividual.unit || item.customFields?.unit;
       if (unit) units.add(unit);
@@ -451,14 +480,12 @@ export default function MpOccurrenceReportsPage() {
       const invHead = item.investigationHead || {};
 
       const dateObj = new Date(occurrence.dateOfOccurrence || item.createdAt);
+      // Try to find the "Main" person involved (usually first individual/offender)
       const primaryIndividual =
-        item.individual?.[0] ||
         item.individuals?.[0] ||
+        item.individual?.[0] ||
         item.offenders?.[0] ||
-        item.offenderList?.[0] ||
         item.customFields?.victim ||
-        item.customFields?.individuals?.[0] ||
-        item.customFields?.offenderList?.[0] ||
         {};
 
       return {
@@ -485,11 +512,12 @@ export default function MpOccurrenceReportsPage() {
 
         victimDetails: {
           armyNumber:
+            primaryIndividual.armyNo ||
             primaryIndividual.armyNumber ||
             primaryIndividual.aadharNumber,
           rank: primaryIndividual.rank,
           name: primaryIndividual.name,
-          unit: primaryIndividual.unit,
+          unit: primaryIndividual.unit || primaryIndividual.unitName,
           ...primaryIndividual,
         },
         reportingMPName: invHead.name,
@@ -513,7 +541,8 @@ export default function MpOccurrenceReportsPage() {
     const invHead = raw.investigationHead || raw.mpParticulars || {}; 
     const occurrence = raw.occurrenceDetails || {};
 
-    const rawPeople = raw.individuals || raw.offenders || raw.individual || raw.offenderList || raw.customFields?.individuals || raw.customFields?.offenderList || [];
+    // Prioritize 'individuals' which we standardized in the import
+    const rawPeople = raw.individuals || raw.offenders || raw.individual || [];
 
     const people = Array.isArray(rawPeople) ? rawPeople.map((p: any, index: number) => {
       const src = p.details || p;
