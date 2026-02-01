@@ -29,6 +29,9 @@ export interface ImmediateReportingIncident {
     coordWith?: string;
     incidentCoveredBy?: string;
     relevantPhotos?: string[];
+    age?: string;
+    totalServiceDuration?: string;
+    individualWorkingStatus?: "Leave" | "Duty" | "";
     createdAt?: string;
     updatedAt?: string;
 }

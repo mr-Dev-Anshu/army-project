@@ -79,7 +79,6 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         sortOrder: "asc",
         fmn: "",
         unit: "",
-        unitLocation: "",
         individualWorkingStatus: "All",
         placeOfOffence: "",
         fromDate: "",
@@ -114,13 +113,12 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
     };
 
     // 3 Unique Options Logic
-    const { placeOptions, unitOptions, fmnOptions, unitLocationOptions } = useMemo(() => {
-        if (!incidents) return { placeOptions: [], unitOptions: [], fmnOptions: [], unitLocationOptions: [] };
+    const { placeOptions, unitOptions, fmnOptions } = useMemo(() => {
+        if (!incidents) return { placeOptions: [], unitOptions: [], fmnOptions: [] };
 
         const places = new Set<string>();
         const units = new Set<string>();
         const fmns = new Set<string>();
-        const unitLocations = new Set<string>();
 
         incidents.forEach(item => {
             if (item.placeOfOccurrence) places.add(item.placeOfOccurrence);
@@ -132,7 +130,6 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
 
                     if (unit) units.add(unit);
                     if (fmn) fmns.add(fmn);
-                    if (ind.unitLocation) unitLocations.add(ind.unitLocation);
                 });
             }
         });
@@ -141,7 +138,6 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
             placeOptions: Array.from(places).sort(),
             unitOptions: Array.from(units).sort(),
             fmnOptions: Array.from(fmns).sort(),
-            unitLocationOptions: Array.from(unitLocations).sort(),
         };
     }, [incidents]);
 
@@ -226,17 +222,12 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 matchesPlace = (item.placeOfOccurrence || "").toLowerCase().includes((filters.placeOfOffence || "").toLowerCase());
             }
 
-            let matchesUnitLocation = true;
-            if (filters.unitLocation && filters.unitLocation !== "All") {
-                matchesUnitLocation = individuals.some((ind: any) => (ind.unitLocation || "").toLowerCase().includes((filters.unitLocation || "").toLowerCase()));
-            }
-
             let matchesWorkingStatus = true;
             if (filters.individualWorkingStatus && filters.individualWorkingStatus !== "All") {
                 matchesWorkingStatus = individuals.some((ind: any) => (ind.individualWorkingStatus || "") === (filters.individualWorkingStatus || ""));
             }
 
-            return matchesSearch && matchesDate && matchesUnit && matchesFmn && matchesPlace && matchesUnitLocation && matchesWorkingStatus;
+            return matchesSearch && matchesDate && matchesUnit && matchesFmn && matchesPlace && matchesWorkingStatus;
         });
     }, [incidents, filters]);
 
@@ -453,99 +444,26 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
         {
             header: "Age & Service Yrs",
             cell: (item) => {
-                const inds = item.individuals && item.individuals.length > 0
-                    ? item.individuals
-                    : [];
+                const age = item.age || item.individuals?.[0]?.age || "-";
+                const service = item.totalServiceDuration || item.individuals?.[0]?.totalServiceDuration || "-";
                 return (
-                    <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="flex flex-col font-[Arial] text-xs space-y-1 border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                <div><span className="font-bold">Age:</span> {ind.age} Years</div>
-                                <div><span className="font-bold">Service:</span> {ind.totalServiceDuration} Years</div>
-                            </div>
-                        ))}
+                    <div className="flex flex-col font-[Arial] text-xs space-y-1">
+                        <div><span className="font-bold">Age:</span> {age} Years</div>
+                        <div><span className="font-bold">Service:</span> {service} Years</div>
                     </div>
                 );
             },
             className: "border-r border-gray-300 min-w-[120px] align-top py-2",
             headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
         },
-        {
-            header: "Unit",
-            cell: (item) => {
-                const inds = item.individuals && item.individuals.length > 0
-                    ? item.individuals
-                    : [];
-                return (
-                    <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => {
-                            const unit = getUnit(ind);
-                            return (
-                                <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                    {unit || "-"}
-                                </div>
-                            );
-                        })}
-                    </div>
-                );
-            },
-            className: "border-r border-gray-300 min-w-[100px] align-top py-2",
-            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[100px]",
-        },
-        {
-            header: "Unit Location",
-            cell: (item) => {
-                const inds = item.individuals && item.individuals.length > 0
-                    ? item.individuals
-                    : [];
-                return (
-                    <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                {ind.unitLocation || "-"}
-                            </div>
-                        ))}
-                    </div>
-                );
-            },
-            className: "border-r border-gray-300 min-w-[120px] align-top py-2",
-            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
-        },
-        {
-            header: "FMN",
-            cell: (item) => {
-                const inds = item.individuals && item.individuals.length > 0
-                    ? item.individuals
-                    : [];
-                return (
-                    <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => {
-                            const fmn = getFmn(ind);
-                            return (
-                                <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                    {fmn || "-"}
-                                </div>
-                            );
-                        })}
-                    </div>
-                );
-            },
-            className: "border-r border-gray-300 min-w-[120px] align-top py-2",
-            headerClassName: "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
-        },
+
         {
             header: "Whether Indl on Lve or Duty",
             cell: (item) => {
-                const inds = item.individuals && item.individuals.length > 0
-                    ? item.individuals
-                    : [];
+                const status = item.individualWorkingStatus || item.individuals?.[0]?.individualWorkingStatus || "-";
                 return (
-                    <div className="flex flex-col space-y-3">
-                        {inds.map((ind: any, idx: number) => (
-                            <div key={idx} className="font-[Arial] text-sm text-[#0A0A0A] border-b border-gray-300 last:border-0 pb-2 last:pb-0">
-                                {ind.individualWorkingStatus || "-"}
-                            </div>
-                        ))}
+                    <div className="font-[Arial] text-sm text-[#0A0A0A]">
+                        {status}
                     </div>
                 );
             },
@@ -628,12 +546,12 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
     return (
         <div className="w-full h-full flex flex-col">
             <ReportPageHeader
-                title="(Initial Report) Immediate Reporting of Incident"
+                title="MP Occurrence & Investigation Initial Report"
+                pageHeaderTitle="(Initial Report) Immediate Reporting of Incident"
                 reportCount={filteredData.length}
-                onDownload={() => window.print()}
+                // onDownload={() => window.print()}
                 breadcrumbItems={[
-                    { label: "Reports & Analysis", href: "/" },
-                    { label: "All Reports", href: "/reports" },
+                    { label: "Immediate Reporting of Incident", href: "/reports/immediate-reporting-incident" },
                 ]}
             />
 
@@ -644,7 +562,6 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 offenceTypeOptions={[]}
                 unitOptions={unitOptions}
                 fmnOptions={fmnOptions}
-                unitLocationOptions={unitLocationOptions}
                 showOffenceType={false}
                 showActionStatus={false}
                 showPriceListFilter={false}
@@ -656,7 +573,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 showPlaceOfOffence={true}
                 placeOptions={placeOptions}
                 placeLabel="Place of Incident"
-                showUnitLocation={true}
+                showUnitLocation={false}
                 showIndividualWorkingStatus={true}
                 onAddNew={onAddNew}
                 onReset={() => setFilters({
@@ -667,7 +584,6 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                     fmn: "",
                     unit: "",
                     placeOfOffence: "",
-                    unitLocation: "",
                     individualWorkingStatus: "All",
                     fromDate: "",
                     toDate: "",

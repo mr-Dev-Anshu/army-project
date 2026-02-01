@@ -338,73 +338,63 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                                 </Button>
                             </div>
                         </div>
-
-                        {/* 3. Age & Total Service Duration */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pl-0 md:pl-0">
-                            <div className="space-y-2">
-                                <Label>3. Age</Label>
-                                <Input
-                                    type="number"
-                                    placeholder="00"
-                                    value={individual.age}
-                                    onChange={(e) => updateIndividualData(index, "age", e.target.value)}
-                                    className="pr-16"
-                                />
-                                <span className="absolute right-3 top-2.5 text-sm text-gray-500 pointer-events-none transform -translate-y-8 translate-x-36 md:translate-x-0 md:static md:hidden">Years old</span>
-                                {/* Hacky absolute positioning for unit text, simplified below */}
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Total Service Duration</Label>
-                                <Input
-                                    type="number"
-                                    placeholder="00"
-                                    value={individual.totalServiceDuration}
-                                    onChange={(e) => updateIndividualData(index, "totalServiceDuration", e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Unit Location */}
-                        <div className="space-y-2">
-                            <Label>Unit Location</Label>
-                            <SuggestionInput
-                                fieldType="unitLocation"
-                                placeholder="e.g. Pune"
-                                value={individual.unitLocation}
-                                onChange={(v) => updateIndividualData(index, "unitLocation", v)}
-                            />
-                        </div>
-
-                        {/* 4. Leave / Duty */}
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-semibold mb-2">4. Whether Individual on Leave or Duty</h3>
-                            <RadioGroup
-                                value={individual.individualWorkingStatus}
-                                onValueChange={(v) => updateIndividualData(index, "individualWorkingStatus", v)}
-                                className="flex gap-4"
-                            >
-                                <label className={cn(
-                                    "flex items-center space-x-2 border rounded-md px-6 py-2 cursor-pointer hover:bg-gray-50 min-w-[120px]",
-                                    individual.individualWorkingStatus === "Leave" ? "border-gray-900" : "border-gray-200"
-                                )}>
-                                    <RadioGroupItem value="Leave" id={`leave-${index}`} />
-                                    <span className="text-sm">Leave</span>
-                                </label>
-                                <label className={cn(
-                                    "flex items-center space-x-2 border rounded-md px-6 py-2 cursor-pointer hover:bg-gray-50 min-w-[120px]",
-                                    individual.individualWorkingStatus === "Duty" ? "border-gray-900" : "border-gray-200"
-                                )}>
-                                    <RadioGroupItem value="Duty" id={`duty-${index}`} />
-                                    <span className="text-sm">Duty</span>
-                                </label>
-                            </RadioGroup>
-                        </div>
                     </div>
                 ))}
 
-                {/* 5. Place of Incident */}
+                {/* 3. Age & Total Service Duration */}
+                <div className="space-y-4 pt-2">
+                    <h3 className="text-sm font-semibold">3. Age & Service</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label>Age (Years)</Label>
+                            <Input
+                                type="number"
+                                placeholder="00"
+                                value={reportData.age || ""}
+                                onChange={(e) => setField("age", e.target.value)}
+                                className="pr-16"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Total Service Duration (Years)</Label>
+                            <Input
+                                type="number"
+                                placeholder="00"
+                                value={reportData.totalServiceDuration || ""}
+                                onChange={(e) => setField("totalServiceDuration", e.target.value)}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 4. Leave / Duty */}
+                <div className="space-y-4 pt-2">
+                    <h3 className="text-sm font-semibold">4. Whether Individual on Leave or Duty</h3>
+                    <RadioGroup
+                        value={reportData.individualWorkingStatus || ""}
+                        onValueChange={(v) => setField("individualWorkingStatus", v)}
+                        className="flex gap-4"
+                    >
+                        <label className={cn(
+                            "flex items-center space-x-2 border rounded-md px-6 py-2 cursor-pointer hover:bg-gray-50 min-w-[120px]",
+                            reportData.individualWorkingStatus === "Leave" ? "border-gray-900" : "border-gray-200"
+                        )}>
+                            <RadioGroupItem value="Leave" id="leave-global" />
+                            <span className="text-sm">Leave</span>
+                        </label>
+                        <label className={cn(
+                            "flex items-center space-x-2 border rounded-md px-6 py-2 cursor-pointer hover:bg-gray-50 min-w-[120px]",
+                            reportData.individualWorkingStatus === "Duty" ? "border-gray-900" : "border-gray-200"
+                        )}>
+                            <RadioGroupItem value="Duty" id="duty-global" />
+                            <span className="text-sm">Duty</span>
+                        </label>
+                    </RadioGroup>
+                </div>
+
+                {/* 6. Place of Incident */}
                 <div className="space-y-4">
-                    <h3 className="text-sm font-semibold">5. Place of Incident</h3>
+                    <h3 className="text-sm font-semibold">6. Place of Incident</h3>
                     <SuggestionInput
                         fieldType="placeOfOccurrence"
                         placeholder="Enter Address"
@@ -412,6 +402,11 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                         onChange={(v) => setField("placeOfOccurrence", v)}
                         icon={<PanelLeft className="w-4 h-4 text-gray-400" />}
                     />
+                </div>
+
+                {/* 7. Date & Time */}
+                <div className="space-y-4">
+                    <h3 className="text-sm font-semibold">7. Date & Time of Incident</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Date of Incident</Label>
@@ -430,12 +425,11 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                             />
                         </div>
                     </div>
-
                 </div>
 
-                {/* 6. Brief of the Incident */}
+                {/* 8. Brief of the Incident */}
                 <div className="space-y-2">
-                    <h3 className="text-sm font-semibold">6. Brief of the Incident</h3>
+                    <h3 className="text-sm font-semibold">8. Brief of the Incident</h3>
                     <SuggestionTextarea
                         fieldType="description"
                         className="min-h-[100px]"
@@ -445,9 +439,9 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                     />
                 </div>
 
-                {/* 7. Coord */}
+                {/* 9. Coord */}
                 <div className="space-y-2">
-                    <h3 className="text-sm font-semibold">7. Coord with Police on Civ Adm, FIR, Current Sit</h3>
+                    <h3 className="text-sm font-semibold">9. Coord with Police on Civ Adm, FIR, Current Sit</h3>
                     <SuggestionTextarea
                         fieldType="coordWith"
                         className="min-h-[80px]"

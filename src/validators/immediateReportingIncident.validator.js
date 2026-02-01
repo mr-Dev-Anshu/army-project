@@ -12,6 +12,7 @@ const immediateReportingIncidentSchema = Joi.object({
                 "shopKeeper", "tempHiredWorker"
             ).optional().allow(""),
             individualDetails: Joi.object().unknown(true).optional(),
+            // Legacy/Fallback support if needed, but primary fields are now root for new reports
             individualWorkingStatus: Joi.string().valid("Leave", "Duty").optional().allow(""),
             unitLocation: Joi.string().trim().optional().allow(""),
             age: Joi.string().trim().optional().allow(""),
@@ -26,6 +27,9 @@ const immediateReportingIncidentSchema = Joi.object({
     coordWith: Joi.string().trim().optional().allow(""),
     incidentCoveredBy: Joi.string().trim().optional().allow(""),
     relevantPhotos: Joi.array().items(Joi.string()).optional(),
+    age: Joi.string().trim().optional().allow(""),
+    totalServiceDuration: Joi.string().trim().optional().allow(""),
+    individualWorkingStatus: Joi.string().valid("Leave", "Duty").optional().allow(""),
 });
 
 export {

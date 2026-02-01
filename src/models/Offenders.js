@@ -39,28 +39,6 @@ const offenderSchema = new mongoose.Schema(
       default: {},
     },
 
-    // Additional fields for Immediate Reporting Incident individuals
-    individualWorkingStatus: {
-      type: String,
-      enum: ["Leave", "Duty", ""],
-      required: false
-    },
-    unitLocation: {
-      type: String,
-      trim: true,
-      required: false
-    },
-    age: {
-      type: String,
-      trim: true,
-      required: false
-    },
-    totalServiceDuration: {
-      type: String,
-      trim: true,
-      required: false
-    },
-
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields";
 
 const immediateReportingIncidentSchema = new mongoose.Schema({
     reportHeading: {
@@ -40,7 +41,25 @@ const immediateReportingIncidentSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
-}, { timestamps: true });
+    age: {
+        type: String,
+        trim: true,
+    },
+    totalServiceDuration: {
+        type: String,
+        trim: true,
+    },
+    individualWorkingStatus: {
+        type: String,
+        enum: ["Leave", "Duty", ""],
+    },
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+immediateReportingIncidentSchema.plugin(auditFieldsPlugin, {});
 
 // Force model recompilation if it exists to pick up schema changes
 if (mongoose.models.ImmediateReportingIncident) {
