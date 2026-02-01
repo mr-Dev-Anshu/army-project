@@ -50,7 +50,6 @@ export default function AllRegisteredReports() {
       staticSpeed: speedData?.length || 0,
       mpOccurrence: mpData?.length || 0,
       immediateIncident: immediateData?.length || 0, // Add count here
-      mtAccident: 56, // Mock data
     };
   }, [trafficData, speedData, mpData, immediateData]);
 
@@ -250,7 +249,7 @@ export default function AllRegisteredReports() {
       <ReportPageHeader
         title="All Registered Reports"
         breadcrumbItems={[{ label: "Reports & Analysis", href: "/" }]}
-        reportCount={counts.trafficVehicle + counts.trafficNoVehicle + counts.staticSpeed + counts.mpOccurrence + counts.immediateIncident + counts.mtAccident}
+        reportCount={counts.trafficVehicle + counts.trafficNoVehicle + counts.staticSpeed + counts.mpOccurrence + counts.immediateIncident}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
