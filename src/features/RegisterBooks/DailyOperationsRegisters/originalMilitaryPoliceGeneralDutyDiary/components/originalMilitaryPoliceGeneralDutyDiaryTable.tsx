@@ -362,187 +362,192 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                                         </div>
                                                     )}
                                                     {item.details?.offenceOccurred && (
-                                                        <>
-                                                            <div className="flex items-center gap-2 p-3">
-                                                                <div className="font-bold text-gray-900">Report No.</div>
-                                                                <div className="text-blue-500 font-medium cursor-pointer hover:underline">{item.details.reportNo}</div>
-                                                            </div>
-
-                                                            <div className="p-3">
-                                                                <div className="font-bold text-gray-900">Place of Offence:</div>
-                                                                <div className="text-gray-800">{item.details.placeOfOffence}</div>
-                                                            </div>
-
-                                                            <div className="p-3">
-                                                                <div className="font-bold text-gray-900">Offence Type:</div>
-                                                                <div className="text-gray-800">{item.details.offenceType}</div>
-                                                            </div>
-
+                                                        <div className="flex flex-col gap-2">
+                                                            {/* Particulars of Offender(s)/Victim(s) */}
                                                             {(() => {
-                                                                const offender = item.offender || {};
-                                                                const details = offender.offenderDetails || item.details?.offenderDetails || {};
-                                                                const category = offender.offenderType || offender.category || item.details?.offenderCategory;
+                                                                // Use the new incidentIndividuals array if available, otherwise fallback to single offender
+                                                                const individuals = item.details?.incidentIndividuals && item.details.incidentIndividuals.length > 0
+                                                                    ? item.details.incidentIndividuals
+                                                                    : (item.offender || item.details?.offenderCategory ? [{
+                                                                        individualType: item.offender?.offenderType || item.offender?.category || item.details?.offenderCategory,
+                                                                        individualDetails: item.offender?.offenderDetails || item.details?.offenderDetails || {},
+                                                                        ...item.offender
+                                                                    }] : []);
 
-                                                                if (!category) return null;
+                                                                const vehicleType = item.details?.vehicleType;
+                                                                const vehicleNumber = item.details?.vehicleNumber;
+                                                                const vehicleName = item.details?.vehicleName;
 
-                                                                const content = (() => {
-                                                                    if (category === 'militaryPersonnel') {
-                                                                        // Check if any military personnel fields exist
-                                                                        const hasData = details.armyNo || details.rank || details.name || details.unit;
-                                                                        if (!hasData) return null;
-
-                                                                        return (
-                                                                            <>
-                                                                                {details.armyNo && <>
-                                                                                    <span className="text-gray-900">Army No. -</span><span>{details.armyNo || "-"}</span>
-                                                                                </>}
-                                                                                {details.rank && <>
-                                                                                    <span className="text-gray-900">Rank -</span><span>{details.rank || "-"}</span>
-                                                                                </>}
-                                                                                {details.name && <>
-                                                                                    <span className="text-gray-900">Name -</span><span>{details.name || "-"}</span>
-                                                                                </>}
-                                                                                {details.unit && <>
-                                                                                    <span className="text-gray-900">Unit -</span><span>{details.unit || "-"}</span>
-                                                                                </>}
-                                                                            </>
-                                                                        );
-                                                                    } else if (category === 'civilian') {
-                                                                        // Check if any civilian fields exist
-                                                                        const hasData = details.civilianAadharCardNumber || details.civilianName || details.civilianFathersName || details.isDependent;
-                                                                        if (!hasData) return null;
-
-                                                                        return (
-                                                                            <>
-                                                                                {details.civilianAadharCardNumber && <><span className="text-gray-900">Aadhar No. -</span><span>{details.civilianAadharCardNumber || "-"}</span></>}
-                                                                                {details.civilianName && <><span className="text-gray-900">Name -</span><span>{details.civilianName || "-"}</span></>}
-                                                                                {details.civilianFathersName && <><span className="text-gray-900">S/O Name -</span><span>{details.civilianFathersName || "-"}</span></>}
-                                                                                {details.isDependent && (
-                                                                                    <>
-                                                                                        <span className="text-gray-900 font-semibold col-span-2 pt-2 pb-1">Relative Details:</span>
-                                                                                        {details.relationName && <><span className="text-gray-900">Relation -</span><span>{details.relationName || "-"}</span></>}
-                                                                                        {details.relativeCategory === "militaryPersonnel" && (
-                                                                                            <>
-                                                                                                {details.relativeDetails?.armyNo && <><span className="text-gray-900">Army No. -</span><span>{details.relativeDetails?.armyNo || "-"}</span></>}
-                                                                                                {details.relativeDetails?.rank && <><span className="text-gray-900">Rank -</span><span>{details.relativeDetails?.rank || "-"}</span></>}
-                                                                                                {details.relativeDetails?.unit && <><span className="text-gray-900">Unit -</span><span>{details.relativeDetails?.unit || "-"}</span></>}
-                                                                                            </>
-                                                                                        )}
-                                                                                        {details.relativeCategory === "servantMaid" && (
-                                                                                            <>
-                                                                                                {details.relativeDetails?.maidName && <><span className="text-gray-900">Name -</span><span>{details.relativeDetails?.maidName || "-"}</span></>}
-                                                                                                {details.relativeDetails?.maidPassID && <><span className="text-gray-900">Pass ID -</span><span>{details.relativeDetails?.maidPassID || "-"}</span></>}
-                                                                                                {details.relativeDetails?.officersEnclaveRank && <><span className="text-gray-900">C/O Rank -</span><span>{details.relativeDetails?.officersEnclaveRank || "-"}</span></>}
-                                                                                                {details.relativeDetails?.officersEnclaveName && <><span className="text-gray-900">C/O Name -</span><span>{details.relativeDetails?.officersEnclaveName || "-"}</span></>}
-                                                                                                {details.relativeDetails?.officersEnclaveUnit && <><span className="text-gray-900">Unit -</span><span>{details.relativeDetails?.officersEnclaveUnit || "-"}</span></>}
-                                                                                            </>
-                                                                                        )}
-
-                                                                                        {
-                                                                                            details.relativeCategory === "shopKeeper" && (
-                                                                                                <>
-                                                                                                    {details.relativeDetails?.shopOwnerName && <><span className="text-gray-900">Name -</span><span>{details.relativeDetails?.shopOwnerName || "-"}</span></>}
-                                                                                                    {details.relativeDetails?.shopName && <><span className="text-gray-900">Shop Name -</span><span>{details.relativeDetails?.shopName || "-"}</span></>}
-                                                                                                    {details.relativeDetails?.shopPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.relativeDetails?.shopPassNo || "-"}</span></>}
-                                                                                                    {details.relativeDetails?.shopAddress && <><span className="text-gray-900">Shop Address -</span><span>{details.relativeDetails?.shopAddress || "-"}</span></>}
-                                                                                                </>
-                                                                                            )
-                                                                                        }
-                                                                                        {
-                                                                                            details.relativeCategory === "tempHiredWorker" && (
-                                                                                                <>
-                                                                                                    {details.relativeDetails?.tempWorkerName && <><span className="text-gray-900">Name -</span><span>{details.relativeDetails?.tempWorkerName || "-"}</span></>}
-                                                                                                    {details.relativeDetails?.tempWorkerPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.relativeDetails?.tempWorkerPassNo || "-"}</span></>}
-                                                                                                    {details.relativeDetails?.tempWorkerPlaceOfStay && <><span className="text-gray-900">Place Of Stay -</span><span>{details.relativeDetails?.tempWorkerPlaceOfStay || "-"}</span></>}
-                                                                                                    {details.relativeDetails?.tempWorkerPlaceOfWork && <><span className="text-gray-900">Place Of Work -</span><span>{details.relativeDetails?.tempWorkerPlaceOfWork || "-"}</span></>}
-                                                                                                </>
-                                                                                            )
-                                                                                        }
-                                                                                    </>
+                                                                const renderPair = (label1: string, val1: any, label2: string, val2: any) => {
+                                                                    if (!val1 && !val2) return null;
+                                                                    return (
+                                                                        <div className="grid grid-cols-2 gap-x-4">
+                                                                            <div className="flex flex-col">
+                                                                                {val1 && (
+                                                                                    <div className="flex gap-1">
+                                                                                        <span className="text-gray-900 font-bold whitespace-nowrap">{label1}</span>
+                                                                                        <span className="text-gray-800 break-words">{val1}</span>
+                                                                                    </div>
                                                                                 )}
-                                                                            </>
-                                                                        );
-                                                                    } else if (category === "employee") {
-                                                                        const hasData = details.employeeServiceNumber || details.employeeRank || details.employeeName || details.employeeUnit;
-                                                                        if (!hasData) return null;
-
-                                                                        return (
-                                                                            <>
-                                                                                {details.employeeServiceNumber && <><span className="text-gray-900">Service No. -</span><span>{details.employeeServiceNumber || "-"}</span></>}
-                                                                                {details.employeeRank && <><span className="text-gray-900">Rank -</span><span>{details.employeeRank || "-"}</span></>}
-                                                                                {details.employeeName && <><span className="text-gray-900">Name -</span><span>{details.employeeName || "-"}</span></>}
-                                                                                {details.employeeUnit && <><span className="text-gray-900">Unit -</span><span>{details.employeeUnit || "-"}</span></>}
-                                                                            </>
-                                                                        )
-                                                                    } else if (category === "servantMaid") {
-                                                                        const coRank = details.officersEnclave?.officersEnclaveRank || "-";
-                                                                        const coName = details.officersEnclave?.officersEnclaveName || "-";
-
-                                                                        const hasData = details.maidName || details.maidPassID || details.maidFathersName || (coRank !== "-" && coRank !== "") || (coName !== "-" && coName !== "");
-                                                                        if (!hasData) return null;
-
-                                                                        return (
-                                                                            <>
-                                                                                {details.maidName && <><span className="text-gray-900">Name -</span><span>{details.maidName || "-"}</span></>}
-
-                                                                                {details.maidPassID && <><span className="text-gray-900">Pass ID,No. -</span><span>{details.maidPassID || "-"}</span></>}
-                                                                                {details.maidFathersName && <><span className="text-gray-900">S/O Name -</span><span>{details.maidFathersName || "-"}</span></>}
-
-
-                                                                                {(coRank !== "-" || coName !== "-") && (
-                                                                                    <>
-                                                                                        {coRank !== "-" && <><span className="text-gray-900">C/O Rank -</span><span>{coRank}</span></>}
-                                                                                        {coName !== "-" && <><span className="text-gray-900">MP Name -</span><span>{coName}</span></>}
-
-
-                                                                                    </>
+                                                                            </div>
+                                                                            <div className="flex flex-col">
+                                                                                {val2 && (
+                                                                                    <div className="flex gap-1">
+                                                                                        <span className="text-gray-900 font-bold whitespace-nowrap">{label2}</span>
+                                                                                        <span className="text-gray-800 break-words">{val2}</span>
+                                                                                    </div>
                                                                                 )}
-                                                                            </>
-                                                                        )
-                                                                    } else if (category === "shopKeeper") {
-                                                                        const hasData = details.shopOwnerName || details.shopName || details.shopPassNo || details.shopAddress;
-                                                                        if (!hasData) return null;
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                };
 
-                                                                        return (
-                                                                            <>
-                                                                                {details.shopOwnerName && <><span className="text-gray-900">Name -</span><span>{details.shopOwnerName || "-"}</span></>}
-                                                                                {details.shopName && <><span className="text-gray-900">Shop Name -</span><span>{details.shopName || "-"}</span></>}
-                                                                                {details.shopPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.shopPassNo || "-"}</span></>}
-                                                                                {details.shopAddress && <><span className="text-gray-900">Shop Address -</span><span>{details.shopAddress || "-"}</span></>}
-                                                                            </>
-                                                                        )
-                                                                    } else if (category === "tempHiredWorker") {
-                                                                        const hasData = details.tempWorkerName || details.tempWorkerPassNo || details.tempWorkerPlaceOfStay || details.tempWorkerPlaceOfWork;
-                                                                        if (!hasData) return null;
+                                                                const renderSingle = (label: string, val: any) => {
+                                                                    if (!val) return null;
+                                                                    return (
+                                                                        <div className="flex gap-1">
+                                                                            <span className="text-gray-900 font-bold whitespace-nowrap">{label}</span>
+                                                                            <span className="text-gray-800 break-words">{val}</span>
+                                                                        </div>
+                                                                    )
+                                                                }
 
-                                                                        return (
-                                                                            <>
-                                                                                {details.tempWorkerName && <><span className="text-gray-900">Name -</span><span>{details.tempWorkerName || "-"}</span></>}
-                                                                                {details.tempWorkerPassNo && <><span className="text-gray-900">Pass No. -</span><span>{details.tempWorkerPassNo || "-"}</span></>}
-                                                                                {details.tempWorkerPlaceOfStay && <><span className="text-gray-900">Place Of Stay -</span><span>{details.tempWorkerPlaceOfStay || "-"}</span></>}
-                                                                                {details.tempWorkerPlaceOfWork && <><span className="text-gray-900">Place Of Work -</span><span>{details.tempWorkerPlaceOfWork || "-"}</span></>}
-                                                                            </>
-                                                                        )
-                                                                    }
-                                                                })();
-
-                                                                if (!content) return null;
+                                                                if (individuals.length === 0) return null;
 
                                                                 return (
-                                                                    <div className="p-3">
-                                                                        <div className="font-bold text-gray-900 mb-2 pb-1">Particulars of Offender / Victims:</div>
-                                                                        <div className="grid grid-cols-[110px_1fr] gap-x-2 gap-y-1">
-                                                                            {content}
-                                                                        </div>
+                                                                    <div className="border-b border-gray-200">
+                                                                        <div className="p-3 pb-2 font-bold text-gray-900 border-b border-gray-200">Particulars of Individual(s):</div>
+                                                                        {individuals.map((ind: any, index: number) => {
+                                                                            const category = ind.individualType || ind.category || ind.offenderCategory; // Handle various schemas
+                                                                            const details = ind.individualDetails || ind.offenderDetails || ind.details || {};
+
+                                                                            if (!category) return null;
+
+                                                                            return (
+                                                                                <div key={index} className={`p-3 ${index !== individuals.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                                                                                    {individuals.length > 1 && <div className="font-semibold text-gray-700 mb-1 text-xs underline">Individual {index + 1}:</div>}
+                                                                                    <div className="flex flex-col gap-y-1 text-sm">
+                                                                                        {category === 'militaryPersonnel' && (
+                                                                                            <>
+                                                                                                {renderPair("Army No.", details.armyNo, "Rank:", details.rank)}
+                                                                                                {renderPair("Name:", details.name, "Unit:", details.unit)}
+                                                                                                {renderPair("FMN:", details.fmn, "Command:", details.command)}
+                                                                                                {renderPair("Address:", details.address, "I Card No.:", details.iCardNumber || details.militaryPersonnelICardNumber)}
+                                                                                            </>
+                                                                                        )}
+                                                                                        {category === 'civilian' && (
+                                                                                            <>
+                                                                                                {renderPair("Aadhar No.", details.civilianAadharCardNumber, "S/O:", details.civilianFathersName)}
+                                                                                                {renderPair("Name:", details.civilianName, "Relation:", details.relationName)}
+                                                                                                {renderSingle("Address:", details.civilianAddress)}
+
+                                                                                                {details.isDependent && details.relativeDetails && (
+                                                                                                    <div className="mt-2 pt-2 border-t border-gray-200">
+                                                                                                        <div className="font-semibold text-gray-900 mb-1">Relative Details:</div>
+                                                                                                        {details.relativeCategory === 'militaryPersonnel' && (
+                                                                                                            <>
+                                                                                                                {renderPair("Army No.", details.relativeDetails.armyNo, "Rank:", details.relativeDetails.rank)}
+                                                                                                                {renderPair("Name:", details.relativeDetails.name || details.relativeDetails.militaryPersonnelName, "Unit:", details.relativeDetails.unit)}
+                                                                                                                {renderPair("FMN:", details.relativeDetails.fmn, "Command:", details.relativeDetails.command || details.relativeDetails.militaryPersonnelCommand)}
+                                                                                                                {renderPair("Address:", details.relativeDetails.address, "I Card No.:", details.relativeDetails.iCardNumber)}
+                                                                                                            </>
+                                                                                                        )}
+                                                                                                        {details.relativeCategory === 'employee' && (
+                                                                                                            <>
+                                                                                                                {renderPair("Service No", details.relativeDetails.employeeServiceNumber, "Rank:", details.relativeDetails.employeeRank)}
+                                                                                                                {renderPair("Name:", details.relativeDetails.employeeName || details.relativeDetails.employeeName, "Unit:", details.relativeDetails.employeeUnit)}
+                                                                                                                {renderPair("FMN:", details.relativeDetails.employeeFmn, "Command:", details.relativeDetails.employeeCommand)}
+                                                                                                                {renderPair("I-Card", details.relativeDetails.employeeICardNumber, "", "")}
+                                                                                                            </>
+                                                                                                        )}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </>
+                                                                                        )}
+                                                                                        {category === 'employee' && (
+                                                                                            <>
+                                                                                                {renderPair("Service No", details.employeeServiceNumber, "Rank:", details.employeeRank)}
+                                                                                                {renderPair("Name:", details.employeeName, "Unit:", details.employeeUnit)}
+                                                                                                {renderPair("FMN:", details.employeeFmn, "Command:", details.employeeCommand)}
+                                                                                                {renderPair("I-Card", details.employeeICardNumber, "", "")}
+                                                                                            </>
+                                                                                        )}
+                                                                                        {['servantMaid', 'shopKeeper', 'tempHiredWorker'].includes(category) && (
+                                                                                            <>
+                                                                                                {renderPair("Name:", details.name || details.maidName || details.shopOwnerName || details.tempWorkerName, "Pass No:", details.passNumber || details.maidPassNumber || details.shopPassNo || details.tempWorkerPassNo)}
+                                                                                                {renderPair("Father's Name:", details.fathersName || details.maidFathersName, "Trade:", details.trade || details.maidTrade)}
+                                                                                                {renderPair("Address:", details.address || details.maidAddress || details.shopAddress, "Unit:", details.unit || details.shopUnit)}
+                                                                                            </>
+                                                                                        )}
+                                                                                        {!['militaryPersonnel', 'civilian', 'employee', 'servantMaid', 'shopKeeper', 'tempHiredWorker'].includes(category) && (
+                                                                                            <>
+                                                                                                {Object.keys(details).slice(0, 6).map(k => (
+                                                                                                    typeof details[k] === 'string' && <div key={k}>{renderSingle(k + ":", details[k])}</div>
+                                                                                                ))}
+                                                                                            </>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+
+                                                                        {/* Vehicle Info displayed once at the bottom of particulars section */}
+                                                                        {(vehicleNumber || vehicleName) && (
+                                                                            <div className="p-3 border-t border-gray-200 bg-gray-50">
+                                                                                <div className="font-semibold text-gray-900 mb-1">Vehicle Details:</div>
+                                                                                <div className="flex flex-col gap-1 text-sm">
+                                                                                    {renderPair(vehicleType === 'Civil Vehicle' ? "Civil Veh No." : "DD Veh BA no.", vehicleNumber, "Make & Take", vehicleName)}
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 );
                                                             })()}
 
-                                                            <div className="p-3">
-                                                                <div className="font-bold text-gray-900 mb-1">Occurrence Brief:</div>
-                                                                <p className="text-gray-800">{item.details.occurrenceBrief}</p>
+                                                            {(item.details.age || item.details.serviceDuration) && (
+                                                                <div className="grid grid-cols-2 divide-x divide-gray-200 border-b border-gray-200">
+                                                                    <div className="p-3">
+                                                                        <div className="font-bold text-gray-900">Age:</div>
+                                                                        <div className="text-gray-800">{item.details.age ? `${item.details.age} Years Old` : "-"}</div>
+                                                                    </div>
+                                                                    <div className="p-3">
+                                                                        <div className="font-bold text-gray-900">Service Duration:</div>
+                                                                        <div className="text-gray-800">{item.details.serviceDuration ? `${item.details.serviceDuration} Years` : "-"}</div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="p-3 border-b border-gray-200">
+                                                                <div className="font-bold text-gray-900">Place of Incident:</div>
+                                                                <div className="text-gray-800">{item.details.placeOfOffence || item.details.placeOfOccurrence || "-"}</div>
                                                             </div>
-                                                        </>
+
+                                                            <div className="grid grid-cols-2 divide-x divide-gray-200 border-b border-gray-200">
+                                                                <div className="p-3">
+                                                                    <div className="font-bold text-gray-900">Date of Incident:</div>
+                                                                    <div className="text-gray-800">
+                                                                        {item.details.dateOfIncident ? format(new Date(item.details.dateOfIncident), "dd/MM/yyyy") :
+                                                                            (item.date ? format(new Date(item.date), "dd/MM/yyyy") : "-")}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="p-3">
+                                                                    <div className="font-bold text-gray-900">Time of Incident:</div>
+                                                                    <div className="text-gray-800">{item.details.timeOfIncident || "-"}</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="p-3 border-b border-gray-200">
+                                                                <div className="font-bold text-gray-900">Brief of Incident:</div>
+                                                                <p className="text-gray-800 whitespace-pre-wrap">{item.details.occurrenceBrief || item.details.briefOfIncident || "-"}</p>
+                                                            </div>
+
+                                                            {item.details.coordWith && (
+                                                                <div className="p-3">
+                                                                    <div className="font-bold text-gray-900">Coord with Police on Civ Adm, FIR, Current Sit:</div>
+                                                                    <p className="text-gray-800 whitespace-pre-wrap">{item.details.coordWith}</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>

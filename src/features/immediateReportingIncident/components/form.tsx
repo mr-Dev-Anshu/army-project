@@ -12,6 +12,7 @@ import { useForm } from "@/context/FormContext";
 import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { SuggestionTextarea } from "@/common/component/SuggestionTextarea";
 import { useCreateImmediateReportingIncident, useUpdateImmediateReportingIncident } from "../hooks";
+import { useCreateGeneralDutyDiaryRegister } from "@/features/RegisterBooks/DailyOperationsRegisters/originalMilitaryPoliceGeneralDutyDiary/hooks";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types";
 import { Loader2, Upload, X, Plus, Trash2, CheckCheck, PanelLeft } from "lucide-react";
 import { uploadFile, uploadMultipleFiles } from "@/lib/uploadFile";
@@ -58,6 +59,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
     const { mutateAsync: createRecord, isPending: isCreating } = useCreateImmediateReportingIncident();
     const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdateImmediateReportingIncident();
+    const { mutateAsync: createGDRegister } = useCreateGeneralDutyDiaryRegister();
     const [isUploading, setIsUploading] = useState(false);
     const [photoUrlInput, setPhotoUrlInput] = useState("");
 
@@ -112,12 +114,69 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 delete (payload as any).updatedAt;
             }
 
+            let incidentId = initialData?._id;
+
             if (initialData && initialData._id) {
                 await updateRecord({ id: initialData._id, data: payload });
                 toast.success("Incident Report Updated");
             } else {
-                await createRecord(payload);
+                const res = await createRecord(payload);
+                incidentId = res._id || res.data?._id;
                 toast.success("Incident Report Created");
+            }
+
+            // Create General Duty Diary Entry if it's a new incident (or maybe always? user said "when incident sumbited")
+            // Assuming we only create it on initial submission to avoid duplicates, or we can't track it easily without a link.
+            // For now, I'll do it if it's a NEW record (no initialData) or if the user wants it every time (which implies duplicates or updates).
+            // "when incident sumbited it automatically create... register record"
+            // I'll stick to NEW incidents for now to prevent spamming the register on edits.
+            if (!initialData) {
+                try {
+                    const offender = reportData.individuals[0]; // Take first individual as main offender/victim
+                    const gdPayload = {
+                        date: reportData.dateOfOccurrence,
+                        details: {
+                            dutyFrom: "", // Not applicable
+                            dutyTill: "", // Not applicable
+                            placeOfDuty: reportData.placeOfOccurrence,
+                            typeOfDuty: "Incident Report",
+                            totalStrength: "1",
+                            briefOfDuty: reportData.description,
+                            individuals: [], // Duty individuals? Maybe empty
+                            offenceOccurred: true,
+
+                            reportNo: payload.reportHeading || "Incident", // Or generated ID
+                            offenceType: payload.reportHeading,
+                            placeOfOffence: reportData.placeOfOccurrence,
+                            occurrenceBrief: reportData.description,
+
+                            // Extra fields for rich display
+                            age: reportData.age,
+                            serviceDuration: reportData.totalServiceDuration,
+                            coordWith: reportData.coordWith,
+                            unitOfIncidentLocation: offender.unitLocation || "",
+                            dateOfIncident: reportData.dateOfOccurrence,
+                            timeOfIncident: reportData.timeOfOccurrence,
+
+                            vehicleType: reportData.vehicleType,
+                            vehicleNumber: reportData.vehicleNumber,
+                            vehicleName: reportData.vehicleName,
+
+                            offenderCategory: offender.individualType || "militaryPersonnel",
+                            offenderDetails: offender.individualDetails || {},
+
+                            // Pass ALL individuals for detailed display
+                            incidentIndividuals: reportData.individuals || []
+                        },
+                        authentication: {}
+                    };
+
+                    await createGDRegister(gdPayload);
+                    // toast.success("General Duty Diary validation updated"); // Optional feedback
+                } catch (gdError) {
+                    console.error("Failed to create General Duty Diary entry", gdError);
+                    toast.warning("Incident created, but failed to update General Duty Diary.");
+                }
             }
 
             dispatch({
