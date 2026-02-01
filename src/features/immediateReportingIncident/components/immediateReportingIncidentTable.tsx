@@ -551,7 +551,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 reportCount={filteredData.length}
                 // onDownload={() => window.print()}
                 breadcrumbItems={[
-                    { label: "Immediate Reporting of Incident", href: "/reports/immediate-reporting-incident" },
+                    { label: "Immediate Reporting of Incident", href: "/immediate-reporting-incident" },
                 ]}
             />
 
