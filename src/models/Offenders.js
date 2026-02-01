@@ -1,11 +1,17 @@
 
 import mongoose from "mongoose";
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields";
 
 const offenderSchema = new mongoose.Schema(
   {
     offenceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "GeneralTrafficOffence",
+      required: false,
+    },
+    incidentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ImmediateReportingIncident",
       required: false,
     },
     // Supporting both field names for compatibility
@@ -29,9 +35,10 @@ const offenderSchema = new mongoose.Schema(
     },
 
     offenderDetails: {
-      type: mongoose.Schema.Types.Mixed,
+      type: mongoose.Schema.Types.Mixed, // Stores armyNo, rank, name, unit, fmn, etc.
       default: {},
     },
+
     customFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
@@ -44,6 +51,8 @@ const offenderSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+offenderSchema.plugin(auditFieldsPlugin, {});
 
 offenderSchema.index({ offenceId: 1 });
 

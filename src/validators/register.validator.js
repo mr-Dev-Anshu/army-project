@@ -26,6 +26,9 @@ const signatureSchema = Joi.object({
 });
 
 const authenticationSchema = Joi.object({
+    initialsOfMPCRNCO: Joi.boolean().optional(),
+    initialsOfSMSJCO: Joi.boolean().optional(),
+    initialsOf2IC: Joi.boolean().optional(),
     initialsMPCPNCO: Joi.string().trim().allow("").optional(),
     initialsQMSJCO: Joi.string().trim().allow("").optional(),
     initials2IC: Joi.string().trim().allow("").optional(),
@@ -54,7 +57,7 @@ const individualSchema = Joi.object({
 
 export const createRegisterSchema = Joi.object({
     type: Joi.string().valid(...registerTypes).required(),
-    date: Joi.date().required(),
+    date: Joi.date().optional(),
 
     outTime: Joi.date().optional(),
     inTime: Joi.date().optional(),

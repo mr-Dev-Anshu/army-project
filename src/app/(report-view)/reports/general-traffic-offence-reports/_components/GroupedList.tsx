@@ -7,10 +7,9 @@ interface GroupedListProps {
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
-  onEdit?: (offence: any) => void;
 }
 
-export default function GroupedList({ data, isVehicleInvolved, onView, onPrint, onEdit }: GroupedListProps) {
+export default function GroupedList({ data, isVehicleInvolved, onView, onPrint }: GroupedListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   if (!data || data.length === 0) {
@@ -35,7 +34,6 @@ export default function GroupedList({ data, isVehicleInvolved, onView, onPrint, 
           isVehicleInvolved={isVehicleInvolved}
           onView={onView}
           onPrint={onPrint}
-          onEdit={onEdit}
           isOpen={expandedIndex === index}
           onToggle={() => handleToggle(index)}
         />

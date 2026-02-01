@@ -10,12 +10,11 @@ interface GroupRowProps {
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
-  onEdit?: (offence: any) => void;
   isOpen: boolean;
   onToggle: () => void;
 }
 
-export default function GroupRow({ group, index, isVehicleInvolved, onView, onPrint, onEdit, isOpen, onToggle }: GroupRowProps) {
+export default function GroupRow({ group, index, isVehicleInvolved, onView, onPrint, isOpen, onToggle }: GroupRowProps) {
   const offences = group.offences || [];
   const total = offences.length;
   const pending = offences.filter((o: any) => !o.actionStatus).length;
@@ -60,7 +59,7 @@ export default function GroupRow({ group, index, isVehicleInvolved, onView, onPr
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50 ${isOpen ? "max-h-[2000px] opacity-100 py-4 px-6 border-t border-gray-100" : "max-h-0 opacity-0"}`}
       >
-        <DetailsTable offences={offences} isVehicleInvolved={isVehicleInvolved} onView={onView} onPrint={onPrint} onEdit={onEdit} />
+        <DetailsTable offences={offences} isVehicleInvolved={isVehicleInvolved} onView={onView} onPrint={onPrint} />
       </div>
     </div>
   );

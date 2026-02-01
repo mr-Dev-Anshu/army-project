@@ -1,24 +1,40 @@
 export interface AffectedIndividual {
-    armyNo: string;
-    rank: string;
-    name: string;
+    individualType: string;
+    individualDetails: {
+        armyNo?: string;
+        rank?: string;
+        name?: string;
+        unit?: string;
+        fmn?: string;
+        [key: string]: any;
+    };
+    offenderDetails?: {
+        [key: string]: any;
+    };
     age: string;
     totalServiceDuration: string;
-    unit: string;
     unitLocation: string;
-    fmn: string;
     individualWorkingStatus: "Leave" | "Duty" | "";
+    _id?: string;
 }
+
 export interface ImmediateReportingIncident {
     _id: string;
+    reportHeading?: string;
+    vehicleType?: string;
+    vehicleNumber?: string;
+    vehicleName?: string;
     individuals: AffectedIndividual[];
-    incidentPlace?: string;
-    incidentDate?: string;
-    incidentTime?: string;
-    incidentBrief?: string;
-    coordinationWithPolice?: string;
+    placeOfOccurrence?: string;
+    dateOfOccurrence?: string;
+    timeOfOccurrence?: string;
+    description?: string;
+    coordWith?: string;
     incidentCoveredBy?: string;
     relevantPhotos?: string[];
+    age?: string;
+    totalServiceDuration?: string;
+    individualWorkingStatus?: "Leave" | "Duty" | "";
     createdAt?: string;
     updatedAt?: string;
 }

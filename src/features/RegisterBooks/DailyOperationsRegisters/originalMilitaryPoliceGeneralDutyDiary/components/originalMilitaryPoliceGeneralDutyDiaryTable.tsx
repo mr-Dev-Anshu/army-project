@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ReportFilterBar, { FilterState } from "@/components/common/ReportFilterBar";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "react-toastify";
+import { useUpdateGeneralDutyDiaryRegister } from "../hooks";
 
 interface GeneralDutyDiaryTableProps {
     data: any[];
@@ -19,6 +22,7 @@ interface GeneralDutyDiaryTableProps {
 }
 
 const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDutyDiaryTableProps) => {
+    const { mutateAsync: updateReport } = useUpdateGeneralDutyDiaryRegister();
     const [filters, setFilters] = useState<FilterState>({
         search: "",
         dutyType: "All",
@@ -45,6 +49,36 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleInitialToggle = async (record: any, field: string) => {
+        try {
+            const currentAuth = record.authentication || {};
+            const isAdding = !currentAuth[field];
+            const newAuth = {
+                initialsOfMPCRNCO: currentAuth.initialsOfMPCRNCO || false,
+                initialsOfSMSJCO: currentAuth.initialsOfSMSJCO || false,
+                initialsOf2IC: currentAuth.initialsOf2IC || false,
+                [field]: isAdding
+            };
+
+            await updateReport({
+                id: record._id,
+                data: {
+                    authentication: newAuth
+                },
+                suppressToast: true
+            });
+
+            if (isAdding) {
+                toast.success("Sign added.");
+            } else {
+                toast.success("Sign removed.");
+            }
+        } catch (error) {
+            console.error("Failed to update initial", error);
+            toast.error("Failed to update sign");
+        }
     };
 
     // Extract unique filter options from data
@@ -177,6 +211,18 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
 
     return (
         <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="24" fill="#E5E5E5" />
+                        <path d="M19.334 13.5H12.334V31H20.5007C22.484 31 24.0007 32.5167 24.0007 34.5V18.1667C24.0007 15.6 21.9007 13.5 19.334 13.5Z" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M28.666 23.9974L30.9993 26.3307L35.666 21.6641" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M35.6667 17V13.5H28.6667C26.1 13.5 24 15.6 24 18.1667V34.5C24 32.5167 25.5167 31 27.5 31H35.6667V28.3167" stroke="#404040" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <h2 className="text-lg font-semibold text-[#404040]">Original Military Police General Duty Diary</h2>
+                </div>
+                <span className="text-sm font-medium  text-[#0A0A0A]">{filteredData.length} Reports</span>
+            </div>
             <ReportFilterBar
                 filters={filters}
                 onFilterChange={handleFilterChange}
@@ -501,13 +547,31 @@ const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDuty
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-300 text-center text-gray-900">
-                                                {item.authentication?.initialsMPCPNCO || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfMPCRNCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfMPCRNCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-300 text-center text-gray-900">
-                                                {item.authentication?.initialsQMSJCO || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOfSMSJCO || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOfSMSJCO")}
+                                                    />
+                                                </div>
                                             </td>
                                             <td className="px-4 py-4 align-top border-r border-gray-300 text-center text-gray-900">
-                                                {item.authentication?.initials2IC || "-"}
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        className="border-black"
+                                                        checked={item.authentication?.initialsOf2IC || false}
+                                                        onCheckedChange={() => handleInitialToggle(item, "initialsOf2IC")}
+                                                    />
+                                                </div>
                                             </td>
 
                                             {/* Actions */}

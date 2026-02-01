@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { MoreVertical, Eye, Printer, Edit, Copy, Trash, Download, Paperclip } from "lucide-react";
+import { MoreVertical, Eye, Printer, Edit, Copy, Trash } from "lucide-react";
 import {
   useUpdateTrafficOffence,
   useDeleteTrafficOffence,
@@ -21,14 +21,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OffenderDetailsCell from "./OffenderDetailsCell";
-import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
 
 interface DetailsTableProps {
   offences: any[];
   isVehicleInvolved: boolean;
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
-  onEdit?: (offence: any) => void;
 }
 
 export default function DetailsTable({
@@ -36,7 +34,6 @@ export default function DetailsTable({
   isVehicleInvolved,
   onView,
   onPrint,
-  onEdit,
 }: DetailsTableProps) {
   const { mutateAsync: updateOffence, isPending: isUpdating } =
     useUpdateTrafficOffence();
@@ -56,8 +53,6 @@ export default function DetailsTable({
   });
 
   const [remarkError, setRemarkError] = React.useState("");
-  const [attachModalOpen, setAttachModalOpen] = React.useState(false);
-  const [selectedReport, setSelectedReport] = React.useState<any>(null);
 
   const handleStatusClick = (offenceId: string, currentStatus: boolean) => {
     setActionRemark(""); // Reset remark
@@ -78,10 +73,14 @@ export default function DetailsTable({
     });
   };
 
-  const handleAttachCertificate = (offence: any) => {
-    setSelectedReport(offence);
-    setAttachModalOpen(true);
-  };
+  const handlePrintClick = React.useCallback((offenceId: string) => {
+    if (!offenceId) {
+      toast.error("Cannot print report without an ID.");
+      return;
+    }
+    const printUrl = `/print/general-traffic-offence/${offenceId}`;
+    window.open(printUrl, "_blank");
+  }, []);
 
   const handleConfirm = async () => {
     if (!modalState.offenceId) return;
@@ -133,40 +132,34 @@ export default function DetailsTable({
           return <span className="text-gray-900">{offence.displayIndex}</span>;
         },
         className:
-          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-200",
+          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-300",
         headerClassName:
-          "sticky left-0 z-20 bg-gray-50 border-r border-gray-200 w-12",
+          "sticky left-0 z-20 bg-gray-50 border-r border-gray-300 w-12",
       },
       {
         header: "Place of Offence",
         cell: (offence) => (
           <div>
             <div className="font-medium text-gray-900">
-              {offence.offenceOccurenceDetails?.incidentLocation ||
-                "Unknown Location"}
-            </div>
-            <div className="text-gray-500 font-normal mt-1">
-              {" "}
-              {offence.offenceOccurenceDetails?.incidentLocation ||
-                "Unknown Location"}
+              {offence.offenceOccurenceDetails?.incidentLocation}
             </div>
           </div>
         ),
-        className: "min-w-[180px]",
+        className: "min-w-[180px] border-r border-gray-300",
       },
     ];
 
     const vehicleColumns: Column<any>[] = [
       {
         header: "Particulars of Driver/Rider",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (offence) => {
-          const primaryDetails = offence.offenders?.[0]?.offenderDetails || {};
+          const mainOffender = offence.offenders?.[0] || {};
           const reportingMP =
-            offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+            offence.onDutyDetailsMPReporting?.nameReportingMP;
           return (
             <OffenderDetailsCell
-              details={primaryDetails}
+              details={mainOffender}
               mpName={reportingMP}
             />
           );
@@ -176,57 +169,55 @@ export default function DetailsTable({
         header: "Unit",
         cell: (offence) =>
           offence.onDutyDetailsMPReporting?.unit ||
-          offence.offenders?.[0]?.offenderDetails?.unit ||
-          "N/A",
-        className: "min-w-[100px]",
+          offence.offenders?.[0]?.offenderDetails?.unit,
+        className: "min-w-[100px] border-r border-gray-300",
       },
       {
         header: "FMN",
         cell: (offence) =>
           offence.fmn ||
-          offence.offenders?.[0]?.offenderDetails?.fmn ||
-          "HQ 21 Corps",
-        className: "min-w-[100px]",
+          offence.offenders?.[0]?.offenderDetails?.fmn,
+        className: "min-w-[100px] border-r border-gray-300",
       },
       {
         header: "Offence Type/ Brief",
-        className: "min-w-[180px] max-w-[200px]",
+        className: "min-w-[180px] max-w-[200px] border-r border-gray-300",
         cell: (offence) => (
           <div title={offence.offenceOccurenceDetails?.description || ""}>
             <div className="font-medium text-gray-900">
-              {offence.currentOffenceType || "Traffic Offence"}
+              {offence.currentOffenceType}
             </div>
-            <div className="text-xs text-gray-500 mt-1 line-clamp-2">
-              {offence.offenceOccurenceDetails?.description || ""}
-            </div>
+            {/* <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+              {offence.offenceOccurenceDetails?.description}
+            </div> */}
           </div>
         ),
       },
       {
         header: "Veh. BA No. / Make & Take",
-        className: "min-w-[150px]",
+        className: "min-w-[150px] border-r border-gray-300",
         cell: (offence) => (
           <div>
-            <div className="font-semibold text-gray-900">
-              {offence.vehicleNumber || "N/A"}
+            <div className="font-semibold text-gray-900 border-b border-gray-300 pb-1 mb-1">
+              {offence.vehicleNumber}
             </div>
             <div className="text-gray-500 text-xs">
-              {offence.vehicleName || "Unknown Vehicle"}
+              {offence.vehicleName}
             </div>
           </div>
         ),
       },
       {
         header: "Report no.",
-        className: "min-w-[140px]",
+        className: "min-w-[140px] border-r border-gray-300",
         cell: (offence) => {
           const reportNo = offence.reportId || offence.reportNumber;
-          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+          return <span className="text-gray-900 text-xs">{reportNo}</span>;
         },
       },
       {
         header: "Date & Time",
-        className: "min-w-[120px]",
+        className: "min-w-[120px] border-r border-gray-300",
         cell: (offence) => {
           const date = new Date(
             offence.offenceOccurenceDetails?.timeOfOffence || offence.createdAt
@@ -249,14 +240,14 @@ export default function DetailsTable({
       },
       {
         header: "Particulars of Co-Driver/Rider",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (offence) => {
           const coDriver = offence.offenders?.[1];
+          // Even if coDriver is undefined, safe to pass, but the logic above returns "-" if !coDriver
           if (!coDriver) return <span className="text-gray-400">-</span>;
-          const details = coDriver.offenderDetails || {};
-          const reportingMP =
-            offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
-          return <OffenderDetailsCell details={details} mpName={reportingMP} />;
+
+          const reportingMP = offence.onDutyDetailsMPReporting?.nameReportingMP;
+          return <OffenderDetailsCell details={coDriver} mpName={reportingMP} />;
         },
       },
     ];
@@ -264,14 +255,14 @@ export default function DetailsTable({
     const noVehicleColumns: Column<any>[] = [
       {
         header: "Particulars of Indls.",
-        className: "min-w-[200px]",
+        className: "min-w-[200px] border-r border-gray-300",
         cell: (offence) => {
-          const primaryDetails = offence.offenders?.[0]?.offenderDetails || {};
+          const mainOffender = offence.offenders?.[0] || {};
           const reportingMP =
-            offence.onDutyDetailsMPReporting?.nameReportingMP || "Unknown";
+            offence.onDutyDetailsMPReporting?.nameReportingMP;
           return (
             <OffenderDetailsCell
-              details={primaryDetails}
+              details={mainOffender}
               mpName={reportingMP}
             />
           );
@@ -279,36 +270,31 @@ export default function DetailsTable({
       },
       {
         header: "Unit",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (offence) =>
           offence.onDutyDetailsMPReporting?.unit ||
-          offence.offenders?.[0]?.offenderDetails?.unit ||
-          "N/A",
+          offence.offenders?.[0]?.offenderDetails?.unit,
       },
       {
         header: "FMN",
-        className: "min-w-[100px]",
+        className: "min-w-[100px] border-r border-gray-300",
         cell: (offence) =>
           offence.fmn ||
-          offence.offenders?.[0]?.offenderDetails?.fmn ||
-          "HQ 21 Corps",
+          offence.offenders?.[0]?.offenderDetails?.fmn,
       },
       {
         header: "Report no.",
-        className: "min-w-[140px]",
+        className: "min-w-[140px] border-r border-gray-300",
         cell: (offence) => {
           const reportNo =
             offence.reportId ||
-            offence.reportNumber ||
-            `GTO/21 CPU/${(
-              offence._id?.slice(-4) || "0000"
-            ).toUpperCase()}/${new Date().getFullYear()}`;
-          return <span className="text-gray-600 text-xs">{reportNo}</span>;
+            offence.reportNumber
+          return <span className="text-gray-900 text-xs">{reportNo}</span>;
         },
       },
       {
         header: "Date & Time",
-        className: "min-w-[120px]",
+        className: "min-w-[120px] border-r border-gray-300",
         cell: (offence) => {
           const date = new Date(
             offence.offenceOccurenceDetails?.timeOfOffence || offence.createdAt
@@ -331,11 +317,10 @@ export default function DetailsTable({
       },
       {
         header: "Offence Description",
-        className: "min-w-[300px] max-w-md",
+        className: "min-w-[300px] max-w-md border-r border-gray-300",
         cell: (offence) => (
           <div className="text-gray-700 text-xs">
-            {offence.offenceOccurenceDetails?.description ||
-              "No description provided."}
+            {offence.offenceOccurenceDetails?.description}
           </div>
         ),
       },
@@ -372,9 +357,9 @@ export default function DetailsTable({
           );
         },
         className:
-          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-200",
+          "text-center w-28 text-xs sticky right-12 z-10 bg-white group-hover:bg-gray-50 border-l border-gray-300",
         headerClassName:
-          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-200",
+          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-300",
       },
       {
         header: "",
@@ -404,10 +389,7 @@ export default function DetailsTable({
                 <Printer className="w-4 h-4" />
                 Print
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2 cursor-pointer"
-                onClick={() => onEdit && onEdit(offence)}
-              >
+              <DropdownMenuItem className="gap-2 cursor-pointer">
                 <Edit className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
@@ -415,13 +397,6 @@ export default function DetailsTable({
                 <Copy className="w-4 h-4" />
                 Duplicate Report
               </DropdownMenuItem> */}
-              <DropdownMenuItem
-                className="gap-2 cursor-pointer"
-                onClick={() => handleAttachCertificate(offence)}
-              >
-                <Paperclip className="w-4 h-4" />
-                Attach Signed Certificates / Letters
-              </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                 onClick={() => {
@@ -447,7 +422,7 @@ export default function DetailsTable({
       ...(isVehicleInvolved ? vehicleColumns : noVehicleColumns),
       ...actionColumns,
     ];
-  }, [isVehicleInvolved, updateOffence, onView]);
+  }, [isVehicleInvolved, updateOffence, onView, onPrint]);
 
   const processedData = useMemo(() => {
     return offences.map((item, index) => ({
@@ -507,20 +482,6 @@ export default function DetailsTable({
           </div>
         )}
       </ConfirmationModal>
-      <AttachCertificateModal
-        isOpen={attachModalOpen}
-        reportId={selectedReport?._id}
-        reportType="traffic"
-        onClose={() => {
-          setAttachModalOpen(false);
-          setSelectedReport(null);
-        }}
-        onSave={() => {
-          toast.success("Certificate attached successfully");
-          setAttachModalOpen(false);
-          setSelectedReport(null);
-        }}
-      />
     </>
   );
 }

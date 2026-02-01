@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -31,22 +30,33 @@ const getByPath = (obj: any, path?: string) => {
   return keys.reduce((o, k) => (o ? o[k] : undefined), obj) || {};
 };
 
+// 🔥 CRITICAL FIX: Ensure ALL labels from Config map to standardized State keys
 const labelKeyMap: Record<string, string> = {
   "Full Name": "name",
-  Name: "name",
-  Rank: "rank",
+  "Name": "name",
+  
+  "Select Rank": "rank",
+  "Rank": "rank",
+  
   "Army Rider / Driver Number": "armyNumber",
   "Army Number": "armyNumber",
-  Unit: "unit",
-  Command: "command",
-  FMN: "fmn",
-  Address: "address",
+  
+  "Unit": "unit",
+  "Command": "command",
+  "FMN": "fmn",
+  "Address": "address",
+  
   "ID Card Number": "iCardNumber",
+  "I Card Number": "iCardNumber",
+  
   "Father's Name (Son of)": "so",
   "Father's / Husband's Name": "so",
+  
   "Army Official Name": "armyOfficialName",
+  
   "Pass No.": "passNo",
   "Maid/Servant Pass Number": "passNo",
+  
   "Pass Issue Date": "passIssueDate",
   "Pass Expire Date": "passExpireDate",
 };
@@ -66,7 +76,6 @@ export default function OffenderDynamicForm({
   const [steps, setSteps] = useState<Step[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  /* ===== CO-DRIVER STATES ===== */
   const [hasCoDriver, setHasCoDriver] = useState(false);
   const [coDriverType, setCoDriverType] = useState("");
   const [coDriverIndex, setCoDriverIndex] = useState<number | null>(null);
@@ -76,45 +85,43 @@ export default function OffenderDynamicForm({
     !title.toLowerCase().includes("co-driver");
 
   /* ================= SYNC LOCAL DATA ================= */
-  /* ================= SYNC LOCAL DATA ================= */
   useEffect(() => {
-    const newData = globalData || {};
-    // simple equality check for object to avoid infinite loop
-    if (JSON.stringify(localData) !== JSON.stringify(newData)) {
-      setLocalData(structuredClone(newData));
-      setErrors({});
-    }
-  }, [path, globalData]); // Removed localData from deps, but needed in comparison logic. Actually we can rely on globalData reference change or deep comparison.
+    setLocalData(structuredClone(globalData || {}));
+    setErrors({});
+  }, [path, globalData]);
 
-  /* ================= HYDRATE UI STATE (Fix Back Navigation) ================= */
+  /* ================= HYDRATE UI STATE (Reactivity Fix) ================= */
+  const peoplePath = scope === "static"
+    ? "formData.staticSpeed.offenderPeople"
+    : "formData.traffic.offenderPeople";
+  
+  const offendersList = getByPath(state, peoplePath);
+
   useEffect(() => {
     if (!isRoot) return;
 
-    const peoplePath =
-      scope === "static"
-        ? "formData.staticSpeed.offenderPeople"
-        : "formData.traffic.offenderPeople";
-
-    const list = getByPath(state, peoplePath);
-
-    if (Array.isArray(list) && list.length > 0) {
-      // 1. Hydrate Co-Driver
-      const coDriverIdx = list.findIndex((p: any) => p.whoIsIt === "Co-Driver");
+    if (Array.isArray(offendersList) && offendersList.length > 0) {
+      // 1. Check for Co-Driver in updated list
+      const coDriverIdx = offendersList.findIndex((p: any) => p.whoIsIt === "Co-Driver");
+      
       if (coDriverIdx !== -1) {
         setHasCoDriver(true);
-        setCoDriverType(list[coDriverIdx].type);
+        setCoDriverType(offendersList[coDriverIdx].type);
         setCoDriverIndex(coDriverIdx);
+      } else {
+        setHasCoDriver(false);
+        setCoDriverType("");
+        setCoDriverIndex(null);
       }
 
       // 2. Hydrate Additional People
       const newSteps: Step[] = [];
-      list.forEach((p: any, idx: number) => {
-        // Skip Main Driver (Index 0) and Co-Driver
+      offendersList.forEach((p: any, idx: number) => {
         if (idx === 0) return;
         if (idx === coDriverIdx) return;
 
         newSteps.push({
-          id: Date.now() + idx, // Generate unique ID
+          id: Date.now() + idx,
           type: p.type,
           index: idx,
         });
@@ -124,9 +131,7 @@ export default function OffenderDynamicForm({
         setSteps(newSteps);
       }
     }
-    // Run only once on mount to restore UI
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [offendersList, isRoot]); 
 
   /* ================= SAVE FIELD ================= */
   const saveField = (label: string, value: string) => {
@@ -150,11 +155,9 @@ export default function OffenderDynamicForm({
     // Validate Dates
     const issueKey = "passIssueDate";
     const expireKey = "passExpireDate";
-
     let issueDate = updated[issueKey];
     let expireDate = updated[expireKey];
 
-    // If current field is issue date or expire date, re-validate
     if (key === issueKey || key === expireKey) {
       if (issueDate && expireDate) {
         const i = new Date(issueDate);
@@ -173,8 +176,6 @@ export default function OffenderDynamicForm({
           });
         }
       } else {
-        // If one is missing, clear error just in case? Or wait? 
-        // Better to clear error if one is removed.
         setErrors((prev) => {
           const newErr = { ...prev };
           delete newErr["Pass Expire Date"];
@@ -191,11 +192,6 @@ export default function OffenderDynamicForm({
 
   /* ================= ADD OFFENDER ================= */
   const handleSelect = (stepId: number, type: string) => {
-    const peoplePath =
-      scope === "static"
-        ? "formData.staticSpeed.offenderPeople"
-        : "formData.traffic.offenderPeople";
-
     const list = getByPath(state, peoplePath) || [];
     const newIndex = list.length;
 
@@ -221,11 +217,6 @@ export default function OffenderDynamicForm({
 
   /* ================= ENSURE CO-DRIVER ================= */
   const ensureCoDriverSlot = (type: string) => {
-    const peoplePath =
-      scope === "static"
-        ? "formData.staticSpeed.offenderPeople"
-        : "formData.traffic.offenderPeople";
-
     const list = getByPath(state, peoplePath) || [];
     const existingIndex = list.findIndex(
       (p: any) => p.whoIsIt === "Co-Driver"
@@ -259,21 +250,14 @@ export default function OffenderDynamicForm({
       <p className="font-semibold text-lg">{title}</p>
       {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
 
-      {/* ================= MAIN FORM ================= */}
       <div className="grid grid-cols-2 gap-4">
         {fields.map((f: any, i: number) => {
+          // Normalize key
           const key = labelKeyMap[f.label] || f.label;
           const value = localData?.[key] || "";
 
           const isSuggestion = [
-            "Unit",
-            "FMN",
-            "Command",
-            "Select Rank",
-            "Address",
-            "ID Card Number",
-            "I Card Number",
-            "Army Rider / Driver Number",
+            "Unit", "FMN", "Command", "Select Rank", "Address", "ID Card Number", "I Card Number", "Army Rider / Driver Number"
           ].includes(f.label);
 
           return isSuggestion ? (
@@ -301,80 +285,66 @@ export default function OffenderDynamicForm({
         })}
       </div>
 
-      {/* ================= CO-DRIVER ================= */}
-      {isRoot &&
-        !isMainCivilian &&
-        (scope === "traffic" || scope === "static") && (
-          <>
-            <div className="mt-6 flex items-start gap-2">
-              <Checkbox
-                checked={hasCoDriver}
-                onCheckedChange={(v) => {
-                  setHasCoDriver(Boolean(v));
+      {isRoot && !isMainCivilian && (scope === "traffic" || scope === "static") && (
+        <>
+          <div className="mt-6 flex items-start gap-2">
+            <Checkbox
+              checked={hasCoDriver}
+              onCheckedChange={(v) => {
+                setHasCoDriver(Boolean(v));
+                if (!v) {
                   setCoDriverType("");
                   setCoDriverIndex(null);
+                }
+              }}
+            />
+            <p className="text-sm">Was there a <b>Co-Driver / Pillion Rider</b>?</p>
+          </div>
+
+          {hasCoDriver && (
+            <div className="mt-4 space-y-4">
+              <RadioGroup
+                value={coDriverType}
+                onValueChange={(v) => {
+                  setCoDriverType(v);
+                  const idx = ensureCoDriverSlot(v);
+                  setCoDriverIndex(idx);
                 }}
-              />
-              <p className="text-sm">
-                Was there a <b>Co-Driver / Pillion Rider</b>?
-              </p>
+                className="grid grid-cols-2 gap-3"
+              >
+                {Object.keys(offenderFormsConfig).map((item) => (
+                  <label key={item} className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer">
+                    <RadioGroupItem value={item} />
+                    {item}
+                  </label>
+                ))}
+              </RadioGroup>
+
+              {coDriverType && coDriverIndex !== null && (
+                <OffenderDynamicForm
+                  title={`${coDriverType} (Co-Driver) Details`}
+                  fields={offenderFormsConfig[coDriverType].fields}
+                  scope={scope}
+                  path={
+                    scope === "static"
+                      ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
+                      : `formData.traffic.offenderPeople[${coDriverIndex}].details`
+                  }
+                  isRoot={false}
+                />
+              )}
             </div>
+          )}
+        </>
+      )}
 
-            {hasCoDriver && (
-              <div className="mt-4 space-y-4">
-                <RadioGroup
-                  value={coDriverType}
-                  onValueChange={(v) => {
-                    setCoDriverType(v);
-                    const idx = ensureCoDriverSlot(v);
-                    setCoDriverIndex(idx);
-                  }}
-                  className="grid grid-cols-2 gap-3"
-                >
-                  {Object.keys(offenderFormsConfig).map((item) => (
-                    <label
-                      key={item}
-                      className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-                    >
-                      <RadioGroupItem value={item} />
-                      {item}
-                    </label>
-                  ))}
-                </RadioGroup>
-
-                {coDriverType && coDriverIndex !== null && (
-                  <OffenderDynamicForm
-                    title={`${coDriverType} (Co-Driver) Details`}
-                    fields={offenderFormsConfig[coDriverType].fields}
-                    scope={scope}
-                    path={
-                      scope === "static"
-                        ? `formData.staticSpeed.offenderPeople[${coDriverIndex}].details`
-                        : `formData.traffic.offenderPeople[${coDriverIndex}].details`
-                    }
-                    isRoot={false}
-                  />
-                )}
-              </div>
-            )}
-          </>
-        )}
-
-      {/* ================= EXTRA PEOPLE (STEPS) ================= */}
       {steps.map((step) => (
         <div key={step.id} className="mt-8 border-t pt-6">
           <p className="font-semibold mb-3">Additional Person Details</p>
-
           {!step.type ? (
-            <RadioGroup
-              onValueChange={(v) => handleSelect(step.id, v)}
-              className="grid sm:grid-cols-2 gap-3"
-            >
+            <RadioGroup onValueChange={(v) => handleSelect(step.id, v)} className="grid sm:grid-cols-2 gap-3">
               {Object.keys(offenderFormsConfig).map((item) => (
-                <label
-                  key={item}
-                  className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer"
-                >
+                <label key={item} className="border rounded-lg px-4 py-2 flex gap-2 cursor-pointer">
                   <RadioGroupItem value={item} />
                   {item}
                 </label>
@@ -396,14 +366,9 @@ export default function OffenderDynamicForm({
         </div>
       ))}
 
-      {/* ================= ADD MORE ================= */}
       {isRoot && (scope === "traffic" || scope === "static") && (
         <div className="pt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={addMore}
-            className="bg-black text-white px-4 py-2 rounded-md text-sm"
-          >
+          <button type="button" onClick={addMore} className="bg-black text-white px-4 py-2 rounded-md text-sm">
             + Add More People
           </button>
         </div>

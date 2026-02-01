@@ -18,7 +18,8 @@ export const useUpdateGeneralDutyDiaryRegister = () => {
     const mutation = useUpdateRegister();
     return {
         ...mutation,
-        mutateAsync: ({ id, data }: { id: string; data: any }) => mutation.mutateAsync({ id, payload: { ...data, type: TYPE } }),
+        mutateAsync: ({ id, data, suppressToast }: { id: string; data: any; suppressToast?: boolean }) =>
+            mutation.mutateAsync({ id, payload: { ...data, type: TYPE }, suppressToast }),
     };
 };
 

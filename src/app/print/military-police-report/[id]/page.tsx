@@ -1,12 +1,16 @@
-import React from 'react';
-import { notFound } from 'next/navigation';
-import { connectDB } from "@/lib/db/mongodb";
-import { generalTrafficOffenceRepo } from "@/reposetories/generalTrafficOffence.repo";
+"use client";
+
+import React, { useEffect } from 'react';
+import { Loader2 } from "lucide-react";
+import { useGetTrafficOffenceById } from "@/features/generalTraficOffence/hooks";
 import MilitaryPoliceReport, { MilitaryPoliceReportProps } from "@/components/reports/MilitaryPoliceReport";
 
 function mapToReportProps(offence: any): MilitaryPoliceReportProps {
-    const primary = offence.offenders?.[0]?.offenderDetails || {};
-    const secondary = offence.offenders?.[1]?.offenderDetails;
+    const offender1 = offence.offenders?.[0] || {};
+    const primaryDetails = offender1.offenderDetails || {};
+
+    const offender2 = offence.offenders?.[1];
+    const secondaryDetails = offender2?.offenderDetails;
 
     const val = (v: any) => v || "";
     const dateVal = (d: string) =>
@@ -30,40 +34,43 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
             offence.reportNo || offence.reportId || offence.reportNumber || "",
         reportDate: dateVal(offence.createdAt),
         particulars: {
+            blocks: offence.particulars?.blocks || offence.blocks || [],
             primary: {
-                aadharCardNo: val(primary.aadharCard || primary.aadharNumber),
-                name: val(primary.name),
-                so: val(primary.fatherName || primary.so),
-                relation: val(primary.relation),
-                armyNo: val(primary.armyNumber || primary.armyNo),
-                rank: val(primary.rank || primary["Select Rank"]),
-                unit: val(primary.unit),
-                command: val(primary.command),
-                fmn: val(primary.fmn),
-                address: val(primary.address),
+                aadharCardNo: val(primaryDetails.aadharCard || primaryDetails.aadharNumber),
+                name: val(primaryDetails.name),
+                so: val(primaryDetails.fatherName || primaryDetails.so),
+                relation: val(primaryDetails.relation),
+                armyNo: val(primaryDetails.armyNumber || primaryDetails.armyNo),
+                rank: val(primaryDetails.rank || primaryDetails["Select Rank"]),
+                unit: val(primaryDetails.unit),
+                command: val(primaryDetails.command),
+                fmn: val(primaryDetails.fmn),
+                address: val(primaryDetails.address),
                 iCardNo: val(
-                    primary.identityCard ||
-                    primary.iCardNumber ||
-                    primary["I Card Number"]
+                    primaryDetails.identityCard ||
+                    primaryDetails.iCardNumber ||
+                    primaryDetails["I Card Number"]
                 ),
+                driverType: offender1.type || offender1.offenderType || primaryDetails.driverType,
             },
-            secondary: secondary
+            secondary: secondaryDetails
                 ? {
-                    aadharCardNo: val(secondary.aadharCard || secondary.aadharNumber),
-                    name: val(secondary.name),
-                    so: val(secondary.fatherName || secondary.so),
-                    relation: val(secondary.relation),
-                    armyNo: val(secondary.armyNumber || secondary.armyNo),
-                    rank: val(secondary.rank || secondary["Select Rank"]),
-                    unit: val(secondary.unit),
-                    command: val(secondary.command),
-                    fmn: val(secondary.fmn),
-                    address: val(secondary.address),
+                    aadharCardNo: val(secondaryDetails.aadharCard || secondaryDetails.aadharNumber),
+                    name: val(secondaryDetails.name),
+                    so: val(secondaryDetails.fatherName || secondaryDetails.so),
+                    relation: val(secondaryDetails.relation),
+                    armyNo: val(secondaryDetails.armyNumber || secondaryDetails.armyNo),
+                    rank: val(secondaryDetails.rank || secondaryDetails["Select Rank"]),
+                    unit: val(secondaryDetails.unit),
+                    command: val(secondaryDetails.command),
+                    fmn: val(secondaryDetails.fmn),
+                    address: val(secondaryDetails.address),
                     iCardNo: val(
-                        secondary.identityCard ||
-                        secondary.iCardNumber ||
-                        secondary["I Card Number"]
+                        secondaryDetails.identityCard ||
+                        secondaryDetails.iCardNumber ||
+                        secondaryDetails["I Card Number"]
                     ),
+                    driverType: offender2.type || offender2.offenderType || secondaryDetails.driverType,
                 }
                 : undefined,
             vehicle: offence.isVehicleInvolved
@@ -138,27 +145,42 @@ function mapToReportProps(offence: any): MilitaryPoliceReportProps {
     };
 }
 
-export default async function PrintReportPage(props: { params: Promise<{ id: string }> }) {
-    await connectDB();
-    const params = await props.params;
-    const { id } = params;
+export default function PrintReportPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params);
+    const { data, isLoading } = useGetTrafficOffenceById(id);
 
-    let offence;
-    try {
-        offence = await generalTrafficOffenceRepo.getById(id);
-    } catch (e) {
-        console.error("Error fetching report:", e);
+    useEffect(() => {
+        if (data) {
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [data]);
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+        );
     }
 
-    if (!offence) {
-        return notFound();
+    if (!data) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center text-red-500">
+                Report not found
+            </div>
+        );
     }
 
-    const reportProps = mapToReportProps(offence);
+    const reportProps = mapToReportProps(data);
 
     return (
-        <div className="bg-white">
-            <MilitaryPoliceReport {...reportProps} />
+        <div id="print-container" className="min-h-screen bg-white p-0">
+            <div id="report-content">
+                <MilitaryPoliceReport {...reportProps} />
+            </div>
         </div>
     );
 }

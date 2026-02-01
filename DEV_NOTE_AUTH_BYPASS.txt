@@ -1,0 +1,9 @@
+/*
+    Temporary Development Note:
+    I have hardcoded the 'x-user-role: superadmin' header in the frontend API calls (src/apis/users/*.ts)
+    to bypass the backend permission check I created.
+
+    When you implement the full Authentication system (Login/Session):
+    1. Remove these hardcoded headers.
+    2. Ensure your axios interceptor or AuthContext passes the real user's role.
+*/

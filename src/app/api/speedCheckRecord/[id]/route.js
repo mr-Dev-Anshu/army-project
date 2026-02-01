@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import { staticSpeedCheckRecordService } from "@/services/speedCheckRecord.service";
-import { updateStaticSpeedCheckRecordSchema } from "@/validators/speedCheckRecord.validator";
+// import { updateStaticSpeedCheckRecordSchema } from "@/validators/speedCheckRecord.validator"; // validation commented out
 
 export async function GET(request, { params }) {
   try {
@@ -43,18 +43,10 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
 
-    // const { error: validationError, value } = updateStaticSpeedCheckRecordSchema.validate(body, {
-    //   abortEarly: false,
-    // });
+    // Validation commented out to allow empty/partial updates from frontend.
+    const value = body;
 
-    // if (validationError) {
-    //   return NextResponse.json(
-    //     { error: "Validation failed", details: validationError.details },
-    //     { status: 400 }
-    //   );
-    // }
-
-    const updated = await staticSpeedCheckRecordService.update(id, body);
+    const updated = await staticSpeedCheckRecordService.update(id, value);
 
     return NextResponse.json(updated);
   } catch (error) {

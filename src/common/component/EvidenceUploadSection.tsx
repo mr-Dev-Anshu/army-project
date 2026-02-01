@@ -9,6 +9,7 @@ export interface EvidenceField {
   label: string;
   key: string;
   multiple?: boolean;
+  accept?: string;
 }
 
 export default function EvidenceUploadSection({
@@ -99,6 +100,7 @@ export default function EvidenceUploadSection({
               ref={inputRef}
               type="file"
               multiple={field.multiple}
+              accept={field.accept}
               className="hidden"
               onChange={(e) => handleUpload(field.key, !!field.multiple, e.target.files)}
             />

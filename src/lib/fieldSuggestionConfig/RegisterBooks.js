@@ -24,6 +24,19 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
         'duty.from': 'location', // Suggest locations
         'duty.to': 'location',   // Suggest locations
 
+        // Vehicle Register Fields (Mapped from details)
+        'details.natureOfDuty': 'natureOfDuty',
+        'details.fromLocation': 'location',
+        'details.toLocation': 'location',
+        'details.dutyType': 'natureOfDuty',
+        'details.typeOfVehicle': 'typeOfVehicle',
+        'details.purposeOfDemand': 'purposeOfDemand',
+        'details.outSignature.value': 'signature',
+        'details.inSignature.value': 'signature',
+        'details.outSignature': 'signature',
+        'details.inSignature': 'signature',
+        'details.vehicleBaNumber': 'vehicleBaNumber',
+
         // General Duty Diary Fields
         'details.placeOfDuty': 'placeOfDuty',
         'details.typeOfDuty': 'typeOfDuty',
@@ -108,6 +121,70 @@ export const REGISTER_BOOKS_SUGGESTION_CONFIG = {
 
         // Other specific fields that might arise
         'details.remarks': 'remarks',
+
+        // Lost and Found Register
+        'details.itemName': 'itemName',
+        'details.place': 'place',
+        'details.handedByName': 'name',
+        'details.caseDetails': 'caseDetails',
+        'details.takeoverBy': 'name',
+        'details.takeoverAuth.initialsMPCPNCO': 'initials',
+        'details.takeoverAuth.initialsQMSJCO': 'initials',
+        'details.takeoverAuth.initials2IC': 'initials',
+
+        // Army Help Line Complaints
+        'details.relatedPoliceStation': 'relatedPoliceStation',
+        'details.mobileNo': 'mobileNumber',
+        'details.civilAddress': 'civilAddress',
+
+        // Mini Kote Arms / AMN Register
+        'details.typeOfArms': 'typeOfArms',
+        'details.buttNo': 'buttNo',
+        'details.registrationNo': 'registrationNo',
+        'details.typeOfAmn': 'typeOfAmn',
+
+        // Contact Info Army
+        'details.rank': 'rank',
+        'details.name': 'name',
+        'details.mobileNumber': 'mobileNumber',
+        'details.appointment': 'appointment',
+        'details.unit': 'unit',
+        'details.postedAt': 'unitLocation',
+        'details.officeLandlineNumber': 'landlineNumber',
+        'details.residencyNo': 'landlineNumber',
+
+        // Contact Info Civil Police
+        'details.policeStationName': 'policeStation',
+        'details.rankOfStation': 'rankOfStation',
+        'details.shoName': 'shoName',
+        'details.addressOfStation': 'address',
+        'details.landmark': 'landmark',
+        'details.district': 'district',
+        'details.state': 'state',
+        'details.stationEmailId': 'email',
+
+        // Military Police Control Room
+        'details.locationOfUnit': 'unitLocation',
+        'details.unitName': 'unit',
+        'details.coName': 'officerName',
+        'details.coRank': 'rank',
+        'details.coMobileNumber': 'mobileNumber',
+        'details.coOfficeLandline': 'landlineNumber',
+        'details.coResidencyTelephone': 'landlineNumber',
+        'details.ic2Name': 'officerName',
+        'details.ic2Rank': 'rank',
+        'details.ic2MobileNumber': 'mobileNumber',
+        'details.ic2OfficeLandline': 'landlineNumber',
+        'details.ic2ResidencyTelephone': 'landlineNumber',
+        'details.mpcrEmailId': 'email',
+        'details.mpcrMobileNumber': 'mobileNumber',
+        'details.mpcrArmyLandline': 'landlineNumber',
+        'details.mpcrBsnlLandline': 'landlineNumber',
+    },
+
+    arrayFields: {
+        'details.assignedDevices.motorolas': 'motorolaId',
+        'details.assignedDevices.cameras': 'cameraId',
     },
 
     trackCustomFields: 'specific',

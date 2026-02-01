@@ -128,8 +128,6 @@ export const initialState: GlobalFormState = {
 
       offenderDetails: {},
       offenderPeople: [],
-      documents: [],
-      attachments: [], // Initial empty state
     },
 
     mpReport: {
@@ -179,8 +177,6 @@ export const initialState: GlobalFormState = {
       },
 
       documents: [],
-
-      attachments: [],
 
       additionalIndividual: {
         vehicleInvolved: "",
@@ -252,25 +248,20 @@ export const initialState: GlobalFormState = {
 
     immediateReportingIncident: {
       _id: "",
-      individuals: [{
-        armyNo: "",
-        rank: "",
-        name: "",
-        age: "",
-        totalServiceDuration: "",
-        unit: "",
-        unitLocation: "",
-        fmn: "",
-        individualWorkingStatus: "",
-      }],
-      incidentPlace: "",
-      incidentDate: "",
-      incidentTime: "",
-      incidentBrief: "",
-      coordinationWithPolice: "",
+      individuals: [],
+      vehicleType: "",
+      vehicleNumber: "",
+      vehicleName: "",
+      placeOfOccurrence: "",
+      dateOfOccurrence: "",
+      timeOfOccurrence: "",
+      description: "",
+      coordWith: "",
       incidentCoveredBy: "",
       relevantPhotos: [],
     },
+
+
   },
 };
 

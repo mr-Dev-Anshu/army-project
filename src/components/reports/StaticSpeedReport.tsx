@@ -7,12 +7,12 @@ export interface StaticSpeedReportProps {
   particulars: {
     rider: {
       armyNo: string;
-      name: string;
-      fmn: string;
-      address: string;
       rank: string;
+      name: string;
       unit: string;
+      fmn: string;
       command: string;
+      address: string;
       iCardNo: string;
     };
     vehicle: {
@@ -67,11 +67,15 @@ const DataField = ({
   if (!value || value === "N/A" || value === "") return null;
   return (
     <div className={`grid ${className}`}>
-      <span className="font-bold">{label}</span>
-      <span>{value}</span>
+      <span className="font-bold whitespace-nowrap">{label}</span>
+      <span className="break-words">{value}</span>
     </div>
   );
 };
+
+const hasContent = (str?: string) => str && str !== "N/A" && str.trim() !== "";
+const hasObjectContent = (obj: any) => Object.values(obj).some((val) => hasContent(val as string));
+
 
 const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
   reportNo,
@@ -137,52 +141,47 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
         </div>
 
         {/* 1. PARTICULARS */}
-        <div className="mb-6">
-          <h2 className="font-bold text-xs mb-4">
-            1. &nbsp;&nbsp; <span className="underline">PARTICULARS:</span>
-          </h2>
+        {(hasObjectContent(particulars.rider) || hasObjectContent(particulars.vehicle)) && (
+          <div className="mb-6">
+            <h2 className="font-bold text-xs mb-4">
+              1. &nbsp;&nbsp; <span className="underline">PARTICULARS:</span>
+            </h2>
 
-          {/* 1.1 Box */}
-          <div className="border border-gray-300 mb-4 text-xs">
-            {/* 1.1 Rider Details */}
-            <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
-              <div className="font-semibold">(1.1)</div>
-              <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                <DataField
-                  label="DD veh rider no."
-                  value={particulars.rider.armyNo}
-                />
-                <DataField label="Rank" value={particulars.rider.rank} />
-                <DataField label="Name" value={particulars.rider.name} />
-                <DataField label="Unit" value={particulars.rider.unit} />
-                <DataField label="FMN" value={particulars.rider.fmn} />
-                <DataField label="Command" value={particulars.rider.command} />
-                <DataField label="Address" value={particulars.rider.address} />
-                <DataField
-                  label="I Card No."
-                  value={particulars.rider.iCardNo}
-                />
-              </div>
-            </div>
+            <div className="border border-gray-300 mb-4 text-xs">
+              {/* 1.1 Rider Details */}
+              {hasObjectContent(particulars.rider) && (
+                <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
+                  <div className="font-semibold">(1.1)</div>
+                  <div className="grid grid-cols-2 gap-x-12 gap-y-1">
+                    <DataField label="DD veh rider no." value={particulars.rider.armyNo} />
+                    <DataField label="Rank" value={particulars.rider.rank} />
+                    <DataField label="Name" value={particulars.rider.name} />
+                    <DataField label="Unit" value={particulars.rider.unit} />
+                    <DataField label="FMN" value={particulars.rider.fmn} />
+                    <DataField label="Command" value={particulars.rider.command} />
+                    <DataField label="Address" value={particulars.rider.address} />
+                    <DataField label="I Card No." value={particulars.rider.iCardNo} />
+                  </div>
+                </div>
+              )}
 
-            <div className="border-t border-gray-200 mx-4"></div>
+              {(hasObjectContent(particulars.rider) && hasObjectContent(particulars.vehicle)) && (
+                <div className="border-t border-gray-200 mx-4"></div>
+              )}
 
-            {/* 1.2 Vehicle Details */}
-            <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
-              <div className="font-semibold">(1.2)</div>
-              <div className="grid grid-cols-2 gap-x-12">
-                <DataField
-                  label="DD Veh BA no."
-                  value={particulars.vehicle.baNo}
-                />
-                <DataField
-                  label="Make & Take"
-                  value={particulars.vehicle.makeAndTake}
-                />
-              </div>
+              {/* 1.2 Vehicle Details */}
+              {hasObjectContent(particulars.vehicle) && (
+                <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
+                  <div className="font-semibold">(1.2)</div>
+                  <div className="grid grid-cols-2 gap-x-12">
+                    <DataField label="DD Veh BA no." value={particulars.vehicle.baNo} />
+                    <DataField label="Make & Take" value={particulars.vehicle.makeAndTake} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* 2. STATEMENT OF EVIDENCE/OCCURRENCE */}
         <div className="mb-6">
@@ -193,21 +192,21 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
 
           <div className="border border-gray-300 mb-6 text-xs">
             {/* (2.1) Date/Time */}
-            {(occurrence.dateOfDuty || occurrence.dutyTime) && (
-              <div className="grid grid-cols-2 border-b border-gray-300">
-                <div className="p-2 pl-4 grid grid-cols-[45px_1fr] items-center">
-                  {occurrence.dateOfDuty && (
-                    <div className="grid grid-cols-[45px_110px_1fr]">
-                      <span>(2.1)</span>
-                      <span className="font-bold">Date of Duty</span>
+            {(hasContent(occurrence.dateOfDuty) || hasContent(occurrence.dutyTime)) && (
+              <div className="grid grid-cols-2">
+                <div className="p-2 pl-4 flex items-center gap-2">
+                  <div className="w-[45px] font-semibold flex-shrink-0">(2.1)</div>
+                  {hasContent(occurrence.dateOfDuty) && (
+                    <div className="flex gap-4">
+                      <span className="font-bold whitespace-nowrap">Date of Duty</span>
                       <span>{occurrence.dateOfDuty}</span>
                     </div>
                   )}
                 </div>
-                <div className="p-2 pl-4 grid grid-cols-[110px_1fr] items-center">
-                  {occurrence.dutyTime && (
+                <div className="p-2 pl-4 flex items-center gap-4">
+                  {hasContent(occurrence.dutyTime) && (
                     <>
-                      <span className="font-bold">Duty Time</span>
+                      <span className="font-bold whitespace-nowrap">Duty Time</span>
                       <span>{occurrence.dutyTime}</span>
                     </>
                   )}
@@ -216,23 +215,24 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
             )}
 
             {/* Duty Location */}
-            {occurrence.dutyLocation && (
+            {hasContent(occurrence.dutyLocation) && (
               <div className="grid grid-cols-2 border-b border-gray-300">
-                <div className="p-2 pl-4 grid grid-cols-[45px_110px_1fr] items-center">
-                  <span></span>
-                  <span className="font-bold">Duty Location</span>
-                  <span>{occurrence.dutyLocation}</span>
+                <div className="p-2 pl-4 flex items-center gap-2 col-span-2">
+                  <div className="w-[45px] flex-shrink-0"></div>
+                  <div className="flex gap-4">
+                    <span className="font-bold whitespace-nowrap">Duty Location</span>
+                    <span>{occurrence.dutyLocation}</span>
+                  </div>
                 </div>
-                <div className="p-2 pl-4"></div>
               </div>
             )}
 
             {/* (2.2) Witness 1 */}
-            {(occurrence.nameOfWitnessingOfficial1 ||
-              occurrence.rankOfWitnessingOfficial1) && (
+            {(hasContent(occurrence.nameOfWitnessingOfficial1) ||
+              hasContent(occurrence.rankOfWitnessingOfficial1)) && (
                 <div className="grid grid-cols-2 border-b border-gray-300">
                   <div className="p-2 pl-4 grid grid-cols-[45px_110px_1fr] items-center">
-                    <span>(2.2)</span>
+                    <span className="font-semibold">(2.2)</span>
                     <span className="font-bold">
                       Name of MP <br />
                       Witnessing
@@ -240,7 +240,7 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
                     <span>{occurrence.nameOfWitnessingOfficial1}</span>
                   </div>
                   <div className="p-2 pl-4 grid grid-cols-[110px_1fr] items-center">
-                    {occurrence.rankOfWitnessingOfficial1 && (
+                    {hasContent(occurrence.rankOfWitnessingOfficial1) && (
                       <>
                         <span className="font-bold">Rank</span>
                         <span>{occurrence.rankOfWitnessingOfficial1}</span>
@@ -251,11 +251,11 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
               )}
 
             {/* (2.2.1) Witness 2 */}
-            {(occurrence.nameOfWitnessingOfficial2 ||
-              occurrence.rankOfWitnessingOfficial2) && (
+            {(hasContent(occurrence.nameOfWitnessingOfficial2) ||
+              hasContent(occurrence.rankOfWitnessingOfficial2)) && (
                 <div className="grid grid-cols-2">
                   <div className="p-2 pl-4 grid grid-cols-[45px_110px_1fr] items-center">
-                    <span>(2.2.1)</span>
+                    <span className="font-semibold">(2.2.1)</span>
                     <span className="font-bold">
                       Name of MP <br />
                       Witnessing
@@ -263,7 +263,7 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
                     <span>{occurrence.nameOfWitnessingOfficial2}</span>
                   </div>
                   <div className="p-2 pl-4 grid grid-cols-[110px_1fr] items-center">
-                    {occurrence.rankOfWitnessingOfficial2 && (
+                    {hasContent(occurrence.rankOfWitnessingOfficial2) && (
                       <>
                         <span className="font-bold">Rank</span>
                         <span>{occurrence.rankOfWitnessingOfficial2}</span>
@@ -274,43 +274,47 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
               )}
           </div>
 
-          <div className="flex gap-4 mb-4 text-xs">
-            <div className="min-w-[40px] font-semibold">(2.3)</div>
-            <div className="text-justify leading-relaxed whitespace-pre-line">
-              {occurrence.statement}
+          {hasContent(occurrence.statement) && (
+            <div className="flex gap-4 mb-4 text-xs">
+              <div className="min-w-[40px] font-semibold">(2.3)</div>
+              <div className="text-justify leading-relaxed whitespace-pre-line">
+                {occurrence.statement}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 3. OFFENCE COMMITTED */}
-        <div className="mb-8">
-          <h2 className="font-bold text-xs mb-4">
-            3. &nbsp;&nbsp;{" "}
-            <span className="underline">
-              OFFENCE COMMITTED/ORDERS CONTRAVENED:
-            </span>
-          </h2>
-          <div className="ml-4 grid grid-cols-[40px_1fr] gap-y-2 text-xs">
-            <div className="font-semibold">(3.1)</div>
-            <div className="flex flex-col gap-y-2">
-              <DataField
-                label="Actual Speed Noted"
-                value={offence.actualSpeed}
-                className="grid-cols-[200px_1fr]"
-              />
-              <DataField
-                label="Auth Speed"
-                value={offence.authSpeed}
-                className="grid-cols-[200px_1fr]"
-              />
-              <DataField
-                label="Over Speed Calculated"
-                value={offence.overSpeed}
-                className="grid-cols-[200px_1fr]"
-              />
+        {hasObjectContent(offence) && (
+          <div className="mb-8">
+            <h2 className="font-bold text-xs mb-4">
+              3. &nbsp;&nbsp;{" "}
+              <span className="underline">
+                OFFENCE COMMITTED/ORDERS CONTRAVENED:
+              </span>
+            </h2>
+            <div className="ml-4 grid grid-cols-[40px_1fr] gap-y-2 text-xs">
+              <div className="font-semibold">(3.1)</div>
+              <div className="flex flex-col gap-y-2">
+                <DataField
+                  label="Actual Speed Noted"
+                  value={offence.actualSpeed}
+                  className="grid-cols-[200px_1fr]"
+                />
+                <DataField
+                  label="Auth Speed"
+                  value={offence.authSpeed}
+                  className="grid-cols-[200px_1fr]"
+                />
+                <DataField
+                  label="Over Speed Calculated"
+                  value={offence.overSpeed}
+                  className="grid-cols-[200px_1fr]"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* 4. WITNESS */}
         <div className="mb-12">
@@ -387,14 +391,18 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
           )}
 
           <div className="flex flex-col gap-1">
-            <div className="flex">
-              <span className="font-bold text-xs w-[60px]">Station:</span>
-              <span className="text-xs">{remarks.station}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold text-xs w-[60px]">Dated:</span>
-              <span className="text-xs">{remarks.dated}</span>
-            </div>
+            {remarks.station && (
+              <div className="flex">
+                <span className="font-bold text-xs w-[60px]">Station :</span>
+                <span className="text-xs">{remarks.station}</span>
+              </div>
+            )}
+            {remarks.dated && (
+              <div className="flex">
+                <span className="font-bold text-xs w-[60px]">Dated :</span>
+                <span className="text-xs">{remarks.dated}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

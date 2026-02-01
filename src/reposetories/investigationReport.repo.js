@@ -2,13 +2,34 @@ import { MPReport } from "@/models/InvestigationReport";
 import mongoose from "mongoose";
 import trackFieldSuggestions from "@/lib/fieldSuggestionTracker";
 import { INVESTIGATION_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/investigationReport";
+import { setCurrentUserId } from "@/lib/mongoose-plugins/auditsFields.js";
 
 export class MPReportRepository {
 
   /* ================= CREATE ================= */
 
-  async create(data) {
+  async create(data, requestContext = null) {
     const report = new MPReport(data);
+
+    // Attach audit information from request context if available
+    if (requestContext && requestContext.userId) {
+      report.createdBy = requestContext.userId;
+      report.updatedBy = requestContext.userId;
+
+      try {
+        setCurrentUserId(requestContext.userId);
+        console.log(
+          "MPReportRepository - setCurrentUserId:",
+          requestContext.userId
+        );
+      } catch (err) {
+        console.error(
+          "MPReportRepository - Failed to setCurrentUserId:",
+          err
+        );
+      }
+    }
+
     const saved = await report.save();
 
     trackFieldSuggestions(
@@ -166,8 +187,10 @@ export class MPReportRepository {
           rules.push({
             $or: [
               { "reportDetails.unit": { $regex: regex } },
+              { "investigationHead.unit": { $regex: regex } },
               { "onDutyDetailsMPReporting.unit": { $regex: regex } },
-              { "offenders.offenderDetails.unit": { $regex: regex } }
+              { "offenders.offenderDetails.unit": { $regex: regex } },
+              { "individuals.unit": { $regex: regex } }
             ]
           });
         }
@@ -177,7 +200,9 @@ export class MPReportRepository {
           rules.push({
             $or: [
               { "reportDetails.fmn": { $regex: regex } },
-              { "offenders.offenderDetails.fmn": { $regex: regex } }
+              { "investigationHead.fmn": { $regex: regex } },
+              { "offenders.offenderDetails.fmn": { $regex: regex } },
+              { "individuals.fmn": { $regex: regex } }
             ]
           });
         }
@@ -270,17 +295,4 @@ export class MPReportRepository {
   async deleteById(id) {
     return await MPReport.findByIdAndDelete(id);
   }
-  async appendCertificates(id, certificates) {
-  return await MPReport.findByIdAndUpdate(
-    id,
-    {
-      $push: {
-        certificates: { $each: certificates },
-      },
-    },
-    { new: true, runValidators: true }
-  );
 }
-}
-
-

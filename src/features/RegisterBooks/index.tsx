@@ -40,8 +40,18 @@ const RegisterBooks = () => {
     const sections: RegisterSection[] = [
         {
             title: "Daily Operations Registers",
-            count: "09",
+            count: "10",
             items: [
+                {
+                    title: "MP General Diary & Daily Occurrence Book",
+                    icon: <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="24" fill="#404040" />
+                        <path d="M14.6665 32.7526C14.6665 31.9791 14.9738 31.2372 15.5208 30.6902C16.0678 30.1432 16.8096 29.8359 17.5832 29.8359H33.3332" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M17.5832 12.3359H33.3332V35.6693H17.5832C16.8096 35.6693 16.0678 35.362 15.5208 34.815C14.9738 34.268 14.6665 33.5262 14.6665 32.7526V15.2526C14.6665 14.4791 14.9738 13.7372 15.5208 13.1902C16.0678 12.6432 16.8096 12.3359 17.5832 12.3359Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    ,
+                    route: "/analysis/registers-books/mp-general-diary-daily-occurrence-book",
+                },
                 {
                     title: "Original Military Police General Duty Diary",
                     icon: <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -177,8 +187,24 @@ const RegisterBooks = () => {
         },
         {
             title: "Occasional Use Registers",
-            count: "03",
+            count: "04",
             items: [
+                {
+                    title: (
+                        <span>
+                            <strong>MT Accident </strong> Register: 21 CORPs PRO
+                        </span>
+                    ),
+                    icon: <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="24" fill="#404040" />
+                        <path d="M26 28H21M31 28H34V24.85C34.0007 24.6121 33.9165 24.3816 33.7625 24.2002C33.6085 24.0187 33.3949 23.8981 33.16 23.86L28 23L25.3 19.4C25.2069 19.2759 25.0861 19.175 24.9472 19.1056C24.8084 19.0362 24.6552 19 24.5 19H17.24C16.8673 18.9975 16.5012 19.0991 16.1832 19.2934C15.8651 19.4878 15.6077 19.7672 15.44 20.1L14.64 21.73C14.2201 22.5647 14.001 23.4858 14 24.42V28H16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M18.5 31C19.8807 31 21 29.8807 21 28.5C21 27.1193 19.8807 26 18.5 26C17.1193 26 16 27.1193 16 28.5C16 29.8807 17.1193 31 18.5 31Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M28.5 31C29.8807 31 31 29.8807 31 28.5C31 27.1193 29.8807 26 28.5 26C27.1193 26 26 27.1193 26 28.5C26 29.8807 27.1193 31 28.5 31Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+
+                    ,
+                    route: "/analysis/registers-books/mt-accident-21-corp-pro",
+                },
                 {
                     title: (
                         <span>

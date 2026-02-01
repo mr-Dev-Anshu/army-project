@@ -10,13 +10,6 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
 
   const records = [
     {
-      title: "(Initial Report) Immediate Reporting of Incident",
-      icon: <Siren className="w-6 h-6 text-white" color="white" />,
-      bgColor: "bg-[#FF9933]",
-      key: "immediate-reporting-incident",
-      path: "/create-record/immediate-reporting-incident",
-    },
-    {
       title: "General & Traffic Offence Reports",
       icon: <ConeIcon className="w-6 h-6 text-white" color="white" />,
       bgColor: "bg-[#1E293B]", // Dark navy/slate
@@ -36,14 +29,7 @@ export default function CreateNewRecordPanel({ setCollapsed }: any) {
       bgColor: "bg-[#7F1D1D]", // Dark red
       key: "mp",
       path: "/create-record/mp-investigation",
-    },
-    {
-      title: "(MT Accident) Mechanical Transport Accident Report",
-      icon: <Car className="w-6 h-6 text-white" />,
-      bgColor: "bg-[#C2A14D]",
-      key: "mtAccident",
-      path: "/create-record/mt-accident",
-    },
+    }
   ];
 
   const handleSelect = (path: string) => {

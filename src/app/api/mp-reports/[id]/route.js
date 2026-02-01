@@ -1,5 +1,5 @@
 import { MPReportService } from "@/services/investigationReport.repo";
-import { updateMPReportSchema } from "@/validators/investigationReport";
+// import { updateMPReportSchema } from "@/validators/investigationReport"; // validation commented out
 import { NextResponse } from "next/server";
 
 const service = new MPReportService();
@@ -21,26 +21,11 @@ export async function PUT(request, { params }) {
   try {
     const { id } = await  params;
     const body = await request.json();
-    console.log(body);
-    
 
-    const { error, value } = updateMPReportSchema.validate(body, {
-      abortEarly: false,
-      stripUnknown: true, 
-    });
+    // Validation intentionally bypassed to allow empty/partial submissions.
+    const value = body;
 
-    if (error) {
-      const errors = error.details.map((detail) => ({
-        field: detail.path.join("."),
-        message: detail.message,
-      }));
-      return NextResponse.json(
-        { success: false, message: "Validation failed", errors },
-        { status: 400 }
-      );
-    }
-
-    const updated = await service.updateReport(id, body);
+    const updated = await service.updateReport(id, value);
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
     return NextResponse.json(
