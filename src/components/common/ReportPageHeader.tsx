@@ -7,6 +7,7 @@ export type BreadcrumbItem = string | { label: string; href?: string };
 
 interface ReportPageHeaderProps {
   title: string;
+  pageHeaderTitle?: string;
   reportCount?: number;
   onDownload?: () => void;
   breadcrumbItems?: BreadcrumbItem[];
@@ -14,6 +15,7 @@ interface ReportPageHeaderProps {
 
 export default function ReportPageHeader({
   title,
+  pageHeaderTitle,
   reportCount,
   onDownload,
   breadcrumbItems = [
@@ -74,7 +76,10 @@ export default function ReportPageHeader({
       </div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-md font-bold text-[#404040]">{title}</h1>
+        <div>
+          <h1 className="text-md font-bold text-[#404040]">{pageHeaderTitle || title}</h1>
+          {pageHeaderTitle && <p className="text-sm text-gray-500 mt-1">{title}</p>}
+        </div>
         <div className="flex items-center gap-4">
           <span className="text-sm font-semibold">{reportCount} Reports</span>
         </div>

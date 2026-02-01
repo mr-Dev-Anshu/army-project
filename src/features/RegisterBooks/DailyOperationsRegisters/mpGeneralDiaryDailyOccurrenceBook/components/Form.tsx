@@ -221,62 +221,239 @@ export default function MpGeneralDiaryForm({
                     <h3 className="font-bold text-gray-900">Particulars of Offender / Victim <span className="text-sm font-normal text-gray-500">(Select one and fill their details)</span></h3>
                 </div>
 
-                <div className="border border-gray-300 rounded-md overflow-hidden">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-900 font-semibold border-b border-gray-300">
-                            <tr>
-                                <th className="px-4 py-3 border-r border-gray-300 w-12 text-center">Sr no.</th>
-                                <th className="px-4 py-3 border-r border-gray-300">Army No, Rank & Name</th>
-                                <th className="px-4 py-3 border-r border-gray-300 w-24">Identity Card</th>
-                                <th className="px-4 py-3 border-r border-gray-300">Unit/Tele No.</th>
-                                <th className="px-4 py-3 w-20">Remark</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {/* Supporting single main offender for now, but structured as table row */}
-                            <tr className="bg-white">
-                                <td className="px-4 py-3 border-r border-gray-300 text-center font-medium">1</td>
-                                <td className="px-4 py-3 border-r border-gray-300">
-                                    <div className="flex flex-col space-y-1">
-                                        <div className="grid grid-cols-[70px_1fr]">
-                                            <span className="font-bold text-gray-900">Army no.:</span>
-                                            <span className="text-gray-700">{formData.individual.armyNo || "-"}</span>
-                                        </div>
-                                        <div className="grid grid-cols-[70px_1fr]">
-                                            <span className="font-bold text-gray-900">Rank:</span>
-                                            <span className="text-gray-700">{formData.individual.rank || "-"}</span>
-                                        </div>
-                                        <div className="grid grid-cols-[70px_1fr]">
-                                            <span className="font-bold text-gray-900">Name:</span>
-                                            <span className="text-gray-700">{formData.individual.name || "-"}</span>
-                                        </div>
+                <div className="border border-blue-400 rounded-md overflow-hidden bg-white">
+                    {(() => {
+                        const individuals = Array.isArray(formData.individual)
+                            ? formData.individual
+                            : (formData.individual ? [formData.individual] : []);
+
+                        if (individuals.length === 0) return <div className="p-4 text-sm text-gray-500">No details available</div>;
+
+                        return individuals.map((person: any, index: number) => {
+                            // Helper to normalize type - logic borrowed from OffenderDetailsCell
+                            const rawType = person.offenderType || person.individualType || person.type || (person.armyNo ? "Military Person" : "Civilian");
+                            let type = rawType;
+                            if (rawType === "Military Person") type = "militaryPersonnel";
+                            else if (rawType === "Employee") type = "employee";
+                            else if (rawType === "Civilian") type = "civilian";
+                            else if (rawType === "Shop Keeper") type = "shopKeeper";
+                            else if (rawType === "Servant/Maid") type = "servantMaid";
+                            else if (rawType === "Temporary Hired Worker") type = "tempHiredWorker";
+
+                            // Helper to get field values safely (case insensitive for keys)
+                            const details = person.offenderDetails || person.individualDetails || person || {};
+                            const get = (...keys: string[]) => {
+                                for (const k of keys) {
+                                    if (details[k]) return details[k];
+                                    // Try lowercase match
+                                    const lowerK = k.toLowerCase();
+                                    const found = Object.keys(details).find(dk => dk.toLowerCase() === lowerK);
+                                    if (found) return details[found];
+                                }
+                                return "";
+                            };
+
+                            return (
+                                <div key={index} className="flex gap-4 p-4 border-b last:border-b-0 text-sm">
+                                    <div className="font-medium text-gray-900 w-6 pt-0.5">{index + 1}.</div>
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+                                        {/* Render based on type */}
+                                        {type === 'militaryPersonnel' && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    {get("armyNumber", "armyNo", "militaryPersonnelArmyNo") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Army No.</span>
+                                                        <span className="text-gray-900">{get("armyNumber", "armyNo", "militaryPersonnelArmyNo")}</span>
+                                                    </div>}
+                                                    {get("name", "militaryPersonnelName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Name</span>
+                                                        <span className="text-gray-900">{get("name", "militaryPersonnelName")}</span>
+                                                    </div>}
+                                                    {get("fmn", "militaryPersonnelFmn", "FMN") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">FMN</span>
+                                                        <span className="text-gray-900">{get("fmn", "militaryPersonnelFmn", "FMN")}</span>
+                                                    </div>}
+                                                    {get("address") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Address</span>
+                                                        <span className="text-gray-900">{get("address")}</span>
+                                                    </div>}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {get("rank", "militaryPersonnelRank", "selectRank", "Select Rank") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Rank:</span>
+                                                        <span className="text-gray-900">{get("rank", "militaryPersonnelRank", "selectRank", "Select Rank")}</span>
+                                                    </div>}
+                                                    {get("unit", "militaryPersonnelUnit", "Unit") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Unit:</span>
+                                                        <span className="text-gray-900">{get("unit", "militaryPersonnelUnit", "Unit")}</span>
+                                                    </div>}
+                                                    {get("command",) && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Command:</span>
+                                                        <span className="text-gray-900">{get("command",)}</span>
+                                                    </div>}
+                                                    {get("iCardNumber", "identityCard", "icard", "I Card No") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">I Card No.:</span>
+                                                        <span className="text-gray-900">{get("iCardNumber", "identityCard", "icard", "I Card No")}</span>
+                                                    </div>
+                                                    }
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {type === 'civilian' && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    {get("aadharCardNo", "Aadhar Card No.", "civilianAadharCardNumber") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Aadhar No.</span>
+                                                        <span className="text-gray-900">{get("aadharCardNo", "Aadhar Card No.", "civilianAadharCardNumber")}</span>
+                                                    </div>}
+
+                                                    {get("name", "civilianName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Name:</span>
+                                                        <span className="text-gray-900">{get("name", "civilianName")}</span>
+                                                    </div>}
+                                                    {get("fatherOrHusbandName", "so", "civilianFathersName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Father/Husband:</span>
+                                                        <span className="text-gray-900">{get("fatherOrHusbandName", "so", "civilianFathersName")}</span>
+                                                    </div>}
+                                                    {get("address", "civilianAddress") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Address</span>
+                                                        <span className="text-gray-900">{get("address", "civilianAddress")}</span>
+                                                    </div>
+                                                    }
+                                                </div>
+
+                                            </>
+                                        )}
+
+                                        {type === "shopKeeper" && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    {get("Shop Owner Name", "shopOwnerName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Name</span>
+                                                        <span className="text-gray-900">{get("Shop Owner Name", "shopOwnerName")}</span>
+                                                    </div>}
+                                                    {get("unit", "Unit", "shopUnit") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Unit</span>
+                                                        <span className="text-gray-900">{get("unit", "Unit", "shopUnit")}</span>
+                                                    </div>}
+                                                    {get("Shop Address", "shopAddress") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Address</span>
+                                                        <span className="text-gray-900">{get("Shop Address", "shopAddress")}</span>
+                                                    </div>}
+                                                    {get("Pass No.", "shopPassNo", "passNo") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Pass No.</span>
+                                                        <span className="text-gray-900">{get("Pass No.", "shopPassNo", "passNo")}</span>
+                                                    </div>}
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* ================= SERVANT / MAID ================= */}
+                                        {type === "servantMaid" && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    {get("name", "maidName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Name</span>
+                                                        <span className="text-gray-900">{get("name", "maidName")}</span>
+                                                    </div>}
+                                                    {get("so", "Father's Name (Son of)", "maidFathersName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Father's Name (Son of)</span>
+                                                        <span className="text-gray-900">{get("so", "Father's Name (Son of)", "maidFathersName")}</span>
+                                                    </div>}
+                                                    {get("passNo", "Maid/Servant Pass Number", "maidPassNumber") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Pass No.</span>
+                                                        <span className="text-gray-900">{get("passNo", "Maid/Servant Pass Number", "maidPassNumber")}</span>
+                                                    </div>}
+                                                    {get("Officers Enclave C/O Rank (Army official's details)", "officersEnclaveRank") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">C/O Rank</span>
+                                                        <span className="text-gray-900">{get("Officers Enclave C/O Rank (Army official's details)", "officersEnclaveRank")}</span>
+                                                    </div>}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {get("armyOfficialName", "Army Official Name", "officersEnclaveName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">C/O Name</span>
+                                                        <span className="text-gray-900">{get("armyOfficialName", "Army Official Name", "officersEnclaveName")}</span>
+                                                    </div>}
+                                                    {get("unit", "Unit", "officersEnclaveUnit") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">C/O Unit</span>
+                                                        <span className="text-gray-900">{get("unit", "Unit", "officersEnclaveUnit")}</span>
+                                                    </div>}
+                                                    {get("fmn", "FMN", "officersEnclaveFmn") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">C/O FMN</span>
+                                                        <span className="text-gray-900">{get("fmn", "FMN", "officersEnclaveFmn")}</span>
+                                                    </div>}
+
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* Employee */}
+                                        {type === "employee" && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    {get("Employee ID", "employeeServiceNumber") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Service No.</span>
+                                                        <span className="text-gray-900">{get("Employee ID", "employeeServiceNumber")}</span>
+                                                    </div>}
+                                                    {get("rank", "employeeRank") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Rank</span>
+                                                        <span className="text-gray-900">{get("rank", "employeeRank")}</span>
+                                                    </div>}
+                                                    {get("name", "employeeName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Name</span>
+                                                        <span className="text-gray-900">{get("name", "employeeName")}</span>
+                                                    </div>}
+                                                    {get("Pass No.", "employeePassNo") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Pass No.</span>
+                                                        <span className="text-gray-900">{get("Pass No.", "employeePassNo")}</span>
+                                                    </div>}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {get("Department") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Department</span>
+                                                        <span className="text-gray-900">{get("Department")}</span>
+                                                    </div>}
+                                                    {get("address") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Address</span>
+                                                        <span className="text-gray-900">{get("address")}</span>
+                                                    </div>}
+
+                                                </div>
+                                            </>
+                                        )}
+                                        {/* TEMP HIRED WORKER */}
+                                        {type === "tempHiredWorker" && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    {get("name", "tempWorkerName") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Name</span>
+                                                        <span className="text-gray-900">{get("name", "tempWorkerName")}</span>
+                                                    </div>}
+                                                    {get("Pass No.", "tempWorkerPassNo", "passNo") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Pass No.</span>
+                                                        <span className="text-gray-900">{get("Pass No.", "tempWorkerPassNo", "passNo")}</span>
+                                                    </div>}
+                                                    {get("Place of Work", "tempWorkerPlaceOfWork") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Place of Work</span>
+                                                        <span className="text-gray-900">{get("Place of Work", "tempWorkerPlaceOfWork")}</span>
+                                                    </div>}
+
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {get("Type of Work", "tempWorkerTypeOfWork") && <div className="grid grid-cols-[110px_1fr]">
+                                                        <span className="font-bold text-gray-900">Type of Work</span>
+                                                        <span className="text-gray-900">{get("Type of Work", "tempWorkerTypeOfWork")}</span>
+                                                    </div>}
+
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
-                                </td>
-                                <td className="px-4 py-3 border-r border-gray-300 align-top">
-                                    {formData.individual.iCardNumber || "-"}
-                                </td>
-                                <td className="px-4 py-3 border-r border-gray-300 align-top">
-                                    <div className="flex flex-col space-y-1">
-                                        <div className="grid grid-cols-[60px_1fr]">
-                                            <span className="font-bold text-gray-900">Unit:</span>
-                                            <span className="text-gray-700">{formData.individual.unit || "-"}</span>
-                                        </div>
-                                        <div className="grid grid-cols-[60px_1fr]">
-                                            <span className="font-bold text-gray-900">FMN:</span>
-                                            <span className="text-gray-700">{formData.individual.fmn || "-"}</span>
-                                        </div>
-                                        <div className="grid grid-cols-[60px_1fr]">
-                                            <span className="font-bold text-gray-900">Address:</span>
-                                            <span className="text-gray-700">{formData.individual.address || "-"}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                    --
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </div>
+                            );
+                        });
+                    })()}
                 </div>
             </section>
 

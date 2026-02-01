@@ -1,21 +1,25 @@
 export const IMMEDIATE_REPORTING_INCIDENT_SUGGESTION_CONFIG = {
     fields: [
-        'incidentPlace',
-        'incidentBrief',
-        'coordinationWithPolice',
+        'reportHeading',
+        'vehicleType',
+        'vehicleNumber',
+        'vehicleName',
+        'placeOfOccurrence',
+        'description',
+        'coordWith',
         'incidentCoveredBy',
     ],
     nestedFields: {},
     arrayObjectFields: {
         'individuals': {
-            'armyNo': 'armyNo',
-            'name': 'name',
-            'rank': 'rank',
+            'individualDetails.armyNo': 'armyNo',
+            'individualDetails.name': 'name',
+            'individualDetails.rank': 'rank',
             'age': 'age',
             'totalServiceDuration': 'totalServiceDuration',
-            'unit': 'unit',
+            'individualDetails.unit': 'unit',
             'unitLocation': 'unitLocation',
-            'fmn': 'fmn'
+            'individualDetails.fmn': 'fmn'
         }
     },
     trackCustomFields: 'specific',
