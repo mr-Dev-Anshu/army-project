@@ -20,12 +20,14 @@ export const generateImmediateIncidentWordReport = async (
 ) => {
     const individuals = data.individuals || [];
 
-    const getDetails = (ind: any) => {
-        return {
-            ...(ind.individualDetails || {}),
-            ...(ind.offenderDetails || {}),
-        };
-    };
+    let nextSrNo = 2;
+    const srNoAge = (data.age || data.totalServiceDuration) ? nextSrNo++ : null;
+    const srNoStatus = data.individualWorkingStatus ? nextSrNo++ : null;
+    const srNoPlace = data.placeOfOccurrence ? nextSrNo++ : null;
+    const srNoTime = data.dateOfOccurrence ? nextSrNo++ : null;
+    const srNoBrief = data.description ? nextSrNo++ : null;
+    const srNoCoord = data.coordWith ? nextSrNo++ : null;
+
 
     const docSections = [];
 
@@ -316,27 +318,51 @@ export const generateImmediateIncidentWordReport = async (
     );
 
     // Title
-    children.push(
-        new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-                new TextRun({
-                    text: "IMMEDIATE REPORTING OF INCIDENT",
-                    ...headerStyle,
-                }),
-            ],
-        }),
-        new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-                new TextRun({
-                    text: "(Type of Incident like Injury to serving soldier due to RTA etc)",
-                    size: 20,
-                }),
-            ],
-            spacing: { after: 400 },
-        }),
-    );
+    if (data.reportHeading) {
+        children.push(
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                    new TextRun({
+                        text: data.reportHeading,
+                        ...headerStyle,
+                    }),
+                ],
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                    new TextRun({
+                        text: "(Type of Incident like Injury to serving soldier due to RTA etc)",
+                        size: 20,
+                    }),
+                ],
+                spacing: { after: 400 },
+            }),
+        );
+    } else {
+        children.push(
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                    new TextRun({
+                        text: "IMMEDIATE REPORTING OF INCIDENT",
+                        ...headerStyle,
+                    }),
+                ],
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                    new TextRun({
+                        text: "(Type of Incident like Injury to serving soldier due to RTA etc)",
+                        size: 20,
+                    }),
+                ],
+                spacing: { after: 400 },
+            }),
+        );
+    }
 
     // 1. Particulars
     children.push(
@@ -370,178 +396,147 @@ export const generateImmediateIncidentWordReport = async (
     }
 
     // 1.x Individuals
-    individuals.forEach((ind) => {
-        const details = getDetails(ind);
-        let type = ind.individualType || "militaryPersonnel";
+    individuals.forEach((ind, idx) => {
+        const details = {
+            ...(ind.individualDetails || {}),
+            ...(ind.offenderDetails || {}),
+        };
+        let type = ind.individualType;
+        if (!type) {
+            if (details.employeeServiceNumber) type = "employee";
+            else if (details.maidPassNumber) type = "servantMaid";
+            else if (details.shopOwnerName) type = "shopKeeper";
+            else if (details.tempWorkerName) type = "tempHiredWorker";
+            else if (
+                details.civilianName ||
+                details.civilianAadharCardNumber
+            )
+                type = "civilian";
+            else type = "militaryPersonnel";
+        }
 
-        // Main Rows
-        const rows: TableRow[] = [];
-        let nestedBlock: { number: string; rows: TableRow[] } | undefined =
-            undefined;
+        const num = (data.vehicleNumber || data.vehicleName) ? idx + 2 : idx + 1;
+
+        // Collect fields
+        const fields: { label: string; value: any }[] = [];
 
         if (type === "militaryPersonnel") {
-            rows.push(
-                createGridRow(
-                    "Army No.",
-                    details.armyNo || details.militaryPersonnelArmyNo,
-                    "Rank",
-                    details.rank || details.militaryPersonnelRank,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "Name",
-                    details.name || details.militaryPersonnelName,
-                    "Unit",
-                    details.unit || details.militaryPersonnelUnit,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "FMN",
-                    details.fmn || details.militaryPersonnelFmn,
-                    "Command",
-                    details.command || details.militaryPersonnelCommand,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "Address",
-                    details.address || details.militaryPersonnelAddress,
-                    "I Card No.",
-                    details.iCardNumber || details.militaryPersonnelICardNumber,
-                ),
-            );
-        } else if (type === "civilian") {
-            rows.push(
-                createGridRow(
-                    "Aadhar Card No.",
-                    details.civilianAadharCardNumber,
-                    "S/O",
-                    details.civilianFathersName,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "Name",
-                    details.civilianName,
-                    "Name the Relation",
-                    details.relationName,
-                ),
-            );
-            // rows.push(createGridRow("Address", details.civilianAddress, undefined, undefined));
-
-            if (
-                details.relativeDetails &&
-                Object.keys(details.relativeDetails).length > 0
-            ) {
-                const rel = details.relativeDetails;
-                const relRows: TableRow[] = [];
-                // Check relative type logic if needed, assuming military structure primarily based on image
-                relRows.push(
-                    createGridRow(
-                        "Army No.",
-                        rel.armyNo || rel.militaryPersonnelArmyNo,
-                        "Rank",
-                        rel.rank || rel.militaryPersonnelRank,
-                    ),
-                );
-                relRows.push(
-                    createGridRow(
-                        "Name",
-                        rel.name || rel.militaryPersonnelName,
-                        "Unit",
-                        rel.unit || rel.militaryPersonnelUnit,
-                    ),
-                );
-                relRows.push(
-                    createGridRow(
-                        "FMN",
-                        rel.fmn || rel.militaryPersonnelFmn,
-                        "Command",
-                        rel.command || rel.militaryPersonnelCommand,
-                    ),
-                );
-                relRows.push(
-                    createGridRow(
-                        "Address",
-                        rel.address || rel.militaryPersonnelAddress,
-                        "I Card No.",
-                        rel.iCardNumber || rel.militaryPersonnelICardNumber,
-                    ),
-                );
-
-                nestedBlock = {
-                    number: `(1.${subIndex}.1)`,
-                    rows: relRows,
-                };
-            }
+            if (details.militaryPersonnelArmyNo) fields.push({ label: "Army No.", value: details.militaryPersonnelArmyNo });
+            if (details.militaryPersonnelRank) fields.push({ label: "Rank", value: details.militaryPersonnelRank });
+            if (details.militaryPersonnelName) fields.push({ label: "Name", value: details.militaryPersonnelName });
+            if (details.militaryPersonnelUnit) fields.push({ label: "Unit", value: details.militaryPersonnelUnit });
+            if (details.militaryPersonnelFmn) fields.push({ label: "FMN", value: details.militaryPersonnelFmn });
+            if (details.militaryPersonnelCommand) fields.push({ label: "Command", value: details.militaryPersonnelCommand });
+            if (details.militaryPersonnelAddress) fields.push({ label: "Address", value: details.militaryPersonnelAddress });
+            if (details.militaryPersonnelICardNumber) fields.push({ label: "I Card No.", value: details.militaryPersonnelICardNumber });
         } else if (type === "employee") {
-            rows.push(
-                createGridRow(
-                    "Service No.",
-                    details.employeeServiceNumber,
-                    "Rank",
-                    details.employeeRank,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "Name",
-                    details.employeeName,
-                    "Unit",
-                    details.employeeUnit,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "FMN",
-                    details.employeeFmn,
-                    "Command",
-                    details.employeeCommand,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "I-Card No.",
-                    details.employeeICardNumber,
-                    undefined,
-                    undefined,
-                ),
-            );
-        }
-        // Fallback for others
-        else {
-            // General mapping
-            rows.push(
-                createGridRow(
-                    "Name",
-                    details.name ||
-                        details.maidName ||
-                        details.shopOwnerName ||
-                        details.tempWorkerName,
-                    "ID/Pass",
-                    details.passNumber ||
-                        details.maidPassNumber ||
-                        details.shopPassNo ||
-                        details.tempWorkerPassNo,
-                ),
-            );
-            rows.push(
-                createGridRow(
-                    "Unit",
-                    details.unit ||
-                        details.officersEnclaveUnit ||
-                        details.shopUnit,
-                    undefined,
-                    undefined,
-                ),
-            );
+            if (details.employeeServiceNumber) fields.push({ label: "Service No.", value: details.employeeServiceNumber });
+            if (details.employeeRank) fields.push({ label: "Rank", value: details.employeeRank });
+            if (details.employeeName) fields.push({ label: "Name", value: details.employeeName });
+            if (details.employeeUnit) fields.push({ label: "Unit", value: details.employeeUnit });
+            if (details.employeeFmn) fields.push({ label: "FMN", value: details.employeeFmn });
+            if (details.employeeCommand) fields.push({ label: "Command", value: details.employeeCommand });
+            if (details.employeeICardNumber) fields.push({ label: "I Card No.", value: details.employeeICardNumber });
+        } else if (type === "servantMaid") {
+            if (details.maidPassNumber) fields.push({ label: "Pass No", value: details.maidPassNumber });
+            if (details.maidName) fields.push({ label: "Name", value: details.maidName });
+            if (details.maidFathersName) fields.push({ label: "S/O", value: details.maidFathersName });
+            if (details.maidTrade) fields.push({ label: "Trade", value: details.maidTrade });
+            if (details.maidQuarterNumber) fields.push({ label: "Quarter No", value: details.maidQuarterNumber });
+            if (details.officersEnclaveRank) fields.push({ label: "C/O Rank", value: details.officersEnclaveRank });
+            if (details.officersEnclaveName) fields.push({ label: "C/O Name", value: details.officersEnclaveName });
+            if (details.officersEnclaveUnit) fields.push({ label: "C/O Unit", value: details.officersEnclaveUnit });
+        } else if (type === "shopKeeper") {
+            if (details.shopOwnerName) fields.push({ label: "Shop Owner", value: details.shopOwnerName });
+            if (details.shopName) fields.push({ label: "Shop Name", value: details.shopName });
+            if (details.shopAddress) fields.push({ label: "Address", value: details.shopAddress });
+            if (details.shopUnit) fields.push({ label: "Unit", value: details.shopUnit });
+            if (details.shopPassNo) fields.push({ label: "Pass No", value: details.shopPassNo });
+        } else if (type === "tempHiredWorker") {
+            if (details.tempWorkerName) fields.push({ label: "Name", value: details.tempWorkerName });
+            if (details.tempWorkerPassNo) fields.push({ label: "Pass No", value: details.tempWorkerPassNo });
+            if (details.tempWorkerPlaceOfStay) fields.push({ label: "Place of Stay", value: details.tempWorkerPlaceOfStay });
+            if (details.tempWorkerPlaceOfWork) fields.push({ label: "Place of Work", value: details.tempWorkerPlaceOfWork });
+            if (details.tempWorkerTypeOfWork) fields.push({ label: "Type of Work", value: details.tempWorkerTypeOfWork });
+        } else if (type === "civilian") {
+            if (details.civilianName) fields.push({ label: "Name", value: details.civilianName });
+            if (details.civilianAadharCardNumber) fields.push({ label: "Aadhar Card No.", value: details.civilianAadharCardNumber });
+            if (details.civilianFathersName) fields.push({ label: "S/O", value: details.civilianFathersName });
+            if (details.civilianAddress) fields.push({ label: "Address", value: details.civilianAddress });
+            if (details.relationName) fields.push({ label: "Name the Relation", value: details.relationName });
         }
 
-        children.push(createSubItemBox(`(1.${subIndex})`, rows, nestedBlock));
+        // Chunk into pairs
+        const contentRows: TableRow[] = [];
+        for (let i = 0; i < fields.length; i += 2) {
+            const f1 = fields[i];
+            const f2 = fields[i + 1];
+            contentRows.push(createGridRow(f1.label, f1.value, f2?.label, f2?.value));
+        }
+
+        // Nested Relative
+        let nestedBlock: { number: string; rows: TableRow[] } | undefined = undefined;
+        if (type === "civilian" && details.relativeDetails && Object.keys(details.relativeDetails).length > 0) {
+            const relFields: { label: string; value: any }[] = [];
+            const rel = details.relativeDetails;
+            const relCategory = details.relativeCategory;
+
+            if (relCategory === "militaryPersonnel") {
+                if (rel.militaryPersonnelArmyNo) relFields.push({ label: "Army No.", value: rel.militaryPersonnelArmyNo });
+                if (rel.militaryPersonnelRank) relFields.push({ label: "Rank", value: rel.militaryPersonnelRank });
+                if (rel.militaryPersonnelName) relFields.push({ label: "Name", value: rel.militaryPersonnelName });
+                if (rel.militaryPersonnelUnit) relFields.push({ label: "Unit", value: rel.militaryPersonnelUnit });
+                if (rel.militaryPersonnelFmn) relFields.push({ label: "FMN", value: rel.militaryPersonnelFmn });
+                if (rel.militaryPersonnelCommand) relFields.push({ label: "Command", value: rel.militaryPersonnelCommand });
+                if (rel.militaryPersonnelAddress) relFields.push({ label: "Address", value: rel.militaryPersonnelAddress });
+                if (rel.militaryPersonnelICardNumber) relFields.push({ label: "I Card No.", value: rel.militaryPersonnelICardNumber });
+            } else if (relCategory === "employee") {
+                if (rel.employeeServiceNo) relFields.push({ label: "Service No.", value: rel.employeeServiceNo });
+                if (rel.employeeRank) relFields.push({ label: "Rank", value: rel.employeeRank });
+                if (rel.employeeName) relFields.push({ label: "Name", value: rel.employeeName });
+                if (rel.employeeUnit) relFields.push({ label: "Unit", value: rel.employeeUnit });
+                if (rel.employeeFmn) relFields.push({ label: "FMN", value: rel.employeeFmn });
+                if (rel.employeeCommand) relFields.push({ label: "Command", value: rel.employeeCommand });
+                if (rel.employeeAddress) relFields.push({ label: "Address", value: rel.employeeAddress });
+                if (rel.employeeICardNumber) relFields.push({ label: "I Card No.", value: rel.employeeICardNumber });
+            } else if (relCategory === "servantMaid") {
+                if (rel.maidPassNumber) relFields.push({ label: "Pass No", value: rel.maidPassNumber });
+                if (rel.maidName) relFields.push({ label: "Name", value: rel.maidName });
+                if (rel.maidFathersName) relFields.push({ label: "S/O", value: rel.maidFathersName });
+                if (rel.maidTrade) relFields.push({ label: "Trade", value: rel.maidTrade });
+                if (rel.maidQuarterNumber) relFields.push({ label: "Quarter No", value: rel.maidQuarterNumber });
+                if (rel.officersEnclaveRank) relFields.push({ label: "C/O Rank", value: rel.officersEnclaveRank });
+                if (rel.officersEnclaveName) relFields.push({ label: "C/O Name", value: rel.officersEnclaveName });
+                if (rel.officersEnclaveUnit) relFields.push({ label: "C/O Unit", value: rel.officersEnclaveUnit });
+            } else if (relCategory === "tempHiredWorker") {
+                if (rel.tempWorkerName) relFields.push({ label: "Name", value: rel.tempWorkerName });
+                if (rel.tempWorkerPassNo) relFields.push({ label: "Pass No", value: rel.tempWorkerPassNo });
+                if (rel.tempWorkerPlaceOfStay) relFields.push({ label: "Place of Stay", value: rel.tempWorkerPlaceOfStay });
+                if (rel.tempWorkerPlaceOfWork) relFields.push({ label: "Place of Work", value: rel.tempWorkerPlaceOfWork });
+                if (details.tempWorkerTypeOfWork) relFields.push({ label: "Type of Work", value: details.tempWorkerTypeOfWork });
+            } else if (relCategory === "shopKeeper") {
+                if (rel.shopOwnerName) relFields.push({ label: "Shop Owner", value: rel.shopOwnerName });
+                if (rel.shopName) relFields.push({ label: "Shop Name", value: rel.shopName });
+                if (rel.shopAddress) relFields.push({ label: "Address", value: rel.shopAddress });
+                if (rel.shopUnit) relFields.push({ label: "Unit", value: rel.shopUnit });
+                if (rel.shopPassNo) relFields.push({ label: "Pass No", value: rel.shopPassNo });
+            }
+
+            const relRows: TableRow[] = [];
+            for (let i = 0; i < relFields.length; i += 2) {
+                const f1 = relFields[i];
+                const f2 = relFields[i + 1];
+                relRows.push(createGridRow(f1.label, f1.value, f2?.label, f2?.value));
+            }
+
+            nestedBlock = {
+                number: `(1.${num}.1)`,
+                rows: relRows,
+            };
+        }
+
+        children.push(createSubItemBox(`(1.${num})`, contentRows, nestedBlock));
         children.push(new Paragraph({ spacing: { after: 200 } }));
-        subIndex++;
     });
 
     // 2-9 Main Sections
@@ -608,99 +603,98 @@ export const generateImmediateIncidentWordReport = async (
     };
 
     // 2. Age / Service
-    children.push(
-        createMainSection(
-            "2",
-            "Age / Service",
-            `${data.age || individuals[0]?.age || "-"} Yrs / ${data.totalServiceDuration || individuals[0]?.totalServiceDuration || "-"} Yrs`,
-        ),
-    );
-    children.push(new Paragraph({ spacing: { after: 100 } }));
+    if (srNoAge) {
+        children.push(
+            createMainSection(
+                srNoAge.toString(),
+                "Age / Service",
+                `${data.age || "-"} Yrs / ${data.totalServiceDuration || "-"} Yrs`,
+            ),
+        );
+        children.push(new Paragraph({ spacing: { after: 100 } }));
+    }
 
-    // 4. FMN (As per image) - Try to get FMN from first individual or null
-    // If we strictly follow the image provided, 3 is not there.
-    children.push(
-        createMainSection(
-            "4",
-            "FMN",
-            individuals[0]?.individualDetails?.fmn ||
-                individuals[0]?.individualDetails?.militaryPersonnelFmn ||
-                "-",
-        ),
-    );
-    children.push(new Paragraph({ spacing: { after: 100 } }));
+    // 3. Leave/Duty
+    if (srNoStatus) {
+        children.push(
+            createMainSection(
+                srNoStatus.toString(),
+                "Whether Individual On Leave / Duty",
+                data.individualWorkingStatus || "-",
+            ),
+        );
+        children.push(new Paragraph({ spacing: { after: 100 } }));
+    }
 
-    // 5. Leave/Duty
-    children.push(
-        createMainSection(
-            "5",
-            "Whether Individual On Leave / Duty",
-            data.individualWorkingStatus ||
-                individuals[0]?.individualWorkingStatus ||
-                "-",
-        ),
-    );
-    children.push(new Paragraph({ spacing: { after: 100 } }));
+    // 4. Place
+    if (srNoPlace) {
+        children.push(
+            createMainSection(
+                srNoPlace.toString(),
+                "Place Of Incident",
+                data.placeOfOccurrence || "-",
+            ),
+        );
+        children.push(new Paragraph({ spacing: { after: 100 } }));
+    }
 
-    // 6. Place
-    children.push(
-        createMainSection(
-            "6",
-            "Place Of Incident",
-            data.placeOfOccurrence || "-",
-        ),
-    );
-    children.push(new Paragraph({ spacing: { after: 100 } }));
+    // 5. Date
+    if (srNoTime) {
+        const dateStr = data.dateOfOccurrence
+            ? format(new Date(data.dateOfOccurrence), "dd/MM/yyyy")
+            : "-";
+        children.push(
+            createMainSection(
+                srNoTime.toString(),
+                "Date & Time Of Incident",
+                `${dateStr} & ${data.timeOfOccurrence || "-"}hrs`,
+            ),
+        );
+        children.push(new Paragraph({ spacing: { after: 100 } }));
+    }
 
-    // 7. Date
-    const dateStr = data.dateOfOccurrence
-        ? format(new Date(data.dateOfOccurrence), "dd/MM/yyyy")
-        : "-";
-    children.push(
-        createMainSection(
-            "7",
-            "Date & Time Of Incident",
-            `${dateStr} & ${data.timeOfOccurrence || "-"}hrs`,
-        ),
-    );
-    children.push(new Paragraph({ spacing: { after: 100 } }));
+    // 6. Brief
+    if (srNoBrief) {
+        children.push(
+            createMainSection(
+                srNoBrief.toString(),
+                "Brief Of The Incident",
+                data.description || "-",
+            ),
+        );
+        children.push(new Paragraph({ spacing: { after: 100 } }));
+    }
 
-    // 8. Brief
-    children.push(
-        createMainSection(
-            "8",
-            "Brief Of The Incident",
-            data.description || "-",
-        ),
-    );
-    children.push(new Paragraph({ spacing: { after: 100 } }));
-
-    // 9. Coord
-    children.push(
-        createMainSection(
-            "9",
-            "Coord With Police On Civil, Adm,\nFIR & Current Sit",
-            data.coordWith || "-",
-        ),
-    );
-    children.push(new Paragraph({ spacing: { after: 400 } }));
+    // 7. Coord
+    if (srNoCoord) {
+        children.push(
+            createMainSection(
+                srNoCoord.toString(),
+                "Coord With Police On Civil, Adm,\nFIR & Current Sit",
+                data.coordWith || "-",
+            ),
+        );
+        children.push(new Paragraph({ spacing: { after: 400 } }));
+    }
 
     // Footer
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({ text: "(Incident being covered by ", size: 20 }),
-                new TextRun({
-                    text: `       ${data.incidentCoveredBy || "________________"}       `,
-                    underline: {},
-                    size: 20,
-                }),
-                new TextRun({ text: " Pro Unit)", size: 20 }),
-            ],
-            alignment: AlignmentType.CENTER, // Image shows center-ish or rightish
-            spacing: { before: 800 },
-        }),
-    );
+    if (data.incidentCoveredBy) {
+        children.push(
+            new Paragraph({
+                children: [
+                    new TextRun({ text: "(Incident being covered by ", size: 20 }),
+                    new TextRun({
+                        text: `       ${data.incidentCoveredBy}       `,
+                        underline: {},
+                        size: 20,
+                    }),
+                    new TextRun({ text: " Pro Unit)", size: 20 }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 800 },
+            }),
+        );
+    }
 
     const doc = new Document({
         creator: "Army App",
