@@ -448,8 +448,8 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                 const service = item.totalServiceDuration || item.individuals?.[0]?.totalServiceDuration || "-";
                 return (
                     <div className="flex flex-col font-[Arial] text-xs space-y-1">
-                        <div><span className="font-bold">Age:</span> {age} Years</div>
-                        <div><span className="font-bold">Service:</span> {service} Years</div>
+                        <div>{age} Years Old</div>
+                        <div>{service} Years</div>
                     </div>
                 );
             },

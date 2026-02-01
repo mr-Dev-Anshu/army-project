@@ -68,99 +68,180 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                 <div className="space-y-2">
                     <div className="font-bold">1. &nbsp;&nbsp; Particulars of Offender / Victim & Vehicle Details :</div>
 
-                    <div className="border border-gray-300 rounded-sm overflow-hidden">
-                        {/* 1.1 Vehicle */}
-                        {(data.vehicleNumber || data.vehicleName) && (
-                            <div className="flex border-b border-gray-300 bg-gray-50/50">
-                                <div className="p-2 w-16 font-bold text-gray-700 border-r border-gray-300 shrink-0">(1.1)</div>
-                                <div className="flex-1 p-2 grid grid-cols-2 gap-4">
-                                    <div className="flex gap-2"><span className="font-bold">DD Veh. BA No.</span> <span>{data.vehicleNumber || "-"}</span></div>
-                                    <div className="flex gap-2"><span className="font-bold">Make & Take</span> <span>{data.vehicleName || "-"}</span></div>
+                    {/* 1.1 Vehicle */}
+                    {(data.vehicleNumber || data.vehicleName) && (
+                        <div className="flex border border-gray-300 mb-3">
+                            <div className="p-2 w-16 font-normal text-gray-700 border-r border-gray-300 shrink-0 text-center flex items-center justify-center">(1.1)</div>
+                            <div className="flex-1 p-2">
+                                <div className="grid grid-cols-2 gap-x-4">
+                                    <div className="flex gap-2">
+                                        <span className="font-bold w-32 shrink-0">DD Veh. BA No.</span>
+                                        <span>{data.vehicleNumber || "-"}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="font-bold w-32 shrink-0">Make & Take</span>
+                                        <span>{data.vehicleName || "-"}</span>
+                                    </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* Individuals */}
-                        {individuals.map((ind, idx) => {
-                            const info = getIndividualInfo(ind);
-                            const num = data.vehicleNumber ? idx + 2 : idx + 1; // 1.2 if vehicle exists, else 1.1? Usually logic follows fixed structure. Let's assume 1.1 is vehicle, 1.2+ are persons.
+                    {individuals.map((ind, idx) => {
+                        // Determine Type
+                        const details = { ...(ind.individualDetails || {}), ...(ind.offenderDetails || {}) };
+                        let type = ind.individualType;
+                        if (!type) {
+                            if (details.employeeServiceNumber) type = "employee";
+                            else if (details.maidPassNumber) type = "servantMaid";
+                            else if (details.shopOwnerName) type = "shopKeeper";
+                            else if (details.tempWorkerName) type = "tempHiredWorker";
+                            else if (details.civilianName || details.civilianAadharCardNumber) type = "civilian";
+                            else type = "militaryPersonnel";
+                        }
 
-                            return (
-                                <React.Fragment key={idx}>
-                                    <div className="flex border-b border-gray-300 last:border-0 hover:bg-gray-50/30">
-                                        <div className="p-2 w-16 font-bold text-gray-700 border-r border-gray-300 shrink-0">
-                                            (1.{num})
-                                        </div>
-                                        <div className="flex-1 p-2">
-                                            {/* Main Person Row */}
-                                            <div className="grid grid-cols-2 gap-x-8 gap-y-1">
-                                                {/* Line 1 */}
-                                                <div className="flex gap-2">
-                                                    <span className="font-bold w-32 shrink-0">{info.fatherName ? "Father's Name" : "Army/Service No."}</span>
-                                                    <span>{info.fatherName || info.armyNo || "-"}</span>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <span className="font-bold w-32 shrink-0">{info.fatherName ? "Relation" : "Rank"}</span>
-                                                    <span>{info.relation ? `Relation: ${info.relation}` : (info.rank || "-")}</span>
-                                                </div>
+                        const num = data.vehicleNumber ? idx + 2 : idx + 1;
 
-                                                {/* Line 2 */}
-                                                <div className="flex gap-2">
-                                                    <span className="font-bold w-32 shrink-0">Name</span>
-                                                    <span>{info.name || "-"}</span>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <span className="font-bold w-32 shrink-0">{info.fatherName ? "" : "Unit"}</span>
-                                                    <span>{info.fatherName ? "" : (info.unit || "-")}</span>
-                                                </div>
+                        const renderRow = (label: string, value: any) => (
+                            <div className="flex gap-2">
+                                <span className="font-bold w-32 shrink-0">{label}</span>
+                                <span>{value || "-"}</span>
+                            </div>
+                        );
 
-                                                {/* Line 3 - Military specific */}
-                                                {!info.fatherName && (
-                                                    <>
-                                                        <div className="flex gap-2">
-                                                            <span className="font-bold w-32 shrink-0">FMN</span>
-                                                            <span>{info.fmn || "-"}</span>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <span className="font-bold w-32 shrink-0">Command</span>
-                                                            <span>{info.command || "-"}</span>
-                                                        </div>
-                                                        <div className="flex gap-2 col-span-2">
-                                                            <span className="font-bold w-32 shrink-0">Address</span>
-                                                            <span>{info.address || "-"}</span>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
+                        return (
+                            <React.Fragment key={idx}>
+                                <div className="flex border border-gray-300 last:border-0 mb-3">
+                                    <div className="p-2 w-16 font-normal text-gray-700 border-r border-gray-300 shrink-0 text-center flex items-start justify-center pt-3">
+                                        (1.{num})
+                                    </div>
+                                    <div className="flex-1 p-2 space-y-2">
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
 
-                                            {/* Nested Relative (1.2.1) */}
-                                            {info.relative && (
-                                                <div className="mt-3 pt-3 border-t border-gray-200 border-dashed">
-                                                    <div className="flex mb-2">
-                                                        <span className="font-bold text-xs text-gray-500 mr-2">(1.{num}.1)</span>
-                                                        <span className="font-bold underline text-sm">Relative Details</span>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-x-8 gap-y-1 pl-6">
-                                                        <div className="flex gap-2"><span className="font-bold w-24 shrink-0">Army No.</span> <span>{info.relative.armyNo || "-"}</span></div>
-                                                        <div className="flex gap-2"><span className="font-bold w-24 shrink-0">Rank</span> <span>{info.relative.rank || "-"}</span></div>
-                                                        <div className="flex gap-2"><span className="font-bold w-24 shrink-0">Name</span> <span>{info.relative.name || "-"}</span></div>
-                                                        <div className="flex gap-2"><span className="font-bold w-24 shrink-0">Unit</span> <span>{info.relative.unit || "-"}</span></div>
-                                                        <div className="flex gap-2"><span className="font-bold w-24 shrink-0">FMN</span> <span>{info.relative.fmn || "-"}</span></div>
-                                                        <div className="flex gap-2"><span className="font-bold w-24 shrink-0">Command</span> <span>{info.relative.command || "-"}</span></div>
-                                                        <div className="flex gap-2 col-span-2"><span className="font-bold w-24 shrink-0">Address</span> <span>{info.relative.address || "-"}</span></div>
-                                                    </div>
-                                                </div>
+                                            {/* Military Personnel */}
+                                            {type === "militaryPersonnel" && (
+                                                <>
+                                                    {renderRow("Army No.", details.militaryPersonnelArmyNo || details.armyNo)}
+                                                    {renderRow("Rank", details.militaryPersonnelRank || details.rank)}
+                                                    {renderRow("Name", details.militaryPersonnelName || details.name)}
+                                                    {renderRow("Unit", details.militaryPersonnelUnit || details.unit)}
+                                                    {renderRow("FMN", details.militaryPersonnelFmn || details.fmn)}
+                                                    {renderRow("Command", details.militaryPersonnelCommand || details.command)}
+                                                    {renderRow("Address", details.militaryPersonnelAddress || details.address)}
+                                                    {renderRow("I-Card No.", details.militaryPersonnelICardNumber || details.iCardNumber)}
+                                                </>
+                                            )}
+
+                                            {/* Employee */}
+                                            {type === "employee" && (
+                                                <>
+                                                    {renderRow("Service No.", details.employeeServiceNumber)}
+                                                    {renderRow("Rank", details.employeeRank)}
+                                                    {renderRow("Name", details.employeeName)}
+                                                    {renderRow("Unit", details.employeeUnit)}
+                                                    {renderRow("FMN", details.employeeFmn)}
+                                                    {renderRow("Command", details.employeeCommand)}
+                                                    {renderRow("I-Card No.", details.employeeICardNumber)}
+                                                </>
+                                            )}
+
+                                            {/* Servant / Maid */}
+                                            {type === "servantMaid" && (
+                                                <>
+                                                    {renderRow("Pass No", details.maidPassNumber)}
+                                                    {renderRow("Name", details.maidName)}
+                                                    {renderRow("Father's Name", details.maidFathersName)}
+                                                    {renderRow("Trade", details.maidTrade)}
+                                                    {renderRow("Quarter No", details.maidQuarterNumber)}
+                                                    {renderRow("C/O", `${details.officersEnclaveRank || ""} ${details.officersEnclaveName || ""}`)}
+                                                    {renderRow("Unit", details.officersEnclaveUnit)}
+                                                </>
+                                            )}
+
+                                            {/* Shop Keeper */}
+                                            {type === "shopKeeper" && (
+                                                <>
+                                                    {renderRow("Shop Owner", details.shopOwnerName)}
+                                                    {renderRow("Shop Name", details.shopName)}
+                                                    {renderRow("Address", details.shopAddress)}
+                                                    {renderRow("Unit", details.shopUnit)}
+                                                    {renderRow("Pass No", details.shopPassNo)}
+                                                </>
+                                            )}
+
+                                            {/* Temp Hired Worker */}
+                                            {type === "tempHiredWorker" && (
+                                                <>
+                                                    {renderRow("Name", details.tempWorkerName)}
+                                                    {renderRow("Pass No", details.tempWorkerPassNo)}
+                                                    {renderRow("Place of Stay", details.tempWorkerPlaceOfStay)}
+                                                    {renderRow("Place of Work", details.tempWorkerPlaceOfWork)}
+                                                    {renderRow("Type of Work", details.tempWorkerTypeOfWork)}
+                                                </>
+                                            )}
+
+                                            {/* Civilian */}
+                                            {type === "civilian" && (
+                                                <>
+                                                    {renderRow("Name", details.civilianName)}
+                                                    {renderRow("Aadhar No", details.civilianAadharCardNumber)}
+                                                    {renderRow("Father's Name", details.civilianFathersName)}
+                                                    {renderRow("Address", details.civilianAddress)}
+                                                    {renderRow("Driver Name", details.civilianName)} {/* As per image context for civilian driver */}
+                                                    {details.relationName && renderRow("Relation", details.relationName)}
+                                                </>
                                             )}
                                         </div>
+
+                                        {/* Nested Relative (Civilian Dependent) */}
+                                        {type === "civilian" && details.relativeDetails && Object.keys(details.relativeDetails).length > 0 && (
+                                            <div className="flex mt-2 pt-2 border-t border-gray-100">
+                                                <div className="w-16 shrink-0 text-center text-gray-500 text-xs font-bold pt-1">
+                                                    (1.{num}.1)
+                                                </div>
+                                                <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-1">
+                                                    {details.relativeCategory === "militaryPersonnel" ? (
+                                                        <>
+                                                            {renderRow("Army No.", details.relativeDetails.militaryPersonnelArmyNo)}
+                                                            {renderRow("Rank", details.relativeDetails.militaryPersonnelRank)}
+                                                            {renderRow("Name", details.relativeDetails.militaryPersonnelName)}
+                                                            {renderRow("Unit", details.relativeDetails.militaryPersonnelUnit)}
+                                                            {renderRow("FMN", details.relativeDetails.militaryPersonnelFmn)}
+                                                            {renderRow("Command", details.relativeDetails.militaryPersonnelCommand)}
+                                                            {renderRow("Address", details.relativeDetails.militaryPersonnelAddress)}
+                                                        </>
+                                                    ) : details.relativeCategory === "employee" ? (
+                                                        <>
+                                                            {renderRow("Service No.", details.relativeDetails.employeeServiceNumber)}
+                                                            {renderRow("Rank", details.relativeDetails.employeeRank)}
+                                                            {renderRow("Name", details.relativeDetails.employeeName)}
+                                                            {renderRow("Unit", details.relativeDetails.employeeUnit)}
+                                                            {renderRow("FMN", details.relativeDetails.employeeFmn)}
+                                                            {renderRow("Command", details.relativeDetails.employeeCommand)}
+                                                            {renderRow("Address", details.relativeDetails.employeeAddress)}
+                                                        </>
+                                                    ) : (
+                                                        // Fallback / Other
+                                                        <>
+                                                            {renderRow("Army/Svc No.", details.relativeDetails.armyNo || details.relativeDetails.employeeServiceNumber || details.relativeDetails.militaryPersonnelArmyNo)}
+                                                            {renderRow("Rank", details.relativeDetails.rank || details.relativeDetails.employeeRank || details.relativeDetails.militaryPersonnelRank)}
+                                                            {renderRow("Name", details.relativeDetails.name || details.relativeDetails.employeeName || details.relativeDetails.militaryPersonnelName)}
+                                                            {renderRow("Unit", details.relativeDetails.unit || details.relativeDetails.employeeUnit || details.relativeDetails.militaryPersonnelUnit)}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </React.Fragment>
-                            );
-                        })}
-                    </div>
+                                </div>
+                            </React.Fragment>
+                        );
+                    })}
+
                 </div>
 
                 {/* 2. Age / Service */}
-                <div className="flex gap-4">
+                <div className="flex gap-4 items-baseline">
                     <div className="w-6 font-bold shrink-0">2.</div>
                     <div className="w-1/3 font-bold shrink-0">Age / Service</div>
                     <div className="flex-1">
@@ -168,80 +249,45 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                     </div>
                 </div>
 
-                {/* 3. Unit / Location */}
-                <div className="flex gap-4">
+
+
+                {/* 3. Leave / Duty */}
+                <div className="flex gap-4 items-baseline">
                     <div className="w-6 font-bold shrink-0">3.</div>
-                    <div className="w-1/3 font-bold shrink-0">Unit / Location Of Unit</div>
-                    <div className="flex-1">
-                        {individuals.map((ind, i) => {
-                            const info = getIndividualInfo(ind);
-                            const u = info.relative ? `${info.unit || "NA"} (Dep) / ${info.relative.unit || "-"}` : (info.unit || "-");
-                            const loc = ind.unitLocation || "-";
-                            return (
-                                <div key={i}>
-                                    {individuals.length > 1 && <span className="font-bold mr-2">({i + 1})</span>}
-                                    {u}, {loc}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* 4. FMN */}
-                <div className="flex gap-4">
-                    <div className="w-6 font-bold shrink-0">4.</div>
-                    <div className="w-1/3 font-bold shrink-0">FMN</div>
-                    <div className="flex-1">
-                        {individuals.map((ind, i) => {
-                            const info = getIndividualInfo(ind);
-                            const f = info.relative ? `${info.fmn || "NA"} (Dep) / ${info.relative.fmn || "-"}` : (info.fmn || "-");
-                            return (
-                                <div key={i}>
-                                    {individuals.length > 1 && <span className="font-bold mr-2">({i + 1})</span>}
-                                    {f}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* 5. Leave / Duty */}
-                <div className="flex gap-4">
-                    <div className="w-6 font-bold shrink-0">5.</div>
                     <div className="w-1/3 font-bold shrink-0">Whether Individual On Leave / Duty</div>
                     <div className="flex-1">
                         {data.individualWorkingStatus || individuals[0]?.individualWorkingStatus || "-"}
                     </div>
                 </div>
 
-                {/* 6. Place */}
-                <div className="flex gap-4">
-                    <div className="w-6 font-bold shrink-0">6.</div>
+                {/* 4. Place */}
+                <div className="flex gap-4 items-baseline">
+                    <div className="w-6 font-bold shrink-0">4.</div>
                     <div className="w-1/3 font-bold shrink-0">Place Of Incident</div>
                     <div className="flex-1">{data.placeOfOccurrence || "-"}</div>
                 </div>
 
-                {/* 7. Date & Time */}
-                <div className="flex gap-4">
-                    <div className="w-6 font-bold shrink-0">7.</div>
+                {/* 5. Date & Time */}
+                <div className="flex gap-4 items-baseline">
+                    <div className="w-6 font-bold shrink-0">5.</div>
                     <div className="w-1/3 font-bold shrink-0">Date & Time Of Incident</div>
                     <div className="flex-1">
                         {data.dateOfOccurrence ? format(new Date(data.dateOfOccurrence), "dd/MM/yyyy") : "-"} & {data.timeOfOccurrence ? data.timeOfOccurrence : "-"}hrs
                     </div>
                 </div>
 
-                {/* 8. Brief */}
-                <div className="flex gap-4">
-                    <div className="w-6 font-bold shrink-0">8.</div>
+                {/* 6. Brief */}
+                <div className="flex gap-4 items-baseline">
+                    <div className="w-6 font-bold shrink-0">6.</div>
                     <div className="w-1/3 font-bold shrink-0">Brief Of The Incident</div>
                     <div className="flex-1 text-justify leading-snug">
                         {data.description || "-"}
                     </div>
                 </div>
 
-                {/* 9. Coord */}
-                <div className="flex gap-4">
-                    <div className="w-6 font-bold shrink-0">9.</div>
+                {/* 7. Coord */}
+                <div className="flex gap-4 items-baseline">
+                    <div className="w-6 font-bold shrink-0">7.</div>
                     <div className="w-1/3 font-bold shrink-0">
                         Coord With Police On Civil, Adm, <br /> FIR & Current Sit
                     </div>
@@ -251,13 +297,13 @@ const ImmediateReportingIncidentReport: React.FC<ImmediateReportingIncidentRepor
                 </div>
 
                 <div className="mt-16 text-center w-full flex justify-end">
-                    <div className="w-1/2 border-t border-black pt-2 text-right">
-                        (Incident being covered by __________________________ Pro Unit)
+                    <div>
+                        (Incident being covered by <span className="inline-block border-b border-black min-w-[200px] text-center">{data.incidentCoveredBy || "__________________________"}</span> Pro Unit)
                     </div>
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 };
 
