@@ -18,8 +18,8 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
     return t; // fallback (e.g. already camelCase)
   };
 
-  // Resolve type from possible locations
-  const rawType = details?.offenderType || details?.individualType || details?.type;
+  // Resolve type from possible locations (including customFields for imported data)
+  const rawType = details?.offenderType || details?.individualType || details?.type || details?.customFields?.offenderType;
   const type = normalizeType(rawType);
 
   // Resolve details object from possible locations
@@ -56,7 +56,7 @@ export default function OffenderDetailsCell({ details, mpName }: OffenderDetails
     /* ================= MILITARY PART ================= */
     if (type === 'militaryPersonnel') {
       const armyNo = get("armyNumber", "armyNo", "Army Rider / Driver Number", "militaryPersonnelArmyNo");
-      const rank = get("rank", "Select Rank", "militaryPersonnelRank"); // "Select Rank" maps to "Select Rank" in form if not in map
+      const rank = get("rank", "selectRank", "Select Rank", "militaryPersonnelRank");
       const name = get("name", "Full Name", "militaryPersonnelName");
       const unit = get("unit", "Unit", "militaryPersonnelUnit");
       const fmn = get("fmn", "FMN", "militaryPersonnelFmn");

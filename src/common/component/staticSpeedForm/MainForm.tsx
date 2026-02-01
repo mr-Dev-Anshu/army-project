@@ -40,8 +40,6 @@ export default function StaticSpeedForm({
     });
   };
 
-  // ... (existing mapStaticToReport code) ...
-
   const mapStaticToReport = (data: any) => {
     const riderDetails = data?.offenderPeople?.[0]?.details || {};
 
@@ -67,8 +65,6 @@ export default function StaticSpeedForm({
         ? data.witnesses?.[data.selectedWitness]
         : data.witnesses?.[0] || null;
 
-    // Safety check for witness object structure
-    // If selectedWitness is the object (new flow), use it directly
     let witReportBlock = data.selectedWitness?.nameReportingMP
       ? data.selectedWitness
       : witness?.reportingBlock || {};
@@ -214,7 +210,6 @@ export default function StaticSpeedForm({
             : undefined,
         },
 
-        // 🔥 FIXED HERE
         onDutyDetailsMPReporting: mpReportingSafe,
 
         offenceOccurenceDetails: {
@@ -232,14 +227,12 @@ export default function StaticSpeedForm({
           actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
           authSpeed: staticData.offenceBlock?.authSpeed ?? "",
 
-          // New fields
           briefDescription: staticData.offenceBlock?.briefDescription || "",
           offenceTypes: staticData.offenceBlock?.offenceTypes ?? [],
           offenceTypeReference:
             staticData.offenceBlock?.offenceTypeReference ?? [],
         },
 
-        // ✅ ADDED REMARK
         remark: staticData.remarks,
         customFields: {
           selectedWitness: staticData.selectedWitness,
@@ -259,29 +252,15 @@ export default function StaticSpeedForm({
         return;
       }
 
-      /* ================= CREATE OFFENDER ================= */
-      // Checking ID validity
       const _idString = staticRes?._id ? String(staticRes._id) : "";
-      console.log("🆔 Static Res ID:", _idString);
-
-      if (!_idString) {
-        console.error("❌ CRTICAL: No Static Record ID returned");
-        toast.error("Error: Record ID missing. Offenders cannot be linked.");
-        return;
-      }
-      /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
-
-      /* ================= CREATE OFFENDERS (ONE BY ONE) ================= */
-
+      
+      /* ================= CREATE OFFENDERS ================= */
       const people = staticData.offenderPeople || [];
       console.log("👥 Offender People Array:", JSON.stringify(people, null, 2));
 
       for (const person of people) {
         const details = person.details || {};
-
-        // 🔥 skip only when absolutely empty
         if (!Object.keys(details).length) {
-          console.warn("⚠️ Skipping empty offender:", person);
           continue;
         }
 
@@ -290,18 +269,10 @@ export default function StaticSpeedForm({
           offenderType: person.type as OffenderType,
 
           offenderDetails: {
-            // 🔥🔥🔥 KEY FIX
             ...details,
-
-            // role = Driver / Co-Driver / Offender
             type: person.whoIsIt || "Offender",
           },
         };
-
-        console.log(
-          "👮 Creating Offender Payload ===>",
-          JSON.stringify(offenderPayload, null, 2)
-        );
 
         try {
           await createOffenderMutation.mutateAsync(offenderPayload);
@@ -316,42 +287,6 @@ export default function StaticSpeedForm({
 
       toast.success("✅ All offenders created successfully");
 
-      // 2.2 Co-Driver
-      const coDriverType = state.formData.coDriverType;
-      const coDriverOrPillion = state.formData.coDriverOrPillion;
-      console.log("🏍️ Co-Driver Logic:", { coDriverOrPillion, coDriverType });
-
-      if (coDriverOrPillion && coDriverType && coDriverType !== "") {
-        // Find by ROLE "CoDriver"
-        const coDriverEntry = people.find((p: any) => p.role === "CoDriver");
-        console.log("👤 Co-Driver Entry Found:", coDriverEntry);
-
-        const coDriverDetails = {
-          ...(coDriverEntry?.details || {}),
-          type: "CoDriver",
-        };
-
-        const coDriverPayload: CreateOffenderData = {
-          offenceId: _idString,
-          offenderType: coDriverType as OffenderType,
-          offenderDetails: coDriverDetails,
-        };
-        console.log(
-          "👮 REQ CO-DRIVER PAYLOAD:",
-          JSON.stringify(coDriverPayload, null, 2)
-        );
-
-        try {
-          const res = await createOffenderMutation.mutateAsync(coDriverPayload);
-          console.log("✅ Co-Driver Created:", res);
-        } catch (e: any) {
-          console.error("❌ Co-Driver Creation Failed:", e);
-          toast.error(`Co-Driver Creation Failed: ${e?.message}`);
-        }
-      }
-
-      toast.success("Offenders Saved!");
-
       /* ================= CREATE WITNESS ================= */
       if (staticData.witnesses?.length > 0) {
         const witnessPayload = staticData.witnesses.map((w: any) => ({
@@ -363,15 +298,10 @@ export default function StaticSpeedForm({
           contactNumber: w.reportingBlock.contactNumber || "",
         }));
 
-        console.log("👀 WITNESS PAYLOAD SENT ===>", witnessPayload);
-
         try {
-          const witnessResponses = await Promise.all(
+          await Promise.all(
             witnessPayload.map((w: any) => createWitnessMutation.mutateAsync(w))
           );
-
-          console.log("✅ WITNESS BACKEND RESPONSES ===>", witnessResponses);
-
           toast.success("Witness Added Successfully!");
         } catch (err: any) {
           console.error(
@@ -403,14 +333,7 @@ export default function StaticSpeedForm({
         "❌ FINAL STATIC SPEED ERROR ===>",
         error?.response?.data || error
       );
-
-      const msg =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
-        "Failed to submit record";
-
-      toast.error(msg);
+      toast.error("Failed to submit record");
     } finally {
       setIsSubmitting(false);
     }
@@ -432,8 +355,11 @@ export default function StaticSpeedForm({
               onCancel();
             }}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
-            isSubmitting={isSubmitting} // Passed prop
+            isSubmitting={isSubmitting}
             onReportNoChange={handleReportNoChange}
+            
+            // 🔥 CRITICAL: TELL STEPPER THIS IS STATIC SPEED
+            module="static" 
           />
 
           <RightPanel
