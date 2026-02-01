@@ -218,7 +218,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                 if (key === 'militaryPersonnelFmn') obj['fmn'] = value;
             }
         } else {
-            currentInd[path] = value;
+            (currentInd as any)[path] = value;
         }
 
         newIndividuals[index] = currentInd;

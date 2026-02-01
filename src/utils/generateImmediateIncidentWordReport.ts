@@ -74,10 +74,10 @@ export const generateImmediateIncidentWordReport = async (data: ImmediateReporti
                             // }),
 
                             /* Data Rows as Tables */
-                            createRowTable(baseIndex + 1, "Army No. Rk, Name", `${ind.armyNo || "-"}, ${ind.rank || "-"}, ${ind.name || "-"}`),
+                            createRowTable(baseIndex + 1, "Army No. Rk, Name", `${ind.individualDetails.armyNo || ind.individualDetails.militaryPersonnelArmyNo || "-"}, ${ind.individualDetails.rank || ind.individualDetails.militaryPersonnelRank || "-"}, ${ind.individualDetails.name || ind.individualDetails.militaryPersonnelName || "-"}`),
                             createRowTable(baseIndex + 2, "Age / Service", `${ind.age || "-"} Yrs / ${ind.totalServiceDuration || "-"} Yrs`),
-                            createRowTable(baseIndex + 3, "Unit & Loc of Unit", `${ind.unit || "-"}, ${ind.unitLocation || "-"}`),
-                            createRowTable(baseIndex + 4, "Fmn", ind.fmn),
+                            createRowTable(baseIndex + 3, "Unit & Loc of Unit", `${ind.individualDetails.unit || ind.individualDetails.militaryPersonnelUnit || "-"}, ${ind.unitLocation || "-"}`),
+                            createRowTable(baseIndex + 4, "Fmn", ind.individualDetails.fmn || ind.individualDetails.militaryPersonnelFmn || "-"),
                             createRowTable(baseIndex + 5, "Whether not on lve/ duty", ind.individualWorkingStatus),
                         ];
                     }),
@@ -85,24 +85,24 @@ export const generateImmediateIncidentWordReport = async (data: ImmediateReporti
                     /* Common Details */
                     new Paragraph({ spacing: { before: 200 } }), // Spacer
 
-                    createRowTable((data.individuals?.length || 0) * 5 + 1, "Place of incident", data.incidentPlace || "-"),
+                    createRowTable((data.individuals?.length || 0) * 5 + 1, "Place of incident", data.placeOfOccurrence || "-"),
 
                     createRowTable(
                         (data.individuals?.length || 0) * 5 + 2,
                         "Dt & Time of incident",
-                        `${data.incidentDate ? format(new Date(data.incidentDate), "dd MMM yyyy") : "-"} approx ${data.incidentTime || "-"} hrs`
+                        `${data.dateOfOccurrence ? format(new Date(data.dateOfOccurrence), "dd MMM yyyy") : "-"} approx ${data.timeOfOccurrence || "-"} hrs`
                     ),
 
                     createRowTable(
                         (data.individuals?.length || 0) * 5 + 3,
                         "Brief of the incident",
-                        data.incidentBrief || "-",
+                        data.description || "-",
                     ),
 
                     createRowTable(
                         (data.individuals?.length || 0) * 5 + 4,
                         "Coord with Police on civ Adm, FIR & current sit",
-                        data.coordinationWithPolice || "-",
+                        data.coordWith || "-",
                     ),
                 ],
             },
@@ -111,7 +111,7 @@ export const generateImmediateIncidentWordReport = async (data: ImmediateReporti
 
     const blob = await Packer.toBlob(doc);
     const docBlob = new Blob([blob], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-    saveAs(docBlob, `Incident_Report_${data.individuals?.[0]?.name || "Draft"}.docx`);
+    saveAs(docBlob, `Incident_Report_${data.individuals?.[0]?.individualDetails?.name || data.individuals?.[0]?.individualDetails?.militaryPersonnelName || "Draft"}.docx`);
 };
 
 /* Helper Functions */

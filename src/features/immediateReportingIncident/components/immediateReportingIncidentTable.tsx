@@ -522,11 +522,11 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({ onAddNew, onEdit, on
                         <DropdownMenuItem onClick={() => onView(item)}>
                             View
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(item)}>
+                        {/* <DropdownMenuItem onClick={() => onEdit(item)}>
                             Edit
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuItem onClick={() => handlePrintClick(item._id)}>
-                            Print
+                            Print Initial Report
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDeleteClick(item._id)} className="text-red-600">
                             Delete

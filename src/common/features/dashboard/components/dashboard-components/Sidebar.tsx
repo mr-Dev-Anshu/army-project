@@ -40,10 +40,10 @@ const Sidebar = () => {
     "Basic Information",
     "Military Structure Data",
   ]);
- 
-   console.log(user , "this is user")
+
+  console.log(user, "this is user")
   // Check if user is admin
-  const isSuperAdmin =user?.role === "superadmin";
+  const isSuperAdmin = user?.role === "superadmin";
 
   const routesThatPreferCollapsed = [
     "/", "/create-record", "/forms", "/test", "/reports", "/analysis", "/setup", "/structure", "/hello"
@@ -75,7 +75,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: <PieChart className="w-5 h-5" />, label: "Dashboard", href: "/", badge: "1" },
-    { icon: <Siren className="w-5 h-5" />, label: "Immediate Reporting of Incident (Initial Report)", href: "/create-record/immediate-reporting-incident" },
+    { icon: <Siren className="w-5 h-5" />, label: "Immediate Reporting of Incident (Initial Report)", href: "/immediate-reporting-incident" },
   ];
 
   const createNewRecordItems = [
@@ -234,7 +234,7 @@ const Sidebar = () => {
             {systemSetup.map((item) => (
               <div key={item.label}>{renderCollapsibleSection(item)}</div>
             ))}
-            
+
             {/* Conditional Rendering for Admin Only */}
             {isSuperAdmin && renderMenuItem({
               icon: <UserIcon className="w-5 h-5" />,

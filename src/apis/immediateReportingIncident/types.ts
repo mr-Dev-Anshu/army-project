@@ -8,6 +8,9 @@ export interface AffectedIndividual {
         fmn?: string;
         [key: string]: any;
     };
+    offenderDetails?: {
+        [key: string]: any;
+    };
     age: string;
     totalServiceDuration: string;
     unitLocation: string;
