@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useEffect } from "react";
 import { useForm } from "@/context/FormContext";
 import VehicleDetailsForm from "@/common/component/VehicleDetailsForm";
+import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
 
 export default function StaticSpeedStep1Particulars() {
   const { state, dispatch } = useForm();
@@ -29,24 +31,18 @@ export default function StaticSpeedStep1Particulars() {
         overflow-y-auto
       "
     >
-      {/* 🔹 VEHICLE DETAILS (ALWAYS VISIBLE) */}
-      <div
-        className="
-          w-full
-          min-h-[200px]
-          sm:min-h-[230px]
-          md:min-h-[260px]
-          lg:min-h-[300px]
-          flex
-        "
-      >
-        <div className="w-full">
-          <h1 className="text-xl font-bold mb-4">
-            1.1 Fill Vehicle Identification Fields:
-          </h1>
+      {/* 🔹 VEHICLE DETAILS */}
+      <div className="w-full border rounded-lg p-4 bg-white">
+        <h1 className="text-xl font-bold mb-4">
+          1.1 Fill Vehicle Identification Fields:
+        </h1>
 
-          <VehicleDetailsForm scope="static" />
-        </div>
+        <VehicleDetailsForm scope="static" hideDriverSection={true} />
+      </div>
+
+      {/* 🔹 OFFENDER (SINGLE) */}
+      <div className="w-full flex border rounded-lg flex-col gap-6">
+        <OffenderWithoutVehicleForm scope="static" />
       </div>
     </div>
   );

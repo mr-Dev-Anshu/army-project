@@ -44,6 +44,16 @@ export default function MultiStepForm({
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
   const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
+  const isoToTime = (iso:any) => {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toISOString().substring(11, 16);
+      // returns HH:mm
+    } catch {
+      return "";
+    }
+  };
+
   const mapBackendOffenderDetails = (d: any = {}) => {
     const mapped: any = {};
 
@@ -157,81 +167,7 @@ export default function MultiStepForm({
     return mapped;
   };
 
-  // const mapBackendOffenderDetails = (d: any = {}) => {
-  //   const mapped: any = {};
-
-  //   Object.entries(d).forEach(([key, value]) => {
-  //     if (!value) return;
-
-  //     const k = key.toLowerCase();
-
-  //     // NAME
-  //     if (k.includes("name") && !mapped.name) {
-  //       mapped.name = value;
-  //     }
-
-  //     // S/O , W/O , D/O , Relative
-  //     else if (
-  //       (k === "so" || k.includes("father") || k.includes("relative")) &&
-  //       !mapped.so
-  //     ) {
-  //       mapped.so = value;
-  //     }
-
-  //     // RANK
-  //     else if (k.includes("rank")) {
-  //       mapped.rank = normalizeRank(String(value));
-  //     }
-
-  //     // ARMY NUMBER
-  //     else if (k.includes("army")) {
-  //       mapped.armyNumber = value;
-  //     }
-
-  //     // UNIT
-  //     else if (k.includes("unit")) {
-  //       mapped.unit = value;
-  //     }
-
-  //     // COMMAND
-  //     else if (k.includes("command")) {
-  //       mapped.command = value;
-  //     }
-
-  //     // FMN
-  //     else if (k.includes("fmn")) {
-  //       mapped.fmn = value;
-  //     }
-
-  //     // ADDRESS / PLACE
-  //     else if (
-  //       k.includes("address") ||
-  //       k.includes("shop") ||
-  //       k.includes("place") ||
-  //       k.includes("stay") ||
-  //       k.includes("work")
-  //     ) {
-  //       mapped.address = value;
-  //     }
-
-  //     // ID CARD / PASS
-  //     else if (
-  //       k.includes("card") ||
-  //       k.includes("icard") ||
-  //       k.includes("passNo")
-  //     ) {
-  //       mapped.iCardNumber = value;
-  //     }
-
-  //     // fallback: keep unknown fields
-  //     else {
-  //       mapped[key] = value;
-  //     }
-  //   });
-
-  //   return mapped;
-  // };
-
+  
   const normalizeRank = (rank?: string) => {
     if (!rank) return "";
 
@@ -271,12 +207,14 @@ export default function MultiStepForm({
         }
 
         // 4. On Duty Details
+
+
         trafficNodes.onDutyDetails = {
           dateOfDuty: eo.onDutyDetails?.dateOfDuty
             ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split("T")[0]
             : "",
-          startTime: eo.onDutyDetails?.startTime || "",
-          endTime: eo.onDutyDetails?.endTime || "",
+          startTime: isoToTime(eo.onDutyDetails?.startTime),
+          endTime: isoToTime(eo.onDutyDetails?.endTime),
           dutyLocation: eo.onDutyDetails?.dutyLocation || "",
           dutyType: eo.onDutyDetails?.dutyType || "",
         };
@@ -291,12 +229,12 @@ export default function MultiStepForm({
         };
 
         // 6. Occurence
+
         trafficNodes.offenceOccurenceDetails = {
-          timeOfOffence: eo.offenceOccurenceDetails?.timeOfOffence || "",
+          timeOfOffence: isoToTime(eo.offenceOccurenceDetails?.timeOfOffence),
           incidentLocation: eo.offenceOccurenceDetails?.incidentLocation || "",
           description: eo.offenceOccurenceDetails?.description || "",
           briefDescription: eo.offenceOccurenceDetails?.briefDescription || "",
-          time: eo.offenceOccurenceDetails?.time || "",
         };
 
         // 7. Arrays - Deep Copy to avoid mutations
@@ -307,38 +245,48 @@ export default function MultiStepForm({
           ? [...eo.offenceTypeReference]
           : [];
 
-        // Witnesses
         if (Array.isArray(eo.onDutyWitnessingMps)) {
-          trafficNodes.witnesses = eo.onDutyWitnessingMps.map((w: any) => ({
-            reportingBlock: {
-              nameReportingMP: w.name || w.nameReportingMP || "",
-              rank: w.rank || "",
-              unit: w.unit || "",
-              armyNumber: w.armyNumber || w.ArmyNo || "",
-              contactNumber: w.contactNumber || "",
-            },
-          }));
+          const witnessMap = new Map<string, any>();
+
+          eo.onDutyWitnessingMps.forEach((w: any) => {
+            const key = (w.armyNumber || w.ArmyNo || w.name || "") + "_witness";
+
+            witnessMap.set(key, {
+              reportingBlock: {
+                nameReportingMP: w.name || w.nameReportingMP || "",
+                rank: w.rank || "",
+                unit: w.unit || "",
+                armyNumber: w.armyNumber || w.ArmyNo || "",
+                contactNumber: w.contactNumber || "",
+              },
+            });
+          });
+
+          trafficNodes.witnesses = Array.from(witnessMap.values());
         }
 
         if (Array.isArray(eo.offenders)) {
-          trafficNodes.offenderPeople = eo.offenders.map(
-            (o: any, index: number) => {
-              console.log(
-                `🟠 OFFENDER ${index} RAW DETAILS 👉`,
-                o.offenderDetails,
-              );
+          const uniqueMap = new Map<string, any>();
 
-              const mapped = mapBackendOffenderDetails(o.offenderDetails);
+          eo.offenders.forEach((o: any) => {
+            const mapped = mapBackendOffenderDetails(o.offenderDetails);
+            if (!mapped || !Object.keys(mapped).length) return;
 
-              console.log(`🟢 OFFENDER ${index} MAPPED DETAILS 👉`, mapped);
+            // ✅ Same person key
+            const key =
+              (mapped.armyNumber || mapped.iCardNumber || mapped.name) +
+              "_" +
+              (o.offenderDetails?.type || "Offender");
 
-              return {
-                type: o.offenderType || "Civilian",
-                whoIsIt: o.category || "Offender",
-                details: mapped,
-              };
-            },
-          );
+            // ✅ Always overwrite -> latest wins
+            uniqueMap.set(key, {
+              type: o.offenderType || "Civilian",
+              whoIsIt: o.offenderDetails?.type || "Offender",
+              details: mapped,
+            });
+          });
+
+          trafficNodes.offenderPeople = Array.from(uniqueMap.values());
         }
 
         dispatch({

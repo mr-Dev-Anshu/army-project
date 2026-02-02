@@ -14,7 +14,7 @@ interface OffenderDynamicFormProps {
   title: string;
   helperText?: string;
   fields: any[];
-  scope?: "traffic" | "static";
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
   path?: string;
   isRoot?: boolean;
 }
@@ -90,10 +90,13 @@ export default function OffenderDynamicForm({
   useEffect(() => {
     if (!isRoot) return;
 
-    const peoplePath =
-      scope === "static"
-        ? "formData.staticSpeed.offenderPeople"
-        : "formData.traffic.offenderPeople";
+  const peoplePath =
+  scope === "static"
+    ? "formData.staticSpeed.offenderPeople"
+    : scope === "traffic"
+    ? "formData.traffic.offenderPeople"
+    : ""; // 👈 IMPORTANT
+
 
     const list = getByPath(state, peoplePath);
 

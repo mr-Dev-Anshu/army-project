@@ -9,7 +9,7 @@ import {
   Copy,
   Trash,
   Download,
-  Paperclip
+  Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicTable, Column } from "@/components/common/DynamicTable";
@@ -110,7 +110,7 @@ export default function MpOccurrenceTable({
           id: modalState.reportId,
           data: {
             actionStatus: modalState.newStatus,
-            actionStatusRemark: actionRemark
+            actionStatusRemark: actionRemark,
           },
         });
         toast.success("Action status updated successfully!");
@@ -130,7 +130,7 @@ export default function MpOccurrenceTable({
       toast.error(
         modalState.type === "status"
           ? "Failed to update action status."
-          : "Failed to delete report."
+          : "Failed to delete report.",
       );
       console.error(error);
     }
@@ -255,12 +255,14 @@ export default function MpOccurrenceTable({
               }}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
-                  }`}
+                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${
+                  isTaken ? "bg-green-500" : "bg-red-500"
+                }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
-                    }`}
+                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
+                    isTaken ? "translate-x-5" : "translate-x-0"
+                  }`}
                 ></div>
               </div>
               <span className="text-[10px] text-gray-500 font-medium uppercase">
@@ -338,10 +340,38 @@ export default function MpOccurrenceTable({
   }, [updateReport, onView]);
 
   const processedData = useMemo(() => {
-    return data.map((item, index) => ({
-      ...item,
-      displayIndex: index + 1,
-    }));
+    console.log("📦 RAW MP TABLE DATA =>", data);
+
+    return data.map((item, index) => {
+      console.log("🧾 SINGLE REPORT =>", item);
+
+      return {
+        ...item,
+        displayIndex: index + 1,
+
+        // ✅ STEP 6 - Evidence
+        evidence: item.evidences || item.evidence || [],
+
+        // ✅ STEP 7 - Documents
+        documents: item.documents || [],
+
+        // ✅ STEP 8 - Detailed Occurrence
+        brief:
+          item.detailedOccurrenceReport?.statement ||
+          item.detailedOccurrenceReport ||
+          item.occurrenceDetails?.description ||
+          "",
+
+        // helpful for other columns
+        placeOfOccurrence:
+          item.occurrenceDetails?.placeOfOccurrence ||
+          item.placeOfOccurrence ||
+          "",
+
+        offenceType:
+          item.occurrenceDetails?.offenceType || item.offenceType || "",
+      };
+    });
   }, [data]);
 
   return (
@@ -362,8 +392,9 @@ export default function MpOccurrenceTable({
         }
         message={
           modalState.type === "status"
-            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
-            }?`
+            ? `Are you sure you want to change the status to ${
+                modalState.newStatus ? "Taken" : "Pending"
+              }?`
             : "Are you sure you want to delete this report? This action cannot be undone."
         }
         confirmLabel={
@@ -374,7 +405,9 @@ export default function MpOccurrenceTable({
       >
         {modalState.type === "status" && (
           <div className="flex flex-col gap-2 mt-2">
-            <Label htmlFor="remark">Action Remark <span className="text-red-500">*</span></Label>
+            <Label htmlFor="remark">
+              Action Remark <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="remark"
               placeholder="Enter reason for status change..."
@@ -383,9 +416,13 @@ export default function MpOccurrenceTable({
                 setActionRemark(e.target.value);
                 if (e.target.value.trim()) setRemarkError("");
               }}
-              className={remarkError ? "border-red-500 focus-visible:ring-red-500" : ""}
+              className={
+                remarkError ? "border-red-500 focus-visible:ring-red-500" : ""
+              }
             />
-            {remarkError && <span className="text-xs text-red-500 mt-1">{remarkError}</span>}
+            {remarkError && (
+              <span className="text-xs text-red-500 mt-1">{remarkError}</span>
+            )}
           </div>
         )}
       </ConfirmationModal>

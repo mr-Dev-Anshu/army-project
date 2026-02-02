@@ -170,6 +170,9 @@ export const initialState: GlobalFormState = {
       },
 
       witnesses: [],
+
+      witnessTemp: {}, // 👈 ADD THIS LINE
+
       witnessVehicleStatus: "",
       evidence: {
         attachEvidence: null,
@@ -215,7 +218,7 @@ export const initialState: GlobalFormState = {
     },
 
     maidServant: {} as any, // Placeholder until fully defined
-    tempWorker: {} as any,   // Placeholder until fully defined
+    tempWorker: {} as any, // Placeholder until fully defined
 
     vehiclesSecurityPassManagement: {
       _id: "",
@@ -252,17 +255,19 @@ export const initialState: GlobalFormState = {
 
     immediateReportingIncident: {
       _id: "",
-      individuals: [{
-        armyNo: "",
-        rank: "",
-        name: "",
-        age: "",
-        totalServiceDuration: "",
-        unit: "",
-        unitLocation: "",
-        fmn: "",
-        individualWorkingStatus: "",
-      }],
+      individuals: [
+        {
+          armyNo: "",
+          rank: "",
+          name: "",
+          age: "",
+          totalServiceDuration: "",
+          unit: "",
+          unitLocation: "",
+          fmn: "",
+          individualWorkingStatus: "",
+        },
+      ],
       incidentPlace: "",
       incidentDate: "",
       incidentTime: "",
@@ -288,7 +293,6 @@ type Action =
   | { type: "SET_FORM_DATA"; payload: any }
   | { type: "CLEAR_MP_ADDITIONAL" }
   | { type: "RESET_FORM" };
-
 
 /* ------------------------------------
    REDUCER
@@ -349,12 +353,12 @@ function reducer(state: GlobalFormState, action: Action): GlobalFormState {
       setByPath(
         newState,
         "formData.mpReport.individualDetails.tempOffender",
-        null
+        null,
       );
       setByPath(
         newState,
         "formData.mpReport.individualDetails.vehicleData",
-        {}
+        {},
       );
       return newState;
     }

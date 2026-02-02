@@ -1,4 +1,44 @@
 
+
+// "use client";
+
+// import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
+// import VehicleDetailsForm from "@/common/component/VehicleDetailsForm";
+// import VehiclePrimaryQuestion from "@/common/component/VehiclePrimaryQuestion";
+
+// export default function Step1Particulars({
+//   value,
+//   onChange,
+// }: {
+//   value: string;
+//   onChange: (v: string) => void;
+// }) {
+//   return (
+//     <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
+
+//       {/* QUESTION */}
+//       <VehiclePrimaryQuestion
+//         vehicleStatus={value}
+//         setVehicleStatus={onChange}
+//         onChange={onChange}
+//       />
+
+//       {/* ✅ VEHICLE FLOW */}
+//       {value === "yes" && (
+//         <VehicleDetailsForm scope="traffic" />
+//       )}
+
+//       {/* ✅ NO VEHICLE FLOW */}
+//       {value === "no" && (
+//         <OffenderWithoutVehicleForm scope="traffic" />
+//       )}
+
+//     </div>
+//   );
+// }
+
+
+
 "use client";
 
 import OffenderWithoutVehicleForm from "@/common/component/OffenderWithoutVehicleForm";
@@ -13,48 +53,37 @@ export default function Step1Particulars({
   onChange: (v: string) => void;
 }) {
   return (
-    <div
-      className="
-        w-full h-full
-        flex flex-col
-        gap-4 sm:gap-5 lg:gap-6
-        px-2 sm:px-3 md:px-4 lg:px-6
-        pb-4
-        overflow-y-auto
-      "
-    >
-      {/* ---------- STEP 1 QUESTION ---------- */}
-      <div className="w-full max-w-full">
+    <div className="w-full h-full flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
+
+      {/* ================= VEHICLE + QUESTION CARD ================= */}
+      <div className="border rounded-xl p-4 space-y-6 bg-white">
+
         <VehiclePrimaryQuestion
           vehicleStatus={value}
           setVehicleStatus={onChange}
           onChange={onChange}
         />
-      </div>
 
-      {/* ---------- STEP 2 FORM RENDER ---------- */}
-      <div
-        className="
-          w-full
-          min-h-[200px]
-          sm:min-h-[230px]
-          md:min-h-[260px]
-          lg:min-h-[300px]
-          flex
-        "
-      >
         {value === "yes" && (
-          <div className="w-full">
-            <VehicleDetailsForm scope="traffic" />
-          </div>
+          <VehicleDetailsForm scope="traffic" hideDriverSection />
         )}
 
-        {value === "no" && (
-          <div className="w-full">
-            <OffenderWithoutVehicleForm />
-          </div>
-        )}
       </div>
+
+      {/* ================= OFFENDER CARD ================= */}
+      {value === "yes" && (
+        <div className="border rounded-xl p-4 bg-white">
+          <OffenderWithoutVehicleForm scope="traffic" />
+        </div>
+      )}
+
+      {/* ================= NO VEHICLE FLOW ================= */}
+      {value === "no" && (
+        <div className="border rounded-xl p-4 bg-white">
+          <OffenderWithoutVehicleForm scope="traffic" />
+        </div>
+      )}
+
     </div>
   );
 }

@@ -286,6 +286,11 @@ export class MPReportRepository {
     });
   }
 
+    async findByReportNumber(reportNumber) {
+    return await MPReport.findOne({
+      "reportDetails.reportNumber": reportNumber
+    });
+  }
   /* ================= DELETE ================= */
 
   async deleteById(id) {

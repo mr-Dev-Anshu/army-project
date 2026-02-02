@@ -116,6 +116,8 @@ export interface MpReportState {
   };
 
   witnesses: Witness[];
+  witnessTemp: any;   
+
   witnessVehicleStatus?: "yes" | "no" | "";
 
   evidence: {

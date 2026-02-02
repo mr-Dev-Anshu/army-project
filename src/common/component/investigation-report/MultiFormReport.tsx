@@ -19,7 +19,10 @@ import Step11Remarks from "./steps/Step11Remarks";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
 import { RightPanel } from "../multi-step-form/RightPanel";
 
-import { useCreateMPReport, useUpdateMPReport } from "@/features/mpReports/hooks";
+import {
+  useCreateMPReport,
+  useUpdateMPReport,
+} from "@/features/mpReports/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import React, { useEffect } from "react";
 
@@ -85,7 +88,8 @@ export default function MultiFormReport({
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
 
   /* ================= FETCH REPORT NO ================= */
-  const reportNo = state.formData.mpReport.reportDetails.reportNo || "PRO/21 CPU/00042/106/25";
+  const reportNo =
+    state.formData.mpReport.reportDetails.reportNo || "PRO/21 CPU/00042/106/25";
 
   // Hydration Effect
   useEffect(() => {
@@ -118,8 +122,17 @@ export default function MultiFormReport({
         offenceTypes: er.occurrenceDetails?.offenceTypes || [],
         offenceTypeReference: er.occurrenceDetails?.offenceTypeReference || [],
         place: er.occurrenceDetails?.placeOfOccurrence || "",
-        date: er.occurrenceDetails?.dateOfOccurrence ? new Date(er.occurrenceDetails.dateOfOccurrence).toISOString().split('T')[0] : "",
-        time: er.occurrenceDetails?.timeOfOccurrence ? new Date(er.occurrenceDetails.timeOfOccurrence).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : "",
+        date: er.occurrenceDetails?.dateOfOccurrence
+          ? new Date(er.occurrenceDetails.dateOfOccurrence)
+              .toISOString()
+              .split("T")[0]
+          : "",
+        time: er.occurrenceDetails?.timeOfOccurrence
+          ? new Date(er.occurrenceDetails.timeOfOccurrence).toLocaleTimeString(
+              "en-GB",
+              { hour: "2-digit", minute: "2-digit" },
+            )
+          : "",
         description: er.occurrenceDetails?.description || "",
       };
 
@@ -144,7 +157,7 @@ export default function MultiFormReport({
             role: ind.role,
             offenderType: ind.role, // Mapping back
             vehicleInvolved: ind.isVehicleInvolved ? "yes" : "no",
-          }))
+          })),
         };
       }
 
@@ -160,23 +173,53 @@ export default function MultiFormReport({
             address: w.address,
             iCardNumber: w.iCardNumber,
             remark: w.remark,
-          }
+          },
+        }));
+      }
+      // ================= DOCUMENTS (STEP 7) =================
+      if (Array.isArray(er.documents)) {
+        mpNodes.documents = er.documents.map((d: any) => ({
+          statement: d.statement || "",
+          url: d.url || "",
+          type: d.type || "Document",
+          fileName: d.fileName || "",
         }));
       }
 
-      // Documents
-      if (Array.isArray(er.documents)) {
-        mpNodes.documents = er.documents;
+      // ================= EVIDENCE (STEP 6) =================
+      if (Array.isArray(er.evidences)) {
+        mpNodes.evidence = {
+          attachEvidence:
+            er.evidences.find((e: any) => e.type === "Evidence") || null,
+          eyeSketch:
+            er.evidences.find((e: any) => e.type === "Eye Sketch") || null,
+          photos: er.evidences.filter((e: any) => e.type === "Photo"),
+          videos: er.evidences.filter((e: any) => e.type === "Video"),
+        };
       }
+
+      // ================= DETAILED OCCURRENCE REPORT (STEP 8) =================
+      mpNodes.detailedReport = er.detailedOccurrenceReport || "";
+
+      // ================= INVESTIGATION POINTS (STEP 9) =================
+      mpNodes.investigationPoints =
+        typeof er.pointsFindOutDuringInvestigation === "string"
+          ? er.pointsFindOutDuringInvestigation.split("\n")
+          : [];
+
+      // ================= OPINION (STEP 10) =================
+      mpNodes.opinion = er.opinion || "";
 
       // Evidence & Detailed Report & Remarks
       // ... map strictly if needed, mainly strictly structure matching
 
-      mpNodes.investigationPoints = er.pointsFindOutDuringInvestigation ? er.pointsFindOutDuringInvestigation.split('\n') : [];
+      mpNodes.investigationPoints = er.pointsFindOutDuringInvestigation
+        ? er.pointsFindOutDuringInvestigation.split("\n")
+        : [];
       mpNodes.opinion = er.opinion || "";
       mpNodes.remarks = {
         analysis: er.remarks?.analysis || "",
-        recommendation: er.remarks?.recommendation || ""
+        recommendation: er.remarks?.recommendation || "",
       };
 
       mpNodes.attachments = er.customFields?.attachments || []; // Hydrate attachments
@@ -185,8 +228,8 @@ export default function MultiFormReport({
         type: "SET_FORM_DATA",
         payload: {
           ...initialState.formData,
-          mpReport: mpNodes
-        }
+          mpReport: mpNodes,
+        },
       });
     }
   }, [existingReport, dispatch]);
@@ -269,7 +312,7 @@ export default function MultiFormReport({
     const investigationPoints = Array.isArray(mp?.investigationPoints)
       ? mp.investigationPoints
       : typeof mp?.investigationPoints === "string" &&
-        mp.investigationPoints.trim()
+          mp.investigationPoints.trim()
         ? mp.investigationPoints.split("\n")
         : [];
 
@@ -293,9 +336,13 @@ export default function MultiFormReport({
 
       /* ================= 2–3. OCCURRENCE DETAILS ================= */
       occurrence: {
-        types: mp?.occurrenceDetails?.offenceTypes && mp.occurrenceDetails.offenceTypes.length > 0
-          ? mp.occurrenceDetails.offenceTypes
-          : (mp?.occurrenceDetails?.offenceType ? [mp.occurrenceDetails.offenceType] : []),
+        types:
+          mp?.occurrenceDetails?.offenceTypes &&
+          mp.occurrenceDetails.offenceTypes.length > 0
+            ? mp.occurrenceDetails.offenceTypes
+            : mp?.occurrenceDetails?.offenceType
+              ? [mp.occurrenceDetails.offenceType]
+              : [],
         refs: mp?.occurrenceDetails?.offenceTypeReference || [],
         place: val(mp?.occurrenceDetails?.place),
         date: val(mp?.occurrenceDetails?.date),
@@ -328,13 +375,13 @@ export default function MultiFormReport({
       detailedReport: {
         statement: val(
           mp?.detailedOccurrenceReport?.statement ||
-          mp?.detailedOccurrenceReport
+            mp?.detailedOccurrenceReport,
         ),
 
         findings: Array.isArray(mp?.investigationPoints)
           ? mp.investigationPoints
           : typeof mp?.investigationPoints === "string" &&
-            mp.investigationPoints.trim()
+              mp.investigationPoints.trim()
             ? mp.investigationPoints.split("\n")
             : [],
 
@@ -391,7 +438,8 @@ export default function MultiFormReport({
       const individualsPayload = (mp.individualDetails?.offenderList || []).map(
         (o: any) => {
           const d = o.details || {};
-          const sanitize = (v: any) => (v && v !== "Nil" && v !== "" ? v : undefined);
+          const sanitize = (v: any) =>
+            v && v !== "Nil" && v !== "" ? v : undefined;
           return {
             armyNo: sanitize(d.armyNumber) || sanitize(d.armyNo),
             rank: sanitize(d.rank),
@@ -399,19 +447,27 @@ export default function MultiFormReport({
             unit: sanitize(d.unit),
             fmn: sanitize(d.fmn),
             address: sanitize(d.address),
-            iCardNumber: sanitize(d.iCardNumber) || sanitize(d.icard) || sanitize(d.passNo),
+            iCardNumber:
+              sanitize(d.iCardNumber) ||
+              sanitize(d.icard) ||
+              sanitize(d.passNo),
             remark: sanitize(d.remark) || "--",
             role: o.role || o.offenderType || "Offender",
-            isVehicleInvolved: Boolean(o.vehicleInvolved === "yes" || d.vehicleInvolved === "yes" || o.isVehicleInvolved),
+            isVehicleInvolved: Boolean(
+              o.vehicleInvolved === "yes" ||
+              d.vehicleInvolved === "yes" ||
+              o.isVehicleInvolved,
+            ),
             customFields: d,
           };
-        }
+        },
       );
 
       /* ================= MAP WITNESSES (EMBEDDED) ================= */
       const witnessesPayload = (mp.witnesses || []).map((w: any) => {
         const d = w.details || w;
-        const sanitize = (v: any) => (v && v !== "Nil" && v !== "" ? v : undefined);
+        const sanitize = (v: any) =>
+          v && v !== "Nil" && v !== "" ? v : undefined;
         return {
           armyNo: sanitize(d.armyNumber) || sanitize(d.armyNo),
           rank: sanitize(d.rank),
@@ -450,13 +506,16 @@ export default function MultiFormReport({
         occurrenceDetails: {
           offenceType: mp.occurrenceDetails.offenceType || "NA",
           offenceTypes: mp.occurrenceDetails?.offenceTypes ?? [],
-          offenceTypeReference: mp.occurrenceDetails?.offenceTypeReference ?? [],
+          offenceTypeReference:
+            mp.occurrenceDetails?.offenceTypeReference ?? [],
           placeOfOccurrence: mp.occurrenceDetails.place || "NA",
-          dateOfOccurrence: toISODateTime(mp.occurrenceDetails.date, "00:00") || "",
-          timeOfOccurrence: toISODateTime(
-            mp.occurrenceDetails.date,
-            mp.occurrenceDetails.time
-          ) || "",
+          dateOfOccurrence:
+            toISODateTime(mp.occurrenceDetails.date, "00:00") || "",
+          timeOfOccurrence:
+            toISODateTime(
+              mp.occurrenceDetails.date,
+              mp.occurrenceDetails.time,
+            ) || "",
           description: mp.occurrenceDetails.description || "Nil",
           customFields: {},
         },
@@ -489,7 +548,7 @@ export default function MultiFormReport({
         },
 
         customFields: {
-          attachments: mp.attachments || [] // Also capture any loose attachments from stepper
+          attachments: mp.attachments || [], // Also capture any loose attachments from stepper
         },
       };
 
@@ -501,7 +560,7 @@ export default function MultiFormReport({
         console.log("📝 UPDATING MP Report:", existingReport._id);
         reportRes = await updateReportAsync({
           id: existingReport._id,
-          data: payload
+          data: payload,
         });
         toast.success("MP Report Updated Successfully");
       } else {
@@ -528,7 +587,7 @@ export default function MultiFormReport({
         const d = o.details ?? o;
 
         const hasData = Object.values(d || {}).some(
-          (v) => v !== "" && v !== null && v !== undefined
+          (v) => v !== "" && v !== null && v !== undefined,
         );
         if (!hasData) continue;
 
@@ -548,7 +607,7 @@ export default function MultiFormReport({
       if (add?.details) {
         const d = add.details;
         const hasData = Object.values(d).some(
-          (v) => v !== "" && v !== null && v !== undefined
+          (v) => v !== "" && v !== null && v !== undefined,
         );
 
         if (hasData) {
@@ -568,7 +627,7 @@ export default function MultiFormReport({
       for (const w of mp.witnesses || []) {
         const d = (w as any).details ?? w;
         const hasData = Object.values(d || {}).some(
-          (v) => v !== "" && v !== null && v !== undefined
+          (v) => v !== "" && v !== null && v !== undefined,
         );
         if (!hasData) continue;
 
@@ -614,7 +673,6 @@ export default function MultiFormReport({
       setIsSubmitting(false);
     }
   };
-
 
   // ================= RIGHT PANEL STEP CONFIG =================
   const stepsConfig = {
