@@ -188,7 +188,7 @@ export default function FormationAnalysisTable({
     };
 
     return (
-        <div className="space-y-6 min-h-screen bg-amber-300">
+        <div className="space-y-6 min-h-screen ">
             {/* Header / Breadcrumbs */}
             <div className="flex items-center text-sm text-[#404040] mb-6 w-full border-b border-gray-300 pb-4">
                 <LineChart className="w-5 h-5 text-[#404040] mr-3" />
