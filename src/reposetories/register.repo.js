@@ -24,32 +24,19 @@ export class RegisterRepository {
         return await Register.findOne({ "details.reportNo": reportNo }).populate('offender').lean();
     }
 
-   async findAll(filters = {}, sort = { createdAt: -1 }, pagination = {}) {
-    const { page = 1, limit = 10 } = pagination;
-    const skip = (page - 1) * limit;
+    async findAll(filters = {}, sort = { createdAt: -1 }, pagination = {}) {
+        const { page = 1, limit = 10 } = pagination;
+        const skip = (page - 1) * limit;
 
-    const pipeline = [
-        { $match: filters },
-        
-        {
-            $lookup: {
-                from: "offenders",
-                localField: "_id",
-                foreignField: "offenceId",
-                as: "offenders"
-            }
-        },
+        const query = Register.find(filters).populate('offender').sort(sort);
 
-        { $sort: sort }
-    ];
+        // Only apply pagination if limit is provided and positive
+        if (limit > 0) {
+            query.skip(skip).limit(limit);
+        }
 
-    if (limit > 0) {
-        pipeline.push({ $skip: skip });
-        pipeline.push({ $limit: limit });
+        return await query.lean();
     }
-
-    return await Register.aggregate(pipeline);
-}
 
     async count(filters = {}) {
         return await Register.countDocuments(filters);
