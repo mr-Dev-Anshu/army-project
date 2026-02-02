@@ -25,7 +25,6 @@ interface MTAccidentReportTableProps {
 
 const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentReportTableProps) => {
     const { updateReport, isUpdating } = useMTAccidentReport();
-    console.log("MT Accident Report Data:", data);
 
     const [filters, setFilters] = useState<FilterState>({
         search: "",
@@ -230,26 +229,106 @@ const MTAccidentReportTable = ({ data, onEdit, onDelete, onAddNew }: MTAccidentR
 
     const dataWithSrNo = filteredData.map((item, index) => ({ ...item, serialNumber: index + 1 }));
 
- const renderParticulars = (details: any) => {
-  const d = details?.individualDetails;
+    const renderParticulars = (details: any) => {
+        const type = details?.individualType;
+        const d = details?.individualDetails || {};
 
-  if (!d) return "-";
+        if (!type) return "-";
 
-  return (
-    <div className="space-y-0.5 text-sm text-[#0A0A0A]">
-      <div className="text-xs font-semibold text-gray-500 mb-1">
-        Military Personnel
-      </div>
+        const TypeLabel = (
+            <div className="text-xs font-semibold text-gray-500 mb-1">
+                {type === 'militaryPersonnel' ? 'Military Personnel' :
+                    type === 'civilian' ? 'Civilian / Dependent' :
+                        type === 'employee' ? 'Employee' :
+                            type === 'shopKeeper' ? 'Shop Keeper' :
+                                type === 'servantMaid' ? 'Servant / Maid' :
+                                    type === 'tempHiredWorker' ? 'Temporarily Hired Worker' :
+                                        type.replace(/([A-Z])/g, ' $1').trim()}
+            </div>
+        );
 
-      {d.armyNo && <div><b>Army No:</b> {d.armyNo}</div>}
-      {d.rank && <div><b>Rank:</b> {d.rank}</div>}
-      {d.name && <div><b>Name:</b> {d.name}</div>}
-      {d.unit && <div><b>Unit:</b> {d.unit}</div>}
-      {d.fmn && <div><b>FMN:</b> {d.fmn}</div>}
-    </div>
-  );
-};
+        if (type === 'militaryPersonnel') {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.militaryPersonnelArmyNo && <div><span className="font-bold ">Army No:</span> {d.militaryPersonnelArmyNo}</div>}
+                    {d.militaryPersonnelRank && <div><span className="font-bold ">Rank:</span> {d.militaryPersonnelRank}</div>}
+                    {d.militaryPersonnelName && <div><span className="font-bold ">Name:</span> {d.militaryPersonnelName}</div>}
+                    {d.militaryPersonnelUnit && <div><span className="font-bold ">Unit:</span> {d.militaryPersonnelUnit}</div>}
+                    {d.militaryPersonnelFmn && <div><span className="font-bold ">FMN:</span> {d.militaryPersonnelFmn}</div>}
 
+                </div>
+            );
+        }
+        if (type === 'employee') {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.employeeServiceNumber && <div><span className="font-bold ">Service No:</span> {d.employeeServiceNumber}</div>}
+                    {d.employeeRank && <div><span className="font-bold ">Rank:</span> {d.employeeRank}</div>}
+                    {d.employeeName && <div><span className="font-bold ">Name:</span> {d.employeeName}</div>}
+                    {d.employeeUnit && <div><span className="font-bold ">Unit:</span> {d.employeeUnit}</div>}
+                    {d.employeeFmn && <div><span className="font-bold ">FMN:</span> {d.employeeFmn}</div>}
+                </div>
+            );
+        }
+        if (type === 'civilian') {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.civilianName && <div><span className="font-bold ">Name:</span> {d.civilianName}</div>}
+                    {d.civilianAadharCardNumber && <div><span className="font-bold ">Aadhar No.:</span> {d.civilianAadharCardNumber}</div>}
+                    {d.civilianFathersName && <div><span className="font-bold ">Father/Husband:</span> {d.civilianFathersName}</div>}
+
+                </div>
+            );
+        }
+        if (type === "shopKeeper") {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.shopOwnerName && <div><span className="font-bold ">Name:</span> {d.shopOwnerName}</div>}
+                    {d.shopUnit && <div><span className="font-bold ">Unit:</span> {d.shopUnit}</div>}
+                    {d.shopAddress && <div><span className="font-bold ">Shop Address:</span> {d.shopAddress}</div>}
+                    {d.shopPassNo && <div><span className="font-bold ">Pass No:</span> {d.shopPassNo}</div>}
+                </div>
+            );
+        }
+        if (type === "servantMaid") {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.maidName && <div><span className="font-bold ">Name:</span> {d.maidName}</div>}
+                    {d.maidFathersName && <div><span className="font-bold ">Father/Husband:</span> {d.maidFathersName}</div>}
+                    {d.maidPassNumber && <div><span className="font-bold ">Pass No:</span> {d.maidPassNumber}</div>}
+                    {d.officersEnclaveRank && <div><span className="font-bold ">C/O Rank:</span> {d.officersEnclaveRank}</div>}
+                    {d.officersEnclaveName && <div><span className="font-bold ">C/O Name:</span> {d.officersEnclaveName}</div>}
+                    {d.officersEnclaveUnit && <div><span className="font-bold ">C/O Unit:</span> {d.officersEnclaveUnit}</div>}
+                    {d.officersEnclaveFmn && <div><span className="font-bold ">C/O FMN:</span> {d.officersEnclaveFmn}</div>}
+                </div>
+            );
+        }
+        if (type === "tempHiredWorker") {
+            return (
+                <div className="space-y-0.5 text-sm text-[#0A0A0A]">
+                    {TypeLabel}
+                    {d.tempWorkerName && <div><span className="font-bold ">Name:</span> {d.tempWorkerName}</div>}
+                    {d.tempWorkerPassNo && <div><span className="font-bold ">Pass No:</span> {d.tempWorkerPassNo}</div>}
+                    {d.tempWorkerPlaceOfWork && <div><span className="font-bold ">Place of Work:</span> {d.tempWorkerPlaceOfWork}</div>}
+                    {d.tempWorkerTypeOfWork && <div><span className="font-bold ">Type of Work:</span> {d.tempWorkerTypeOfWork}</div>}
+                </div>
+            );
+        }
+        // Fallback for others (Servant, Shopkeeper, etc.)
+        return (
+            <div className="space-y-0.5 text-sm">
+                {TypeLabel}
+                {Object.entries(d).slice(0, 3).map(([k, v]: any) => (
+                    <div key={k}><span className="font-medium text-gray-700 capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {v}</div>
+                ))}
+            </div>
+        );
+    };
 
 
 
