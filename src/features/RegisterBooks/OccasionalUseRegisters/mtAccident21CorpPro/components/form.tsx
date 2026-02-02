@@ -21,7 +21,7 @@ const INITIAL_DATA = {
   individualDetails: {
     individualType: "militaryPersonnel",
     individualDetails: {} as any,
-    passengers: [],
+    passengers: [] as any[],
   },
 
   accidentDetails: {
@@ -240,8 +240,8 @@ const MTAccidentReportForm: React.FC<Props> = ({
                 value={
                   formData.accidentDetails.accidentDate
                     ? new Date(formData.accidentDetails.accidentDate)
-                        .toISOString()
-                        .split("T")[0]
+                      .toISOString()
+                      .split("T")[0]
                     : ""
                 }
                 onChange={(e) =>
@@ -483,8 +483,8 @@ const MTAccidentReportForm: React.FC<Props> = ({
                 value={
                   formData.firMactDetails.firDate
                     ? new Date(formData.firMactDetails.firDate)
-                        .toISOString()
-                        .split("T")[0]
+                      .toISOString()
+                      .split("T")[0]
                     : ""
                 }
                 onChange={(e) =>
