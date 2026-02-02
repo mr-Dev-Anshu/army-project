@@ -1,5 +1,7 @@
 import Joi from "joi";
 
+
+
 const individualSchema = Joi.object({
     individualType: Joi.string()
         .valid(
@@ -11,8 +13,32 @@ const individualSchema = Joi.object({
             "tempHiredWorker"
         )
         .optional(),
+
     individualDetails: Joi.object().optional().unknown(true),
+
+    // ✅ ADD THIS
+    passengers: Joi.array()
+        .items(
+            Joi.object({
+                individualDetails: Joi.object().optional().unknown(true)
+            })
+        )
+        .default([]),
 });
+
+// const individualSchema = Joi.object({
+//     individualType: Joi.string()
+//         .valid(
+//             "militaryPersonnel",
+//             "employee",
+//             "civilian",
+//             "servantMaid",
+//             "shopKeeper",
+//             "tempHiredWorker"
+//         )
+//         .optional(),
+//     individualDetails: Joi.object().optional().unknown(true),
+// });
 
 const accidentSchema = Joi.object({
     accidentTime: Joi.string().allow(null, "").optional(),
