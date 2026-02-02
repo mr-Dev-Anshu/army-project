@@ -502,7 +502,10 @@ export default function StaticSpeedCheckReportsPage() {
     setDownloadType("PDF");
     try {
       const response = await fetch(`/api/static-speed-report/pdf/${id}`);
-      if (!response.ok) throw new Error("Failed to generate PDF");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ error: "Unknown server error" }));
+        throw new Error(errData.error || "Failed to generate PDF");
+      }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -514,7 +517,7 @@ export default function StaticSpeedCheckReportsPage() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("PDF Download Error", error);
-      alert("Failed to download PDF");
+      alert(`Failed to download PDF: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsDownloading(false);
       setDownloadType(null);

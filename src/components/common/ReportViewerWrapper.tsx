@@ -83,13 +83,36 @@ export default function ReportViewerWrapper({
                     )}
                 </div>
 
-                {/* Right: Close Button Only */}
+                {/* Right: Download Actions & Close */}
                 <div className="flex items-center gap-2">
+                    {onDownloadWord && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onDownloadWord}
+                            title="Download Word Report"
+                            className="bg-transparent text-white hover:bg-white/10 hover:text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+                        >
+                            <FileText className="w-5 h-5" />
+                        </Button>
+                    )}
+                    {onDownloadPdf && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onDownloadPdf}
+                            title="Download PDF Report"
+                            className="bg-transparent text-white hover:bg-white/10 hover:text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+                        >
+                            <FileDown className="w-5 h-5" />
+                        </Button>
+                    )}
+                    <div className="w-px h-6 bg-white/20 mx-1"></div>
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={onBack}
-                        className="bg-white text-black hover:bg-gray-200 rounded text-black w-8 h-8 flex items-center justify-center"
+                        className="bg-white text-black hover:bg-gray-200 rounded text-black w-8 h-8 flex items-center justify-center shadow-sm"
                     >
                         <X className="w-5 h-5" />
                     </Button>

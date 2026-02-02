@@ -29,7 +29,11 @@ export async function GET(
 
         // Navigate to the print page
         // Relaxed wait condition to avoid timeouts on long-running background requests
-        await page.goto(reportUrl, { waitUntil: 'load', timeout: 60000 });
+        const response = await page.goto(reportUrl, { waitUntil: 'load', timeout: 60000 });
+
+        if (!response || !response.ok()) {
+            throw new Error(`Print page returned status: ${response?.status()} ${response?.statusText()}`);
+        }
 
         // Ensure the report content is loaded
         const reportSelector = '.print\\:block'; // Targeting the main report container

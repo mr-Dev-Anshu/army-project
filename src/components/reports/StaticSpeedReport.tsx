@@ -6,18 +6,10 @@ export interface StaticSpeedReportProps {
   unitName: string; // Report Header Unit
   particulars: {
     rider: {
-      armyNo: string;
-      name: string;
-      fmn: string;
-      address: string;
-      rank: string;
-      unit: string;
-      command: string;
-      iCardNo: string;
+      [key: string]: any;
     };
     vehicle: {
-      baNo: string;
-      makeAndTake: string;
+      [key: string]: any;
     };
   };
   occurrence: {
@@ -72,6 +64,9 @@ const DataField = ({
     </div>
   );
 };
+
+const hasContent = (str?: string) => str && str !== "N/A" && str.trim() !== "";
+const hasObjectContent = (obj: any) => Object.values(obj).some((val) => hasContent(val as string));
 
 const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
   reportNo,
@@ -137,52 +132,134 @@ const StaticSpeedReport: React.FC<StaticSpeedReportProps> = ({
         </div>
 
         {/* 1. PARTICULARS */}
-        <div className="mb-6">
-          <h2 className="font-bold text-xs mb-4">
-            1. &nbsp;&nbsp; <span className="underline">PARTICULARS:</span>
-          </h2>
+        {(hasObjectContent(particulars.rider) || hasObjectContent(particulars.vehicle)) && (
+          <div className="mb-6">
+            <h2 className="font-bold text-xs mb-4">
+              1. &nbsp;&nbsp; <span className="underline">PARTICULARS:</span>
+            </h2>
 
-          {/* 1.1 Box */}
-          <div className="border border-gray-300 mb-4 text-xs">
-            {/* 1.1 Rider Details */}
-            <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
-              <div className="font-semibold">(1.1)</div>
-              <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                <DataField
-                  label="DD veh rider no."
-                  value={particulars.rider.armyNo}
-                />
-                <DataField label="Rank" value={particulars.rider.rank} />
-                <DataField label="Name" value={particulars.rider.name} />
-                <DataField label="Unit" value={particulars.rider.unit} />
-                <DataField label="FMN" value={particulars.rider.fmn} />
-                <DataField label="Command" value={particulars.rider.command} />
-                <DataField label="Address" value={particulars.rider.address} />
-                <DataField
-                  label="I Card No."
-                  value={particulars.rider.iCardNo}
-                />
-              </div>
-            </div>
+            <div className="border border-gray-300 mb-4 text-xs">
+              {/* 1.1 Rider Details */}
+              {hasObjectContent(particulars.rider) && (
+                <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
+                  <div className="font-semibold">(1.1)</div>
+                  <div className="grid grid-cols-2 gap-x-12 gap-y-1">
+                    {(() => {
+                      const details = particulars.rider;
+                      // Determine type from various possible fields
+                      const rawType = details?.offenderType || details?.individualType || details?.type || details?.customFields?.offenderType;
 
-            <div className="border-t border-gray-200 mx-4"></div>
+                      const normalizeType = (t: string) => {
+                        if (!t) return "";
+                        if (t === "Military Person") return "militaryPersonnel";
+                        if (t === "Employee") return "employee";
+                        if (t === "Civilian") return "civilian";
+                        if (t === "Shop Keeper") return "shopKeeper";
+                        if (t === "Servant/Maid") return "servantMaid";
+                        if (t === "Temporary Hired Worker") return "tempHiredWorker";
+                        return t;
+                      };
+                      const type = normalizeType(rawType) || 'militaryPersonnel';
 
-            {/* 1.2 Vehicle Details */}
-            <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
-              <div className="font-semibold">(1.2)</div>
-              <div className="grid grid-cols-2 gap-x-12">
-                <DataField
-                  label="DD Veh BA no."
-                  value={particulars.vehicle.baNo}
-                />
-                <DataField
-                  label="Make & Take"
-                  value={particulars.vehicle.makeAndTake}
-                />
-              </div>
+                      // Use details directly or nested
+                      const d = details?.offenderDetails || details?.individualDetails || details || {};
+
+                      const get = (...keys: string[]) => {
+                        for (const k of keys) {
+                          if (d[k]) return d[k];
+                        }
+                        return null;
+                      };
+
+                      if (type === 'civilian') {
+                        return (
+                          <>
+                            <DataField label="Name" value={get("name", "civilianName", "Full Name")} />
+                            <DataField label="Aadhar No." value={get("aadharCardNo", "civilianAadharCardNumber", "Aadhar Card No.")} />
+                            <DataField label="Father/Husband" value={get("so", "civilianFathersName", "Father's / Husband's Name")} />
+                            <DataField label="Address" value={get("address", "civilianAddress", "Address")} />
+                            <DataField label="ID Card" value={get("iCardNumber", "civilianICardNumber", "ID Card Number")} />
+                          </>
+                        );
+                      }
+                      if (type === 'employee') {
+                        return (
+                          <>
+                            <DataField label="Service No" value={get("Employee ID", "employeeServiceNumber")} />
+                            <DataField label="Name" value={get("name", "employeeName")} />
+                            <DataField label="Rank" value={get("rank", "employeeRank")} />
+                            <DataField label="Dept" value={get("Department")} />
+                          </>
+                        );
+                      }
+                      if (type === 'shopKeeper') {
+                        return (
+                          <>
+                            <DataField label="Name" value={get("Shop Owner Name", "shopOwnerName")} />
+                            <DataField label="Unit" value={get("unit", "shopUnit", "Unit")} />
+                            <DataField label="Address" value={get("Shop Address", "shopAddress")} />
+                            <DataField label="Pass No" value={get("Pass No.", "shopPassNo", "passNo")} />
+                          </>
+                        );
+                      }
+                      if (type === 'servantMaid') {
+                        return (
+                          <>
+                            <DataField label="Name" value={get("name", "maidName")} />
+                            <DataField label="Father/Husband" value={get("so", "maidFathersName")} />
+                            <DataField label="Pass No" value={get("passNo", "maidPassNumber", "Maid/Servant Pass Number")} />
+                            <DataField label="C/O Name" value={get("armyOfficialName", "officersEnclaveName")} />
+                            <DataField label="C/O Rank" value={get("Officers Enclave C/O Rank (Army official's details)", "officersEnclaveRank")} />
+                            <DataField label="C/O Unit" value={get("unit", "officersEnclaveUnit")} />
+                          </>
+                        );
+                      }
+                      if (type === 'tempHiredWorker') {
+                        return (
+                          <>
+                            <DataField label="Name" value={get("name", "tempWorkerName")} />
+                            <DataField label="Pass No" value={get("Pass No.", "tempWorkerPassNo")} />
+                            <DataField label="Place Of Work" value={get("Place of Work", "tempWorkerPlaceOfWork")} />
+                            <DataField label="Type Of Work" value={get("Type of Work", "tempWorkerTypeOfWork")} />
+                          </>
+                        );
+                      }
+
+                      // Default / Military Personnel
+                      return (
+                        <>
+                          <DataField label="DD veh rider no." value={get("armyNo", "armyNumber", "militaryPersonnelArmyNo")} />
+                          <DataField label="Rank" value={get("rank", "selectRank", "militaryPersonnelRank")} />
+                          <DataField label="Name" value={get("name", "militaryPersonnelName")} />
+                          <DataField label="Unit" value={get("unit", "militaryPersonnelUnit")} />
+                          <DataField label="FMN" value={get("fmn", "militaryPersonnelFmn")} />
+                          <DataField label="Command" value={get("command")} />
+                          <DataField label="I-Card No" value={get("iCardNumber", "iCardNo")} />
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {/* Separator if both exist */}
+              {(hasObjectContent(particulars.rider) && hasObjectContent(particulars.vehicle)) && (
+                <div className="border-t border-gray-200 mx-4"></div>
+              )}
+
+              {/* 1.2 Vehicle Details */}
+              {hasObjectContent(particulars.vehicle) && (
+                <div className="p-4 grid grid-cols-[40px_1fr] gap-4">
+                  <div className="font-semibold">(1.2)</div>
+                  <div className="grid grid-cols-2 gap-x-12">
+                    <DataField label="DD Veh BA no." value={particulars.vehicle.baNo} />
+                    <DataField label="Make & Take" value={particulars.vehicle.makeAndTake} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* 2. STATEMENT OF EVIDENCE/OCCURRENCE */}
         <div className="mb-6">

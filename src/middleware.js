@@ -34,6 +34,7 @@ async function middleware(request) {
     pathname === "/login" ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||
+    pathname.startsWith("/print/") || // Exclude print routes from auth
     pathname.includes(".")
   ) {
     return NextResponse.next();

@@ -21,6 +21,7 @@ function mapToReportProps(raw: any): StaticSpeedReportProps {
         unitName: "21 Corps Provost Unit", // Hardcoded as per original
         particulars: {
             rider: {
+                offenderType: val(offender.offenderType || offender.individualType || raw.offenderType),
                 armyNo: val(offender.armyNumber),
                 name: val(offender.name),
                 rank: val(offender.rank),
@@ -29,6 +30,8 @@ function mapToReportProps(raw: any): StaticSpeedReportProps {
                 address: val(raw.address || offender.address),
                 command: val(raw.command || offender.command),
                 iCardNo: val(offender.iCardNumber),
+                // Pass raw offender details for the get() helper in StaticSpeedReport
+                offenderDetails: offender,
             },
             vehicle: {
                 baNo: val(raw.vehicleNumber),
