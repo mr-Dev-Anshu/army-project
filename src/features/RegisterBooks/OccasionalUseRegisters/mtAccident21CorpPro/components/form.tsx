@@ -21,7 +21,9 @@ const INITIAL_DATA = {
   individualDetails: {
     individualType: "militaryPersonnel",
     individualDetails: {} as any,
+    passengers: [],
   },
+
   accidentDetails: {
     accidentDate: "",
     accidentTime: "",
@@ -123,7 +125,6 @@ const MTAccidentReportForm: React.FC<Props> = ({
 
   const handleSubmit = async () => {
     try {
-      // Validate form data against schema
       const { error, value } = createMTAccidentReportSchema.validate(formData, {
         abortEarly: false,
         stripUnknown: true,
@@ -145,8 +146,7 @@ const MTAccidentReportForm: React.FC<Props> = ({
         const errorMessage = error.details
           .map((d) => {
             const fieldPath = d.path.join(".");
-            const label = fieldLabels[fieldPath] || fieldPath; // Fallback to path if no label
-            // Replace the quoted path (e.g. "casualtyDetails.injuredCivil") with the friendly label
+            const label = fieldLabels[fieldPath] || fieldPath;
             return d.message.replace(/"[^"]*"/, label);
           })
           .join(", ");
@@ -155,16 +155,18 @@ const MTAccidentReportForm: React.FC<Props> = ({
         return;
       }
 
-      // Use validated value
+      // ✅ PAYLOAD CHECK
+      console.log("FINAL PAYLOAD =>", value);
+
       if (initialData) {
         await updateReport({ id: initialData._id, data: value });
       } else {
         await createReport(value);
       }
+
       onSuccess();
     } catch (error) {
       console.error("Failed to save report", error);
-      // Error toast is already handled in the hook
     }
   };
 
@@ -173,25 +175,57 @@ const MTAccidentReportForm: React.FC<Props> = ({
   return (
     <div className="flex flex-col h-full bg-white font-[Arial]">
       <div className="flex-1 overflow-y-auto p-6 space-y-8">
-        {individualForms.map((_, index) => (
-          <div key={index} className="mb-6">
-            <IndividualVictimDetails
-              data={iv}
-              onChange={(path, value) =>
-                handleChange(`individualDetails.${path}`, value)
-              }
-            />
-          </div>
-        ))}
-      <div className="w-full flex justify-end">
+        {individualForms.map((_, index) => {
+          const isMain = index === 0;
+
+          return (
+            <div key={index} className="mb-6">
+              <IndividualVictimDetails
+                data={
+                  isMain
+                    ? iv
+                    : iv.passengers?.[index - 1] || { individualDetails: {} }
+                }
+                onChange={(path, value) =>
+                  handleChange(
+                    isMain
+                      ? `individualDetails.${path}`
+                      : `individualDetails.passengers.${index - 1}.${path}`,
+                    value,
+                  )
+                }
+              />
+            </div>
+          );
+        })}
+
+        <div className="w-full flex justify-end">
           <button
-          type="button"
-          className="bg-black text-white px-4 py-2 rounded-lg"
-          onClick={() => setIndividualForms((p) => [...p, 0])}
-        >
-          + Add More Individuals
-        </button>
-      </div>
+            type="button"
+            className="bg-black text-white px-4 py-2 rounded-lg"
+            onClick={() => {
+              setIndividualForms((prev) => [...prev, 0]);
+
+              setFormData((prev) => ({
+                ...prev,
+                individualDetails: {
+                  ...prev.individualDetails,
+
+                  // 🚨 FORCE passengers array creation
+                  passengers: [
+                    ...(Array.isArray(prev.individualDetails.passengers)
+                      ? prev.individualDetails.passengers
+                      : []),
+
+                    { individualDetails: {} },
+                  ],
+                },
+              }));
+            }}
+          >
+            + Add More Individuals
+          </button>
+        </div>
 
         {/* Accident Details */}
         <section className="space-y-4">
