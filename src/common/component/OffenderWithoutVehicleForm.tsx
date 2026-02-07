@@ -25,6 +25,7 @@ type Block = {
 
 interface Props {
   scope?: "traffic" | "static" | "mp-main" | "mp-additional";
+  rootPath?: string;
 }
 
 /* ================= COMPONENT ================= */

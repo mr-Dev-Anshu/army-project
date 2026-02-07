@@ -249,7 +249,7 @@ export interface StaticSpeedFormState {
     incidentLocation: string;
     description: string;
     briefDescription?: string;
-    description2: string;
+    description2?: string;
     authSpeed: string;
     actualSpeedNoted: string;
     overSpeedCalculated: string;
