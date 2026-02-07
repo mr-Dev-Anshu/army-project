@@ -1,6 +1,5 @@
-
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { initialState, useForm } from "@/context/FormContext";
 import { LeftStepper } from "../multi-step-form/LeftStepper";
@@ -19,7 +18,19 @@ import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { CreateOffenderData, OffenderType } from "@/apis/offender/types";
 
-import { useEffect } from "react";
+/* ================= VALUE MAPPERS (🔥 MAIN FIX) ================= */
+
+const mapVehicleCategory = (v?: string) => {
+  if (v === "2w") return "2-Wheeler";
+  if (v === "4w") return "4-Wheeler";
+  return v || "";
+};
+
+const mapVehicleType = (v?: string) => {
+  if (v === "civilian") return "Civilian Vehicle";
+  if (v === "dd") return "DD Vehicle";
+  return v || "";
+};
 
 export default function StaticSpeedForm({
   onCancel,
@@ -37,7 +48,8 @@ export default function StaticSpeedForm({
   const updateStaticRecord = useUpdateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
-  console.log(existingReport);
+
+  /* ================= FINAL SUBMIT (UNCHANGED) ================= */
 
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
@@ -46,7 +58,6 @@ export default function StaticSpeedForm({
       staticData.reportingBlock || {};
 
     try {
-      /* ================= STATIC SPEED PAYLOAD ================= */
       const payload = {
         reportId: reportNo,
         vehicleType: staticData.vehicleDetails.vehicleType,
@@ -58,13 +69,11 @@ export default function StaticSpeedForm({
           dateOfDuty: staticData.dutyBlock?.dateOfDuty || undefined,
           dutyLocation: staticData.dutyBlock?.dutyLocation || undefined,
           dutyType: staticData.dutyBlock?.dutyType || undefined,
-
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
                 `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`,
               ).toISOString()
             : undefined,
-
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
                 `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`,
@@ -83,28 +92,20 @@ export default function StaticSpeedForm({
           ]
             .filter(Boolean)
             .join("\n\n"),
-
           overSpeedCalculated:
             staticData.offenceBlock?.overSpeedCalculated ?? "",
           actualSpeedNoted: staticData.offenceBlock?.actualSpeedNoted ?? "",
           authSpeed: staticData.offenceBlock?.authSpeed ?? "",
-
           briefDescription: staticData.offenceBlock?.briefDescription || "",
         },
 
         remark: staticData.remarks,
-
         customFields: {
           selectedWitness: staticData.selectedWitness,
         },
       };
 
-      console.log("🚗 STATIC SPEED PAYLOAD ===>", payload);
-
-      /* ================= CREATE STATIC RECORD ================= */
       const staticRes = await createStaticRecord.mutateAsync(payload);
-
-      toast.success("Static Record Created Successfully!");
 
       if (!staticRes?._id) {
         toast.error("Static Record ID Missing!");
@@ -113,13 +114,10 @@ export default function StaticSpeedForm({
 
       const offenceId = String(staticRes._id);
 
-      /* ================= CREATE OFFENDERS ================= */
-
       const people = staticData.offenderPeople || [];
 
       for (const person of people) {
         const details = person.details || {};
-
         if (!Object.keys(details).length) continue;
 
         const offenderPayload: CreateOffenderData = {
@@ -134,10 +132,6 @@ export default function StaticSpeedForm({
         await createOffenderMutation.mutateAsync(offenderPayload);
       }
 
-      toast.success("Offenders Saved!");
-
-      /* ================= CREATE WITNESSES ================= */
-
       if (staticData.witnesses?.length) {
         for (const w of staticData.witnesses) {
           await createWitnessMutation.mutateAsync({
@@ -149,13 +143,9 @@ export default function StaticSpeedForm({
             contactNumber: w.reportingBlock.contactNumber || "",
           });
         }
-
-        toast.success("Witnesses Saved!");
       }
 
-      toast.success("🎉 ALL STATIC SPEED PROCESSES COMPLETED!");
-
-      /* ================= RESET ================= */
+      toast.success("🎉 Static Speed Record Saved!");
 
       dispatch({
         type: "SET_PATH",
@@ -167,177 +157,14 @@ export default function StaticSpeedForm({
       dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
       dispatch({ type: "SET_PREVIEW", payload: false });
     } catch (err: any) {
-      console.error("❌ FINAL STATIC SPEED ERROR ===>", err);
-
-      const msg =
+      toast.error(
         err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Failed to submit record";
-
-      toast.error(msg);
+          err?.message ||
+          "Failed to submit record",
+      );
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Hydration Effect
-  useEffect(() => {
-    if (existingReport) {
-      console.log("Hydrating Static Speed Form:", existingReport);
-      const er = existingReport;
-
-      // Deep copy initial structure
-      const speedNodes = {
-        ...initialState.formData.staticSpeed,
-        offenderPeople: [],
-      };
-
-      speedNodes.reportNo = er.reportNo || er.reportId || "";
-
-      // ✅ FIXED REMARK HYDRATION
-      speedNodes.remarks =
-        er.remark || er.remarks || er.customFields?.remarks || "";
-
-      // Vehicle
-      speedNodes.vehicleDetails = {
-        category: er.vehicleCategory || "",
-        vehicleType: er.vehicleType || "",
-        driverType: er.driverType || "",
-        vehicleNumber: er.vehicleNumber || "",
-        vehicleName: er.vehicleName || "",
-      };
-
-      // Duty Block
-      speedNodes.dutyBlock = {
-        dateOfDuty: er.onDutyDetails?.dateOfDuty
-          ? new Date(er.onDutyDetails.dateOfDuty).toISOString().split("T")[0]
-          : "",
-        startTime: er.onDutyDetails?.startTime
-          ? new Date(er.onDutyDetails.startTime).toLocaleTimeString("en-GB", {
-              hour12: false,
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "",
-        endTime: er.onDutyDetails?.endTime
-          ? new Date(er.onDutyDetails.endTime).toLocaleTimeString("en-GB", {
-              hour12: false,
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "",
-        dutyLocation: er.onDutyDetails?.dutyLocation || "",
-        dutyType: er.onDutyDetails?.dutyType || "",
-      };
-
-      // Reporting Block
-      speedNodes.reportingBlock = {
-        nameReportingMP: er.onDutyDetailsMPReporting?.nameReportingMP || "",
-        rank: er.onDutyDetailsMPReporting?.rank || "",
-        unit: er.onDutyDetailsMPReporting?.unit || "",
-        armyNumber: er.onDutyDetailsMPReporting?.armyNumber || "",
-        contactNumber: er.onDutyDetailsMPReporting?.contactNumber || "",
-      };
-
-      // Offence Block
-      // Offence Block  ✅ FIXED
-      const occ = er.offenceOccurenceDetails || {};
-
-      speedNodes.offenceBlock = {
-        timeOfOffence: occ.timeOfOffence
-          ? occ.timeOfOffence
-          : occ.time
-            ? new Date(occ.time).toISOString().slice(11, 16)
-            : "",
-
-        time: occ.time || "",
-        incidentLocation: occ.incidentLocation || "",
-        description: occ.description || "",
-        briefDescription: occ.briefDescription || "",
-        description2: occ.description2 || "",
-        actualSpeedNoted: occ.actualSpeedNoted || "",
-        authSpeed: occ.authSpeed || "",
-        overSpeedCalculated: occ.overSpeedCalculated || "",
-      };
-
-      // Witnesses
-      if (Array.isArray(er.onDutyWitnessingMps)) {
-        speedNodes.witnesses = er.onDutyWitnessingMps.map((w: any) => ({
-          reportingBlock: {
-            nameReportingMP: w.name || "",
-            rank: w.rank || "",
-            unit: w.unit || "",
-            armyNumber: w.ArmyNo || w.armyNumber || "",
-            contactNumber: w.contactNumber || "",
-          },
-        }));
-      }
-
-      // Offenders
-      // Offenders ✅ UNIVERSAL (ShopKeeper / Servant / TempWorker / Employee / Relative)
-      if (Array.isArray(er.offenders)) {
-        speedNodes.offenderPeople = er.offenders.map((o: any) => {
-          const d = o.offenderDetails || {};
-
-          const details: any = {};
-
-          /* 🔁 COPY EVERYTHING AS-IS */
-          Object.entries(d).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-              details[key] = value;
-            }
-          });
-
-          /* ✅ NORMALIZED COMMON KEYS */
-          details.name = d.name || d["Full Name"] || "";
-          details.so = d.so || d["Father's / Husband's Name"] || "";
-          details.address = d.address || d["Address"] || "";
-          details.rank = d.rank || d.type || "";
-          details.unit = d.unit || "";
-          details.armyNumber = d.armyNumber || "";
-          details.iCardNumber =
-            d["I Card Number"] || d.iCardNumber || d.passNo || "";
-
-          /* ✅ ALSO ENSURE LABEL KEYS EXIST */
-          details["Full Name"] = details.name;
-          details["Father's / Husband's Name"] = details.so;
-          details["Address"] = details.address;
-          details["I Card Number"] = details.iCardNumber;
-          details["Select Rank"] = details.rank;
-          details["Unit"] = details.unit;
-          details["Army Rider / Driver Number"] = details.armyNumber;
-
-          return {
-            type: o.offenderType || "Civilian",
-            whoIsIt: o.category || "Offender",
-            details,
-          };
-        });
-      }
-
-      speedNodes.attachments = er.customFields?.attachments || [];
-
-      dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          ...initialState.formData,
-          staticSpeed: speedNodes,
-        },
-      });
-    }
-  }, [existingReport, dispatch]);
-
-  /* ================= FETCH REPORT NO ================= */
-
-  const reportNo = staticData.reportNo || "TEMP/STATIC/001";
-
-  const handleReportNoChange = (newReportNo: string) => {
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.staticSpeed.reportNo",
-      value: newReportNo,
-    });
   };
 
   const mapStaticSpeedToReport = (staticSpeed: any) => {
@@ -362,7 +189,6 @@ export default function StaticSpeedForm({
       reportNo: staticSpeed.reportNo,
       reportDate: new Date().toLocaleDateString("en-GB"),
 
-      /* ================= PARTICULARS ================= */
       particulars: {
         rider: {
           armyNo: val(firstPerson?.details?.armyNumber),
@@ -372,28 +198,23 @@ export default function StaticSpeedForm({
           address: val(firstPerson?.details?.address),
           iCardNo: val(firstPerson?.details?.iCardNumber),
         },
-
         vehicle: {
           baNo: val(v.vehicleNumber),
           makeAndTake: val(v.vehicleName),
         },
       },
 
-      /* ================= OCCURRENCE ================= */
       occurrence: {
         dateOfDuty: duty.dateOfDuty,
         dutyLocation: val(duty.dutyLocation),
-
         timeOfOffence: val(
           occ.timeOfOffence ||
             (occ.time ? new Date(occ.time).toISOString().slice(11, 16) : ""),
         ),
-
         locationOfOffence: val(occ.incidentLocation),
         statement: val(occ.description),
       },
 
-      /* ================= OFFENCE ================= */
       offence: {
         actualSpeed: val(occ.actualSpeedNoted),
         authSpeed: val(occ.authSpeed),
@@ -401,7 +222,6 @@ export default function StaticSpeedForm({
         description: val(occ.description),
       },
 
-      /* ================= WITNESS SIGNATURE (🔥 FIX) ================= */
       witnessSig: {
         armyNo: val(firstWitness?.reportingBlock?.armyNumber),
         rank: val(firstWitness?.reportingBlock?.rank),
@@ -409,7 +229,6 @@ export default function StaticSpeedForm({
         unit: val(firstWitness?.reportingBlock?.unit),
       },
 
-      /* ================= MP SIGN ================= */
       mpSig: {
         armyNo: val(mp.armyNumber),
         rank: val(mp.rank),
@@ -417,7 +236,6 @@ export default function StaticSpeedForm({
         unit: val(mp.unit),
       },
 
-      /* ================= REMARKS ================= */
       remarks: {
         text: val(staticSpeed.remarks),
         station: val(duty.dutyLocation),
@@ -426,7 +244,104 @@ export default function StaticSpeedForm({
     };
   };
 
+  /* ================= HYDRATION (🔥 FIXED PART) ================= */
+
+  useEffect(() => {
+    if (!existingReport) return;
+
+    const er = existingReport;
+    console.log("EDIT STATIC SPEED DATA RECEIVED 👉", existingReport);
+
+    const speedNodes = {
+      ...initialState.formData.staticSpeed,
+    };
+
+    speedNodes.reportNo = er.reportId || "";
+    speedNodes.remarks =
+      er.remark || er.remarks || er.customFields?.remarks || "";
+
+    // 🔥 VEHICLE FIX
+    speedNodes.vehicleDetails = {
+      category: mapVehicleCategory(er.vehicleCategory),
+      vehicleType: mapVehicleType(er.vehicleType),
+      driverType: er.driverType || "",
+      vehicleNumber: er.vehicleNumber || "",
+      vehicleName: er.vehicleName || "",
+    };
+
+    speedNodes.dutyBlock = {
+      dateOfDuty: er.onDutyDetails?.dateOfDuty
+        ? new Date(er.onDutyDetails.dateOfDuty).toISOString().split("T")[0]
+        : "",
+      startTime: er.onDutyDetails?.startTime
+        ? new Date(er.onDutyDetails.startTime).toISOString().slice(11, 16)
+        : "",
+      endTime: er.onDutyDetails?.endTime
+        ? new Date(er.onDutyDetails.endTime).toISOString().slice(11, 16)
+        : "",
+      dutyLocation: er.onDutyDetails?.dutyLocation || "",
+      dutyType: er.onDutyDetails?.dutyType || "",
+    };
+
+    speedNodes.reportingBlock = {
+      nameReportingMP: er.onDutyDetailsMPReporting?.nameReportingMP || "",
+      rank: er.onDutyDetailsMPReporting?.rank || "",
+      unit: er.onDutyDetailsMPReporting?.unit || "",
+      armyNumber: er.onDutyDetailsMPReporting?.armyNumber || "",
+      contactNumber: er.onDutyDetailsMPReporting?.contactNumber || "",
+    };
+
+    const occ = er.offenceOccurenceDetails || {};
+
+    speedNodes.offenceBlock = {
+      time: occ.time || "",
+      timeOfOffence: occ.time
+        ? new Date(occ.time).toISOString().slice(11, 16)
+        : "",
+      incidentLocation: occ.incidentLocation || "",
+      description: occ.description || "",
+      briefDescription: occ.briefDescription || "",
+      actualSpeedNoted: occ.actualSpeedNoted || "",
+      authSpeed: occ.authSpeed || "",
+      overSpeedCalculated: occ.overSpeedCalculated || "",
+    };
+
+    // 🔥 OFFENDER FIX
+    speedNodes.offenderPeople = Array.isArray(er.offenders)
+      ? er.offenders.map((o: any) => ({
+          id: o._id,
+          type: o.offenderType, // "Civilian" ✔
+          whoIsIt: "Offender",
+          details: {
+            ...o.offenderDetails,
+          },
+        }))
+      : [];
+
+    speedNodes.witnesses = Array.isArray(er.onDutyWitnessingMps)
+      ? er.onDutyWitnessingMps.map((w: any) => ({
+          reportingBlock: {
+            nameReportingMP: w.name || "",
+            rank: w.rank || "",
+            unit: w.unit || "",
+            armyNumber: w.armyNumber || w.ArmyNo || "",
+            contactNumber: w.contactNumber || "",
+          },
+        }))
+      : [];
+
+    dispatch({
+      type: "SET_FORM_DATA",
+      payload: {
+        ...initialState.formData,
+        staticSpeed: speedNodes,
+      },
+    });
+  }, [existingReport]); // 🔥 dependency fix
+
   /* ================= UI ================= */
+
+  const reportNo = staticData.reportNo || "TEMP/STATIC/001";
 
   return (
     <div className="h-[calc(100vh-40px)] bg-gray-100 -mt-4 w-full px-6">
@@ -441,7 +356,11 @@ export default function StaticSpeedForm({
                 label: "Offence Committed/\nOrders Contravened",
                 icon: "3",
               },
-              { id: 4, label: "Remarks of CO/2IC Provost Unit", icon: "4" },
+              {
+                id: 4,
+                label: "Remarks of CO/2IC Provost Unit",
+                icon: "4",
+              },
             ]}
             currentStep={state.currentStep}
             completedSteps={state.completedSteps}
@@ -454,7 +373,6 @@ export default function StaticSpeedForm({
             }}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting}
-            onReportNoChange={handleReportNoChange}
           />
 
           <RightPanel
@@ -468,8 +386,14 @@ export default function StaticSpeedForm({
                 title: "1. PARTICULARS:",
                 component: <StaticSpeedStep1Particulars />,
               },
-              2: { title: "2. STATEMENT:", component: <Step2Statement /> },
-              3: { title: "3. OFFENCE:", component: <Step3Offence /> },
+              2: {
+                title: "2. STATEMENT:",
+                component: <Step2Statement />,
+              },
+              3: {
+                title: "3. OFFENCE:",
+                component: <Step3Offence />,
+              },
               4: {
                 title: "4. REMARKS:",
                 component: (

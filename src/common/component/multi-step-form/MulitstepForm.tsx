@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm, initialState } from "@/context/FormContext";
 import { LeftStepper } from "./LeftStepper";
 import { RightPanel } from "./RightPanel";
@@ -31,6 +31,8 @@ export default function MultiStepForm({
   existingOffence?: any;
 }) {
   const { state, dispatch } = useForm();
+
+  const submitLockRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   console.log("EDIT DATA RECEIVED 👉", existingOffence);
 
@@ -44,7 +46,7 @@ export default function MultiStepForm({
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
   const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
-  const isoToTime = (iso:any) => {
+  const isoToTime = (iso: any) => {
     if (!iso) return "";
     try {
       return new Date(iso).toISOString().substring(11, 16);
@@ -100,8 +102,19 @@ export default function MultiStepForm({
         return;
       }
 
-      if (k.includes("rank")) {
-        mapped.rank = normalizeRank(String(value));
+      if (k === "select rank" || k.includes("rank")) {
+        const rawRank = String(value).toLowerCase().trim();
+
+        const allowedRanks = ["sepoy", "naik", "havildar", "lance naik"];
+
+        // ✅ If backend rank matches dropdown → use it
+        if (allowedRanks.includes(rawRank)) {
+          mapped.rank = rawRank;
+        } else {
+          // ❗ otherwise force EMPTY (so UI doesn't break)
+          mapped.rank = "";
+        }
+
         return;
       }
 
@@ -167,7 +180,6 @@ export default function MultiStepForm({
     return mapped;
   };
 
-  
   const normalizeRank = (rank?: string) => {
     if (!rank) return "";
 
@@ -208,7 +220,6 @@ export default function MultiStepForm({
 
         // 4. On Duty Details
 
-
         trafficNodes.onDutyDetails = {
           dateOfDuty: eo.onDutyDetails?.dateOfDuty
             ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split("T")[0]
@@ -222,7 +233,8 @@ export default function MultiStepForm({
         // 5. MP Reporting
         trafficNodes.onDutyDetailsMPReporting = {
           nameReportingMP: eo.onDutyDetailsMPReporting?.nameReportingMP || "",
-          rank: eo.onDutyDetailsMPReporting?.rank || "",
+          rank: String(eo.onDutyDetailsMPReporting?.rank ?? ""),
+
           unit: eo.onDutyDetailsMPReporting?.unit || "",
           armyNumber: eo.onDutyDetailsMPReporting?.armyNumber || "",
           contactNumber: eo.onDutyDetailsMPReporting?.contactNumber || "",
@@ -422,36 +434,41 @@ export default function MultiStepForm({
   };
 
   const onSubmitFinal = async () => {
+    if (submitLockRef.current) {
+      console.warn("🚫 Submit blocked (already running)");
+      return;
+    }
+
+    submitLockRef.current = true;
     setIsSubmitting(true);
+
     try {
       const traffic = state.formData.traffic;
-      console.log("🚔 RAW TRAFFIC ===>", traffic);
+      if (!traffic) throw new Error("Traffic data missing");
 
       /* ================= CREATE / UPDATE OFFENCE ================= */
-      const payload = {
+      const payload: any = {
         reportId: reportNo,
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
-        // Mapped Vehicle Details
-        ...(traffic.vehicleInvolved === "yes" && {
-          vehicleCategory:
-            traffic.vehicleDetails.category === "2w"
-              ? "2-Wheeler"
-              : "4-Wheeler",
-          vehicleType:
-            traffic.vehicleDetails.vehicleType === "civilian"
-              ? "Civilian Vehicle"
-              : "DD Vehicle",
-          vehicleName: traffic.vehicleDetails.vehicleName,
-          vehicleNumber: traffic.vehicleDetails.vehicleNumber,
-          driverType: traffic.vehicleDetails.driverType,
-        }),
+        ...(traffic.vehicleInvolved === "yes" &&
+          traffic.vehicleDetails && {
+            vehicleCategory:
+              traffic.vehicleDetails.category === "2w"
+                ? "2-Wheeler"
+                : "4-Wheeler",
+            vehicleType:
+              traffic.vehicleDetails.vehicleType === "civilian"
+                ? "Civilian Vehicle"
+                : "DD Vehicle",
+            vehicleName: traffic.vehicleDetails.vehicleName || "",
+            vehicleNumber: traffic.vehicleDetails.vehicleNumber || "",
+            driverType: traffic.vehicleDetails.driverType,
+          }),
 
-        onDutyDetails: {
+        onDutyDetails: traffic.onDutyDetails && {
           ...traffic.onDutyDetails,
-          dateOfDuty: traffic.onDutyDetails?.dateOfDuty
-            ? traffic.onDutyDetails.dateOfDuty
-            : undefined,
+          dateOfDuty: traffic.onDutyDetails?.dateOfDuty || undefined,
           startTime: toISO(
             traffic.onDutyDetails?.dateOfDuty,
             traffic.onDutyDetails?.startTime,
@@ -461,66 +478,69 @@ export default function MultiStepForm({
             traffic.onDutyDetails?.endTime,
           ),
         },
+
         onDutyDetailsMPReporting: traffic.onDutyDetailsMPReporting,
-        offenceOccurenceDetails: {
+
+        offenceOccurenceDetails: traffic.offenceOccurenceDetails && {
           ...traffic.offenceOccurenceDetails,
           timeOfOffence: toISO(
             traffic.onDutyDetails?.dateOfDuty,
             traffic.offenceOccurenceDetails?.timeOfOffence,
           ),
-          briefDescription: traffic.offenceOccurenceDetails?.briefDescription,
+          briefDescription:
+            traffic.offenceOccurenceDetails?.briefDescription || "",
         },
-        offenceTypes: traffic.offenceTypes?.length
-          ? traffic.offenceTypes
-          : ["minor"],
-        offenceTypeReference: traffic.offenceCode || [],
 
-        remarks: traffic.remarks,
+        offenceTypes:
+          traffic.offenceTypes?.length > 0 ? traffic.offenceTypes : ["minor"],
+
+        offenceTypeReference: traffic.offenceCode || [],
+        remarks: traffic.remarks || "",
+
         customFields: {
-          remarks: traffic.remarks,
-          selectedWitness: traffic.selectedWitness,
-          attachments: state.formData.mpReport?.attachments || [], // Save attachments with types
+          remarks: traffic.remarks || "",
+          selectedWitness: traffic.selectedWitness || [],
+          attachments: state.formData.mpReport?.attachments || [],
         },
       };
 
-      let offenceRes;
-      if (existingOffence && existingOffence._id) {
-        // UPDATE MODE
-        console.log("📝 UPDATING Traffic Offence:", existingOffence._id);
+      let offenceRes: any;
+
+      if (existingOffence?._id) {
         offenceRes = await updateOffence({
           id: existingOffence._id,
           data: payload,
         });
+
         toast.success("Traffic Offence Updated Successfully!");
+
+        // 🧹 clear old data ONLY in edit
+        // await deleteAllOffenders(existingOffence._id);
+        // await deleteAllWitnesses(existingOffence._id);
       } else {
-        // CREATE MODE
-        console.log("🆕 CREATING Traffic Offence");
         offenceRes = await createOffence(payload);
         toast.success("Traffic Offence Created Successfully!");
       }
 
-      const offenceId = offenceRes?._id;
-      if (!offenceId) {
-        toast.error("Offence ID missing");
-        return;
-      }
+      // 🔒 SAFE offenceId extraction
+      const offenceId =
+        offenceRes?._id || offenceRes?.data?._id || offenceRes?.result?._id;
 
-      /* ================= COLLECT ALL OFFENDERS ================= */
+      if (!offenceId) throw new Error("Offence ID missing");
+
+      /* ================= COLLECT OFFENDERS ================= */
       const offenders: any[] = [];
 
-      /* 1️⃣ Vehicle / normal offenders */
       if (Array.isArray(traffic.offenderPeople)) {
         offenders.push(...traffic.offenderPeople);
       }
 
-      /* 2️⃣ No-vehicle offender flow */
       if (
         traffic.vehicleInvolved === "no" &&
         traffic.offenderWithoutVehicle?.military
       ) {
         const m = traffic.offenderWithoutVehicle.military;
-
-        const hasData = m?.name || m?.armyNumber || m?.address || m?.rank;
+        const hasData = Object.values(m || {}).some((v) => v);
 
         if (hasData) {
           offenders.push({
@@ -531,33 +551,28 @@ export default function MultiStepForm({
         }
       }
 
-      console.log("👥 FINAL OFFENDERS ===>", offenders);
-
+      /* ================= SAVE OFFENDERS ================= */
       for (const o of offenders) {
         const d = o.details || {};
+        const hasValidData = Object.values(d).some((v) => v);
 
-        // 🛑 completely empty offender skip
-        if (!Object.keys(d).length) continue;
+        if (!hasValidData) continue;
 
-        const payload: CreateOffenderData = {
+        await createOffender({
           offenceId,
           offenderType: (o.type || "Civilian") as OffenderType,
-
           offenderDetails: {
             type: o.whoIsIt || "Offender",
-
-            // 🔥🔥🔥 MAGIC LINE
             ...d,
           },
-        };
-
-        console.log("🚨 OFFENDER PAYLOAD ===>", payload);
-        await createOffender(payload);
+        });
       }
 
       /* ================= WITNESSES ================= */
       if (Array.isArray(traffic.witnesses)) {
         for (const w of traffic.witnesses) {
+          if (!w?.reportingBlock?.armyNumber) continue;
+
           await createWitness({
             offenceId,
             rank: w.reportingBlock.rank,
@@ -569,37 +584,23 @@ export default function MultiStepForm({
         }
       }
 
-      /* ================= ATTACHMENTS ================= */
-      // If the API supports separate fields for types, we could do:
-      // const certs = atts.filter(a => a.type === 'Certificate');
-      // const forms = atts.filter(a => a.type === 'Forms');
-      // const letters = atts.filter(a => a.type === 'Letter');
-      // But based on available types, we might need to put them in 'customFields' or rely on a "documents" endpoint.
-      // For now, let's assume we update the MP Report part or just save it.
-      // Since `createTrafficOffence` seems to not have explicit attachment fields in the helper above,
-      // we might need to rely on the fact that we might have already put them in `customFields` or similar.
-      // However, if we need to SAVE them, we might need `mpReport` context.
-      // Let's assume for now valid saving is handled through `mpReport` submission if that exists (not seen here)
-      // OR we just attach them to customFields for now.
-
-      // NOTE: The user requested separate submission logic.
-      // If we don't have a dedicated API for documents, we might be limited.
-      // Assuming we can patch the offence with custom data.
-
       toast.success("🎉 TRAFFIC REPORT COMPLETED");
 
-      /* ================= RESET FORM ================= */
+      /* ================= RESET ================= */
       dispatch({ type: "SET_FORM_DATA", payload: initialState.formData });
       dispatch({ type: "SET_STEP", payload: 1 });
       dispatch({ type: "SET_PATH", path: "completedSteps", value: [] });
       dispatch({ type: "SET_PREVIEW", payload: false });
     } catch (err: any) {
       console.error("❌ FINAL SUBMIT ERROR ===>", err);
+
       const msg = err?.response?.data?.details?.[0]?.message
-        ? `Val Error: ${err.response.data.details[0].message} (${err.response.data.details[0].path})`
-        : err?.response?.data?.error || "Submit failed";
+        ? `Val Error: ${err.response.data.details[0].message}`
+        : err?.message || "Submit failed";
+
       toast.error(msg);
     } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
   };

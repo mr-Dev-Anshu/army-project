@@ -339,16 +339,16 @@ export default function Step2Statement() {
     Array.isArray(d?.witnesses) && d.witnesses.length > 0
       ? d.witnesses
       : [
-        {
-          reportingBlock: {
-            nameReportingMP: "",
-            rank: "",
-            unit: "",
-            armyNumber: "",
-            contactNumber: "",
+          {
+            reportingBlock: {
+              nameReportingMP: "",
+              rank: "",
+              unit: "",
+              armyNumber: "",
+              contactNumber: "",
+            },
           },
-        },
-      ];
+        ];
 
   const hasFilledWitness = witnesses.some((w) => {
     const r = w.reportingBlock;
@@ -428,7 +428,7 @@ export default function Step2Statement() {
               onChange={(e) =>
                 set(
                   "formData.traffic.onDutyDetailsMPReporting.nameReportingMP",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -438,7 +438,7 @@ export default function Step2Statement() {
             <Label className="mb-2 font-semibold">Rank</Label>
             <SuggestionInput
               placeholder="Rank"
-              value={d.onDutyDetailsMPReporting.rank}
+              value={d.onDutyDetailsMPReporting.rank || ""}
               onChange={(v) =>
                 set("formData.traffic.onDutyDetailsMPReporting.rank", v)
               }
@@ -478,7 +478,7 @@ export default function Step2Statement() {
               onChange={(e) =>
                 set(
                   "formData.traffic.onDutyDetailsMPReporting.armyNumber",
-                  e.target.value
+                  e.target.value,
                 )
               }
             />
@@ -621,9 +621,9 @@ export default function Step2Statement() {
                     checked={Boolean(
                       d.selectedWitness &&
                       d.selectedWitness.nameReportingMP ===
-                      data.nameReportingMP &&
+                        data.nameReportingMP &&
                       d.selectedWitness.armyNumber === data.armyNumber &&
-                      d.selectedWitness.unit === data.unit
+                      d.selectedWitness.unit === data.unit,
                     )}
                     onChange={() =>
                       set("formData.traffic.selectedWitness", w.reportingBlock)
@@ -682,7 +682,7 @@ export default function Step2Statement() {
             onChange={(v) =>
               set(
                 "formData.traffic.offenceOccurenceDetails.incidentLocation",
-                v
+                v,
               )
             }
             fieldType="incidentLocation"

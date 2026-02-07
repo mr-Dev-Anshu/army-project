@@ -1,5 +1,6 @@
 
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,7 +17,6 @@ type OffenderKey = Extract<
   string
 >;
 
-
 type Block = {
   id: number;
   type?: OffenderKey;
@@ -24,21 +24,15 @@ type Block = {
 };
 
 interface Props {
-  scope?: "traffic" | "static"| "mp-main" | "mp-additional";
-  rootPath?: string;
+  scope?: "traffic" | "static" | "mp-main" | "mp-additional";
 }
 
 /* ================= COMPONENT ================= */
 
 export default function OffenderWithoutVehicleForm({
   scope = "traffic",
-
 }: Props) {
   const { state, dispatch } = useForm();
-
-  const [blocks, setBlocks] = useState<Block[]>([{ id: Date.now() }]);
-  const [hasArmyRelative, setHasArmyRelative] = useState(false); // ✅ NEW
-  const [relativeType, setRelativeType] = useState<OffenderKey | "">(""); // ✅ NEW
 
   /* ================= SOURCE LIST ================= */
   const people =
@@ -46,36 +40,47 @@ export default function OffenderWithoutVehicleForm({
       ? state.formData.staticSpeed?.offenderPeople || []
       : state.formData.traffic?.offenderPeople || [];
 
-  /* ================= HYDRATE ================= */
+  /* ================= LOCAL UI STATE ================= */
+  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [hasArmyRelative, setHasArmyRelative] = useState(false);
+  const [relativeType, setRelativeType] = useState<OffenderKey | "">("");
+
+  /* ================= 🔥 HYDRATE (FIXED) ================= */
   useEffect(() => {
-    if (people.length > 0) {
-      const restored = people.map((p: any, i: number) => ({
-        id: Date.now() + i,
-        type: p.type,
-        index: i,
-      }));
-      setBlocks(restored);
+    if (!people || people.length === 0) {
+      setBlocks([{ id: Date.now() }]);
+      return;
     }
-  }, []);
+
+    const restored: Block[] = people.map((p: any, i: number) => ({
+      id: Date.now() + i,
+      type: p.type,
+      index: i,
+    }));
+
+    setBlocks(restored);
+
+    // 🔥 sync relative
+    const relative = people[1];
+    if (relative?.whoIsIt === "Relative") {
+      setHasArmyRelative(true);
+      setRelativeType(relative.type);
+    } else {
+      setHasArmyRelative(false);
+      setRelativeType("");
+    }
+  }, [people]); // 🔥 MAIN FIX
 
   /* ================= MAIN SELECT ================= */
   const handleSelect = (blockId: number, type: OffenderKey) => {
-  const peoplePath =
-  scope === "static"
-    ? "formData.staticSpeed.offenderPeople"
-    : scope === "traffic"
-    ? "formData.traffic.offenderPeople"
-    : scope === "mp-main"
-    ? "formData.mpReport.individualDetails.tempOffender"
-    : "formData.mpReport.additionalIndividual.tempOffender";
+    const peoplePath =
+      scope === "static"
+        ? "formData.staticSpeed.offenderPeople"
+        : "formData.traffic.offenderPeople";
 
-
-    let updated = [...people];
-
-    const existingIndex = blocks.find((b) => b.id === blockId)?.index;
-
-    const idx =
-      existingIndex !== undefined ? existingIndex : updated.length;
+    const updated = [...people];
+    const existing = blocks.find((b) => b.id === blockId)?.index;
+    const idx = existing ?? updated.length;
 
     updated[idx] = {
       whoIsIt: "Offender",
@@ -89,13 +94,6 @@ export default function OffenderWithoutVehicleForm({
       value: updated,
     });
 
-    setBlocks((prev) =>
-      prev.map((b) =>
-        b.id === blockId ? { ...b, type, index: idx } : b
-      )
-    );
-
-    // reset relative
     setHasArmyRelative(false);
     setRelativeType("");
   };
@@ -125,7 +123,7 @@ export default function OffenderWithoutVehicleForm({
   };
 
   return (
-    <div className="space-y-6  p-6 bg-white">
+    <div className="space-y-6 p-6 bg-white">
       <p className="font-semibold text-lg">
         Select Who was the Offender?
       </p>
@@ -134,7 +132,7 @@ export default function OffenderWithoutVehicleForm({
       {blocks.map((block) => (
         <div key={block.id} className="space-y-4">
           <RadioGroup
-            value={(block.type as string) || ""}
+            value={block.type || ""}
             onValueChange={(v) =>
               handleSelect(block.id, v as OffenderKey)
             }
@@ -147,7 +145,7 @@ export default function OffenderWithoutVehicleForm({
                   "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
                   block.type === item
                     ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300"
+                    : "border-gray-300",
                 )}
               >
                 <RadioGroupItem value={item} />
@@ -202,7 +200,7 @@ export default function OffenderWithoutVehicleForm({
                     "border rounded-lg px-4 py-2 flex gap-2 cursor-pointer",
                     relativeType === item
                       ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300"
+                      : "border-gray-300",
                   )}
                 >
                   <RadioGroupItem value={item} />
