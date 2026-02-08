@@ -93,7 +93,6 @@ export const witnessSchema = new Schema({
 export const documentSchema = new Schema({
   statement: { type: String },
   url: { type: String },
-  type:{type:String},
   customFields: {
     type: Schema.Types.Mixed,
     default: {},
@@ -132,7 +131,18 @@ const mpReportSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    initialsMPCRNCO: {
+      type: Boolean,
+      default: false,
+    },
+    initialsCO: {
+      type: Boolean,
+      default: false,
+    },
     actionStatusRemark: {
+      type: String,
+    },
+    addRemark: {
       type: String,
     },
     remarks: {
@@ -145,7 +155,6 @@ const mpReportSchema = new Schema(
     },
 
     evidences: [evidenceSchema],
-    certificates: [documentSchema],
     customFields: {
       type: Schema.Types.Mixed,
       default: {},
@@ -162,15 +171,9 @@ const mpReportSchema = new Schema(
 // Attach common audit fields plugin to MP reports
 mpReportSchema.plugin(auditFieldsPlugin, {});
 
-mpReportSchema.virtual("offenders").get(function () {
-  return this.individuals ? this.individuals.filter((ind) => ind.role === "Offender") : [];
-});
 
-mpReportSchema.index({ "reportDetails.reportNumber": 1 }, { unique: true });
-mpReportSchema.index({ "investigationHead.armyNumber": 1 });
-mpReportSchema.index({ "occurrenceDetails.offenceType": 1 });
-mpReportSchema.index({ "occurrenceDetails.placeOfOccurrence": 1 });
-mpReportSchema.index({ "occurrenceDetails.dateOfOccurrence": -1 });
+
+
 
 if (mongoose.models.MPReport) {
   delete mongoose.models.MPReport;

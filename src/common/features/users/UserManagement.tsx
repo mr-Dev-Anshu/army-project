@@ -5,11 +5,7 @@ import {
     Users,
     Plus,
     Search,
-    Filter,
     MoreVertical,
-    ChevronLeft,
-    ChevronRight,
-    Download,
     FileText,
 } from "lucide-react";
 import { useUsers } from "./hooks/useUser";
@@ -176,20 +172,7 @@ export default function UserManagement() {
                     </table>
 
                     {/* Pagination */}
-                    <div className="px-6 py-5 flex items-center justify-between border-t border-gray-100">
-                        <span className="text-sm text-gray-400">
-                            Showing {filteredUsers?.length > 0 ? 1 : 0} to {filteredUsers?.length || 0} of {users?.length || 0} entries
-                        </span>
-                        <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-300"><ChevronLeft className="h-4 w-4" /></Button>
-                            <Button className="h-8 w-8 bg-blue-600 text-white rounded-md text-xs">1</Button>
-                            <Button variant="ghost" className="h-8 w-8 text-gray-600 text-xs">2</Button>
-                            <Button variant="ghost" className="h-8 w-8 text-gray-600 text-xs">3</Button>
-                            <span className="px-2 text-gray-300">...</span>
-                            <Button variant="ghost" className="h-8 w-8 text-gray-600 text-xs">9</Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600"><ChevronRight className="h-4 w-4" /></Button>
-                        </div>
-                    </div>
+                   
                 </div>
             </main>
 

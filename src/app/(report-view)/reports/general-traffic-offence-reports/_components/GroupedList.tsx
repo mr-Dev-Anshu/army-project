@@ -10,7 +10,13 @@ interface GroupedListProps {
   onEdit?: (offence: any) => void;
 }
 
-export default function GroupedList({ data, isVehicleInvolved, onView, onPrint, onEdit }: GroupedListProps) {
+export default function GroupedList({
+  data,
+  isVehicleInvolved,
+  onView,
+  onPrint,
+  onEdit,
+}: GroupedListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   if (!data || data.length === 0) {
@@ -24,7 +30,6 @@ export default function GroupedList({ data, isVehicleInvolved, onView, onPrint, 
   const handleToggle = (index: number) => {
     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
   };
-  
 
   return (
     <div className="divide-y divide-gray-100">
@@ -36,7 +41,7 @@ export default function GroupedList({ data, isVehicleInvolved, onView, onPrint, 
           isVehicleInvolved={isVehicleInvolved}
           onView={onView}
           onPrint={onPrint}
-          onEdit={onEdit}
+          onEdit={onEdit} 
           isOpen={expandedIndex === index}
           onToggle={() => handleToggle(index)}
         />

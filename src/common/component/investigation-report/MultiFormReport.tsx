@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { initialState, useForm } from "@/context/FormContext";
 import { toast } from "react-toastify";
 
@@ -24,7 +24,6 @@ import {
   useUpdateMPReport,
 } from "@/features/mpReports/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
-import React, { useEffect } from "react";
 
 /* ================= EVIDENCE BUILDER ================= */
 const buildEvidences = (ev: any) => {
@@ -82,9 +81,11 @@ export default function MultiFormReport({
   const { state, dispatch } = useForm();
   const [mode] = useState("mp");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingReport, setEditingReport] = useState<any | null>(null);
+
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { mutateAsync: createReportAsync } = useCreateMPReport();
-  const { mutateAsync: updateReportAsync } = useUpdateMPReport();
+    const { mutateAsync: updateReportAsync } = useUpdateMPReport();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
 
   /* ================= FETCH REPORT NO ================= */
@@ -257,13 +258,16 @@ export default function MultiFormReport({
     { id: 11, label: "Remarks", icon: "11" },
   ];
 
+  // ... (existing helper functions) ...
+
   const toISODateTime = (date?: string, time?: string) =>
-    date && time ? new Date(`${date}T${time}`).toISOString() : undefined;
+    date && time ? new Date(`${date}T${time}`).toISOString() : null;
 
   const mapMpToReport = (mp: any) => {
     const offenderList = mp?.individualDetails?.offenderList || [];
     const witnessList = mp?.witnesses || [];
 
+    /* ================= 4. OFFENDERS ================= */
     /* ================= 4. OFFENDERS ================= */
     const people = offenderList.map((p: any, i: number) => {
       const src = p.details ?? p;
@@ -325,14 +329,28 @@ export default function MultiFormReport({
       firNo: val(mp?.reportDetails?.firNo),
 
       /* ================= 1. MP DETAILS ================= */
-      mpDetails: {
-        armyNo: val(mp?.mpParticulars?.armyNo),
-        rank: val(mp?.mpParticulars?.rank),
-        name: val(mp?.mpParticulars?.name),
-        unit: val(mp?.mpParticulars?.unit),
-        fmn: val(mp?.mpParticulars?.fmn),
-        command: val(mp?.mpParticulars?.command),
-      },
+      /* ================= 1. MP DETAILS ================= */
+      mpDetails: (() => {
+        const p = mp?.mpParticulars || {};
+        const armyNo = val(p.armyNo);
+        const rank = val(p.rank);
+        const name = val(p.name);
+        const unit = val(p.unit);
+        const fmn = val(p.fmn);
+        const command = val(p.command);
+
+        // Return undefined if essentially empty, so report view hides the section
+        if (!armyNo && !rank && !name && !unit && !fmn && !command) return undefined;
+
+        return {
+          armyNumber: armyNo,
+          rank,
+          name,
+          unit,
+          fmn,
+          command,
+        };
+      })(),
 
       /* ================= 2–3. OCCURRENCE DETAILS ================= */
       occurrence: {
@@ -356,17 +374,20 @@ export default function MultiFormReport({
       witnesses,
 
       /* ================= 6. EVIDENCE ================= */
-      evidence: {
-        eyeSketch: mp?.evidence?.eyeSketch?.url ? "Available" : "", // Changed from "Nil" to ""
-        photos:
-          mp?.evidence?.photos?.length > 0
-            ? `${mp.evidence.photos.length} Photos`
-            : "",
-        videos:
-          mp?.evidence?.videos?.length > 0
-            ? `${mp.evidence.videos.length} Videos`
-            : "",
-      },
+      /* ================= 6. EVIDENCE ================= */
+      evidence: (() => {
+        const es = mp?.evidence?.eyeSketch?.url ? "Available" : "";
+        const ph = mp?.evidence?.photos?.length > 0 ? `${mp.evidence.photos.length} Photos` : "";
+        const vid = mp?.evidence?.videos?.length > 0 ? `${mp.evidence.videos.length} Videos` : "";
+
+        if (!es && !ph && !vid) return undefined;
+
+        return {
+          eyeSketch: es,
+          photos: ph,
+          videos: vid,
+        };
+      })(),
 
       /* ================= 7. DOCUMENTS ================= */
       documents: (mp?.documents || []).map((d: any) => val(d?.statement)),
@@ -528,7 +549,6 @@ export default function MultiFormReport({
           statement: d.statement || "Nil",
           url: d.url || "NA",
           fileName: d.fileName || "",
-          type: d.type || "Document", // Pass Type
         })),
 
         evidences: buildEvidences(mp.evidence),
@@ -738,14 +758,6 @@ export default function MultiFormReport({
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
             onReportNoChange={handleReportNoChange} // Wired up
-            onAttach={(items) => {
-              const current = state.formData.mpReport.attachments || [];
-              dispatch({
-                type: "SET_PATH",
-                path: "formData.mpReport.attachments",
-                value: [...current, ...items],
-              });
-            }}
           />
 
           {/* RIGHT SIDE DYNAMIC CONTENT */}

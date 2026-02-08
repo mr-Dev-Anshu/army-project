@@ -32,20 +32,22 @@ const mapVehicleType = (v?: string) => {
   return v || "";
 };
 
-export default function StaticSpeedForm({
-  onCancel,
-  existingReport,
-}: {
-  onCancel: () => void;
+interface StaticSpeedFormProps {
   existingReport?: any;
-}) {
+  onCancel?: () => void;
+}
+
+export default function StaticSpeedForm({
+  existingReport,
+  onCancel,
+}: StaticSpeedFormProps) {
+
   const { state, dispatch } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const staticData = state.formData.staticSpeed as any;
 
   const createStaticRecord = useCreateStaticSpeedRecord();
-  const updateStaticRecord = useUpdateStaticSpeedRecord();
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
 
@@ -106,6 +108,8 @@ export default function StaticSpeedForm({
       };
 
       const staticRes = await createStaticRecord.mutateAsync(payload);
+
+      toast.success("Static Record Created Successfully!");
 
       if (!staticRes?._id) {
         toast.error("Static Record ID Missing!");
@@ -369,7 +373,7 @@ export default function StaticSpeedForm({
             onCreate={handleFinalSubmit}
             onCancel={() => {
               dispatch({ type: "SET_STEP", payload: 1 });
-              onCancel();
+              onCancel?.();
             }}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting}

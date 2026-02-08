@@ -21,13 +21,11 @@ export async function PUT(request, { params }) {
   try {
     const { id } = await  params;
     const body = await request.json();
-    console.log(body);
-    
 
     // Validation intentionally bypassed to allow empty/partial submissions.
     const value = body;
 
-    const updated = await service.updateReport(id, body);
+    const updated = await service.updateReport(id, value);
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
     return NextResponse.json(

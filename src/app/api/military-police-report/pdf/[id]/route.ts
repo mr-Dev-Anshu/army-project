@@ -17,7 +17,19 @@ export async function GET(
 
         // Get the base URL from the request to ensure we hit the correct internal address
         // Fallback to localhost:3000 if origin is missing (unlikely in Next.js)
-        const baseUrl = req.nextUrl.origin || "http://localhost:3000";
+        const cookies = req.cookies.getAll();
+        const urlObj = new URL(req.nextUrl.origin || "http://localhost:3000");
+
+        if (cookies.length > 0) {
+            await page.setCookie(...cookies.map(cookie => ({
+                name: cookie.name,
+                value: cookie.value,
+                domain: urlObj.hostname,
+                path: '/',
+            })));
+        }
+
+        const baseUrl = urlObj.origin;
         const targetUrl = `${baseUrl}/print/military-police-report/${id}`;
 
         console.log(`Generating PDF from: ${targetUrl}`);

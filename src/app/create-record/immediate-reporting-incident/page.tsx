@@ -18,7 +18,7 @@ function CreateImmediateReportingIncidentPageContent() {
     };
 
     const handleSuccess = () => {
-        router.push("/reports/immediate-reporting-incident");
+        router.push("/immediate-reporting-incident");
     };
 
     if (id && isLoading) {

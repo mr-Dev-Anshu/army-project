@@ -9,11 +9,13 @@ export async function createImmediateReportingIncidentRepo(data) {
 }
 
 export async function findAllImmediateReportingIncidentsRepo() {
-    return await ImmediateReportingIncident.find({}).sort({ createdAt: -1 });
+    return await ImmediateReportingIncident.find({})
+        .populate('individuals')
+        .sort({ createdAt: -1 });
 }
 
 export async function findImmediateReportingIncidentByIdRepo(id) {
-    return await ImmediateReportingIncident.findById(id);
+    return await ImmediateReportingIncident.findById(id).populate('individuals');
 }
 
 export async function updateImmediateReportingIncidentByIdRepo(id, data) {

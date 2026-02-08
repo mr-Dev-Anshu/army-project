@@ -21,7 +21,7 @@
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
   import OffenderDetailsCell from "./OffenderDetailsCell";
-  import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
+  // import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
 
   interface DetailsTableProps {
     offences: any[];
@@ -527,7 +527,7 @@
             </div>
           )}
         </ConfirmationModal>
-        <AttachCertificateModal
+        {/* <AttachCertificateModal
           isOpen={attachModalOpen}
           reportId={selectedReport?._id}
           reportType="traffic"
@@ -540,7 +540,7 @@
             setAttachModalOpen(false);
             setSelectedReport(null);
           }}
-        />
+        /> */}
       </>
     );
   }

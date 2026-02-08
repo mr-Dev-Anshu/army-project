@@ -31,7 +31,6 @@ import { Label } from "@/components/ui/label";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 import OffenderDetailsCell from "@/app/(report-view)/reports/general-traffic-offence-reports/_components/OffenderDetailsCell";
-import AttachCertificateModal from "@/components/ui/CertificateAttachModal";
 
 interface MpOccurrenceTableProps {
   data: any[];
@@ -426,7 +425,7 @@ export default function MpOccurrenceTable({
           </div>
         )}
       </ConfirmationModal>
-      <AttachCertificateModal
+      {/* <AttachCertificateModal
         isOpen={attachModalOpen}
         reportId={selectedReport?._id}
         reportType="mp"
@@ -439,7 +438,7 @@ export default function MpOccurrenceTable({
           setAttachModalOpen(false);
           setSelectedReport(null);
         }}
-      />
+      /> */}
     </>
   );
 }

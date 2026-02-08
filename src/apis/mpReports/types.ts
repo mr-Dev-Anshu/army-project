@@ -62,6 +62,10 @@ export interface MPReport {
     [key: string]: any;
   };
   actionStatus?: boolean;
+  actionStatusRemark?: string;
+  addRemark?: string;
+  initialsMPCRNCO?: boolean;
+  initialsCO?: boolean;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: any;

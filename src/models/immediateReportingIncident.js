@@ -1,38 +1,37 @@
 import mongoose from "mongoose";
 
-const individualSchema = new mongoose.Schema({
-    armyNo: { type: String },
-    name: { type: String },
-    rank: { type: String },
-    age: { type: String },
-    totalServiceDuration: { type: String },
-    unit: { type: String },
-    unitLocation: { type: String },
-    fmn: { type: String },
-    individualWorkingStatus: {
-        type: String,
-        enum: ["Leave", "Duty", ""]
-    }
-});
+import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields";
 
 const immediateReportingIncidentSchema = new mongoose.Schema({
-    individuals: {
-        type: [individualSchema],
-        default: []
-    },
-    incidentPlace: {
+    reportHeading: {
         type: String,
     },
-    incidentDate: {
+    vehicleType: {
         type: String,
     },
-    incidentTime: {
+    vehicleNumber: {
         type: String,
     },
-    incidentBrief: {
+    vehicleName: {
         type: String,
     },
-    coordinationWithPolice: {
+    individuals: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Offender'
+    }],
+    placeOfOccurrence: {
+        type: String,
+    },
+    dateOfOccurrence: {
+        type: String,
+    },
+    timeOfOccurrence: {
+        type: String,
+    },
+    description: {
+        type: String,
+    },
+    coordWith: {
         type: String,
     },
     incidentCoveredBy: {
@@ -42,8 +41,25 @@ const immediateReportingIncidentSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
+    age: {
+        type: String,
+        trim: true,
+    },
+    totalServiceDuration: {
+        type: String,
+        trim: true,
+    },
+    individualWorkingStatus: {
+        type: String,
+        enum: ["Leave", "Duty", ""],
+    },
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
 
-}, { timestamps: true });
+immediateReportingIncidentSchema.plugin(auditFieldsPlugin, {});
 
 // Force model recompilation if it exists to pick up schema changes
 if (mongoose.models.ImmediateReportingIncident) {

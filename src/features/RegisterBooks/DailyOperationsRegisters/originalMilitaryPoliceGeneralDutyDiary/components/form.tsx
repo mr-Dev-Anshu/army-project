@@ -365,6 +365,7 @@ const GeneralDutyDiaryForm = ({ initialData, onSuccess, onCancel }: GeneralDutyD
                         <IndividualInputFields
                             data={currentIndividual}
                             onChange={handleFieldChange}
+                            showExtendedFields={true}
                         />
 
                         <div className="flex justify-end pt-2">

@@ -9,13 +9,15 @@ interface ReportViewerWrapperProps {
     onEdit?: () => void;
     isDownloading?: boolean;
     downloadType?: "PDF" | "Word" | null;
+    activeView?: "attachments" | "evidences" | "report";
     onDownloadWord?: () => void;
     onDownloadPdf?: () => void;
+    printUrl?: string; // New prop for dedicated print page URL
+    children: React.ReactNode;
     onViewReport?: () => void;
+    // onPrintReport: () => void;
     onViewAttachments?: () => void;
     onViewEvidences?: () => void;
-    activeView?: "report" | "attachments" | "evidences";
-    children: React.ReactNode;
 }
 
 export default function ReportViewerWrapper({
@@ -27,15 +29,13 @@ export default function ReportViewerWrapper({
     downloadType,
     onDownloadWord,
     onDownloadPdf,
-    onViewReport,
-    onViewAttachments,
-    onViewEvidences,
-    activeView = "report",
+    printUrl,
     children,
 }: ReportViewerWrapperProps) {
     return (
         <div className="fixed inset-0 z-50 bg-[#333333] flex flex-col animate-in fade-in duration-200">
-            <div className="bg-black text-white px-6 py-4 flex items-center justify-between shadow-md print:hidden border-b border-white/10 h-16">
+            {/* Header */}
+            <div className="bg-[#0A0A0A] text-white px-6 py-4 flex items-center justify-between shadow-md print:hidden border-b border-white/10">
                 {/* Left: Back + Title */}
                 <div className="flex items-center gap-4">
                     <Button
@@ -46,50 +46,104 @@ export default function ReportViewerWrapper({
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
-                    <span className="font-semibold text-sm tracking-wide uppercase text-white">{title}</span>
+                    <span className="font-semibold text-sm tracking-wide uppercase">{title}</span>
                 </div>
 
-                {/* Center: View Modes */}
-                <div className="flex items-center gap-3 absolute left-1/2 transform -translate-x-1/2">
-                    {/* View Final Report */}
+                {/* Center: Actions */}
+                <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+                    {/* Edit Report */}
                     <Button
-                        variant={activeView === "report" ? "default" : "secondary"}
-                        className={`${activeView === "report" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-white text-black hover:bg-gray-100"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all border-none`}
-                        onClick={onViewReport}
+                        variant="outline"
+                        className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
+                        onClick={onEdit}
+                        disabled={!onEdit}
                     >
-                        View Final Report <FileText className="w-4 h-4" />
+                        Edit Report <Edit className="w-3.5 h-3.5" />
                     </Button>
 
-                    {/* View Signed Attachments */}
-                    {onViewAttachments && (
-                        <Button
-                            variant={activeView === "attachments" ? "default" : "secondary"}
-                            className={`${activeView === "attachments" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-white text-black hover:bg-gray-100"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all border-none`}
-                            onClick={onViewAttachments}
-                        >
-                            View Signed Attachments <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px] font-bold">A</div>
-                        </Button>
-                    )}
-
-                    {/* View Evidences */}
-                    {onViewEvidences && (
-                        <Button
-                            variant={activeView === "evidences" ? "default" : "secondary"}
-                            className={`${activeView === "evidences" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-white text-black hover:bg-gray-100"} h-9 px-4 gap-2 rounded text-sm font-medium transition-all border-none`}
-                            onClick={onViewEvidences}
-                        >
-                            View Evidences <div className="w-4 h-4 border border-current rounded-[3px] flex items-center justify-center text-[8px] font-bold">E</div>
-                        </Button>
-                    )}
+                    {/* Print Report */}
+                    <Button
+                        variant="secondary"
+                        className="bg-white text-black hover:bg-gray-200 h-9 px-4 gap-2 rounded text-sm font-normal transition-all"
+                        onClick={() => {
+                            if (printUrl) {
+                                window.open(printUrl, '_blank');
+                            } else {
+                                const printStyles = document.createElement('style');
+                                printStyles.textContent = `
+                                    @media print {
+                                        * { box-sizing: border-box; }
+                                        body { margin: 0 !important; padding: 0 !important; }
+                                        body * { visibility: hidden; }
+                                        .print-content, .print-content * { visibility: visible; }
+                                        .print-content { 
+                                            position: absolute !important; 
+                                            left: 0 !important; 
+                                            top: 0 !important; 
+                                            width: 100% !important;
+                                            height: auto !important;
+                                            overflow: visible !important;
+                                            page-break-inside: avoid;
+                                        }
+                                        .fixed { position: static !important; }
+                                        .bg-\[\#333333\] { background: white !important; }
+                                        @page { margin: -0.3in; size: auto; }
+                                    }
+                                `;
+                                document.head.appendChild(printStyles);
+                                
+                                if (onPrint) {
+                                    onPrint();
+                                } 
+                                else {
+                                    window.print();
+                                }
+                                
+                                setTimeout(() => {
+                                    document.head.removeChild(printStyles);
+                                }, 1000);
+                            }
+                        }}
+                    >
+                        Print Report <Printer className="w-3.5 h-3.5" />
+                    </Button>
                 </div>
 
-                {/* Right: Close Button Only */}
+                {/* Right: Actions */}
                 <div className="flex items-center gap-2">
+                    {onDownloadWord && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-white/70 hover:text-white hover:bg-white/10 w-9 h-9"
+                            onClick={onDownloadWord}
+                            disabled={isDownloading}
+                            title="Download Word"
+                        >
+                            {isDownloading && downloadType === 'Word' ? <Loader2 className="animate-spin w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                        </Button>
+                    )}
+
+                    {onDownloadPdf && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-white/70 hover:text-white hover:bg-white/10 w-9 h-9"
+                            onClick={onDownloadPdf}
+                            disabled={isDownloading}
+                            title="Download PDF"
+                        >
+                            {isDownloading && downloadType === 'PDF' ? <Loader2 className="animate-spin w-4 h-4" /> : <FileDown className="w-4 h-4" />}
+                        </Button>
+                    )}
+
+                    <div className="w-px h-6 bg-white/20 mx-2" />
+
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={onBack}
-                        className="bg-white text-black hover:bg-gray-200 rounded text-black w-8 h-8 flex items-center justify-center"
+                        className="text-white/70 hover:text-white hover:bg-white/10 rounded-full w-8 h-8"
                     >
                         <X className="w-5 h-5" />
                     </Button>
@@ -97,29 +151,9 @@ export default function ReportViewerWrapper({
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-auto p-8 pb-32 flex justify-center relative">
+            <div className="flex-1 overflow-auto p-8 flex justify-center print-content">
                 {/* The child component (Report) should carry its own background (usually white) and shadow */}
                 {children}
-
-                {/* FLOATING ACTION BUTTONS */}
-                {/* FLOATING ACTION BUTTONS */}
-                <div className="fixed bottom-0 left-0 w-full bg-black py-4 flex justify-center items-center gap-4 z-50 print:hidden border-t border-white/10">
-                    {onEdit && (
-                        <Button
-                            className="bg-white text-black hover:bg-gray-200 border border-gray-200 h-10 px-6 rounded font-semibold text-sm transition-all"
-                            onClick={onEdit}
-                        >
-                            Edit Report <Edit className="w-4 h-4 ml-2" />
-                        </Button>
-                    )}
-
-                    <Button
-                        className="bg-white text-black hover:bg-gray-200 border border-gray-200 h-10 px-6 rounded font-semibold text-sm transition-all"
-                        onClick={() => onPrint ? onPrint() : window.print()}
-                    >
-                        Print Report <Printer className="w-4 h-4 ml-2" />
-                    </Button>
-                </div>
             </div>
 
             {/* DOWNLOAD LOADER OVERLAY */}

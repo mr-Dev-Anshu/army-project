@@ -9,6 +9,7 @@ import { MaidServant } from "@/features/civilEmployee/maid_Servant/types";
 import { Shopkeeper } from "@/features/civilEmployee/shopkeeper/types";
 import { TemporaryHiredWorker } from "@/features/civilEmployee/temporaryHired/types";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types";
+import { AttachedItem } from "@/app/(report-view)/reports/mp-occurrence-reports/page";
 
 export interface VehicleDetailsState {
   category: string;
@@ -16,12 +17,6 @@ export interface VehicleDetailsState {
   driverType: string;
   vehicleName: string;
   vehicleNumber: string;
-}
-
-export interface AttachmentItem {
-  type: "Certificate" | "Forms" | "Letter";
-  name: string;
-  url: string;
 }
 
 // ---------- OFFENDER ----------
@@ -144,9 +139,7 @@ export interface MpReportState {
     analysis: string;
     recommendation: string;
   };
-
-  certificates?: string[]; // Legacy support during migration?
-  attachments?: AttachmentItem[]; // NEW STRUCTURE
+  attachments: AttachedItem[]; // <-- for report viewer attachments tab
 }
 
 // ---------- DEPENDENTS ----------
@@ -263,8 +256,7 @@ export interface StaticSpeedFormState {
   offenderDetails: any;
   offenderPeople: any[];
 
-  documents?: string[];
-  attachments?: AttachmentItem[];
+
 }
 
 // ---------- FORM ROOT ----------

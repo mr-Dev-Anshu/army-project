@@ -34,14 +34,14 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
         armyNo: "",
         rank: "",
         name: "",
-        unit: "",
-        fmn: "",
-        command: "",
     });
     const [authentication, setAuthentication] = useState({
         initialsMPCPNCO: "",
         initialsQMSJCO: "",
         initials2IC: "",
+        initialsOfMPCRNCO: false,
+        initialsOfSMSJCO: false,
+        initialsOf2IC: false,
     });
 
     useEffect(() => {
@@ -53,7 +53,10 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
             setRemark(initialData.remark || "");
 
             if (initialData.authentication) {
-                setAuthentication(initialData.authentication);
+                setAuthentication((prev) => ({
+                    ...prev,
+                    ...initialData.authentication
+                }));
             }
 
             // Details
@@ -71,7 +74,7 @@ const KeyOutInForm = ({ initialData, onSuccess, onCancel }: KeyOutInFormProps) =
         setIndividual((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleAuthenticationChange = (field: string, value: string) => {
+    const handleAuthenticationChange = (field: string, value: any) => {
         setAuthentication((prev) => ({ ...prev, [field]: value }));
     };
 
