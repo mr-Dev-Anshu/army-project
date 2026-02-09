@@ -395,52 +395,43 @@ export const IndividualVictimDetails: React.FC<
                     Related Person Details
                   </p>
 
-                  {/* ✅ ONLY ONE TIME – 6 OPTIONS */}
-                  <RadioGroup
-                    value={
-                      data.individualDetails?.relatedPerson?.individualType ||
-                      ""
-                    }
-                    onValueChange={(v) =>
-                      onChange(
-                        "individualDetails.relatedPerson.individualType",
-                        v,
-                      )
-                    }
-                    className="grid grid-cols-2 gap-3"
-                  >
-                    {[
-                      { id: "militaryPersonnel", label: "Military Personnel" },
-                      { id: "civilian", label: "Civilian / Dependent" },
-                      { id: "employee", label: "Employee" },
-                      { id: "servantMaid", label: "Servant / Maid" },
-                      { id: "shopKeeper", label: "Shop Keeper" },
-                      {
-                        id: "tempHiredWorker",
-                        label: "Temporary Hired Worker",
-                      },
-                    ].map((type) => (
-                      <label
-                        key={type.id}
-                        htmlFor={`related-${type.id}`}
-                        className={cn(
-                          "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer",
-                          data.individualDetails?.relatedPerson
-                            ?.individualType === type.id
-                            ? "border-blue-500 bg-gray-50"
-                            : "border-gray-200",
-                        )}
-                      >
-                        <RadioGroupItem
-                          id={`related-${type.id}`}
-                          value={type.id}
-                        />
-                        <span className="text-xs font-medium">
-                          {type.label}
-                        </span>
-                      </label>
-                    ))}
-                  </RadioGroup>
+                  {!hideTypeSelector && (
+                    <RadioGroup
+                      value={data.individualType}
+                      onValueChange={(v) => onChange("individualType", v)}
+                      className="grid grid-cols-2 gap-3"
+                    >
+                      {[
+                        {
+                          id: "militaryPersonnel",
+                          label: "Military Personnel",
+                        },
+                        { id: "civilian", label: "Civilian / Dependent" },
+                        { id: "employee", label: "Employee" },
+                        { id: "servantMaid", label: "Servant / Maid" },
+                        { id: "shopKeeper", label: "Shop Keeper" },
+                        {
+                          id: "tempHiredWorker",
+                          label: "Temporary Hired Worker",
+                        },
+                      ].map((type) => (
+                        <label
+                          key={type.id}
+                          className={cn(
+                            "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
+                            data.individualType === type.id
+                              ? "border-blue-500 bg-gray-50"
+                              : "border-gray-200",
+                          )}
+                        >
+                          <RadioGroupItem value={type.id} />
+                          <span className="text-xs font-medium">
+                            {type.label}
+                          </span>
+                        </label>
+                      ))}
+                    </RadioGroup>
+                  )}
 
                   {/* ✅ ONLY FORM – NO MORE 6 OPTIONS */}
                   {data.individualDetails?.relatedPerson?.individualType && (
