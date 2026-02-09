@@ -432,20 +432,10 @@
 //   );
 // }
 
-
-
-
-
 "use client";
 
 import React, { useMemo } from "react";
-import {
-  MoreVertical,
-  Eye,
-  Printer,
-  Edit,
-  Trash,
-} from "lucide-react";
+import { MoreVertical, Eye, Printer, Edit, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -562,168 +552,199 @@ export default function StaticSpeedTable({
 
   /* ================= COLUMNS (OLD UI) ================= */
 
-  const columns = useMemo<Column<any>[]>(() => [
-    {
-      header: "Sr no.",
-      cell: (item) => (
-        <span className="text-gray-900">{item.displayIndex}</span>
-      ),
-      className:
-        "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-300",
-      headerClassName:
-        "sticky left-0 z-20 bg-gray-50 border-r border-gray-300 w-12",
-    },
-    {
-      header: "Place of Offence",
-      className: "min-w-[150px] border-r border-gray-300",
-      cell: (item) => (
-        <div>
-          <div className="font-medium text-gray-900">
-            {item.placeOfOffence}
+  const columns = useMemo<Column<any>[]>(
+    () => [
+      {
+        header: "Sr no.",
+        cell: (item) => (
+          <span className="text-gray-900">{item.displayIndex}</span>
+        ),
+        className:
+          "w-12 text-center sticky left-0 z-10 bg-white group-hover:bg-gray-50 border-r border-gray-300",
+        headerClassName:
+          "sticky left-0 z-20 bg-gray-50 border-r border-gray-300 w-12",
+      },
+      {
+        header: "Place of Offence",
+        className: "min-w-[150px] border-r border-gray-300",
+        cell: (item) => (
+          <div>
+            <div className="font-medium text-gray-900">
+              {item.placeOfOffence}
+            </div>
+            <div className="text-gray-500 text-xs mt-1">{item.subLocation}</div>
           </div>
-          <div className="text-gray-500 text-xs mt-1">
-            {item.subLocation}
+        ),
+      },
+      {
+        header: "Date & Time",
+        className: "min-w-[120px] border-r border-gray-300",
+        cell: (item) => (
+          <div>
+            <div className="font-semibold text-gray-900">{item.date}</div>
+            <div className="text-gray-500 text-xs">{item.time}</div>
           </div>
-        </div>
-      ),
-    },
-    {
-      header: "Date & Time",
-      className: "min-w-[120px] border-r border-gray-300",
-      cell: (item) => (
-        <div>
-          <div className="font-semibold text-gray-900">{item.date}</div>
-          <div className="text-gray-500 text-xs">{item.time}</div>
-        </div>
-      ),
-    },
-    {
-      header: "Particulars of Driver/Rider",
-      className: "min-w-[200px] border-r border-gray-300",
-      cell: (item) => (
-        <div className="flex flex-col gap-2">
-          {item.driverDetails && (
-            <OffenderDetailsCell details={item.driverDetails} mpName="" />
-          )}
-          {item.mpDetails &&
-            Object.values(item.mpDetails).some(Boolean) && (
-              <div className="pt-2 border-t border-dashed border-gray-300">
-                <div className="font-semibold text-xs text-gray-900 mb-1">
-                  MP Details:
-                </div>
-                <MpDetailsCell details={item.mpDetails} />
-              </div>
-            )}
-        </div>
-      ),
-    },
-    {
-      header: "Unit",
-      className: "min-w-[100px] border-r border-gray-300",
-      cell: (item) => item.unit,
-    },
-    {
-      header: "FMN",
-      className: "min-w-[100px] border-r border-gray-300",
-      cell: (item) => item.fmn,
-    },
-    {
-      header: "Offence Brief",
-      className: "min-w-[180px] border-r border-gray-300",
-      cell: (item) => (
-        <div className="text-gray-700 text-xs max-w-xs">
-          {item.offenceBrief}
-        </div>
-      ),
-    },
-    {
-      header: "Veh. BA No. / Make & Take",
-      className: "min-w-[150px] border-r border-gray-300",
-      cell: (item) => (
-        <div>
-          <div className="font-semibold text-gray-900">{item.vehicleNo}</div>
-          <div className="text-gray-500 text-xs">{item.vehicleModel}</div>
-        </div>
-      ),
-    },
-    {
-      header: "Report no.",
-      className: "min-w-[140px] border-r border-gray-300",
-      cell: (item) => (
-        <span className="text-gray-600 text-xs">{item.reportNo}</span>
-      ),
-    },
-    {
-      header: "Action Status",
-      className:
-        "text-center w-28 text-xs sticky right-12 z-10 bg-white border-l border-gray-300",
-      headerClassName:
-        "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-300",
-      cell: (item) => {
-        const isTaken = item.actionStatus === true;
-        return (
-          <div
-            className="flex flex-col items-center gap-1 cursor-pointer"
-            onClick={() => item._id && handleStatusClick(item._id, isTaken)}
-          >
+        ),
+      },
+      {
+        header: "Particulars of Driver/Rider",
+        className: "min-w-[200px] border-r border-gray-300",
+        cell: (item) => {
+          // ✅ source of truth = originalData.offenders
+          const offenders = item.originalData?.offenders || [];
+
+          // ✅ latest offender (last added)
+          const latestOffender =
+            offenders.length > 0
+              ? offenders[offenders.length - 1].offenderDetails
+              : null;
+
+          return (
+            <div className="flex flex-col gap-2">
+              {latestOffender ? (
+                <OffenderDetailsCell details={latestOffender} mpName="" />
+              ) : (
+                <span className="text-gray-400 text-xs italic">
+                  No driver details
+                </span>
+              )}
+
+              {item.mpDetails &&
+                Object.values(item.mpDetails).some(Boolean) && (
+                  <div className="pt-2 border-t border-dashed border-gray-300">
+                    <div className="font-semibold text-xs text-gray-900 mb-1">
+                      MP Details:
+                    </div>
+                    <MpDetailsCell details={item.mpDetails} />
+                  </div>
+                )}
+            </div>
+          );
+        },
+      },
+
+      {
+        header: "Unit",
+        className: "min-w-[100px] border-r border-gray-300",
+        cell: (item) => item.unit,
+      },
+      {
+        header: "FMN",
+        className: "min-w-[100px] border-r border-gray-300",
+        cell: (item) => item.fmn,
+      },
+      {
+        header: "Offence Brief",
+        className: "min-w-[180px] border-r border-gray-300",
+        cell: (item) => (
+          <div className="text-gray-700 text-xs max-w-xs">
+            {item.offenceBrief}
+          </div>
+        ),
+      },
+      {
+        header: "Veh. BA No. / Make & Take",
+        className: "min-w-[150px] border-r border-gray-300",
+        cell: (item) => (
+          <div>
+            <div className="font-semibold text-gray-900">{item.vehicleNo}</div>
+            <div className="text-gray-500 text-xs">{item.vehicleModel}</div>
+          </div>
+        ),
+      },
+      {
+        header: "Report no.",
+        className: "min-w-[140px] border-r border-gray-300",
+        cell: (item) => (
+          <span className="text-gray-600 text-xs">{item.reportNo}</span>
+        ),
+      },
+      {
+        header: "Action Status",
+        className:
+          "text-center w-28 text-xs sticky right-12 z-10 bg-white border-l border-gray-300",
+        headerClassName:
+          "text-center w-28 sticky right-12 z-20 bg-gray-50 border-l border-gray-300",
+        cell: (item) => {
+          const isTaken = item.actionStatus === true;
+          return (
             <div
-              className={`w-10 h-5 rounded-full p-1 transition-colors ${
-                isTaken ? "bg-green-500" : "bg-red-500"
-              }`}
+              className="flex flex-col items-center gap-1 cursor-pointer"
+              onClick={() => item._id && handleStatusClick(item._id, isTaken)}
             >
               <div
-                className={`w-3 h-3 bg-white rounded-full transition-transform ${
-                  isTaken ? "translate-x-5" : "translate-x-0"
+                className={`w-10 h-5 rounded-full p-1 transition-colors ${
+                  isTaken ? "bg-green-500" : "bg-red-500"
                 }`}
-              />
+              >
+                <div
+                  className={`w-3 h-3 bg-white rounded-full transition-transform ${
+                    isTaken ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </div>
+              <span className="text-[10px] uppercase text-gray-500">
+                {isTaken ? "Taken" : "Pending"}
+              </span>
             </div>
-            <span className="text-[10px] uppercase text-gray-500">
-              {isTaken ? "Taken" : "Pending"}
-            </span>
-          </div>
-        );
+          );
+        },
       },
-    },
-    {
-      header: "",
-      className:
-        "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
-      headerClassName: "w-12 sticky right-0 z-20 bg-gray-50",
-      cell: (item) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="w-4 h-4 text-gray-400" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            <DropdownMenuItem onSelect={() => onView?.(item)}>
-              <Eye className="w-4 h-4 mr-2" /> View
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onPrint?.(item)}>
-              <Printer className="w-4 h-4 mr-2" /> Print
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => onEdit?.(item.originalData || item)}
-            >
-              <Edit className="w-4 h-4 mr-2" /> Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-red-600"
-              onSelect={() => item._id && handleDeleteClick(item._id)}
-            >
-              <Trash className="w-4 h-4 mr-2" /> Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ], [onView, onPrint, onEdit]);
-
-  const processedData = useMemo(
-    () => data.map((item, i) => ({ ...item, displayIndex: i + 1 })),
-    [data],
+      {
+        header: "",
+        className:
+          "text-right w-12 sticky right-0 z-10 bg-white group-hover:bg-gray-50",
+        headerClassName: "w-12 sticky right-0 z-20 bg-gray-50",
+        cell: (item) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="w-4 h-4 text-gray-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuItem onSelect={() => onView?.(item)}>
+                <Eye className="w-4 h-4 mr-2" /> View
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onPrint?.(item)}>
+                <Printer className="w-4 h-4 mr-2" /> Print
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => onEdit?.(item.originalData || item)}
+              >
+                <Edit className="w-4 h-4 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-600"
+                onSelect={() => item._id && handleDeleteClick(item._id)}
+              >
+                <Trash className="w-4 h-4 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    [onView, onPrint, onEdit],
   );
+  console.log("data:", data);
+
+  const processedData = useMemo(() => {
+    return data.map((item, i) => {
+      const offenders = Array.isArray(item.offenders)
+        ? [...item.offenders].sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )
+        : [];
+
+      return {
+        ...item,
+        displayIndex: i + 1,
+        offenders, // 🔥 EXACTLY like traffic
+      };
+    });
+  }, [data]);
 
   return (
     <>

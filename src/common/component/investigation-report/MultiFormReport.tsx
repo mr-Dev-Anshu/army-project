@@ -85,7 +85,7 @@ export default function MultiFormReport({
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { mutateAsync: createReportAsync } = useCreateMPReport();
-    const { mutateAsync: updateReportAsync } = useUpdateMPReport();
+  const { mutateAsync: updateReportAsync } = useUpdateMPReport();
   const { mutateAsync: createOffenderMutate } = useCreateOffender();
 
   /* ================= FETCH REPORT NO ================= */
@@ -264,36 +264,45 @@ export default function MultiFormReport({
     date && time ? new Date(`${date}T${time}`).toISOString() : null;
 
   const mapMpToReport = (mp: any) => {
-    const offenderList = mp?.individualDetails?.offenderList || [];
-    const witnessList = mp?.witnesses || [];
+    const offenderList = Array.isArray(existingReport?.offenders)
+      ? existingReport.offenders
+      : [];
 
-    /* ================= 4. OFFENDERS ================= */
-    /* ================= 4. OFFENDERS ================= */
-    const people = offenderList.map((p: any, i: number) => {
-      const src = p.details ?? p;
-      const val = (v: any) => (v && v !== "Nil" && v !== "--" ? v : ""); // Helper inside map
+    const people = offenderList
+      // 🔥 REMOVE DUPLICATES
+      .filter((o, index, self) => {
+        const d = o.offenderDetails || {};
+        const key = `${d.name}|${d.armyNumber}|${d.iCardNumber}`;
+        return (
+          index ===
+          self.findIndex((x) => {
+            const xd = x.offenderDetails || {};
+            return `${xd.name}|${xd.armyNumber}|${xd.iCardNumber}` === key;
+          })
+        );
+      })
+      // 🔥 MAP CORRECTLY
+      .map((p: any, i: number) => {
+        const d = p.offenderDetails || {};
+        const val = (v: any) => (v && v !== "Nil" && v !== "--" ? v : "");
 
-      return {
-        sno: i + 1,
-        armyNo: val(src.armyNumber),
-        rank: val(src.rank),
-        name: val(src.name),
-        identityCard: val(src.iCardNumber),
-        unitName: val(src.unit),
-        fmn: val(src.fmn),
-        address: val(src.address),
-        remark: val(src.remark),
-        role:
-          p.offenderType === "Victim"
-            ? "Victim"
-            : p.offenderType === "Offender"
-              ? "Offender"
-              : "Unknown",
-        customFields: { ...src, ...(src.customFields || {}) },
-      };
-    });
+        return {
+          sno: i + 1,
+          armyNo: val(d.armyNumber),
+          rank: val(d.rank),
+          name: val(d.name),
+          identityCard: val(d.iCardNumber),
+          unitName: val(d.unit),
+          fmn: val(d.fmn),
+          address: val(d.address),
+          remark: val(d.remark),
+          role: p.category || p.offenderType || "Offender",
+          customFields: d,
+        };
+      });
 
     /* ================= 5. WITNESSES ================= */
+    const witnessList = mp?.witnesses || [];
     const witnesses = witnessList.map((w: any, i: number) => {
       const src = w.details ?? w;
       const val = (v: any) => (v && v !== "Nil" && v !== "--" ? v : "");
@@ -340,7 +349,8 @@ export default function MultiFormReport({
         const command = val(p.command);
 
         // Return undefined if essentially empty, so report view hides the section
-        if (!armyNo && !rank && !name && !unit && !fmn && !command) return undefined;
+        if (!armyNo && !rank && !name && !unit && !fmn && !command)
+          return undefined;
 
         return {
           armyNumber: armyNo,
@@ -377,8 +387,14 @@ export default function MultiFormReport({
       /* ================= 6. EVIDENCE ================= */
       evidence: (() => {
         const es = mp?.evidence?.eyeSketch?.url ? "Available" : "";
-        const ph = mp?.evidence?.photos?.length > 0 ? `${mp.evidence.photos.length} Photos` : "";
-        const vid = mp?.evidence?.videos?.length > 0 ? `${mp.evidence.videos.length} Videos` : "";
+        const ph =
+          mp?.evidence?.photos?.length > 0
+            ? `${mp.evidence.photos.length} Photos`
+            : "";
+        const vid =
+          mp?.evidence?.videos?.length > 0
+            ? `${mp.evidence.videos.length} Videos`
+            : "";
 
         if (!es && !ph && !vid) return undefined;
 

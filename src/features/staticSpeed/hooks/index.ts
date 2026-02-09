@@ -32,40 +32,23 @@ export const useCreateStaticSpeedRecord = () => {
 
 export const useUpdateStaticSpeedRecord = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["update-static-speed-record"],
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<any>;
-    }) => api.updateStaticSpeedRecord(id, data),
-    onMutate: async ({ id, data }) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["static-speed-records"] });
-      await queryClient.cancelQueries({ queryKey: ["static-speed-record", id] });
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      api.updateStaticSpeedRecord(id, data),
 
-      // Snapshot previous value
-      const previousRecords = queryClient.getQueryData(["static-speed-records"]);
-
-      // Optimistically update
-      queryClient.setQueryData(["static-speed-records"], (old: any[]) => {
-        if (!old) return [];
-        return old.map((record) =>
-          record._id === id ? { ...record, ...data } : record
-        );
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["static-speed-records"],
+        exact: false,
       });
 
-      return { previousRecords };
+      queryClient.invalidateQueries({
+        queryKey: ["static-speed-record", id],
+      });
     },
-    onError: (err, newTodo, context) => {
-      queryClient.setQueryData(["static-speed-records"], context?.previousRecords);
-    },
-    onSettled: (_, __, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["static-speed-records"] });
-      queryClient.invalidateQueries({ queryKey: ["static-speed-record", id] });
-    },
+
     retry: 0,
   });
 };

@@ -50,7 +50,8 @@ const Sidebar = () => {
   const [openMenus, setOpenMenus] = useState<string[]>([
     "Forms & Certificates",
     "Basic Information",
-    "Military Structure Data",
+    // "Military Structure Data",
+   
   ]);
 
   // Routes where sidebar should DEFAULT to collapsed (for more screen space)
@@ -171,16 +172,16 @@ const Sidebar = () => {
         { label: "Installation", href: "/setup/installation" },
       ],
     },
-    {
-      icon: <Network className="w-5 h-5" />,
-      label: "Military Structure Data",
-      submenu: [
-        { label: "Brigade", href: "/structure/brigade" },
-        { label: "Division", href: "/structure/division" },
-        { label: "Corps / Sub-Area", href: "/structure/corps" },
-        { label: "Command / Area", href: "/structure/command" },
-      ],
-    },
+    // {
+    //   icon: <Network className="w-5 h-5" />,
+    //   label: "Military Structure Data",
+    //   submenu: [
+    //     { label: "Brigade", href: "/structure/brigade" },
+    //     { label: "Division", href: "/structure/division" },
+    //     { label: "Corps / Sub-Area", href: "/structure/corps" },
+    //     { label: "Command / Area", href: "/structure/command" },
+    //   ],
+    // },
     {
       icon: <UserIcon className="w-5 h-5" />,
       label: "User Access Management",
