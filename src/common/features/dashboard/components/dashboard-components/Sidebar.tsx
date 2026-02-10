@@ -31,6 +31,9 @@ import Link from "next/link";
 import ConeIcon from "@/components/icons/ConeIcon";
 import { useForm } from "@/context/FormContext";
 import { useAuth } from "@/context/AuthContext";
+import SimpleToolTip from "@/components/ui/SimpleToolTip";
+
+/* ✅ TOOLTIP IMPORT (ADDED) */
 
 const cn = (...classes: (string | boolean | undefined)[]) =>
   classes.filter(Boolean).join(" ");
@@ -50,11 +53,8 @@ const Sidebar = () => {
   const [openMenus, setOpenMenus] = useState<string[]>([
     "Forms & Certificates",
     "Basic Information",
-    // "Military Structure Data",
-   
   ]);
 
-  // Routes where sidebar should DEFAULT to collapsed (for more screen space)
   const routesThatPreferCollapsed = [
     "/",
     "/create-record",
@@ -64,28 +64,21 @@ const Sidebar = () => {
     "/analysis",
     "/setup",
     "/structure",
-    "/hello"
-    // Add more prefixes as needed
+    "/hello",
   ];
 
   const shouldPreferCollapsed = () => {
     return routesThatPreferCollapsed.some((route) =>
-      pathname.startsWith(route)
+      pathname.startsWith(route),
     );
   };
 
-  // Apply default collapse preference only on route change
-  // Does NOT override if user has manually toggled during their stay
   useEffect(() => {
     const preferred = shouldPreferCollapsed();
-
-    // Only reset if current state doesn't match route preference
-    // This preserves user manual toggles while on the page
     if (isCollapsed !== preferred) {
       setIsCollapsed(preferred);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]); // Only trigger on navigation
+  }, [pathname]);
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
@@ -93,7 +86,7 @@ const Sidebar = () => {
     setOpenMenus((prev) =>
       prev.includes(label)
         ? prev.filter((item) => item !== label)
-        : [...prev, label]
+        : [...prev, label],
     );
   };
 
@@ -113,8 +106,7 @@ const Sidebar = () => {
 
   const createNewRecordItems: MenuItem[] = [
     {
-      icon: <Siren className="w-5 h-5" />
-      ,
+      icon: <Siren className="w-5 h-5" />,
       label: "Immediate Reporting of Incident (Initial Report)",
       href: "/create-record/immediate-reporting-incident",
     },
@@ -156,7 +148,7 @@ const Sidebar = () => {
   const formsAndCertificates: MenuItem = {
     icon: <FileBadge className="w-5 h-5" />,
     label: "Certificates, Letters & Forms",
-    href:"/form-certificate/certificate"
+    href: "/form-certificate/certificate",
   };
 
   const systemSetup: MenuItem[] = [
@@ -164,24 +156,21 @@ const Sidebar = () => {
       icon: <Database className="w-5 h-5" />,
       label: "Basic Information",
       submenu: [
-        { label: "Offence Types Management", href: "/setup/offence-type-management" },
-        { label: "Civil Employees Management", href: "/setup/civil-employees" },
-        { label: "Vehicles Security Pass Management", href: "/setup/vehicles-security-pass-management" },
-        // { label: "Rank Management", href: "/setup/ranks-master-list" },
-        // { label: "Unit Management", href: "/setup/unit-master-list" },
+        {
+          label: "Offence Types Management",
+          href: "/setup/offence-type-management",
+        },
+        {
+          label: "Civil Employees Management",
+          href: "/setup/civil-employees",
+        },
+        {
+          label: "Vehicles Security Pass Management",
+          href: "/setup/vehicles-security-pass-management",
+        },
         { label: "Installation", href: "/setup/installation" },
       ],
     },
-    // {
-    //   icon: <Network className="w-5 h-5" />,
-    //   label: "Military Structure Data",
-    //   submenu: [
-    //     { label: "Brigade", href: "/structure/brigade" },
-    //     { label: "Division", href: "/structure/division" },
-    //     { label: "Corps / Sub-Area", href: "/structure/corps" },
-    //     { label: "Command / Area", href: "/structure/command" },
-    //   ],
-    // },
     {
       icon: <UserIcon className="w-5 h-5" />,
       label: "User Access Management",
@@ -191,7 +180,6 @@ const Sidebar = () => {
 
   const renderMenuItem = (item: MenuItem, isSubmenu = false) => {
     if (item.submenu) return null;
-
     const active = isActive(item.href);
 
     return (
@@ -202,18 +190,24 @@ const Sidebar = () => {
           isCollapsed
             ? "h-10 justify-center hover:bg-gray-100"
             : cn(
-              "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
-              isSubmenu && "py-1.5",
-              active && "bg-blue-50 text-blue-700 hover:bg-blue-50"
-            )
+                "gap-3 px-4 py-2 hover:bg-gray-100 text-left",
+                isSubmenu && "py-1.5",
+                active && "bg-blue-50 text-blue-700 hover:bg-blue-50",
+              ),
         )}
       >
         {!isSubmenu && (
           <span
             className={cn(
               "flex-shrink-0",
-              active ? "text-blue-700" : "text-gray-500 group-hover:text-gray-900"
+              active
+                ? "text-blue-700"
+                : "text-gray-500 group-hover:text-gray-900",
             )}
+            {...(isCollapsed && {
+              "data-tooltip-id": "sidebar-tooltip",
+              "data-tooltip-content": item.label,
+            })}
           >
             {item.icon}
           </span>
@@ -227,7 +221,7 @@ const Sidebar = () => {
                 isSubmenu ? "text-sm" : "text-base",
                 active
                   ? "text-blue-700 font-medium"
-                  : "text-gray-600 group-hover:text-gray-900"
+                  : "text-gray-600 group-hover:text-gray-900",
               )}
             >
               {item.label}
@@ -262,7 +256,7 @@ const Sidebar = () => {
             isCollapsed
               ? "h-10 justify-center hover:bg-gray-100"
               : "gap-3 px-4 py-2.5 text-left hover:bg-gray-100",
-            hasActiveSubmenu && "bg-blue-50"
+            hasActiveSubmenu && "bg-blue-50",
           )}
         >
           <span
@@ -270,8 +264,12 @@ const Sidebar = () => {
               "flex-shrink-0",
               hasActiveSubmenu
                 ? "text-blue-700"
-                : "text-gray-500 group-hover:text-gray-900"
+                : "text-gray-500 group-hover:text-gray-900",
             )}
+            {...(isCollapsed && {
+              "data-tooltip-id": "sidebar-tooltip",
+              "data-tooltip-content": item.label,
+            })}
           >
             {item.icon}
           </span>
@@ -283,7 +281,7 @@ const Sidebar = () => {
                   "flex-1 text-base leading-snug",
                   hasActiveSubmenu
                     ? "text-blue-700 font-medium"
-                    : "text-gray-600 group-hover:text-gray-900"
+                    : "text-gray-600 group-hover:text-gray-900",
                 )}
               >
                 {item.label}
@@ -444,6 +442,7 @@ const Sidebar = () => {
           </button>
         )}
       </div>
+      <SimpleToolTip />
     </div>
   );
 };
