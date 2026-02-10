@@ -11,11 +11,18 @@ interface IndividualVictimDetailsProps {
   onChange: (path: string, value: any) => void;
   hideHeader?: boolean;
   hideFooter?: boolean;
+  hideTypeSelector?: boolean;
 }
 
 export const IndividualVictimDetails: React.FC<
   IndividualVictimDetailsProps
-> = ({ data, onChange, hideHeader = false, hideFooter = false }) => {
+> = ({
+  data,
+  onChange,
+  hideHeader = false,
+  hideFooter = false,
+  hideTypeSelector = false,
+}) => {
   const [passengers, setPassengers] = useState<any[]>([]);
 
   return (
@@ -45,33 +52,35 @@ export const IndividualVictimDetails: React.FC<
               </div>
             )}
 
-            <RadioGroup
-              value={data.individualType}
-              onValueChange={(v) => onChange("individualType", v)}
-              className="grid grid-cols-2 gap-3"
-            >
-              {[
-                { id: "militaryPersonnel", label: "Military Personnel" },
-                { id: "civilian", label: "Civilian / Dependent" },
-                { id: "employee", label: "Employee" },
-                { id: "servantMaid", label: "Servant / Maid" },
-                { id: "shopKeeper", label: "Shop Keeper" },
-                { id: "tempHiredWorker", label: "Temporary Hired Worker" },
-              ].map((type) => (
-                <label
-                  key={type.id}
-                  className={cn(
-                    "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
-                    data.individualType === type.id
-                      ? "border-blue-500 bg-gray-50"
-                      : "border-gray-200",
-                  )}
-                >
-                  <RadioGroupItem value={type.id} />
-                  <span className="text-xs font-medium">{type.label}</span>
-                </label>
-              ))}
-            </RadioGroup>
+            {!hideTypeSelector && (
+              <RadioGroup
+                value={data.individualType}
+                onValueChange={(v) => onChange("individualType", v)}
+                className="grid grid-cols-2 gap-3"
+              >
+                {[
+                  { id: "militaryPersonnel", label: "Military Personnel" },
+                  { id: "civilian", label: "Civilian / Dependent" },
+                  { id: "employee", label: "Employee" },
+                  { id: "servantMaid", label: "Servant / Maid" },
+                  { id: "shopKeeper", label: "Shop Keeper" },
+                  { id: "tempHiredWorker", label: "Temporary Hired Worker" },
+                ].map((type) => (
+                  <label
+                    key={type.id}
+                    className={cn(
+                      "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer hover:bg-gray-50 transition-colors",
+                      data.individualType === type.id
+                        ? "border-blue-500 bg-gray-50"
+                        : "border-gray-200",
+                    )}
+                  >
+                    <RadioGroupItem value={type.id} />
+                    <span className="text-xs font-medium">{type.label}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            )}
 
             {/* ===== BETWEEN OPTIONS & FORM TEXT ===== */}
             <div className="pt-4">
@@ -225,42 +234,118 @@ export const IndividualVictimDetails: React.FC<
           </div>
         )}
 
-        {/* ================= CIVILIAN ================= */}
-
         {data.individualType === "civilian" && (
-          <div className="space-y-4 grid gap-3 grid-cols-2 pt-4">
-            <SuggestionInput
-              label="Name"
-              placeholder="Enter Name"
-              fieldType="name"
-              value={data.individualDetails?.name || ""}
-              onChange={(v) => onChange("individualDetails.name", v)}
-            />
+          <>
+            {/* ===== CIVILIAN MAIN FORM ===== */}
+            <div className="space-y-4 grid gap-3 grid-cols-2 pt-4">
+              <SuggestionInput
+                label="Name"
+                placeholder="Enter Name"
+                fieldType="name"
+                value={data.individualDetails?.name || ""}
+                onChange={(v) => onChange("individualDetails.name", v)}
+              />
 
-            <SuggestionInput
-              label="Address"
-              placeholder="Enter Address"
-              fieldType="address"
-              value={data.individualDetails?.address || ""}
-              onChange={(v) => onChange("individualDetails.address", v)}
-            />
+              <SuggestionInput
+                label="Address"
+                placeholder="Enter Address"
+                fieldType="address"
+                value={data.individualDetails?.address || ""}
+                onChange={(v) => onChange("individualDetails.address", v)}
+              />
 
-            <SuggestionInput
-              label="Father / Husband Name"
-              placeholder="Enter Name"
-              fieldType="fatherName"
-              value={data.individualDetails?.fatherName || ""}
-              onChange={(v) => onChange("individualDetails.fatherName", v)}
-            />
+              <SuggestionInput
+                label="Father / Husband Name"
+                placeholder="Enter Name"
+                fieldType="fatherName"
+                value={data.individualDetails?.fatherName || ""}
+                onChange={(v) => onChange("individualDetails.fatherName", v)}
+              />
 
-            <SuggestionInput
-              label="I Card Number"
-              placeholder="Enter ID Card Number"
-              fieldType="iCard"
-              value={data.individualDetails?.iCard || ""}
-              onChange={(v) => onChange("individualDetails.iCard", v)}
-            />
-          </div>
+              <SuggestionInput
+                label="I Card Number"
+                placeholder="Enter ID Card Number"
+                fieldType="iCard"
+                value={data.individualDetails?.iCard || ""}
+                onChange={(v) => onChange("individualDetails.iCard", v)}
+              />
+            </div>
+
+            {/* ===== CIVILIAN → MILITARY RELATIVE CHECK ===== */}
+            <div className="col-span-2 border-t pt-4 mt-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={data.hasMilitaryRelative || false}
+                  onCheckedChange={(v) => onChange("hasMilitaryRelative", v)}
+                />
+                <span className="text-sm font-medium">
+                  Does the individual have a military relative?
+                </span>
+              </div>
+
+              {data.hasMilitaryRelative && (
+                <>
+                  <SuggestionInput
+                    label="Relation with Military Person"
+                    placeholder="e.g. Father, Brother, Husband"
+                    fieldType="relation"
+                    value={data.militaryRelative?.relation || ""}
+                    onChange={(v) => onChange("militaryRelative.relation", v)}
+                  />
+
+                  <RadioGroup
+                    value={data.militaryRelative?.individualType || ""}
+                    onValueChange={(v) =>
+                      onChange("militaryRelative.individualType", v)
+                    }
+                    className="grid grid-cols-2 gap-3 pt-3"
+                  >
+                    {[
+                      { id: "militaryPersonnel", label: "Military Personnel" },
+                      { id: "civilian", label: "Civilian / Dependent" },
+                      { id: "employee", label: "Employee" },
+                      { id: "servantMaid", label: "Servant / Maid" },
+                      { id: "shopKeeper", label: "Shop Keeper" },
+                      {
+                        id: "tempHiredWorker",
+                        label: "Temporary Hired Worker",
+                      },
+                    ].map((type) => (
+                      <label
+                        key={type.id}
+                        className={cn(
+                          "flex items-center space-x-2 rounded-md border h-10 px-3 cursor-pointer",
+                          data.militaryRelative?.individualType === type.id
+                            ? "border-blue-500 bg-gray-50"
+                            : "border-gray-200",
+                        )}
+                      >
+                        <RadioGroupItem value={type.id} />
+                        <span className="text-xs font-medium">
+                          {type.label}
+                        </span>
+                      </label>
+                    ))}
+                  </RadioGroup>
+
+                  {data.militaryRelative?.individualType && (
+                    <div className="mt-4 rounded-md border p-4 bg-gray-50">
+                      <IndividualVictimDetails
+                        key={data.militaryRelative.individualType} // 🔥 YAHI LINE
+                        hideHeader
+                        hideFooter
+                        hideTypeSelector
+                        data={data.militaryRelative}
+                        onChange={(path, value) =>
+                          onChange(`militaryRelative.${path}`, value)
+                        }
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </>
         )}
 
         {/* ================= SERVANT / MAID ================= */}
@@ -576,6 +661,7 @@ export const IndividualVictimDetails: React.FC<
                     <IndividualVictimDetails
                       hideHeader={true}
                       hideFooter={true}
+                    hideTypeSelector={false}
                       data={
                         data.coDriver || {
                           individualType: "",
