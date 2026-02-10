@@ -750,26 +750,54 @@ const MTAccidentReportForm: React.FC<Props> = ({
 
   /* ================= SUBMIT ================= */
 
-  const handleSubmit = async () => {
-    const { error, value } =
-      createMTAccidentReportSchema.validate(formData, {
-        abortEarly: false,
-        stripUnknown: true,
-      });
+const handleSubmit = async () => {
+  const { error, value } =
+    createMTAccidentReportSchema.validate(formData, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
-    if (error) {
-      toast.error(error.details.map((d) => d.message).join(", "));
-      return;
-    }
+  if (error) {
+    toast.error(error.details.map((d) => d.message).join(", "));
+    return;
+  }
 
+  /* ================= BUILD INDIVIDUALS ================= */
+  const individualsPayload = buildIndividualsPayload(
+    value.individualDetails,
+  );
+
+  /* ================= FINAL PAYLOAD ================= */
+  const payload = {
+    ...value,
+
+    individuals: individualsPayload, // 🔥 MAIN THING
+
+    // optional: remove raw nested form structure
+    individualDetails: undefined,
+  };
+
+  /* 🔍 CONSOLE FOR YOU */
+  console.log("🚨 FINAL MT ACCIDENT PAYLOAD =>", payload);
+  console.table(individualsPayload);
+
+  try {
     if (initialData) {
-      await updateReport({ id: initialData._id, data: value });
+      await updateReport({
+        id: initialData._id,
+        data: payload,
+      });
     } else {
-      await createReport(value);
+      await createReport(payload);
     }
 
     onSuccess();
-  };
+  } catch (err) {
+    console.error("❌ SUBMIT ERROR", err);
+    toast.error("Failed to save report");
+  }
+};
+
 
   const iv = formData.individualDetails;
 
