@@ -801,64 +801,185 @@ const handleSubmit = async () => {
 
   const iv = formData.individualDetails;
 
-  return (
-    <div className="flex flex-col h-full bg-white font-[Arial]">
-      <div className="flex-1 overflow-y-auto p-6 space-y-8">
-        {individualForms.map((_, index) => {
-          const isMain = index === 0;
+return (
+  <div className="flex flex-col h-full bg-white font-[Arial]">
 
-          return (
-            <IndividualVictimDetails
-              key={index}
-              data={
+    <div className="flex-1 overflow-y-auto p-6 space-y-8">
+
+      {/* ================= Individuals ================= */}
+      {individualForms.map((_, index) => {
+        const isMain = index === 0;
+
+        return (
+          <IndividualVictimDetails
+            key={index}
+            data={
+              isMain
+                ? iv
+                : iv.passengers[index - 1] || { individualDetails: {} }
+            }
+            onChange={(path, value) =>
+              handleChange(
                 isMain
-                  ? iv
-                  : iv.passengers[index - 1] || { individualDetails: {} }
+                  ? `individualDetails.${path}`
+                  : `individualDetails.passengers.${index - 1}.${path}`,
+                value,
+              )
+            }
+          />
+        );
+      })}
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          className="bg-black text-white px-4 py-2 rounded-lg"
+          onClick={() => {
+            setIndividualForms((p) => [...p, 0]);
+            setFormData((prev) => ({
+              ...prev,
+              individualDetails: {
+                ...prev.individualDetails,
+                passengers: [
+                  ...prev.individualDetails.passengers,
+                  { individualDetails: {} },
+                ],
+              },
+            }));
+          }}
+        >
+          + Add More Individuals
+        </button>
+      </div>
+
+      {/* ================= Accident Details ================= */}
+      <section className="space-y-4">
+        <h3 className="text-base font-semibold text-gray-900">
+          Accident Details
+        </h3>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Date of Accident</Label>
+            <Input
+              type="date"
+              value={
+                formData.accidentDetails.accidentDate
+                  ? new Date(formData.accidentDetails.accidentDate)
+                      .toISOString()
+                      .split("T")[0]
+                  : ""
               }
-              onChange={(path, value) =>
+              onChange={(e) =>
                 handleChange(
-                  isMain
-                    ? `individualDetails.${path}`
-                    : `individualDetails.passengers.${index - 1}.${path}`,
-                  value,
+                  "accidentDetails.accidentDate",
+                  new Date(e.target.value).toISOString(),
                 )
               }
             />
-          );
-        })}
+          </div>
 
-        <div className="flex justify-end">
-          <button
-            type="button"
-            className="bg-black text-white px-4 py-2 rounded-lg"
-            onClick={() => {
-              setIndividualForms((p) => [...p, 0]);
-
-              setFormData((prev) => ({
-                ...prev,
-                individualDetails: {
-                  ...prev.individualDetails,
-                  passengers: [
-                    ...prev.individualDetails.passengers,
-                    { individualDetails: {} },
-                  ],
-                },
-              }));
-            }}
-          >
-            + Add More Individuals
-          </button>
+          <div>
+            <Label>Time of Accident</Label>
+            <Input
+              type="time"
+              value={formData.accidentDetails.accidentTime}
+              onChange={(e) =>
+                handleChange(
+                  "accidentDetails.accidentTime",
+                  e.target.value,
+                )
+              }
+            />
+          </div>
         </div>
-      </div>
 
-      <FormFooter
-        onCancel={onCancel}
-        onSave={handleSubmit}
-        isLoading={isPending}
-        saveLabel={initialData ? "Update & Save" : "Save & Add Another"}
+        <SuggestionInput
+          label="Place of Accident"
+          fieldType="address"
+          value={formData.accidentDetails.placeOfAccident}
+          onChange={(v) =>
+            handleChange("accidentDetails.placeOfAccident", v)
+          }
+        />
+      </section>
+
+      {/* ================= Vehicle Details ================= */}
+      <section className="space-y-4">
+        <h3 className="text-base font-semibold text-gray-900">
+          Vehicle Details
+        </h3>
+
+        <SuggestionInput
+          label="Vehicle Number"
+          fieldType="vehicleNumber"
+          value={formData.vehicleDetails.vehicleNumber}
+          onChange={(v) =>
+            handleChange("vehicleDetails.vehicleNumber", v)
+          }
+        />
+
+        <SuggestionInput
+          label="Vehicle Model"
+          fieldType="vehicleType"
+          value={formData.vehicleDetails.vehicleModel}
+          onChange={(v) =>
+            handleChange("vehicleDetails.vehicleModel", v)
+          }
+        />
+      </section>
+
+      {/* ================= Casualty Details ================= */}
+      <section className="space-y-4">
+        <h3 className="text-base font-semibold text-gray-900">
+          Casualty Details
+        </h3>
+
+        <div className="grid grid-cols-4 gap-4">
+          <Input
+            type="number"
+            placeholder="Injured Civil"
+            value={formData.casualtyDetails.injuredCivil}
+            onChange={(e) =>
+              handleChange(
+                "casualtyDetails.injuredCivil",
+                Number(e.target.value),
+              )
+            }
+          />
+          <Input
+            type="number"
+            placeholder="Injured Military"
+            value={formData.casualtyDetails.injuredMilitary}
+            onChange={(e) =>
+              handleChange(
+                "casualtyDetails.injuredMilitary",
+                Number(e.target.value),
+              )
+            }
+          />
+        </div>
+      </section>
+
+      {/* ================= Authentication ================= */}
+      <AuthenticationSection
+        data={formData.authentication}
+        onChange={(field, value) =>
+          handleChange(`authentication.${field}`, value)
+        }
       />
+
     </div>
-  );
+
+    <FormFooter
+      onCancel={onCancel}
+      onSave={handleSubmit}
+      isLoading={isPending}
+      saveLabel={initialData ? "Update & Save" : "Save & Add Another"}
+    />
+  </div>
+);
+
 };
 
 export default MTAccidentReportForm;
