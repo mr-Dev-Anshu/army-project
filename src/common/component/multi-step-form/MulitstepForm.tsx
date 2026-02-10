@@ -75,23 +75,22 @@ export default function MultiStepForm({
           vehicleNumber: eo.vehicleNumber || "",
         };
       }
-
-      /* ================= 🔥 OFFENDER HYDRATION (DEDUP FIX) ================= */
+      /* ================= 🔥 OFFENDER HYDRATION (FIXED) ================= */
       if (Array.isArray(eo.offenders)) {
-        const uniqueMap = new Map<string, any>();
+        traffic.offenderPeople = eo.offenders.map((o: any) => ({
+          whoIsIt: o.category || "Offender",
 
-        eo.offenders.forEach((o: any) => {
-          const key = o.offenderType;
-          if (!uniqueMap.has(key)) {
-            uniqueMap.set(key, {
-              whoIsIt: o.category || "Offender",
-              type: o.offenderType, // 🔥 radio select
-              details: { ...o.offenderDetails }, // 🔥 form prefill
-            });
-          }
-        });
+          // 👇 radio selection ke liye
+          offenderType: o.offenderType || "Civilian",
 
-        traffic.offenderPeople = Array.from(uniqueMap.values());
+          // 👇 form prefill ke liye
+          details: {
+            ...o.offenderDetails,
+          },
+
+          // 👇 backend offender id (future update/delete ke kaam aayega)
+          _id: o._id,
+        }));
       }
 
       /* ================= COMMON ================= */
@@ -481,10 +480,7 @@ export default function MultiStepForm({
     },
     2: {
       title: "2. STATEMENT",
-      component: (
-          <Step2Statement
-        />
-      ),
+      component: <Step2Statement />,
     },
 
     3: { title: "3. OFFENCE", component: <Step3Offence /> },
