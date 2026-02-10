@@ -114,50 +114,106 @@ const MTAccidentReportForm: React.FC<Props> = ({ onCancel, onSuccess, initialDat
         });
     };
 
-    const handleSubmit = async () => {
-        try {
-            // Validate form data against schema
-            const { error, value } = createMTAccidentReportSchema.validate(formData, {
-                abortEarly: false,
-                stripUnknown: true
-            });
+const handleSubmit = async () => {
+  try {
+    const { error, value } = createMTAccidentReportSchema.validate(formData, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
-            if (error) {
-                console.error("Validation error:", error);
+    if (error) {
+      console.error("Validation error:", error);
 
-                const fieldLabels: Record<string, string> = {
-                    "casualtyDetails.injuredCivil": "Injured (Civil)",
-                    "casualtyDetails.injuredMilitary": "Injured (Military)",
-                    "casualtyDetails.diedCivil": "Died (Civil)",
-                    "casualtyDetails.diedMilitary": "Died (Military)",
-                    "accidentDetails.accidentDate": "Accident Date",
-                    "damageToVehicle": "Damage to Vehicle",
-                    "actionStatusRemark": "Action Remark"
-                };
+      const fieldLabels: Record<string, string> = {
+        "casualtyDetails.injuredCivil": "Injured (Civil)",
+        "casualtyDetails.injuredMilitary": "Injured (Military)",
+        "casualtyDetails.diedCivil": "Died (Civil)",
+        "casualtyDetails.diedMilitary": "Died (Military)",
+        "accidentDetails.accidentDate": "Accident Date",
+        "damageToVehicle": "Damage to Vehicle",
+        "actionStatusRemark": "Action Remark",
+      };
 
-                const errorMessage = error.details.map(d => {
-                    const fieldPath = d.path.join(".");
-                    const label = fieldLabels[fieldPath] || fieldPath; // Fallback to path if no label
-                    // Replace the quoted path (e.g. "casualtyDetails.injuredCivil") with the friendly label
-                    return d.message.replace(/"[^"]*"/, label);
-                }).join(", ");
+      const errorMessage = error.details
+        .map((d) => {
+          const fieldPath = d.path.join(".");
+          const label = fieldLabels[fieldPath] || fieldPath;
+          return d.message.replace(/"[^"]*"/, label);
+        })
+        .join(", ");
 
-                toast.error(errorMessage);
-                return;
-            }
+      toast.error(errorMessage);
+      return;
+    }
 
-            // Use validated value
-            if (initialData) {
-                await updateReport({ id: initialData._id, data: value });
-            } else {
-                await createReport(value);
-            }
-            onSuccess();
-        } catch (error) {
-            console.error("Failed to save report", error);
-            // Error toast is already handled in the hook
+    /* ================= BUILD MULTIPLE PERSONS ================= */
+
+    const persons: any[] = [];
+
+    // PRIMARY INDIVIDUAL
+    if (formData.individual?.individualType) {
+      persons.push({
+        role: "primary",
+        individualType: formData.individual.individualType,
+        individualDetails: formData.individual.individualDetails,
+      });
+    }
+
+    // CO-DRIVER
+    if (formData.coDriverAvailable && formData.coDriver?.individualType) {
+      persons.push({
+        role: "coDriver",
+        individualType: formData.coDriver.individualType,
+        individualDetails: formData.coDriver.individualDetails,
+      });
+    }
+
+    // PASSENGERS
+    if (Array.isArray(formData.passengers)) {
+      formData.passengers.forEach((p: any) => {
+        if (p.individualType) {
+          persons.push({
+            role: "passenger",
+            individualType: p.individualType,
+            individualDetails: p.individualDetails,
+          });
         }
+      });
+    }
+
+    /* ================= FINAL PAYLOAD ================= */
+
+    const payload = {
+      ...value,
+      individualDetails: {
+        ...value.individualDetails,
+        persons, // ✅ MULTIPLE PEOPLE GOING HERE
+      },
     };
+
+    /* ================= API CALL ================= */
+
+    let response;
+
+    if (initialData) {
+      response = await updateReport({
+        id: initialData._id,
+        data: payload,
+      });
+    } else {
+      response = await createReport(payload);
+    }
+
+    console.log("✅ Backend Response:", response);
+    console.log("👥 Persons Sent:", persons);
+
+    onSuccess();
+  } catch (error) {
+    console.error("❌ Failed to save report", error);
+  }
+};
+
+
 
     const iv = formData.individualDetails;
 
