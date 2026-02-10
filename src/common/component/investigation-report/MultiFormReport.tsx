@@ -268,11 +268,19 @@ export default function MultiFormReport({
       ? existingReport.offenders
       : [];
 
-    const people = offenderList
-      // 🔥 REMOVE DUPLICATES
-      .filter((o, index, self) => {
+    type OffenderItem = {
+      offenderDetails?: {
+        name?: string;
+        armyNumber?: string;
+        iCardNumber?: string;
+      };
+    };
+
+    const people = (offenderList as OffenderItem[])
+      .filter((o: OffenderItem, index: number, self: OffenderItem[]) => {
         const d = o.offenderDetails || {};
         const key = `${d.name}|${d.armyNumber}|${d.iCardNumber}`;
+
         return (
           index ===
           self.findIndex((x) => {
@@ -281,7 +289,8 @@ export default function MultiFormReport({
           })
         );
       })
-      // 🔥 MAP CORRECTLY
+
+      //  MAP CORRECTLY
       .map((p: any, i: number) => {
         const d = p.offenderDetails || {};
         const val = (v: any) => (v && v !== "Nil" && v !== "--" ? v : "");

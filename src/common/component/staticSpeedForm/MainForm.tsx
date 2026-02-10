@@ -508,10 +508,13 @@ export default function StaticSpeedForm({
   const createOffenderMutation = useCreateOffender();
   const createWitnessMutation = useCreateOnDutyWitnessingMp();
 
-  const pickDefined = (obj: any) =>
-    Object.fromEntries(
-      Object.entries(obj).filter(([_, v]) => v !== undefined && v !== ""),
-    );
+ const pickDefined = <T extends Record<string, any>>(obj: T): T =>
+  Object.fromEntries(
+    Object.entries(obj).filter(
+      ([_, v]) => v !== undefined && v !== "",
+    ),
+  ) as T;
+
 
   /* ================= FINAL SUBMIT ================= */
 
