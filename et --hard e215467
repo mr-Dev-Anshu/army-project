@@ -1,0 +1,627 @@
+[33m9001e0d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m some changes
+[33m1c510bd[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m ui fixes completed
+[33m720e20f[m mt accident ui fixes completed
+[33m34face8[m[33m ([m[1;32mSrishti/MT-accident[m[33m)[m main merging done
+[33mf96b4c2[m[33m ([m[1;31morigin/Srishti/main-merging-forms[m[33m, [m[1;32mSrishti/main-merging-forms[m[33m)[m all bugs with main branch is fixed
+[33m6161e2d[m[33m ([m[1;31morigin/srishti-edit-feature[m[33m, [m[1;32msrishti-edit-feature[m[33m)[m all 3 forms edits successfully
+[33ma2dfad6[m form 1st and 2nd is working now
+[33m0a13245[m[33m ([m[1;32msrishti-mt-accident[m[33m)[m some commits
+[33m378d139[m bg color issue fixed
+[33m0b3ddd6[m Merge pull request #64 from mr-Dev-Anshu/revert-62-srishti-mt-accident
+[33m9a42280[m[33m ([m[1;31morigin/revert-62-srishti-mt-accident[m[33m)[m Revert "Srishti mt accident"
+[33maad08ac[m Merge pull request #62 from mr-Dev-Anshu/srishti-mt-accident
+[33mdabec21[m[33m ([m[1;31morigin/srishti-mt-accident[m[33m)[m build error issue fixed
+[33m561f802[m partially completed
+[33me215467[m Merge pull request #61 from mr-Dev-Anshu/gaurav/immediateMissingDataFix
+[33m8c4610e[m[33m ([m[1;31morigin/gaurav/immediateMissingDataFix[m[33m)[m immediate word template missing data issue fixed
+[33ma887014[m d
+[33m8a11be5[m add more individuals flow working fine
+[33m7ecd74a[m git pull origin main
+[33m47f1fa1[m missing data issue fixed
+[33m3e93c45[m all fixes are completed
+[33ma91ce68[m[33m ([m[1;31morigin/anshu-offendersInRegisters[m[33m)[m update in repo
+[33m387b593[m ui changes
+[33mc27d823[m Merge pull request #60 from mr-Dev-Anshu/immediateview
+[33m7bb2c28[m[33m ([m[1;31morigin/immediateview[m[33m)[m Refactor generateImmediateIncidentWordReport for improved readability and consistency
+[33m31ea5af[m Refactor ImmediateReportingIncidentReport component for improved readability and consistency
+[33m40ed145[m Merge pull request #59 from mr-Dev-Anshu/Aditya-Import-Fix-New1-2
+[33m6685de6[m[33m ([m[1;31morigin/Aditya-Import-Fix-New1-2[m[33m)[m Merge branch 'main' into Aditya-Import-Fix-New1-2
+[33m621a9b6[m change revert
+[33m35b1d43[m ui
+[33mceb2076[m Report view Merge pull request #57 from mr-Dev-Anshu/reportView/aish
+[33m9ba6e42[m mp occourence issue fix
+[33m9d2ace0[m ofenders problem fix
+[33meabcd61[m minor changes made
+[33m6961c08[m new
+[33m2ffab3a[m Merge pull request #58 from mr-Dev-Anshu/gaurav/RegisterImprove
+[33m49ced5c[m[33m ([m[1;31morigin/gaurav/RegisterImprove[m[33m)[m Merge branch 'main' into gaurav/RegisterImprove
+[33mc4eb490[m word ui updated
+[33maab55c9[m build issue fixed
+[33m05c6918[m report preview
+[33m18e5aab[m minor changes made
+[33m9f37af8[m all bugs are fixed related to forms
+[33md04cb5d[m minor changes made
+[33m35066d2[m immediate report table data rendering updated
+[33m832f921[m issue not solved
+[33m5036ff1[m[33m ([m[1;31morigin/reportView/aish[m[33m)[m qwe
+[33m9717fe9[m Merge pull request #54 from mr-Dev-Anshu/ayush/tooltip-sidebar
+[33m0856406[m ui changes fixed
+[33mfb41e9a[m[33m ([m[1;31morigin/ayush/tooltip-sidebar[m[33m)[m minor ui changes made
+[33m2ad2cb8[m individual reusable component created
+[33md23e426[m[33m ([m[1;31morigin/Aditya-Import-Fix-New1[m[33m)[m new json data fix
+[33m952470c[m jd
+[33m9ece787[m issue fixed
+[33mf590abd[m 3rd investigation report working fine with functionality
+[33m546dd11[m remove uniue
+[33m3df5230[m edit prefilled data is working fine on report no. 3
+[33m134cbf4[m 2nd report edit bugs ar fixed
+[33m8699eaf[m 1st register from table ui updated
+[33m65a844b[m edit feature done with all fixes
+[33mfc6d201[m importjson Fix
+[33m3c24a0f[m import json Fix
+[33m0bb59c0[m Merge pull request #55 from mr-Dev-Anshu/gaurav/ReportImprovement
+[33ma30c3e7[m[33m ([m[1;31morigin/gaurav/ReportImprovement[m[33m)[m evidence video upload issue fixed
+[33ma5fa61d[m fixed sidebar
+[33m12dd438[m minor changes made
+[33m2a4e22d[m Merge branch 'main' of https://github.com/mr-Dev-Anshu/army-project into ayush/tooltip-sidebar
+[33mc646a27[m ..
+[33m5ac33a8[m Merge pull request #53 from mr-Dev-Anshu/gaurav/ReportImprovement
+[33mf867658[m Merge branch 'main' of https://github.com/mr-Dev-Anshu/army-project into gaurav/ReportImprovement
+[33mb05f5e9[m build error fixed
+[33ma35bbaf[m Initials Signed Checkbox added in all registers
+[33m47287f7[m build fixed
+[33md2818b5[m initial signed added in 21 corps
+[33me59dcf1[m Merge pull request #52 from mr-Dev-Anshu/gaurav/ReportImprovement
+[33m3ea0754[m Static speed report table updated
+[33m9166333[m fallback value removed
+[33mdbeebf3[m add remark feature implemented in mp investigation report
+[33m310e071[m initial signed made working
+[33mee95ad1[m offence type table updated to show all value
+[33mdefaea7[m fallback removed
+[33m5394596[m 3rd report is done
+[33m7134fe3[m all fields are prefilled
+[33m57a21d7[m duplicate ui fixed
+[33m36efecf[m Merge pull request #50 from mr-Dev-Anshu/gaurav/ReportUIFix
+[33m36a217b[m[33m ([m[1;31morigin/gaurav/ReportUIFix[m[33m)[m downloading and printing isue fixed
+[33m407520a[m Merge branch 'Aditya-PrintFix' of https://github.com/mr-Dev-Anshu/army-project into gaurav/ReportUIFix
+[33m036c788[m pdf downloading bug fixed
+[33mb79978c[m static speed are working fine trying to fix duplicate options
+[33ma53bbf7[m[33m ([m[1;31morigin/Aditya-printFixNew[m[33m)[m print_fix
+[33m1d0f33a[m minor changes made
+[33m3c27bba[m[33m ([m[1;31morigin/Aditya-PrintFix[m[33m)[m merging
+[33m3118466[m print add
+[33m09bf11f[m auth features working fine
+[33m27bc284[m general traffic offence form edit feature is working now
+[33m23b78ef[m[33m ([m[1;31morigin/anshu-hoc-WithAuth[m[33m)[m superadmin access screen with hoc
+[33mab12d94[m[33m ([m[1;32medit/srishti[m[33m)[m Merge pull request #48 from mr-Dev-Anshu/gaurav/ReportBugResolved
+[33mdb55939[m[33m ([m[1;31morigin/gaurav/ReportBugResolved[m[33m)[m Merge branch 'main' into gaurav/ReportBugResolved
+[33mdd3dc24[m build issue fixed
+[33m943d4e6[m Merge pull request #49 from mr-Dev-Anshu/revert-46-attachCertificate/aishraj
+[33mcc25aec[m[33m ([m[1;31morigin/revert-46-attachCertificate/aishraj[m[33m)[m Revert "Attach certificate/aishraj"
+[33md4c10d3[m Merge pull request #46 from mr-Dev-Anshu/attachCertificate/aishraj
+[33m072d850[m minor changes made
+[33m2a0a0a8[m mt accident register created
+[33m648d238[m[33m ([m[1;32mattachCertificate/aishraj[m[33m)[m Fix build errors: Resolve duplicate imports and missing icons
+[33m3f07dc3[m Add new evidence and attachment viewer components with upload cleanup
+[33m95a5577[m Merge branch 'main' into attachCertificate/aishraj
+[33m1768b26[m chnages done
+[33mc0538e9[m mp investigation preview fixed
+[33m84413d4[m Merge pull request #45 from mr-Dev-Anshu/Aditya-importCSV
+[33m6beae71[m done all the featutre and the ui
+[33m4afe596[m[33m ([m[1;31morigin/certificate/aish[m[33m)[m done all the featutre and the ui
+[33ma5cd2c9[m mp occurence missing value issue fixed
+[33m7b6bf52[m[33m ([m[1;31morigin/Aditya-importCSV[m[33m)[m final done
+[33ma33a3ec[m attached
+[33m5fbe6ee[m done
+[33mbbbd56d[m Merge pull request #44 from mr-Dev-Anshu/testingForm/aish
+[33mc779551[m qwe
+[33mf9997fd[m last done
+[33m660f059[m[33m ([m[1;31morigin/testingForm/aish[m[33m)[m comment valdiaion
+[33mc8b17c1[m no validation
+[33m026707c[m logon fixed
+[33mb49efa8[m firm fixed
+[33m14d85d3[m qwe
+[33m12f8125[m[33m ([m[1;31morigin/login/aish[m[33m)[m form fixed
+[33ma60348f[m fixing form
+[33maf9fbda[m Merge pull request #43 from AishRaj Authentication system
+[33m558fb7a[m Merge branch 'main' into login/aish
+[33m9058047[m fixed
+[33mb755aee[m attached doc
+[33m594bec6[m[33m ([m[1;31morigin/gaurav/allRegisters[m[33m)[m mt accident register created
+[33me0ac671[m individual issue fixed in form
+[33mb31252e[m minor changes made in Vehicles Security Pass
+[33m0acbcf4[m mt accident backend setup created
+[33m077905b[m MP General Diary & Daily Occurrence Book created
+[33me765be7[m qwe
+[33mcd9f89c[m backend display on frontend
+[33maece28e[m Merge branch 'main' of https://github.com/mr-Dev-Anshu/army-project into Aditya-importCSV
+[33m7acf042[m popup added in the ADD New button
+[33ma7f98a5[m rendering taking less time
+[33m39fd850[m mp generatl register created
+[33m734096a[m rediring fixed
+[33m2db8479[m edit fixed
+[33ma7ce34f[m editiing fix
+[33mae2c2ff[m qwe
+[33m96c6d94[m Mobile Phone Out|In Register created
+[33m8d09f06[m[33m ([m[1;31morigin/ayush/attachCertificate[m[33m)[m attach certificate functionality
+[33m7cd9e46[m Duty Out|In Register created
+[33m517f2d1[m audit fix
+[33ma6276ee[m login fixing
+[33m3e428be[m[33m ([m[1;31morigin/usermodel/aish[m[33m)[m changed the auth route
+[33m9b95b48[m Merge pull request #41 from mr-Dev-Anshu/ayush/certificate
+[33m7ec0ff0[m Merge pull request #42 from mr-Dev-Anshu/gaurav/validationIssueFixed
+[33m917179b[m[33m ([m[1;31morigin/gaurav/validationIssueFixed[m[33m)[m Validation issue fixed
+[33mf0b2527[m[33m ([m[1;31morigin/ayush/certificate[m[33m)[m fixed some issues
+[33m13756f5[m implement the login and middleware
+[33m4ec3631[m axios level validation added in all 3 forms
+[33ma827d5c[m folder str
+[33mc590d06[m make field optional
+[33mcac73c6[m userUi
+[33m6b7e398[m Military Police Control Room – Contact Directory (All India) register created
+[33m3a4fe4d[m completed certificate feature
+[33mc6db0c5[m Contact Info. of Civil Police Station register created
+[33mf4c35d3[m suggestion issue fixed
+[33m1f3e769[m Contact Info. of Army Personnel & their Appointment created
+[33m536d23f[m Army Help Line Complaints Record Register created
+[33mebac931[m aish/formvalidation
+[33mdd0f1aa[m lost and found form suggestion issue fixed
+[33m14f0714[m Vehicle Demand Register created
+[33m5d898d4[m lost and found register created
+[33m3c010b3[m Duty Roster Register created
+[33m266f32a[m[33m ([m[1;31morigin/anshu-importCSV[m[33m)[m csv to json
+[33m1dc9972[m[33m ([m[1;31morigin/gaurav/AllRegisters[m[33m)[m MINI Kote Arms / AMN Out|In Register created
+[33m4707b70[m recce in out register created
+[33ma6cd438[m convoy in out register created
+[33m2569396[m vehicle in out register created
+[33me8ccecc[m unit,fmn,command remove from all form
+[33m18cfc78[m Merge pull request #39 from mr-Dev-Anshu/gaurav/registerBooks
+[33me57a2ca[m[33m ([m[1;31morigin/gaurav/registerBooks[m[33m)[m gaurav/registerBooks
+[33m664ecda[m offence data auto fill by report no. feature implemented
+[33mf9c8940[m suggestion issue fixed
+[33m91eafc3[m filter and minor ui changes made
+[33mee7e9db[m conditional rendering added
+[33m97c7602[m duty diary register created
+[33meed529d[m Original Military Police General Duty Diary created
+[33m3b19a8b[m Merge pull request #38 from mr-Dev-Anshu/gaurav/RegisterAndImediateROI
+[33mc706b87[m[33m ([m[1;31morigin/gaurav/RegisterAndImediateROI[m[33m)[m build issue fixed
+[33m1ad06ec[m minor changes made
+[33m07fb277[m minor changes made
+[33mcec282e[m new wrapper added report view
+[33mbefce42[m pdf and word download feature added in immediate ROI
+[33m5491acb[m Immediate ROI view added
+[33mb144013[m minor changes made in form ui
+[33maf70d2c[m minor bug fixed
+[33m6f711cc[m keyout register created
+[33m3b20ac0[m individual reusable model created
+[33m4f11238[m minor changes made in immediateROI form
+[33m48265c7[m Immediatate report table ui updated
+[33m0a51825[m multiple individual support added
+[33mc7db6f9[m immediate report table created
+[33m9e05b2e[m Immediate ROI form created all api setup
+[33m919a365[m imediate ROI backend Api created
+[33m397657f[m[33m ([m[1;31morigin/anshu-feature/registers-apis[m[33m)[m schema for the registers
+[33md690baa[m Merge pull request #36 from mr-Dev-Anshu/gaurav/rankAndUnitFeature
+[33mcd6ace0[m[33m ([m[1;31morigin/gaurav/rankAndUnitFeature[m[33m)[m build issue fixed
+[33m651ba72[m Merge branch 'main' of https://github.com/mr-Dev-Anshu/army-project into gaurav/rankAndUnitFeature
+[33maa79f70[m Merge branch 'dev2' of https://github.com/mr-Dev-Anshu/army-project into gaurav/rankAndUnitFeature
+[33md8bf54f[m Merge pull request #35 from mr-Dev-Anshu/dev2
+[33m3d044d3[m[33m ([m[1;31morigin/dev2[m[33m)[m build error fixed
+[33m657cf1d[m Merge pull request #30 from mr-Dev-Anshu/dev2
+[33mb113018[m minor changes made unitMasterlist
+[33m9a9857f[m unit master list feature implemented
+[33mb0d85b6[m unitMasterList backend setup added
+[33m4350e6d[m rank master list feature implemented
+[33m65b4bd1[m rank masterlist backend and client hooks created
+[33m0c349e4[m logo text updated
+[33m02c703d[m Merge pull request #34 from mr-Dev-Anshu/gaurav/2p-improvement
+[33m3393154[m[33m ([m[1;31morigin/gaurav/2p-improvement[m[33m)[m build issue fixed
+[33m6f3ec4d[m routing added
+[33macc7783[m vehicle security pass form created
+[33m0d61ac3[m minor changes made
+[33m9bafbcc[m vehicle form issue fixed
+[33m995a5c7[m semi vehicle form completed
+[33m47448af[m owner type till civilian completed
+[33mc8b4df2[m vehicle pass page completed
+[33m47fe7b1[m vehicle security pass management backend api created
+[33mfac3dcf[m issue fixed where newly added offence types and references were not appearing
+[33m955b360[m offence-type-management fully created
+[33m8b05a47[m ui updated
+[33m1be3fb5[m offence type mangement feature added
+[33m2ebfda9[m Military Police Control Room – Contact Directory (All India) form created
+[33m7d46630[m contact-info-civil-police-station form created
+[33mf56637b[m Contact Info. of Army Personnel form created
+[33m5554db8[m army-help-line-complaints-record created
+[33m773df72[m vehicle-demand form created
+[33m6754e42[m lost-and-found register form created
+[33m3fec3ef[m Daily Operations Registers all form created
+[33m7aa2ad8[m recce-in-out form created
+[33m8d2ef1d[m vehicle-in-out form created
+[33m19d5906[m mobile-phone-in-out form created
+[33m2c4aacc[m convoy-in-out form created
+[33m99d7a42[m 21 Corps Provost Unit Key Out In register form created
+[33mf8fe96b[m duty-in-out form created
+[33m00eb25e[m minor changes made
+[33mc8bebe4[m original-military-police-general-duty-diary form created
+[33mbfcfede[m 3rd report pdf ui fixed
+[33maa19eeb[m 3rd report pdf created
+[33mcaefaba[m minor changes made in shopkeeper form
+[33m827105b[m agreement field added
+[33mf17c652[m filter added to all reports
+[33mbdcc2cf[m filter logic updated and minor changes made
+[33mac19cc9[m filter ui updated with right side opening
+[33m5e715ba[m filter ui update
+[33m19a9abc[m improved filter
+[33mf4270f8[m[33m ([m[1;31morigin/gaurav/fixing-form-bug2[m[33m)[m gaurav/fixing-form-bug2
+[33mcbabf4e[m loader added while downloading for better ux
+[33me2444c3[m military police report template created
+[33m36aad00[m witness bug resolved
+[33m2f2702d[m offence ref bug fixed
+[33mcaeda85[m minor bug fixed
+[33m0e246fd[m 3 form view fixed
+[33m4d24044[m 1 and 2 form completed with view and preveiw
+[33m92cb707[m 2nd form view and preveiw issue fixed
+[33m7a93291[m first form preview and view issue fixed
+[33m19640eb[m bug fixed
+[33mb2e8384[m in 3rd form sync report no.
+[33mc762e0f[m static speed form minor bug issue fixed
+[33m87f9b9c[m fixed report missing and same state sharing issue
+[33mf9897fe[m[33m ([m[1;31morigin/gaurav/fixing-form-bug[m[33m)[m Build error issue fixed
+[33m51274db[m minor bug fixed and missing attach evidence made working
+[33mbf6f219[m new offence type and reference input field added in all three forms
+[33mbed2206[m Merge branch 'offenceReference' of https://github.com/mr-Dev-Anshu/army-project into gaurav/fixing-form-bug
+[33ma108e43[m 3rd form fixed
+[33m24d8eab[m[33m ([m[1;31morigin/offenceReference[m[33m)[m update
+[33mb4d855d[m update in  the pages
+[33m42a9d24[m merginf
+[33m728c0c4[m offenceReference componennt completed
+[33mdceff15[m 1 and 2 form working
+[33m1dc3883[m merging
+[33m48935f3[m fixind modelaa
+[33m2c98cc2[m fixing api
+[33mdabe881[m suggetion api  fixing
+[33m19fc13e[m missing value issue fixed in speed record table
+[33m1174e3b[m Missing value issue fixed
+[33mf0b7504[m backward form data persistent issue fixed
+[33m4fdec63[m Merge branch 'dev2' of https://github.com/mr-Dev-Anshu/army-project into offenceReference
+[33md850054[m loader added while form submiting
+[33m81cb458[m Merge branch 'dev2' of https://github.com/mr-Dev-Anshu/army-project into gaurav/fixing-form-bug
+[33m3fc9fd7[m routing fixed for all forms
+[33m55ff49a[m add modal component
+[33m7f42eae[m added loading
+[33mc646561[m offence reference model
+[33me33865f[m Merge pull request #31 from mr-Dev-Anshu/fromToFilter/aish
+[33mebfaa5f[m[33m ([m[1;31morigin/fromToFilter/aish[m[33m)[m merging
+[33m2480fb9[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into fromToFilter/aish
+[33m8ca3853[m merging
+[33m178a9a1[m[33m ([m[1;31morigin/dev[m[33m)[m add serachable select component
+[33m8613294[m Merge branch 'dev2' of https://github.com/mr-Dev-Anshu/army-project into gaurav/fixing-form-bug
+[33mfb15b26[m minor changes made
+[33mdcdd7a4[m Merge pull request #29 from mr-Dev-Anshu/gaurav/routing-fix
+[33m419e2a4[m aish/mtaccidents
+[33m98ce86c[m added
+[33m9cc1b5e[m missing date picker added in Shop Keeper and Employee input field and name  field and Army Official Name share same state issue fixed
+[33m46a4075[m add more people btn issue fixed
+[33mfc44766[m applying filtering dates
+[33m91c87d6[m[33m ([m[1;31morigin/All-form-srishti[m[33m)[m all woring fine
+[33m15cb83e[m[33m ([m[1;31morigin/gaurav/routing-fix[m[33m)[m compiling error fixed
+[33m088fcd8[m add more people button is added on 2nd form as well
+[33m7a14940[m overall-analysis routing fixed
+[33mb5cc9fe[m cancel btn bug fixed
+[33mc280755[m editing bug fixed
+[33ma7c045e[m form submit logic bug fixed
+[33m42d7d4e[m add more people button working
+[33m155f122[m add more people button on 1st form
+[33m5948419[m MP Offence Analysis Monthly Report dynamic routing added for form also
+[33m40cf53e[m MP Offence Analysis Monthly Report dynamic routing added
+[33me5321d8[m dashboard routing fixed
+[33m552ad6f[m some ui fixes
+[33ma856e64[m routing civil employee refactored
+[33m584f4df[m routing fixed of civil employee
+[33md91606c[m[33m ([m[1;31morigin/anshu-routingfixing[m[33m)[m fixed some of the route
+[33m88bc69d[m update
+[33m14464e1[m make layout
+[33m57f56fa[m Merge pull request #27 from mr-Dev-Anshu/gaurav/bug-resolving
+[33m571174f[m ui changes
+[33m2ac1dfa[m 3rd is also compatible for all fields and options
+[33mddefaa6[m final working with all options 2nd form
+[33mef18f28[m final fix to the 1st form
+[33mc27640a[m[33m ([m[1;31morigin/gaurav/bug-resolving[m[33m)[m border value updated
+[33m13def39[m 0 changes to --
+[33m272c36f[m Overall Formation Analysis table Ui fixed
+[33m308eaa7[m OverallFormationAnalysisTable created
+[33m69c6e10[m made card dynamic value
+[33m11563db[m scroll into view completed
+[33me5658f7[m finally alļ forms are working fine
+[33m131076f[m breadcrumb bug fixed on division form
+[33md030762[m implemented the confirmation modal for changing the reporting period
+[33m99a5365[m edit feature and minor bug resolved
+[33m3bd8dee[m now division card working
+[33mb664b9a[m 2nd form working fine
+[33mf141572[m all analysis
+[33mb1fe91a[m 1st form is working fine
+[33me1f4042[m 1st api is working fine
+[33m794759a[m fix static form
+[33m4c67a80[m first commit
+[33mc4bbcc9[m first commit
+[33m8e7ea47[m ui fixed
+[33m16ea16c[m merged
+[33m3d96791[m something
+[33mac07c98[m[33m ([m[1;31morigin/api-srishti[m[33m)[m api 3 offender creation works sucessfullly
+[33m003c505[m something
+[33m4df9e9a[m 3rd form half fix
+[33mb708bc7[m[33m ([m[1;31morigin/gaurav/form-bug-resolve[m[33m)[m offenders bug fixed
+[33m912888b[m 3rd code half working
+[33mf9ba6e8[m no vehicle involved is now working fine
+[33mb4d7af4[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into gaurav/form-bug-resolve
+[33m4161879[m some ui fixes
+[33mf8e7acc[m Merge pull request #24 from mr-Dev-Anshu/gaurav/mp-occurrence-api-update
+[33m433950b[m[33m ([m[1;31morigin/gaurav/mp-occurrence-api-update[m[33m)[m api logic updated
+[33md45df84[m all conflicts are resolved with the branch dev
+[33m0a6cfc9[m 1st api vehicle involved part completed
+[33m01f4b5e[m done
+[33mdc6329c[m some fields are left
+[33md8c6a39[m offenders working fine
+[33md4e6647[m mp occurrence api updated with offenders value
+[33m83fd0ac[m Merge pull request #23 from mr-Dev-Anshu/revert-22-Updated/AishRaj
+[33m780d4b0[m[33m ([m[1;31morigin/revert-22-Updated/AishRaj[m[33m)[m Revert "Updated/aish raj"
+[33mdbe7a47[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into dev
+[33m25b724f[m feat: Add Army Project Launcher Builder with cross-platform support
+[33mdd2e675[m Merge pull request #22 from mr-Dev-Anshu/Updated/AishRaj
+[33mf8e0e9c[m[33m ([m[1;31morigin/Updated/AishRaj[m[33m)[m new branch
+[33m7b517dd[m Merge pull request #21 from mr-Dev-Anshu/gaurav/report-format2
+[33m6600535[m[33m ([m[1;31morigin/gaurav/report-format2[m[33m)[m change
+[33meff1ee6[m add run.bat script to automate MongoDB and npm server startup
+[33m670ae78[m remove
+[33m2b976e1[m Merge pull request #20 from mr-Dev-Anshu/preview/srishti
+[33mdc11829[m merged with gaurav/report
+[33ma78d357[m offender check
+[33m819a683[m[33m ([m[1;31morigin/gaurav/report-format[m[33m)[m build issue fixed
+[33m16504d1[m client side validation added for action remark desc
+[33m8234efc[m mp occrenence word report ui update
+[33mb8563b6[m static report word ui updated
+[33m735635a[m word ui
+[33m0c39363[m mp occurence report minor changes made
+[33m9af0769[m mp occurence report ui updated
+[33m00b5e3b[m upload evidence is completed
+[33m8c10e20[m[33m ([m[1;31morigin/previw[m[33m, [m[1;31morigin/Ui-Updation/srishti[m[33m)[m first commit
+[33m36faa8a[m merged from branch gaurav/preview-report
+[33mf0f3fb2[m ui  civillian flow completed
+[33mbf534cf[m STATIC SPEED CHECK Report ui updated
+[33m5c2f447[m all ui fixes done
+[33md7c5fe0[m MILITARY POLICE REPORT Ui updated
+[33m3d94801[m offence report word ui updated
+[33mde37adc[m 1st form is working fine now
+[33m76cd29d[m 2nd form is working fine
+[33m85bf9cf[m some fixes in 1st and 2nd api
+[33mc861f07[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into gaurav/report-format
+[33m87eb28c[m Merge pull request #17 from mr-Dev-Anshu/reportFixes
+[33m9f2ecd8[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into gaurav/report-format
+[33m18d1dfa[m Merge pull request #18 from mr-Dev-Anshu/gaurav/division-wise-analysis
+[33m2d87f60[m[33m ([m[1;31morigin/gaurav/division-wise-analysis[m[33m)[m report completed
+[33mb30bdb6[m  filter option made working
+[33mb387b8a[m edit and delete feature implemented
+[33mbb8207f[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into gaurav/division-wise-analysis
+[33m9c27c7d[m fix
+[33m10080dd[m Merge pull request #14 from mr-Dev-Anshu/gaurav/report-analysis
+[33m0dc646b[m[33m ([m[1;31morigin/gaurav/report-analysis[m[33m)[m Merge branch 'dev' into gaurav/report-analysis
+[33ma62976c[m Merge pull request #13 from mr-Dev-Anshu/gaurav/CMS
+[33mc07b57f[m some changes
+[33m94a4a4f[m division form added
+[33m7d26c99[m hq36 division ui created
+[33m1fad762[m[33m ([m[1;31morigin/DivisionAnalysis/aish[m[33m)[m Merge branch 'gaurav/report-analysis' of https://github.com/mr-Dev-Anshu/army-project into DivisionAnalysis/aish
+[33mc2890f8[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into DivisionAnalysis/aish
+[33md5a8caf[m dev merged
+[33mcd05011[m some changes
+[33m27b36f0[m[33m ([m[1;31morigin/reportFixes[m[33m)[m merging
+[33m16df3db[m must be an array
+[33m4c33279[m offender validation
+[33m0593e96[m[33m ([m[1;31morigin/gaurav/CMS[m[33m)[m breadcrumb fix
+[33m64810b4[m breadcrumb ui fix
+[33m7770206[m action change remark input field
+[33m24d66a8[m cancel button working , auto reset working
+[33m853db6c[m completed backend
+[33mf437dd1[m done
+[33mbfb6f6b[m Repeated header removed and accordion style list made
+[33me7853de[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into gaurav/CMS
+[33maed339f[m table height fixed
+[33m92830a3[m minor changes made
+[33m0194679[m Merge branch 'anshu-fileUpload' into dev
+[33m4dfe6af[m add report id
+[33m974f162[m Merge pull request #15 from mr-Dev-Anshu/anshu-fileUpload
+[33mf75a4eb[m[33m ([m[1;31morigin/anshu-fileUpload[m[33m)[m file upload with the demo
+[33m64f4b01[m all done
+[33mac8193e[m 3rd api integration done
+[33m089a3c6[m all ui changes are done
+[33mafe315d[m conditional rendering added
+[33m7b211ba[m conditional rendering added
+[33mf8941ba[m militaryReport ui updated
+[33ma95e8a3[m console error fixed
+[33m98832e4[m all validation error fixed
+[33m1215876[m minor bug fixed
+[33m63bef86[m maid servent form issue fixed
+[33maed36b2[m price list filter added
+[33m35df400[m date and adhaar validation improved edit feature added
+[33m9559532[m sidebar auto collapsed fixed
+[33mb73c40d[m some ui changes made
+[33me765902[m 2nd form is working fine now
+[33mcc9ea08[m first form is working completely fine with api integration
+[33m648f868[m show the particulars data in the report is completely working now
+[33m8fb8a4d[m clear form button is working now
+[33mcc2eb1d[m form is working properly on ui
+[33m59f6858[m some ui fixes
+[33m2cf1226[m ui changes
+[33m8c24bd8[m witness alignments completed
+[33ma603fc7[m scrollbar fixed
+[33m7e76aef[m color change of headings is completed
+[33mcd533e0[m add more people button added
+[33mc828b07[m compiling issue fixed
+[33m393cb8c[m HQ 21 CORPS formation data card made dynamic
+[33mf0aa2ca[m add/edit remark quick action added
+[33m3de4bc8[m tooltip added in filter
+[33mb22a1da[m filter bar made working
+[33mbb2adb5[m formation analysis ui updated
+[33mbff6686[m table ui updated
+[33m8bc8232[m formationAnalysis table created
+[33me0b0683[m MP Offence Analysis Monthly Report ui created
+[33m2bf4bbb[m build issue fixed and all table icon updated
+[33ma840ea7[m build error fixed
+[33me462838[m temp Hired worker table created
+[33m7141aab[m typography updated in both shopkeeper and maid table
+[33mcd1f1df[m[33m ([m[1;31morigin/investigation2/srishti[m[33m)[m left stepper , input border and back button added
+[33md5f95af[m pass status filter added
+[33m2b90b5a[m shopkeeper ui fix
+[33mdaf0cb6[m shopkeeper table ui updated
+[33m88fb0c9[m pass expired red bg fixed
+[33m717b1a2[m[33m ([m[1;31morigin/inhouse-report-Analysis/anshu[m[33m)[m analysis
+[33mea4c6ef[m table pass expired overlay fixed
+[33m5c1fca6[m overlay fix
+[33medf55d6[m something
+[33mf729808[m mad servant form created
+[33m2443699[m conflict merged
+[33mb7baee1[m edit and delete feature added
+[33md35cd24[m in shopkeepeer tabel header and sr.no and action column fixed
+[33mb35432d[m shopkeeper form fully functional
+[33mcbd6fc4[m shopkeeper form now working
+[33m147601a[m condition added for expired pass
+[33maed21a4[m civil main ui and shopkeeper table created
+[33mbe58627[m minor changes made in suggestion feat.
+[33mf1e4235[m ui changes
+[33m973b745[m All new api working fine
+[33m5434ea1[m all form integrated with their respective apis
+[33m9aa705f[m field suggestion tracker added in maidservant,shopkeeper & temporary hired worker
+[33me129250[m printing logic fixed
+[33m566d470[m Merge pull request #12 from mr-Dev-Anshu/dev
+[33m5696554[m[33m ([m[1;31morigin/anshu-civil_Employee_CMS[m[33m)[m All api for employe/civil , form completed
+[33mc73fc06[m leftStepper responsiveness completed
+[33m49a5006[m Merge branch 'gaurav/fix-build' into dev
+[33m08151d5[m dev build error fixed
+[33ma9b500e[m Merge pull request #10 from mr-Dev-Anshu/gaurav/fix-build
+[33mafb124a[m[33m ([m[1;31morigin/gaurav/fix-build[m[33m)[m static speed form validation error fixed
+[33m27dc246[m Build error issue fixed
+[33m31391df[m Merge pull request #8 from mr-Dev-Anshu/gaurav/build
+[33m6a11c8a[m merged successfully
+[33m69bfb88[m[33m ([m[1;31morigin/gaurav/build[m[33m)[m icon case issue fixed
+[33md62029d[m filter width issue fixed
+[33m1320d0c[m[33m ([m[1;31morigin/Investigation-client-srishti[m[33m)[m changes fixed
+[33m218bb61[m minor changes made
+[33m2556730[m issue fixed
+[33meec26b6[m changes done
+[33mf8c38d2[m all fixes are completed
+[33m9808b6c[m investigation report integration completed
+[33meaa75bb[m Merge pull request #6 from mr-Dev-Anshu/gaurav/ui-fix
+[33m2b44348[m traffic and static speed's report integration done
+[33m615b3ee[m[33m ([m[1;31morigin/gaurav/ui-fix[m[33m)[m  word file download added in mp occurence report
+[33m3d23daf[m static report word file download intergerated
+[33m4d42b81[m a global table added
+[33m6c63d9f[m table added successfully
+[33m9abce58[m in general traffic report word file download option added
+[33md183f82[m all errors are fixed
+[33m36b988d[m all ui are fixed
+[33m12d9932[m all ui fixes are completed
+[33m963dd92[m create record page ui updated
+[33m7ec136a[m Sidebar collapsed minor bug fixed
+[33mbacf62d[m sidebar ui fixed
+[33mc1f316e[m some unused icon removed and dashboard ui fixed
+[33m4eb8626[m dashboard ui fixed:
+[33m4f1f907[m dashboard stats card made dynamic with backend data
+[33mbe1f280[m report added in dashboard
+[33m822418b[m all types fixes done
+[33me58cf9f[m Merge pull request #5 from mr-Dev-Anshu/gaurav/suggestions
+[33m61959e6[m[33m ([m[1;31morigin/gaurav/suggestions[m[33m)[m print btn made working in all reports
+[33m8c68cce[m all ui made consistent
+[33maa7c1de[m  all 3 pages report view added
+[33m34c9ed4[m minor changes made
+[33m48eaaca[m All 5 pages created for mp occurence report
+[33m9aef87b[m 3 pages created for mp occurence report
+[33m77fba1e[m report created for both offence & speed report
+[33m434a24b[m api testing done for 3rd module
+[33m2054a33[m field suggestion api integrated in all forms
+[33m89d48e2[m some ui fixes again
+[33mf3ec700[m Merge branch 'Investigation-client-srishti' of https://github.com/mr-Dev-Anshu/army-project into gaurav/suggestions
+[33ma3d61d0[m context optimization
+[33mbbcfe4b[m view report created for static speed record
+[33m5376933[m field suggestion added in all repo
+[33m8a8c368[m srishti changes
+[33mcb1857c[m ui changes
+[33m95447f8[m Merge pull request #3 from mr-Dev-Anshu/anshu-feature-fieldSuggestion-api
+[33m42bd9ae[m[33m ([m[1;31morigin/anshu-feature-fieldSuggestion-api[m[33m)[m Merge branch 'dev' into anshu-feature-fieldSuggestion-api
+[33m70e4ddd[m Merge branch 'dev' into anshu-feature-fieldSuggestion-api
+[33ma5d3036[m Merge pull request #2 from mr-Dev-Anshu/gaurav/table
+[33m47d6de6[m[33m ([m[1;31morigin/gaurav/table[m[33m)[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into gaurav/table
+[33m40cb899[m Merge pull request #1 from mr-Dev-Anshu/anshu-3-api
+[33m250ef12[m[33m ([m[1;31morigin/anshu-3-api[m[33m)[m Merge branch 'dev' into anshu-3-api
+[33m85726f6[m suggestions api created
+[33m416f07b[m minor changes made
+[33m0395d61[m report preview added
+[33m8730698[m 3rd module's ui completed almost
+[33m65e924d[m made delete btn working in all 3 reports
+[33m77319a1[m add new btn in all report made working
+[33mae1644c[m custom confirmation model added for action status
+[33m2052747[m minor changes made
+[33m45b9df4[m all reports integrated to dashboard and sidebar
+[33m9941203[m reset filter btn added
+[33m3ed4966[m vertical scrolling added in all report table with fixed headers while scrolling
+[33ma69039d[m report preview created
+[33m64cd2ed[m date filter implemented
+[33m51e2f28[m offence filter loading bug fixed
+[33m1a3e359[m offence type filter added
+[33m9005286[m font family added and all ui fixes are completed here
+[33m6093a8b[m made report header reusable component
+[33mb89a658[m filter made working
+[33m468e842[m report filter made reusable
+[33m0d5082f[m mp-occurence reports page created
+[33mfd6dd92[m action status implemented in static speed record
+[33m690b79a[m action status bug fixed
+[33md4e6bae[m action status made dyanmic
+[33m966bfbf[m dropdown menu list updated
+[33m2143f50[m type of offence value updated
+[33mf50745a[m created separate page for involved and not vehicle involved
+[33m0b247e4[m sidebar fixed
+[33mf31ba42[m route name updated
+[33m52d0aaa[m backend hook implemented to get static report data
+[33md38202e[m static speed check report table created
+[33m5cd0d35[m quick action dropdown component created
+[33m6942ab7[m first and last column fixed while all are horizontal scrollable
+[33m46754fe[m minor changes made
+[33m6ccf4bc[m custom hook used for fetching offence
+[33mc139abc[m Merge branch 'dev' of https://github.com/mr-Dev-Anshu/army-project into gaurav/table
+[33m3be3da4[m table ui created completed
+[33m5addc6d[m toggle btn added for vehicle involved or not
+[33mff5e0b2[m action status made dynamic
+[33m0c75cff[m reusable component made
+[33m10c04e3[m table ui completed
+[33m0510fa1[m table layout created
+[33md2fc225[m[33m ([m[1;31morigin/speed-static/srishti[m[33m)[m ui changes
+[33mdc82093[m get offence backend api updated
+[33m3b14677[m all fields completed with api integration
+[33m8a7e0bf[m[33m ([m[1;31morigin/anshu-uis[m[33m)[m table
+[33m88cd429[m some ui fixes
+[33m5ab0e9a[m api integration done
+[33mb12a49c[m static part is working well with all api's
+[33mae327bf[m static speed api integreation completed
+[33m6392f82[m 3rd module
+[33m7d63739[m Merge branch 'speed-static/srishti' of https://github.com/mr-Dev-Anshu/army-project into speed-static/srishti
+[33m8df41df[m ui changes
+[33m41c9ef5[m custome fileds
+[33m1718e2c[m update in static speed check schema
+[33md236d14[m 2nd form ui completed
+[33md06ac22[m[33m ([m[1;31morigin/srishti[m[33m)[m fix some ui
+[33mb75c0e4[m address and name of relative who is in the  millitary are added
+[33m789921c[m general offence form completed with api integration
+[33me85af54[m Merge branch 'srishti' of https://github.com/mr-Dev-Anshu/army-project into srishti
+[33ma08b9e7[m create offence and offender api integration is completed with responsive ui
+[33md971a31[m apis for second
+[33m4a6112d[m Merge branch 'anshu' of https://github.com/mr-Dev-Anshu/army-project into srishti
+[33ma3dcc5a[m wrapper added
+[33m6747139[m[33m ([m[1;31morigin/anshu[m[33m)[m added apis and ch
+[33mcb893ac[m both branches merged successfully
+[33me5c4211[m Merge branch 'anshu' of https://github.com/mr-Dev-Anshu/army-project into srishti
+[33m376b8c5[m multi step form completed
+[33mf3ea77b[m apis for the first module
+[33mc07f549[m added form components
+[33mfcfe298[m sidebar, staticCard,and actionCard component is completed !
+[33mb5c34fc[m path changed
+[33maaf8052[m axios tanstack query setup
+[33m7dcfcf2[m test2
+[33m6790e16[m test init
+[33md845e5b[m initialize the next app

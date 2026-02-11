@@ -23,7 +23,7 @@ export const IndividualVictimDetails: React.FC<
   hideFooter = false,
   hideTypeSelector = false,
 }) => {
-  const [passengers, setPassengers] = useState<any[]>([]);
+  // const [passengers, setPassengers] = useState<any[]>([]);
 
   return (
     <div>
@@ -661,7 +661,7 @@ export const IndividualVictimDetails: React.FC<
                     <IndividualVictimDetails
                       hideHeader={true}
                       hideFooter={true}
-                    hideTypeSelector={false}
+                      hideTypeSelector={false}
                       data={
                         data.coDriver || {
                           individualType: "",
@@ -675,33 +675,19 @@ export const IndividualVictimDetails: React.FC<
                   </div>
                 )}
 
-                {passengers.map((p: any, index: any) => (
+                {data.passengers?.map((p: any, index: number) => (
                   <div key={index} className="mt-4 border rounded-md p-3">
                     <p className="text-sm font-medium mb-2">
                       Passenger {index + 1}
                     </p>
 
                     <IndividualVictimDetails
-                      hideHeader={true}
-                      hideFooter={true}
+                      hideHeader
+                      hideFooter
                       data={p}
-                      onChange={(path, value) => {
-                        setPassengers((prev: any) =>
-                          prev.map((item: any, i: any) =>
-                            i === index
-                              ? {
-                                  ...item,
-                                  [path.split(".")[0]]: path.includes(".")
-                                    ? {
-                                        ...item[path.split(".")[0]],
-                                        [path.split(".")[1]]: value,
-                                      }
-                                    : value,
-                                }
-                              : item,
-                          ),
-                        );
-                      }}
+                      onChange={(path, value) =>
+                        onChange(`passengers.${index}.${path}`, value)
+                      }
                     />
                   </div>
                 ))}
@@ -709,15 +695,15 @@ export const IndividualVictimDetails: React.FC<
                 {/* ➕ ADD MORE PASSENGERS (ALWAYS VISIBLE) */}
                 <div
                   className="text-right text-blue-600 text-sm cursor-pointer mt-2"
-                  onClick={() => {
-                    setPassengers((prev: any) => [
-                      ...prev,
+                  onClick={() =>
+                    onChange("passengers", [
+                      ...(data.passengers || []),
                       {
                         individualType: "",
                         individualDetails: {},
                       },
-                    ]);
-                  }}
+                    ])
+                  }
                 >
                   + Add More Passengers
                 </div>

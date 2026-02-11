@@ -11,8 +11,24 @@ const individualSchema = Joi.object({
             "tempHiredWorker"
         )
         .optional(),
+
     individualDetails: Joi.object().optional().unknown(true),
-});
+    hasMilitaryRelative: Joi.boolean().optional(),
+
+    // 🔥 ADD THIS
+    passengers: Joi.array().items(
+        Joi.object({
+            individualType: Joi.string().optional(),
+            individualDetails: Joi.object().optional().unknown(true),
+        }).unknown(true)
+    ).optional(),
+
+    isVehicleInvolved: Joi.boolean().optional(),
+    vehicleType: Joi.string().allow(null, "").optional(),
+    vehicleRegistration: Joi.string().allow(null, "").optional(),
+
+})
+
 
 const accidentSchema = Joi.object({
     accidentTime: Joi.string().allow(null, "").optional(),
