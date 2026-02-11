@@ -22,6 +22,9 @@ interface GeneralDutyDiaryTableProps {
 }
 
 const GeneralDutyDiaryTable = ({ data, onEdit, onDelete, onAddNew }: GeneralDutyDiaryTableProps) => {
+
+
+    console.log(data);
     const { mutateAsync: updateReport } = useUpdateGeneralDutyDiaryRegister();
     const [filters, setFilters] = useState<FilterState>({
         search: "",

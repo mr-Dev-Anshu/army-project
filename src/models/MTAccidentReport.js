@@ -1,100 +1,140 @@
 import mongoose from "mongoose";
 
 const individualSchema = new mongoose.Schema(
-    {
-        individualType: {
-            type: String,
-            enum: [
-                "militaryPersonnel", "employee", "civilian", "servantMaid",
-                "shopKeeper", "tempHiredWorker",
-            ]
-        },
-        individualDetails: {
-            type: mongoose.Schema.Types.Mixed,
-            default: {}
-        },
-    }, { _id: false }
+  {
+    individualType: {
+      type: String,
+      enum: [
+        "militaryPersonnel",
+        "employee",
+        "civilian",
+        "servantMaid",
+        "shopKeeper",
+        "tempHiredWorker",
+      ],
+    },
+
+    individualDetails: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+
+    passengers: {
+      type: [
+        new mongoose.Schema(
+          {
+            individualType: {
+              type: String,
+              enum: [
+                "militaryPersonnel",
+                "employee",
+                "civilian",
+                "servantMaid",
+                "shopKeeper",
+                "tempHiredWorker",
+              ],
+            },
+            individualDetails: {
+              type: mongoose.Schema.Types.Mixed,
+              default: {},
+            },
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
+  },
+  { _id: false },
 );
 
 const accidentSchema = new mongoose.Schema(
-    {
-        accidentTime: String,
-        accidentDate: Date,
-        placeOfAccident: String,
-        accidentType: {
-            type: String,
-            enum: [
-                "normal", "serious", "fatal", "verySerious"
-            ]
-        },
-        causeOfAccident: String,
-    }, { _id: false }
+  {
+    accidentTime: String,
+    accidentDate: Date,
+    placeOfAccident: String,
+    accidentType: {
+      type: String,
+      enum: ["normal", "serious", "fatal", "verySerious"],
+    },
+    causeOfAccident: String,
+  },
+  { _id: false },
 );
 
 const vehicleSchema = new mongoose.Schema(
-    {
-        vehicleNumber: String,
-        vehicleModel: String,
-    }, { _id: false }
+  {
+    vehicleNumber: String,
+    vehicleModel: String,
+  },
+  { _id: false },
 );
 
 const casualtySchema = new mongoose.Schema(
-    {
-        injuredCivil: { type: Number, default: 0 },
-        injuredMilitary: { type: Number, default: 0 },
-        diedCivil: { type: Number, default: 0 },
-        diedMilitary: { type: Number, default: 0 },
-    }, { _id: false }
+  {
+    injuredCivil: { type: Number, default: 0 },
+    injuredMilitary: { type: Number, default: 0 },
+    diedCivil: { type: Number, default: 0 },
+    diedMilitary: { type: Number, default: 0 },
+  },
+  { _id: false },
 );
 const firMactSchema = new mongoose.Schema(
-    {
-        firMactNumber: String,
-        firDate: Date,
-        firPoliceStation: String,
-    }, { _id: false }
+  {
+    firMactNumber: String,
+    firDate: Date,
+    firPoliceStation: String,
+  },
+  { _id: false },
 );
-const authenticationSchema = new mongoose.Schema({
+const authenticationSchema = new mongoose.Schema(
+  {
     initialsOfMPCRNCO: { type: Boolean, default: false },
     initialsOfSMSJCO: { type: Boolean, default: false },
     initialsOf2IC: { type: Boolean, default: false },
     initialsMPCPNCO: String,
     initialsQMSJCO: String,
     initials2IC: String,
-}, { _id: false });
+  },
+  { _id: false },
+);
+
 const mtAccidentReportSchema = new mongoose.Schema(
-    {
-        individualDetails: {
-            type: individualSchema,
-            default: {},
-        },
-        accidentDetails: {
-            type: accidentSchema,
-            default: {},
-        },
-        vehicleDetails: { type: vehicleSchema, default: {} },
-        casualtyDetails: { type: casualtySchema, default: {} },
-        firMactDetails: { type: firMactSchema, default: {} },
-        actionStatus: {
-            type: String,
-            enum: [
-                "pending", "taken"
-            ],
-            default: "pending"
-        },
-        actionStatusRemark: String,
-        damageToVehicle: String,
-        authentication: { type: authenticationSchema },
-        customFields: {
-            type: mongoose.Schema.Types.Mixed,
-            default: {}
-        },
+  {
+    individualDetails: {
+      type: individualSchema,
+      default: {},
     },
 
-    {
-        timestamps: true,
-    }
+    accidentDetails: {
+      type: accidentSchema,
+      default: {},
+    },
+
+    vehicleDetails: { type: vehicleSchema, default: {} },
+
+    casualtyDetails: { type: casualtySchema, default: {} },
+
+    firMactDetails: { type: firMactSchema, default: {} },
+
+    actionStatus: {
+      type: String,
+      enum: ["pending", "taken"],
+      default: "pending",
+    },
+
+    actionStatusRemark: String,
+    damageToVehicle: String,
+    authentication: { type: authenticationSchema },
+
+    customFields: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
+  },
+  { timestamps: true },
 );
 
 export const MTAccidentReport =
-    mongoose.models.MTAccidentReport ||
-    mongoose.model("MTAccidentReport", mtAccidentReportSchema);
+  mongoose.models.MTAccidentReport ||
+  mongoose.model("MTAccidentReport", mtAccidentReportSchema);
