@@ -49,126 +49,121 @@ export default function MultiStepForm({
       return "";
     }
   };
+
   useEffect(() => {
     if (!existingOffence?._id) return;
     if (hydratedRef.current === existingOffence._id) return;
 
     hydratedRef.current = existingOffence._id;
 
-    try {
-      const eo = existingOffence;
-      const traffic = { ...state.formData.traffic };
+    const eo = existingOffence;
 
-      /* ================= STEP 1 : PARTICULARS ================= */
+    const traffic = {
+      ...initialState.formData.traffic,
 
-      traffic.vehicleInvolved = eo.isVehicleInvolved ? "yes" : "no";
+      /* STEP 1 */
+      vehicleInvolved: eo.isVehicleInvolved ? "yes" : "no",
 
-      // ✅ Vehicle Category (RADIO)
-      if (eo.vehicleNumber) {
-        traffic.vehicleDetails = {
-          ...traffic.vehicleDetails,
-          category: eo.vehicleNumber ? "4w" : "", // default 4w
-          vehicleType: eo.vehicleType?.toLowerCase().includes("dd")
-            ? "dd"
-            : "civilian",
-          vehicleName: eo.vehicleName || "",
-          vehicleNumber: eo.vehicleNumber || "",
-        };
-      }
-      /* ================= 🔥 OFFENDER HYDRATION (FIXED) ================= */
-      if (Array.isArray(eo.offenders)) {
-        traffic.offenderPeople = eo.offenders.map((o: any) => ({
-          whoIsIt: o.category || "Offender",
+      vehicleDetails: {
+        category: eo.vehicleNumber ? "4w" : "",
+        vehicleType: eo.vehicleType || "",
+        vehicleName: eo.vehicleName || "",
+        vehicleNumber: eo.vehicleNumber || "",
+      },
 
-          // 👇 radio selection ke liye
-          offenderType: o.offenderType || "Civilian",
-
-          // 👇 form prefill ke liye
-          details: {
-            ...o.offenderDetails,
-          },
-
-          // 👇 backend offender id (future update/delete ke kaam aayega)
-          _id: o._id,
-        }));
-      }
-
-      /* ================= COMMON ================= */
-
-      /* ================= 🔥 WITNESSES HYDRATION (DEDUP FIX) ================= */
-      if (Array.isArray(eo.onDutyWitnessingMps)) {
-        const witnessMap = new Map<string, any>();
-
-        eo.onDutyWitnessingMps.forEach((w: any) => {
-          const key = `${w.ArmyNo || ""}_${w.rank || ""}_${w.unit || ""}`;
-
-          if (!witnessMap.has(key)) {
-            witnessMap.set(key, {
-              reportingBlock: {
-                armyNumber: w.ArmyNo || "",
-                nameReportingMP: w.name || "",
-                rank: w.rank || "",
-                unit: w.unit || "",
-                contactNumber: w.contactNumber || "",
-              },
-            });
-          }
-        });
-
-        traffic.witnesses = Array.from(witnessMap.values());
-      }
-
-      traffic.reportNo = eo.reportNo || eo.reportId || eo.reportNumber;
-      traffic.remarks = eo.customFields?.remarks || eo.remarks || "";
-
-      traffic.onDutyDetails = {
+      /* STEP 2 */
+      onDutyDetails: {
         dateOfDuty: eo.onDutyDetails?.dateOfDuty
           ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split("T")[0]
           : "",
-        startTime: isoToTime(eo.onDutyDetails?.startTime),
-        endTime: isoToTime(eo.onDutyDetails?.endTime),
+        startTime: eo.onDutyDetails?.startTime
+          ? new Date(eo.onDutyDetails.startTime).toISOString().substring(11, 16)
+          : "",
+        endTime: eo.onDutyDetails?.endTime
+          ? new Date(eo.onDutyDetails.endTime).toISOString().substring(11, 16)
+          : "",
         dutyLocation: eo.onDutyDetails?.dutyLocation || "",
         dutyType: eo.onDutyDetails?.dutyType || "",
-      };
+      },
 
-      traffic.onDutyDetailsMPReporting = {
+      onDutyDetailsMPReporting: {
         nameReportingMP: eo.onDutyDetailsMPReporting?.nameReportingMP || "",
-        rank: String(eo.onDutyDetailsMPReporting?.rank ?? ""),
+        rank: eo.onDutyDetailsMPReporting?.rank || "",
         unit: eo.onDutyDetailsMPReporting?.unit || "",
         armyNumber: eo.onDutyDetailsMPReporting?.armyNumber || "",
-        contactNumber: eo.onDutyDetailsMPReporting?.contactNumber || "",
-      };
+      },
 
-      traffic.offenceOccurenceDetails = {
-        timeOfOffence: isoToTime(eo.offenceOccurenceDetails?.timeOfOffence),
+      /* STEP 3 */
+      offenceOccurenceDetails: {
+        timeOfOffence: eo.offenceOccurenceDetails?.timeOfOffence
+          ? new Date(eo.offenceOccurenceDetails.timeOfOffence)
+              .toISOString()
+              .substring(11, 16)
+          : "",
         incidentLocation: eo.offenceOccurenceDetails?.incidentLocation || "",
         description: eo.offenceOccurenceDetails?.description || "",
         briefDescription: eo.offenceOccurenceDetails?.briefDescription || "",
-      };
+      },
 
-      traffic.offenceTypes = Array.isArray(eo.offenceTypes)
-        ? [...eo.offenceTypes]
-        : [];
+      offenceTypes: eo.offenceTypes || [],
+      offenceRefList: eo.offenceTypeReference || [],
 
-      traffic.offenceRefList = Array.isArray(eo.offenceTypeReference)
-        ? [...eo.offenceTypeReference]
-        : [];
+      /* STEP 4 */
+      remarks: eo.customFields?.remarks || eo.remarks || "",
+    };
 
-      dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          ...state.formData,
-          traffic,
-          mpReport: {
-            ...state.formData.mpReport,
-            attachments: eo.customFields?.attachments || [],
-          },
+    if (Array.isArray(eo.offenders) && eo.offenders.length > 0) {
+      const uniqueMap = new Map<string, any>();
+
+      eo.offenders.forEach((o: any) => {
+        // unique key (important)
+        const key = `${o.category || ""}_${o.offenderType || ""}_${o._id || ""}`;
+
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, {
+            whoIsIt: o.category || "Offender", // Offender / Relative
+            type: o.offenderType,
+            details: { ...o.offenderDetails },
+            _id: o._id,
+          });
+        }
+      });
+
+      traffic.offenderPeople = Array.from(uniqueMap.values());
+    }
+
+    /* WITNESSES */
+   if (Array.isArray(eo.onDutyWitnessingMps)) {
+
+  const witnessMap = new Map<string, any>();
+
+  eo.onDutyWitnessingMps.forEach((w: any) => {
+
+    const key = `${w.ArmyNo}_${w.rank}_${w.unit}`;
+
+    if (!witnessMap.has(key)) {
+      witnessMap.set(key, {
+        reportingBlock: {
+          armyNumber: w.ArmyNo || "",
+          nameReportingMP: w.name || "",
+          rank: w.rank || "",
+          unit: w.unit || "",
+          contactNumber: w.contactNumber || "",
         },
       });
-    } catch (err) {
-      console.error("Hydration failed:", err);
-      toast.error("Failed to load edit data");
     }
+  });
+
+  traffic.witnesses = Array.from(witnessMap.values());
+}
+
+    dispatch({
+      type: "SET_FORM_DATA",
+      payload: {
+        ...initialState.formData,
+        traffic,
+      },
+    });
   }, [existingOffence?._id]);
 
   const mapTrafficToReport = (traffic: any) => {

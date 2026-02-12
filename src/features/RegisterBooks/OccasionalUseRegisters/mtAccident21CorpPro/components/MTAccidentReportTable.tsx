@@ -254,90 +254,92 @@ const MTAccidentReportTable = ({
     ...item,
     serialNumber: index + 1,
   }));
-
 const renderParticulars = (individuals: any[]) => {
   if (!individuals || individuals.length === 0) return "-";
 
   const getLabel = (type: string) => {
-    return type === "militaryPersonnel"
-      ? "Military Personnel"
-      : type === "civilian"
-      ? "Civilian / Dependent"
-      : type === "employee"
-      ? "Employee"
-      : type === "shopKeeper"
-      ? "Shop Keeper"
-      : type === "servantMaid"
-      ? "Servant / Maid"
-      : type === "tempHiredWorker"
-      ? "Temporary Hired Worker"
-      : type?.replace(/([A-Z])/g, " $1").trim();
+    return type
+      ?.replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s: string) => s.toUpperCase());
   };
 
-  const renderBlock = (
-    type: string,
-    data: any,
-    label?: string,
-    level = 0
-  ) => (
-    <div className="mb-2 text-sm" style={{ marginLeft: level * 14 }}>
-      <div className="border-l-2 border-gray-300 pl-2">
-        {label && (
-          <div className="text-xs font-semibold text-gray-500">{label}</div>
-        )}
+  const renderDetails = (obj: any, level = 0) => {
+    if (!obj || typeof obj !== "object") return null;
 
-        <div className="text-xs font-bold text-gray-700 mb-1">
-          {getLabel(type)}
-        </div>
+    return Object.entries(obj).map(([key, value]: any) => {
+      // ❌ Skip unwanted fields
+      if (
+        value === null ||
+        value === undefined ||
+        key === "_id" ||
+        key === "__v" ||
+        key === "createdAt" ||
+        key === "updatedAt" ||
+        typeof value === "boolean" // 🔥 BOOLEAN HIDE
+      ) {
+        return null;
+      }
 
-        {Object.entries(data || {}).map(([k, v]: any) => {
-          if (!v) return null;
-
-          const display =
-            typeof v === "object"
-              ? Object.values(v).filter(Boolean).join(", ")
-              : v;
-
-          return (
-            <div key={k} className="text-xs">
-              <span className="font-semibold">
-                {k.replace(/([A-Z])/g, " $1")}:
-              </span>{" "}
-              {display}
+      // ✅ Nested Object
+      if (typeof value === "object" && !Array.isArray(value)) {
+        return (
+          <div key={key} style={{ marginLeft: level * 16 }}>
+            <div className="text-sm font-bold text-gray-800 mt-2">
+              {getLabel(key)}
             </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+            <div className="border-l-2 border-gray-300 pl-2">
+              {renderDetails(value, level + 1)}
+            </div>
+          </div>
+        );
+      }
+
+      // ✅ Array
+      if (Array.isArray(value) && value.length > 0) {
+        return value.map((item, index) => (
+          <div key={index} style={{ marginLeft: level * 16 }}>
+            <div className="text-sm font-bold text-gray-800 mt-2">
+              {getLabel(key)} {index + 1}
+            </div>
+            <div className="border-l-2 border-gray-300 pl-2">
+              {renderDetails(item, level + 1)}
+            </div>
+          </div>
+        ));
+      }
+
+      // ✅ Normal Field
+      return (
+        <div key={key} style={{ marginLeft: level * 16 }}>
+          <span className="font-semibold text-xs text-gray-700">
+            {getLabel(key)}:
+          </span>{" "}
+          <span className="text-xs text-gray-600">
+            {String(value)}
+          </span>
+        </div>
+      );
+    });
+  };
 
   return (
     <div>
-      {individuals.map((ind, i) => (
-        <div key={i} className="mb-4 pb-3 border-b border-dashed border-gray-300">
-          {/* MAIN INDIVIDUAL */}
-          {renderBlock(
-            ind.individualType,
-            ind.individualDetails,
-            `Individual ${i + 1}`
-          )}
+      {individuals.map((ind, index) => (
+        <div
+          key={index}
+          className="mb-4 pb-3 border-b border-dashed border-gray-300"
+        >
+          <div className="text-base font-bold text-gray-900 mb-2">
+            Individual {index + 1} ({getLabel(ind.individualType)})
+          </div>
 
-          {/* PASSENGERS */}
-          {ind.passengers?.map((p: any, pi: number) => (
-            <React.Fragment key={pi}>
-              {renderBlock(
-                p.individualType,
-                p.individualDetails,
-                `Passenger ${i + 1}.${pi + 1}`,
-                1
-              )}
-            </React.Fragment>
-          ))}
+          {renderDetails(ind)}
         </div>
       ))}
     </div>
   );
 };
+
 
 
   return (
