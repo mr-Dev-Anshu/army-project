@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -17,6 +15,23 @@ import { IndividualVictimDetails } from "@/components/IndividualVictimDetails";
 
 /* ================= TYPES ================= */
 
+type Individual = {
+  individualType?: string;
+  individualDetails?: any;
+
+  passengers?: Individual[];
+
+  coDriver?: Individual;
+  coDriverAvailable?: boolean;
+
+  hasMilitaryRelative?: boolean;
+  militaryRelative?: Individual;
+
+  isVehicleInvolved?: boolean;
+  vehicleType?: string;
+  vehicleRegistration?: string;
+};
+
 type Passenger = {
   individualType: string;
   individualDetails: any;
@@ -29,7 +44,7 @@ type IndividualDetailsBlock = {
 };
 
 type MTAccidentFormData = {
-  individualDetails: IndividualDetailsBlock;
+  individuals: Individual[]; 
   accidentDetails: {
     accidentDate: string;
     accidentTime: string;
@@ -65,11 +80,13 @@ type MTAccidentFormData = {
 /* ================= INITIAL DATA ================= */
 
 const INITIAL_DATA: MTAccidentFormData = {
-  individualDetails: {
-    individualType: "militaryPersonnel",
-    individualDetails: {},
-    passengers: [],
-  },
+  individuals: [
+    {
+      individualType: "militaryPersonnel",
+      individualDetails: {},
+      passengers: [],
+    },
+  ],
   accidentDetails: {
     accidentDate: "",
     accidentTime: "",
@@ -122,106 +139,155 @@ const MTAccidentReportForm: React.FC<Props> = ({
 
   /* ================= HYDRATION ================= */
 
-  useEffect(() => {
-    if (!initialData) return;
+ useEffect(() => {
+  if (!initialData) return;
 
-    setFormData({
-      ...INITIAL_DATA,
-      ...initialData,
-      individualDetails: {
-        ...INITIAL_DATA.individualDetails,
-        ...(initialData.individualDetails || {}),
-        passengers: initialData.individualDetails?.passengers || [],
-      },
-    });
-  }, [initialData]);
+  setFormData({
+    ...INITIAL_DATA,
+    ...initialData,
+
+    individuals: Array.isArray(initialData.individuals)
+      ? initialData.individuals
+      : INITIAL_DATA.individuals,
+  });
+}, [initialData]);
+
 
   /* ================= FIXED HANDLE CHANGE (🔥 MAIN FIX) ================= */
 
-const handleChange = (path: string, value: any) => {
-  setFormData((prev) => {
-    const newData: any = structuredClone(prev);
-    const keys = path.split(".");
-    let current: any = newData;
+  const handleChange = (path: string, value: any) => {
+    setFormData((prev) => {
+      const newData: any = structuredClone(prev);
+      const keys = path.split(".");
 
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
+      let current = newData;
 
-      // 🔥 If numeric → it's array index
-      if (!isNaN(Number(key))) {
-        current = current[Number(key)];
-      } else {
-        current = current[key];
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        const nextKey = keys[i + 1];
+
+        const isIndex = !isNaN(Number(key));
+        const isNextIndex = !isNaN(Number(nextKey));
+
+        if (isIndex) {
+          const index = Number(key);
+          if (!Array.isArray(current)) return prev;
+          if (!current[index]) current[index] = isNextIndex ? [] : {};
+          current = current[index];
+        } else {
+          if (!current[key]) current[key] = isNextIndex ? [] : {};
+          current = current[key];
+        }
       }
 
-      if (current === undefined) return prev;
-    }
+      const lastKey = keys[keys.length - 1];
 
-    const lastKey = keys[keys.length - 1];
+      if (!isNaN(Number(lastKey))) {
+        current[Number(lastKey)] = value;
+      } else {
+        current[lastKey] = value;
+      }
 
-    if (!isNaN(Number(lastKey))) {
-      current[Number(lastKey)] = value;
-    } else {
-      current[lastKey] = value;
-    }
-
-    return newData;
-  });
-};
-
-  /* ================= SUBMIT ================= */
-
-  const handleSubmit = async () => {
-    const { error, value } = createMTAccidentReportSchema.validate(formData, {
-      abortEarly: false,
+      return newData;
     });
+  };
 
-    if (error) {
-      toast.error(error.details.map((d) => d.message).join(", "));
-      return;
+const handleSubmit = async () => {
+  const cleanedData = structuredClone(formData);
+
+  /* =========================================
+     STEP 1 — SAFETY CHECK
+  ========================================= */
+
+  if (!Array.isArray(cleanedData.individuals) || cleanedData.individuals.length === 0) {
+    toast.error("At least one individual is required");
+    return;
+  }
+
+  /* =========================================
+     STEP 2 — CLEAN MILITARY RELATIVE (ALL)
+  ========================================= */
+
+  const cleanRelative = (person: any) => {
+    if (!person) return;
+
+    if (!person.hasMilitaryRelative) {
+      delete person.militaryRelative;
     }
 
-    const payload = {
-      ...value,
-      individualDetails: {
-        ...value.individualDetails,
-        passengers: value.individualDetails?.passengers || [],
-      },
-    };
-
-    console.log("🚨 FINAL MT ACCIDENT PAYLOAD =>", payload);
-
-    try {
-      if (initialData) {
-        await updateReport({
-          id: initialData._id,
-          data: payload,
-        });
-      } else {
-        await createReport(payload);
-      }
-
-      onSuccess();
-    } catch (err) {
-      console.error("❌ SUBMIT ERROR", err);
-      toast.error("Failed to save report");
+    if (
+      person?.hasMilitaryRelative &&
+      !person?.militaryRelative?.individualType
+    ) {
+      delete person.militaryRelative;
     }
   };
 
-  const iv = formData.individualDetails;
+  cleanedData.individuals.forEach(cleanRelative);
+
+  /* =========================================
+     STEP 3 — VALIDATE (NO STRUCTURE CHANGE)
+  ========================================= */
+
+  const { error, value } = createMTAccidentReportSchema.validate(
+    cleanedData,
+    { abortEarly: false }
+  );
+
+  if (error) {
+    toast.error(error.details.map((d) => d.message).join(", "));
+    return;
+  }
+
+  /* =========================================
+     STEP 4 — FINAL PAYLOAD (AS IS)
+  ========================================= */
+
+  const payload = {
+    ...value,
+    individuals: value.individuals || [],
+  };
+
+  console.log("🚀 FINAL CLEAN PAYLOAD =>", payload);
+
+  /* =========================================
+     STEP 5 — SAVE
+  ========================================= */
+
+  try {
+    if (initialData) {
+      await updateReport({
+        id: initialData._id,
+        data: payload,
+      });
+    } else {
+      await createReport(payload);
+    }
+
+    onSuccess();
+  } catch (err) {
+    console.error("❌ SUBMIT ERROR", err);
+    toast.error("Failed to save report");
+  }
+};
+
+
+  const iv = formData.individuals;
 
   return (
     <div className="flex flex-col h-full bg-white font-[Arial]">
       <div className="flex-1 overflow-y-auto p-6 space-y-8">
         {/* ===== Main Individual ===== */}
-        <IndividualVictimDetails
-          data={iv}
-          onChange={(path, value) =>
-            handleChange(`individualDetails.${path}`, value)
-          }
-        />
-
-      
+        {formData.individuals.map((ind, index) => (
+          <div key={index}>
+            <IndividualVictimDetails
+              data={ind}
+              onChange={(path, value) =>
+                handleChange(`individuals.${index}.${path}`, value)
+              }
+            />
+          </div>
+        ))}
 
         <div className="flex justify-end">
           <button
@@ -230,16 +296,14 @@ const handleChange = (path: string, value: any) => {
             onClick={() => {
               setFormData((prev) => ({
                 ...prev,
-                individualDetails: {
-                  ...prev.individualDetails,
-                  passengers: [
-                    ...prev.individualDetails.passengers,
-                    {
-                      individualType: "passenger",
-                      individualDetails: {},
-                    },
-                  ],
-                },
+                individuals: [
+                  ...prev.individuals,
+                  {
+                    individualType: "",
+                    individualDetails: {},
+                    passengers: [],
+                  },
+                ],
               }));
             }}
           >

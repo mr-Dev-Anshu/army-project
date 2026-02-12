@@ -145,30 +145,34 @@ const MTAccidentReportTable = ({
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const getUnitFmn = (details: any) => {
-    const d = details?.individualDetails || {};
-    const type = details?.individualType;
-    let unit = "-";
-    let fmn = "-";
+ const getUnitFmn = (individuals: any[]) => {
+  const main = individuals?.[0];
+  if (!main) return { unit: "-", fmn: "-" };
 
-    if (type === "militaryPersonnel") {
-      unit = d.militaryPersonnelUnit || "-";
-      fmn = d.militaryPersonnelFmn || "-";
-    } else if (type === "employee") {
-      unit = d.employeeUnit || "-";
-      fmn = d.employeeFmn || "-";
-    } else if (type === "servantMaid") {
-      unit = d.maidUnit || "-";
-      fmn = d.maidFmn || "-";
-    }
-    // Add other types if they have Unit/FMN
-    return { unit, fmn };
-  };
+  const d = main.individualDetails || {};
+  const type = main.individualType;
+
+  let unit = "-";
+  let fmn = "-";
+
+  if (type === "militaryPersonnel") {
+    unit = d.unit || "-";
+    fmn = d.fmn || "-";
+  }
+
+  if (type === "employee") {
+    unit = d.unit || "-";
+    fmn = d.fmn || "-";
+  }
+
+  return { unit, fmn };
+};
+
 
   const uniqueUnits = useMemo(() => {
     const units = new Set<string>();
     data.forEach((item) => {
-      const { unit } = getUnitFmn(item.individualDetails);
+      const { unit } = getUnitFmn(item.individuals);
       if (unit && unit !== "-") units.add(unit);
     });
     return Array.from(units);
@@ -177,7 +181,7 @@ const MTAccidentReportTable = ({
   const uniqueFmns = useMemo(() => {
     const fmns = new Set<string>();
     data.forEach((item) => {
-      const { fmn } = getUnitFmn(item.individualDetails);
+      const { fmn } = getUnitFmn(item.individuals);
       if (fmn && fmn !== "-") fmns.add(fmn);
     });
     return Array.from(fmns);
@@ -229,14 +233,14 @@ const MTAccidentReportTable = ({
       }
 
       if (filters.unit) {
-        const { unit } = getUnitFmn(item.individualDetails);
+        const { unit } = getUnitFmn(item.individuals);
         if (!unit.toLowerCase().includes(filters.unit.toLowerCase())) {
           return false;
         }
       }
 
       if (filters.fmn) {
-        const { fmn } = getUnitFmn(item.individualDetails);
+        const { fmn } = getUnitFmn(item.individuals);
         if (!fmn.toLowerCase().includes(filters.fmn.toLowerCase())) {
           return false;
         }
@@ -251,75 +255,90 @@ const MTAccidentReportTable = ({
     serialNumber: index + 1,
   }));
 
-  const renderParticulars = (details: any) => {
-    if (!details) return "-";
+const renderParticulars = (individuals: any[]) => {
+  if (!individuals || individuals.length === 0) return "-";
 
-    const mainType = details?.individualType;
-    const mainData = details?.individualDetails || {};
-    const passengers = details?.passengers || [];
+  const getLabel = (type: string) => {
+    return type === "militaryPersonnel"
+      ? "Military Personnel"
+      : type === "civilian"
+      ? "Civilian / Dependent"
+      : type === "employee"
+      ? "Employee"
+      : type === "shopKeeper"
+      ? "Shop Keeper"
+      : type === "servantMaid"
+      ? "Servant / Maid"
+      : type === "tempHiredWorker"
+      ? "Temporary Hired Worker"
+      : type?.replace(/([A-Z])/g, " $1").trim();
+  };
 
-    const getLabel = (type: string) => {
-      return type === "militaryPersonnel"
-        ? "Military Personnel"
-        : type === "civilian"
-          ? "Civilian / Dependent"
-          : type === "employee"
-            ? "Employee"
-            : type === "shopKeeper"
-              ? "Shop Keeper"
-              : type === "servantMaid"
-                ? "Servant / Maid"
-                : type === "tempHiredWorker"
-                  ? "Temporarily Hired Worker"
-                  : type?.replace(/([A-Z])/g, " $1").trim();
-    };
-
-    const renderBlock = (type: string, d: any, indexLabel?: string) => (
-      <div className="space-y-0.5 text-sm text-[#0A0A0A] mb-2">
-        {indexLabel && (
-          <div className="font-semibold text-xs text-gray-500">
-            {indexLabel}
-          </div>
+  const renderBlock = (
+    type: string,
+    data: any,
+    label?: string,
+    level = 0
+  ) => (
+    <div className="mb-2 text-sm" style={{ marginLeft: level * 14 }}>
+      <div className="border-l-2 border-gray-300 pl-2">
+        {label && (
+          <div className="text-xs font-semibold text-gray-500">{label}</div>
         )}
-        <div className="text-xs font-semibold text-gray-500">
+
+        <div className="text-xs font-bold text-gray-700 mb-1">
           {getLabel(type)}
         </div>
-        {Object.entries(d || {}).map(([key, value]: any) => {
-          if (!value) return null;
 
-          let displayValue = value;
+        {Object.entries(data || {}).map(([k, v]: any) => {
+          if (!v) return null;
 
-          // 🔥 If value is object, stringify it safely
-          if (typeof value === "object") {
-            displayValue = Object.values(value).filter(Boolean).join(", ");
-          }
+          const display =
+            typeof v === "object"
+              ? Object.values(v).filter(Boolean).join(", ")
+              : v;
 
           return (
-            <div key={key}>
-              <span className="font-bold">
-                {key.replace(/([A-Z])/g, " $1").trim()}:
+            <div key={k} className="text-xs">
+              <span className="font-semibold">
+                {k.replace(/([A-Z])/g, " $1")}:
               </span>{" "}
-              {displayValue}
+              {display}
             </div>
           );
         })}
       </div>
-    );
+    </div>
+  );
 
-    return (
-      <div>
-        {/* Main Individual */}
-        {renderBlock(mainType, mainData, "1.")}
+  return (
+    <div>
+      {individuals.map((ind, i) => (
+        <div key={i} className="mb-4 pb-3 border-b border-dashed border-gray-300">
+          {/* MAIN INDIVIDUAL */}
+          {renderBlock(
+            ind.individualType,
+            ind.individualDetails,
+            `Individual ${i + 1}`
+          )}
 
-        {/* Passengers */}
-        {passengers.map((p: any, i: number) => (
-          <React.Fragment key={`passenger-${i}`}>
-            {renderBlock(p.individualType, p.individualDetails, `1.${i + 1}`)}
-          </React.Fragment>
-        ))}
-      </div>
-    );
-  };
+          {/* PASSENGERS */}
+          {ind.passengers?.map((p: any, pi: number) => (
+            <React.Fragment key={pi}>
+              {renderBlock(
+                p.individualType,
+                p.individualDetails,
+                `Passenger ${i + 1}.${pi + 1}`,
+                1
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 
   return (
     <div className="space-y-4">
@@ -496,7 +515,7 @@ const MTAccidentReportTable = ({
             <tbody className="divide-y divide-gray-300">
               {dataWithSrNo.length > 0 ? (
                 dataWithSrNo.map((item, index) => {
-                  const { unit, fmn } = getUnitFmn(item.individualDetails);
+                  const { unit, fmn } = getUnitFmn(item.individuals);
                   return (
                     <tr
                       key={item._id || index}
@@ -506,7 +525,9 @@ const MTAccidentReportTable = ({
                         {item.serialNumber}
                       </td>
                       <td className="px-4 py-4 align-top border-r border-gray-300">
-                        {renderParticulars(item.individualDetails)}
+                        <div className="max-h-[220px] overflow-y-auto pr-2 [&::-webkit-scrollbar]:hidden">
+                          {renderParticulars(item.individuals)}
+                        </div>
                       </td>
                       <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A]">
                         {unit}

@@ -101,9 +101,9 @@ const authenticationSchema = new mongoose.Schema(
 
 const mtAccidentReportSchema = new mongoose.Schema(
   {
-    individualDetails: {
-      type: individualSchema,
-      default: {},
+    individuals: {
+      type: [individualSchema],
+      default: [],
     },
 
     accidentDetails: {
