@@ -19,6 +19,32 @@ const individualSchema = new mongoose.Schema(
       default: {},
     },
 
+    militaryRelative: {
+      type: mongoose.Schema.Types.Mixed,
+    },
+
+    coDriver: {
+      type: mongoose.Schema.Types.Mixed,
+    },
+
+    hasMilitaryRelative: {
+      type: Boolean,
+      default: false,
+    },
+
+    coDriverAvailable: {
+      type: Boolean,
+      default: false,
+    },
+
+    isVehicleInvolved: {
+      type: Boolean,
+      default: false,
+    },
+
+    vehicleType: String,
+    vehicleRegistration: String,
+
     passengers: {
       type: [
         new mongoose.Schema(
@@ -44,6 +70,10 @@ const individualSchema = new mongoose.Schema(
       ],
       default: [],
     },
+  },
+  {
+    timestamps: true,
+    strict: false, // ⭐⭐⭐ ADD THIS
   },
   { _id: false },
 );
@@ -132,7 +162,9 @@ const mtAccidentReportSchema = new mongoose.Schema(
       default: {},
     },
   },
-  { timestamps: true },
+  { timestamps: true ,
+    strict:false
+  },
 );
 
 export const MTAccidentReport =

@@ -45,12 +45,65 @@ export class MTAccidentReportRepository {
         return report;
     }
 
-    async update(id, data) {
-        // If you need to track suggestions on update as well, you can add it here
-        return await MTAccidentReport.findByIdAndUpdate(id, data, {
-            new: true,
-            runValidators: true,
-        });
+      async update(id, data) {
+
+        const existing = await MTAccidentReport.findById(id);
+
+        if (!existing) return null;
+
+        /*
+        ----------------------------------------------
+        MERGE INDIVIDUALS (VERY IMPORTANT)
+        ----------------------------------------------
+        */
+        if (Array.isArray(data.individuals)) {
+
+            const mergedIndividuals = data.individuals.map((newInd, index) => {
+
+                const oldInd = existing.individuals?.[index]?.toObject?.() || {};
+
+                return {
+                    ...oldInd,
+                    ...newInd,
+
+                    // deep merge nested objects if exist
+                    individualDetails: {
+                        ...(oldInd.individualDetails || {}),
+                        ...(newInd.individualDetails || {})
+                    },
+
+                    coDriver: {
+                        ...(oldInd.coDriver || {}),
+                        ...(newInd.coDriver || {})
+                    },
+
+                    militaryRelative: {
+                        ...(oldInd.militaryRelative || {}),
+                        ...(newInd.militaryRelative || {})
+                    },
+
+                    passengers: Array.isArray(newInd.passengers)
+                        ? newInd.passengers
+                        : oldInd.passengers || []
+                };
+
+            });
+
+            data.individuals = mergedIndividuals;
+        }
+
+        /*
+        ----------------------------------------------
+        SAFE UPDATE
+        ----------------------------------------------
+        */
+        const updated = await MTAccidentReport.findByIdAndUpdate(
+            id,
+            { $set: data },
+            { new: true, runValidators: true }
+        );
+
+        return updated;
     }
 
     async delete(id) {
