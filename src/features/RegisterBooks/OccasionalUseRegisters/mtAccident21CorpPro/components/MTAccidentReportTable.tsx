@@ -773,7 +773,7 @@ const renderCoPassengers = (individuals: any[]) => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-2 py-4 align-middle text-center sticky right-0 z-30 bg-white group-hover:bg-gray-50">
+                      <td className="px-2 py-4 align-top text-center sticky border-l-2 right-0 z-30 bg-white group-hover:bg-gray-50">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
