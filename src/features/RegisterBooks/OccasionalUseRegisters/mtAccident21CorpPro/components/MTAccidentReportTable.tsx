@@ -145,29 +145,28 @@ const MTAccidentReportTable = ({
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
- const getUnitFmn = (individuals: any[]) => {
-  const main = individuals?.[0];
-  if (!main) return { unit: "-", fmn: "-" };
+  const getUnitFmn = (individuals: any[]) => {
+    const main = individuals?.[0];
+    if (!main) return { unit: "-", fmn: "-" };
 
-  const d = main.individualDetails || {};
-  const type = main.individualType;
+    const d = main.individualDetails || {};
+    const type = main.individualType;
 
-  let unit = "-";
-  let fmn = "-";
+    let unit = "-";
+    let fmn = "-";
 
-  if (type === "militaryPersonnel") {
-    unit = d.unit || "-";
-    fmn = d.fmn || "-";
-  }
+    if (type === "militaryPersonnel") {
+      unit = d.unit || "-";
+      fmn = d.fmn || "-";
+    }
 
-  if (type === "employee") {
-    unit = d.unit || "-";
-    fmn = d.fmn || "-";
-  }
+    if (type === "employee") {
+      unit = d.unit || "-";
+      fmn = d.fmn || "-";
+    }
 
-  return { unit, fmn };
-};
-
+    return { unit, fmn };
+  };
 
   const uniqueUnits = useMemo(() => {
     const units = new Set<string>();
@@ -254,92 +253,176 @@ const MTAccidentReportTable = ({
     ...item,
     serialNumber: index + 1,
   }));
-const renderParticulars = (individuals: any[]) => {
-  if (!individuals || individuals.length === 0) return "-";
 
-  const getLabel = (type: string) => {
-    return type
-      ?.replace(/([A-Z])/g, " $1")
-      .replace(/^./, (s: string) => s.toUpperCase());
-  };
 
-  const renderDetails = (obj: any, level = 0) => {
-    if (!obj || typeof obj !== "object") return null;
+  const FIELD_CONFIG: Record<string, string[]> = {
+  militaryPersonnel: [
+    "armyNo",
+    "rank",
+    "name",
+    "unit",
+    "fmn",
+    "command",
+    "address",
+    "iCard",
+  ],
 
-    return Object.entries(obj).map(([key, value]: any) => {
-      // ❌ Skip unwanted fields
-      if (
-        value === null ||
-        value === undefined ||
-        key === "_id" ||
-        key === "__v" ||
-        key === "createdAt" ||
-        key === "updatedAt" ||
-        typeof value === "boolean" // 🔥 BOOLEAN HIDE
-      ) {
-        return null;
-      }
+  civilian: [
+    "name",
+    "fatherName",
+    "address",
+    "iCard",
+  ],
 
-      // ✅ Nested Object
-      if (typeof value === "object" && !Array.isArray(value)) {
-        return (
-          <div key={key} style={{ marginLeft: level * 16 }}>
-            <div className="text-sm font-bold text-gray-800 mt-2">
-              {getLabel(key)}
-            </div>
-            <div className="border-l-2 border-gray-300 pl-2">
-              {renderDetails(value, level + 1)}
-            </div>
-          </div>
-        );
-      }
+  employee: [
+    "employeeId",
+    "department",
+    "placeOfWork",
+    "placeOfStay",
+    "passNumber",
+    "passIssueDate",
+    "passExpireDate",
+    "address",
+  ],
 
-      // ✅ Array
-      if (Array.isArray(value) && value.length > 0) {
-        return value.map((item, index) => (
-          <div key={index} style={{ marginLeft: level * 16 }}>
-            <div className="text-sm font-bold text-gray-800 mt-2">
-              {getLabel(key)} {index + 1}
-            </div>
-            <div className="border-l-2 border-gray-300 pl-2">
-              {renderDetails(item, level + 1)}
-            </div>
-          </div>
-        ));
-      }
+  servantMaid: [
+    "passNumber",
+    "passId",
+    "name",
+    "fatherName",
+    "trade",
+    "quarterNo",
+    "officerRank",
+    "armyOfficialName",
+    "unit",
+    "fmn",
+    "command",
+    "address",
+    "iCard",
+  ],
 
-      // ✅ Normal Field
+  shopKeeper: [
+    "ownerName",
+    "shopName",
+    "shopAddress",
+    "unit",
+    "passNumber",
+    "passIssueDate",
+    "passExpireDate",
+  ],
+
+  tempHiredWorker: [
+    "name",
+    "placeOfStay",
+    "placeOfWork",
+    "workType",
+    "passNumber",
+    "passIssueDate",
+    "passExpireDate",
+  ],
+};
+
+
+  const renderFieldsByType = (type: string, details: any) => {
+    if (!details || !FIELD_CONFIG[type]) return null;
+
+    return FIELD_CONFIG[type].map((field) => {
+      if (!details[field]) return null;
+
+      const label = field
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (s) => s.toUpperCase());
+
       return (
-        <div key={key} style={{ marginLeft: level * 16 }}>
-          <span className="font-semibold text-xs text-gray-700">
-            {getLabel(key)}:
-          </span>{" "}
-          <span className="text-xs text-gray-600">
-            {String(value)}
-          </span>
+        <div key={field}>
+          <b>{label}:</b> {details[field]}
         </div>
       );
     });
   };
 
+const renderParticulars = (individuals: any[]) => {
+  if (!individuals?.length) return "-";
+
   return (
-    <div>
+    <div className="text-xs">
       {individuals.map((ind, index) => (
-        <div
-          key={index}
-          className="mb-4 pb-3 border-b border-dashed border-gray-300"
-        >
-          <div className="text-base font-bold text-gray-900 mb-2">
-            Individual {index + 1} ({getLabel(ind.individualType)})
+        <div key={index} className="pb-4">
+          <div className="font-bold mb-2 capitalize">
+            Individual {index + 1} ({ind.individualType})
           </div>
 
-          {renderDetails(ind)}
+          {renderFieldsByType(ind.individualType, ind.individualDetails)}
+
+          {/* 🔴 Dark separator ONLY between individuals */}
+          {index !== individuals.length - 1 && (
+            <div className="border-t-2 border-gray-700 mt-4"></div>
+          )}
         </div>
       ))}
     </div>
   );
 };
 
+const renderCoPassengers = (individuals: any[]) => {
+  if (!individuals?.length) return "-";
+
+  return (
+    <div className="text-xs">
+      {individuals.map((ind, index) => (
+        <div key={index} className="pb-4">
+
+          {/* 🔹 Co Driver */}
+          {ind.coDriver && (
+            <div className="mb-4  p-2 rounded-sm">
+              <div className="font-bold mb-2 capitalize">
+                Co Driver ({ind.coDriver.individualType})
+              </div>
+
+              {renderFieldsByType(
+                ind.coDriver.individualType,
+                ind.coDriver.individualDetails
+              )}
+
+              {/* 🔸 Light separator before Relative */}
+              {ind.coDriver.militaryRelative && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="font-semibold mb-2 capitalize">
+                    Relative ({ind.coDriver.militaryRelative.relation})
+                  </div>
+
+                  {renderFieldsByType(
+                    ind.coDriver.militaryRelative.individualType,
+                    ind.coDriver.militaryRelative.individualDetails
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 🔹 Passengers */}
+          {ind.passengers?.map((p: any, pIndex: number) => (
+            <div
+              key={pIndex}
+              className="mb-3 border-t-1 p-2"
+            >
+              <div className="font-bold mb-2 capitalize">
+                Passenger {pIndex + 1} ({p.individualType})
+              </div>
+
+              {renderFieldsByType(p.individualType, p.individualDetails)}
+            </div>
+          ))}
+
+          {/* 🔴 Dark separator ONLY between individuals */}
+          {index !== individuals.length - 1 && (
+            <div className="border-t-2 border-gray-700 mt-4"></div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 
   return (
@@ -401,7 +484,7 @@ const renderParticulars = (individuals: any[]) => {
                 </th>
                 <th
                   rowSpan={2}
-                  className="px-4 py-3 border-r border-gray-300  align-top sticky top-0 z-40 bg-[#F5F5F5]"
+                  className="px-4 py-3 border-r border-gray-300 w-[2000px] align-top sticky top-0 z-40 bg-[#F5F5F5]"
                 >
                   Particulars of Offender(s), Victim(s) and Vehicles Involved
                 </th>
@@ -433,8 +516,15 @@ const renderParticulars = (individuals: any[]) => {
                   rowSpan={2}
                   className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]"
                 >
-                  Veh. BA No. / Make & Type
+                  Veh. No. / Make & Type
                 </th>
+                <th
+                  rowSpan={2}
+                  className="px-4 py-3 border-r border-gray-300 w-[350px] align-top sticky top-0 z-40 bg-[#F5F5F5]"
+                >
+                  Particulars of Co-Driver & Passengers
+                </th>
+
                 <th
                   rowSpan={2}
                   className="px-4 py-3 border-r border-gray-300 w-32 align-top sticky top-0 z-40 bg-[#F5F5F5]"
@@ -527,7 +617,7 @@ const renderParticulars = (individuals: any[]) => {
                         {item.serialNumber}
                       </td>
                       <td className="px-4 py-4 align-top border-r border-gray-300">
-                        <div className="max-h-[220px] overflow-y-auto pr-2 [&::-webkit-scrollbar]:hidden">
+                        <div className="max-h-[220px]">
                           {renderParticulars(item.individuals)}
                         </div>
                       </td>
@@ -563,6 +653,12 @@ const renderParticulars = (individuals: any[]) => {
                           {item.vehicleDetails?.vehicleModel || ""}
                         </div>
                       </td>
+                      {/* 🔹 Co Driver & Passengers */}
+                      <td className="px-4 py-4 align-top border-r w-[2000px] border-gray-300">
+                        {renderCoPassengers(item.individuals)}
+                      </td>
+
+                      {/* 🔹 Type of Accident */}
                       <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A] capitalize">
                         {item.accidentDetails?.accidentType || "-"}
                       </td>
