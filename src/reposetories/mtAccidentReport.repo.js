@@ -3,18 +3,17 @@ import { MTAccidentReport } from "@/models/MTAccidentReport.js";
 import { MT_ACCIDENT_REPORT_SUGGESTION_CONFIG } from "@/lib/fieldSuggestionConfig/MTAccidentReport.js";
 
 export class MTAccidentReportRepository {
+
     async getAll(filters = {}) {
         const query = {};
 
         if (filters.search) {
-            // Basic search implementation - expand as needed
             query.$or = [
                 { "accidentDetails.placeOfAccident": { $regex: filters.search, $options: "i" } },
                 { "vehicleDetails.vehicleNumber": { $regex: filters.search, $options: "i" } }
             ];
         }
 
-        // Date filters
         if (filters.fromDate || filters.toDate) {
             query.createdAt = {};
             if (filters.fromDate) {
@@ -45,15 +44,14 @@ export class MTAccidentReportRepository {
         return report;
     }
 
-      async update(id, data) {
+    async update(id, data) {
 
         const existing = await MTAccidentReport.findById(id);
-
         if (!existing) return null;
 
         /*
         ----------------------------------------------
-        MERGE INDIVIDUALS (VERY IMPORTANT)
+        MERGE INDIVIDUALS (IMPORTANT)
         ----------------------------------------------
         */
         if (Array.isArray(data.individuals)) {
@@ -66,7 +64,6 @@ export class MTAccidentReportRepository {
                     ...oldInd,
                     ...newInd,
 
-                    // deep merge nested objects if exist
                     individualDetails: {
                         ...(oldInd.individualDetails || {}),
                         ...(newInd.individualDetails || {})
@@ -86,7 +83,6 @@ export class MTAccidentReportRepository {
                         ? newInd.passengers
                         : oldInd.passengers || []
                 };
-
             });
 
             data.individuals = mergedIndividuals;

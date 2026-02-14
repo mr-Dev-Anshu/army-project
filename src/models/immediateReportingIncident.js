@@ -1,63 +1,46 @@
 import mongoose from "mongoose";
 
 import { auditFieldsPlugin } from "@/lib/mongoose-plugins/auditsFields";
+import { individualSchema } from "./MTAccidentReport";
 
-const immediateReportingIncidentSchema = new mongoose.Schema({
-    reportHeading: {
-        type: String,
+const immediateReportingIncidentSchema = new mongoose.Schema(
+  {
+    reportHeading: String,
+    vehicleType: String,
+    vehicleNumber: String,
+    vehicleName: String,
+
+    individuals: {
+      type: [individualSchema],
+      default: [],
     },
-    vehicleType: {
-        type: String,
-    },
-    vehicleNumber: {
-        type: String,
-    },
-    vehicleName: {
-        type: String,
-    },
-    individuals: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Offender'
-    }],
-    placeOfOccurrence: {
-        type: String,
-    },
-    dateOfOccurrence: {
-        type: String,
-    },
-    timeOfOccurrence: {
-        type: String,
-    },
-    description: {
-        type: String,
-    },
-    coordWith: {
-        type: String,
-    },
-    incidentCoveredBy: {
-        type: String,
-    },
+
+    placeOfOccurrence: String,
+    dateOfOccurrence: String,
+    timeOfOccurrence: String,
+    description: String,
+    coordWith: String,
+    incidentCoveredBy: String,
+
     relevantPhotos: {
-        type: [String],
-        default: []
+      type: [String],
+      default: [],
     },
-    age: {
-        type: String,
-        trim: true,
-    },
-    totalServiceDuration: {
-        type: String,
-        trim: true,
-    },
+
+    age: String,
+    totalServiceDuration: String,
+
     individualWorkingStatus: {
-        type: String,
-        enum: ["Leave", "Duty", ""],
+      type: String,
+      enum: ["Leave", "Duty", ""],
     },
-}, {
+  },
+  {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
+    strict: false,
+  }
+);
+
 
 immediateReportingIncidentSchema.plugin(auditFieldsPlugin, {});
 

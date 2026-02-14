@@ -254,74 +254,67 @@ const MTAccidentReportTable = ({
     serialNumber: index + 1,
   }));
 
-
   const FIELD_CONFIG: Record<string, string[]> = {
-  militaryPersonnel: [
-    "armyNo",
-    "rank",
-    "name",
-    "unit",
-    "fmn",
-    "command",
-    "address",
-    "iCard",
-  ],
+    militaryPersonnel: [
+      "armyNo",
+      "rank",
+      "name",
+      "unit",
+      "fmn",
+      "command",
+      "address",
+      "iCard",
+    ],
 
-  civilian: [
-    "name",
-    "fatherName",
-    "address",
-    "iCard",
-  ],
+    civilian: ["name", "fatherName", "address", "iCard"],
 
-  employee: [
-    "employeeId",
-    "department",
-    "placeOfWork",
-    "placeOfStay",
-    "passNumber",
-    "passIssueDate",
-    "passExpireDate",
-    "address",
-  ],
+    employee: [
+      "employeeId",
+      "department",
+      "placeOfWork",
+      "placeOfStay",
+      "passNumber",
+      "passIssueDate",
+      "passExpireDate",
+      "address",
+    ],
 
-  servantMaid: [
-    "passNumber",
-    "passId",
-    "name",
-    "fatherName",
-    "trade",
-    "quarterNo",
-    "officerRank",
-    "armyOfficialName",
-    "unit",
-    "fmn",
-    "command",
-    "address",
-    "iCard",
-  ],
+    servantMaid: [
+      "passNumber",
+      "passId",
+      "name",
+      "fatherName",
+      "trade",
+      "quarterNo",
+      "officerRank",
+      "armyOfficialName",
+      "unit",
+      "fmn",
+      "command",
+      "address",
+      "iCard",
+    ],
 
-  shopKeeper: [
-    "ownerName",
-    "shopName",
-    "shopAddress",
-    "unit",
-    "passNumber",
-    "passIssueDate",
-    "passExpireDate",
-  ],
+    shopKeeper: [
+      "ownerName",
+      "shopName",
+      "shopAddress",
+      "unit",
+      "passNumber",
+      "passIssueDate",
+      "passExpireDate",
+    ],
 
-  tempHiredWorker: [
-    "name",
-    "placeOfStay",
-    "placeOfWork",
-    "workType",
-    "passNumber",
-    "passIssueDate",
-    "passExpireDate",
-  ],
-};
-
+    tempHiredWorker: [
+      "name",
+      "placeOfStay",
+      "placeOfWork",
+      "workType",
+      "passNumber",
+      "passIssueDate",
+      "passExpireDate",
+    ],
+  };
 
   const renderFieldsByType = (type: string, details: any) => {
     if (!details || !FIELD_CONFIG[type]) return null;
@@ -341,40 +334,48 @@ const MTAccidentReportTable = ({
     });
   };
 
-const renderParticulars = (individuals: any[]) => {
+ const renderParticulars = (individuals: any[]) => {
   if (!individuals?.length) return "-";
 
   return (
     <div className="text-xs">
       {individuals.map((ind, index) => (
-        <div key={index} className="pb-4">
-          <div className="font-bold mb-2 capitalize">
+        <div
+          key={index}
+          className={`pb-6 ${
+            index !== individuals.length - 1
+              ? "mb-6 border-b max-h-[1200px] border-gray-300"
+              : ""
+          }`}
+        >
+          <div className="font-bold mb-3 capitalize">
             Individual {index + 1} ({ind.individualType})
           </div>
 
           {renderFieldsByType(ind.individualType, ind.individualDetails)}
-
-          {/* 🔴 Dark separator ONLY between individuals */}
-          {index !== individuals.length - 1 && (
-            <div className="border-t-2 border-gray-700 mt-4"></div>
-          )}
         </div>
       ))}
     </div>
   );
 };
 
-const renderCoPassengers = (individuals: any[]) => {
+
+ const renderCoPassengers = (individuals: any[]) => {
   if (!individuals?.length) return "-";
 
   return (
     <div className="text-xs">
       {individuals.map((ind, index) => (
-        <div key={index} className="pb-4">
-
-          {/* 🔹 Co Driver */}
+        <div
+          key={index}
+          className={`pb-6 ${
+            index !== individuals.length - 1
+              ? "mb-6 border-b border-gray-300"
+              : ""
+          }`}
+        >
           {ind.coDriver && (
-            <div className="mb-4  p-2 rounded-sm">
+            <div className="mb-4">
               <div className="font-bold mb-2 capitalize">
                 Co Driver ({ind.coDriver.individualType})
               </div>
@@ -384,7 +385,6 @@ const renderCoPassengers = (individuals: any[]) => {
                 ind.coDriver.individualDetails
               )}
 
-              {/* 🔸 Light separator before Relative */}
               {ind.coDriver.militaryRelative && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <div className="font-semibold mb-2 capitalize">
@@ -400,12 +400,8 @@ const renderCoPassengers = (individuals: any[]) => {
             </div>
           )}
 
-          {/* 🔹 Passengers */}
           {ind.passengers?.map((p: any, pIndex: number) => (
-            <div
-              key={pIndex}
-              className="mb-3 border-t-1 p-2"
-            >
+            <div key={pIndex} className="mt-4 pt-3 border-t border-gray-200">
               <div className="font-bold mb-2 capitalize">
                 Passenger {pIndex + 1} ({p.individualType})
               </div>
@@ -413,17 +409,11 @@ const renderCoPassengers = (individuals: any[]) => {
               {renderFieldsByType(p.individualType, p.individualDetails)}
             </div>
           ))}
-
-          {/* 🔴 Dark separator ONLY between individuals */}
-          {index !== individuals.length - 1 && (
-            <div className="border-t-2 border-gray-700 mt-4"></div>
-          )}
         </div>
       ))}
     </div>
   );
 };
-
 
   return (
     <div className="space-y-4">
@@ -617,9 +607,7 @@ const renderCoPassengers = (individuals: any[]) => {
                         {item.serialNumber}
                       </td>
                       <td className="px-4 py-4 align-top border-r border-gray-300">
-                        <div className="max-h-[220px]">
-                          {renderParticulars(item.individuals)}
-                        </div>
+                        <div>{renderParticulars(item.individuals)}</div>
                       </td>
                       <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A]">
                         {unit}

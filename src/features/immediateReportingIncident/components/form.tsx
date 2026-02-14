@@ -87,51 +87,141 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
         });
     };
 
+
     const handleSave = async () => {
-        try {
-            if (!reportData.individuals || reportData.individuals.length === 0) {
-                toast.error("At least one individual is required");
-                return;
-            }
-            if (reportData.individuals.some((ind: any) =>
-                (ind.individualType === 'militaryPersonnel' || !ind.individualType) && !ind.individualDetails?.armyNo
-            )) {
-                toast.error("Army Number is required for all individuals");
-                return;
-            }
+    try {
+        const cleanedData = structuredClone(reportData);
 
-            const currentPhotos = [...(reportData.relevantPhotos || [])];
-            if (photoUrlInput.trim()) {
-                currentPhotos.push(photoUrlInput.trim());
-            }
+        /* =========================================
+           STEP 1 — SAFETY CHECK
+        ========================================= */
 
-            const payload = { ...reportData, relevantPhotos: currentPhotos };
-            if (!initialData) {
-                delete (payload as any)._id;
-                delete (payload as any).createdAt;
-                delete (payload as any).updatedAt;
-            }
+        if (!Array.isArray(cleanedData.individuals) || cleanedData.individuals.length === 0) {
+            toast.error("At least one individual is required");
+            return;
+        }
 
-            if (initialData && initialData._id) {
-                await updateRecord({ id: initialData._id, data: payload });
-                toast.success("Incident Report Updated");
-            } else {
-                await createRecord(payload);
-                toast.success("Incident Report Created");
-            }
+        if (
+            cleanedData.individuals.some(
+                (ind: any) =>
+                    (ind.individualType === "militaryPersonnel" || !ind.individualType) &&
+                    !ind?.individualDetails?.armyNo
+            )
+        ) {
+            toast.error("Army Number is required for all individuals");
+            return;
+        }
 
-            dispatch({
-                type: "SET_PATH",
-                path: "formData.immediateReportingIncident",
-                value: INITIAL_STATE,
+        /* =========================================
+           STEP 2 — CLEAN EMPTY VALUES (LIKE MT)
+        ========================================= */
+
+        cleanedData.individuals = cleanedData.individuals.map((ind: any) => {
+            const newInd = { ...ind };
+
+            // remove empty strings
+            Object.keys(newInd).forEach((key) => {
+                if (newInd[key] === "") {
+                    delete newInd[key];
+                }
             });
 
-            onSuccess();
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error?.response?.data?.message || "Operation failed");
+            if (newInd.individualDetails) {
+                Object.keys(newInd.individualDetails).forEach((key) => {
+                    if (newInd.individualDetails[key] === "") {
+                        delete newInd.individualDetails[key];
+                    }
+                });
+            }
+
+            return newInd;
+        });
+
+        /* =========================================
+           STEP 3 — FINAL PAYLOAD (NO STRUCTURE CHANGE)
+        ========================================= */
+
+        const payload = {
+            ...cleanedData,
+            individuals: cleanedData.individuals || [],
+        };
+
+        console.log("🚀 FINAL IMMEDIATE REPORT PAYLOAD =>", payload);
+
+        /* =========================================
+           STEP 4 — SAVE
+        ========================================= */
+
+        if (initialData && initialData._id) {
+            await updateRecord({
+                id: initialData._id,
+                data: payload,
+            });
+            toast.success("Incident Report Updated");
+        } else {
+            await createRecord(payload);
+            toast.success("Incident Report Created");
         }
-    };
+
+        dispatch({
+            type: "SET_PATH",
+            path: "formData.immediateReportingIncident",
+            value: INITIAL_STATE,
+        });
+
+        onSuccess();
+    } catch (error: any) {
+        console.error("❌ SUBMIT ERROR", error);
+        toast.error(error?.response?.data?.message || "Operation failed");
+    }
+};
+
+
+    // const handleSave = async () => {
+    //     try {
+    //         if (!reportData.individuals || reportData.individuals.length === 0) {
+    //             toast.error("At least one individual is required");
+    //             return;
+    //         }
+    //         if (reportData.individuals.some((ind: any) =>
+    //             (ind.individualType === 'militaryPersonnel' || !ind.individualType) && !ind.individualDetails?.armyNo
+    //         )) {
+    //             toast.error("Army Number is required for all individuals");
+    //             return;
+    //         }
+
+    //         const currentPhotos = [...(reportData.relevantPhotos || [])];
+    //         if (photoUrlInput.trim()) {
+    //             currentPhotos.push(photoUrlInput.trim());
+    //         }
+
+    //         const payload = { ...reportData, relevantPhotos: currentPhotos };
+    //         if (!initialData) {
+    //             delete (payload as any)._id;
+    //             delete (payload as any).createdAt;
+    //             delete (payload as any).updatedAt;
+    //         }
+
+    //         if (initialData && initialData._id) {
+    //             await updateRecord({ id: initialData._id, data: payload });
+    //             toast.success("Incident Report Updated");
+    //         } else {
+    //             await createRecord(payload);
+    //             toast.success("Incident Report Created");
+    //         }
+
+    //         dispatch({
+    //             type: "SET_PATH",
+    //             path: "formData.immediateReportingIncident",
+    //             value: INITIAL_STATE,
+    //         });
+
+    //         onSuccess();
+    //     } catch (error: any) {
+    //         console.error(error);
+    //         toast.error(error?.response?.data?.message || "Operation failed");
+    //     }
+    // };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -253,53 +343,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                     </div>
                 </div>
 
-                {/* 1. Vehicle Type */}
-                <div className="border rounded-lg p-6 space-y-4">
-                    <h3 className="text-sm font-semibold flex gap-2">
-                        <span>1.</span>
-                        Vehicle Type (DD / Civil / Other)
-                    </h3>
-                    <RadioGroup
-                        value={reportData.vehicleType}
-                        onValueChange={(v) => setField("vehicleType", v)}
-                        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-                    >
-                        {["Civil Vehicle", "DD Vehicle", "NO Vehicle Involved"].map((type) => (
-                            <label
-                                key={type}
-                                className={cn(
-                                    "flex items-center space-x-2 border rounded-md px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors",
-                                    reportData.vehicleType === type ? "border-blue-500 bg-blue-50/50" : "border-gray-200"
-                                )}
-                            >
-                                <RadioGroupItem value={type} id={type} />
-                                <span className="text-sm font-medium">{type}</span>
-                            </label>
-                        ))}
-                    </RadioGroup>
-
-                    {reportData.vehicleType !== "NO Vehicle Involved" && (
-                        <div className="space-y-4 pt-2">
-                            <div className="space-y-2">
-                                <Label>BA no. / Registration No.</Label>
-                                <Input
-                                    placeholder="-"
-                                    value={reportData.vehicleNumber}
-                                    onChange={(e) => setField("vehicleNumber", e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Make & Take</Label>
-                                <SuggestionInput
-                                    fieldType="vehicleName"
-                                    placeholder="-"
-                                    value={reportData.vehicleName}
-                                    onChange={(v) => setField("vehicleName", v)}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
+               
 
                 {/* 2. Particulars of Offender / Victim (Loop) */}
                 {reportData.individuals?.map((individual: any, index: number) => (
@@ -315,7 +359,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                             )}
                             <div className="mb-4">
                                 <h3 className="text-sm font-semibold flex gap-2 mb-2">
-                                    <span>{(index === 0 ? "2." : "")}</span>
+                                    <span>{(index === 0 ? "1." : "")}</span>
                                     Particulars of Offender / Victim {reportData.individuals.length > 1 ? `#${index + 1}` : ""}
                                 </h3>
                             </div>
@@ -343,7 +387,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
                 {/* 3. Age & Total Service Duration */}
                 <div className="space-y-4 pt-2">
-                    <h3 className="text-sm font-semibold">3. Age & Service</h3>
+                    <h3 className="text-sm font-semibold">2. Age & Service</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Age (Years)</Label>
@@ -369,7 +413,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
                 {/* 4. Leave / Duty */}
                 <div className="space-y-4 pt-2">
-                    <h3 className="text-sm font-semibold">4. Whether Individual on Leave or Duty</h3>
+                    <h3 className="text-sm font-semibold">3. Whether Individual on Leave or Duty</h3>
                     <RadioGroup
                         value={reportData.individualWorkingStatus || ""}
                         onValueChange={(v) => setField("individualWorkingStatus", v)}
@@ -394,7 +438,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
                 {/* 6. Place of Incident */}
                 <div className="space-y-4">
-                    <h3 className="text-sm font-semibold">6. Place of Incident</h3>
+                    <h3 className="text-sm font-semibold">5. Place of Incident</h3>
                     <SuggestionInput
                         fieldType="placeOfOccurrence"
                         placeholder="Enter Address"
@@ -406,7 +450,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
                 {/* 7. Date & Time */}
                 <div className="space-y-4">
-                    <h3 className="text-sm font-semibold">7. Date & Time of Incident</h3>
+                    <h3 className="text-sm font-semibold">6. Date & Time of Incident</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Date of Incident</Label>
@@ -429,7 +473,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
                 {/* 8. Brief of the Incident */}
                 <div className="space-y-2">
-                    <h3 className="text-sm font-semibold">8. Brief of the Incident</h3>
+                    <h3 className="text-sm font-semibold">7. Brief of the Incident</h3>
                     <SuggestionTextarea
                         fieldType="description"
                         className="min-h-[100px]"
@@ -441,7 +485,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
                 {/* 9. Coord */}
                 <div className="space-y-2">
-                    <h3 className="text-sm font-semibold">9. Coord with Police on Civ Adm, FIR, Current Sit</h3>
+                    <h3 className="text-sm font-semibold">8. Coord with Police on Civ Adm, FIR, Current Sit</h3>
                     <SuggestionTextarea
                         fieldType="coordWith"
                         className="min-h-[80px]"
@@ -453,7 +497,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
                 {/* 8. Covered By */}
                 <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold">8. (Mention Incident being Covered by</span>
+                    <span className="text-sm font-semibold">9. Mention Incident being Covered by</span>
                     <div className="w-64">
                         <SuggestionInput
                             fieldType="incidentCoveredBy"
@@ -463,12 +507,12 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                             className="h-8"
                         />
                     </div>
-                    <span className="text-sm font-semibold">Pro Unit]</span>
+                    <span className="text-sm font-semibold">Pro Unit</span>
                 </div>
 
                 {/* 9. Photos */}
                 <div className="space-y-4">
-                    <h3 className="text-sm font-semibold">9. Note: Relevant Photos if any may also be attached/shared</h3>
+                    <h3 className="text-sm font-semibold">10. Note: Relevant Photos if any may also be attached/shared</h3>
 
                     <div className="space-y-2">
                         <Label className="text-sm text-gray-500 font-normal">Attach Relevant Photos (Optional)</Label>

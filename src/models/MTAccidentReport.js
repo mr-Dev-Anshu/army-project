@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const individualSchema = new mongoose.Schema(
+ export const individualSchema = new mongoose.Schema(
   {
     individualType: {
       type: String,
