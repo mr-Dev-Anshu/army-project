@@ -474,7 +474,7 @@ const MTAccidentReportTable = ({
                 </th>
                 <th
                   rowSpan={2}
-                  className="px-4 py-3 border-r border-gray-300 w-[2000px] align-top sticky top-0 z-40 bg-[#F5F5F5]"
+                  className="px-4 py-3 border-r border-gray-300 min-w-[200px] align-top sticky top-0 z-40 bg-[#F5F5F5]"
                 >
                   Particulars of Offender(s), Victim(s) and Vehicles Involved
                 </th>
@@ -510,7 +510,7 @@ const MTAccidentReportTable = ({
                 </th>
                 <th
                   rowSpan={2}
-                  className="px-4 py-3 border-r border-gray-300 w-[350px] align-top sticky top-0 z-40 bg-[#F5F5F5]"
+                  className="px-4 py-3 border-r border-gray-300 w-[300px] align-top sticky top-0 z-40 bg-[#F5F5F5]"
                 >
                   Particulars of Co-Driver & Passengers
                 </th>
@@ -642,7 +642,7 @@ const MTAccidentReportTable = ({
                         </div>
                       </td>
                       {/* 🔹 Co Driver & Passengers */}
-                      <td className="px-4 py-4 align-top border-r w-[2000px] border-gray-300">
+                      <td className="px-4 py-4 align-top border-r min-w-[300px] border-gray-300">
                         {renderCoPassengers(item.individuals)}
                       </td>
 

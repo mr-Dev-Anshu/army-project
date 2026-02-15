@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
- export const individualSchema = new mongoose.Schema(
+export const individualSchema = new mongoose.Schema(
   {
     individualType: {
       type: String,
@@ -24,7 +24,41 @@ import mongoose from "mongoose";
     },
 
     coDriver: {
-      type: mongoose.Schema.Types.Mixed,
+      type: new mongoose.Schema(
+        {
+          individualType: {
+            type: String,
+            enum: [
+              "militaryPersonnel",
+              "employee",
+              "civilian",
+              "servantMaid",
+              "shopKeeper",
+              "tempHiredWorker",
+            ],
+          },
+
+          individualDetails: {
+            type: mongoose.Schema.Types.Mixed,
+            default: {},
+          },
+
+          hasMilitaryRelative: {
+            type: Boolean,
+            default: false,
+          },
+
+          militaryRelative: {
+            relation: String,
+            individualType: String,
+            individualDetails: {
+              type: mongoose.Schema.Types.Mixed,
+              default: {},
+            },
+          },
+        },
+        { _id: false },
+      ),
     },
 
     hasMilitaryRelative: {
@@ -60,9 +94,24 @@ import mongoose from "mongoose";
                 "tempHiredWorker",
               ],
             },
+
             individualDetails: {
               type: mongoose.Schema.Types.Mixed,
               default: {},
+            },
+
+            hasMilitaryRelative: {
+              type: Boolean,
+              default: false,
+            },
+
+            militaryRelative: {
+              relation: String,
+              individualType: String,
+              individualDetails: {
+                type: mongoose.Schema.Types.Mixed,
+                default: {},
+              },
             },
           },
           { _id: false },
@@ -162,9 +211,7 @@ const mtAccidentReportSchema = new mongoose.Schema(
       default: {},
     },
   },
-  { timestamps: true ,
-    strict:false
-  },
+  { timestamps: true, strict: false },
 );
 
 export const MTAccidentReport =

@@ -393,6 +393,98 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
       headerClassName:
         "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
     },
+
+    {
+      header: "Co-Driver / Passengers / Relative",
+      cell: (item) => {
+        const inds = item.individuals || [];
+        if (!inds.length) return "-";
+
+        const renderAllFields = (obj: any) => {
+          if (!obj) return null;
+
+          return Object.entries(obj).map(([key, value]) => {
+            if (!value) return null;
+
+            const label = key
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (s) => s.toUpperCase());
+
+            return (
+              <div key={key}>
+                <b>{label}:</b> {String(value)}
+              </div>
+            );
+          });
+        };
+
+        return (
+          <div className="text-xs">
+            {inds.map((ind: any, index: number) => (
+              <div
+                key={index}
+                className={`pb-6 ${
+                  index !== inds.length - 1
+                    ? "mb-6 border-b border-gray-300"
+                    : ""
+                }`}
+              >
+                {/* Co Driver */}
+                {ind.coDriver && (
+                  <div className="mb-4">
+                    <div className="font-bold mb-2 capitalize">
+                      Co Driver ({ind.coDriver.individualType})
+                    </div>
+
+                    {renderAllFields(ind.coDriver.individualDetails)}
+
+                    {/* Relative of Co Driver */}
+                    {ind.coDriver.militaryRelative && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="font-semibold mb-2 capitalize">
+                          Relative ({ind.coDriver.militaryRelative.relation})
+                        </div>
+                        {renderAllFields(
+                          ind.coDriver.militaryRelative.individualDetails,
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Relative of Main Individual */}
+                {ind.militaryRelative && (
+                  <div className="mb-4">
+                    <div className="font-bold mb-2 capitalize">
+                      Relative ({ind.militaryRelative.relation})
+                    </div>
+                    {renderAllFields(ind.militaryRelative.individualDetails)}
+                  </div>
+                )}
+
+                {/* Passengers */}
+                {ind.passengers?.map((p: any, pIndex: number) => (
+                  <div
+                    key={pIndex}
+                    className="mt-4 pt-3 border-t border-gray-200"
+                  >
+                    <div className="font-bold mb-2 capitalize">
+                      Passenger {pIndex + 1} ({p.individualType})
+                    </div>
+
+                    {renderAllFields(p.individualDetails)}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        );
+      },
+      className: "border-r border-gray-300 min-w-[300px] align-top py-2",
+      headerClassName:
+        "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[300px]",
+    },
+
     {
       header: "Age & Service Yrs",
       cell: (item) => {

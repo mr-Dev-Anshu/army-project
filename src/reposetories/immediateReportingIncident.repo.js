@@ -10,7 +10,6 @@ export async function createImmediateReportingIncidentRepo(data) {
 
 export async function findAllImmediateReportingIncidentsRepo() {
     return await ImmediateReportingIncident.find({})
-        .populate('individuals')
         .sort({ createdAt: -1 });
 }
 

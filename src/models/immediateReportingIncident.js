@@ -10,10 +10,11 @@ const immediateReportingIncidentSchema = new mongoose.Schema(
     vehicleNumber: String,
     vehicleName: String,
 
-    individuals: {
-      type: [individualSchema],
-      default: [],
-    },
+  individuals: {
+  type: [individualSchema],
+  default: [],
+},
+
 
     placeOfOccurrence: String,
     dateOfOccurrence: String,
