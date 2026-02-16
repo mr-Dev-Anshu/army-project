@@ -24,6 +24,7 @@ import {
   useUpdateMPReport,
 } from "@/features/mpReports/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
+import { useCreateDocument } from "@/features/certificateAndForm/hook";
 
 /* ================= EVIDENCE BUILDER ================= */
 const buildEvidences = (ev: any) => {
@@ -82,6 +83,8 @@ export default function MultiFormReport({
   const [mode] = useState("mp");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingReport, setEditingReport] = useState<any | null>(null);
+  const createDocumentMutation = useCreateDocument();
+  const [attachments, setAttachments] = useState<any[]>([]);
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { mutateAsync: createReportAsync } = useCreateMPReport();
@@ -270,12 +273,12 @@ export default function MultiFormReport({
 
     const people = offenderList
       // 🔥 REMOVE DUPLICATES
-      .filter((o, index, self) => {
+      .filter((o:any, index:number, self:any) => {
         const d = o.offenderDetails || {};
         const key = `${d.name}|${d.armyNumber}|${d.iCardNumber}`;
         return (
           index ===
-          self.findIndex((x) => {
+          self.findIndex((x:any) => {
             const xd = x.offenderDetails || {};
             return `${xd.name}|${xd.armyNumber}|${xd.iCardNumber}` === key;
           })
@@ -608,10 +611,35 @@ export default function MultiFormReport({
       console.log("✅ MP REPORT RESPONSE ===>", reportRes);
 
       const offenceId = reportRes?._id;
+
+      /* ================= SAVE ATTACHMENTS ================= */
+      if (attachments?.length) {
+        try {
+          console.log("📎 SAVING MP ATTACHMENTS ===>", attachments);
+
+          await Promise.all(
+            attachments.map((file: any) =>
+              createDocumentMutation.mutateAsync({
+                name: file.name,
+                url: file.url,
+                type: file.type?.toLowerCase() || "document",
+    
+              }),
+            ),
+          );
+
+          toast.success("Attachments saved");
+        } catch (err) {
+          console.error("❌ Attachment Save Error:", err);
+          toast.error("Attachment save failed");
+        }
+      }
+
       if (!offenceId) {
         toast.error("Offence ID missing");
         return;
       }
+
 
       /* ================= CREATE ALL OFFENDERS & WITNESSES (GLOBAL SEARCH) ================= */
       // We still create these for the global search / centralized offender DB if needed.
@@ -771,6 +799,7 @@ export default function MultiFormReport({
             reportNo={reportNo}
             onCancel={onCancel}
             onCreate={onSubmitFinal}
+            onAttach={(items) => setAttachments(items)}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
             onReportNoChange={handleReportNoChange} // Wired up

@@ -18,6 +18,7 @@ import Step4Remarks from "./steps/Step4Remarks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { OffenderType } from "@/apis/offender/types";
+import { useCreateDocument } from "@/features/certificateAndForm/hook";
 
 export default function MultiStepForm({
   onCancel,
@@ -31,6 +32,7 @@ export default function MultiStepForm({
   const submitLockRef = useRef(false);
   const hydratedRef = useRef<string | null>(null); // ✅ FIX
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attachments, setAttachments] = useState<any[]>([]);
 
   console.log("EDIT DATA RECEIVED 👉", existingOffence);
 
@@ -38,6 +40,7 @@ export default function MultiStepForm({
   const { mutateAsync: updateOffence } = useUpdateTrafficOffence();
   const { mutateAsync: createOffender } = useCreateOffender();
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
+  const createDocumentMutation = useCreateDocument();
 
   const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
@@ -311,89 +314,102 @@ export default function MultiStepForm({
       const traffic = state.formData.traffic;
 
       const payload = {
-        reportId: traffic.reportNo || existingOffence.reportId,
+        reportId: traffic.reportNo || existingOffence?.reportId || "",
 
         actionStatus: false,
 
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
-        /* ================= OFFENCE ================= */
         offenceTypes: Array.isArray(traffic.offenceTypes)
           ? traffic.offenceTypes
-          : existingOffence.offenceTypes,
+          : existingOffence?.offenceTypes || [],
 
         currentOffenceType:
           traffic.offenceTypes?.[traffic.offenceTypes.length - 1] ||
-          existingOffence.currentOffenceType,
+          existingOffence?.currentOffenceType ||
+          "",
 
         offenceTypeReference: Array.isArray(traffic.offenceRefList)
           ? traffic.offenceRefList
           : [],
 
-        /* ================= OCCURRENCE ================= */
         offenceOccurenceDetails: {
           timeOfOffence: traffic.offenceOccurenceDetails?.timeOfOffence
             ? new Date(
                 `1970-01-01T${traffic.offenceOccurenceDetails.timeOfOffence}:00Z`,
               )
-            : new Date(existingOffence.offenceOccurenceDetails.timeOfOffence),
+            : existingOffence?.offenceOccurenceDetails?.timeOfOffence
+              ? new Date(existingOffence.offenceOccurenceDetails.timeOfOffence)
+              : null,
 
           incidentLocation:
             traffic.offenceOccurenceDetails?.incidentLocation ||
-            existingOffence.offenceOccurenceDetails.incidentLocation,
+            existingOffence?.offenceOccurenceDetails?.incidentLocation ||
+            "",
 
           description:
             traffic.offenceOccurenceDetails?.description ||
-            existingOffence.offenceOccurenceDetails.description,
+            existingOffence?.offenceOccurenceDetails?.description ||
+            "",
 
           briefDescription:
             traffic.offenceOccurenceDetails?.briefDescription ||
-            existingOffence.offenceOccurenceDetails.briefDescription,
+            existingOffence?.offenceOccurenceDetails?.briefDescription ||
+            "",
         },
 
-        /* ================= ON DUTY ================= */
         onDutyDetails: {
           dateOfDuty: traffic.onDutyDetails?.dateOfDuty
             ? new Date(traffic.onDutyDetails.dateOfDuty)
-            : new Date(existingOffence.onDutyDetails.dateOfDuty),
+            : existingOffence?.onDutyDetails?.dateOfDuty
+              ? new Date(existingOffence.onDutyDetails.dateOfDuty)
+              : null,
 
           startTime: traffic.onDutyDetails?.startTime
             ? new Date(`1970-01-01T${traffic.onDutyDetails.startTime}:00Z`)
-            : new Date(existingOffence.onDutyDetails.startTime),
+            : existingOffence?.onDutyDetails?.startTime
+              ? new Date(existingOffence.onDutyDetails.startTime)
+              : null,
 
           endTime: traffic.onDutyDetails?.endTime
             ? new Date(`1970-01-01T${traffic.onDutyDetails.endTime}:00Z`)
-            : new Date(existingOffence.onDutyDetails.endTime),
+            : existingOffence?.onDutyDetails?.endTime
+              ? new Date(existingOffence.onDutyDetails.endTime)
+              : null,
 
           dutyLocation:
             traffic.onDutyDetails?.dutyLocation ||
-            existingOffence.onDutyDetails.dutyLocation,
+            existingOffence?.onDutyDetails?.dutyLocation ||
+            "",
 
           dutyType:
             traffic.onDutyDetails?.dutyType ||
-            existingOffence.onDutyDetails.dutyType,
+            existingOffence?.onDutyDetails?.dutyType ||
+            "",
         },
 
-        /* ================= REPORTING MP ================= */
         onDutyDetailsMPReporting: {
           nameReportingMP:
             traffic.onDutyDetailsMPReporting?.nameReportingMP ||
-            existingOffence.onDutyDetailsMPReporting.nameReportingMP,
+            existingOffence?.onDutyDetailsMPReporting?.nameReportingMP ||
+            "",
 
           rank:
             traffic.onDutyDetailsMPReporting?.rank ||
-            existingOffence.onDutyDetailsMPReporting.rank,
+            existingOffence?.onDutyDetailsMPReporting?.rank ||
+            "",
 
           unit:
             traffic.onDutyDetailsMPReporting?.unit ||
-            existingOffence.onDutyDetailsMPReporting.unit,
+            existingOffence?.onDutyDetailsMPReporting?.unit ||
+            "",
 
           armyNumber:
             traffic.onDutyDetailsMPReporting?.armyNumber ||
-            existingOffence.onDutyDetailsMPReporting.armyNumber,
+            existingOffence?.onDutyDetailsMPReporting?.armyNumber ||
+            "",
         },
 
-        /* ================= 🔥 WITNESSES ================= */
         onDutyWitnessingMps: Array.isArray(traffic.witnesses)
           ? traffic.witnesses.map((w: any) => ({
               ArmyNo: w.reportingBlock?.armyNumber || "",
@@ -402,27 +418,29 @@ export default function MultiStepForm({
               unit: w.reportingBlock?.unit || "",
               contactNumber: w.reportingBlock?.contactNumber || "",
             }))
-          : existingOffence.onDutyWitnessingMps,
+          : existingOffence?.onDutyWitnessingMps || [],
 
         witnessingMpsCount: Array.isArray(traffic.witnesses)
           ? traffic.witnesses.length
-          : existingOffence.witnessingMpsCount,
+          : existingOffence?.witnessingMpsCount || 0,
 
-        /* ================= CUSTOM ================= */
         customFields: {
-          remarks: traffic.remarks || existingOffence.customFields.remarks,
+          remarks:
+            traffic.remarks || existingOffence?.customFields?.remarks || "",
+
           selectedWitness: Array.isArray(traffic.witnesses)
             ? traffic.witnesses
-            : existingOffence.customFields.selectedWitness,
+            : existingOffence?.customFields?.selectedWitness || [],
+
           attachments:
             state.formData.mpReport?.attachments ||
-            existingOffence.customFields.attachments,
+            existingOffence?.customFields?.attachments ||
+            [],
         },
 
-        /* ================= META ================= */
-        offendersCount: existingOffence.offendersCount || 0,
-        resolvedRefs: existingOffence.resolvedRefs || [],
-        displayIndex: existingOffence.displayIndex || 1,
+        offendersCount: existingOffence?.offendersCount || 0,
+        resolvedRefs: existingOffence?.resolvedRefs || [],
+        displayIndex: existingOffence?.displayIndex || 1,
       };
 
       let offenceRes;
@@ -439,6 +457,29 @@ export default function MultiStepForm({
       }
 
       const offenceId = offenceRes?._id;
+
+      /* ================= SAVE ATTACHMENTS ================= */
+      if (attachments?.length) {
+        try {
+          console.log("📎 SAVING TRAFFIC ATTACHMENTS ===>", attachments);
+
+          await Promise.all(
+            attachments.map((file: any) =>
+              createDocumentMutation.mutateAsync({
+                name: file.name,
+                url: file.url,
+                type: file.type?.toLowerCase() || "document",
+              }),
+            ),
+          );
+
+          toast.success("Attachments saved");
+        } catch (err) {
+          console.error("❌ Attachment Save Error:", err);
+          toast.error("Attachment save failed");
+        }
+      }
+
       if (!offenceId) throw new Error("Offence ID missing");
 
       if (Array.isArray(traffic.offenderPeople)) {
@@ -481,10 +522,7 @@ export default function MultiStepForm({
     },
     2: {
       title: "2. STATEMENT",
-      component: (
-          <Step2Statement
-        />
-      ),
+      component: <Step2Statement />,
     },
 
     3: { title: "3. OFFENCE", component: <Step3Offence /> },
@@ -523,6 +561,7 @@ export default function MultiStepForm({
           onCreate={onSubmitFinal}
           onCancel={onCancel}
           isSubmitting={isSubmitting}
+          onAttach={(items) => setAttachments(items)}
           onReportNoChange={(val) =>
             dispatch({
               type: "SET_PATH",

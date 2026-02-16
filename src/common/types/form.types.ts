@@ -19,6 +19,12 @@ export interface VehicleDetailsState {
   vehicleNumber: string;
 }
 
+export interface AttachmentItem {
+  type: "Certificate" | "Forms" | "Letter";
+  name: string;
+  url: string;
+}
+
 // ---------- OFFENDER ----------
 export interface OffenderWithoutVehicleState {
   offenderType: OffenderType | "";
@@ -156,6 +162,8 @@ export type DependentType =
 //   whoIsIt: DependentType;
 //   details?: Record<string, any>;
 // }
+
+
 
 
 
