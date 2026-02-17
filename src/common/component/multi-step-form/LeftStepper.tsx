@@ -24,7 +24,7 @@ interface LeftStepperProps {
   onReportNoChange?: (val: string) => void;
   hideReportNo?: boolean;
   isSubmitting?: boolean;
-  module?: "traffic" | "static"; 
+  module?: "traffic" | "static";
 }
 
 export const LeftStepper = ({
@@ -80,132 +80,132 @@ export const LeftStepper = ({
 
         // 1. Prepare Fresh State
         const newState = structuredClone(initialState);
-        
+
         // 2. Select Target Form State
         let targetForm: any;
         if (module === "static") {
-           targetForm = newState.formData.staticSpeed;
+          targetForm = newState.formData.staticSpeed;
         } else {
-           targetForm = newState.formData.traffic;
+          targetForm = newState.formData.traffic;
         }
 
         // 3. MAP BASIC INFO
         targetForm.reportNo = json.reportId || json.reportNo || reportValue;
-        
+
         // 4. MAP VEHICLE DETAILS
         const isVehInvolved = json.isVehicleInvolved === true || json.vehicleInvolved === "yes" || module === "static";
-        
+
         if (isVehInvolved) {
-            targetForm.vehicleInvolved = "yes";
-            
-            // Map Category
-            let cat = json.vehicleCategory || "";
-            if (cat === "2-Wheeler") cat = "2w";
-            else if (cat === "4-Wheeler") cat = "4w";
+          targetForm.vehicleInvolved = "yes";
 
-            // Map Type
-            let type = json.vehicleType || "";
-            if (type === "Civilian Vehicle") type = "civilian";
-            else if (type === "DD Vehicle") type = "dd";
+          // Map Category
+          let cat = json.vehicleCategory || "";
+          if (cat === "2-Wheeler") cat = "2w";
+          else if (cat === "4-Wheeler") cat = "4w";
 
-            targetForm.vehicleDetails = {
-                category: cat,
-                vehicleType: type,
-                driverType: json.driverType || "Military Person",
-                vehicleName: json.vehicleName || "",
-                vehicleNumber: json.vehicleNumber || "",
-            };
+          // Map Type
+          let type = json.vehicleType || "";
+          if (type === "Civilian Vehicle") type = "civilian";
+          else if (type === "DD Vehicle") type = "dd";
+
+          targetForm.vehicleDetails = {
+            category: cat,
+            vehicleType: type,
+            driverType: json.driverType || "Military Person",
+            vehicleName: json.vehicleName || "",
+            vehicleNumber: json.vehicleNumber || "",
+          };
         } else {
-             targetForm.vehicleInvolved = "no";
-             if (json.offenderWithoutVehicle) {
-                targetForm.offenderWithoutVehicle = json.offenderWithoutVehicle;
-             }
+          targetForm.vehicleInvolved = "no";
+          if (json.offenderWithoutVehicle) {
+            targetForm.offenderWithoutVehicle = json.offenderWithoutVehicle;
+          }
         }
 
         // 5. MAP OFFENDERS (Driver/Co-Driver)
         if (Array.isArray(json.offenders)) {
-            const mappedOffenders = json.offenders.map((o: any) => {
-                const details = o.offenderDetails || {};
-                
-                // Determine role
-                const role = details.type || (o.category === "Offender" ? "Driver" : "Offender");
+          const mappedOffenders = json.offenders.map((o: any) => {
+            const details = o.offenderDetails || {};
 
-                return {
-                    type: o.offenderType || "Civilian", 
-                    whoIsIt: role,
-                    details: {
-                        ...details,
-                        // 🔥 CRITICAL FIX: Map ALL Verbose Keys to Standard Keys
-                        rank: details["Select Rank"] || details.rank || "", 
-                        
-                        armyNumber: details.armyNumber || details["Army Rider / Driver Number"] || details.armyNo || "",
-                        
-                        iCardNumber: details.iCardNumber || details["ID Card Number"] || details["I Card Number"] || details.iCardNo || "",
-                        
-                        name: details.name || details["Full Name"] || "",
-                        
-                        unit: details.unit || details["Unit"] || "",
-                        fmn: details.fmn || details["FMN"] || "",
-                        command: details.command || details["Command"] || "",
-                        address: details.address || details["Address"] || "",
-                        
-                        so: details.so || details["Father's Name (Son of)"] || details["Father's / Husband's Name"] || "",
-                        
-                        passNo: details.passNo || details["Pass No."] || details["Maid/Servant Pass Number"] || "",
-                        
-                        passIssueDate: details.passIssueDate || details["Pass Issue Date"] || "",
-                        passExpireDate: details.passExpireDate || details["Pass Expire Date"] || "",
-                        
-                        armyOfficialName: details.armyOfficialName || details["Army Official Name"] || "",
-                    },
-                };
-            });
+            // Determine role
+            const role = details.type || (o.category === "Offender" ? "Driver" : "Offender");
 
-            // 🔥 FIX: Sort so "Driver" is ALWAYS at index 0 for the form
-            mappedOffenders.sort((a: any, b: any) => {
-                if (a.whoIsIt === "Driver") return -1;
-                if (b.whoIsIt === "Driver") return 1;
-                return 0;
-            });
+            return {
+              type: o.offenderType || "Civilian",
+              whoIsIt: role,
+              details: {
+                ...details,
+                // 🔥 CRITICAL FIX: Map ALL Verbose Keys to Standard Keys
+                rank: details["Select Rank"] || details.rank || "",
 
-            targetForm.offenderPeople = mappedOffenders;
+                armyNumber: details.armyNumber || details["Army Rider / Driver Number"] || details.armyNo || "",
+
+                iCardNumber: details.iCardNumber || details["ID Card Number"] || details["I Card Number"] || details.iCardNo || "",
+
+                name: details.name || details["Full Name"] || "",
+
+                unit: details.unit || details["Unit"] || "",
+                fmn: details.fmn || details["FMN"] || "",
+                command: details.command || details["Command"] || "",
+                address: details.address || details["Address"] || "",
+
+                so: details.so || details["Father's Name (Son of)"] || details["Father's / Husband's Name"] || "",
+
+                passNo: details.passNo || details["Pass No."] || details["Maid/Servant Pass Number"] || "",
+
+                passIssueDate: details.passIssueDate || details["Pass Issue Date"] || "",
+                passExpireDate: details.passExpireDate || details["Pass Expire Date"] || "",
+
+                armyOfficialName: details.armyOfficialName || details["Army Official Name"] || "",
+              },
+            };
+          });
+
+          // 🔥 FIX: Sort so "Driver" is ALWAYS at index 0 for the form
+          mappedOffenders.sort((a: any, b: any) => {
+            if (a.whoIsIt === "Driver") return -1;
+            if (b.whoIsIt === "Driver") return 1;
+            return 0;
+          });
+
+          targetForm.offenderPeople = mappedOffenders;
         }
 
         // 6. MAP OTHER SECTIONS
         if (module === "static") {
-            if (json.onDutyDetails) {
-                targetForm.dutyBlock = {
-                    ...json.onDutyDetails,
-                    dateOfDuty: json.onDutyDetails.dateOfDuty || "",
-                    startTime: json.onDutyDetails.startTime ? new Date(json.onDutyDetails.startTime).toTimeString().slice(0,5) : "",
-                    endTime: json.onDutyDetails.endTime ? new Date(json.onDutyDetails.endTime).toTimeString().slice(0,5) : "",
-                };
-            }
-            if (json.onDutyDetailsMPReporting) targetForm.reportingBlock = json.onDutyDetailsMPReporting;
-            if (json.offenceOccurenceDetails) {
-                targetForm.offenceBlock = {
-                   ...json.offenceOccurenceDetails,
-                   actualSpeedNoted: json.offenceOccurenceDetails.actualSpeedNoted || "",
-                   authSpeed: json.offenceOccurenceDetails.authSpeed || "",
-                   overSpeedCalculated: json.offenceOccurenceDetails.overSpeedCalculated || "",
-                };
-            }
-            targetForm.remarks = json.remark || json.remarks || "";
+          if (json.onDutyDetails) {
+            targetForm.dutyBlock = {
+              ...json.onDutyDetails,
+              dateOfDuty: json.onDutyDetails.dateOfDuty || "",
+              startTime: json.onDutyDetails.startTime ? new Date(json.onDutyDetails.startTime).toTimeString().slice(0, 5) : "",
+              endTime: json.onDutyDetails.endTime ? new Date(json.onDutyDetails.endTime).toTimeString().slice(0, 5) : "",
+            };
+          }
+          if (json.onDutyDetailsMPReporting) targetForm.reportingBlock = json.onDutyDetailsMPReporting;
+          if (json.offenceOccurenceDetails) {
+            targetForm.offenceBlock = {
+              ...json.offenceOccurenceDetails,
+              actualSpeedNoted: json.offenceOccurenceDetails.actualSpeedNoted || "",
+              authSpeed: json.offenceOccurenceDetails.authSpeed || "",
+              overSpeedCalculated: json.offenceOccurenceDetails.overSpeedCalculated || "",
+            };
+          }
+          targetForm.remarks = json.remark || json.remarks || "";
 
         } else {
-            if (json.onDutyDetails) targetForm.onDutyDetails = json.onDutyDetails;
-            if (json.onDutyDetailsMPReporting) targetForm.onDutyDetailsMPReporting = json.onDutyDetailsMPReporting;
-            if (json.offenceOccurenceDetails) targetForm.offenceOccurenceDetails = json.offenceOccurenceDetails;
-            if (json.offenceTypes) targetForm.offenceTypes = json.offenceTypes;
-            if (json.offenceTypeReference) targetForm.offenceCode = json.offenceTypeReference;
-            if (json.remarks) targetForm.remarks = json.remarks;
+          if (json.onDutyDetails) targetForm.onDutyDetails = json.onDutyDetails;
+          if (json.onDutyDetailsMPReporting) targetForm.onDutyDetailsMPReporting = json.onDutyDetailsMPReporting;
+          if (json.offenceOccurenceDetails) targetForm.offenceOccurenceDetails = json.offenceOccurenceDetails;
+          if (json.offenceTypes) targetForm.offenceTypes = json.offenceTypes;
+          if (json.offenceTypeReference) targetForm.offenceCode = json.offenceTypeReference;
+          if (json.remarks) targetForm.remarks = json.remarks;
         }
 
         dispatch({ type: "SET_FORM_DATA", payload: newState.formData });
-        
+
         if (targetForm.reportNo) {
-           setReportValue(targetForm.reportNo);
-           if (onReportNoChange) onReportNoChange(targetForm.reportNo);
+          setReportValue(targetForm.reportNo);
+          if (onReportNoChange) onReportNoChange(targetForm.reportNo);
         }
 
         toast.success(`Imported to ${module}!`);
@@ -224,25 +224,25 @@ export const LeftStepper = ({
     <div className="w-full lg:w-[380px] h-full bg-[#171717] text-white rounded-xl flex flex-col p-3 sm:p-4 md:p-6">
       <div>
         <div className="flex justify-between items-start">
-            <h2 className="font-bold text-base sm:text-lg md:text-xl mb-2 sm:mb-3">
+          <h2 className="font-bold text-base sm:text-lg md:text-xl mb-2 sm:mb-3">
             {title || "Create New Record"}
-            </h2>
-            <div>
+          </h2>
+          <div>
             <input
-                type="file"
-                accept=".json"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={handleFileChange}
+              type="file"
+              accept=".json"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
             />
-            <button 
-                onClick={handleImportClick}
-                className="text-gray-400 hover:text-white transition p-1"
-                title="Import JSON"
+            <button
+              onClick={handleImportClick}
+              className="text-gray-400 hover:text-white transition p-1"
+              title="Import JSON"
             >
-                <Upload className="w-5 h-5" />
+              <Upload className="w-5 h-5" />
             </button>
-            </div>
+          </div>
         </div>
 
         {!hideReportNo && (

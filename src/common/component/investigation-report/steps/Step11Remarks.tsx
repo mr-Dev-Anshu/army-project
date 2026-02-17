@@ -1,6 +1,5 @@
 "use client";
 
-import { FormSection } from "@/common/component/FormSection";
 import { useForm } from "@/context/FormContext";
 import { FormTextarea } from "@/common/component/FormTextarea";
 
@@ -14,13 +13,6 @@ export default function Step11Remarks() {
       type: "SET_PATH",
       path: `formData.mpReport.remarks.${k}`,
       value: v,
-    });
-
-  const clear = () =>
-    dispatch({
-      type: "SET_PATH",
-      path: "formData.mpReport.remarks",
-      value: { analysis: "", recommendation: "" },
     });
 
   return (

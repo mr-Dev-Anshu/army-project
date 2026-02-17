@@ -125,14 +125,14 @@ export default function MultiFormReport({
         place: er.occurrenceDetails?.placeOfOccurrence || "",
         date: er.occurrenceDetails?.dateOfOccurrence
           ? new Date(er.occurrenceDetails.dateOfOccurrence)
-              .toISOString()
-              .split("T")[0]
+            .toISOString()
+            .split("T")[0]
           : "",
         time: er.occurrenceDetails?.timeOfOccurrence
           ? new Date(er.occurrenceDetails.timeOfOccurrence).toLocaleTimeString(
-              "en-GB",
-              { hour: "2-digit", minute: "2-digit" },
-            )
+            "en-GB",
+            { hour: "2-digit", minute: "2-digit" },
+          )
           : "",
         description: er.occurrenceDetails?.description || "",
       };
@@ -334,7 +334,7 @@ export default function MultiFormReport({
     const investigationPoints = Array.isArray(mp?.investigationPoints)
       ? mp.investigationPoints
       : typeof mp?.investigationPoints === "string" &&
-          mp.investigationPoints.trim()
+        mp.investigationPoints.trim()
         ? mp.investigationPoints.split("\n")
         : [];
 
@@ -375,7 +375,7 @@ export default function MultiFormReport({
       occurrence: {
         types:
           mp?.occurrenceDetails?.offenceTypes &&
-          mp.occurrenceDetails.offenceTypes.length > 0
+            mp.occurrenceDetails.offenceTypes.length > 0
             ? mp.occurrenceDetails.offenceTypes
             : mp?.occurrenceDetails?.offenceType
               ? [mp.occurrenceDetails.offenceType]
@@ -421,13 +421,13 @@ export default function MultiFormReport({
       detailedReport: {
         statement: val(
           mp?.detailedOccurrenceReport?.statement ||
-            mp?.detailedOccurrenceReport,
+          mp?.detailedOccurrenceReport,
         ),
 
         findings: Array.isArray(mp?.investigationPoints)
           ? mp.investigationPoints
           : typeof mp?.investigationPoints === "string" &&
-              mp.investigationPoints.trim()
+            mp.investigationPoints.trim()
             ? mp.investigationPoints.split("\n")
             : [],
 

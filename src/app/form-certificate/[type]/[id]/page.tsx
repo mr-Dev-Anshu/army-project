@@ -35,10 +35,10 @@ export default function DocumentDetailsPage() {
     <div className="flex flex-col h-[100dvh] bg-gray-100/50 sm:bg-white overflow-hidden">
       {/* 📱 Mobile-Only Back Navigation */}
       <div className="sm:hidden flex items-center px-4 py-3 bg-white border-b border-gray-200">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => router.back()} 
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.back()}
           className="-ml-2 h-8 gap-1 text-gray-600"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -48,10 +48,10 @@ export default function DocumentDetailsPage() {
 
       {/* Component 1: Header - Sticky/Fixed at top */}
       <div className="flex-none z-20 shadow-sm sm:shadow-none bg-white">
-        <DocumentHeader 
-          doc={doc} 
-          type={normalizedType} 
-          isLoading={isLoading || isFetching} 
+        <DocumentHeader
+          doc={doc}
+          type={normalizedType}
+          isLoading={isLoading || isFetching}
         />
       </div>
 
@@ -63,7 +63,7 @@ export default function DocumentDetailsPage() {
             On desktop (sm:p-4), it looks like a paper on a desk.
           */}
           <div className="bg-white min-h-full sm:min-h-0 sm:rounded-xl sm:shadow-lg sm:border border-gray-200 transition-all duration-300">
-             <DocumentPreview doc={doc} isLoading={isLoading || isFetching} />
+            <DocumentPreview doc={doc} isLoading={isLoading || isFetching} />
           </div>
         </div>
       </main>
