@@ -82,6 +82,7 @@ export default function MultiFormReport({
   const [mode] = useState("mp");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingReport, setEditingReport] = useState<any | null>(null);
+  const [attachments, setAttachments] = useState<any[]>([]);
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { mutateAsync: createReportAsync } = useCreateMPReport();
@@ -783,6 +784,8 @@ export default function MultiFormReport({
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting} // Passed prop
             onReportNoChange={handleReportNoChange} // Wired up
+            attachments={attachments}
+            onAttachmentsChange={(items) => setAttachments(items)}
           />
 
           {/* RIGHT SIDE DYNAMIC CONTENT */}

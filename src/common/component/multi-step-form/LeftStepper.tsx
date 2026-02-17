@@ -1,9 +1,10 @@
 "use client";
-import { Check, Edit2, Save, Upload } from "lucide-react";
+import { Check, Edit2, Save, Upload, Paperclip, FileText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm, initialState } from "@/context/FormContext";
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
+import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
 
 interface Step {
   id: number;
@@ -25,6 +26,8 @@ interface LeftStepperProps {
   hideReportNo?: boolean;
   isSubmitting?: boolean;
   module?: "traffic" | "static";
+  attachments?: AttachedItem[];
+  onAttachmentsChange?: (attachments: AttachedItem[]) => void;
 }
 
 export const LeftStepper = ({
@@ -40,6 +43,8 @@ export const LeftStepper = ({
   hideReportNo = false,
   isSubmitting = false,
   module = "traffic",
+  attachments = [],
+  onAttachmentsChange,
 }: LeftStepperProps) => {
   const getStatus = (id: number) => {
     if (id === currentStep) return "active";
@@ -52,6 +57,7 @@ export const LeftStepper = ({
 
   const [editing, setEditing] = useState(false);
   const [reportValue, setReportValue] = useState(reportNo || "");
+  const [isAttachOpen, setIsAttachOpen] = useState(false);
 
   useEffect(() => {
     if (!editing) {
@@ -304,7 +310,67 @@ export const LeftStepper = ({
             </div>
           );
         })}
+
+        {/* UPLOAD DOCUMENTS SECTION */}
+        {onAttachmentsChange && currentStep === steps.length && (
+          <div className="border-t border-gray-700 pt-6 space-y-4">
+            <h4 className="text-sm font-semibold text-gray-300">Upload Supporting Documents</h4>
+            <p className="text-xs text-gray-400">Upload certificates, forms, or letters to attach to this report</p>
+
+            <Button
+              onClick={() => setIsAttachOpen(true)}
+              className="w-full bg-green-600 hover:bg-green-700 text-white h-10 text-sm font-medium rounded-md shadow-none flex items-center justify-center gap-2"
+            >
+              <Paperclip className="w-4 h-4" />
+              Upload Documents
+            </Button>
+
+            {/* Display uploaded attachments */}
+            {attachments && attachments.length > 0 && (
+              <div className="space-y-2">
+                {attachments.map((att: AttachedItem, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between border border-gray-600 rounded-lg px-3 py-2 bg-[#1f1f1f]"
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-gray-200 truncate">{att.name}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {att.type?.toUpperCase()}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newAttachments = [...attachments];
+                        newAttachments.splice(idx, 1);
+                        onAttachmentsChange?.(newAttachments);
+                      }}
+                      className="text-red-400 hover:text-red-300 p-1 flex-shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Attachment Modal */}
+      <FormAttachmentModal
+        isOpen={isAttachOpen}
+        onClose={() => setIsAttachOpen(false)}
+        onSave={(newAttachments) => {
+          if (onAttachmentsChange) {
+            onAttachmentsChange([...attachments, ...newAttachments]);
+          }
+        }}
+      />
 
       <div className="mt-4 flex flex-col sm:flex-row gap-2">
         <Button className="w-full sm:w-fit border border-gray-50 bg-transparent text-sm sm:text-base" onClick={() => onCancel && onCancel()}>Cancel</Button>

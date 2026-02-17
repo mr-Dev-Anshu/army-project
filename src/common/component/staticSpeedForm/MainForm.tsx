@@ -44,6 +44,7 @@ export default function StaticSpeedForm({
 }: StaticSpeedFormProps) {
   const { state, dispatch } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attachments, setAttachments] = useState<any[]>([]);
   console.log(existingReport);
 
   const staticData = state.formData.staticSpeed as any;
@@ -81,13 +82,13 @@ export default function StaticSpeedForm({
           dutyType: staticData.dutyBlock?.dutyType,
           startTime: staticData.dutyBlock?.startTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`,
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.startTime}`,
+            ).toISOString()
             : undefined,
           endTime: staticData.dutyBlock?.endTime
             ? new Date(
-                `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`,
-              ).toISOString()
+              `${staticData.dutyBlock.dateOfDuty}T${staticData.dutyBlock.endTime}`,
+            ).toISOString()
             : undefined,
         }),
 
@@ -180,8 +181,8 @@ export default function StaticSpeedForm({
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message ||
-          err?.message ||
-          "Failed to submit record",
+        err?.message ||
+        "Failed to submit record",
       );
     } finally {
       setIsSubmitting(false);
@@ -292,97 +293,97 @@ export default function StaticSpeedForm({
 
   const reportNo = staticData.reportNo || "TEMP/STATIC/001";
 
-const mapStaticSpeedToReport = (staticSpeed: any) => {
-  if (!staticSpeed) return null;
+  const mapStaticSpeedToReport = (staticSpeed: any) => {
+    if (!staticSpeed) return null;
 
-  const duty = staticSpeed?.dutyBlock || {};
-  const occ = staticSpeed?.offenceBlock || {};
-  const mp = staticSpeed?.reportingBlock || {};
-  const v = staticSpeed?.vehicleDetails || {};
+    const duty = staticSpeed?.dutyBlock || {};
+    const occ = staticSpeed?.offenceBlock || {};
+    const mp = staticSpeed?.reportingBlock || {};
+    const v = staticSpeed?.vehicleDetails || {};
 
-  const val = (v: any) => (v && v !== "Nil" ? v : "");
+    const val = (v: any) => (v && v !== "Nil" ? v : "");
 
-  const firstPerson = Array.isArray(staticSpeed.offenderPeople)
-    ? staticSpeed.offenderPeople[0]
-    : null;
+    const firstPerson = Array.isArray(staticSpeed.offenderPeople)
+      ? staticSpeed.offenderPeople[0]
+      : null;
 
-  /* 🔥 WITNESS MERGE LOGIC */
-  const witnessesArray = Array.isArray(staticSpeed.witnesses)
-    ? staticSpeed.witnesses
-    : [];
+    /* 🔥 WITNESS MERGE LOGIC */
+    const witnessesArray = Array.isArray(staticSpeed.witnesses)
+      ? staticSpeed.witnesses
+      : [];
 
-  const witnessMap = new Map<string, any>();
+    const witnessMap = new Map<string, any>();
 
-  witnessesArray.forEach((w: any) => {
-    const key =
-      w?.reportingBlock?.armyNumber ||
-      w?.reportingBlock?.ArmyNo ||
-      crypto.randomUUID();
+    witnessesArray.forEach((w: any) => {
+      const key =
+        w?.reportingBlock?.armyNumber ||
+        w?.reportingBlock?.ArmyNo ||
+        crypto.randomUUID();
 
-    witnessMap.set(key, w); // overwrite if same armyNo
-  });
+      witnessMap.set(key, w); // overwrite if same armyNo
+    });
 
-  const mergedWitnesses = Array.from(witnessMap.values());
-  const firstWitness = mergedWitnesses[0] || null;
+    const mergedWitnesses = Array.from(witnessMap.values());
+    const firstWitness = mergedWitnesses[0] || null;
 
-  return {
-    reportNo: staticSpeed.reportNo,
-    reportDate: new Date().toLocaleDateString("en-GB"),
+    return {
+      reportNo: staticSpeed.reportNo,
+      reportDate: new Date().toLocaleDateString("en-GB"),
 
-    particulars: {
-      rider: {
-        armyNo: val(firstPerson?.details?.armyNumber),
-        rank: val(firstPerson?.details?.rank),
-        name: val(firstPerson?.details?.name),
-        unit: val(firstPerson?.details?.unit),
-        address: val(firstPerson?.details?.address),
-        iCardNo: val(firstPerson?.details?.iCardNumber),
+      particulars: {
+        rider: {
+          armyNo: val(firstPerson?.details?.armyNumber),
+          rank: val(firstPerson?.details?.rank),
+          name: val(firstPerson?.details?.name),
+          unit: val(firstPerson?.details?.unit),
+          address: val(firstPerson?.details?.address),
+          iCardNo: val(firstPerson?.details?.iCardNumber),
+        },
+        vehicle: {
+          baNo: val(v.vehicleNumber),
+          makeAndTake: val(v.vehicleName),
+        },
       },
-      vehicle: {
-        baNo: val(v.vehicleNumber),
-        makeAndTake: val(v.vehicleName),
-      },
-    },
 
-    occurrence: {
-      dateOfDuty: duty.dateOfDuty,
-      dutyLocation: val(duty.dutyLocation),
-      timeOfOffence: val(
-        occ.timeOfOffence ||
+      occurrence: {
+        dateOfDuty: duty.dateOfDuty,
+        dutyLocation: val(duty.dutyLocation),
+        timeOfOffence: val(
+          occ.timeOfOffence ||
           (occ.time ? new Date(occ.time).toISOString().slice(11, 16) : "")
-      ),
-      locationOfOffence: val(occ.incidentLocation),
-      statement: val(occ.description),
-    },
+        ),
+        locationOfOffence: val(occ.incidentLocation),
+        statement: val(occ.description),
+      },
 
-    offence: {
-      actualSpeed: val(occ.actualSpeedNoted),
-      authSpeed: val(occ.authSpeed),
-      overSpeed: val(occ.overSpeedCalculated),
-      description: val(occ.description),
-    },
+      offence: {
+        actualSpeed: val(occ.actualSpeedNoted),
+        authSpeed: val(occ.authSpeed),
+        overSpeed: val(occ.overSpeedCalculated),
+        description: val(occ.description),
+      },
 
-    witnessSig: {
-      armyNo: val(firstWitness?.reportingBlock?.armyNumber),
-      rank: val(firstWitness?.reportingBlock?.rank),
-      name: val(firstWitness?.reportingBlock?.nameReportingMP),
-      unit: val(firstWitness?.reportingBlock?.unit),
-    },
+      witnessSig: {
+        armyNo: val(firstWitness?.reportingBlock?.armyNumber),
+        rank: val(firstWitness?.reportingBlock?.rank),
+        name: val(firstWitness?.reportingBlock?.nameReportingMP),
+        unit: val(firstWitness?.reportingBlock?.unit),
+      },
 
-    mpSig: {
-      armyNo: val(mp.armyNumber),
-      rank: val(mp.rank),
-      name: val(mp.nameReportingMP),
-      unit: val(mp.unit),
-    },
+      mpSig: {
+        armyNo: val(mp.armyNumber),
+        rank: val(mp.rank),
+        name: val(mp.nameReportingMP),
+        unit: val(mp.unit),
+      },
 
-    remarks: {
-      text: val(staticSpeed.remarks),
-      station: val(duty.dutyLocation),
-      dated: new Date().toLocaleDateString("en-GB"),
-    },
+      remarks: {
+        text: val(staticSpeed.remarks),
+        station: val(duty.dutyLocation),
+        dated: new Date().toLocaleDateString("en-GB"),
+      },
+    };
   };
-};
 
 
   return (
@@ -408,6 +409,9 @@ const mapStaticSpeedToReport = (staticSpeed: any) => {
             onCancel={onCancel}
             onStepClick={(id) => dispatch({ type: "SET_STEP", payload: id })}
             isSubmitting={isSubmitting}
+            attachments={attachments}
+            onAttachmentsChange={(items) => setAttachments(items)}
+            module="static"
           />
 
           <RightPanel
