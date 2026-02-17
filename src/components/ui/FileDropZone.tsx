@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  onFileSelect: (file: File) => void;
+  onFileSelect: (files: File[]) => void;
 }
 
 export default function FileDropZone({ onFileSelect }: Props) {
@@ -15,11 +15,12 @@ export default function FileDropZone({ onFileSelect }: Props) {
       <input
         ref={inputRef}
         type="file"
+        multiple
         accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
         hidden
         onChange={(e) => {
-          if (e.target.files?.[0]) {
-            onFileSelect(e.target.files[0]);
+          if (e.target.files) {
+            onFileSelect(Array.from(e.target.files));
           }
         }}
       />

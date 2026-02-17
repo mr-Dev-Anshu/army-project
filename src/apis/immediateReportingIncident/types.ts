@@ -32,6 +32,12 @@ export interface ImmediateReportingIncident {
     coordWith?: string;
     incidentCoveredBy?: string;
     relevantPhotos?: string[];
+    attachments?: Array<{
+        type: string;
+        name: string;
+        url: string;
+        uploadedAt: string;
+    }>;
     age?: string;
     totalServiceDuration?: string;
     individualWorkingStatus?: "Leave" | "Duty" | "";

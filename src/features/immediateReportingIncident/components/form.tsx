@@ -13,10 +13,11 @@ import { SuggestionInput } from "@/common/component/SuggestionInput";
 import { SuggestionTextarea } from "@/common/component/SuggestionTextarea";
 import { useCreateImmediateReportingIncident, useUpdateImmediateReportingIncident } from "../hooks";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types";
-import { Loader2, Upload, X, Plus, Trash2, CheckCheck, PanelLeft } from "lucide-react";
+import { Loader2, Upload, X, Plus, Trash2, CheckCheck, PanelLeft, Paperclip, FileText } from "lucide-react";
 import { uploadFile, uploadMultipleFiles } from "@/lib/uploadFile";
 import Link from "next/link";
 import { IndividualVictimDetails } from "@/components/IndividualVictimDetails";
+import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
 
 const INITIAL_STATE = {
     reportHeading: "",
@@ -44,6 +45,7 @@ const INITIAL_STATE = {
     coordWith: "",
     incidentCoveredBy: "",
     relevantPhotos: [] as string[],
+    attachments: [] as AttachedItem[],
 };
 
 interface Props {
@@ -60,6 +62,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
     const { mutateAsync: updateRecord, isPending: isUpdating } = useUpdateImmediateReportingIncident();
     const [isUploading, setIsUploading] = useState(false);
     const [photoUrlInput, setPhotoUrlInput] = useState("");
+    const [showAttachmentModal, setShowAttachmentModal] = useState(false);
 
     const isPending = isCreating || isUpdating;
 
@@ -89,92 +92,92 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
 
 
     const handleSave = async () => {
-    try {
-        const cleanedData = structuredClone(reportData);
+        try {
+            const cleanedData = structuredClone(reportData);
 
-        /* =========================================
-           STEP 1 — SAFETY CHECK
-        ========================================= */
+            /* =========================================
+               STEP 1 — SAFETY CHECK
+            ========================================= */
 
-        if (!Array.isArray(cleanedData.individuals) || cleanedData.individuals.length === 0) {
-            toast.error("At least one individual is required");
-            return;
-        }
-
-        if (
-            cleanedData.individuals.some(
-                (ind: any) =>
-                    (ind.individualType === "militaryPersonnel" || !ind.individualType) &&
-                    !ind?.individualDetails?.armyNo
-            )
-        ) {
-            toast.error("Army Number is required for all individuals");
-            return;
-        }
-
-        /* =========================================
-           STEP 2 — CLEAN EMPTY VALUES (LIKE MT)
-        ========================================= */
-
-        cleanedData.individuals = cleanedData.individuals.map((ind: any) => {
-            const newInd = { ...ind };
-
-            // remove empty strings
-            Object.keys(newInd).forEach((key) => {
-                if (newInd[key] === "") {
-                    delete newInd[key];
-                }
-            });
-
-            if (newInd.individualDetails) {
-                Object.keys(newInd.individualDetails).forEach((key) => {
-                    if (newInd.individualDetails[key] === "") {
-                        delete newInd.individualDetails[key];
-                    }
-                });
+            if (!Array.isArray(cleanedData.individuals) || cleanedData.individuals.length === 0) {
+                toast.error("At least one individual is required");
+                return;
             }
 
-            return newInd;
-        });
+            if (
+                cleanedData.individuals.some(
+                    (ind: any) =>
+                        (ind.individualType === "militaryPersonnel" || !ind.individualType) &&
+                        !ind?.individualDetails?.armyNo
+                )
+            ) {
+                toast.error("Army Number is required for all individuals");
+                return;
+            }
 
-        /* =========================================
-           STEP 3 — FINAL PAYLOAD (NO STRUCTURE CHANGE)
-        ========================================= */
+            /* =========================================
+               STEP 2 — CLEAN EMPTY VALUES (LIKE MT)
+            ========================================= */
 
-        const payload = {
-            ...cleanedData,
-            individuals: cleanedData.individuals || [],
-        };
+            cleanedData.individuals = cleanedData.individuals.map((ind: any) => {
+                const newInd = { ...ind };
 
-        console.log("🚀 FINAL IMMEDIATE REPORT PAYLOAD =>", payload);
+                // remove empty strings
+                Object.keys(newInd).forEach((key) => {
+                    if (newInd[key] === "") {
+                        delete newInd[key];
+                    }
+                });
 
-        /* =========================================
-           STEP 4 — SAVE
-        ========================================= */
+                if (newInd.individualDetails) {
+                    Object.keys(newInd.individualDetails).forEach((key) => {
+                        if (newInd.individualDetails[key] === "") {
+                            delete newInd.individualDetails[key];
+                        }
+                    });
+                }
 
-        if (initialData && initialData._id) {
-            await updateRecord({
-                id: initialData._id,
-                data: payload,
+                return newInd;
             });
-            toast.success("Incident Report Updated");
-        } else {
-            await createRecord(payload);
-            toast.success("Incident Report Created");
+
+            /* =========================================
+               STEP 3 — FINAL PAYLOAD (NO STRUCTURE CHANGE)
+            ========================================= */
+
+            const payload = {
+                ...cleanedData,
+                individuals: cleanedData.individuals || [],
+            };
+
+            console.log("🚀 FINAL IMMEDIATE REPORT PAYLOAD =>", payload);
+
+            /* =========================================
+               STEP 4 — SAVE
+            ========================================= */
+
+            if (initialData && initialData._id) {
+                await updateRecord({
+                    id: initialData._id,
+                    data: payload,
+                });
+                toast.success("Incident Report Updated");
+            } else {
+                await createRecord(payload);
+                toast.success("Incident Report Created");
+            }
+
+            dispatch({
+                type: "SET_PATH",
+                path: "formData.immediateReportingIncident",
+                value: INITIAL_STATE,
+            });
+
+            onSuccess();
+        } catch (error: any) {
+            console.error("❌ SUBMIT ERROR", error);
+            toast.error(error?.response?.data?.message || "Operation failed");
         }
-
-        dispatch({
-            type: "SET_PATH",
-            path: "formData.immediateReportingIncident",
-            value: INITIAL_STATE,
-        });
-
-        onSuccess();
-    } catch (error: any) {
-        console.error("❌ SUBMIT ERROR", error);
-        toast.error(error?.response?.data?.message || "Operation failed");
-    }
-};
+    };
 
 
     // const handleSave = async () => {
@@ -343,7 +346,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                     </div>
                 </div>
 
-               
+
 
                 {/* 2. Particulars of Offender / Victim (Loop) */}
                 {reportData.individuals?.map((individual: any, index: number) => (
@@ -565,7 +568,64 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                     </div>
                 </div>
 
+                {/* 11. Upload Supporting Documents */}
+                <div className="space-y-4 border-t pt-6">
+                    <h3 className="text-sm font-semibold">11. Upload Supporting Documents (Optional)</h3>
+                    <p className="text-xs text-gray-500">Upload certificates, forms, or letters to attach to this report</p>
+
+                    <Button
+                        type="button"
+                        onClick={() => setShowAttachmentModal(true)}
+                        className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                    >
+                        <Paperclip className="w-4 h-4" />
+                        Upload Documents
+                    </Button>
+
+                    {/* Display uploaded attachments */}
+                    {reportData.attachments && reportData.attachments.length > 0 && (
+                        <div className="space-y-2">
+                            {reportData.attachments.map((att: AttachedItem, idx: number) => (
+                                <div
+                                    key={idx}
+                                    className="flex items-center justify-between border rounded-lg px-4 py-3 bg-gray-50"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <FileText className="w-5 h-5 text-gray-600" />
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900">{att.name}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {att.type?.toUpperCase()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const newAttachments = [...(reportData.attachments || [])];
+                                            newAttachments.splice(idx, 1);
+                                            setField("attachments", newAttachments);
+                                        }}
+                                        className="text-red-500 hover:text-red-700 p-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
             </div>
+
+            {/* Attachment Modal */}
+            <FormAttachmentModal
+                isOpen={showAttachmentModal}
+                onClose={() => setShowAttachmentModal(false)}
+                onSave={(newAttachments: AttachedItem[]) => {
+                    setField("attachments", [...(reportData.attachments || []), ...newAttachments]);
+                }}
+            />
 
             {/* Footer */}
             <div className="flex justify-between gap-4 pt-6 border-t mt-8 bg-white sticky bottom-0 z-10 p-4">
