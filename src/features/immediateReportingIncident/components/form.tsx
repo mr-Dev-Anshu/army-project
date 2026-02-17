@@ -585,7 +585,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({ onCancel, onSu
                     {/* Display uploaded attachments */}
                     {reportData.attachments && reportData.attachments.length > 0 && (
                         <div className="space-y-2">
-                            {reportData.attachments.map((att: AttachedItem, idx: number) => (
+                            {reportData.attachments.map((att, idx: number) => (
                                 <div
                                     key={idx}
                                     className="flex items-center justify-between border rounded-lg px-4 py-3 bg-gray-50"

@@ -15,7 +15,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   type: "certificate" | "letter" | "form";
-mode: "create" | "rename" | "reupload";
+  mode: "create" | "rename" | "reupload";
   document?: {
     _id: string;
     name: string;
@@ -134,10 +134,10 @@ export default function AddDocumentModal({
   };
 
   const modalTitle = isRename
-  ? "Rename Document"
-  : isReupload
-  ? `Re-upload ${type}`
-  : `Add New ${type}`;
+    ? "Rename Document"
+    : isReupload
+      ? `Re-upload ${type}`
+      : `Add New ${type}`;
 
   return (
     <Modal
@@ -149,7 +149,7 @@ export default function AddDocumentModal({
     >
       <div className="space-y-5">
         {/* File upload ONLY in create mode */}
-        {!isRename && <FileDropZone onFileSelect={setFile} />}
+        {!isRename && <FileDropZone onFileSelect={(files) => setFile(files[0] || null)} />}
 
         {!isRename && file && (
           <p className="text-xs text-gray-500">
@@ -167,9 +167,8 @@ export default function AddDocumentModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={isReupload}
-            className={`mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              isReupload ? "bg-gray-100 cursor-not-allowed" : ""
-            }`}
+            className={`mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${isReupload ? "bg-gray-100 cursor-not-allowed" : ""
+              }`}
           />
         </div>
 
@@ -178,23 +177,23 @@ export default function AddDocumentModal({
             Cancel
           </Button>
 
-            <Button
+          <Button
             className="bg-[#188FFA]"
-              size="sm"
-              disabled={
-                uploading ||
-                (isRename ? !name : isReupload ? !file : !file || !name)
-              }
-              onClick={handleSave}
-            >
-              {uploading
-                ? "Saving..."
-                : isRename
+            size="sm"
+            disabled={
+              uploading ||
+              (isRename ? !name : isReupload ? !file : !file || !name)
+            }
+            onClick={handleSave}
+          >
+            {uploading
+              ? "Saving..."
+              : isRename
                 ? "Rename"
                 : isReupload
-                ? `Re-upload ${type}`
-                : `Save ${type}`}
-            </Button>
+                  ? `Re-upload ${type}`
+                  : `Save ${type}`}
+          </Button>
         </div>
       </div>
     </Modal>

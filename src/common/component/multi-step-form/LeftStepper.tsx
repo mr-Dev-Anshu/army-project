@@ -314,15 +314,14 @@ export const LeftStepper = ({
         {/* UPLOAD DOCUMENTS SECTION */}
         {onAttachmentsChange && currentStep === steps.length && (
           <div className="border-t border-gray-700 pt-6 space-y-4">
-            <h4 className="text-sm font-semibold text-gray-300">Upload Supporting Documents</h4>
-            <p className="text-xs text-gray-400">Upload certificates, forms, or letters to attach to this report</p>
+          
 
             <Button
               onClick={() => setIsAttachOpen(true)}
-              className="w-full bg-green-600 hover:bg-green-700 text-white h-10 text-sm font-medium rounded-md shadow-none flex items-center justify-center gap-2"
+              className="w-full bg-white text-black hover:bg-gray-200 h-10 text-[13px] font-medium rounded-md shadow-none flex items-center justify-center gap-2"
             >
               <Paperclip className="w-4 h-4" />
-              Upload Documents
+              Attach Signed Certificates/Form/Letters
             </Button>
 
             {/* Display uploaded attachments */}
