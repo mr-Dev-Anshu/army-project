@@ -46,7 +46,7 @@ const RegisterBooks = () => {
                     title: "MP General Diary & Daily Occurrence Book",
                     icon: <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="48" height="48" rx="24" fill="#404040" />
-                        <path d="M14.6665 32.7526C14.6665 31.9791 14.9738 31.2372 15.5208 30.6902C16.0678 30.1432 16.8096 29.8359 17.5832 29.8359H33.3332" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M14.6665 32.7526C14.6665 31.9791 14.9738 31.2372 15.5208 30.6902C16.0678 30.1432 16.8096 29.8359 17.5832 29.8359H33.3332" stroke="white" strokeWidth="2" stroke-linecap="round" stroke-linejoin="round" />
                         <path d="M17.5832 12.3359H33.3332V35.6693H17.5832C16.8096 35.6693 16.0678 35.362 15.5208 34.815C14.9738 34.268 14.6665 33.5262 14.6665 32.7526V15.2526C14.6665 14.4791 14.9738 13.7372 15.5208 13.1902C16.0678 12.6432 16.8096 12.3359 17.5832 12.3359Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     ,

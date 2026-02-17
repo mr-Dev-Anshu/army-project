@@ -12,7 +12,11 @@ import StaticSpeedReport from "@/components/reports/StaticSpeedReport";
 import MpOccurrenceReport from "@/components/reports/MpOccurrenceReport";
 
 import ConfirmationModal from "@/components/common/ConfirmationModal";
-import { TrafficFormState, StaticSpeedFormState, MpReportState } from "@/common/types/form.types";
+import {
+  TrafficFormState,
+  StaticSpeedFormState,
+  MpReportState,
+} from "@/common/types/form.types";
 import MilitaryPoliceReport from "@/components/reports/MilitaryPoliceReport";
 
 /* ================= TYPES ================= */
@@ -46,39 +50,35 @@ export const RightPanel = ({
   const totalSteps = Object.keys(stepsConfig || {}).length;
   const isLastStep = step === totalSteps;
 
+  const isNextDisabled = () => {
+    /* ===== STATIC ===== */
+    if (mode === "static" && step === 1) {
+      const vd = formData.staticSpeed?.vehicleDetails;
+      const offenders = formData.staticSpeed?.offenderPeople;
 
+      // ✅ vehicle details required
+      if (!vd?.vehicleType || !vd?.category) return true;
 
- const isNextDisabled = () => {
-  /* ===== STATIC ===== */
-  if (mode === "static" && step === 1) {
-    const vd = formData.staticSpeed?.vehicleDetails;
-    const offenders = formData.staticSpeed?.offenderPeople;
+      // ✅ at least one offender required
+      if (!Array.isArray(offenders) || offenders.length === 0) return true;
 
-    // ✅ vehicle details required
-    if (!vd?.vehicleType || !vd?.category) return true;
+      // ✅ offender details should not be empty
+      const first = offenders[0]?.details || {};
+      const hasSomeDetail = Object.values(first).some(
+        (v) => v !== "" && v !== null && v !== undefined,
+      );
 
-    // ✅ at least one offender required
-    if (!Array.isArray(offenders) || offenders.length === 0) return true;
+      if (!hasSomeDetail) return true;
 
-    // ✅ offender details should not be empty
-    const first = offenders[0]?.details || {};
-    const hasSomeDetail = Object.values(first).some(
-      (v) => v !== "" && v !== null && v !== undefined
-    );
+      return false;
+    }
 
-    if (!hasSomeDetail) return true;
+    /* ===== TRAFFIC ===== */
+    if (mode === "traffic" && step === 1)
+      return !formData.traffic?.vehicleInvolved;
 
     return false;
-  }
-
-  /* ===== TRAFFIC ===== */
-  if (mode === "traffic" && step === 1)
-    return !formData.traffic?.vehicleInvolved;
-
-  return false;
-};
-
-
+  };
 
   // /* ================= NEXT DISABLE ================= */
   // const isNextDisabled = () => {
@@ -94,38 +94,55 @@ export const RightPanel = ({
   //   return false;
   // };
 
-  const renderPreviewReport = () => {
-    if (!mapReport) {
-      console.error("❌ mapReport missing");
-      return <p className="text-red-500">Preview not available</p>;
-    }
+const renderPreviewReport = () => {
+  if (!mapReport) {
+    console.error("❌ mapReport missing");
+    return <p className="text-red-500">Preview not available</p>;
+  }
 
-    if (mode === "traffic") {
-      return (
-        <MilitaryPoliceReport
-          {...mapReport(state.formData.traffic)}
-        />
-      );
-    }
+  if (mode === "traffic") {
+    const traffic = state.formData.traffic || {};
 
-    if (mode === "static") {
-      return (
-        <StaticSpeedReport
-          {...mapReport(state.formData.staticSpeed)}
-        />
-      );
-    }
+    const mappedRaw = mapReport(traffic) || {};
 
-    if (mode === "mp") {
-      return (
-        <MpOccurrenceReport
-          {...mapReport(state.formData.mpReport)}
-        />
-      );
-    }
+    const normalize = (arr: any[]) =>
+      Array.isArray(arr)
+        ? arr.map((item: any) =>
+            typeof item === "string"
+              ? item
+              : item?.reference || item?.offenceType || ""
+          )
+        : [];
 
-    return null;
-  };
+    const mapped = {
+      ...mappedRaw,
+      offence: {
+        ...mappedRaw?.offence,
+        types: normalize(mappedRaw?.offence?.types),
+        refs: normalize(mappedRaw?.offence?.refs),
+      },
+    };
+
+    console.log("PREVIEW DATA 👉", mapped);
+
+    return <MilitaryPoliceReport {...mapped} />;
+  }
+
+  if (mode === "static") {
+    return (
+      <StaticSpeedReport {...mapReport(state.formData.staticSpeed)} />
+    );
+  }
+
+  if (mode === "mp") {
+    return (
+      <MpOccurrenceReport {...mapReport(state.formData.mpReport)} />
+    );
+  }
+
+  return null;
+};
+
 
   return (
     <>
@@ -133,9 +150,7 @@ export const RightPanel = ({
         <div className="border rounded-lg w-full flex flex-col flex-1 min-h-0">
           {/* ================= HEADER ================= */}
           <div className="flex justify-between px-4 py-3 border-b bg-white">
-            <h3 className="font-bold text-lg">
-              {current?.title || "Step"}
-            </h3>
+            <h3 className="font-bold text-lg">{current?.title || "Step"}</h3>
 
             {!state.preview && (
               <div className="flex gap-2 ">
@@ -171,9 +186,7 @@ export const RightPanel = ({
             {state.preview && (
               <div className="h-full flex flex-col">
                 <div className="flex items-center justify-between px-4 py-2 bg-white border-b">
-                  <h2 className="font-semibold text-sm">
-                    REPORT PREVIEW
-                  </h2>
+                  <h2 className="font-semibold text-sm">REPORT PREVIEW</h2>
 
                   <div className="flex items-center gap-2">
                     <Button
@@ -189,8 +202,7 @@ export const RightPanel = ({
                         dispatch({ type: "SET_PREVIEW", payload: false });
                         dispatch({
                           type: "SET_STEP",
-                          payload:
-                            state.completedSteps.at(-1) ?? step,
+                          payload: state.completedSteps.at(-1) ?? step,
                         });
                       }}
                     >
@@ -220,7 +232,11 @@ export const RightPanel = ({
               </Button>
 
               {!isLastStep ? (
-                <Button className="bg-[#0088FF] p-6 px-10" onClick={onNext} disabled={isNextDisabled()}>
+                <Button
+                  className="bg-[#0088FF] p-6 px-10"
+                  onClick={onNext}
+                  disabled={isNextDisabled()}
+                >
                   Next <ChevronRight className="ml-2" />
                 </Button>
               ) : (
@@ -231,7 +247,7 @@ export const RightPanel = ({
                       type: "SET_PATH",
                       path: "completedSteps",
                       value: Array.from(
-                        new Set([...state.completedSteps, step])
+                        new Set([...state.completedSteps, step]),
                       ),
                     });
                     dispatch({ type: "SET_PREVIEW", payload: true });
@@ -270,7 +286,6 @@ export const RightPanel = ({
             setShowClearModal(false);
           }, 300);
         }}
-
         title="Clear Form?"
         message="Are you sure you want to clear the entire form?"
         confirmLabel="Yes, Clear"

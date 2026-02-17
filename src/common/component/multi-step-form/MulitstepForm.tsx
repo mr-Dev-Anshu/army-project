@@ -18,6 +18,7 @@ import Step4Remarks from "./steps/Step4Remarks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { useCreateOnDutyWitnessingMp } from "@/features/MpWitnessing/hooks";
 import { OffenderType } from "@/apis/offender/types";
+import { useCreateDocument } from "@/features/certificateAndForm/hook";
 
 export default function MultiStepForm({
   onCancel,
@@ -31,6 +32,7 @@ export default function MultiStepForm({
   const submitLockRef = useRef(false);
   const hydratedRef = useRef<string | null>(null); // ✅ FIX
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attachments, setAttachments] = useState<any[]>([]);
 
   console.log("EDIT DATA RECEIVED 👉", existingOffence);
 
@@ -38,6 +40,7 @@ export default function MultiStepForm({
   const { mutateAsync: updateOffence } = useUpdateTrafficOffence();
   const { mutateAsync: createOffender } = useCreateOffender();
   const { mutateAsync: createWitness } = useCreateOnDutyWitnessingMp();
+  const createDocumentMutation = useCreateDocument();
 
   const reportNo = state.formData.traffic?.reportNo || "TEMP/REPORT/001";
 
@@ -58,10 +61,25 @@ export default function MultiStepForm({
 
     const eo = existingOffence;
 
+    /* ===== OFFENDERS ===== */
+
+    const offenderPeople =
+      Array.isArray(eo.offenders) && eo.offenders.length > 0
+        ? eo.offenders.map((o: any) => ({
+            whoIsIt: o.category || "Offender",
+            type: o.offenderType || "Civilian",
+            details: { ...(o.offenderDetails || {}) },
+            _id: o._id,
+          }))
+        : [];
+
+    /* ===== TRAFFIC ===== */
+
     const traffic = {
       ...initialState.formData.traffic,
 
-      /* STEP 1 */
+      offenderPeople, // ✅ MUST BE HERE
+
       vehicleInvolved: eo.isVehicleInvolved ? "yes" : "no",
 
       vehicleDetails: {
@@ -71,7 +89,6 @@ export default function MultiStepForm({
         vehicleNumber: eo.vehicleNumber || "",
       },
 
-      /* STEP 2 */
       onDutyDetails: {
         dateOfDuty: eo.onDutyDetails?.dateOfDuty
           ? new Date(eo.onDutyDetails.dateOfDuty).toISOString().split("T")[0]
@@ -86,14 +103,6 @@ export default function MultiStepForm({
         dutyType: eo.onDutyDetails?.dutyType || "",
       },
 
-      onDutyDetailsMPReporting: {
-        nameReportingMP: eo.onDutyDetailsMPReporting?.nameReportingMP || "",
-        rank: eo.onDutyDetailsMPReporting?.rank || "",
-        unit: eo.onDutyDetailsMPReporting?.unit || "",
-        armyNumber: eo.onDutyDetailsMPReporting?.armyNumber || "",
-      },
-
-      /* STEP 3 */
       offenceOccurenceDetails: {
         timeOfOffence: eo.offenceOccurenceDetails?.timeOfOffence
           ? new Date(eo.offenceOccurenceDetails.timeOfOffence)
@@ -107,55 +116,10 @@ export default function MultiStepForm({
 
       offenceTypes: eo.offenceTypes || [],
       offenceRefList: eo.offenceTypeReference || [],
-
-      /* STEP 4 */
       remarks: eo.customFields?.remarks || eo.remarks || "",
     };
 
-    if (Array.isArray(eo.offenders) && eo.offenders.length > 0) {
-      const uniqueMap = new Map<string, any>();
-
-      eo.offenders.forEach((o: any) => {
-        // unique key (important)
-        const key = `${o.category || ""}_${o.offenderType || ""}_${o._id || ""}`;
-
-        if (!uniqueMap.has(key)) {
-          uniqueMap.set(key, {
-            whoIsIt: o.category || "Offender", // Offender / Relative
-            type: o.offenderType,
-            details: { ...o.offenderDetails },
-            _id: o._id,
-          });
-        }
-      });
-
-      traffic.offenderPeople = Array.from(uniqueMap.values());
-    }
-
-    /* WITNESSES */
-   if (Array.isArray(eo.onDutyWitnessingMps)) {
-
-  const witnessMap = new Map<string, any>();
-
-  eo.onDutyWitnessingMps.forEach((w: any) => {
-
-    const key = `${w.ArmyNo}_${w.rank}_${w.unit}`;
-
-    if (!witnessMap.has(key)) {
-      witnessMap.set(key, {
-        reportingBlock: {
-          armyNumber: w.ArmyNo || "",
-          nameReportingMP: w.name || "",
-          rank: w.rank || "",
-          unit: w.unit || "",
-          contactNumber: w.contactNumber || "",
-        },
-      });
-    }
-  });
-
-  traffic.witnesses = Array.from(witnessMap.values());
-}
+    console.log("HYDRATED TRAFFIC 👉", traffic);
 
     dispatch({
       type: "SET_FORM_DATA",
@@ -166,133 +130,161 @@ export default function MultiStepForm({
     });
   }, [existingOffence?._id]);
 
-  const mapTrafficToReport = (traffic: any) => {
-    const occ = traffic?.offenceOccurenceDetails || {};
-    const duty = traffic?.onDutyDetails || {};
-    const mp = traffic?.onDutyDetailsMPReporting || {};
-    const v = traffic?.vehicleDetails || {};
+const mapTrafficToReport = (traffic: any) => {
+  const occ = traffic?.offenceOccurenceDetails || {};
+  const duty = traffic?.onDutyDetails || {};
+  const mp = traffic?.onDutyDetailsMPReporting || {};
+  const v = traffic?.vehicleDetails || {};
 
-    const val = (v: any) =>
-      v !== undefined && v !== null && v !== "Nil" ? String(v) : "";
+  const val = (v: any) =>
+    v !== undefined && v !== null && v !== "Nil" ? String(v) : "";
 
-    const dateVal = (d: string) =>
-      d ? new Date(d).toLocaleDateString("en-GB") : "";
+  const dateVal = (d: string) =>
+    d ? new Date(d).toLocaleDateString("en-GB") : "";
 
-    /* ================= PERSON MAPPER ================= */
-    const mapPerson = (person: any) => {
-      const d = person?.details || {};
-      if (!Object.keys(d).length) return null;
+  /* ================= PERSON MAPPER ================= */
+  const mapPerson = (person: any) => {
+    const d = person?.details || person?.offenderDetails || person || {};
 
-      return {
-        aadharCardNo: val(d.aadharCardNo),
-        name: val(d.name),
-        so: val(d.so),
-        relation: val(d.relation),
-        armyNo: val(d.armyNumber || d.armyNo),
-        rank: val(d.rank),
-        unit: val(d.unit),
-        command: val(d.command),
-        fmn: val(d.fmn),
-        address: val(d.address),
-        iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo),
-      };
-    };
+    const hasValue = Object.values(d || {}).some(
+      (v) => v !== undefined && v !== null && v !== ""
+    );
 
-    /* ================= OFFENDERS ================= */
-    const persons = Array.isArray(traffic?.offenderPeople)
-      ? traffic.offenderPeople.map(mapPerson).filter(Boolean)
-      : [];
+    if (!hasValue) return null;
 
-    /* ================= WITNESSES ================= */
-    const witnesses = Array.isArray(traffic?.witnesses)
-      ? traffic.witnesses
-      : [];
-
-    const witnessSig = witnesses[0]?.reportingBlock
-      ? {
-          armyNo: val(
-            witnesses[0].reportingBlock.armyNumber ||
-              witnesses[0].reportingBlock.armyNo,
-          ),
-          rank: val(witnesses[0].reportingBlock.rank),
-          name: val(witnesses[0].reportingBlock.nameReportingMP),
-          unit: val(witnesses[0].reportingBlock.unit),
-        }
-      : {
-          armyNo: "",
-          rank: "",
-          name: "",
-          unit: "",
-        };
-
-    /* ================= RETURN ================= */
     return {
-      reportNo: traffic?.reportNo || "",
-      reportDate: new Date().toLocaleDateString("en-GB"),
-
-      particulars: {
-        persons,
-
-        vehicle:
-          traffic?.vehicleInvolved === "yes"
-            ? {
-                baNo: val(v.vehicleNumber),
-                makeAndTake: val(v.vehicleName),
-                vehicleNumber:
-                  v.vehicleType === "DD Vehicle"
-                    ? "DD Veh. BA No."
-                    : "Registration No.",
-              }
-            : undefined,
-      },
-
-      occurrence: {
-        dateOfDuty: dateVal(duty.dateOfDuty),
-        dutyTime: (() => {
-          const start = duty.startTime;
-          const end = duty.endTime;
-          if (start && end) return `${start} Hrs - ${end} Hrs`;
-          if (start) return `${start} Hrs`;
-          return "";
-        })(),
-        dutyLocation: val(duty.dutyLocation),
-
-        witnessingMps: witnesses.map((w: any) => ({
-          name: val(w.reportingBlock?.nameReportingMP),
-          rank: val(w.reportingBlock?.rank),
-        })),
-
-        timeOfOffence: val(occ.timeOfOffence)
-          ? `${val(occ.timeOfOffence)} Hrs`
-          : "",
-        locationOfOffence: val(occ.incidentLocation),
-        statement: val(occ.description),
-      },
-
-      offence: {
-        types: Array.isArray(traffic?.offenceTypes) ? traffic.offenceTypes : [],
-        refs: Array.isArray(traffic?.offenceRefList)
-          ? traffic.offenceRefList
-          : [],
-        description: val(occ.description),
-      },
-
-      witnessSig, // ✅🔥 ADDED (CRASH FIX)
-
-      mpSig: {
-        armyNo: val(mp.armyNumber),
-        rank: val(mp.rank),
-        name: val(mp.nameReportingMP),
-        unit: val(mp.unit),
-      },
-
-      remarks: {
-        text: val(traffic.remarks),
-        station: val(duty.dutyLocation),
-        dated: new Date().toLocaleDateString("en-GB"),
-      },
+      name: val(d.name),
+      so: val(d.so),
+      relation: val(d.relation),
+      armyNo: val(d.armyNumber || d.armyNo),
+      rank: val(d.rank),
+      unit: val(d.unit),
+      command: val(d.command),
+      fmn: val(d.fmn),
+      address: val(d.address),
+      iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo),
     };
   };
+
+  /* ================= OFFENDERS ================= */
+  const persons = Array.isArray(traffic?.offenderPeople)
+    ? traffic.offenderPeople.map(mapPerson).filter(Boolean)
+    : [];
+
+  /* ================= PARTICULAR BLOCKS ================= */
+
+  const blocks: any[] = [];
+
+  persons.forEach((p: any, i: number) => {
+    blocks.push({
+      index: `(1.${i + 1})`,
+      type: "person",
+      fields: [
+        { label: "Name", value: p.name },
+        { label: "S/O", value: p.so },
+        { label: "Army No.", value: p.armyNo },
+        { label: "Rank", value: p.rank },
+        { label: "Unit", value: p.unit },
+        { label: "Address", value: p.address },
+        { label: "I Card No.", value: p.iCardNo },
+      ],
+    });
+  });
+
+  if (traffic?.vehicleInvolved === "yes") {
+    blocks.push({
+      index: `(1.${blocks.length + 1})`,
+      type: "vehicle",
+      fields: [
+        { label: "DD Veh. BA No.", value: val(v.vehicleNumber) },
+        { label: "Make & Take", value: val(v.vehicleName) },
+      ],
+    });
+  }
+
+  /* ================= WITNESSES ================= */
+
+  const witnesses = Array.isArray(traffic?.witnesses)
+    ? traffic.witnesses
+    : [];
+
+  const witnessSig = witnesses[0]?.reportingBlock
+    ? {
+        armyNo: val(
+          witnesses[0].reportingBlock.armyNumber ||
+            witnesses[0].reportingBlock.armyNo
+        ),
+        rank: val(witnesses[0].reportingBlock.rank),
+        name: val(witnesses[0].reportingBlock.nameReportingMP),
+        unit: val(witnesses[0].reportingBlock.unit),
+      }
+    : {
+        armyNo: "",
+        rank: "",
+        name: "",
+        unit: "",
+      };
+
+  /* ================= RETURN ================= */
+
+  return {
+    reportNo: traffic?.reportNo || "",
+    reportDate: new Date().toLocaleDateString("en-GB"),
+
+    particulars: {
+      blocks, // ✅ KEY FIX
+    },
+
+    occurrence: {
+      dateOfDuty: dateVal(duty.dateOfDuty),
+      dutyTime: (() => {
+        const start = duty.startTime;
+        const end = duty.endTime;
+        if (start && end) return `${start} Hrs - ${end} Hrs`;
+        if (start) return `${start} Hrs`;
+        return "";
+      })(),
+      dutyLocation: val(duty.dutyLocation),
+
+      witnessingMps: witnesses.map((w: any) => ({
+        name: val(w.reportingBlock?.nameReportingMP),
+        rank: val(w.reportingBlock?.rank),
+      })),
+
+      timeOfOffence: val(occ.timeOfOffence)
+        ? `${val(occ.timeOfOffence)} Hrs`
+        : "",
+      locationOfOffence: val(occ.incidentLocation),
+      statement: val(occ.description),
+    },
+
+    offence: {
+      types: Array.isArray(traffic?.offenceTypes)
+        ? traffic.offenceTypes
+        : [],
+      refs: Array.isArray(traffic?.offenceRefList)
+        ? traffic.offenceRefList
+        : [],
+      description: val(occ.description),
+    },
+
+    witnessSig,
+
+    mpSig: {
+      armyNo: val(mp.armyNumber),
+      rank: val(mp.rank),
+      name: val(mp.nameReportingMP),
+      unit: val(mp.unit),
+    },
+
+    remarks: {
+      text: val(traffic.remarks),
+      station: val(duty.dutyLocation),
+      dated: new Date().toLocaleDateString("en-GB"),
+    },
+  };
+};
+
 
   /* ================= SUBMIT ================= */
   const onSubmitFinal = async () => {
@@ -305,89 +297,102 @@ export default function MultiStepForm({
       const traffic = state.formData.traffic;
 
       const payload = {
-        reportId: traffic.reportNo || existingOffence.reportId,
+        reportId: traffic.reportNo || existingOffence?.reportId || "",
 
         actionStatus: false,
 
         isVehicleInvolved: traffic.vehicleInvolved === "yes",
 
-        /* ================= OFFENCE ================= */
         offenceTypes: Array.isArray(traffic.offenceTypes)
           ? traffic.offenceTypes
-          : existingOffence.offenceTypes,
+          : existingOffence?.offenceTypes || [],
 
         currentOffenceType:
           traffic.offenceTypes?.[traffic.offenceTypes.length - 1] ||
-          existingOffence.currentOffenceType,
+          existingOffence?.currentOffenceType ||
+          "",
 
         offenceTypeReference: Array.isArray(traffic.offenceRefList)
           ? traffic.offenceRefList
           : [],
 
-        /* ================= OCCURRENCE ================= */
         offenceOccurenceDetails: {
           timeOfOffence: traffic.offenceOccurenceDetails?.timeOfOffence
             ? new Date(
                 `1970-01-01T${traffic.offenceOccurenceDetails.timeOfOffence}:00Z`,
               )
-            : new Date(existingOffence.offenceOccurenceDetails.timeOfOffence),
+            : existingOffence?.offenceOccurenceDetails?.timeOfOffence
+              ? new Date(existingOffence.offenceOccurenceDetails.timeOfOffence)
+              : null,
 
           incidentLocation:
             traffic.offenceOccurenceDetails?.incidentLocation ||
-            existingOffence.offenceOccurenceDetails.incidentLocation,
+            existingOffence?.offenceOccurenceDetails?.incidentLocation ||
+            "",
 
           description:
             traffic.offenceOccurenceDetails?.description ||
-            existingOffence.offenceOccurenceDetails.description,
+            existingOffence?.offenceOccurenceDetails?.description ||
+            "",
 
           briefDescription:
             traffic.offenceOccurenceDetails?.briefDescription ||
-            existingOffence.offenceOccurenceDetails.briefDescription,
+            existingOffence?.offenceOccurenceDetails?.briefDescription ||
+            "",
         },
 
-        /* ================= ON DUTY ================= */
         onDutyDetails: {
           dateOfDuty: traffic.onDutyDetails?.dateOfDuty
             ? new Date(traffic.onDutyDetails.dateOfDuty)
-            : new Date(existingOffence.onDutyDetails.dateOfDuty),
+            : existingOffence?.onDutyDetails?.dateOfDuty
+              ? new Date(existingOffence.onDutyDetails.dateOfDuty)
+              : null,
 
           startTime: traffic.onDutyDetails?.startTime
             ? new Date(`1970-01-01T${traffic.onDutyDetails.startTime}:00Z`)
-            : new Date(existingOffence.onDutyDetails.startTime),
+            : existingOffence?.onDutyDetails?.startTime
+              ? new Date(existingOffence.onDutyDetails.startTime)
+              : null,
 
           endTime: traffic.onDutyDetails?.endTime
             ? new Date(`1970-01-01T${traffic.onDutyDetails.endTime}:00Z`)
-            : new Date(existingOffence.onDutyDetails.endTime),
+            : existingOffence?.onDutyDetails?.endTime
+              ? new Date(existingOffence.onDutyDetails.endTime)
+              : null,
 
           dutyLocation:
             traffic.onDutyDetails?.dutyLocation ||
-            existingOffence.onDutyDetails.dutyLocation,
+            existingOffence?.onDutyDetails?.dutyLocation ||
+            "",
 
           dutyType:
             traffic.onDutyDetails?.dutyType ||
-            existingOffence.onDutyDetails.dutyType,
+            existingOffence?.onDutyDetails?.dutyType ||
+            "",
         },
 
-        /* ================= REPORTING MP ================= */
         onDutyDetailsMPReporting: {
           nameReportingMP:
             traffic.onDutyDetailsMPReporting?.nameReportingMP ||
-            existingOffence.onDutyDetailsMPReporting.nameReportingMP,
+            existingOffence?.onDutyDetailsMPReporting?.nameReportingMP ||
+            "",
 
           rank:
             traffic.onDutyDetailsMPReporting?.rank ||
-            existingOffence.onDutyDetailsMPReporting.rank,
+            existingOffence?.onDutyDetailsMPReporting?.rank ||
+            "",
 
           unit:
             traffic.onDutyDetailsMPReporting?.unit ||
-            existingOffence.onDutyDetailsMPReporting.unit,
+            existingOffence?.onDutyDetailsMPReporting?.unit ||
+            "",
 
           armyNumber:
             traffic.onDutyDetailsMPReporting?.armyNumber ||
-            existingOffence.onDutyDetailsMPReporting.armyNumber,
+            existingOffence?.onDutyDetailsMPReporting?.armyNumber ||
+            "",
         },
 
-        /* ================= 🔥 WITNESSES ================= */
         onDutyWitnessingMps: Array.isArray(traffic.witnesses)
           ? traffic.witnesses.map((w: any) => ({
               ArmyNo: w.reportingBlock?.armyNumber || "",
@@ -396,27 +401,29 @@ export default function MultiStepForm({
               unit: w.reportingBlock?.unit || "",
               contactNumber: w.reportingBlock?.contactNumber || "",
             }))
-          : existingOffence.onDutyWitnessingMps,
+          : existingOffence?.onDutyWitnessingMps || [],
 
         witnessingMpsCount: Array.isArray(traffic.witnesses)
           ? traffic.witnesses.length
-          : existingOffence.witnessingMpsCount,
+          : existingOffence?.witnessingMpsCount || 0,
 
-        /* ================= CUSTOM ================= */
         customFields: {
-          remarks: traffic.remarks || existingOffence.customFields.remarks,
+          remarks:
+            traffic.remarks || existingOffence?.customFields?.remarks || "",
+
           selectedWitness: Array.isArray(traffic.witnesses)
             ? traffic.witnesses
-            : existingOffence.customFields.selectedWitness,
+            : existingOffence?.customFields?.selectedWitness || [],
+
           attachments:
             state.formData.mpReport?.attachments ||
-            existingOffence.customFields.attachments,
+            existingOffence?.customFields?.attachments ||
+            [],
         },
 
-        /* ================= META ================= */
-        offendersCount: existingOffence.offendersCount || 0,
-        resolvedRefs: existingOffence.resolvedRefs || [],
-        displayIndex: existingOffence.displayIndex || 1,
+        offendersCount: existingOffence?.offendersCount || 0,
+        resolvedRefs: existingOffence?.resolvedRefs || [],
+        displayIndex: existingOffence?.displayIndex || 1,
       };
 
       let offenceRes;
@@ -433,6 +440,29 @@ export default function MultiStepForm({
       }
 
       const offenceId = offenceRes?._id;
+
+      /* ================= SAVE ATTACHMENTS ================= */
+      if (attachments?.length) {
+        try {
+          console.log("📎 SAVING TRAFFIC ATTACHMENTS ===>", attachments);
+
+          await Promise.all(
+            attachments.map((file: any) =>
+              createDocumentMutation.mutateAsync({
+                name: file.name,
+                url: file.url,
+                type: file.type?.toLowerCase() || "document",
+              }),
+            ),
+          );
+
+          toast.success("Attachments saved");
+        } catch (err) {
+          console.error("❌ Attachment Save Error:", err);
+          toast.error("Attachment save failed");
+        }
+      }
+
       if (!offenceId) throw new Error("Offence ID missing");
 
       if (Array.isArray(traffic.offenderPeople)) {
@@ -514,6 +544,7 @@ export default function MultiStepForm({
           onCreate={onSubmitFinal}
           onCancel={onCancel}
           isSubmitting={isSubmitting}
+          // onAttach={(items) => setAttachments(items)}
           onReportNoChange={(val) =>
             dispatch({
               type: "SET_PATH",

@@ -12,8 +12,8 @@ export async function GET() {
         // }
 
         const superAdmin = await User.create({
-            username: "AnshuSuper",
-            password: "admin@123", 
+            username: "AnshuSuperAdmin",
+            password: "admin@1234", 
             role: "superadmin",
             email: "superadmin@army.nic.in",
             armyNo: "SA-001",

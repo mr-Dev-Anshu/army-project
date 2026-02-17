@@ -44,7 +44,7 @@ type IndividualDetailsBlock = {
 };
 
 type MTAccidentFormData = {
-  individuals: Individual[]; 
+  individuals: Individual[];
   accidentDetails: {
     accidentDate: string;
     accidentTime: string;
@@ -139,19 +139,18 @@ const MTAccidentReportForm: React.FC<Props> = ({
 
   /* ================= HYDRATION ================= */
 
- useEffect(() => {
-  if (!initialData) return;
+  useEffect(() => {
+    if (!initialData) return;
 
-  setFormData({
-    ...INITIAL_DATA,
-    ...initialData,
+    setFormData({
+      ...INITIAL_DATA,
+      ...initialData,
 
-    individuals: Array.isArray(initialData.individuals)
-      ? initialData.individuals
-      : INITIAL_DATA.individuals,
-  });
-}, [initialData]);
-
+      individuals: Array.isArray(initialData.individuals)
+        ? initialData.individuals
+        : INITIAL_DATA.individuals,
+    });
+  }, [initialData]);
 
   /* ================= FIXED HANDLE CHANGE (🔥 MAIN FIX) ================= */
 
@@ -192,85 +191,87 @@ const MTAccidentReportForm: React.FC<Props> = ({
     });
   };
 
-const handleSubmit = async () => {
-  const cleanedData = structuredClone(formData);
+  const handleSubmit = async () => {
+    const cleanedData = structuredClone(formData);
 
-  /* =========================================
+    /* =========================================
      STEP 1 — SAFETY CHECK
   ========================================= */
 
-  if (!Array.isArray(cleanedData.individuals) || cleanedData.individuals.length === 0) {
-    toast.error("At least one individual is required");
-    return;
-  }
+    if (
+      !Array.isArray(cleanedData.individuals) ||
+      cleanedData.individuals.length === 0
+    ) {
+      toast.error("At least one individual is required");
+      return;
+    }
 
-  /* =========================================
+    /* =========================================
      STEP 2 — CLEAN MILITARY RELATIVE (ALL)
   ========================================= */
 
-  const cleanRelative = (person: any) => {
-    if (!person) return;
+    const cleanRelative = (person: any) => {
+      if (!person) return;
 
-    if (!person.hasMilitaryRelative) {
-      delete person.militaryRelative;
-    }
+      if (!person.hasMilitaryRelative) {
+        delete person.militaryRelative;
+      }
 
-    if (
-      person?.hasMilitaryRelative &&
-      !person?.militaryRelative?.individualType
-    ) {
-      delete person.militaryRelative;
-    }
-  };
+      if (
+        person?.hasMilitaryRelative &&
+        !person?.militaryRelative?.individualType
+      ) {
+        delete person.militaryRelative;
+      }
+    };
 
-  cleanedData.individuals.forEach(cleanRelative);
+    cleanedData.individuals.forEach(cleanRelative);
 
-  /* =========================================
+    /* =========================================
      STEP 3 — VALIDATE (NO STRUCTURE CHANGE)
   ========================================= */
 
-  const { error, value } = createMTAccidentReportSchema.validate(
-    cleanedData,
-    { abortEarly: false }
-  );
+    const { error, value } = createMTAccidentReportSchema.validate(
+      cleanedData,
+      { abortEarly: false },
+    );
 
-  if (error) {
-    toast.error(error.details.map((d) => d.message).join(", "));
-    return;
-  }
+    if (error) {
+      toast.error(error.details.map((d) => d.message).join(", "));
+      return;
+    }
 
-  /* =========================================
+    /* =========================================
      STEP 4 — FINAL PAYLOAD (AS IS)
   ========================================= */
 
-  const payload = {
-    ...value,
-    individuals: value.individuals || [],
-  };
+    const payload = {
+      ...value,
+      individuals: value.individuals || [],
+    };
 
-  console.log("🚀 FINAL CLEAN PAYLOAD =>", payload);
+    console.log("🚀 FINAL CLEAN PAYLOAD =>", payload);
 
-  /* =========================================
+    /* =========================================
      STEP 5 — SAVE
   ========================================= */
 
-  try {
-    if (initialData) {
-      await updateReport({
-        id: initialData._id,
-        data: payload,
-      });
-    } else {
-      await createReport(payload);
+    try {
+      if (initialData) {
+        await updateReport({
+          id: initialData._id,
+          data: payload,
+        });
+      } else {
+        await createReport(payload);
+      }
+
+      onSuccess();
+    } catch (err) {
+      console.error("❌ SUBMIT ERROR", err);
+      toast.error("Failed to save report");
     }
-
-    onSuccess();
-  } catch (err) {
-    console.error("❌ SUBMIT ERROR", err);
-    toast.error("Failed to save report");
-  }
-};
-
+  };
 
   const iv = formData.individuals;
 
@@ -412,12 +413,13 @@ const handleSubmit = async () => {
           </div>
         </section>
 
-        {/* Vehicle Details */}
         <section className="space-y-4">
           <h3 className="text-base font-semibold text-gray-900 mb-4">
             Vehicle Details
           </h3>
-          <div className="space-y-4">
+
+          <div className="grid grid-cols-2  gap-4">
+            {/* Registration Number */}
             <div className="space-y-1">
               <SuggestionInput
                 label="Vehicle BA No. / Civil Vehicle Registration No."
@@ -429,11 +431,13 @@ const handleSubmit = async () => {
                 }
               />
             </div>
+
+            {/* Make & Type */}
             <div className="space-y-1">
               <SuggestionInput
-                label="Make & Take"
+                label="Make & Type"
                 fieldType="vehicleType"
-                placeholder="Model / Type"
+                placeholder="eg. Gypsy / Truck / Car"
                 value={formData.vehicleDetails.vehicleModel}
                 onChange={(v) => handleChange("vehicleDetails.vehicleModel", v)}
               />
