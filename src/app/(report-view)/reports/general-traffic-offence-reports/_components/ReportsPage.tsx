@@ -37,6 +37,7 @@ import MilitaryPoliceReport, {
 
 
 import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
+import { generateWordReport } from "@/utils/generateWordReport";
 
 import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 
@@ -340,30 +341,94 @@ export default function ReportsPage({
 
 /* ================= REPORT MAPPER ================= */
 export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
-  const primary = offence.offenders?.[0]?.offenderDetails || {};
 
-  const firstWitness = offence.onDutyWitnessingMps?.[0] || {};
-  const reportingMp = offence.onDutyDetailsMPReporting || {};
+  /* ===== SAFE EXTRACT ===== */
+
+  const extract = (obj: any) => {
+    if (!obj) return {};
+
+    return (
+      obj.offenderDetails ||
+      obj.individualDetails ||
+      obj.driverDetails?.offenderDetails ||
+      obj.driverDetails?.individualDetails ||
+      obj
+    );
+  };
+
+  /* ===== COLLECT ALL INDIVIDUALS ===== */
+
+  let individuals: any[] = [];
+
+  if (Array.isArray(offence.offenders))
+    individuals.push(...offence.offenders);
+
+  if (offence.driverDetails)
+    individuals.push(offence.driverDetails);
+
+  if (offence.coDriverDetails)
+    individuals.push(offence.coDriverDetails);
+
+  if (Array.isArray(offence.passengers))
+    individuals.push(...offence.passengers);
+
+  if (Array.isArray(offence.relatives))
+    individuals.push(...offence.relatives);
+
+  if (offence.originalData?.driverDetails)
+    individuals.push(offence.originalData.driverDetails);
+
+  /* ===== REMOVE DUPLICATES ===== */
+
+  const map = new Map();
+
+  individuals.forEach((ind: any) => {
+    const d = extract(ind);
+
+    const key =
+      d.iCardNumber ||
+      d.passNo ||
+      d.armyNo ||
+      d.armyNumber ||
+      `${d.name || ""}-${d.address || ""}`;
+
+    if (!map.has(key)) map.set(key, ind);
+  });
+
+  const uniqueIndividuals = Array.from(map.values());
+
+  /* ===== WITNESS DEDUPE ===== */
+
+  const witnessRaw = offence.onDutyWitnessingMps || [];
+
+  const witnessMap = new Map();
+
+  witnessRaw.forEach((w: any) => {
+    const key =
+      w.armyNumber ||
+      w.ArmyNo ||
+      `${w.name || ""}-${w.rank || ""}`;
+
+    if (!witnessMap.has(key)) witnessMap.set(key, w);
+  });
+
+  const uniqueWitnesses = Array.from(witnessMap.values());
+  const firstWitness = uniqueWitnesses[0] || {};
+
+  /* ===== RETURN ===== */
 
   return {
     reportNo: offence.reportNo || offence.reportId || "",
-    reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
+
+    reportDate: offence.createdAt
+      ? new Date(offence.createdAt).toLocaleDateString("en-GB")
+      : "",
+
+    /* 🔥 KEY FIX — individuals pass */
 
     particulars: {
-      primary: {
-        aadharCardNo: primary.aadharCardNo || "",
-        name: primary.name || "",
-        so: primary.so || "",
-        relation: primary.relation || "",
-        armyNo: primary.armyNumber || primary.armyNo || "",
-        rank: primary.rank || "",
-        unit: primary.unit || "",
-        command: primary.command || "",
-        fmn: primary.fmn || "",
-        address: primary.address || "",
-        iCardNo: primary.iCardNumber || primary.iCardNo || primary.passNo || "",
-      },
-    },
+      individuals: uniqueIndividuals,
+    } as any,
 
     occurrence: {
       dateOfDuty: offence.onDutyDetails?.dateOfDuty
@@ -374,33 +439,37 @@ export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
         const start = offence.onDutyDetails?.startTime;
         const end = offence.onDutyDetails?.endTime;
         if (start && end) return `${start} - ${end}`;
-        if (start) return start;
-        return "";
+        return start || "";
       })(),
 
       dutyLocation: offence.onDutyDetails?.dutyLocation || "",
 
-      witnessingMps: Array.isArray(offence.onDutyWitnessingMps)
-        ? offence.onDutyWitnessingMps.map((w: any) => ({
-          name: w.name || w.nameReportingMP || "",
-          rank: w.rank || "",
-        }))
-        : [],
+      witnessingMps: uniqueWitnesses.map((w: any) => ({
+        name: w.name || w.nameReportingMP || "",
+        rank: w.rank || "",
+      })),
 
       locationOfOffence:
         offence.offenceOccurenceDetails?.incidentLocation || "",
 
-      timeOfOffence: offence.offenceOccurenceDetails?.timeOfOffence || "",
+      timeOfOffence:
+        offence.offenceOccurenceDetails?.timeOfOffence || "",
 
-      statement: offence.offenceOccurenceDetails?.description || "",
+      statement:
+        offence.offenceOccurenceDetails?.description || "",
     },
 
     offence: {
-      types: offence.currentOffenceType ? [offence.currentOffenceType] : [],
+      types: offence.currentOffenceType
+        ? [offence.currentOffenceType]
+        : [],
+
       refs: Array.isArray(offence.offenceTypeReference)
         ? offence.offenceTypeReference
         : [],
-      description: offence.offenceOccurenceDetails?.description || "",
+
+      description:
+        offence.offenceOccurenceDetails?.description || "",
     },
 
     remarks: {
@@ -409,7 +478,6 @@ export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
       dated: new Date().toLocaleDateString("en-GB"),
     },
 
-    // ✅ ADD THESE TWO (THIS FIXES THE ERROR)
     witnessSig: {
       armyNo: firstWitness.ArmyNo || firstWitness.armyNumber || "",
       rank: firstWitness.rank || "",
@@ -418,10 +486,10 @@ export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
     },
 
     mpSig: {
-      armyNo: reportingMp.armyNumber || "",
-      rank: reportingMp.rank || "",
-      name: reportingMp.nameReportingMP || "",
-      unit: reportingMp.unit || "",
+      armyNo: offence.onDutyDetailsMPReporting?.armyNumber || "",
+      rank: offence.onDutyDetailsMPReporting?.rank || "",
+      name: offence.onDutyDetailsMPReporting?.nameReportingMP || "",
+      unit: offence.onDutyDetailsMPReporting?.unit || "",
     },
   };
 }

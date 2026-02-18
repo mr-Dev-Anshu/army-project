@@ -1624,6 +1624,7 @@ export default function MpOccurrenceReportsPage() {
           <div className="w-full max-w-5xl mx-auto">
             <SignedAttachmentsViewer
               record={viewingReport}
+              onAttachMore={() => setIsAttachModalOpen(true)}
             />
           </div>
         )}
@@ -1761,6 +1762,15 @@ export default function MpOccurrenceReportsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Attachment Modal */}
+      {isAttachModalOpen && (
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => setIsAttachModalOpen(false)}
+          onSave={handleAttachSave}
+        />
       )}
     </div>
   );
