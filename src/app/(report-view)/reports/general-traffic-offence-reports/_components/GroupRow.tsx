@@ -80,6 +80,7 @@ interface GroupRowProps {
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
   onEdit?: (offence: any) => void; // ✅ FIX
+  onAttach?: (offence: any) => void;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -91,6 +92,7 @@ export default function GroupRow({
   onView,
   onPrint,
   onEdit, // ✅ FIX
+  onAttach,
   isOpen,
   onToggle,
 }: GroupRowProps) {
@@ -131,27 +133,26 @@ export default function GroupRow({
             {total.toString().padStart(2, "0")}
           </span>
           <ChevronDown
-            className={`w-5 h-5 text-gray-400 transform transition-transform duration-300 ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            className={`w-5 h-5 text-gray-400 transform transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+              }`}
           />
         </div>
       </div>
 
       {/* Expandable Content */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50 ${
-          isOpen
-            ? "max-h-[2000px] opacity-100 py-4 px-6 border-t border-gray-100"
-            : "max-h-0 opacity-0"
-        }`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50 ${isOpen
+          ? "max-h-[2000px] opacity-100 py-4 px-6 border-t border-gray-100"
+          : "max-h-0 opacity-0"
+          }`}
       >
         <DetailsTable
           offences={offences}
           isVehicleInvolved={isVehicleInvolved}
           onView={onView}
           onPrint={onPrint}
-          onEdit={onEdit}   
+          onEdit={onEdit}
+          onAttach={onAttach}
         />
       </div>
     </div>

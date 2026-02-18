@@ -38,6 +38,7 @@ interface MpOccurrenceTableProps {
   onPrint?: (item: any) => void;
   onDownload?: (item: any) => void;
   onEdit?: (item: any) => void;
+  onAttach?: (item: any) => void;
 }
 
 export default function MpOccurrenceTable({
@@ -46,6 +47,7 @@ export default function MpOccurrenceTable({
   onPrint,
   onDownload,
   onEdit,
+  onAttach,
 }: MpOccurrenceTableProps) {
   const { mutateAsync: updateReport, isPending: isUpdating } =
     useUpdateMPReport();
@@ -254,14 +256,12 @@ export default function MpOccurrenceTable({
               }}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${
-                  isTaken ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors duration-200 ${isTaken ? "bg-green-500" : "bg-red-500"
+                  }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
-                    isTaken ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isTaken ? "translate-x-5" : "translate-x-0"
+                    }`}
                 ></div>
               </div>
               <span className="text-[10px] text-gray-500 font-medium uppercase">
@@ -315,7 +315,7 @@ export default function MpOccurrenceTable({
               </DropdownMenuItem> */}
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
-                onClick={() => handleAttachCertificate(item)}
+                onClick={() => onAttach && onAttach(item)}
               >
                 <Paperclip className="w-4 h-4" />
                 Attach Signed Certificates / Letters
@@ -391,9 +391,8 @@ export default function MpOccurrenceTable({
         }
         message={
           modalState.type === "status"
-            ? `Are you sure you want to change the status to ${
-                modalState.newStatus ? "Taken" : "Pending"
-              }?`
+            ? `Are you sure you want to change the status to ${modalState.newStatus ? "Taken" : "Pending"
+            }?`
             : "Are you sure you want to delete this report? This action cannot be undone."
         }
         confirmLabel={

@@ -16,10 +16,12 @@ import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
+import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
 
 import {
   useGetAllTrafficOffences,
   useCreateTrafficOffence,
+  useUpdateTrafficOffence,
 } from "@/features/generalTraficOffence/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { CreateOffenderData } from "@/apis/offender/types";
@@ -50,8 +52,58 @@ export default function ReportsPage({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { mutateAsync: createTrafficOffence } = useCreateTrafficOffence();
+  const { mutateAsync: updateTrafficOffence } = useUpdateTrafficOffence();
   const { mutateAsync: createOffender } = useCreateOffender();
   const { exportToExcel } = useExcelExport();
+
+  /* ================= ATTACHMENT MODAL STATE ================= */
+  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+  const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
+
+  const handleAttach = (item: any) => {
+    setRecordForAttachment(item);
+    setIsAttachModalOpen(true);
+  };
+
+  const handleAttachSave = async (newAttachments: any[]) => {
+    // Determine target record
+    const targetRecord = viewingReport || recordForAttachment;
+    if (!targetRecord?._id) return;
+
+    try {
+      const currentAttachments = targetRecord.customFields?.attachments || targetRecord.attachments || [];
+      const updatedAttachments = [...currentAttachments, ...newAttachments];
+
+      await updateTrafficOffence({
+        id: targetRecord._id,
+        data: {
+          customFields: {
+            ...targetRecord.customFields,
+            attachments: updatedAttachments,
+          },
+        },
+      });
+
+      toast.success("Attachments Added Successfully");
+
+      // If viewing report is effective one, update local state
+      if (viewingReport && viewingReport._id === targetRecord._id) {
+        setViewingReport((prev: any) => ({
+          ...prev,
+          customFields: {
+            ...prev.customFields,
+            attachments: updatedAttachments,
+          },
+        }));
+      }
+
+      setIsAttachModalOpen(false);
+      setRecordForAttachment(null);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add attachments");
+    }
+  };
 
   /* ================= FILTER STATE ================= */
 
@@ -145,6 +197,8 @@ export default function ReportsPage({
         onDownloadWord={() =>
           generateWordReport(mapToReportProps(viewingReport))
         }
+
+        onAttach={() => handleAttach(viewingReport)}
         onPrint={() => window.print()}
       >
         <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
@@ -207,12 +261,24 @@ export default function ReportsPage({
           isVehicleInvolved={viewType === "vehicle"}
           onView={setViewingReport}
           onEdit={(offence) => {
-            setEditingOffence(offence); // 🔥 FIX
-            setIsCreating(true); // 🔥 FIX
+            setEditingOffence(offence);
+            setIsCreating(true);
           }}
+          onAttach={handleAttach}
         />
       ) : (
         <div className="text-center text-gray-500 mt-10">No records found</div>
+      )}
+
+      {isAttachModalOpen && (
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => {
+            setIsAttachModalOpen(false);
+            setRecordForAttachment(null);
+          }}
+          onSave={handleAttachSave}
+        />
       )}
     </div>
   );
@@ -262,9 +328,9 @@ export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
 
       witnessingMps: Array.isArray(offence.onDutyWitnessingMps)
         ? offence.onDutyWitnessingMps.map((w: any) => ({
-            name: w.name || w.nameReportingMP || "",
-            rank: w.rank || "",
-          }))
+          name: w.name || w.nameReportingMP || "",
+          rank: w.rank || "",
+        }))
         : [],
 
       locationOfOffence:

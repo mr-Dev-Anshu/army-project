@@ -314,10 +314,13 @@ export const LeftStepper = ({
         {/* UPLOAD DOCUMENTS SECTION */}
         {onAttachmentsChange && currentStep === steps.length && (
           <div className="border-t border-gray-700 pt-6 space-y-4">
-          
+
 
             <Button
-              onClick={() => setIsAttachOpen(true)}
+              onClick={() => {
+                console.log('Attach button clicked, opening modal...');
+                setIsAttachOpen(true);
+              }}
               className="w-full bg-white text-black hover:bg-gray-200 h-10 text-[13px] font-medium rounded-md shadow-none flex items-center justify-center gap-2"
             >
               <Paperclip className="w-4 h-4" />
@@ -366,7 +369,7 @@ export const LeftStepper = ({
         onClose={() => setIsAttachOpen(false)}
         onSave={(newAttachments) => {
           if (onAttachmentsChange) {
-            onAttachmentsChange([...attachments, ...newAttachments]);
+            onAttachmentsChange([...(attachments || []), ...newAttachments]);
           }
         }}
       />

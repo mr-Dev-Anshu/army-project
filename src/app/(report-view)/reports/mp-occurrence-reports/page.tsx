@@ -8,15 +8,15 @@
 // import { useGetAllMPReports, useCreateMPReport } from "@/features/mpReports/hooks";
 
 // // Import Offender Hook and Type
+// Import Offender Hook and Type
 // import { useCreateOffender } from "@/features/offender/Hooks";
 // import { CreateOffenderData } from "@/apis/offender/types";
 
 // import ReportFilterBar from "@/components/common/ReportFilterBar";
 // import ReportPageHeader from "@/components/common/ReportPageHeader";
 // import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
-// import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/reports/MpOccurrenceReport";
+// import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
 
-// import { Button } from "@/components/ui/button";
 // import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 
 // import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
@@ -60,7 +60,7 @@
 //   "Opinion": "opinion",
 //   "Analysis": "remarks.analysis",
 //   "Recommendation": "remarks.recommendation",
-  
+
 //   "Offender Name": "individuals[0].name",
 //   "Offender Rank": "individuals[0].rank",
 //   "Offender Army No": "individuals[0].armyNo",
@@ -133,12 +133,47 @@
 //   const [editingReport, setEditingReport] = useState<any | null>(null);
 
 //   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
-  
+
 //   const [showAddOptions, setShowAddOptions] = useState(false);
 //   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
 //   const { mutateAsync: createMPReport } = useCreateMPReport();
-//   const { mutateAsync: createOffender } = useCreateOffender();
+// const { mutateAsync: createOffender } = useCreateOffender();
+
+// Attachment Modal State
+// const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+// const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
+
+// const handleAttach = (item: any) => {
+//   setRecordForAttachment(item);
+//   setIsAttachModalOpen(true);
+// };
+
+// const handleAttachSave = async (newAttachments: any[]) => {
+// Logic from previous implementation, adapted
+// We need to know WHICH record we are attaching to. 
+// If viewingReport is open, it's viewingReport. If came from table, it's recordForAttachment.
+// const targetRecord = viewingReport || recordForAttachment;
+
+// if (!targetRecord?._id) return;
+
+// Note: We need a specialized hook or reuse create/update logic. 
+// The previous implementation used a hook that might not be visible here or I need to import it.
+// Wait, there isn't a useUpdateMpReport hook imported yet?
+// Checking imports... only createMPReport. 
+// I need to check if there is an update hook or if I need to add it.
+// For now I will scaffold the function to just close modal and log, 
+// but I need to IMPLEMENT the actual save.
+
+// Let's assume for now we just log/toast until I confirm the hook.
+// Actually, looking at previous steps, I didn't see an update hook for MP Reports in the list.
+// I should double check hooks.
+
+//   console.log("Saving attachments for", targetRecord._id, newAttachments);
+//   toast.success("Attachments saved (Simulation)");
+//   setIsAttachModalOpen(false);
+//   setRecordForAttachment(null);
+// };
 
 //   React.useEffect(() => {
 //     if (viewingReport && shouldAutoPrint) {
@@ -773,7 +808,7 @@
 //           onPrint={handlePrintReport}
 //           onEdit={handleEditReport}
 //           onDownload={handleDownloadReport}
-          
+
 //         />
 //       )}
 
@@ -834,7 +869,7 @@
 //                 <p className="text-gray-500 leading-relaxed">Fill out the form manually to add a single record.</p>
 //               </button>
 //             </div>
-            
+
 //             <div className="bg-gray-50 px-6 py-4 flex justify-end">
 //                <Button variant="ghost" onClick={() => setShowAddOptions(false)}>Cancel</Button>
 //             </div>
@@ -865,7 +900,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, FileSpreadsheet, FileJson, Loader2, Plus, X } from "lucide-react";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
-// import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
+import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
 import { toast } from "react-toastify";
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
@@ -874,12 +909,7 @@ import { processImport } from "@/lib/processImport";
 
 
 
-export interface AttachedItem {
-  id?: string;
-  name: string;
-  url: string;
-  type?: string; // image/pdf/video etc
-}
+
 
 
 /* ================= HELPERS ================= */
@@ -973,10 +1003,22 @@ export default function MpOccurrenceReportsPage() {
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
   /* ================= VIEW MODE STATE ================= */
-  const [viewMode, setViewMode] = useState<"report" | "attachments" | "evidences">("report");
+  const [viewMode, setViewMode] = useState<"report" | "evidences">("report");
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
 
   const { mutateAsync: updateReport } = useUpdateMPReport();
+
+  const handleAttach = (item: any) => {
+    // If we are already viewing a report, we don't necessarily need to setViewingReport 
+    // unless we want to switch context, but usually the modal just needs to know which logical record to attach to.
+    // However, for consistency with other pages, let's just open the modal.
+    // Ideally we should track "recordForAttachment" separately if it differs from viewingReport.
+    // But here, let's assume we attach to the active item.
+    if (!viewingReport) {
+      setViewingReport(item); // Set it so handleAttachSave can use it
+    }
+    setIsAttachModalOpen(true);
+  };
 
   // Handle Attachment Save
   const handleAttachSave = async (newItems: AttachedItem[]) => {
@@ -1580,7 +1622,6 @@ export default function MpOccurrenceReportsPage() {
           downloadType={downloadType}
           activeView={viewMode}
           onViewReport={() => setViewMode("report")}
-          onViewAttachments={() => setViewMode("attachments")}
           onViewEvidences={() => setViewMode("evidences")}
           onDownloadWord={() => handleDownloadReport(viewingReport)}
           onDownloadPdf={() => handleDownloadPdf(viewingReport)}
@@ -1588,18 +1629,11 @@ export default function MpOccurrenceReportsPage() {
           onEdit={() => {
             setIsCreating(true);
           }}
+          onAttach={() => handleAttach(viewingReport)}
         >
           {viewMode === "report" && (
             <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
           )}
-
-          {/* {viewMode === "attachments" && (
-            <SignedAttachmentsViewer
-              record={finalViewingRecord}
-              onAttachMore={() => setIsAttachModalOpen(true)}
-              onDelete={handleAttachDelete}
-            />
-          )} */}
 
           {/* {viewMode === "evidences" && (
             <EvidenceViewer
@@ -1607,13 +1641,13 @@ export default function MpOccurrenceReportsPage() {
               onDelete={handleAttachDelete}
             />
           )} */}
-        </ReportViewerWrapper>
+        </ReportViewerWrapper >
 
-        {/* <FormAttachmentModal
+        <FormAttachmentModal
           isOpen={isAttachModalOpen}
           onClose={() => setIsAttachModalOpen(false)}
           onSave={handleAttachSave}
-        /> */}
+        />
       </>
     );
   }
@@ -1675,6 +1709,7 @@ export default function MpOccurrenceReportsPage() {
             setViewingReport(item);
             setIsCreating(true);
           }}
+          onAttach={handleAttach}
         />
       )}
 
@@ -1699,6 +1734,7 @@ export default function MpOccurrenceReportsPage() {
               >
                 <X className="w-6 h-6" />
               </button>
+
             </div>
 
             <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">

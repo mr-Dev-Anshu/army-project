@@ -8,6 +8,7 @@ interface GroupedListProps {
   onView: (offence: any) => void;
   onPrint?: (offence: any) => void;
   onEdit?: (offence: any) => void;
+  onAttach?: (offence: any) => void;
 }
 
 export default function GroupedList({
@@ -16,6 +17,7 @@ export default function GroupedList({
   onView,
   onPrint,
   onEdit,
+  onAttach,
 }: GroupedListProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -41,7 +43,8 @@ export default function GroupedList({
           isVehicleInvolved={isVehicleInvolved}
           onView={onView}
           onPrint={onPrint}
-          onEdit={onEdit} 
+          onEdit={onEdit}
+          onAttach={onAttach}
           isOpen={expandedIndex === index}
           onToggle={() => handleToggle(index)}
         />

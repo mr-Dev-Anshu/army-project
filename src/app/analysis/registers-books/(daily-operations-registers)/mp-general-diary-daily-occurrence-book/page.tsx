@@ -12,6 +12,7 @@ import {
     useCreateMpGeneralDiaryEntry
 } from "@/features/RegisterBooks/DailyOperationsRegisters/mpGeneralDiaryDailyOccurrenceBook/hooks";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
+import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
 import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/reports/MpOccurrenceReport";
 import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
 import RightSideSheet from "@/components/common/RightSideSheet";
@@ -27,6 +28,15 @@ const Page = () => {
     // Add/Edit State
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<any>(null);
+
+    // Attachment State
+    const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+    const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
+
+    const handleAttach = (item: any) => {
+        setRecordForAttachment(item);
+        setIsAttachModalOpen(true);
+    };
 
     // Fetch Data
     const { data: registers, isLoading } = useGetMpGeneralDiaryEntries({});
@@ -91,6 +101,50 @@ const Page = () => {
             // toast handled in hook usually, but adding catch for safety
         }
     }
+
+    const handleAttachSave = async (newAttachments: any[]) => {
+        const targetRecord = viewingReport || recordForAttachment;
+        if (!targetRecord?._id) {
+            console.error("No target record ID found for attachment");
+            return;
+        }
+
+        try {
+            const currentAttachments = targetRecord.customFields?.attachments || targetRecord.attachments || [];
+            const updatedAttachments = [...currentAttachments, ...newAttachments];
+
+            await updateMutation.mutateAsync({
+                id: targetRecord._id,
+                payload: {
+                    ...targetRecord,
+                    customFields: {
+                        ...(targetRecord.customFields || {}),
+                        attachments: updatedAttachments
+                    }
+                }
+            });
+
+            toast.success("Attachments Added Successfully");
+
+            // If viewing this report, update local state
+            if (viewingReport && viewingReport._id === targetRecord._id) {
+                setViewingReport((prev: any) => ({
+                    ...prev,
+                    customFields: {
+                        ...(prev.customFields || {}),
+                        attachments: updatedAttachments
+                    }
+                }));
+            }
+
+            setIsAttachModalOpen(false);
+            setRecordForAttachment(null);
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to add attachments");
+        }
+    };
 
     // --- Mapper Logic ---
     const mapToReportProps = (data: any): MpOccurrenceReportProps => {
@@ -206,6 +260,7 @@ const Page = () => {
                 downloadType={downloadType}
                 onDownloadWord={() => handleDownloadReport(viewingReport)}
                 onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+                onAttach={() => handleAttach(viewingReport)}
                 onPrint={() => window.print()}
             >
                 <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
@@ -246,9 +301,22 @@ const Page = () => {
                     <MpGeneralDiaryDailyOccurrenceBookTable
                         data={registers || []}
                         onEdit={handleEdit}
+                        onView={handleView}
+                        onAttach={handleAttach}
                     />
                 )}
             </div>
+
+            {isAttachModalOpen && (
+                <FormAttachmentModal
+                    isOpen={isAttachModalOpen}
+                    onClose={() => {
+                        setIsAttachModalOpen(false);
+                        setRecordForAttachment(null);
+                    }}
+                    onSave={handleAttachSave}
+                />
+            )}
 
             <RightSideSheet
                 isOpen={isSheetOpen}
