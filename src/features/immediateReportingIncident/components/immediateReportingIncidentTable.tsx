@@ -319,7 +319,36 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
       header: "Particulars of Individual/Victim",
       cell: (item) => {
         const inds = item.individuals || [];
-        if (!inds.length) return "-";
+
+        const getVehicle = () => {
+          // Report level
+          if (item.vehicleNumber || item.vehicleName || item.vehicleType) {
+            return {
+              vehicleNumber: item.vehicleNumber,
+              vehicleName: item.vehicleName,
+              vehicleType: item.vehicleType,
+            };
+          }
+
+          // Individual level fallback
+          if (inds.length) {
+            const ind: any = inds[0]; // ✅ CAST FIX
+
+            if (ind.vehicleRegistration || ind.vehicleType) {
+              return {
+                vehicleNumber: ind.vehicleRegistration,
+                vehicleName: ind.vehicleType,
+                vehicleType: ind.vehicleType,
+              };
+            }
+          }
+
+          return null;
+        };
+
+        const vehicle = getVehicle();
+
+        if (!inds.length && !vehicle) return "-";
 
         const renderAllFields = (obj: any) => {
           if (!obj) return null;
@@ -340,10 +369,31 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
         };
 
         return (
-          <div className="text-xs">
+          <div className="text-xs space-y-3">
+            {/* ✅ VEHICLE TOP */}
+            {vehicle && (
+              <div className="pb-3 border-b border-gray-300 mb-3">
+                <div className="font-bold mb-1">Vehicle Details</div>
+
+                <div>
+                  <b>Vehicle No:</b> {vehicle.vehicleNumber || "-"}
+                </div>
+
+                <div>
+                  <b>Make & Type:</b> {vehicle.vehicleName || "-"}
+                </div>
+
+                <div>
+                  <b>Vehicle Type:</b> {vehicle.vehicleType || "-"}
+                </div>
+              </div>
+            )}
+
+            {/* ✅ INDIVIDUALS */}
             {inds.map((ind: any, index: number) => {
               const type =
                 ind.offenderType || ind.individualType || "individual";
+
               const details =
                 ind.offenderDetails || ind.individualDetails || {};
 
@@ -355,7 +405,6 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
                     : ""
                     }`}
                 >
-                  {/* MT Accident style heading */}
                   <div className="font-bold mb-3 capitalize">
                     Individual {index + 1} ({type})
                   </div>
@@ -370,29 +419,6 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
       className: "border-r border-gray-300 min-w-[200px] align-top py-2",
       headerClassName:
         "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[200px]",
-    },
-
-    {
-      header: "Vehicle BA No. / Reg No.",
-      cell: (item) => (
-        <span className="font-[Arial] text-sm text-[#0A0A0A]">
-          {item.vehicleNumber || "-"}
-        </span>
-      ),
-      className: "border-r border-gray-300 min-w-[120px] align-top py-2",
-      headerClassName:
-        "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
-    },
-    {
-      header: "Make & Take",
-      cell: (item) => (
-        <span className="font-[Arial] text-sm text-[#0A0A0A]">
-          {item.vehicleName || "-"}
-        </span>
-      ),
-      className: "border-r border-gray-300 min-w-[120px] align-top py-2",
-      headerClassName:
-        "border-r border-gray-300 bg-gray-100 font-bold text-[#0A0A0A] min-w-[120px]",
     },
 
     {

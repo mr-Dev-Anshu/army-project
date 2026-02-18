@@ -25,7 +25,7 @@ export function DynamicTable<T>({
   getRowClassName
 }: DynamicTableProps<T>) {
   return (
-    <div className={cn("overflow-x-auto overflow-y-auto max-h-[350px] rounded-lg border border-gray-200 bg-white", className)}>
+    <div className={cn("overflow-x-auto overflow-y-auto  rounded-lg border border-gray-200 bg-white", className)}>
       <table className="w-full text-left text-sm text-gray-700 relative border-collapse">
         <thead className="bg-gray-50 border-b border-gray-200 font-semibold text-gray-900 uppercase text-xs">
           <tr>

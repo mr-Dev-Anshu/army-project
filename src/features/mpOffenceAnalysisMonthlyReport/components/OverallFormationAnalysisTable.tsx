@@ -193,10 +193,10 @@ export default function OverallFormationAnalysisTable({ onBack }: OverallFormati
                 <h1 className="text-xl font-bold text-[#404040]">
                     View Overall Formation Analysis
                 </h1>
-                <Button className="bg-[#0A0A0A] text-white font-medium hover:bg-gray-800 gap-2 px-6 cursor-pointer rounded-md">
+                {/* <Button className="bg-[#0A0A0A] text-white font-medium hover:bg-gray-800 gap-2 px-6 cursor-pointer rounded-md">
                     Download & Print Report
                     <Printer className="w-4 h-4 ml-1" />
-                </Button>
+                </Button> */}
             </div>
 
             {/* Filters Bar */}

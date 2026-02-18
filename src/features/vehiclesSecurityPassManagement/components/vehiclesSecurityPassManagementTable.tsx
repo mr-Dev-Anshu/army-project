@@ -525,7 +525,7 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full  ">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     {/* Icon from image or shopkeeper table */}
@@ -572,7 +572,7 @@ const VehiclesSecurityPassManagementTable: React.FC<Props> = ({ onAddNew, onEdit
             />
 
             <DynamicTable
-                className="[&::-webkit-scrollbar]:hidden border-gray-300 [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
+                className="[&::-webkit-scrollbar]:hidden h-screen border-gray-300 [&_tbody]:divide-gray-300 [&_table]:border-gray-300"
                 data={filteredData}
                 columns={columns}
                 getRowClassName={(item) => {

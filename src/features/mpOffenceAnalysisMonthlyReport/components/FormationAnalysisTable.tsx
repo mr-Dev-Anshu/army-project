@@ -215,10 +215,10 @@ export default function FormationAnalysisTable({
                         {formation.subtitle}
                     </span>
                 </div>
-                <Button className="bg-black text-white font-medium hover:bg-gray-800 gap-2 px-6 cursor-pointer">
+                {/* <Button className="bg-black text-white font-medium hover:bg-gray-800 gap-2 px-6 cursor-pointer">
                     Download & Print Report
                     <Printer className="w-4 h-4" />
-                </Button>
+                </Button> */}
             </div>
 
             {/* Filters Bar */}

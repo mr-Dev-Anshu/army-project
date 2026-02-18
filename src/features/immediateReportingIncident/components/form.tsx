@@ -66,9 +66,9 @@ const INITIAL_STATE = {
 };
 
 interface Props {
-    onCancel: () => void;
-    onSuccess: () => void;
-    initialData?: ImmediateReportingIncident;
+  onCancel: () => void;
+  onSuccess: () => void;
+  initialData?: ImmediateReportingIncident;
 }
 
 export const ImmediateReportingIncidentForm: React.FC<Props> = ({
@@ -324,6 +324,16 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({
                     Type of incident like injury to serving soldier due to RTA etc.
                 </p>
             </div>
+            <div className="space-y-2">
+              <Label>Time of Incident (24hr format)</Label>
+              <Input
+                type="time"
+                value={reportData.timeOfOccurrence}
+                onChange={(e) => setField("timeOfOccurrence", e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
 
             <div className="space-y-6 flex-1 overflow-y-auto pr-2">
                 <div className="space-y-4">
@@ -331,15 +341,22 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({
                         Fill Details Carefully:
                     </Label>
 
-                    <div className="space-y-2">
-                        <Label>Heading of Report</Label>
-                        <Input
-                            placeholder="eg. INITIAL REPORTING OF INCIDENT"
-                            value={reportData.reportHeading}
-                            onChange={(e) => setField("reportHeading", e.target.value)}
-                        />
-                    </div>
-                </div>
+        {/* 8. Covered By */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold">
+            9. Mention Incident being Covered by
+          </span>
+          <div className="w-64">
+            <SuggestionInput
+              fieldType="incidentCoveredBy"
+              placeholder=""
+              value={reportData.incidentCoveredBy}
+              onChange={(v) => setField("incidentCoveredBy", v)}
+              className="h-8"
+            />
+          </div>
+          <span className="text-sm font-semibold">Pro Unit</span>
+        </div>
 
                 {/* 2. Particulars of Offender / Victim (Loop) */}
                 {reportData.individuals?.map((individual: any, index: number) => (
@@ -493,6 +510,7 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({
                             />
                         </div>
                     </div>
+                  ))}
                 </div>
 
                 {/* 8. Brief of the Incident */}
@@ -696,5 +714,23 @@ export const ImmediateReportingIncidentForm: React.FC<Props> = ({
                 </Button>
             </div>
         </div>
-    );
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-between gap-4 pt-6 border-t mt-8 bg-white sticky bottom-0 z-10 p-4">
+        <Button variant="outline" onClick={onCancel} className="px-8">
+          Cancel
+        </Button>
+        <Button
+          className="bg-[#0088FF] hover:bg-blue-600 text-white flex-1"
+          onClick={handleSave}
+          disabled={isPending}
+        >
+          {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          <CheckCheck className="w-4 h-4 mr-2" />{" "}
+          {initialData ? "Update Report" : "Save Report"}
+        </Button>
+      </div>
+    </div>
+  );
 };

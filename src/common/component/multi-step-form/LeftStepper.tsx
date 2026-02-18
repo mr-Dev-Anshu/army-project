@@ -241,14 +241,14 @@ export const LeftStepper = ({
               className="hidden"
               onChange={handleFileChange}
             />
-            {/* <button
-              onClick={handleImportClick}
-              className="text-gray-400 hover:text-white transition p-1"
-              title="Import JSON"
+            {/* <button 
+                onClick={handleImportClick}
+                className="text-gray-400 hover:text-white transition p-1"
+                title="Import JSON"
             >
-              <Upload className="w-5 h-5" />
+                <Upload className="w-5 h-5" />
             </button> */}
-          </div>
+            </div>
         </div>
 
         {!hideReportNo && (

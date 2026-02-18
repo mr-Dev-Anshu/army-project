@@ -1,16 +1,7 @@
-
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import {
-  Loader2,
-  ArrowLeft,
-  FileSpreadsheet,
-  FileJson,
-  Plus,
-  X,
-} from "lucide-react";
-import { toast } from "react-toastify";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
@@ -23,11 +14,7 @@ import {
   useCreateTrafficOffence,
   useUpdateTrafficOffence,
 } from "@/features/generalTraficOffence/hooks";
-import { useCreateOffender } from "@/features/offender/Hooks";
-import { CreateOffenderData } from "@/apis/offender/types";
 
-import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
-import { excelToJson } from "@/lib/excelToJson";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +27,7 @@ import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
 import { generateWordReport } from "@/utils/generateWordReport";
 
 import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
+import { generateWordReport } from "@/utils/generateWordReport";
 
 // ... existing imports
 
@@ -177,10 +165,11 @@ export default function ReportsPage({
     return params;
   }, [filters, viewType]);
 
-  const { data, isLoading, isError, refetch } =
+  const { data, isLoading, isError } =
     useGetAllTrafficOffences(apiParams);
 
   /* ================= GROUP FILTERING ================= */
+  console.log("Data received:", data);
 
   const { vehicleGroups, noVehicleGroups } = useMemo(() => {
     if (!data) return { vehicleGroups: [], noVehicleGroups: [] };
@@ -203,7 +192,7 @@ export default function ReportsPage({
 
   const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
 
-  /* ================= CREATE / EDIT ================= */
+  /* ================= CREATE ================= */
 
   if (isCreating) {
     return (
@@ -218,7 +207,6 @@ export default function ReportsPage({
           <ArrowLeft /> Back
         </Button>
 
-        {/* 🔥 SAME FORM FOR CREATE + EDIT */}
         <MultiStepForm existingOffence={editingOffence} />
       </div>
     );
@@ -273,7 +261,7 @@ export default function ReportsPage({
         }
         reportCount={activeGroups.reduce(
           (a: number, g: any) => a + g.offences.length,
-          0,
+          0
         )}
       />
 
@@ -288,20 +276,6 @@ export default function ReportsPage({
           setEditingOffence(null);
           setIsCreating(true);
         }}
-        onReset={() =>
-          setFilters({
-            search: "",
-            offenceType: "All",
-            date: "",
-            fromDate: "",
-            toDate: "",
-            unit: "",
-            fmn: "",
-            placeOfOffence: "",
-            actionStatus: "All",
-            sortOrder: "desc",
-          })
-        }
       />
 
       {isLoading ? (
@@ -322,7 +296,9 @@ export default function ReportsPage({
           onAttach={handleAttach}
         />
       ) : (
-        <div className="text-center text-gray-500 mt-10">No records found</div>
+        <div className="text-center text-gray-500 mt-10">
+          No records found
+        </div>
       )}
 
       {isAttachModalOpen && (
@@ -340,6 +316,7 @@ export default function ReportsPage({
 }
 
 /* ================= REPORT MAPPER ================= */
+
 export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
 
   /* ===== SAFE EXTRACT ===== */
