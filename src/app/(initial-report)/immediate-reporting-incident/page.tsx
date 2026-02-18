@@ -120,7 +120,7 @@ import { useRouter } from "next/navigation";
 import ImmediateReportingIncidentTable from "@/features/immediateReportingIncident/components/immediateReportingIncidentTable";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types";
 import ImmediateReportingIncidentReport from "@/components/reports/ImmediateReportingIncident";
-import { generateImmediateIncidentWordReport } from "@/utils/generateImmediateIncidentWordReport";
+
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
 
@@ -240,22 +240,7 @@ export default function ImmediateReportingIncidentReportsPage() {
     window.print();
   };
 
-  const handleDownloadWord = async () => {
-    if (!reportData) return;
 
-    setIsDownloading(true);
-    setDownloadType("Word");
-
-    try {
-      await generateImmediateIncidentWordReport(reportData);
-    } catch (error) {
-      console.error("Failed to generate Word report:", error);
-      alert("Failed to generate Word report");
-    } finally {
-      setIsDownloading(false);
-      setDownloadType(null);
-    }
-  };
 
   const handleDownloadPdf = async () => {
     if (!reportData?._id) return;
@@ -302,9 +287,7 @@ export default function ImmediateReportingIncidentReportsPage() {
         onEdit={() => handleEdit(reportData)}
         isDownloading={isDownloading}
         downloadType={downloadType}
-        onDownloadWord={handleDownloadWord}
         onDownloadPdf={handleDownloadPdf}
-        onAttach={() => handleAttach(reportData)}
         onPrint={handlePrint}
       >
         <div style={{ padding: "48px" }}>

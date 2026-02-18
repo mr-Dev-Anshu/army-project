@@ -14,7 +14,7 @@ import {
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
 import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/reports/MpOccurrenceReport";
-import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
+
 import RightSideSheet from "@/components/common/RightSideSheet";
 import { toast } from "react-toastify";
 
@@ -202,21 +202,7 @@ const Page = () => {
         };
     };
 
-    const handleDownloadReport = async (details: any) => {
-        setIsDownloading(true);
-        setDownloadType("Word");
-        try {
-            const props = mapToReportProps(details);
-            generateMPOccurrenceWordReport(props);
-            await new Promise(resolve => setTimeout(resolve, 500));
-        } catch (e) {
-            console.error(e);
-            alert("Failed to download Word report");
-        } finally {
-            setIsDownloading(false);
-            setDownloadType(null);
-        }
-    };
+
 
     const handleDownloadPdf = async (details: any) => {
         const id = details.originalReportId;
@@ -258,9 +244,7 @@ const Page = () => {
                 }}
                 isDownloading={isDownloading}
                 downloadType={downloadType}
-                onDownloadWord={() => handleDownloadReport(viewingReport)}
                 onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-                onAttach={() => handleAttach(viewingReport)}
                 onPrint={() => window.print()}
             >
                 <MpOccurrenceReport {...mapToReportProps(viewingReport)} />

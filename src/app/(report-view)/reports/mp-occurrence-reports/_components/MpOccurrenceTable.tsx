@@ -8,7 +8,6 @@ import {
   Edit,
   Copy,
   Trash,
-  Download,
   Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,6 @@ interface MpOccurrenceTableProps {
   data: any[];
   onView?: (item: any) => void;
   onPrint?: (item: any) => void;
-  onDownload?: (item: any) => void;
   onEdit?: (item: any) => void;
   onAttach?: (item: any) => void;
 }
@@ -45,7 +43,6 @@ export default function MpOccurrenceTable({
   data,
   onView,
   onPrint,
-  onDownload,
   onEdit,
   onAttach,
 }: MpOccurrenceTableProps) {

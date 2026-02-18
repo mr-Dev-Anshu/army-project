@@ -17,6 +17,7 @@ import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 
 import {
   useGetStaticSpeedRecords,
@@ -32,7 +33,7 @@ import StaticSpeedReport, {
 
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 import { Button } from "@/components/ui/button";
-import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
+
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
@@ -235,6 +236,7 @@ export default function StaticSpeedCheckReportsPage() {
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
   const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
   const [editingReport, setEditingReport] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<"report" | "attachments">("report");
 
   const handleAttach = (item: any) => {
     setRecordForAttachment(item);
@@ -405,8 +407,6 @@ export default function StaticSpeedCheckReportsPage() {
     else reader.readAsText(file);
     event.target.value = "";
   };
-
-  /* ... rest of your component logic (useEffect, apiParams, processedData, mapToReportProps, etc) ... */
 
   useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
@@ -637,20 +637,7 @@ export default function StaticSpeedCheckReportsPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
 
-  const handleDownloadReport = async (item: any) => {
-    setIsDownloading(true);
-    setDownloadType("Word");
-    try {
-      generateStaticSpeedWordReport(mapToReportProps(item));
-      await new Promise((r) => setTimeout(r, 500));
-    } catch (e) {
-      console.error(e);
-      alert("Failed to download Word report");
-    } finally {
-      setIsDownloading(false);
-      setDownloadType(null);
-    }
-  };
+
 
   const handleDownloadPdf = async (item: any) => {
     const id = item._id || item.reportId;
@@ -699,24 +686,41 @@ export default function StaticSpeedCheckReportsPage() {
       </div>
     );
 
-  if (viewingReport)
+  if (viewingReport) {
+    const reportProps = mapToReportProps(viewingReport);
+
     return (
       <ReportViewerWrapper
         title="STATIC SPEED CHECK REPORT"
         onBack={() => {
           setViewingReport(null);
           setShouldAutoPrint(false);
+          setViewMode("report");
         }}
         isDownloading={isDownloading}
         downloadType={downloadType}
-        onDownloadWord={() => handleDownloadReport(viewingReport)}
         onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-        onAttach={() => handleAttach(viewingReport)}
         onPrint={() => window.print()}
+
+        // Two buttons config
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
       >
-        <StaticSpeedReport {...mapToReportProps(viewingReport)} />
+        {viewMode === "report" && (
+          <StaticSpeedReport {...reportProps} />
+        )}
+
+        {viewMode === "attachments" && (
+          <div className="w-full max-w-5xl mx-auto">
+            <SignedAttachmentsViewer
+              attachments={viewingReport.customFields?.attachments || viewingReport.attachments || []}
+            />
+          </div>
+        )}
       </ReportViewerWrapper>
     );
+  }
 
   /* ================= MAIN LIST ================= */
 
@@ -758,7 +762,6 @@ export default function StaticSpeedCheckReportsPage() {
           data={processedData}
           onView={setViewingReport}
           onPrint={handlePrintReport}
-          onDownload={handleDownloadReport}
           onEdit={(report) => {
             setEditingReport(report.originalData || report);
             setIsCreating(true);

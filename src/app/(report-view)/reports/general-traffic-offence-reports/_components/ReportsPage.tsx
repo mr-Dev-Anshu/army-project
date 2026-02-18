@@ -35,10 +35,12 @@ import MilitaryPoliceReport, {
   MilitaryPoliceReportProps,
 } from "@/components/reports/MilitaryPoliceReport";
 
-import { generateWordReport } from "@/utils/generateWordReport";
+
 import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
 
-/* ================= MAIN PAGE ================= */
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
+
+// ... existing imports
 
 export default function ReportsPage({
   viewType = "vehicle",
@@ -46,11 +48,16 @@ export default function ReportsPage({
   viewType?: "vehicle" | "no-vehicle";
 }) {
   const [isCreating, setIsCreating] = useState(false);
-  const [editingOffence, setEditingOffence] = useState<any | null>(null); // ✅ FIX
+  const [editingOffence, setEditingOffence] = useState<any | null>(null);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [showAddOptions, setShowAddOptions] = useState(false);
+  const [viewMode, setViewMode] = useState<"report" | "attachments">("report"); // Added viewMode
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+
+  /* ================= HOOKS ================= */
   const { mutateAsync: createTrafficOffence } = useCreateTrafficOffence();
   const { mutateAsync: updateTrafficOffence } = useUpdateTrafficOffence();
   const { mutateAsync: createOffender } = useCreateOffender();
@@ -59,6 +66,35 @@ export default function ReportsPage({
   /* ================= ATTACHMENT MODAL STATE ================= */
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
   const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
+
+  const handleDownloadPdf = async (item: any) => {
+    const id = item._id || item.reportId;
+    if (!id) return toast.error("Report ID not found");
+
+    setIsDownloading(true);
+    setDownloadType("PDF");
+
+    try {
+      const response = await fetch(`/api/military-police-report/pdf/${id}`);
+      if (!response.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `TrafficOffenceReport-${item.reportNo || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF Error", error);
+      toast.error("Failed to download PDF");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
+  };
 
   const handleAttach = (item: any) => {
     setRecordForAttachment(item);
@@ -190,18 +226,36 @@ export default function ReportsPage({
   /* ================= VIEW ================= */
 
   if (viewingReport) {
+    const reportProps = mapToReportProps(viewingReport);
+
     return (
       <ReportViewerWrapper
         title="REPORT PREVIEW"
-        onBack={() => setViewingReport(null)}
-        onDownloadWord={() =>
-          generateWordReport(mapToReportProps(viewingReport))
-        }
-
-        onAttach={() => handleAttach(viewingReport)}
+        onBack={() => {
+          setViewingReport(null);
+          setViewMode("report");
+        }}
+        isDownloading={isDownloading}
+        downloadType={downloadType}
+        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
+
+        // Two buttons config
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
       >
-        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+        {viewMode === "report" && (
+          <MilitaryPoliceReport {...reportProps} />
+        )}
+
+        {viewMode === "attachments" && (
+          <div className="w-full max-w-5xl mx-auto">
+            <SignedAttachmentsViewer
+              attachments={viewingReport.customFields?.attachments || viewingReport.attachments || []}
+            />
+          </div>
+        )}
       </ReportViewerWrapper>
     );
   }

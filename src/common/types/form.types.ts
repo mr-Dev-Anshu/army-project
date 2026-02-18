@@ -9,7 +9,12 @@ import { MaidServant } from "@/features/civilEmployee/maid_Servant/types";
 import { Shopkeeper } from "@/features/civilEmployee/shopkeeper/types";
 import { TemporaryHiredWorker } from "@/features/civilEmployee/temporaryHired/types";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types";
-import { AttachedItem } from "@/app/(report-view)/reports/mp-occurrence-reports/page";
+
+export interface AttachedItem {
+  type: string;
+  name: string;
+  url?: string;
+}
 
 export interface VehicleDetailsState {
   category: string;
@@ -111,7 +116,7 @@ export interface MpReportState {
   };
 
   witnesses: Witness[];
-  witnessTemp: any;   
+  witnessTemp: any;
 
   witnessVehicleStatus?: "yes" | "no" | "";
 

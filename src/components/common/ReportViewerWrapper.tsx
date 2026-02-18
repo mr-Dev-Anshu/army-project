@@ -9,7 +9,6 @@ interface ReportViewerWrapperProps {
     onEdit?: () => void;
     isDownloading?: boolean;
     downloadType?: "PDF" | "Word" | null;
-    onDownloadWord?: () => void;
     onDownloadPdf?: () => void;
     onViewReport?: () => void;
     onViewAttachments?: () => void;
@@ -25,7 +24,6 @@ export default function ReportViewerWrapper({
     onEdit,
     isDownloading,
     downloadType,
-    onDownloadWord,
     onDownloadPdf,
     onViewReport,
     onViewAttachments,
@@ -83,21 +81,8 @@ export default function ReportViewerWrapper({
                     )}
                 </div>
 
-                {/* Right: Download Icons + Close Button */}
+                {/* Right: Download PDF + Close Button */}
                 <div className="flex items-center gap-2">
-                    {onDownloadWord && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={onDownloadWord}
-                            disabled={isDownloading}
-                            className="bg-white text-black hover:bg-gray-200 rounded w-8 h-8 flex items-center justify-center"
-                            title="Download Word"
-                        >
-                            <FileText className="w-5 h-5" />
-                        </Button>
-                    )}
-
                     {onDownloadPdf && (
                         <Button
                             variant="ghost"
@@ -112,7 +97,7 @@ export default function ReportViewerWrapper({
                     )}
 
                     {/* Divider */}
-                    {(onDownloadWord || onDownloadPdf) && (
+                    {onDownloadPdf && (
                         <div className="h-6 w-px bg-white/20 mx-1" />
                     )}
 

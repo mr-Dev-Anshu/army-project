@@ -895,10 +895,11 @@ import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import MpOccurrenceReport, { MpOccurrenceReportProps } from "@/components/reports/MpOccurrenceReport";
 
-// import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
+import EvidenceViewer from "@/components/common/EvidenceViewer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, FileSpreadsheet, FileJson, Loader2, Plus, X } from "lucide-react";
-import { generateMPOccurrenceWordReport } from "@/utils/generateMPOccurrenceWordReport";
+
 import MultiFormReport from "@/common/component/investigation-report/MultiFormReport";
 import FormAttachmentModal, { AttachedItem } from "@/components/ui/FormAttachmentModal";
 import { toast } from "react-toastify";
@@ -1003,7 +1004,7 @@ export default function MpOccurrenceReportsPage() {
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
   /* ================= VIEW MODE STATE ================= */
-  const [viewMode, setViewMode] = useState<"report" | "evidences">("report");
+  const [viewMode, setViewMode] = useState<"report" | "attachments" | "evidences">("report");
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
 
   const { mutateAsync: updateReport } = useUpdateMPReport();
@@ -1521,21 +1522,7 @@ export default function MpOccurrenceReportsPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
 
-  const handleDownloadReport = async (item: any) => {
-    setIsDownloading(true);
-    setDownloadType("Word");
-    try {
-      const props = mapToReportProps(item);
-      generateMPOccurrenceWordReport(props);
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (e) {
-      console.error(e);
-      alert("Failed to download Word report");
-    } finally {
-      setIsDownloading(false);
-      setDownloadType(null);
-    }
-  };
+
 
   const handleDownloadPdf = async (item: any) => {
     const id = item._id;
@@ -1577,11 +1564,12 @@ export default function MpOccurrenceReportsPage() {
   const distinctReportsCount = processedData.length;
   const pageTitle = "MP Occurrence & Investigation Report";
 
+  // RENDER: EDITING / CREATING
   if (isCreating) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { setIsCreating(false); setViewingReport(null); }} className="gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Reports
           </Button>
           <h1 className="text-lg font-semibold text-gray-800">
@@ -1601,58 +1589,55 @@ export default function MpOccurrenceReportsPage() {
           )}
         </div>
       </div>
-    )
-  }
-
-
-  const viewingIdStr = viewingReport?._id ?? viewingReport?.originalData?._id ?? "";
-  const finalViewingRecord = viewingReport?.originalData || viewingReport;
-
-  if (viewingReport) {
-    return (
-      <>
-        <ReportViewerWrapper
-          title="MP OCCURRENCE REPORT"
-          onBack={() => {
-            setViewingReport(null);
-            setShouldAutoPrint(false);
-            setViewMode("report");
-          }}
-          isDownloading={isDownloading}
-          downloadType={downloadType}
-          activeView={viewMode}
-          onViewReport={() => setViewMode("report")}
-          onViewEvidences={() => setViewMode("evidences")}
-          onDownloadWord={() => handleDownloadReport(viewingReport)}
-          onDownloadPdf={() => handleDownloadPdf(viewingReport)}
-          onPrint={() => window.print()}
-          onEdit={() => {
-            setIsCreating(true);
-          }}
-          onAttach={() => handleAttach(viewingReport)}
-        >
-          {viewMode === "report" && (
-            <MpOccurrenceReport {...mapToReportProps(viewingReport)} />
-          )}
-
-          {/* {viewMode === "evidences" && (
-            <EvidenceViewer
-              evidences={finalViewingRecord?.evidences || []}
-              onDelete={handleAttachDelete}
-            />
-          )} */}
-        </ReportViewerWrapper >
-
-        <FormAttachmentModal
-          isOpen={isAttachModalOpen}
-          onClose={() => setIsAttachModalOpen(false)}
-          onSave={handleAttachSave}
-        />
-      </>
     );
   }
 
+  // RENDER: VIEWING REPORT
+  // RENDER: VIEWING REPORT
+  if (viewingReport) {
+    const reportProps = mapToReportProps(viewingReport);
 
+    return (
+      <ReportViewerWrapper
+        title="MP OCCURRENCE REPORT"
+        onBack={() => {
+          setViewingReport(null);
+          setShouldAutoPrint(false);
+          setViewMode("report"); // Reset view mode
+        }}
+        isDownloading={isDownloading}
+        downloadType={downloadType}
+        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
+        onPrint={() => window.print()}
+
+        // View Mode Props
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
+        onViewEvidences={() => setViewMode("evidences")}
+      >
+        {viewMode === "report" && (
+          <MpOccurrenceReport {...reportProps} />
+        )}
+
+        {viewMode === "attachments" && (
+          <div className="w-full max-w-5xl mx-auto">
+            <SignedAttachmentsViewer
+              record={viewingReport}
+            />
+          </div>
+        )}
+
+        {viewMode === "evidences" && (
+          <div className="w-full max-w-6xl mx-auto">
+            <EvidenceViewer
+              evidences={viewingReport.originalData?.evidences || viewingReport.evidences || []}
+            />
+          </div>
+        )}
+      </ReportViewerWrapper>
+    );
+  }
 
   if (isError) {
     return (
@@ -1704,7 +1689,6 @@ export default function MpOccurrenceReportsPage() {
           data={processedData}
           onView={(item) => setViewingReport(item)}
           onPrint={handlePrintReport}
-          onDownload={handleDownloadReport}
           onEdit={(item) => {
             setViewingReport(item);
             setIsCreating(true);
