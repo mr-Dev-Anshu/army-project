@@ -7,10 +7,12 @@ import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import GroupedList from "./GroupedList";
+import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
 
 import {
   useGetAllTrafficOffences,
   useCreateTrafficOffence,
+  useUpdateTrafficOffence,
 } from "@/features/generalTraficOffence/hooks";
 
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
@@ -20,9 +22,14 @@ import MilitaryPoliceReport, {
   MilitaryPoliceReportProps,
 } from "@/components/reports/MilitaryPoliceReport";
 
+
+import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
 import { generateWordReport } from "@/utils/generateWordReport";
 
-/* ================= MAIN PAGE ================= */
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
+import { generateWordReport } from "@/utils/generateWordReport";
+
+// ... existing imports
 
 export default function ReportsPage({
   viewType = "vehicle",
@@ -32,7 +39,96 @@ export default function ReportsPage({
   const [isCreating, setIsCreating] = useState(false);
   const [editingOffence, setEditingOffence] = useState<any | null>(null);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
+  const [showAddOptions, setShowAddOptions] = useState(false);
+  const [viewMode, setViewMode] = useState<"report" | "attachments">("report"); // Added viewMode
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
+
+  /* ================= HOOKS ================= */
+  const { mutateAsync: createTrafficOffence } = useCreateTrafficOffence();
+  const { mutateAsync: updateTrafficOffence } = useUpdateTrafficOffence();
+  const { mutateAsync: createOffender } = useCreateOffender();
+  const { exportToExcel } = useExcelExport();
+
+  /* ================= ATTACHMENT MODAL STATE ================= */
+  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+  const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
+
+  const handleDownloadPdf = async (item: any) => {
+    const id = item._id || item.reportId;
+    if (!id) return toast.error("Report ID not found");
+
+    setIsDownloading(true);
+    setDownloadType("PDF");
+
+    try {
+      const response = await fetch(`/api/military-police-report/pdf/${id}`);
+      if (!response.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `TrafficOffenceReport-${item.reportNo || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF Error", error);
+      toast.error("Failed to download PDF");
+    } finally {
+      setIsDownloading(false);
+      setDownloadType(null);
+    }
+  };
+
+  const handleAttach = (item: any) => {
+    setRecordForAttachment(item);
+    setIsAttachModalOpen(true);
+  };
+
+  const handleAttachSave = async (newAttachments: any[]) => {
+    // Determine target record
+    const targetRecord = viewingReport || recordForAttachment;
+    if (!targetRecord?._id) return;
+
+    try {
+      const currentAttachments = targetRecord.customFields?.attachments || targetRecord.attachments || [];
+      const updatedAttachments = [...currentAttachments, ...newAttachments];
+
+      await updateTrafficOffence({
+        id: targetRecord._id,
+        data: {
+          customFields: {
+            ...targetRecord.customFields,
+            attachments: updatedAttachments,
+          },
+        },
+      });
+
+      toast.success("Attachments Added Successfully");
+
+      // If viewing report is effective one, update local state
+      if (viewingReport && viewingReport._id === targetRecord._id) {
+        setViewingReport((prev: any) => ({
+          ...prev,
+          customFields: {
+            ...prev.customFields,
+            attachments: updatedAttachments,
+          },
+        }));
+      }
+
+      setIsAttachModalOpen(false);
+      setRecordForAttachment(null);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add attachments");
+    }
+  };
 
   /* ================= FILTER STATE ================= */
 
@@ -119,16 +215,36 @@ export default function ReportsPage({
   /* ================= VIEW ================= */
 
   if (viewingReport) {
+    const reportProps = mapToReportProps(viewingReport);
+
     return (
       <ReportViewerWrapper
         title="REPORT PREVIEW"
-        onBack={() => setViewingReport(null)}
-        onDownloadWord={() =>
-          generateWordReport(mapToReportProps(viewingReport))
-        }
+        onBack={() => {
+          setViewingReport(null);
+          setViewMode("report");
+        }}
+        isDownloading={isDownloading}
+        downloadType={downloadType}
+        onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
+
+        // Two buttons config
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
       >
-        <MilitaryPoliceReport {...mapToReportProps(viewingReport)} />
+        {viewMode === "report" && (
+          <MilitaryPoliceReport {...reportProps} />
+        )}
+
+        {viewMode === "attachments" && (
+          <div className="w-full max-w-5xl mx-auto">
+            <SignedAttachmentsViewer
+              attachments={viewingReport.customFields?.attachments || viewingReport.attachments || []}
+            />
+          </div>
+        )}
       </ReportViewerWrapper>
     );
   }
@@ -177,11 +293,23 @@ export default function ReportsPage({
             setEditingOffence(offence);
             setIsCreating(true);
           }}
+          onAttach={handleAttach}
         />
       ) : (
         <div className="text-center text-gray-500 mt-10">
           No records found
         </div>
+      )}
+
+      {isAttachModalOpen && (
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => {
+            setIsAttachModalOpen(false);
+            setRecordForAttachment(null);
+          }}
+          onSave={handleAttachSave}
+        />
       )}
     </div>
   );

@@ -435,7 +435,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { MoreVertical, Eye, Printer, Edit, Trash } from "lucide-react";
+import { MoreVertical, Eye, Printer, Edit, Trash, Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -459,16 +459,16 @@ interface StaticSpeedTableProps {
   data: any[];
   onView?: (item: any) => void;
   onPrint?: (item: any) => void;
-  onDownload?: (item: any) => void;
   onEdit?: (item: any) => void;
+  onAttach?: (item: any) => void;
 }
 
 export default function StaticSpeedTable({
   data,
   onView,
   onPrint,
-  onDownload,
   onEdit,
+  onAttach,
 }: StaticSpeedTableProps) {
   const { mutateAsync: updateRecord, isPending: isUpdating } =
     useUpdateStaticSpeedRecord();
@@ -673,14 +673,12 @@ export default function StaticSpeedTable({
               onClick={() => item._id && handleStatusClick(item._id, isTaken)}
             >
               <div
-                className={`w-10 h-5 rounded-full p-1 transition-colors ${
-                  isTaken ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-10 h-5 rounded-full p-1 transition-colors ${isTaken ? "bg-green-500" : "bg-red-500"
+                  }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full transition-transform ${
-                    isTaken ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`w-3 h-3 bg-white rounded-full transition-transform ${isTaken ? "translate-x-5" : "translate-x-0"
+                    }`}
                 />
               </div>
               <span className="text-[10px] uppercase text-gray-500">
@@ -715,6 +713,12 @@ export default function StaticSpeedTable({
                 <Edit className="w-4 h-4 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onSelect={() => onAttach?.(item)}
+              >
+                <Paperclip className="w-4 h-4 mr-2" /> Attach Signed Certificates/Letters
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 className="text-red-600"
                 onSelect={() => item._id && handleDeleteClick(item._id)}
               >
@@ -733,9 +737,9 @@ export default function StaticSpeedTable({
     return data.map((item, i) => {
       const offenders = Array.isArray(item.offenders)
         ? [...item.offenders].sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          )
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
         : [];
 
       return {

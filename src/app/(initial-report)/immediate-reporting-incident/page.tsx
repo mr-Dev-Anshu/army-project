@@ -8,8 +8,12 @@ import { useRouter } from "next/navigation";
 import ImmediateReportingIncidentTable from "@/features/immediateReportingIncident/components/immediateReportingIncidentTable";
 import { ImmediateReportingIncident } from "@/apis/immediateReportingIncident/types";
 import ImmediateReportingIncidentReport from "@/components/reports/ImmediateReportingIncident";
-import { generateImmediateIncidentWordReport } from "@/utils/generateImmediateIncidentWordReport";
+
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
+import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
+
+import { useUpdateImmediateReportingIncident } from "@/features/immediateReportingIncident/hooks";
+import { toast } from "react-toastify";
 
 export default function ImmediateReportingIncidentReportsPage() {
   const router = useRouter();
@@ -21,6 +25,19 @@ export default function ImmediateReportingIncidentReportsPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadType, setDownloadType] =
     useState<"PDF" | "Word" | null>(null);
+
+  /* ================= ATTACHMENT MODAL STATE ================= */
+  const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+  const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
+
+  const handleAttach = (item: any) => {
+    // If we are viewing a report, we might be attaching to it.
+    // If called from table row, item is passed.
+    setRecordForAttachment(item);
+    setIsAttachModalOpen(true);
+  };
+
+  const { mutateAsync: updateReport } = useUpdateImmediateReportingIncident();
 
   /* ================= NORMALIZE DATA ================= */
   const reportData = useMemo(() => {
@@ -36,6 +53,63 @@ export default function ImmediateReportingIncidentReportsPage() {
 
   const handleEdit = (item: ImmediateReportingIncident) => {
     router.push(`/create-record/immediate-reporting-incident?id=${item._id}`);
+  };
+
+  const handleAttachSave = async (newAttachments: any[]) => {
+    // If viewingReport is open, use reportData. Else use recordForAttachment.
+    const target = reportData || recordForAttachment;
+    // Normalize if needed (though recordForAttachment from table is likely the raw item)
+    // reportData is already normalized from viewingReport
+
+    // If target has .data structure (from API response), use .data
+    // reportData logic above: (viewingReport as any)?.data || viewingReport
+    const targetData = (target as any)?.data || target;
+
+    if (!targetData?._id) return;
+
+    try {
+      const currentAttachments = targetData.customFields?.attachments || [];
+      const updatedAttachments = [...currentAttachments, ...newAttachments];
+
+      await updateReport({
+        id: targetData._id,
+        data: {
+          // @ts-ignore
+          customFields: {
+            ...targetData.customFields,
+            attachments: updatedAttachments,
+          },
+        },
+      });
+
+      toast.success("Attachments Added Successfully");
+
+      toast.success("Attachments Added Successfully");
+
+      // If we are viewing THIS report, update local state
+      if (viewingReport) {
+        const viewingId = (viewingReport as any)?.data?._id || viewingReport._id;
+        if (viewingId === targetData._id) {
+          setViewingReport((prev: any) => {
+            const prevData = (prev as any)?.data || prev;
+            return {
+              ...prevData,
+              customFields: {
+                ...prevData.customFields,
+                attachments: updatedAttachments
+              }
+            }
+          });
+        }
+      }
+
+      setIsAttachModalOpen(false);
+      setRecordForAttachment(null);
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add attachments");
+    }
   };
 
   /* ================= AUTO PRINT ================= */
@@ -54,22 +128,7 @@ export default function ImmediateReportingIncidentReportsPage() {
     window.print();
   };
 
-  const handleDownloadWord = async () => {
-    if (!reportData) return;
 
-    setIsDownloading(true);
-    setDownloadType("Word");
-
-    try {
-      await generateImmediateIncidentWordReport(reportData);
-    } catch (error) {
-      console.error("Failed to generate Word report:", error);
-      alert("Failed to generate Word report");
-    } finally {
-      setIsDownloading(false);
-      setDownloadType(null);
-    }
-  };
 
   const handleDownloadPdf = async () => {
     if (!reportData?._id) return;
@@ -116,7 +175,6 @@ export default function ImmediateReportingIncidentReportsPage() {
         onEdit={() => handleEdit(reportData)}
         isDownloading={isDownloading}
         downloadType={downloadType}
-        onDownloadWord={handleDownloadWord}
         onDownloadPdf={handleDownloadPdf}
         onPrint={handlePrint}
       >
@@ -134,7 +192,19 @@ export default function ImmediateReportingIncidentReportsPage() {
         onAddNew={handleAddNew}
         onEdit={handleEdit}
         onView={setViewingReport}
+        onAttach={handleAttach}
       />
+
+      {isAttachModalOpen && (
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => {
+            setIsAttachModalOpen(false);
+            setRecordForAttachment(null);
+          }}
+          onSave={handleAttachSave}
+        />
+      )}
     </div>
   );
 }

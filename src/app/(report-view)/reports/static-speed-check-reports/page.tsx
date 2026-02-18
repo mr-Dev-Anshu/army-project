@@ -16,10 +16,13 @@ import StaticSpeedTable from "./_components/StaticSpeedTable";
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportPageHeader from "@/components/common/ReportPageHeader";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
+import FormAttachmentModal from "@/components/ui/FormAttachmentModal";
+import SignedAttachmentsViewer from "@/components/common/SignedAttachmentsViewer";
 
 import {
   useGetStaticSpeedRecords,
   useCreateStaticSpeedRecord,
+  useUpdateStaticSpeedRecord,
 } from "@/features/staticSpeed/hooks";
 import { useCreateOffender } from "@/features/offender/Hooks";
 import { CreateOffenderData } from "@/apis/offender/types";
@@ -30,7 +33,7 @@ import StaticSpeedReport, {
 
 import StaticSpeedForm from "@/common/component/staticSpeedForm/MainForm";
 import { Button } from "@/components/ui/button";
-import { generateStaticSpeedWordReport } from "@/utils/generateStaticSpeedWordReport";
+
 
 import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
 import { excelToJson } from "@/lib/excelToJson";
@@ -117,21 +120,21 @@ const normalizeOneStaticSpeed = (item: any): any => {
 
   const offenders = Array.isArray(r.offenders)
     ? r.offenders.map((o: any) => ({
-        offenderType:
-          o.offenderType === "militaryPersonnel"
-            ? "Military Person"
-            : o.offenderType || "Military Person",
-        offenderDetails: {
-          armyNumber: o.armyNumber ?? "",
-          rank: o.selectRank ?? o.rank ?? "",
-          name: o.name ?? "",
-          unit: o.unit ?? "",
-          fmn: o.fmn ?? "",
-          command: o.command ?? "",
-          address: o.address ?? "",
-          iCardNumber: o.iCardNumber ?? "",
-        },
-      }))
+      offenderType:
+        o.offenderType === "militaryPersonnel"
+          ? "Military Person"
+          : o.offenderType || "Military Person",
+      offenderDetails: {
+        armyNumber: o.armyNumber ?? "",
+        rank: o.selectRank ?? o.rank ?? "",
+        name: o.name ?? "",
+        unit: o.unit ?? "",
+        fmn: o.fmn ?? "",
+        command: o.command ?? "",
+        address: o.address ?? "",
+        iCardNumber: o.iCardNumber ?? "",
+      },
+    }))
     : [];
 
   let finalTime: string | undefined;
@@ -167,13 +170,13 @@ const normalizeOneStaticSpeed = (item: any): any => {
     },
     onDutyWitnessingMps: witnessing.armyNo
       ? [
-          {
-            armyNumber: witnessing.armyNo,
-            rank: witnessing.rank,
-            name: witnessing.name,
-            unit: witnessing.unit,
-          },
-        ]
+        {
+          armyNumber: witnessing.armyNo,
+          rank: witnessing.rank,
+          name: witnessing.name,
+          unit: witnessing.unit,
+        },
+      ]
       : [],
     remarks: r.remarks ?? item.remarks ?? "",
     offenders,
@@ -231,13 +234,59 @@ export default function StaticSpeedCheckReportsPage() {
   const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
   const [showAddOptions, setShowAddOptions] = useState(false);
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+  const [recordForAttachment, setRecordForAttachment] = useState<any | null>(null);
   const [editingReport, setEditingReport] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<"report" | "attachments">("report");
+
+  const handleAttach = (item: any) => {
+    setRecordForAttachment(item);
+    setIsAttachModalOpen(true);
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Hooks for creating records - Using mutateAsync for sequential processing
   const { mutateAsync: createStaticSpeedRecord } = useCreateStaticSpeedRecord();
+  const { mutateAsync: updateStaticSpeedRecord } = useUpdateStaticSpeedRecord();
   const { mutateAsync: createOffender } = useCreateOffender();
+
+  const handleAttachSave = async (newAttachments: any[]) => {
+    const targetRecord = viewingReport || recordForAttachment;
+    if (!targetRecord?._id) return;
+
+    try {
+      const currentAttachments = targetRecord.customFields?.attachments || targetRecord.attachments || [];
+      const updatedAttachments = [...currentAttachments, ...newAttachments];
+
+      await updateStaticSpeedRecord({
+        id: targetRecord._id,
+        data: {
+          customFields: {
+            ...targetRecord.customFields,
+            attachments: updatedAttachments,
+          },
+        },
+      });
+
+      toast.success("Attachments Added Successfully");
+
+      // Update local state if we are viewing this report
+      if (viewingReport && viewingReport._id === targetRecord._id) {
+        setViewingReport((prev: any) => ({
+          ...prev,
+          customFields: {
+            ...prev.customFields,
+            attachments: updatedAttachments,
+          },
+        }));
+      }
+
+      setIsAttachModalOpen(false);
+      setRecordForAttachment(null);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add attachments");
+    }
+  };
 
   const handleImportCSV = () => {
     fileInputRef.current?.click();
@@ -358,8 +407,6 @@ export default function StaticSpeedCheckReportsPage() {
     else reader.readAsText(file);
     event.target.value = "";
   };
-
-  /* ... rest of your component logic (useEffect, apiParams, processedData, mapToReportProps, etc) ... */
 
   useEffect(() => {
     if (viewingReport && shouldAutoPrint) {
@@ -490,22 +537,22 @@ export default function StaticSpeedCheckReportsPage() {
         time: isNaN(dateObj.getTime())
           ? "--:--"
           : dateObj.toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }),
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }),
         driverDetails: driverOffender
           ? {
-              ...driverOffender,
-              offenderDetails: driverOffender.offenderDetails ?? driverOffender,
-            }
+            ...driverOffender,
+            offenderDetails: driverOffender.offenderDetails ?? driverOffender,
+          }
           : undefined,
         coDriverDetails: coDriverOffender
           ? {
-              ...coDriverOffender,
-              offenderDetails:
-                coDriverOffender.offenderDetails ?? coDriverOffender,
-            }
+            ...coDriverOffender,
+            offenderDetails:
+              coDriverOffender.offenderDetails ?? coDriverOffender,
+          }
           : undefined,
         mpName: item.onDutyDetailsMPReporting?.nameReportingMP || "Unknown",
         unit: item.onDutyDetailsMPReporting?.unit || driver.unit || "MP Unit",
@@ -590,20 +637,7 @@ export default function StaticSpeedCheckReportsPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadType, setDownloadType] = useState<"PDF" | "Word" | null>(null);
 
-  const handleDownloadReport = async (item: any) => {
-    setIsDownloading(true);
-    setDownloadType("Word");
-    try {
-      generateStaticSpeedWordReport(mapToReportProps(item));
-      await new Promise((r) => setTimeout(r, 500));
-    } catch (e) {
-      console.error(e);
-      alert("Failed to download Word report");
-    } finally {
-      setIsDownloading(false);
-      setDownloadType(null);
-    }
-  };
+
 
   const handleDownloadPdf = async (item: any) => {
     const id = item._id || item.reportId;
@@ -652,23 +686,41 @@ export default function StaticSpeedCheckReportsPage() {
       </div>
     );
 
-  if (viewingReport)
+  if (viewingReport) {
+    const reportProps = mapToReportProps(viewingReport);
+
     return (
       <ReportViewerWrapper
         title="STATIC SPEED CHECK REPORT"
         onBack={() => {
           setViewingReport(null);
           setShouldAutoPrint(false);
+          setViewMode("report");
         }}
         isDownloading={isDownloading}
         downloadType={downloadType}
-        onDownloadWord={() => handleDownloadReport(viewingReport)}
         onDownloadPdf={() => handleDownloadPdf(viewingReport)}
         onPrint={() => window.print()}
+
+        // Two buttons config
+        activeView={viewMode}
+        onViewReport={() => setViewMode("report")}
+        onViewAttachments={() => setViewMode("attachments")}
       >
-        <StaticSpeedReport {...mapToReportProps(viewingReport)} />
+        {viewMode === "report" && (
+          <StaticSpeedReport {...reportProps} />
+        )}
+
+        {viewMode === "attachments" && (
+          <div className="w-full max-w-5xl mx-auto">
+            <SignedAttachmentsViewer
+              attachments={viewingReport.customFields?.attachments || viewingReport.attachments || []}
+            />
+          </div>
+        )}
       </ReportViewerWrapper>
     );
+  }
 
   /* ================= MAIN LIST ================= */
 
@@ -710,11 +762,22 @@ export default function StaticSpeedCheckReportsPage() {
           data={processedData}
           onView={setViewingReport}
           onPrint={handlePrintReport}
-          onDownload={handleDownloadReport}
           onEdit={(report) => {
             setEditingReport(report.originalData || report);
             setIsCreating(true);
           }}
+          onAttach={handleAttach}
+        />
+      )}
+
+      {isAttachModalOpen && (
+        <FormAttachmentModal
+          isOpen={isAttachModalOpen}
+          onClose={() => {
+            setIsAttachModalOpen(false);
+            setRecordForAttachment(null);
+          }}
+          onSave={handleAttachSave}
         />
       )}
       <input

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { MoreVertical, Edit, Trash2 } from "lucide-react";
+import { MoreVertical, Edit, Trash2, Eye, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -50,11 +50,15 @@ const OffenderCell = ({ details }: { details: any }) => {
 interface MpGeneralDiaryDailyOccurrenceBookTableProps {
     data: any[];
     onEdit?: (item: any) => void;
+    onView?: (item: any) => void;
+    onAttach?: (item: any) => void;
 }
 
 export default function MpGeneralDiaryDailyOccurrenceBookTable({
     data,
     onEdit,
+    onView,
+    onAttach,
 }: MpGeneralDiaryDailyOccurrenceBookTableProps) {
     const { mutateAsync: updateRegister } = useUpdateMpGeneralDiaryEntry();
     const { mutateAsync: deleteRegister, isPending: isDeleting } =
@@ -396,10 +400,24 @@ export default function MpGeneralDiaryDailyOccurrenceBookTable({
 
                                                         <DropdownMenuItem
                                                             className="gap-2 cursor-pointer"
+                                                            onClick={() => onView && onView(item)}
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                            View
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="gap-2 cursor-pointer"
                                                             onClick={() => onEdit && onEdit(item)}
                                                         >
                                                             <Edit className="w-4 h-4" />
                                                             Edit
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="gap-2 cursor-pointer"
+                                                            onClick={() => onAttach && onAttach(item)}
+                                                        >
+                                                            <Paperclip className="w-4 h-4" />
+                                                            Attach Signed Certificates/Letters
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"

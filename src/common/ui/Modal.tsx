@@ -1,7 +1,8 @@
 "use client";
 
 import { FiX } from "react-icons/fi";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   isOpen: boolean;
@@ -31,22 +32,36 @@ export default function Modal({
   showCloseButton = true,
   disableBackdropClose = false,
 }: ModalProps) {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  return (
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only close when clicking the backdrop itself, not bubbled events
+    if (e.target === e.currentTarget && !disableBackdropClose) {
+      onClose();
+    }
+  };
+
+  const modalContent = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      onClick={(e) => {
-        // 🔵 Only close if backdrop click is enabled
-        if (!disableBackdropClose) {
-          onClose();
-        }
-      }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
       <div
-        className={`relative bg-white rounded-2xl shadow-2xl ] ${maxWidthClasses[maxWidth]} ${className}`}
+        className={`relative bg-white rounded-2xl shadow-2xl w-full ${maxWidthClasses[maxWidth]} ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
@@ -68,4 +83,9 @@ export default function Modal({
       </div>
     </div>
   );
+
+  // Use portal to render modal at document.body level to avoid z-index issues
+  return typeof document !== "undefined"
+    ? createPortal(modalContent, document.body)
+    : null;
 }

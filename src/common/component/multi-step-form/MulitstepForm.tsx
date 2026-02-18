@@ -66,11 +66,11 @@ export default function MultiStepForm({
     const offenderPeople =
       Array.isArray(eo.offenders) && eo.offenders.length > 0
         ? eo.offenders.map((o: any) => ({
-            whoIsIt: o.category || "Offender",
-            type: o.offenderType || "Civilian",
-            details: { ...(o.offenderDetails || {}) },
-            _id: o._id,
-          }))
+          whoIsIt: o.category || "Offender",
+          type: o.offenderType || "Civilian",
+          details: { ...(o.offenderDetails || {}) },
+          _id: o._id,
+        }))
         : [];
 
     /* ===== TRAFFIC ===== */
@@ -106,8 +106,8 @@ export default function MultiStepForm({
       offenceOccurenceDetails: {
         timeOfOffence: eo.offenceOccurenceDetails?.timeOfOffence
           ? new Date(eo.offenceOccurenceDetails.timeOfOffence)
-              .toISOString()
-              .substring(11, 16)
+            .toISOString()
+            .substring(11, 16)
           : "",
         incidentLocation: eo.offenceOccurenceDetails?.incidentLocation || "",
         description: eo.offenceOccurenceDetails?.description || "",
@@ -130,160 +130,160 @@ export default function MultiStepForm({
     });
   }, [existingOffence?._id]);
 
-const mapTrafficToReport = (traffic: any) => {
-  const occ = traffic?.offenceOccurenceDetails || {};
-  const duty = traffic?.onDutyDetails || {};
-  const mp = traffic?.onDutyDetailsMPReporting || {};
-  const v = traffic?.vehicleDetails || {};
+  const mapTrafficToReport = (traffic: any) => {
+    const occ = traffic?.offenceOccurenceDetails || {};
+    const duty = traffic?.onDutyDetails || {};
+    const mp = traffic?.onDutyDetailsMPReporting || {};
+    const v = traffic?.vehicleDetails || {};
 
-  const val = (v: any) =>
-    v !== undefined && v !== null && v !== "Nil" ? String(v) : "";
+    const val = (v: any) =>
+      v !== undefined && v !== null && v !== "Nil" ? String(v) : "";
 
-  const dateVal = (d: string) =>
-    d ? new Date(d).toLocaleDateString("en-GB") : "";
+    const dateVal = (d: string) =>
+      d ? new Date(d).toLocaleDateString("en-GB") : "";
 
-  /* ================= PERSON MAPPER ================= */
-  const mapPerson = (person: any) => {
-    const d = person?.details || person?.offenderDetails || person || {};
+    /* ================= PERSON MAPPER ================= */
+    const mapPerson = (person: any) => {
+      const d = person?.details || person?.offenderDetails || person || {};
 
-    const hasValue = Object.values(d || {}).some(
-      (v) => v !== undefined && v !== null && v !== ""
-    );
+      const hasValue = Object.values(d || {}).some(
+        (v) => v !== undefined && v !== null && v !== ""
+      );
 
-    if (!hasValue) return null;
+      if (!hasValue) return null;
 
-    return {
-      name: val(d.name),
-      so: val(d.so),
-      relation: val(d.relation),
-      armyNo: val(d.armyNumber || d.armyNo),
-      rank: val(d.rank),
-      unit: val(d.unit),
-      command: val(d.command),
-      fmn: val(d.fmn),
-      address: val(d.address),
-      iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo),
+      return {
+        name: val(d.name),
+        so: val(d.so),
+        relation: val(d.relation),
+        armyNo: val(d.armyNumber || d.armyNo),
+        rank: val(d.rank),
+        unit: val(d.unit),
+        command: val(d.command),
+        fmn: val(d.fmn),
+        address: val(d.address),
+        iCardNo: val(d.iCardNumber || d.iCardNo || d.passNo),
+      };
     };
-  };
 
-  /* ================= OFFENDERS ================= */
-  const persons = Array.isArray(traffic?.offenderPeople)
-    ? traffic.offenderPeople.map(mapPerson).filter(Boolean)
-    : [];
+    /* ================= OFFENDERS ================= */
+    const persons = Array.isArray(traffic?.offenderPeople)
+      ? traffic.offenderPeople.map(mapPerson).filter(Boolean)
+      : [];
 
-  /* ================= PARTICULAR BLOCKS ================= */
+    /* ================= PARTICULAR BLOCKS ================= */
 
-  const blocks: any[] = [];
+    const blocks: any[] = [];
 
-  persons.forEach((p: any, i: number) => {
-    blocks.push({
-      index: `(1.${i + 1})`,
-      type: "person",
-      fields: [
-        { label: "Name", value: p.name },
-        { label: "S/O", value: p.so },
-        { label: "Army No.", value: p.armyNo },
-        { label: "Rank", value: p.rank },
-        { label: "Unit", value: p.unit },
-        { label: "Address", value: p.address },
-        { label: "I Card No.", value: p.iCardNo },
-      ],
+    persons.forEach((p: any, i: number) => {
+      blocks.push({
+        index: `(1.${i + 1})`,
+        type: "person",
+        fields: [
+          { label: "Name", value: p.name },
+          { label: "S/O", value: p.so },
+          { label: "Army No.", value: p.armyNo },
+          { label: "Rank", value: p.rank },
+          { label: "Unit", value: p.unit },
+          { label: "Address", value: p.address },
+          { label: "I Card No.", value: p.iCardNo },
+        ],
+      });
     });
-  });
 
-  if (traffic?.vehicleInvolved === "yes") {
-    blocks.push({
-      index: `(1.${blocks.length + 1})`,
-      type: "vehicle",
-      fields: [
-        { label: "DD Veh. BA No.", value: val(v.vehicleNumber) },
-        { label: "Make & Take", value: val(v.vehicleName) },
-      ],
-    });
-  }
+    if (traffic?.vehicleInvolved === "yes") {
+      blocks.push({
+        index: `(1.${blocks.length + 1})`,
+        type: "vehicle",
+        fields: [
+          { label: "DD Veh. BA No.", value: val(v.vehicleNumber) },
+          { label: "Make & Take", value: val(v.vehicleName) },
+        ],
+      });
+    }
 
-  /* ================= WITNESSES ================= */
+    /* ================= WITNESSES ================= */
 
-  const witnesses = Array.isArray(traffic?.witnesses)
-    ? traffic.witnesses
-    : [];
+    const witnesses = Array.isArray(traffic?.witnesses)
+      ? traffic.witnesses
+      : [];
 
-  const witnessSig = witnesses[0]?.reportingBlock
-    ? {
+    const witnessSig = witnesses[0]?.reportingBlock
+      ? {
         armyNo: val(
           witnesses[0].reportingBlock.armyNumber ||
-            witnesses[0].reportingBlock.armyNo
+          witnesses[0].reportingBlock.armyNo
         ),
         rank: val(witnesses[0].reportingBlock.rank),
         name: val(witnesses[0].reportingBlock.nameReportingMP),
         unit: val(witnesses[0].reportingBlock.unit),
       }
-    : {
+      : {
         armyNo: "",
         rank: "",
         name: "",
         unit: "",
       };
 
-  /* ================= RETURN ================= */
+    /* ================= RETURN ================= */
 
-  return {
-    reportNo: traffic?.reportNo || "",
-    reportDate: new Date().toLocaleDateString("en-GB"),
+    return {
+      reportNo: traffic?.reportNo || "",
+      reportDate: new Date().toLocaleDateString("en-GB"),
 
-    particulars: {
-      blocks, // ✅ KEY FIX
-    },
+      particulars: {
+        blocks, // ✅ KEY FIX
+      },
 
-    occurrence: {
-      dateOfDuty: dateVal(duty.dateOfDuty),
-      dutyTime: (() => {
-        const start = duty.startTime;
-        const end = duty.endTime;
-        if (start && end) return `${start} Hrs - ${end} Hrs`;
-        if (start) return `${start} Hrs`;
-        return "";
-      })(),
-      dutyLocation: val(duty.dutyLocation),
+      occurrence: {
+        dateOfDuty: dateVal(duty.dateOfDuty),
+        dutyTime: (() => {
+          const start = duty.startTime;
+          const end = duty.endTime;
+          if (start && end) return `${start} Hrs - ${end} Hrs`;
+          if (start) return `${start} Hrs`;
+          return "";
+        })(),
+        dutyLocation: val(duty.dutyLocation),
 
-      witnessingMps: witnesses.map((w: any) => ({
-        name: val(w.reportingBlock?.nameReportingMP),
-        rank: val(w.reportingBlock?.rank),
-      })),
+        witnessingMps: witnesses.map((w: any) => ({
+          name: val(w.reportingBlock?.nameReportingMP),
+          rank: val(w.reportingBlock?.rank),
+        })),
 
-      timeOfOffence: val(occ.timeOfOffence)
-        ? `${val(occ.timeOfOffence)} Hrs`
-        : "",
-      locationOfOffence: val(occ.incidentLocation),
-      statement: val(occ.description),
-    },
+        timeOfOffence: val(occ.timeOfOffence)
+          ? `${val(occ.timeOfOffence)} Hrs`
+          : "",
+        locationOfOffence: val(occ.incidentLocation),
+        statement: val(occ.description),
+      },
 
-    offence: {
-      types: Array.isArray(traffic?.offenceTypes)
-        ? traffic.offenceTypes
-        : [],
-      refs: Array.isArray(traffic?.offenceRefList)
-        ? traffic.offenceRefList
-        : [],
-      description: val(occ.description),
-    },
+      offence: {
+        types: Array.isArray(traffic?.offenceTypes)
+          ? traffic.offenceTypes
+          : [],
+        refs: Array.isArray(traffic?.offenceRefList)
+          ? traffic.offenceRefList
+          : [],
+        description: val(occ.description),
+      },
 
-    witnessSig,
+      witnessSig,
 
-    mpSig: {
-      armyNo: val(mp.armyNumber),
-      rank: val(mp.rank),
-      name: val(mp.nameReportingMP),
-      unit: val(mp.unit),
-    },
+      mpSig: {
+        armyNo: val(mp.armyNumber),
+        rank: val(mp.rank),
+        name: val(mp.nameReportingMP),
+        unit: val(mp.unit),
+      },
 
-    remarks: {
-      text: val(traffic.remarks),
-      station: val(duty.dutyLocation),
-      dated: new Date().toLocaleDateString("en-GB"),
-    },
+      remarks: {
+        text: val(traffic.remarks),
+        station: val(duty.dutyLocation),
+        dated: new Date().toLocaleDateString("en-GB"),
+      },
+    };
   };
-};
 
 
   /* ================= SUBMIT ================= */
@@ -319,8 +319,8 @@ const mapTrafficToReport = (traffic: any) => {
         offenceOccurenceDetails: {
           timeOfOffence: traffic.offenceOccurenceDetails?.timeOfOffence
             ? new Date(
-                `1970-01-01T${traffic.offenceOccurenceDetails.timeOfOffence}:00Z`,
-              )
+              `1970-01-01T${traffic.offenceOccurenceDetails.timeOfOffence}:00Z`,
+            )
             : existingOffence?.offenceOccurenceDetails?.timeOfOffence
               ? new Date(existingOffence.offenceOccurenceDetails.timeOfOffence)
               : null,
@@ -395,12 +395,12 @@ const mapTrafficToReport = (traffic: any) => {
 
         onDutyWitnessingMps: Array.isArray(traffic.witnesses)
           ? traffic.witnesses.map((w: any) => ({
-              ArmyNo: w.reportingBlock?.armyNumber || "",
-              name: w.reportingBlock?.nameReportingMP || "",
-              rank: w.reportingBlock?.rank || "",
-              unit: w.reportingBlock?.unit || "",
-              contactNumber: w.reportingBlock?.contactNumber || "",
-            }))
+            ArmyNo: w.reportingBlock?.armyNumber || "",
+            name: w.reportingBlock?.nameReportingMP || "",
+            rank: w.reportingBlock?.rank || "",
+            unit: w.reportingBlock?.unit || "",
+            contactNumber: w.reportingBlock?.contactNumber || "",
+          }))
           : existingOffence?.onDutyWitnessingMps || [],
 
         witnessingMpsCount: Array.isArray(traffic.witnesses)
@@ -544,7 +544,8 @@ const mapTrafficToReport = (traffic: any) => {
           onCreate={onSubmitFinal}
           onCancel={onCancel}
           isSubmitting={isSubmitting}
-          // onAttach={(items) => setAttachments(items)}
+          attachments={attachments}
+          onAttachmentsChange={(items) => setAttachments(items)}
           onReportNoChange={(val) =>
             dispatch({
               type: "SET_PATH",

@@ -32,6 +32,7 @@ interface Props {
   onAddNew: () => void;
   onEdit: (item: ImmediateReportingIncident) => void;
   onView: (item: ImmediateReportingIncident) => void;
+  onAttach: (item: ImmediateReportingIncident) => void;
 }
 
 const getIndividualInfo = (ind: any) => {
@@ -76,6 +77,7 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
   onAddNew,
   onEdit,
   onView,
+  onAttach,
 }) => {
   // 1. Fetch data
   const { data: incidents = [], isLoading } =
@@ -398,11 +400,10 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
               return (
                 <div
                   key={index}
-                  className={`pb-6 ${
-                    index !== inds.length - 1
-                      ? "mb-6 border-b border-gray-300"
-                      : ""
-                  }`}
+                  className={`pb-6 ${index !== inds.length - 1
+                    ? "mb-6 border-b border-gray-300"
+                    : ""
+                    }`}
                 >
                   <div className="font-bold mb-3 capitalize">
                     Individual {index + 1} ({type})
@@ -449,11 +450,10 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
             {inds.map((ind: any, index: number) => (
               <div
                 key={index}
-                className={`pb-6 ${
-                  index !== inds.length - 1
-                    ? "mb-6 border-b border-gray-300"
-                    : ""
-                }`}
+                className={`pb-6 ${index !== inds.length - 1
+                  ? "mb-6 border-b border-gray-300"
+                  : ""
+                  }`}
               >
                 {/* Co Driver */}
                 {ind.coDriver && (
@@ -616,6 +616,9 @@ const ImmediateReportingIncidentTable: React.FC<Props> = ({
                         </DropdownMenuItem> */}
             <DropdownMenuItem onClick={() => handlePrintClick(item._id)}>
               Print Initial Report
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAttach(item)}>
+              Attach Signed Certificates/Letters
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleDeleteClick(item._id)}
