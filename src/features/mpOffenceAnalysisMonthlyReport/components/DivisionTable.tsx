@@ -412,10 +412,10 @@ export default function DivisionTable({
                         {formation.subtitle}
                     </span>
                 </div>
-                <Button className="bg-black text-white font-medium hover:bg-gray-800 gap-2 px-6 cursor-pointer rounded-md">
+                {/* <Button className="bg-black text-white font-medium hover:bg-gray-800 gap-2 px-6 cursor-pointer rounded-md">
                     Download & Print Report
                     <Printer className="w-4 h-4 ml-1" />
-                </Button>
+                </Button> */}
             </div>
 
             {/* Filters Bar */}

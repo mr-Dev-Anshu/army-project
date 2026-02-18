@@ -66,10 +66,10 @@ const Page = () => {
                         </span>
                     </div>
                 </div>
-                <Button className="bg-neutral-900 text-white hover:bg-neutral-800 gap-2">
+                {/* <Button className="bg-neutral-900 text-white hover:bg-neutral-800 gap-2">
                     Download & Print Report
                     <Printer className="h-4 w-4" />
-                </Button>
+                </Button> */}
             </div>
 
             <div className="p-6">

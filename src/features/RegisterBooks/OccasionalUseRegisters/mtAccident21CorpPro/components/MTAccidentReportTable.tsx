@@ -334,11 +334,28 @@ const MTAccidentReportTable = ({
     });
   };
 
- const renderParticulars = (individuals: any[]) => {
-  if (!individuals?.length) return "-";
+
+const renderParticulars = (individuals: any[], vehicle?: any) => {
+  if (!individuals?.length && !vehicle) return "-";
+  console.log(vehicle);
 
   return (
-    <div className="text-xs">
+    <div className="text-xs space-y-3">
+
+      {/* ✅ VEHICLE TOP */}
+      {vehicle && (
+        <div className="pb-3 border-b border-gray-300 mb-3">
+          <div className="font-bold mb-1">Vehicle Details</div>
+
+          <div>
+            <b>Vehicle No:</b> {vehicle.vehicleNumber || "-"}
+          </div>
+
+          <div>
+            <b>Make & Type:</b> {vehicle.vehicleModel || "-"}
+          </div>
+        </div>
+      )}
       {individuals.map((ind, index) => (
         <div
           key={index}
@@ -502,12 +519,7 @@ const MTAccidentReportTable = ({
                 >
                   Place of Accident
                 </th>
-                <th
-                  rowSpan={2}
-                  className="px-4 py-3 border-r border-gray-300 w-40 align-top sticky top-0 z-40 bg-[#F5F5F5]"
-                >
-                  Veh. No. / Make & Type
-                </th>
+               
                 <th
                   rowSpan={2}
                   className="px-4 py-3 border-r border-gray-300 w-[300px] align-top sticky top-0 z-40 bg-[#F5F5F5]"
@@ -607,7 +619,7 @@ const MTAccidentReportTable = ({
                         {item.serialNumber}
                       </td>
                       <td className="px-4 py-4 align-top border-r border-gray-300">
-                        <div>{renderParticulars(item.individuals)}</div>
+                        <div>{renderParticulars(item.individuals,item.vehicleDetails)}</div>
                       </td>
                       <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A]">
                         {unit}
@@ -633,14 +645,7 @@ const MTAccidentReportTable = ({
                       <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A]">
                         {item.accidentDetails?.placeOfAccident || "-"}
                       </td>
-                      <td className="px-4 py-4 align-top border-r border-gray-300 text-[#0A0A0A]">
-                        <div className="font-medium">
-                          {item.vehicleDetails?.vehicleNumber || "-"}
-                        </div>
-                        <div className="text-gray-500 text-xs">
-                          {item.vehicleDetails?.vehicleModel || ""}
-                        </div>
-                      </td>
+                     
                       {/* 🔹 Co Driver & Passengers */}
                       <td className="px-4 py-4 align-top border-r min-w-[300px] border-gray-300">
                         {renderCoPassengers(item.individuals)}

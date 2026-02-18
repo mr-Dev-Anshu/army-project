@@ -1,16 +1,7 @@
-
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import {
-  Loader2,
-  ArrowLeft,
-  FileSpreadsheet,
-  FileJson,
-  Plus,
-  X,
-} from "lucide-react";
-import { toast } from "react-toastify";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 import ReportFilterBar from "@/components/common/ReportFilterBar";
 import ReportViewerWrapper from "@/components/common/ReportViewerWrapper";
@@ -21,11 +12,7 @@ import {
   useGetAllTrafficOffences,
   useCreateTrafficOffence,
 } from "@/features/generalTraficOffence/hooks";
-import { useCreateOffender } from "@/features/offender/Hooks";
-import { CreateOffenderData } from "@/apis/offender/types";
 
-import { csvToJsonWithHiddenKeys } from "@/lib/csvToJson";
-import { excelToJson } from "@/lib/excelToJson";
 import MultiStepForm from "@/common/component/multi-step-form/MulitstepForm";
 import { Button } from "@/components/ui/button";
 
@@ -34,7 +21,6 @@ import MilitaryPoliceReport, {
 } from "@/components/reports/MilitaryPoliceReport";
 
 import { generateWordReport } from "@/utils/generateWordReport";
-import { useExcelExport, ExcelColumn } from "@/hooks/useExcelExport";
 
 /* ================= MAIN PAGE ================= */
 
@@ -44,14 +30,9 @@ export default function ReportsPage({
   viewType?: "vehicle" | "no-vehicle";
 }) {
   const [isCreating, setIsCreating] = useState(false);
-  const [editingOffence, setEditingOffence] = useState<any | null>(null); // ✅ FIX
+  const [editingOffence, setEditingOffence] = useState<any | null>(null);
   const [viewingReport, setViewingReport] = useState<any | null>(null);
-  const [showAddOptions, setShowAddOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const { mutateAsync: createTrafficOffence } = useCreateTrafficOffence();
-  const { mutateAsync: createOffender } = useCreateOffender();
-  const { exportToExcel } = useExcelExport();
 
   /* ================= FILTER STATE ================= */
 
@@ -88,10 +69,11 @@ export default function ReportsPage({
     return params;
   }, [filters, viewType]);
 
-  const { data, isLoading, isError, refetch } =
+  const { data, isLoading, isError } =
     useGetAllTrafficOffences(apiParams);
 
   /* ================= GROUP FILTERING ================= */
+  console.log("Data received:", data);
 
   const { vehicleGroups, noVehicleGroups } = useMemo(() => {
     if (!data) return { vehicleGroups: [], noVehicleGroups: [] };
@@ -114,7 +96,7 @@ export default function ReportsPage({
 
   const activeGroups = viewType === "vehicle" ? vehicleGroups : noVehicleGroups;
 
-  /* ================= CREATE / EDIT ================= */
+  /* ================= CREATE ================= */
 
   if (isCreating) {
     return (
@@ -129,7 +111,6 @@ export default function ReportsPage({
           <ArrowLeft /> Back
         </Button>
 
-        {/* 🔥 SAME FORM FOR CREATE + EDIT */}
         <MultiStepForm existingOffence={editingOffence} />
       </div>
     );
@@ -164,7 +145,7 @@ export default function ReportsPage({
         }
         reportCount={activeGroups.reduce(
           (a: number, g: any) => a + g.offences.length,
-          0,
+          0
         )}
       />
 
@@ -179,20 +160,6 @@ export default function ReportsPage({
           setEditingOffence(null);
           setIsCreating(true);
         }}
-        onReset={() =>
-          setFilters({
-            search: "",
-            offenceType: "All",
-            date: "",
-            fromDate: "",
-            toDate: "",
-            unit: "",
-            fmn: "",
-            placeOfOffence: "",
-            actionStatus: "All",
-            sortOrder: "desc",
-          })
-        }
       />
 
       {isLoading ? (
@@ -207,43 +174,110 @@ export default function ReportsPage({
           isVehicleInvolved={viewType === "vehicle"}
           onView={setViewingReport}
           onEdit={(offence) => {
-            setEditingOffence(offence); // 🔥 FIX
-            setIsCreating(true); // 🔥 FIX
+            setEditingOffence(offence);
+            setIsCreating(true);
           }}
         />
       ) : (
-        <div className="text-center text-gray-500 mt-10">No records found</div>
+        <div className="text-center text-gray-500 mt-10">
+          No records found
+        </div>
       )}
     </div>
   );
 }
 
 /* ================= REPORT MAPPER ================= */
-export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
-  const primary = offence.offenders?.[0]?.offenderDetails || {};
 
-  const firstWitness = offence.onDutyWitnessingMps?.[0] || {};
-  const reportingMp = offence.onDutyDetailsMPReporting || {};
+export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
+
+  /* ===== SAFE EXTRACT ===== */
+
+  const extract = (obj: any) => {
+    if (!obj) return {};
+
+    return (
+      obj.offenderDetails ||
+      obj.individualDetails ||
+      obj.driverDetails?.offenderDetails ||
+      obj.driverDetails?.individualDetails ||
+      obj
+    );
+  };
+
+  /* ===== COLLECT ALL INDIVIDUALS ===== */
+
+  let individuals: any[] = [];
+
+  if (Array.isArray(offence.offenders))
+    individuals.push(...offence.offenders);
+
+  if (offence.driverDetails)
+    individuals.push(offence.driverDetails);
+
+  if (offence.coDriverDetails)
+    individuals.push(offence.coDriverDetails);
+
+  if (Array.isArray(offence.passengers))
+    individuals.push(...offence.passengers);
+
+  if (Array.isArray(offence.relatives))
+    individuals.push(...offence.relatives);
+
+  if (offence.originalData?.driverDetails)
+    individuals.push(offence.originalData.driverDetails);
+
+  /* ===== REMOVE DUPLICATES ===== */
+
+  const map = new Map();
+
+  individuals.forEach((ind: any) => {
+    const d = extract(ind);
+
+    const key =
+      d.iCardNumber ||
+      d.passNo ||
+      d.armyNo ||
+      d.armyNumber ||
+      `${d.name || ""}-${d.address || ""}`;
+
+    if (!map.has(key)) map.set(key, ind);
+  });
+
+  const uniqueIndividuals = Array.from(map.values());
+
+  /* ===== WITNESS DEDUPE ===== */
+
+  const witnessRaw = offence.onDutyWitnessingMps || [];
+
+  const witnessMap = new Map();
+
+  witnessRaw.forEach((w: any) => {
+    const key =
+      w.armyNumber ||
+      w.ArmyNo ||
+      `${w.name || ""}-${w.rank || ""}`;
+
+    if (!witnessMap.has(key)) witnessMap.set(key, w);
+  });
+
+  const uniqueWitnesses = Array.from(witnessMap.values());
+  const firstWitness = uniqueWitnesses[0] || {};
+
+  /* ===== RETURN ===== */
 
   return {
     reportNo: offence.reportNo || offence.reportId || "",
-    reportDate: new Date(offence.createdAt).toLocaleDateString("en-GB"),
+
+    reportDate: offence.createdAt
+      ? new Date(offence.createdAt).toLocaleDateString("en-GB")
+      : "",
+
+    /* 🔥 KEY FIX — individuals pass */
 
     particulars: {
-      primary: {
-        aadharCardNo: primary.aadharCardNo || "",
-        name: primary.name || "",
-        so: primary.so || "",
-        relation: primary.relation || "",
-        armyNo: primary.armyNumber || primary.armyNo || "",
-        rank: primary.rank || "",
-        unit: primary.unit || "",
-        command: primary.command || "",
-        fmn: primary.fmn || "",
-        address: primary.address || "",
-        iCardNo: primary.iCardNumber || primary.iCardNo || primary.passNo || "",
-      },
-    },
+      individuals: uniqueIndividuals,
+    } as any,
 
     occurrence: {
       dateOfDuty: offence.onDutyDetails?.dateOfDuty
@@ -254,33 +288,37 @@ export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
         const start = offence.onDutyDetails?.startTime;
         const end = offence.onDutyDetails?.endTime;
         if (start && end) return `${start} - ${end}`;
-        if (start) return start;
-        return "";
+        return start || "";
       })(),
 
       dutyLocation: offence.onDutyDetails?.dutyLocation || "",
 
-      witnessingMps: Array.isArray(offence.onDutyWitnessingMps)
-        ? offence.onDutyWitnessingMps.map((w: any) => ({
-            name: w.name || w.nameReportingMP || "",
-            rank: w.rank || "",
-          }))
-        : [],
+      witnessingMps: uniqueWitnesses.map((w: any) => ({
+        name: w.name || w.nameReportingMP || "",
+        rank: w.rank || "",
+      })),
 
       locationOfOffence:
         offence.offenceOccurenceDetails?.incidentLocation || "",
 
-      timeOfOffence: offence.offenceOccurenceDetails?.timeOfOffence || "",
+      timeOfOffence:
+        offence.offenceOccurenceDetails?.timeOfOffence || "",
 
-      statement: offence.offenceOccurenceDetails?.description || "",
+      statement:
+        offence.offenceOccurenceDetails?.description || "",
     },
 
     offence: {
-      types: offence.currentOffenceType ? [offence.currentOffenceType] : [],
+      types: offence.currentOffenceType
+        ? [offence.currentOffenceType]
+        : [],
+
       refs: Array.isArray(offence.offenceTypeReference)
         ? offence.offenceTypeReference
         : [],
-      description: offence.offenceOccurenceDetails?.description || "",
+
+      description:
+        offence.offenceOccurenceDetails?.description || "",
     },
 
     remarks: {
@@ -289,7 +327,6 @@ export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
       dated: new Date().toLocaleDateString("en-GB"),
     },
 
-    // ✅ ADD THESE TWO (THIS FIXES THE ERROR)
     witnessSig: {
       armyNo: firstWitness.ArmyNo || firstWitness.armyNumber || "",
       rank: firstWitness.rank || "",
@@ -298,10 +335,10 @@ export function mapToReportProps(offence: any): MilitaryPoliceReportProps {
     },
 
     mpSig: {
-      armyNo: reportingMp.armyNumber || "",
-      rank: reportingMp.rank || "",
-      name: reportingMp.nameReportingMP || "",
-      unit: reportingMp.unit || "",
+      armyNo: offence.onDutyDetailsMPReporting?.armyNumber || "",
+      rank: offence.onDutyDetailsMPReporting?.rank || "",
+      name: offence.onDutyDetailsMPReporting?.nameReportingMP || "",
+      unit: offence.onDutyDetailsMPReporting?.unit || "",
     },
   };
 }

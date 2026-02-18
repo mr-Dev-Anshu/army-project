@@ -49,6 +49,8 @@ interface MenuItem {
 const Sidebar = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const isSuperAdmin = user?.role?.toLowerCase() === "superadmin";
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openMenus, setOpenMenus] = useState<string[]>([
     "Forms & Certificates",
@@ -102,14 +104,15 @@ const Sidebar = () => {
       href: "/",
       badge: "1",
     },
-  ];
-
-  const createNewRecordItems: MenuItem[] = [
     {
       icon: <Siren className="w-5 h-5" />,
       label: "Immediate Reporting of Incident (Initial Report)",
       href: "/create-record/immediate-reporting-incident",
-    },
+    }
+  ];
+
+  const createNewRecordItems: MenuItem[] = [
+    
     {
       icon: <ConeIcon className="w-5 h-5" color="currentColor" />,
       label: "General & Traffic Offence Report",
@@ -151,32 +154,37 @@ const Sidebar = () => {
     href: "/form-certificate/certificate",
   };
 
-  const systemSetup: MenuItem[] = [
-    {
-      icon: <Database className="w-5 h-5" />,
-      label: "Basic Information",
-      submenu: [
+const systemSetup: MenuItem[] = [
+  {
+    icon: <Database className="w-5 h-5" />,
+    label: "Basic Information",
+    submenu: [
+      {
+        label: "Offence Types Management",
+        href: "/setup/offence-type-management",
+      },
+      {
+        label: "Civil Employees Management",
+        href: "/setup/civil-employees",
+      },
+      {
+        label: "Vehicles Security Pass Management",
+        href: "/setup/vehicles-security-pass-management",
+      },
+    ],
+  },
+
+  // ✅ ONLY SUPER ADMIN CAN SEE
+  ...(isSuperAdmin
+    ? [
         {
-          label: "Offence Types Management",
-          href: "/setup/offence-type-management",
+          icon: <UserIcon className="w-5 h-5" />,
+          label: "User Access Management",
+          href: "/setup/users",
         },
-        {
-          label: "Civil Employees Management",
-          href: "/setup/civil-employees",
-        },
-        {
-          label: "Vehicles Security Pass Management",
-          href: "/setup/vehicles-security-pass-management",
-        },
-        { label: "Installation", href: "/setup/installation" },
-      ],
-    },
-    {
-      icon: <UserIcon className="w-5 h-5" />,
-      label: "User Access Management",
-      href: "/setup/users",
-    },
-  ];
+      ]
+    : []),
+];
 
   const renderMenuItem = (item: MenuItem, isSubmenu = false) => {
     if (item.submenu) return null;
@@ -347,7 +355,7 @@ const Sidebar = () => {
         )}
       >
         {/* Dashboard */}
-        <div className="mb-2">
+        <div className="mb-4 mt-4">
           {menuItems.map((item) => (
             <div key={item.label}>{renderMenuItem(item)}</div>
           ))}
